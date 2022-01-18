@@ -12,8 +12,12 @@ int yywrap(){
 %%
 
 <INITIAL>"string" return TOKEN_STRING;
+<INITIAL>"("            return TOKEN_LP;
+<INITIAL>")"            return TOKEN_RP;
+<INITIAL>","            return TOKEN_COMMA;
 <INITIAL>";" return TOKEN_SEMICOLON;
 <INITIAL>"=" return TOKEN_ASSIGN;
+
 <INITIAL>[A-Za-z_][A-Za-z_0-9]* {
     yylval.identifier = yytext;
     return IDENTIFIER;

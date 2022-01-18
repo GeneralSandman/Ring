@@ -24,12 +24,12 @@ lex.yy.c : ring.flex.l ring.bison.y y.tab.h
 	flex ring.flex.l
 
 y.tab.o: y.tab.c
-	$(CC) -c -g $*.c
+	$(CC) $(CFLAGS) $*.c
 lex.yy.o: lex.yy.c ring.h
-	$(CC) -c -g $*.c $(INCLUDES)
+	$(CC) $(CFLAGS) $*.c
 ring.o: ring.c
-	$(CC) -c -g $*.c
+	$(CC) $(CFLAGS) $*.c
 string.o: string.c
-	$(CC) -c -g $*.c
+	$(CC) $(CFLAGS) $*.c
 
 main.o: main.c ring.h
