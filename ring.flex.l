@@ -24,10 +24,10 @@ int yywrap(){
     BEGIN STRING_LITERAL_STATE;
 }
 <INITIAL>\n {
-    printf("new line\n");
+    // printf("new line\n");
 }
 <INITIAL>\r\n {
-    printf("new line\n");
+    // printf("new line\n");
 }
 <INITIAL>"//" BEGIN COMMENT;
 <INITIAL>. {
@@ -35,13 +35,15 @@ int yywrap(){
 
 
 <COMMENT>\n {
+    printf("COMMENT: %s\n", yylval.comment_value);
     BEGIN INITIAL;
 }
 <COMMENT>\r\n {
     BEGIN INITIAL;
 }
 <COMMENT>. {
-    printf("comment: %c\n", yytext[0]);
+    string_literal_add_char(yytext[0]);
+    yylval.comment_value = get_string_literal();
 };
 
 

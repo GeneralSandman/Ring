@@ -1,2 +1,3 @@
 // comment
-string a = "abcdfg";
+string a = "aaaaaa";
+string b = "bbbbbb";
