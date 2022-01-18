@@ -1,0 +1,2 @@
+// comment
+string a = "abcdfg";
