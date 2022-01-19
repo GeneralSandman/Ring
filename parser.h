@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include "ring.h"
 
-StatementList *         create_statement_list();
+Statement *             create_statement_list();
 Statement *             create_statemen();
 Expression *            create_expression();
 FunctionCallExpression *create_function_call_expression();

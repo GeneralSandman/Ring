@@ -5,7 +5,7 @@
 // typedef union Ring_BasicValue_Tag Ring_BasicValue;
 
 // struct StatementList_Tag;
-typedef struct StatementList_Tag StatementList;
+// typedef struct StatementList_Tag StatementList;
 
 // struct Statement_Tag;
 typedef struct Statement_Tag Statement;
@@ -42,16 +42,13 @@ typedef enum {
     ARGUMENT_TYPE_EXPRESSION,
 } ArgumentType;
 
-struct StatementList_Tag {
-    Statement *statemet;
-    Statement *next;
-};
 struct Statement_Tag {
     StatementType type;
     unsigned int  line_number;
     union {
         Expression *expression;
     } u;
+    Statement *next;
 };
 
 struct Expression_Tag {

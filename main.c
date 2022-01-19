@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "interpreter.h"
 
-void complie(FILE *fp) {
-    extern int yyparse(void);
+void interpret(Ring_Interpreter *ring_interpreter, FILE *fp) {
+    extern int   yyparse(void);
     extern FILE *yyin;
 
     yyin = fp;
@@ -14,7 +15,8 @@ void complie(FILE *fp) {
 }
 
 int main(int argc, char **argv) {
-    FILE *fp;
+    Ring_Interpreter *ring_interpreter;
+    FILE *            fp;
 
     if (argc != 2) {
         fprintf(stderr, "usage:%s filename", argv[0]);
@@ -27,7 +29,8 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    complie(fp);
+    ring_interpreter = new_ring_interpreter();
+    interpret(ring_interpreter, fp);
 
     return 0;
 }

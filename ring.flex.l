@@ -20,7 +20,11 @@ int yywrap(){
 <INITIAL>"=" return TOKEN_ASSIGN;
 
 <INITIAL>[A-Za-z_][A-Za-z_0-9]* {
-    yylval.identifier = yytext;
+    #ifdef DEBUG
+    printf("[DEBUG][ring.flex.l][status:INITIAL]\tidentifier(%s)\n", yytext);
+    #endif
+
+    yylval.m_identifier = yytext;
     return IDENTIFIER;
 }
 
@@ -29,10 +33,18 @@ int yywrap(){
     BEGIN STRING_LITERAL_STATE;
 }
 <INITIAL>\n {
-    // printf("new line\n");
+    #ifdef DEBUG
+    printf("[DEBUG][ring.flex.l][status:INITIAL]\tnew line(LF)\n");
+    #endif
+
+    increase_ring_interpreter_line_number();
 }
 <INITIAL>\r\n {
-    // printf("new line\n");
+    #ifdef DEBUG
+    printf("[DEBUG][ring.flex.l][status:INITIAL]\tnew line(CRLF)\n");
+    #endif
+
+    increase_ring_interpreter_line_number();
 }
 <INITIAL>"//" BEGIN COMMENT;
 <INITIAL>. {
@@ -40,15 +52,29 @@ int yywrap(){
 
 
 <COMMENT>\n {
-    printf("COMMENT: %s\n", yylval.comment_value);
+    yylval.m_comment_value = get_string_literal();
+    reset_string_literal_buffer();
+
+    #ifdef DEBUG
+    printf("[DEBUG][ring.flex.l][status:COMMENT]\tcomment(%s)\n", yylval.m_comment_value);
+    #endif
+
+    increase_ring_interpreter_line_number();
     BEGIN INITIAL;
 }
 <COMMENT>\r\n {
+    yylval.m_comment_value = get_string_literal();
+    reset_string_literal_buffer();
+
+    #ifdef DEBUG
+    printf("[DEBUG][ring.flex.l][status:COMMENT]\tcomment(%s)\n", yylval.m_comment_value);
+    #endif
+
+    increase_ring_interpreter_line_number();
     BEGIN INITIAL;
 }
 <COMMENT>. {
     string_literal_add_char(yytext[0]);
-    yylval.comment_value = get_string_literal();
 };
 
 
@@ -58,7 +84,7 @@ int yywrap(){
 }
 <STRING_LITERAL_STATE>. {
     string_literal_add_char(yytext[0]);
-    yylval.string_value = get_string_literal();
+    yylval.m_string_value = get_string_literal();
     BEGIN STRING_LITERAL_STATE;
 }
 
