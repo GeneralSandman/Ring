@@ -5,7 +5,8 @@ OBJS = \
   y.tab.o\
   main.o\
   ring.o\
-  string.o
+  string.o\
+  parser.o
 CFLAGS = -c -g -Wall -Wswitch-enum -ansi -pedantic -DDEBUG
 BIN = ./bin
 INCLUDES = \
@@ -33,3 +34,4 @@ string.o: string.c
 	$(CC) $(CFLAGS) $*.c
 
 main.o: main.c ring.h
+parser.o: parser.c ring.h

@@ -4,36 +4,20 @@
 // union Ring_BasicValue_Tag;
 // typedef union Ring_BasicValue_Tag Ring_BasicValue;
 
-struct Expression_Tag;
-typedef struct Expression_Tag Expression;
-
-struct StatementList_Tag;
+// struct StatementList_Tag;
 typedef struct StatementList_Tag StatementList;
 
-struct Statement_Tag;
+// struct Statement_Tag;
 typedef struct Statement_Tag Statement;
 
-struct FunctionCallExpression_Tag;
+// struct Expression_Tag;
+typedef struct Expression_Tag Expression;
+
+// struct FunctionCallExpression_Tag;
 typedef struct FunctionCallExpression_Tag FunctionCallExpression;
 
-struct ArgumentList_Tag;
+// struct ArgumentList_Tag;
 typedef struct ArgumentList_Tag ArgumentList;
-
-typedef enum {
-    ARGUMENT_TYPE_UNKNOW = 0,
-    ARGUMENT_TYPE_RING_BASICVALUE,
-    ARGUMENT_TYPE_EXPRESSION,
-} ArgumentType;
-
-typedef enum {
-    EXPRESSION_TYPE_UNKNOW = 0,
-    EXPRESSION_TYPE_FUNCTION_CALL,
-} ExpressionType;
-
-typedef enum {
-    STATEMENT_TYPE_UNKNOW = 0,
-    STATEMENT_TYPE_EXPRESSION,
-} StatementType;
 
 typedef union {
     int    int_value;
@@ -42,7 +26,23 @@ typedef union {
     char * string_value;
 } Ring_BasicValue;
 
-struct StatementList {
+typedef enum {
+    STATEMENT_TYPE_UNKNOW = 0,
+    STATEMENT_TYPE_EXPRESSION,
+} StatementType;
+
+typedef enum {
+    EXPRESSION_TYPE_UNKNOW = 0,
+    EXPRESSION_TYPE_FUNCTION_CALL,
+} ExpressionType;
+
+typedef enum {
+    ARGUMENT_TYPE_UNKNOW = 0,
+    ARGUMENT_TYPE_RING_BASICVALUE,
+    ARGUMENT_TYPE_EXPRESSION,
+} ArgumentType;
+
+struct StatementList_Tag {
     Statement *statemet;
     Statement *next;
 };

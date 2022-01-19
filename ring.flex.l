@@ -1,7 +1,8 @@
 %{
 #include <stdio.h>
-#include "y.tab.h"
 #include "ring.h"
+#include "y.tab.h"
+#include "parser.h"
 
 int yywrap(){
     return 1;
