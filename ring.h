@@ -2,26 +2,30 @@
 #define RING_INCLUDE_H
 
 typedef enum {
-
-} StatementType;
-
-typedef struct {
-    StatementType type;
-    int line_number;
-} Statement;
-
-typedef enum {
-    EXPRESSION_TYPE_UNKNOW = 1,
-
-    EXPRESSION_TYPE_Variable_Definition,
-    EXPRESSION_TYPE_Function_Call,
+    EXPRESSION_TYPE_UNKNOW = 0,
+    EXPRESSION_TYPE_FUNCTION_CALL,
 } ExpressionType;
 
 typedef struct {
     ExpressionType type;
     int line_number;
-
+    union {
+    } u;
 } Expression;
+
+typedef enum {
+    STATEMENT_TYPE_UNKNOW = 0,
+    STATEMENT_TYPE_VARIABLE_DEFINITION,
+    STATEMENT_TYPE_EXPRESSION,
+} StatementType;
+typedef struct {
+    StatementType type;
+    int line_number;
+    union {
+        Expression *expression;
+    } u;
+
+} Statement;
 
 void init_string_literal_buffer();
 void reset_string_literal_buffer();
