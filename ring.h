@@ -60,7 +60,7 @@ struct Expression_Tag {
 };
 
 struct FunctionCallExpression_Tag {
-    unsigned int  line_number;
+    unsigned int  current_line_number;
     char *        function_name;
     ArgumentList *argument_list;
 };

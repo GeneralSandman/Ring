@@ -41,18 +41,18 @@
 statement_list
     : statement
     {
-        $$ = create_statement_list($1);
+        create_statement_list($1);
     }
     | statement_list statement
     {
-        $$ = statement_list_add_item($2);
+        statement_list_add_item($2);
     }
     ;
 
 statement
     : expression TOKEN_SEMICOLON
     {
-        $$ = create_statemen();
+        $$ = create_statemen($1);
     }
     ;
 
@@ -67,38 +67,39 @@ function_call_expression
     : identifier TOKEN_LP argument_list TOKEN_RP
     {
         #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:function_call_expression]\t\n");
         #endif
 
-        $$ = create_function_call_expression($1, NULL);
+        $$ = create_function_call_expression($1, $3);
     }
     ;
-
-argument_list
-    : string_value 
-    {
-        #ifdef DEBUG
-        printf("[DEBUG][ring.bison.y][status:argument_list]\t\n");
-        #endif
-
-        // $$ = create_argument_list($1);
-    }
-    ;
-
 
 identifier
     : IDENTIFIER
     {
         #ifdef DEBUG
-        printf("[DEBUG][ring.bison.y][status:identifier]\tidentifier(%s)\n", $1);
+        printf("[DEBUG][ring.bison.y][RULE:identifier]\tidentifier(%s)\n", $1);
         #endif
     }
     ;
+
+argument_list
+    : STRING_LITERAL 
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:argument_list]\t\n");
+        #endif
+
+        $$ = create_argument_list($1);
+    }
+    ;
+
 
 string_value
     : STRING_LITERAL
     {
         #ifdef DEBUG
-        printf("[DEBUG][ring.bison.y][status:string_value] string_value(%s)\n", $1);
+        printf("[DEBUG][ring.bison.y][RULE:string_value] string_value(%s)\n", $1);
         #endif
     }
     ;
