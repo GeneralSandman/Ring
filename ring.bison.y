@@ -52,7 +52,7 @@ statement_list
 statement
     : expression TOKEN_SEMICOLON
     {
-
+        $$ = create_statemen();
     }
     ;
 

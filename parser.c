@@ -15,13 +15,18 @@ Statement *statement_list_add_item(Statement *statement) {
 Statement *create_statemen() {
     Statement *statement = NULL;
     statement            = (Statement *)malloc(sizeof(Statement));
-    statement->next      = NULL;
+
+    statement->type         = STATEMENT_TYPE_EXPRESSION;
+    statement->line_number  = 0;
+    statement->u.expression = NULL;
+    statement->next         = NULL;
     return statement;
 }
 
 Expression *create_expression() {
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
+
     return expression;
 }
 

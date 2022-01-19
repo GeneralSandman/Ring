@@ -9,6 +9,10 @@ Ring_Interpreter *new_ring_interpreter() {
     if (ring_interpreter == NULL) {
         ring_interpreter = malloc(sizeof(Ring_Interpreter));
     }
+
+    ring_interpreter->line_number         = 0;
+    ring_interpreter->statement_list_size = 0;
+    ring_interpreter->statement_list      = NULL;
     return ring_interpreter;
 }
 
@@ -38,14 +42,12 @@ int ring_interpreter_init_statement_list(Statement *statement) {
     ring_interpreter->statement_list      = statement;
     ring_interpreter->statement_list_size = 1;
 
-    printf("%p\n", ring_interpreter->statement_list);
     return 0;
 }
 
 int ring_interpreter_add_statement(Statement *statement) {
     assert(ring_interpreter != NULL);
     assert(ring_interpreter->statement_list != NULL);
-    printf("%p\n", ring_interpreter->statement_list);
 
     Statement *pos;
     pos = ring_interpreter->statement_list;
