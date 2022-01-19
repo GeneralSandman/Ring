@@ -10,7 +10,7 @@ Ring_Interpreter *new_ring_interpreter() {
         ring_interpreter = malloc(sizeof(Ring_Interpreter));
     }
 
-    ring_interpreter->line_number         = 0;
+    ring_interpreter->current_line_number = 0;
     ring_interpreter->statement_list_size = 0;
     ring_interpreter->statement_list      = NULL;
     return ring_interpreter;
@@ -25,7 +25,7 @@ unsigned int get_ring_interpreter_line_number() {
         // TODO: asser();
         return 0;
     }
-    return ring_interpreter->line_number;
+    return ring_interpreter->current_line_number;
 }
 
 unsigned int increase_ring_interpreter_line_number() {
@@ -33,7 +33,7 @@ unsigned int increase_ring_interpreter_line_number() {
         // TODO: asser();
         return 0;
     }
-    ring_interpreter->line_number++;
+    ring_interpreter->current_line_number++;
 }
 
 int ring_interpreter_init_statement_list(Statement *statement) {

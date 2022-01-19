@@ -4,7 +4,7 @@
 #include "ring.h"
 
 typedef struct {
-    unsigned int line_number;
+    unsigned int current_line_number;
 
     unsigned int statement_list_size;
     Statement *  statement_list;

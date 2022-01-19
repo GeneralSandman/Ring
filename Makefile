@@ -36,4 +36,4 @@ string.o: string.c
 
 main.o: main.c ring.h
 parser.o: parser.c ring.h
-interpreter.o: interpreter.c
+interpreter.o: interpreter.c ring.h

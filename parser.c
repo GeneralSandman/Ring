@@ -3,12 +3,18 @@
 #include "interpreter.h"
 
 Statement *create_statement_list(Statement *statement) {
+#ifdef DEBUG
     printf("[DEBUG][parser.c][function:create_statement_list]\t\n");
+#endif
+
     ring_interpreter_init_statement_list(statement);
 }
 
 Statement *statement_list_add_item(Statement *statement) {
+#ifdef DEBUG
     printf("[DEBUG][parser.c][function:statement_list_add_item]\t\n");
+#endif
+
     ring_interpreter_add_statement(statement);
 }
 
@@ -40,7 +46,9 @@ Expression *create_expression_(FunctionCallExpression *function_call_expression)
 }
 
 FunctionCallExpression *create_function_call_expression(char *identifier, ArgumentList *argument_list) {
+#ifdef DEBUG
     printf("[DEBUG][parser.c][function:create_function_call_expression]\tidentifier(%s)\n", identifier);
+#endif
 
     FunctionCallExpression *function_call_expression = NULL;
     function_call_expression                         = (FunctionCallExpression *)malloc(sizeof(FunctionCallExpression));
