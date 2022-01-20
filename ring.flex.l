@@ -119,6 +119,10 @@ int yywrap(){
     string_literal_add_char('\r');
     BEGIN STRING_LITERAL_STATE;
 }
+<STRING_LITERAL_STATE>\\t {
+    string_literal_add_char('\t');
+    BEGIN STRING_LITERAL_STATE;
+}
 <STRING_LITERAL_STATE>. {
     string_literal_add_char(yytext[0]);
     BEGIN STRING_LITERAL_STATE;
