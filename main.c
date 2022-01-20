@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "interpreter.h"
 
-void interpret(Ring_Interpreter *ring_interpreter, FILE *fp) {
+void compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
     extern int   yyparse(void);
     extern FILE *yyin;
 
@@ -11,6 +11,15 @@ void interpret(Ring_Interpreter *ring_interpreter, FILE *fp) {
         /* BUGBUG */
         fprintf(stderr, "Error ! Error ! Error !\n");
         exit(1);
+    }
+}
+
+void interpret(Ring_Interpreter *ring_interpreter) {
+    Statement *p;
+    for (p = ring_interpreter->statement_list; p != NULL; p = p->next) {
+#ifdef DEBUG
+        printf("[DEBUG][main.c][function:interpret]\t interpret statement: type(%d),line_number(%d)\n", p->type, p->line_number);
+#endif
     }
 }
 
@@ -30,7 +39,8 @@ int main(int argc, char **argv) {
     }
 
     ring_interpreter = new_ring_interpreter();
-    interpret(ring_interpreter, fp);
+    compile(ring_interpreter, fp);
+    interpret(ring_interpreter);
 
     return 0;
 }

@@ -26,7 +26,7 @@ Statement *create_statemen_from_expression(Expression *expression) {
     statement            = (Statement *)malloc(sizeof(Statement));
 
     statement->type         = STATEMENT_TYPE_EXPRESSION;
-    statement->line_number  = 0;
+    statement->line_number  = get_ring_interpreter_line_number();
     statement->u.expression = expression;
     statement->next         = NULL;
     return statement;
@@ -41,7 +41,7 @@ Statement *create_statement_from_variable(Variable *variable) {
     statement            = (Statement *)malloc(sizeof(Statement));
 
     statement->type        = STATEMENT_TYPE_VARIABLE_DEFINITION;
-    statement->line_number = 0;
+    statement->line_number = get_ring_interpreter_line_number();
     statement->u.variable  = variable;
     statement->next        = NULL;
     return statement;
