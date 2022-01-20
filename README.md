@@ -2,7 +2,7 @@
 
 ## 如何使用源代码
 
-[如何运行 HelloWorld](./doc/using)
+[如何运行 HelloWorld](./doc/using.md)
 
 ## Ring语言语法规范
 
