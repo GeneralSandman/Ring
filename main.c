@@ -15,6 +15,10 @@ void compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
 }
 
 void interpret(Ring_Interpreter *ring_interpreter) {
+#ifdef DEBUG
+    printf("[DEBUG][main.c][function:interpret]\t interpret statement: statement_list_size(%d)\n", ring_interpreter->statement_list_size);
+#endif
+
     Statement *p;
     for (p = ring_interpreter->statement_list; p != NULL; p = p->next) {
 #ifdef DEBUG
