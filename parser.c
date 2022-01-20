@@ -1,6 +1,5 @@
 #include "ring.h"
 #include "parser.h"
-#include "interpreter.h"
 
 void create_statement_list(Statement *statement) {
 #ifdef DEBUG
@@ -119,8 +118,8 @@ ArgumentList *create_argument_list(char *argument) {
     ArgumentList *argument_list = NULL;
     argument_list               = (ArgumentList *)malloc(sizeof(ArgumentList));
 
-    argument_list->type = ARGUMENT_TYPE_RING_BASICVALUE;
-    // argument_list->u.ring_basic_value->string_value = argument; // FIXME:
-    argument_list->next = NULL;
+    argument_list->type                            = ARGUMENT_TYPE_RING_BASICVALUE;
+    argument_list->u.ring_basic_value.string_value = argument;
+    argument_list->next                            = NULL;
     return argument_list;
 }

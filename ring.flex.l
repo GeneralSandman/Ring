@@ -16,8 +16,21 @@ int yywrap(){
 <INITIAL>"double"       return TOKEN_DOUBLE;
 <INITIAL>"string"       return TOKEN_STRING;
 
+<INITIAL>"true"         return TOKEN_TRUE;
+<INITIAL>"false"        return TOKEN_FALSE;
+
 <INITIAL>"var"          return TOKEN_VAR;
 <INITIAL>"function"     return TOKEN_FUNCTION;
+
+<INITIAL>"+"            return TOKEN_ADD;
+<INITIAL>"-"            return TOKEN_SUB;
+<INITIAL>"*"            return TOKEN_MUL;
+<INITIAL>"/"            return TOKEN_DIV;
+
+<INITIAL>"and"          return TOKEN_AND;
+<INITIAL>"or"           return TOKEN_OR;
+
+
 
 <INITIAL>"("            return TOKEN_LP;
 <INITIAL>")"            return TOKEN_RP;
@@ -93,12 +106,21 @@ int yywrap(){
 
 
 <STRING_LITERAL_STATE>\" {
+    yylval.m_string_value = get_string_literal();
+
     BEGIN INITIAL;
     return STRING_LITERAL;
 }
+<STRING_LITERAL_STATE>\\n {
+    string_literal_add_char('\n');
+    BEGIN STRING_LITERAL_STATE;
+}
+<STRING_LITERAL_STATE>\\r {
+    string_literal_add_char('\r');
+    BEGIN STRING_LITERAL_STATE;
+}
 <STRING_LITERAL_STATE>. {
     string_literal_add_char(yytext[0]);
-    yylval.m_string_value = get_string_literal();
     BEGIN STRING_LITERAL_STATE;
 }
 

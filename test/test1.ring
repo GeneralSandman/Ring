@@ -1,4 +1,3 @@
 //file: test/test1.ring
-var string str; // Variable Definition&Declaration
-str = "12345";
-print("test print\n");
+print("Hello World\n");
+print("Stinking Darling, I Love You!\n");

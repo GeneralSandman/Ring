@@ -24,8 +24,21 @@
 %token TOKEN_INT 
 %token TOKEN_DOUBLE 
 %token TOKEN_STRING 
+
+%token TOKEN_TRUE
+%token TOKEN_FALSE
+
 %token TOKEN_VAR
 %token TOKEN_FUNCTION
+
+%token TOKEN_ADD
+%token TOKEN_SUB
+%token TOKEN_MUL
+%token TOKEN_DIV
+
+%token TOKEN_AND
+%token TOKEN_OR
+
 %token TOKEN_LP 
 %token TOKEN_RP 
 %token TOKEN_COMMA 

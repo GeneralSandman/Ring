@@ -7,7 +7,9 @@ OBJS = \
   ring.o\
   string.o\
   parser.o\
-  interpreter.o
+  interpreter.o\
+  inner_func.o
+
 CFLAGS = -c -g -Wall -Wswitch-enum -ansi -pedantic -DDEBUG
 BIN = ./bin
 INCLUDES = \
@@ -37,3 +39,4 @@ string.o: string.c
 main.o: main.c ring.h
 parser.o: parser.c ring.h
 interpreter.o: interpreter.c ring.h
+inner_func.o: inner_func.c ring.h interpreter.h

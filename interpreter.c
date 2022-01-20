@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "interpreter.h"
+#include "ring.h"
+#include "inner_func.h"
 
 static Ring_Interpreter *ring_interpreter = NULL;
 
@@ -13,6 +14,9 @@ Ring_Interpreter *new_ring_interpreter() {
     ring_interpreter->current_line_number = 1;
     ring_interpreter->statement_list_size = 0;
     ring_interpreter->statement_list      = NULL;
+    ring_interpreter->function_list       = NULL;
+
+    ring_interpreter_registe_inner_func();
     return ring_interpreter;
 }
 
@@ -57,4 +61,8 @@ int ring_interpreter_add_statement(Statement *statement) {
     pos->next = statement;
     ring_interpreter->statement_list_size++;
     return 0;
+}
+
+void ring_interpreter_registe_inner_func() {
+    register_inner_func(ring_interpreter);
 }
