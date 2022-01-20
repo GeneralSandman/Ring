@@ -10,7 +10,7 @@ OBJS = \
   interpreter.o\
   inner_func.o
 
-CFLAGS = -c -g -Wall -Wswitch-enum -ansi -pedantic -DDEBUG
+CFLAGS = -c -g -std=c99 -Wall -Wswitch-enum -pedantic
 BIN = ./bin
 INCLUDES = \
 
