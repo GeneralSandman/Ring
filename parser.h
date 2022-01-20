@@ -7,9 +7,12 @@
 
 void                    create_statement_list();
 void                    statement_list_add_item();
-Statement *             create_statemen();
+Statement *             create_statemen_from_expression();
+Statement *             create_statement_from_variable(Variable *variable);
 Expression *            create_expression();
 Expression *            create_expression_(FunctionCallExpression *function_call_expression);
+Expression *            create_expression__(AssignExpression *assign_expression);
+AssignExpression *      create_assign_expression(char *identifier, char *string_value);
 FunctionCallExpression *create_function_call_expression();
 ArgumentList *          create_argument_list();
 

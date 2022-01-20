@@ -1,5 +1,4 @@
-// comment
-string a = "aaaaaa";
-string b = "bbbbbb";
-print("print test\n");
-print("argument 1","argument 2");
+//file: test/test1.ring
+var string str; // Variable Definition&Declaration
+str = "12345";
+print("test print\n");

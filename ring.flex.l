@@ -12,12 +12,18 @@ int yywrap(){
 %start COMMENT STRING_LITERAL_STATE
 %%
 
-<INITIAL>"string" return TOKEN_STRING;
+<INITIAL>"int"          return TOKEN_INT;
+<INITIAL>"double"       return TOKEN_DOUBLE;
+<INITIAL>"string"       return TOKEN_STRING;
+
+<INITIAL>"var"          return TOKEN_VAR;
+<INITIAL>"function"     return TOKEN_FUNCTION;
+
 <INITIAL>"("            return TOKEN_LP;
 <INITIAL>")"            return TOKEN_RP;
 <INITIAL>","            return TOKEN_COMMA;
-<INITIAL>";" return TOKEN_SEMICOLON;
-<INITIAL>"=" return TOKEN_ASSIGN;
+<INITIAL>";"            return TOKEN_SEMICOLON;
+<INITIAL>"="            return TOKEN_ASSIGN;
 
 <INITIAL>[A-Za-z_][A-Za-z_0-9]* {
     #ifdef DEBUG

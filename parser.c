@@ -17,9 +17,9 @@ void statement_list_add_item(Statement *statement) {
     ring_interpreter_add_statement(statement);
 }
 
-Statement *create_statemen(Expression *expression) {
+Statement *create_statemen_from_expression(Expression *expression) {
 #ifdef DEBUG
-    printf("[DEBUG][parser.c][function:create_statemen]\t \n");
+    printf("[DEBUG][parser.c][function:create_statemen_from_expression]\t \n");
 #endif
 
     Statement *statement = NULL;
@@ -29,6 +29,21 @@ Statement *create_statemen(Expression *expression) {
     statement->line_number  = 0;
     statement->u.expression = expression;
     statement->next         = NULL;
+    return statement;
+}
+
+Statement *create_statement_from_variable(Variable *variable) {
+#ifdef DEBUG
+    printf("[DEBUG][parser.c][function:create_statement_from_variable]\t \n");
+#endif
+
+    Statement *statement = NULL;
+    statement            = (Statement *)malloc(sizeof(Statement));
+
+    statement->type        = STATEMENT_TYPE_VARIABLE_DEFINITION;
+    statement->line_number = 0;
+    statement->u.variable  = variable;
+    statement->next        = NULL;
     return statement;
 }
 
@@ -54,6 +69,32 @@ Expression *create_expression_(FunctionCallExpression *function_call_expression)
     expression->type                       = EXPRESSION_TYPE_FUNCTION_CALL;
     expression->u.function_call_expression = function_call_expression;
     return expression;
+}
+
+Expression *create_expression__(AssignExpression *assign_expression) {
+#ifdef DEBUG
+    printf("[DEBUG][parser.c][function:create_expression__]\t \n");
+#endif
+
+    Expression *expression = NULL;
+    expression             = (Expression *)malloc(sizeof(Expression));
+
+    expression->type                = EXPRESSION_TYPE_ASSIGN;
+    expression->u.assign_expression = assign_expression;
+    return expression;
+}
+
+AssignExpression *create_assign_expression(char *identifier, char *string_value) {
+#ifdef DEBUG
+    printf("[DEBUG][parser.c][function:create_assign_expression]\t identifier(%s),string_value(%s)\n", identifier, string_value);
+#endif
+
+    AssignExpression *assing_expression = NULL;
+    assing_expression                   = (AssignExpression *)malloc(sizeof(AssignExpression));
+
+    assing_expression->assign_identifier = identifier;
+    assing_expression->right_value       = string_value;
+    return assing_expression;
 }
 
 FunctionCallExpression *create_function_call_expression(char *identifier, ArgumentList *argument_list) {
