@@ -14,8 +14,13 @@ int main(int argc, char **argv) {
     FILE *            fp;
 
     if (argc != 2) {
-        fprintf(stderr, "usage:%s filename", argv[0]);
+        fprintf(stderr, "usage:%s <filename>", argv[0]);
         exit(1);
+    }
+
+    if (!strcmp(argv[1], "--version")) {
+        printf("Ring version: %s \n", RING_VERSION);
+        return 0;
     }
 
     fp = fopen(argv[1], "r");
