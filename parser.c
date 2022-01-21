@@ -3,7 +3,7 @@
 
 void create_statement_list(Statement *statement) {
 #ifdef DEBUG
-    printf("[DEBUG][parser.c][function:create_statement_list]\t\n");
+    print_debug_info("\t");
 #endif
     ring_interpreter_init_statement_list(statement);
 }

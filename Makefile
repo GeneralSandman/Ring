@@ -8,7 +8,8 @@ OBJS = \
   string.o\
   parser.o\
   interpreter.o\
-  inner_func.o
+  inner_func.o\
+  utils.o
 
 CFLAGS = -c -g -std=c99 -Wall -Wswitch-enum -pedantic
 BIN = ./bin
@@ -40,3 +41,4 @@ main.o: main.c ring.h
 parser.o: parser.c ring.h
 interpreter.o: interpreter.c ring.h
 inner_func.o: inner_func.c ring.h interpreter.h
+utils.o: utils.c ring.h

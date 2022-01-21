@@ -119,6 +119,21 @@ struct Function_Tag {
     Function *next;
 };
 
+// typedef struct {
+// } ListNode;
+
+// struct List {
+//     ListNode *node;
+//     ListNode *next;
+// };
+
+// struct IdentifierDefinition_Tag {
+
+// };
+
+#define print_debug_info(message) \
+    printf("[DEBUG][%s:%d][function:%s]%s\n", __FILE__, __LINE__, __FUNCTION__, message)
+
 Ring_Interpreter *new_ring_interpreter();
 Ring_Interpreter *get_ring_interpreter();
 unsigned int      get_ring_interpreter_line_number();
