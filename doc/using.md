@@ -9,11 +9,13 @@ mkdir bin
 
 make
 
+./bin/ring --version
+
 ./bin/ring test/helloworld.ring
 
 ```
 
-会在命令行里显示一个超炫的字符画：
+解释执行```test/helloworld.ring```会在命令行里显示一个超炫的字符画：
 
 
 ```
