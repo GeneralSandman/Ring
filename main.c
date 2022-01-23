@@ -3,14 +3,17 @@
 #include <string.h>
 #include "ring.h"
 
-void compile(Ring_Interpreter *ring_interpreter, FILE *fp);
-void interpret(Ring_Interpreter *ring_interpreter);
+void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp);
+void ring_interpret(Ring_Interpreter *ring_interpreter);
 void interpret_statement(Statement *statement);
 void interpret_expression(Expression *expression);
 void invoke_function(FunctionCallExpression *function_call_expression);
+int  interpret_binary_expression(Expression *expression);
+void assign(Expression *expression);
 
 int main(int argc, char **argv) {
     Ring_Interpreter *ring_interpreter;
+    char *            file_name;
     FILE *            fp;
 
     if (argc != 2) {
@@ -23,20 +26,22 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    fp = fopen(argv[1], "r");
+    file_name = argv[1];
+
+    fp = fopen(file_name, "r");
     if (fp == NULL) {
         fprintf(stderr, "%s not found.\n", argv[1]);
         exit(1);
     }
 
-    ring_interpreter = new_ring_interpreter();
-    compile(ring_interpreter, fp);
-    interpret(ring_interpreter);
+    ring_interpreter = new_ring_interpreter(file_name);
+    ring_compile(ring_interpreter, fp);
+    ring_interpret(ring_interpreter);
 
     return 0;
 }
 
-void compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
+void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
     extern int   yyparse(void);
     extern FILE *yyin;
 
@@ -48,7 +53,7 @@ void compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
     }
 }
 
-void interpret(Ring_Interpreter *ring_interpreter) {
+void ring_interpret(Ring_Interpreter *ring_interpreter) {
 #ifdef DEBUG
     printf("[DEBUG][main.c][function:interpret]\t interpret statement: statement_list_size(%d)\n", ring_interpreter->statement_list_size);
 #endif
@@ -84,12 +89,49 @@ void interpret_expression(Expression *expression) {
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
-        /* code */
+        assign(expression);
+        break;
+
+    case EXPRESSION_TYPE_ARITHMETIC_ADD:
+    case EXPRESSION_TYPE_ARITHMETIC_SUB:
+    case EXPRESSION_TYPE_ARITHMETIC_MUL:
+    case EXPRESSION_TYPE_ARITHMETIC_DIV:
+        interpret_binary_expression(expression);
         break;
 
     default:
         break;
     }
+}
+
+int interpret_binary_expression(Expression *expression) {
+#ifdef DEBUG
+    printf("[DEBUG][main.c][function:interpret_binary_expression]\t \n");
+#endif
+
+    int result;
+
+    switch (expression->type) {
+    case EXPRESSION_TYPE_LITERAL_INT:
+        result = expression->u.int_literal;
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_ADD:
+        result = interpret_binary_expression(expression->u.binary_expression->left_expression) + interpret_binary_expression(expression->u.binary_expression->right_expression);
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_SUB:
+        result = interpret_binary_expression(expression->u.binary_expression->left_expression) - interpret_binary_expression(expression->u.binary_expression->right_expression);
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_MUL:
+        result = interpret_binary_expression(expression->u.binary_expression->left_expression) * interpret_binary_expression(expression->u.binary_expression->right_expression);
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_DIV:
+        result = interpret_binary_expression(expression->u.binary_expression->left_expression) / interpret_binary_expression(expression->u.binary_expression->right_expression);
+        break;
+    default:
+        break;
+    }
+
+    return result;
 }
 
 void invoke_function(FunctionCallExpression *function_call_expression) {
@@ -110,4 +152,8 @@ void invoke_function(FunctionCallExpression *function_call_expression) {
     function->inner_func(1, function_call_expression->argument_list->u.ring_basic_value.string_value);
 
     // invoke
+}
+
+void assign(Expression *expression) {
+    printf("-------------%d\n", interpret_binary_expression(expression->u.assign_expression->expression));
 }

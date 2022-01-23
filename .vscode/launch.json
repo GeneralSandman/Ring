@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/bin/ring",
             "args": [
-                "${workspaceFolder}/test/test1.ring"
+                "${workspaceFolder}/test/test-v0.0.3.ring"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

@@ -12,7 +12,9 @@ Statement *             create_statement_from_variable(Variable *variable);
 Expression *            create_expression();
 Expression *            create_expression_(FunctionCallExpression *function_call_expression);
 Expression *            create_expression__(AssignExpression *assign_expression);
-AssignExpression *      create_assign_expression(char *identifier, char *string_value);
+Expression *            create_expression_binary(ExpressionType type, Expression *left, Expression *right);
+Expression *            create_expression_literal(ExpressionType type, char *literal_interface);
+AssignExpression *      create_assign_expression(char *identifier, Expression *expression);
 FunctionCallExpression *create_function_call_expression();
 ArgumentList *          create_argument_list();
 

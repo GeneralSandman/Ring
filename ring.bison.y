@@ -8,9 +8,10 @@
 
 
 %union {
-    char *m_identifier;
-    char *m_string_value;
     char *m_comment_value;
+
+    char *m_literal_interface;
+    char *m_identifier;
 
     Statement *m_statement_list;
     Expression *m_expression;
@@ -24,11 +25,13 @@
 %token TOKEN_INT 
 %token TOKEN_DOUBLE 
 %token TOKEN_STRING 
+%token TOKEN_STRUCT 
 
 %token TOKEN_TRUE
 %token TOKEN_FALSE
 
 %token TOKEN_VAR
+%token TOKEN_CONST
 %token TOKEN_FUNCTION
 
 %token TOKEN_ADD
@@ -38,19 +41,33 @@
 
 %token TOKEN_AND
 %token TOKEN_OR
+%token TOKEN_NOT
+
+%token TOKEN_EQ
+%token TOKEN_NE
+
+%token TOKEN_GT
+%token TOKEN_GE
+%token TOKEN_LT
+%token TOKEN_LE
 
 %token TOKEN_LP 
 %token TOKEN_RP 
 %token TOKEN_COMMA 
 %token TOKEN_SEMICOLON 
 %token TOKEN_ASSIGN
+
+%token INT_LITERAL
+%token DOUBLE_LITERAL
 %token STRING_LITERAL
 %token IDENTIFIER
 
-%type <m_string_value> STRING_LITERAL string_value
+%type <m_literal_interface> literal_term INT_LITERAL DOUBLE_LITERAL STRING_LITERAL
 %type <m_identifier> IDENTIFIER identifier
 %type <m_statement_list> statement statement_list
-%type <m_expression> expression
+%type <m_expression> expression 
+%type <m_expression> expression_arithmetic_operation_additive 
+%type <m_expression> expression_arithmetic_operation_multiplicative 
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
 %type <m_argument_list> argument_list
@@ -130,7 +147,7 @@ expression
     : function_call_expression 
     {
         #ifdef DEBUG
-        printf("[DEBUG][ring.bison.y][RULE:expression]\t\n");
+        printf("[DEBUG][ring.bison.y][RULE:expression-function_call_expression]\t\n");
         #endif
 
         $$ = create_expression_($1);
@@ -138,10 +155,96 @@ expression
     | assign_expression
     {
         #ifdef DEBUG
-        printf("[DEBUG][ring.bison.y][RULE:expression]\t\n");
+        printf("[DEBUG][ring.bison.y][RULE:expression-assign_expression]\t\n");
         #endif
         
         $$ = create_expression__($1);
+    }
+    | expression_arithmetic_operation_additive
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:expression-expression_arithmetic_operation_additive]\t\n");
+        #endif
+
+    }
+    ;
+
+expression_arithmetic_operation_additive
+    : expression_arithmetic_operation_multiplicative 
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:expression_arithmetic_operation_additive]\t\n");
+        #endif
+
+    }
+    | expression_arithmetic_operation_additive TOKEN_ADD expression_arithmetic_operation_multiplicative
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:expression_arithmetic_operation_additive]\t\n");
+        #endif
+
+        $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_ADD, $1, $3);
+    }
+    | expression_arithmetic_operation_additive TOKEN_SUB expression_arithmetic_operation_multiplicative
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:expression_arithmetic_operation_additive]\t\n");
+        #endif
+
+        $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_SUB, $1, $3);
+    }
+    ;
+
+expression_arithmetic_operation_multiplicative
+    : literal_term
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:expression_arithmetic_operation_multiplicative]\t\n");
+        #endif
+
+    }
+    | expression_arithmetic_operation_multiplicative TOKEN_MUL literal_term
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:expression_arithmetic_operation_multiplicative]\t\n");
+        #endif
+
+        $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_MUL, $1, $3);
+    }
+    | expression_arithmetic_operation_multiplicative TOKEN_DIV literal_term
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:expression_arithmetic_operation_multiplicative]\t\n");
+        #endif
+
+        $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_DIV, $1, $3);
+    }
+    ;
+
+literal_term
+    : INT_LITERAL
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:literal_term-INT_LITERAL]\t\n");
+        #endif
+
+        $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_INT, $1);
+    }
+    | DOUBLE_LITERAL
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:literal_term-DOUBLE_LITERAL]\t\n");
+        #endif
+
+        $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_DOUBLE, $1);
+    }
+    | STRING_LITERAL
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:literal_term-STRING_LITERAL]\t\n");
+        #endif
+
+        $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_STRING, $1);
     }
     ;
 
@@ -157,7 +260,7 @@ function_call_expression
     ;
 
 assign_expression
-    : identifier TOKEN_ASSIGN string_value
+    : identifier TOKEN_ASSIGN expression
     {
         #ifdef DEBUG
         printf("[DEBUG][ring.bison.y][RULE:assign_expression]\t\n");
@@ -188,21 +291,19 @@ argument_list
     ;
 
 
-string_value
-    : STRING_LITERAL
-    {
-        #ifdef DEBUG
-        printf("[DEBUG][ring.bison.y][RULE:string_value] string_value(%s)\n", $1);
-        #endif
-    }
-    ;
-
 
 %%
 
 
 int yyerror(char const *str){
-    fprintf(stderr, "complie error:%s\n", str);
+    fprintf(stderr, "file:\t%s \n\
+        \t line:%d column:%d \n\
+        \t complie error:%s\n", 
+        get_ring_interpreter_current_file_name(),
+        get_ring_interpreter_line_number(), 
+        get_ring_interpreter_column_number(), 
+        str);
+    
     return 0;
 }
 

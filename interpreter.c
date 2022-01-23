@@ -6,12 +6,16 @@
 
 static Ring_Interpreter *ring_interpreter = NULL;
 
-Ring_Interpreter *new_ring_interpreter() {
+Ring_Interpreter *new_ring_interpreter(char *file_name) {
     if (ring_interpreter == NULL) {
         ring_interpreter = malloc(sizeof(Ring_Interpreter));
     }
 
-    ring_interpreter->current_line_number = 1;
+    ring_interpreter->current_file_name     = file_name;
+    ring_interpreter->current_line_number   = 1;
+    ring_interpreter->current_column_number = 1;
+    ring_interpreter->current_line_content  = NULL;
+
     ring_interpreter->statement_list_size = 0;
     ring_interpreter->statement_list      = NULL;
     ring_interpreter->function_list       = NULL;
@@ -22,6 +26,16 @@ Ring_Interpreter *new_ring_interpreter() {
 
 Ring_Interpreter *get_ring_interpreter() {
     return ring_interpreter;
+}
+
+char *get_ring_interpreter_current_file_name() {
+    assert(ring_interpreter != NULL);
+    return ring_interpreter->current_file_name;
+}
+
+char *get_ring_interpreter_current_line_content() {
+    assert(ring_interpreter != NULL);
+    return ring_interpreter->current_line_content;
 }
 
 unsigned int get_ring_interpreter_line_number() {
@@ -39,6 +53,21 @@ unsigned int increase_ring_interpreter_line_number() {
     }
     ring_interpreter->current_line_number++;
     return ring_interpreter->current_line_number;
+}
+
+unsigned int get_ring_interpreter_column_number() {
+    assert(ring_interpreter != NULL);
+    return ring_interpreter->current_column_number;
+}
+
+unsigned int increase_ring_interpreter_column_number(unsigned int len) {
+    assert(ring_interpreter != NULL);
+    ring_interpreter->current_column_number += len;
+    return ring_interpreter->current_column_number;
+}
+
+void reset_ring_interpreter_column_number() {
+    ring_interpreter->current_column_number = 1;
 }
 
 int ring_interpreter_init_statement_list(Statement *statement) {

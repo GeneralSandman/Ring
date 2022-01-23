@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-0.0.2-beat"
+#define RING_VERSION "ring-v0.0.2-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -10,6 +10,8 @@ typedef struct Statement_Tag Statement;
 
 // struct Expression_Tag;
 typedef struct Expression_Tag Expression;
+
+typedef struct BinaryExpression_Tag BinaryExpression;
 
 // struct FunctionCallExpression_Tag;
 typedef struct FunctionCallExpression_Tag FunctionCallExpression;
@@ -22,18 +24,32 @@ typedef struct ArgumentList_Tag ArgumentList;
 // struct Variable_Tag;
 typedef struct Variable_Tag Variable;
 
+typedef struct Identifier_Tag Identifier;
+
 // struct Function_Tag;
 typedef struct Function_Tag Function;
 
 typedef void Ring_InnerFunc(int argc, char *string);
 
 struct Ring_Interpreter_Tag {
+    char *       current_file_name;
     unsigned int current_line_number;
+    unsigned int current_column_number;
+    char *       current_line_content;
 
     unsigned int statement_list_size;
     Statement *  statement_list;
+    unsigned int function_list_size;
     Function *   function_list;
+    Variable *   variable_list;
+    Identifier * identifier_list;
 };
+
+typedef enum {
+    IDENTIFIER_TYPE_UNKNOW = 0,
+    IDENTIFIER_TYPE_VARIABLE,
+    IDENTIFIER_TYPE_FUNCATION,
+} IdentifierType;
 
 typedef union {
     int    int_value;
@@ -50,8 +66,15 @@ typedef enum {
 
 typedef enum {
     EXPRESSION_TYPE_UNKNOW = 0,
+    EXPRESSION_TYPE_LITERAL_INT,
+    EXPRESSION_TYPE_LITERAL_DOUBLE,
+    EXPRESSION_TYPE_LITERAL_STRING,
     EXPRESSION_TYPE_FUNCTION_CALL,
     EXPRESSION_TYPE_ASSIGN,
+    EXPRESSION_TYPE_ARITHMETIC_ADD,
+    EXPRESSION_TYPE_ARITHMETIC_SUB,
+    EXPRESSION_TYPE_ARITHMETIC_MUL,
+    EXPRESSION_TYPE_ARITHMETIC_DIV,
 } ExpressionType;
 
 typedef enum {
@@ -78,11 +101,16 @@ struct Statement_Tag {
 };
 
 struct Expression_Tag {
+    unsigned int line_number;
+
     ExpressionType type;
-    unsigned int   line_number;
     union {
+        int                     int_literal;
+        double                  double_literal;
+        char *                  string_literal;
         FunctionCallExpression *function_call_expression;
         AssignExpression *      assign_expression;
+        BinaryExpression *      binary_expression;
     } u;
 };
 
@@ -92,9 +120,23 @@ struct FunctionCallExpression_Tag {
     ArgumentList *argument_list;
 };
 
+struct Identifier_Tag {
+    unsigned int line_number;
+
+    IdentifierType type;
+    char *         identifier_name;
+
+    Identifier *next;
+};
+
 struct AssignExpression_Tag {
-    char *assign_identifier;
-    char *right_value;
+    char *      assign_identifier;
+    Expression *expression;
+};
+
+struct BinaryExpression_Tag {
+    Expression *left_expression;
+    Expression *right_expression;
 };
 
 struct ArgumentList_Tag {
@@ -112,6 +154,7 @@ struct Variable_Tag {
     union {
         Ring_BasicValue *ring_basic_value;
     } u;
+    Variable *next;
 };
 
 struct Function_Tag {
@@ -136,10 +179,15 @@ struct Function_Tag {
 #define print_debug_info(message) \
     printf("[DEBUG][%s:%d][function:%s]%s\n", __FILE__, __LINE__, __FUNCTION__, message)
 
-Ring_Interpreter *new_ring_interpreter();
+Ring_Interpreter *new_ring_interpreter(char *file_name);
 Ring_Interpreter *get_ring_interpreter();
+char *            get_ring_interpreter_current_file_name();
+char *            get_ring_interpreter_current_line_content();
 unsigned int      get_ring_interpreter_line_number();
 unsigned int      increase_ring_interpreter_line_number();
+unsigned int      get_ring_interpreter_column_number();
+unsigned int      increase_ring_interpreter_column_number(unsigned int len);
+void              reset_ring_interpreter_column_number();
 int               ring_interpreter_init_statement_list(Statement *statement);
 int               ring_interpreter_add_statement(Statement *statement);
 void              ring_interpreter_registe_inner_func();
@@ -149,6 +197,10 @@ void  reset_string_literal_buffer();
 void  string_literal_add_char(char ch);
 char *get_string_literal();
 
+void insert_identifier(IdentifierType type, char *name);
+
 Variable *new_variable();
+
+Identifier *new_identifier(IdentifierType type, char *name);
 
 #endif
