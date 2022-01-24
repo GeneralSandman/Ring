@@ -113,7 +113,7 @@ int yywrap(){
 }
 <INITIAL>\n {
     #ifdef DEBUG
-    printf("[DEBUG][ring.flex.l][STATUS:INITIAL]\tnew line(LF)\n");
+    printf("[DEBUG][ring.flex.l][STATUS:INITIAL]\tnew line(LF)\n\n\n");
     #endif
 
     reset_ring_interpreter_column_number();
@@ -121,7 +121,7 @@ int yywrap(){
 }
 <INITIAL>\r\n {
     #ifdef DEBUG
-    printf("[DEBUG][ring.flex.l][STATUS:INITIAL]\tnew line(CRLF)\n");
+    printf("[DEBUG][ring.flex.l][STATUS:INITIAL]\tnew line(CRLF)\n\n\n");
     #endif
 
     reset_ring_interpreter_column_number();
@@ -138,7 +138,7 @@ int yywrap(){
     reset_string_literal_buffer();
 
     #ifdef DEBUG
-    printf("[DEBUG][ring.flex.l][STATUS:COMMENT]\tcomment(%s)\n", yylval.m_comment_value);
+    printf("[DEBUG][ring.flex.l][STATUS:COMMENT]\tcomment(%s)\n\n\n", yylval.m_comment_value);
     #endif
 
     reset_ring_interpreter_column_number();
@@ -150,7 +150,7 @@ int yywrap(){
     reset_string_literal_buffer();
 
     #ifdef DEBUG
-    printf("[DEBUG][ring.flex.l][STATUS:COMMENT]\tcomment(%s)\n", yylval.m_comment_value);
+    printf("[DEBUG][ring.flex.l][STATUS:COMMENT]\tcomment(%s)\n\n\n", yylval.m_comment_value);
     #endif
 
     reset_ring_interpreter_column_number();

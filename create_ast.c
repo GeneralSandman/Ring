@@ -65,6 +65,22 @@ Expression *create_expression() {
     return expression;
 }
 
+Expression *create_expression_identifier(char *identifier) {
+#ifdef DEBUG
+    print_debug_info("\t");
+#endif
+
+    Expression *expression = NULL;
+    expression             = (Expression *)malloc(sizeof(Expression));
+
+    expression->line_number           = get_ring_interpreter_line_number();
+    expression->type                  = EXPRESSION_TYPE_VARIABLE;
+    expression->u.variable_identifier = identifier;
+    printf("----------expression:%p\n", expression);
+
+    return expression;
+}
+
 Expression *create_expression_(FunctionCallExpression *function_call_expression) {
 #ifdef DEBUG
     print_debug_info("\t");
@@ -177,6 +193,21 @@ ArgumentList *create_argument_list(char *argument) {
     argument_list->type                            = ARGUMENT_TYPE_RING_BASICVALUE;
     argument_list->u.ring_basic_value.string_value = argument;
     argument_list->next                            = NULL;
+    return argument_list;
+}
+
+ArgumentList *create_argument_list_from_expression(Expression *expression) {
+#ifdef DEBUG
+    print_debug_info("\t");
+#endif
+    printf("----------expression:%p\n", expression);
+
+    ArgumentList *argument_list = NULL;
+    argument_list               = (ArgumentList *)malloc(sizeof(ArgumentList));
+
+    argument_list->type         = ARGUMENT_TYPE_EXPRESSION;
+    argument_list->u.expression = expression;
+    argument_list->next         = NULL;
     return argument_list;
 }
 

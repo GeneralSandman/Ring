@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
 #include "ring.h"
 
 void interpret_statement(Statement *statement) {
@@ -72,11 +74,15 @@ int interpret_binary_expression(Expression *expression) {
 }
 
 void invoke_function(FunctionCallExpression *function_call_expression) {
+#ifdef DEBUG
+    print_debug_info("\t");
+#endif
+
     // search_funcaion
     Function *function = NULL;
 
     for (Function *pos = get_ring_interpreter()->function_list; pos != NULL; pos = function->next) {
-        if (!strcmp(pos->function_name, function_call_expression->function_name)) {
+        if (0 == strcmp(pos->function_name, function_call_expression->function_name)) {
             function = pos;
         }
     }
@@ -86,11 +92,36 @@ void invoke_function(FunctionCallExpression *function_call_expression) {
         return;
     }
 
-    function->inner_func(1, function_call_expression->argument_list->u.ring_basic_value.string_value);
+    function->inner_func(1, function_call_expression->argument_list->u.expression);
 
     // invoke
 }
 
 void assign(Expression *expression) {
-    printf("-------------%d\n", interpret_binary_expression(expression->u.assign_expression->expression));
+#ifdef DEBUG
+    print_debug_info("\t");
+#endif
+    assert(expression->type == EXPRESSION_TYPE_ASSIGN);
+
+    int result = 0;
+    result     = interpret_binary_expression(expression->u.assign_expression->expression);
+
+    char *identifier;
+    identifier = expression->u.assign_expression->assign_identifier;
+
+    Variable *variable = NULL;
+
+    for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+        if (0 == strcmp(pos->variable_identifer, identifier)) {
+            variable = pos;
+        }
+    }
+
+    if (variable == NULL) {
+        printf("findn't match variable\n");
+        return;
+    }
+
+    variable->u.ring_basic_value            = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    variable->u.ring_basic_value->int_value = result;
 }

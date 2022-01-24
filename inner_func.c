@@ -17,9 +17,9 @@ void register_inner_func(Ring_Interpreter *ring_interpreter) {
     ring_interpreter->function_list = function;
 }
 
-void ring_inner_func_print(int argc, char *string) {
+void ring_inner_func_print(int argc, Expression *expression) {
 #ifdef DEBUG
-    printf("[DEBUG][inner_func.c][function:ring_inner_func_print]\t argc(%d),string(%s)\n", argc, string);
+    printf("[DEBUG][inner_func.c][function:ring_inner_func_print]\t argc(%d)\n", argc);
 #endif
 
     if (argc != 1) {
@@ -28,5 +28,5 @@ void ring_inner_func_print(int argc, char *string) {
     }
 
     // TODO: 实现更多类型的打印
-    printf("%s", string);
+    printf("%s", "sdfsd");
 }

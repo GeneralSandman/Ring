@@ -8,18 +8,16 @@
 
 
 %union {
-    char *m_comment_value;
-
-    char *m_literal_interface;
-    char *m_identifier;
-
-    Statement *m_statement_list;
-    Expression *m_expression;
-    AssignExpression *m_assign_expression;
-    FunctionCallExpression *m_function_call_expression;
-    ArgumentList *m_argument_list;
-    Variable * m_variable;
-    VariableType * m_variable_type;
+    char*                       m_comment_value;
+    char*                       m_literal_interface;
+    char*                       m_identifier;
+    Statement*                  m_statement_list;
+    Expression*                 m_expression;
+    AssignExpression*           m_assign_expression;
+    FunctionCallExpression*     m_function_call_expression;
+    ArgumentList*               m_argument_list;
+    Variable*                   m_variable;
+    VariableType*               m_variable_type;
 }
 
 %token TOKEN_INT 
@@ -63,7 +61,7 @@
 %token IDENTIFIER
 
 %type <m_literal_interface> literal_term INT_LITERAL DOUBLE_LITERAL STRING_LITERAL
-%type <m_identifier> IDENTIFIER identifier
+%type <m_identifier> identifier IDENTIFIER
 %type <m_statement_list> statement statement_list
 %type <m_expression> expression 
 %type <m_expression> expression_arithmetic_operation_additive 
@@ -166,6 +164,14 @@ expression
         printf("[DEBUG][ring.bison.y][RULE:expression-expression_arithmetic_operation_additive]\t\n");
         #endif
 
+    }
+    | identifier 
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:expression-identifier]\t\n");
+        #endif
+
+        $$ = create_expression_identifier($1);
     }
     ;
 
@@ -283,10 +289,19 @@ argument_list
     : STRING_LITERAL 
     {
         #ifdef DEBUG
-        printf("[DEBUG][ring.bison.y][RULE:argument_list]\t\n");
+        printf("[DEBUG][ring.bison.y][RULE:argument_list-STRING_LITERAL]\t\n");
         #endif
 
         $$ = create_argument_list($1);
+    }
+    | expression
+    {
+        #ifdef DEBUG
+        printf("[DEBUG][ring.bison.y][RULE:argument_list-expression]\t\n");
+        #endif
+
+        $$ = create_argument_list_from_expression($1);
+
     }
     ;
 

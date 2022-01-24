@@ -29,7 +29,7 @@ typedef struct Identifier_Tag Identifier;
 // struct Function_Tag;
 typedef struct Function_Tag Function;
 
-typedef void Ring_InnerFunc(int argc, char *string);
+typedef void Ring_InnerFunc(int argc, Expression *expression);
 
 struct Ring_Interpreter_Tag {
     char *       current_file_name;
@@ -74,6 +74,7 @@ typedef enum {
     EXPRESSION_TYPE_LITERAL_INT,
     EXPRESSION_TYPE_LITERAL_DOUBLE,
     EXPRESSION_TYPE_LITERAL_STRING,
+    EXPRESSION_TYPE_VARIABLE,
     EXPRESSION_TYPE_FUNCTION_CALL,
     EXPRESSION_TYPE_ASSIGN,
     EXPRESSION_TYPE_ARITHMETIC_ADD,
@@ -113,6 +114,7 @@ struct Expression_Tag {
         int                     int_literal;
         double                  double_literal;
         char *                  string_literal;
+        char *                  variable_identifier;
         FunctionCallExpression *function_call_expression;
         AssignExpression *      assign_expression;
         BinaryExpression *      binary_expression;
