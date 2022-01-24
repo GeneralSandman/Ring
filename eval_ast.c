@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ring.h"
 
 void interpret_statement(Statement *statement) {
@@ -67,6 +68,7 @@ int interpret_binary_expression(Expression *expression) {
         result = interpret_binary_expression(expression->u.binary_expression->left_expression) / interpret_binary_expression(expression->u.binary_expression->right_expression);
         break;
     default:
+        // log error
         break;
     }
 

@@ -76,7 +76,6 @@ Expression *create_expression_identifier(char *identifier) {
     expression->line_number           = get_ring_interpreter_line_number();
     expression->type                  = EXPRESSION_TYPE_VARIABLE;
     expression->u.variable_identifier = identifier;
-    printf("----------expression:%p\n", expression);
 
     return expression;
 }
@@ -200,7 +199,6 @@ ArgumentList *create_argument_list_from_expression(Expression *expression) {
 #ifdef DEBUG
     print_debug_info("\t");
 #endif
-    printf("----------expression:%p\n", expression);
 
     ArgumentList *argument_list = NULL;
     argument_list               = (ArgumentList *)malloc(sizeof(ArgumentList));

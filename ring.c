@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "ring.h"
 
@@ -26,7 +27,6 @@ void insert_identifier(IdentifierType type, char *name) {
     Identifier *identifier;
     identifier = new_identifier(type, name);
 
-    Identifier *old_identifier_list;
     identifier->next                        = get_ring_interpreter()->identifier_list;
     get_ring_interpreter()->identifier_list = identifier;
 }

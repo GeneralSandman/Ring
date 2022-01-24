@@ -4,8 +4,8 @@
 
 #define STRING_LITERAL_CAPACITY (1024)
 
-static char *string_literal_buffer = NULL;
-static int   string_literal_buffer_size = 0;
+static char *string_literal_buffer          = NULL;
+static int   string_literal_buffer_size     = 0;
 static int   string_literal_buffer_capacity = 0;
 
 void init_string_literal_buffer() {
@@ -13,7 +13,7 @@ void init_string_literal_buffer() {
     if (string_literal_buffer == NULL) {
         printf("[ERROR] malloc error\n");
     }
-    string_literal_buffer_size = 0;
+    string_literal_buffer_size     = 0;
     string_literal_buffer_capacity = STRING_LITERAL_CAPACITY;
 }
 

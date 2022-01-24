@@ -19,6 +19,5 @@ AssignExpression *      create_assign_expression(char *identifier, Expression *e
 FunctionCallExpression *create_function_call_expression();
 ArgumentList *          create_argument_list();
 ArgumentList *          create_argument_list_from_expression(Expression *expression);
-Identifier *            new_identifier(IdentifierType type, char *name);
 
 #endif
