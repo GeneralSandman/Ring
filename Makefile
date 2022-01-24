@@ -6,7 +6,8 @@ OBJS = \
   main.o\
   ring.o\
   string.o\
-  parser.o\
+  create_ast.o\
+  eval_ast.o\
   interpreter.o\
   inner_func.o\
   utils.o
@@ -38,7 +39,8 @@ string.o: string.c
 	$(CC) $(CFLAGS) $*.c
 
 main.o: main.c ring.h
-parser.o: parser.c ring.h
+create_ast.o: create_ast.c ring.h
+eval_ast.o: eval_ast.c ring.h
 interpreter.o: interpreter.c ring.h
 inner_func.o: inner_func.c ring.h interpreter.h
 utils.o: utils.c ring.h

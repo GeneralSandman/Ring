@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.2-beat"
+#define RING_VERSION "ring-v0.0.3-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -39,9 +39,14 @@ struct Ring_Interpreter_Tag {
 
     unsigned int statement_list_size;
     Statement *  statement_list;
+
     unsigned int function_list_size;
     Function *   function_list;
+
+    unsigned int variable_list_size;
     Variable *   variable_list;
+
+    unsigned int identifier_list_size;
     Identifier * identifier_list;
 };
 
@@ -202,5 +207,11 @@ void insert_identifier(IdentifierType type, char *name);
 Variable *new_variable();
 
 Identifier *new_identifier(IdentifierType type, char *name);
+
+void interpret_statement(Statement *statement);
+void interpret_expression(Expression *expression);
+void invoke_function(FunctionCallExpression *function_call_expression);
+int  interpret_binary_expression(Expression *expression);
+void assign(Expression *expression);
 
 #endif

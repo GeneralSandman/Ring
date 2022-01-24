@@ -18,7 +18,15 @@ Ring_Interpreter *new_ring_interpreter(char *file_name) {
 
     ring_interpreter->statement_list_size = 0;
     ring_interpreter->statement_list      = NULL;
-    ring_interpreter->function_list       = NULL;
+
+    ring_interpreter->function_list_size = 0;
+    ring_interpreter->function_list      = NULL;
+
+    ring_interpreter->variable_list_size = 0;
+    ring_interpreter->variable_list      = NULL;
+
+    ring_interpreter->identifier_list_size = 0;
+    ring_interpreter->identifier_list      = NULL;
 
     ring_interpreter_registe_inner_func();
     return ring_interpreter;
