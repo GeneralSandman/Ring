@@ -203,8 +203,39 @@ struct Function_Tag {
 
 // };
 
-#define print_debug_info(message) \
-    printf("[DEBUG][%s:%d][function:%s]%s\n", __FILE__, __LINE__, __FUNCTION__, message)
+#define print_debug_info(format, ...) \
+    printf("[DEBUG][%s:%d][function:%s]\t " format "\n", __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+
+#define LOG_COLOR_RED_UNDERLINE "\033[4;31m"
+#define LOG_COLOR_GREEN_UNDERLINE "\033[4;32m"
+#define LOG_COLOR_YELLOW_UNDERLINE "\033[4;33m"
+#define LOG_COLOR_BLUE_UNDERLINE "\033[4;34m"
+#define LOG_COLOR_PURPLE_UNDERLINE "\033[4;35m"
+
+#define LOG_COLOR_RED "\033[0;31m"
+#define LOG_COLOR_GREEN "\033[0;32m"
+#define LOG_COLOR_YELLOW "\033[0;33m"
+#define LOG_COLOR_BLUE "\033[0;34m"
+#define LOG_COLOR_PURPLE "\033[0;35m"
+
+#define LOG_COLOR_CLEAR "\033[0m"
+// 编译错误
+#define debug_log_with_red_coloar(format, ...) \
+    printf("%s[DEBUG][%s:%d][function:%s]\t " format "%s\n", LOG_COLOR_RED, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+
+// 标示错误的地址
+#define debug_log_with_green_coloar(format, ...) \
+    printf("%s[DEBUG][%s:%d][function:%s]\t " format "%s\n", LOG_COLOR_GREEN, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+
+#define debug_log_with_yellow_coloar(format, ...) \
+    printf("%s[DEBUG][%s:%d][function:%s]\t " format "%s\n", LOG_COLOR_YELLOW, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+
+#define debug_log_with_blue_coloar(format, ...) \
+    printf("%s[DEBUG][%s:%d][function:%s]\t " format "%s\n", LOG_COLOR_BLUE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+
+// 编译告警
+#define debug_log_with_purple_coloar(format, ...) \
+    printf("%s[DEBUG][%s:%d][function:%s]\t " format "%s\n", LOG_COLOR_PURPLE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
 Ring_Interpreter *new_ring_interpreter(char *file_name);
 Ring_Interpreter *get_ring_interpreter();
@@ -236,11 +267,5 @@ void             invoke_function(FunctionCallExpression *function_call_expressio
 int              interpret_variable_expression(char *variable_identifier);
 int              interpret_binary_expression(Expression *expression);
 void             assign(Expression *expression);
-
-void print_debug_info_with_red(const char *message);
-void print_debug_info_with_green(const char *message);
-void print_debug_info_with_yellow(const char *message);
-void print_debug_info_with_blue(const char *message);
-void print_debug_info_with_purple(const char *message);
 
 #endif
