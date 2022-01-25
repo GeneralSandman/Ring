@@ -2,6 +2,7 @@
     "files.associations": {
         "stdlib.h": "c",
         "stdio.h": "c",
-        "ring.h": "c"
+        "ring.h": "c",
+        "system_error": "c"
     }
 }

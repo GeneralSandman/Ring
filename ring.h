@@ -221,10 +221,10 @@ struct Function_Tag {
 #define LOG_COLOR_CLEAR "\033[0m"
 
 #define complie_err_log(format, ...) \
-    printf("%s" format "%s\n", LOG_COLOR_RED, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+    printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
 #define runtime_err_log(format, ...) \
-    printf("%s" format "%s\n", LOG_COLOR_RED, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+    printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
 #ifdef DEBUG
 // 编译错误
@@ -281,8 +281,8 @@ void             ring_interpret(Ring_Interpreter *ring_interpreter);
 void             interpret_statement(Statement *statement);
 Ring_BasicValue *interpret_expression(Expression *expression);
 void             invoke_function(FunctionCallExpression *function_call_expression);
-int              interpret_variable_expression(char *variable_identifier);
-int              interpret_binary_expression(Expression *expression);
+Ring_BasicValue *interpret_variable_expression(char *variable_identifier);
+Ring_BasicValue *interpret_binary_expression(Expression *expression);
 void             assign(Expression *expression);
 
 #endif

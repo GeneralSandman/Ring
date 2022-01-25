@@ -57,8 +57,10 @@ Ring_BasicValue *interpret_expression(Expression *expression) {
         break;
 
     case EXPRESSION_TYPE_VARIABLE:
-        result->type        = BASICVALUE_TYPE_INT;
-        result->u.int_value = interpret_variable_expression(expression->u.variable_identifier);
+        // TODO:
+        // result->type = BASICVALUE_TYPE_INT;
+        // result->u.int_value =
+        result = interpret_variable_expression(expression->u.variable_identifier);
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
@@ -75,7 +77,8 @@ Ring_BasicValue *interpret_expression(Expression *expression) {
     return result;
 }
 
-int interpret_variable_expression(char *variable_identifier) {
+// TODO:
+Ring_BasicValue *interpret_variable_expression(char *variable_identifier) {
     // 查找相应的变量值
     Variable *variable = NULL;
 
@@ -90,33 +93,83 @@ int interpret_variable_expression(char *variable_identifier) {
         exit(1);
     }
 
-    return variable->u.ring_basic_value->u.int_value;
+    // FIXME: 存在内存泄漏
+    Ring_BasicValue *result;
+
+    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+
+    switch (variable->type) {
+    case VARIABLE_TYPE_INT:
+        result->type        = BASICVALUE_TYPE_INT;
+        result->u.int_value = variable->u.ring_basic_value->u.int_value;
+        break;
+    case VARIABLE_TYPE_DOUBLE:
+        result->type           = BASICVALUE_TYPE_DOUBLE;
+        result->u.double_value = variable->u.ring_basic_value->u.double_value;
+        break;
+
+    case VARIABLE_TYPE_STRING:
+        result->type           = BASICVALUE_TYPE_STRING;
+        result->u.string_value = variable->u.ring_basic_value->u.string_value;
+        break;
+    default:
+        break;
+    }
+
+    return result;
 }
 
-int interpret_binary_expression(Expression *expression) {
+Ring_BasicValue *interpret_binary_expression(Expression *expression) {
     debug_log_with_blue_coloar();
     // TODO: 还要考虑各个变量的类型
     //       是否涉及到强制类型转换
     //       两边类型不匹配还要编译报错
 
-    int result;
+    // FIXME: 存在内存泄漏
+    Ring_BasicValue *result;
+
+    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+
+    Ring_BasicValue *left  = NULL;
+    Ring_BasicValue *right = NULL;
 
     switch (expression->type) {
     case EXPRESSION_TYPE_LITERAL_INT:
-        result = expression->u.int_literal;
+        result->type        = BASICVALUE_TYPE_INT;
+        result->u.int_value = expression->u.int_literal;
+        break;
+
+    case EXPRESSION_TYPE_LITERAL_DOUBLE:
+        break;
+
+    case EXPRESSION_TYPE_LITERAL_STRING:
+        result->type           = BASICVALUE_TYPE_STRING;
+        result->u.string_value = expression->u.string_literal;
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
-        result = interpret_binary_expression(expression->u.binary_expression->left_expression) + interpret_binary_expression(expression->u.binary_expression->right_expression);
+        left                = interpret_binary_expression(expression->u.binary_expression->left_expression);
+        right               = interpret_binary_expression(expression->u.binary_expression->right_expression);
+        result->type        = BASICVALUE_TYPE_INT;
+        result->u.int_value = left->u.int_value + right->u.int_value;
         break;
     case EXPRESSION_TYPE_ARITHMETIC_SUB:
-        result = interpret_binary_expression(expression->u.binary_expression->left_expression) - interpret_binary_expression(expression->u.binary_expression->right_expression);
+        left                = interpret_binary_expression(expression->u.binary_expression->left_expression);
+        right               = interpret_binary_expression(expression->u.binary_expression->right_expression);
+        result->type        = BASICVALUE_TYPE_INT;
+        result->u.int_value = left->u.int_value - right->u.int_value;
         break;
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
-        result = interpret_binary_expression(expression->u.binary_expression->left_expression) * interpret_binary_expression(expression->u.binary_expression->right_expression);
+        left                = interpret_binary_expression(expression->u.binary_expression->left_expression);
+        right               = interpret_binary_expression(expression->u.binary_expression->right_expression);
+        result->type        = BASICVALUE_TYPE_INT;
+        result->u.int_value = left->u.int_value * right->u.int_value;
         break;
     case EXPRESSION_TYPE_ARITHMETIC_DIV:
-        result = interpret_binary_expression(expression->u.binary_expression->left_expression) / interpret_binary_expression(expression->u.binary_expression->right_expression);
+        left                = interpret_binary_expression(expression->u.binary_expression->left_expression);
+        right               = interpret_binary_expression(expression->u.binary_expression->right_expression);
+        result->type        = BASICVALUE_TYPE_INT;
+        result->u.int_value = left->u.int_value / right->u.int_value;
         break;
     default:
         // log error
@@ -153,8 +206,9 @@ void assign(Expression *expression) {
 
     assert(expression->type == EXPRESSION_TYPE_ASSIGN);
 
-    int result = 0;
-    result     = interpret_binary_expression(expression->u.assign_expression->expression);
+    Ring_BasicValue *result = NULL;
+    // TODO:
+    result = interpret_binary_expression(expression->u.assign_expression->expression);
 
     char *identifier;
     identifier = expression->u.assign_expression->assign_identifier;
@@ -172,7 +226,6 @@ void assign(Expression *expression) {
         return;
     }
 
-    variable->u.ring_basic_value              = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-    variable->u.ring_basic_value->type        = BASICVALUE_TYPE_INT;
-    variable->u.ring_basic_value->u.int_value = result;
+    // TODO:
+    variable->u.ring_basic_value = result;
 }

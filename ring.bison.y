@@ -265,12 +265,9 @@ argument_list
 
 
 int yyerror(char const *str){
-    complie_err_log("file:\t%s \n\
-        \t line:%d column:%d \n\
-        \t complie error:%s\n", 
+    complie_err_log("file(%s) line(%d) column(%d): error:%s\n", 
         get_ring_interpreter_current_file_name(),
-        get_ring_interpreter_line_number(), 
-        get_ring_interpreter_column_number(), 
+        get_ring_interpreter_line_number(), get_ring_interpreter_column_number(), 
         str);
     
     return 0;
