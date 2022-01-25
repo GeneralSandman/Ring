@@ -169,7 +169,7 @@ struct BinaryExpression_Tag {
 struct ArgumentList_Tag {
     ArgumentType type;
     union {
-        Ring_BasicValue ring_basic_value;
+        Ring_BasicValue ring_basic_value; // TODO: 应该把这个删掉，参数应该全都是表达式
         Expression *    expression;
     } u;
     struct ArgumentList_Tag *next;

@@ -34,6 +34,19 @@ Ring_BasicValue *interpret_expression(Expression *expression) {
     result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
 
     switch (expression->type) {
+    case EXPRESSION_TYPE_LITERAL_INT:
+        result->type        = BASICVALUE_TYPE_INT;
+        result->u.int_value = expression->u.int_literal;
+        break;
+    case EXPRESSION_TYPE_LITERAL_DOUBLE:
+        result->type           = BASICVALUE_TYPE_DOUBLE;
+        result->u.double_value = expression->u.double_literal;
+        break;
+    case EXPRESSION_TYPE_LITERAL_STRING:
+        result->type           = BASICVALUE_TYPE_STRING;
+        result->u.string_value = expression->u.string_literal;
+        break;
+
     case EXPRESSION_TYPE_FUNCTION_CALL:
         /* code */
         invoke_function(expression->u.function_call_expression);
