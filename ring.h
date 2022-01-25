@@ -219,23 +219,39 @@ struct Function_Tag {
 #define LOG_COLOR_PURPLE "\033[0;35m"
 
 #define LOG_COLOR_CLEAR "\033[0m"
+
+#define complie_err_log(format, ...) \
+    printf("%s" format "%s\n", LOG_COLOR_RED, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+
+#define runtime_err_log(format, ...) \
+    printf("%s" format "%s\n", LOG_COLOR_RED, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+
+#ifdef DEBUG
 // 编译错误
 #define debug_log_with_red_coloar(format, ...) \
-    printf("%s[DEBUG][%s:%d][function:%s]\t " format "%s\n", LOG_COLOR_RED, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-
+    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_RED, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 // 标示错误的地址
 #define debug_log_with_green_coloar(format, ...) \
-    printf("%s[DEBUG][%s:%d][function:%s]\t " format "%s\n", LOG_COLOR_GREEN, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-
+    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_GREEN, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+//
 #define debug_log_with_yellow_coloar(format, ...) \
-    printf("%s[DEBUG][%s:%d][function:%s]\t " format "%s\n", LOG_COLOR_YELLOW, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-
+    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_YELLOW, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+//
 #define debug_log_with_blue_coloar(format, ...) \
-    printf("%s[DEBUG][%s:%d][function:%s]\t " format "%s\n", LOG_COLOR_BLUE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-
+    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_BLUE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 // 编译告警
 #define debug_log_with_purple_coloar(format, ...) \
-    printf("%s[DEBUG][%s:%d][function:%s]\t " format "%s\n", LOG_COLOR_PURPLE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_PURPLE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#else
+// 编译错误
+#define debug_log_with_red_coloar(format, ...)
+// 标示错误的地址
+#define debug_log_with_green_coloar(format, ...)
+#define debug_log_with_yellow_coloar(format, ...)
+#define debug_log_with_blue_coloar(format, ...)
+// 编译告警
+#define debug_log_with_purple_coloar(format, ...)
+#endif
 
 Ring_Interpreter *new_ring_interpreter(char *file_name);
 Ring_Interpreter *get_ring_interpreter();
@@ -261,6 +277,7 @@ Variable *new_variable();
 
 Identifier *new_identifier(IdentifierType type, char *name);
 
+void             ring_interpret(Ring_Interpreter *ring_interpreter);
 void             interpret_statement(Statement *statement);
 Ring_BasicValue *interpret_expression(Expression *expression);
 void             invoke_function(FunctionCallExpression *function_call_expression);

@@ -53,13 +53,10 @@ int yywrap(){
 <INITIAL>"="            { increase_ring_interpreter_column_number(yyleng); return TOKEN_ASSIGN;         }
 
 <INITIAL>[A-Za-z_][A-Za-z_0-9]* {
-    #ifdef DEBUG
-    printf("[DEBUG][ring.flex.l][STATUS:INITIAL][file:%s][line_num:%d][column_num:%d]\t identifier(%s)\n", 
-        get_ring_interpreter_current_file_name(),
+    debug_log_with_red_coloar("[STATUS:INITIAL]\t line_num(%d),column_num(%d),identifier(%s)",
         get_ring_interpreter_line_number(), 
         get_ring_interpreter_column_number(), 
         yytext);
-    #endif
 
     increase_ring_interpreter_column_number(yyleng);
 
@@ -77,13 +74,10 @@ int yywrap(){
     return IDENTIFIER;
 }
 <INITIAL>([1-9][0-9]*)|"0" {
-    #ifdef DEBUG
-    printf("[DEBUG][ring.flex.l][STATUS:INITIAL][file:%s][line_num:%d][column_num:%d]\t int_literal(%s)\n", 
-        get_ring_interpreter_current_file_name(),
+    debug_log_with_red_coloar("[STATUS:INITIAL]\t line_num(%d),column_num(%d),int_literal(%s)",
         get_ring_interpreter_line_number(), 
         get_ring_interpreter_column_number(), 
         yytext);
-    #endif
 
     increase_ring_interpreter_column_number(yyleng);
     yylval.m_literal_interface = yytext;
@@ -91,13 +85,10 @@ int yywrap(){
     return INT_LITERAL;
 }
 <INITIAL>[0-9]+\.[0-9]+ {
-    #ifdef DEBUG
-    printf("[DEBUG][ring.flex.l][STATUS:INITIAL][file:%s][line_num:%d][column_num:%d]\t double_literal(%s)\n", 
-        get_ring_interpreter_current_file_name(),
+    debug_log_with_red_coloar("[STATUS:INITIAL]\t line_num(%d),column_num(%d),double_literal(%s)",
         get_ring_interpreter_line_number(), 
         get_ring_interpreter_column_number(), 
         yytext);
-    #endif
 
     increase_ring_interpreter_column_number(yyleng);
     yylval.m_literal_interface = yytext;
@@ -112,17 +103,13 @@ int yywrap(){
     BEGIN STRING_LITERAL_STATE;
 }
 <INITIAL>\n {
-    #ifdef DEBUG
-    printf("[DEBUG][ring.flex.l][STATUS:INITIAL]\tnew line(LF)\n\n\n");
-    #endif
+    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(LF)\n\n");
 
     reset_ring_interpreter_column_number();
     increase_ring_interpreter_line_number();
 }
 <INITIAL>\r\n {
-    #ifdef DEBUG
-    printf("[DEBUG][ring.flex.l][STATUS:INITIAL]\tnew line(CRLF)\n\n\n");
-    #endif
+    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(CRLF)\n\n");
 
     reset_ring_interpreter_column_number();
     increase_ring_interpreter_line_number();
@@ -137,9 +124,7 @@ int yywrap(){
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
 
-    #ifdef DEBUG
-    printf("[DEBUG][ring.flex.l][STATUS:COMMENT]\tcomment(%s)\n\n\n", yylval.m_comment_value);
-    #endif
+    debug_log_with_red_coloar("[STATUS:COMMENT]\t new comment(%s)", yylval.m_comment_value);
 
     reset_ring_interpreter_column_number();
     increase_ring_interpreter_line_number();
@@ -149,9 +134,7 @@ int yywrap(){
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
 
-    #ifdef DEBUG
-    printf("[DEBUG][ring.flex.l][STATUS:COMMENT]\tcomment(%s)\n\n\n", yylval.m_comment_value);
-    #endif
+    debug_log_with_red_coloar("[STATUS:COMMENT]\t new comment(%s)", yylval.m_comment_value);
 
     reset_ring_interpreter_column_number();
     increase_ring_interpreter_line_number();

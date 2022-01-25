@@ -4,6 +4,16 @@
 #include <string.h>
 #include "ring.h"
 
+void ring_interpret(Ring_Interpreter *ring_interpreter) {
+    debug_log_with_blue_coloar("\t interpret statement: statement_list_size(%d)", ring_interpreter->statement_list_size);
+
+    Statement *p;
+    for (p = ring_interpreter->statement_list; p != NULL; p = p->next) {
+        debug_log_with_blue_coloar("\t interpret statement: type(%d),line_number(%d)", p->type, p->line_number);
+        interpret_statement(p);
+    }
+}
+
 void interpret_statement(Statement *statement) {
     switch (statement->type) {
     case STATEMENT_TYPE_VARIABLE_DEFINITION:
@@ -71,9 +81,7 @@ int interpret_variable_expression(char *variable_identifier) {
 }
 
 int interpret_binary_expression(Expression *expression) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_blue_coloar();
     // TODO: 还要考虑各个变量的类型
     //       是否涉及到强制类型转换
     //       两边类型不匹配还要编译报错
@@ -106,9 +114,7 @@ int interpret_binary_expression(Expression *expression) {
 }
 
 void invoke_function(FunctionCallExpression *function_call_expression) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_blue_coloar();
 
     // search_funcaion
     Function *function = NULL;
@@ -130,9 +136,8 @@ void invoke_function(FunctionCallExpression *function_call_expression) {
 }
 
 void assign(Expression *expression) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_blue_coloar();
+
     assert(expression->type == EXPRESSION_TYPE_ASSIGN);
 
     int result = 0;

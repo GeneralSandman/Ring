@@ -3,9 +3,7 @@
 #include "ring.h"
 
 Variable *new_variable(VariableType type, char *identifier) {
-#ifdef DEBUG
-    printf("[DEBUG][ring.c][function:new_variable]\ttype(%d),identifier(%s)\n", type, identifier);
-#endif
+    debug_log_with_yellow_coloar("\t type(%d),identifier(%s)", type, identifier);
 
     Variable *variable;
     variable = (Variable *)malloc(sizeof(Variable));

@@ -18,10 +18,7 @@ void register_inner_func(Ring_Interpreter *ring_interpreter) {
 }
 
 void ring_inner_func_print(int argc, Expression *expression) {
-#ifdef DEBUG
-    printf("[DEBUG][inner_func.c][function:ring_inner_func_print]\t argc(%d)\n", argc);
-#endif
-
+    debug_log_with_blue_coloar("\t argc(%d)", argc);
     if (argc != 1) {
         printf("error\n");
         exit(1);

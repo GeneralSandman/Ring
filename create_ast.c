@@ -3,24 +3,18 @@
 #include "parser.h"
 
 void create_statement_list(Statement *statement) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
     ring_interpreter_init_statement_list(statement);
 }
 
 void statement_list_add_item(Statement *statement) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     ring_interpreter_add_statement(statement);
 }
 
 Statement *create_statemen_from_expression(Expression *expression) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     Statement *statement = NULL;
     statement            = (Statement *)malloc(sizeof(Statement));
@@ -33,9 +27,7 @@ Statement *create_statemen_from_expression(Expression *expression) {
 }
 
 Statement *create_statement_from_variable(Variable *variable) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     Statement *statement = NULL;
     statement            = (Statement *)malloc(sizeof(Statement));
@@ -55,9 +47,7 @@ Statement *create_statement_from_variable(Variable *variable) {
 }
 
 Expression *create_expression() {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
@@ -66,9 +56,7 @@ Expression *create_expression() {
 }
 
 Expression *create_expression_identifier(char *identifier) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
@@ -81,9 +69,7 @@ Expression *create_expression_identifier(char *identifier) {
 }
 
 Expression *create_expression_(FunctionCallExpression *function_call_expression) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
@@ -94,9 +80,7 @@ Expression *create_expression_(FunctionCallExpression *function_call_expression)
 }
 
 Expression *create_expression__(AssignExpression *assign_expression) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
@@ -107,9 +91,7 @@ Expression *create_expression__(AssignExpression *assign_expression) {
 }
 
 Expression *create_expression_binary(ExpressionType type, Expression *left, Expression *right) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
@@ -124,9 +106,7 @@ Expression *create_expression_binary(ExpressionType type, Expression *left, Expr
 
 Expression *
 create_expression_literal(ExpressionType type, char *literal_interface) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     assert(literal_interface != NULL);
     Expression *expression = NULL;
@@ -155,9 +135,7 @@ create_expression_literal(ExpressionType type, char *literal_interface) {
 
 AssignExpression *create_assign_expression(char *identifier, Expression *expression) {
     // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
-#ifdef DEBUG
-    print_debug_info("\t ");
-#endif
+    debug_log_with_yellow_coloar();
 
     AssignExpression *assing_expression = NULL;
     assing_expression                   = (AssignExpression *)malloc(sizeof(AssignExpression));
@@ -168,9 +146,7 @@ AssignExpression *create_assign_expression(char *identifier, Expression *express
 }
 
 FunctionCallExpression *create_function_call_expression(char *identifier, ArgumentList *argument_list) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     FunctionCallExpression *function_call_expression = NULL;
     function_call_expression                         = (FunctionCallExpression *)malloc(sizeof(FunctionCallExpression));
@@ -182,9 +158,7 @@ FunctionCallExpression *create_function_call_expression(char *identifier, Argume
 }
 
 ArgumentList *create_argument_list(char *argument) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     ArgumentList *argument_list = NULL;
     argument_list               = (ArgumentList *)malloc(sizeof(ArgumentList));
@@ -197,9 +171,7 @@ ArgumentList *create_argument_list(char *argument) {
 }
 
 ArgumentList *create_argument_list_from_expression(Expression *expression) {
-#ifdef DEBUG
-    print_debug_info("\t");
-#endif
+    debug_log_with_yellow_coloar();
 
     ArgumentList *argument_list = NULL;
     argument_list               = (ArgumentList *)malloc(sizeof(ArgumentList));
@@ -211,9 +183,7 @@ ArgumentList *create_argument_list_from_expression(Expression *expression) {
 }
 
 Identifier *new_identifier(IdentifierType type, char *name) {
-#ifdef DEBUG
-    print_debug_info("\t ");
-#endif
+    debug_log_with_yellow_coloar();
 
     Identifier *identifier;
     identifier = (Identifier *)malloc(sizeof(Identifier));
