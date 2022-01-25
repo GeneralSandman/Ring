@@ -28,5 +28,29 @@ void ring_inner_func_print(int argc, Expression *expression) {
     }
 
     // TODO: 实现更多类型的打印
-    printf("%s", "sdfsd");
+
+    Ring_BasicValue *result;
+
+    result = interpret_expression(expression);
+    if (result == NULL) {
+        printf("error\n");
+        exit(1);
+    }
+
+    switch (result->type) {
+    case BASICVALUE_TYPE_INT:
+        printf("%d", result->u.int_value);
+        break;
+
+    case BASICVALUE_TYPE_DOUBLE:
+        printf("%lf", result->u.double_value);
+        break;
+
+    case BASICVALUE_TYPE_STRING:
+        printf("%s", result->u.string_value);
+        break;
+
+    default:
+        break;
+    }
 }

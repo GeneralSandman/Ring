@@ -18,7 +18,11 @@ void interpret_statement(Statement *statement) {
     }
 }
 
-void interpret_expression(Expression *expression) {
+Ring_BasicValue *interpret_expression(Expression *expression) {
+    Ring_BasicValue *result;
+
+    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+
     switch (expression->type) {
     case EXPRESSION_TYPE_FUNCTION_CALL:
         /* code */
@@ -27,6 +31,11 @@ void interpret_expression(Expression *expression) {
 
     case EXPRESSION_TYPE_ASSIGN:
         assign(expression);
+        break;
+
+    case EXPRESSION_TYPE_VARIABLE:
+        result->type        = BASICVALUE_TYPE_INT;
+        result->u.int_value = interpret_variable_expression(expression->u.variable_identifier);
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
@@ -39,6 +48,26 @@ void interpret_expression(Expression *expression) {
     default:
         break;
     }
+
+    return result;
+}
+
+int interpret_variable_expression(char *variable_identifier) {
+    // 查找相应的变量值
+    Variable *variable = NULL;
+
+    for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+        if (0 == strcmp(pos->variable_identifer, variable_identifier)) {
+            variable = pos;
+        }
+    }
+
+    if (variable == NULL) {
+        printf("findn't match variable\n");
+        exit(1);
+    }
+
+    return variable->u.ring_basic_value->u.int_value;
 }
 
 int interpret_binary_expression(Expression *expression) {
@@ -55,6 +84,7 @@ int interpret_binary_expression(Expression *expression) {
     case EXPRESSION_TYPE_LITERAL_INT:
         result = expression->u.int_literal;
         break;
+
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
         result = interpret_binary_expression(expression->u.binary_expression->left_expression) + interpret_binary_expression(expression->u.binary_expression->right_expression);
         break;
@@ -124,6 +154,7 @@ void assign(Expression *expression) {
         return;
     }
 
-    variable->u.ring_basic_value            = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-    variable->u.ring_basic_value->int_value = result;
+    variable->u.ring_basic_value              = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    variable->u.ring_basic_value->type        = BASICVALUE_TYPE_INT;
+    variable->u.ring_basic_value->u.int_value = result;
 }

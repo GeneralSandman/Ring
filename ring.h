@@ -5,6 +5,8 @@
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
+typedef struct Ring_BasicValue_Tag Ring_BasicValue;
+
 // struct Statement_Tag;
 typedef struct Statement_Tag Statement;
 
@@ -56,12 +58,12 @@ typedef enum {
     IDENTIFIER_TYPE_FUNCATION,
 } IdentifierType;
 
-typedef union {
-    int    int_value;
-    double double_value;
-    char   char_value;
-    char * string_value;
-} Ring_BasicValue;
+// typedef union {
+//     int    int_value;
+//     double double_value;
+//     char   char_value;
+//     char * string_value;
+// } Ring_BasicValue;
 
 typedef enum {
     STATEMENT_TYPE_UNKNOW = 0,
@@ -95,6 +97,24 @@ typedef enum {
     VARIABLE_TYPE_DOUBLE,
     VARIABLE_TYPE_STRING,
 } VariableType;
+
+typedef enum {
+    BASICVALUE_TYPE_UNKNOW = 0,
+    BASICVALUE_TYPE_INT,
+    BASICVALUE_TYPE_DOUBLE,
+    BASICVALUE_TYPE_CHAR,
+    BASICVALUE_TYPE_STRING,
+} BasicValueType;
+
+struct Ring_BasicValue_Tag {
+    BasicValueType type;
+    union {
+        int    int_value;
+        double double_value;
+        char   char_value;
+        char * string_value;
+    } u;
+};
 
 struct Statement_Tag {
     StatementType type;
@@ -210,10 +230,17 @@ Variable *new_variable();
 
 Identifier *new_identifier(IdentifierType type, char *name);
 
-void interpret_statement(Statement *statement);
-void interpret_expression(Expression *expression);
-void invoke_function(FunctionCallExpression *function_call_expression);
-int  interpret_binary_expression(Expression *expression);
-void assign(Expression *expression);
+void             interpret_statement(Statement *statement);
+Ring_BasicValue *interpret_expression(Expression *expression);
+void             invoke_function(FunctionCallExpression *function_call_expression);
+int              interpret_variable_expression(char *variable_identifier);
+int              interpret_binary_expression(Expression *expression);
+void             assign(Expression *expression);
+
+void print_debug_info_with_red(const char *message);
+void print_debug_info_with_green(const char *message);
+void print_debug_info_with_yellow(const char *message);
+void print_debug_info_with_blue(const char *message);
+void print_debug_info_with_purple(const char *message);
 
 #endif
