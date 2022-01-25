@@ -45,4 +45,6 @@ void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
         fprintf(stderr, "YYPARSE error\n");
         exit(1);
     }
+
+    debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n");
 }
