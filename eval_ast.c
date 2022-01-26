@@ -119,6 +119,67 @@ Ring_BasicValue *interpret_variable_expression(char *variable_identifier) {
     return result;
 }
 
+Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression) {
+    debug_log_with_blue_coloar();
+    Ring_BasicValue *result;
+
+    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+
+    Ring_BasicValue *left  = NULL;
+    Ring_BasicValue *right = NULL;
+
+    left  = interpret_binary_expression(expression->u.binary_expression->left_expression);
+    right = interpret_binary_expression(expression->u.binary_expression->right_expression);
+
+    double left_value   = 0.0;
+    double right_value  = 0.0;
+    double result_value = 0.0;
+
+    if (left->type == BASICVALUE_TYPE_INT && right->type == BASICVALUE_TYPE_INT) {
+        result->type = BASICVALUE_TYPE_INT;
+        left_value   = (double)left->u.int_value;
+        right_value  = (double)right->u.int_value;
+    } else if (left->type == BASICVALUE_TYPE_INT && right->type == BASICVALUE_TYPE_DOUBLE) {
+        result->type = BASICVALUE_TYPE_DOUBLE;
+        left_value   = (double)left->u.int_value;
+        right_value  = (double)right->u.double_value;
+    } else if (left->type == BASICVALUE_TYPE_DOUBLE && right->type == BASICVALUE_TYPE_INT) {
+        result->type = BASICVALUE_TYPE_DOUBLE;
+        left_value   = (double)left->u.double_value;
+        right_value  = (double)right->u.int_value;
+    } else if (left->type == BASICVALUE_TYPE_DOUBLE && right->type == BASICVALUE_TYPE_DOUBLE) {
+        result->type = BASICVALUE_TYPE_DOUBLE;
+        left_value   = (double)left->u.double_value;
+        right_value  = (double)right->u.double_value;
+    }
+
+    switch (expression->type) {
+    case EXPRESSION_TYPE_ARITHMETIC_ADD:
+        result_value = left_value + right_value;
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_SUB:
+        result_value = left_value - right_value;
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_MUL:
+        result_value = left_value * right_value;
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_DIV:
+        result_value = left_value / right_value;
+        break;
+    default:
+        // log error
+        break;
+    }
+
+    if (result->type == BASICVALUE_TYPE_INT) {
+        result->u.int_value = (int)result_value;
+    } else if (result->type == BASICVALUE_TYPE_DOUBLE) {
+        result->u.double_value = result_value;
+    }
+
+    return result;
+}
+
 Ring_BasicValue *interpret_binary_expression(Expression *expression) {
     debug_log_with_blue_coloar();
     // TODO: 还要考虑各个变量的类型
@@ -140,6 +201,8 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression) {
         break;
 
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
+        result->type           = BASICVALUE_TYPE_DOUBLE;
+        result->u.double_value = expression->u.double_literal;
         break;
 
     case EXPRESSION_TYPE_LITERAL_STRING:
@@ -148,28 +211,10 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression) {
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
-        left                = interpret_binary_expression(expression->u.binary_expression->left_expression);
-        right               = interpret_binary_expression(expression->u.binary_expression->right_expression);
-        result->type        = BASICVALUE_TYPE_INT;
-        result->u.int_value = left->u.int_value + right->u.int_value;
-        break;
     case EXPRESSION_TYPE_ARITHMETIC_SUB:
-        left                = interpret_binary_expression(expression->u.binary_expression->left_expression);
-        right               = interpret_binary_expression(expression->u.binary_expression->right_expression);
-        result->type        = BASICVALUE_TYPE_INT;
-        result->u.int_value = left->u.int_value - right->u.int_value;
-        break;
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
-        left                = interpret_binary_expression(expression->u.binary_expression->left_expression);
-        right               = interpret_binary_expression(expression->u.binary_expression->right_expression);
-        result->type        = BASICVALUE_TYPE_INT;
-        result->u.int_value = left->u.int_value * right->u.int_value;
-        break;
     case EXPRESSION_TYPE_ARITHMETIC_DIV:
-        left                = interpret_binary_expression(expression->u.binary_expression->left_expression);
-        right               = interpret_binary_expression(expression->u.binary_expression->right_expression);
-        result->type        = BASICVALUE_TYPE_INT;
-        result->u.int_value = left->u.int_value / right->u.int_value;
+        result = interpret_binary_expression_arithmetic(expression);
         break;
     default:
         // log error

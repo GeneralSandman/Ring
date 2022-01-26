@@ -282,6 +282,7 @@ void             interpret_statement(Statement *statement);
 Ring_BasicValue *interpret_expression(Expression *expression);
 void             invoke_function(FunctionCallExpression *function_call_expression);
 Ring_BasicValue *interpret_variable_expression(char *variable_identifier);
+Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression);
 Ring_BasicValue *interpret_binary_expression(Expression *expression);
 void             assign(Expression *expression);
 
