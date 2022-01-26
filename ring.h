@@ -231,6 +231,9 @@ struct Function_Tag {
 #define complie_err_log(format, ...) \
     printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
+#define complie_err_log2(format, ...) \
+    printf("%s" format "%s\n", LOG_COLOR_GREEN, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+
 #define runtime_err_log(format, ...) \
     printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
@@ -291,6 +294,7 @@ char *get_string_literal();
 
 void insert_identifier(IdentifierType type, char *name);
 
+int       identifier_check_valid(char *identifier);
 Variable *new_variable();
 
 Identifier *new_identifier(IdentifierType type, char *name);

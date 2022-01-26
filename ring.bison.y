@@ -24,6 +24,8 @@
 %token TOKEN_DOUBLE 
 %token TOKEN_STRING 
 %token TOKEN_STRUCT 
+%token TOKEN_BIND 
+%token TOKEN_LAMBDA 
 
 %token TOKEN_TRUE
 %token TOKEN_FALSE
@@ -263,12 +265,25 @@ argument_list
 
 %%
 
+extern char *yytext;
 
+// TODO: 需要优化这个错误提示
 int yyerror(char const *str){
-    complie_err_log("file(%s) line(%d) column(%d): error:%s\n", 
+    complie_err_log("file(%s) \n"
+        "    line(%d) column(%d): \n"
+        "    %s", 
         get_ring_interpreter_current_file_name(),
         get_ring_interpreter_line_number(), get_ring_interpreter_column_number(), 
-        str);
+        ring_interpreter_get_current_line_content());
+    complie_err_log2("%*s^.....%s", get_ring_interpreter_column_number()+4, "", str);
+
+    printf("%s\n", yytext);
+
+    va_list ap;
+    va_start(ap, str);
+    if(yylloc.first_line) {
+
+    }
     
     return 0;
 }

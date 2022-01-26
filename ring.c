@@ -1,6 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ring.h"
+#include "y.tab.h"
+
+// 标识符合法性检查
+// 其实这个用不到，flex是有优先级的，会有语法错误
+// 检查变量是否重复定义
+int identifier_check_valid(char *identifier) {
+}
 
 Variable *new_variable(VariableType type, char *identifier) {
     debug_log_with_yellow_coloar("\t type(%d),identifier(%s)", type, identifier);
