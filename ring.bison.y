@@ -279,11 +279,11 @@ int yyerror(char const *str){
 
     printf("%s\n", yytext);
 
-    va_list ap;
-    va_start(ap, str);
-    if(yylloc.first_line) {
+    // va_list ap;
+    // va_start(ap, str);
+    // if(yylloc.first_line) {
 
-    }
+    // }
     
     return 0;
 }
