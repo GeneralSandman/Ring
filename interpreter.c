@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 #include "ring.h"
 #include "inner_func.h"
 
@@ -14,7 +15,7 @@ Ring_Interpreter *new_ring_interpreter(char *file_name) {
     ring_interpreter->current_file_name     = file_name;
     ring_interpreter->current_line_number   = 1;
     ring_interpreter->current_column_number = 1;
-    ring_interpreter->current_line_content  = NULL;
+    ring_interpreter->current_line_content  = new_ring_string();
 
     ring_interpreter->statement_list_size = 0;
     ring_interpreter->statement_list      = NULL;
@@ -72,6 +73,24 @@ unsigned int increase_ring_interpreter_column_number(unsigned int len) {
     assert(ring_interpreter != NULL);
     ring_interpreter->current_column_number += len;
     return ring_interpreter->current_column_number;
+}
+
+void ring_interpreter_update_line_content(char *str) {
+    assert(ring_interpreter != NULL);
+
+    for (int i = 0; i < strlen(str); i++) {
+        ring_string_add_char(ring_interpreter->current_line_content, str[i]);
+    }
+
+    ring_interpreter->current_column_number += strlen(str);
+}
+
+void ring_interpreter_reset_current_line_content() {
+    reset_ring_string(ring_interpreter->current_line_content);
+}
+
+char *ring_interpreter_get_current_line_content() {
+    return get_ring_string(ring_interpreter->current_line_content);
 }
 
 void reset_ring_interpreter_column_number() {

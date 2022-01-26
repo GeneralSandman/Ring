@@ -5,6 +5,8 @@
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
+typedef struct Ring_String_Tag Ring_String;
+
 typedef struct Ring_BasicValue_Tag Ring_BasicValue;
 
 // struct Statement_Tag;
@@ -37,7 +39,7 @@ struct Ring_Interpreter_Tag {
     char *       current_file_name;
     unsigned int current_line_number;
     unsigned int current_column_number;
-    char *       current_line_content;
+    Ring_String *current_line_content;
 
     unsigned int statement_list_size;
     Statement *  statement_list;
@@ -57,6 +59,12 @@ typedef enum {
     IDENTIFIER_TYPE_VARIABLE,
     IDENTIFIER_TYPE_FUNCATION,
 } IdentifierType;
+
+struct Ring_String_Tag {
+    char *buffer;
+    int   size;
+    int   capacity;
+};
 
 // typedef union {
 //     int    int_value;
@@ -253,6 +261,13 @@ struct Function_Tag {
 #define debug_log_with_purple_coloar(format, ...)
 #endif
 
+void         init_current_line_content();
+Ring_String *get_current_line_content_string();
+Ring_String *new_ring_string();
+void         reset_ring_string(Ring_String *string);
+void         ring_string_add_char(Ring_String *string, char ch);
+char *       get_ring_string(Ring_String *string);
+
 Ring_Interpreter *new_ring_interpreter(char *file_name);
 Ring_Interpreter *get_ring_interpreter();
 char *            get_ring_interpreter_current_file_name();
@@ -261,6 +276,9 @@ unsigned int      get_ring_interpreter_line_number();
 unsigned int      increase_ring_interpreter_line_number();
 unsigned int      get_ring_interpreter_column_number();
 unsigned int      increase_ring_interpreter_column_number(unsigned int len);
+void              ring_interpreter_update_line_content(char *str);
+void              ring_interpreter_reset_current_line_content();
+char *            ring_interpreter_get_current_line_content();
 void              reset_ring_interpreter_column_number();
 int               ring_interpreter_init_statement_list(Statement *statement);
 int               ring_interpreter_add_statement(Statement *statement);
