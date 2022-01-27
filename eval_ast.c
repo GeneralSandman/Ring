@@ -120,7 +120,7 @@ Ring_BasicValue *interpret_variable_expression(char *variable_identifier) {
 }
 
 Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression) {
-    debug_log_with_blue_coloar();
+    debug_log_with_blue_coloar("expression->type:%d", expression->type);
     Ring_BasicValue *result;
 
     result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
@@ -181,7 +181,7 @@ Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression) 
 }
 
 Ring_BasicValue *interpret_binary_expression(Expression *expression) {
-    debug_log_with_blue_coloar();
+    debug_log_with_blue_coloar("expression->type:%d", expression->type);
     // TODO: 还要考虑各个变量的类型
     //       是否涉及到强制类型转换
     //       两边类型不匹配还要编译报错
@@ -190,9 +190,6 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression) {
     Ring_BasicValue *result;
 
     result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-
-    Ring_BasicValue *left  = NULL;
-    Ring_BasicValue *right = NULL;
 
     switch (expression->type) {
     case EXPRESSION_TYPE_LITERAL_INT:
@@ -225,7 +222,7 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression) {
 }
 
 void invoke_function(FunctionCallExpression *function_call_expression) {
-    debug_log_with_blue_coloar();
+    debug_log_with_blue_coloar("function_call_expression->function_name:%s", function_call_expression->function_name);
 
     // search_funcaion
     Function *function = NULL;
@@ -247,7 +244,7 @@ void invoke_function(FunctionCallExpression *function_call_expression) {
 }
 
 void assign(Expression *expression) {
-    debug_log_with_blue_coloar();
+    debug_log_with_blue_coloar("expression->type:%d", expression->type);
 
     assert(expression->type == EXPRESSION_TYPE_ASSIGN);
 

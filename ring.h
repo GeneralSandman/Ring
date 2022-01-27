@@ -290,7 +290,7 @@ char *       get_ring_string(Ring_String *string);
 Ring_Interpreter *new_ring_interpreter(char *file_name);
 Ring_Interpreter *get_ring_interpreter();
 char *            get_ring_interpreter_current_file_name();
-char *            get_ring_interpreter_current_line_content();
+Ring_String *     get_ring_interpreter_current_line_content();
 unsigned int      get_ring_interpreter_line_number();
 unsigned int      increase_ring_interpreter_line_number();
 unsigned int      get_ring_interpreter_column_number();

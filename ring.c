@@ -7,6 +7,7 @@
 // 其实这个用不到，flex是有优先级的，会有语法错误
 // 检查变量是否重复定义
 int identifier_check_valid(char *identifier) {
+    return 0;
 }
 
 Variable *new_variable(VariableType type, char *identifier) {

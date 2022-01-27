@@ -3,18 +3,18 @@
 #include "parser.h"
 
 void create_statement_list(Statement *statement) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("statement->type:%d", statement->type);
     ring_interpreter_init_statement_list(statement);
 }
 
 void statement_list_add_item(Statement *statement) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("statement->type:%d", statement->type);
 
     ring_interpreter_add_statement(statement);
 }
 
 Statement *create_statemen_from_expression(Expression *expression) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("expression->type:%d", expression->type);
 
     Statement *statement = NULL;
     statement            = (Statement *)malloc(sizeof(Statement));
@@ -27,7 +27,7 @@ Statement *create_statemen_from_expression(Expression *expression) {
 }
 
 Statement *create_statement_from_variable(Variable *variable) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("variable->type:%d", variable->type);
 
     Statement *statement = NULL;
     statement            = (Statement *)malloc(sizeof(Statement));
@@ -47,14 +47,14 @@ Statement *create_statement_from_variable(Variable *variable) {
 }
 
 void add_function_definition(Function *function_definition) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
 
     function_definition->next             = get_ring_interpreter()->function_list;
     get_ring_interpreter()->function_list = function_definition;
 }
 
 Expression *create_expression() {
-    debug_log_with_yellow_coloar();
+    // debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
@@ -63,7 +63,7 @@ Expression *create_expression() {
 }
 
 Expression *create_expression_identifier(char *identifier) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("identifier:%s", identifier);
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
@@ -76,7 +76,7 @@ Expression *create_expression_identifier(char *identifier) {
 }
 
 Expression *create_expression_(FunctionCallExpression *function_call_expression) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("function_call_expression->name:%s", function_call_expression->function_name);
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
@@ -87,7 +87,7 @@ Expression *create_expression_(FunctionCallExpression *function_call_expression)
 }
 
 Expression *create_expression__(AssignExpression *assign_expression) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("assign_expression->assign_identifier:%s", assign_expression->assign_identifier);
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
@@ -98,7 +98,7 @@ Expression *create_expression__(AssignExpression *assign_expression) {
 }
 
 Expression *create_expression_binary(ExpressionType type, Expression *left, Expression *right) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("type:%d", type);
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
@@ -113,7 +113,7 @@ Expression *create_expression_binary(ExpressionType type, Expression *left, Expr
 
 Expression *
 create_expression_literal(ExpressionType type, char *literal_interface) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("type:%d", type);
 
     assert(literal_interface != NULL);
     Expression *expression = NULL;
@@ -132,7 +132,6 @@ create_expression_literal(ExpressionType type, char *literal_interface) {
         expression->u.string_literal = literal_interface;
         // sscanf(literal_interface, "%s", expression->u.string_literal);
         break;
-
     default:
         break;
     }
@@ -142,7 +141,7 @@ create_expression_literal(ExpressionType type, char *literal_interface) {
 
 AssignExpression *create_assign_expression(char *identifier, Expression *expression) {
     // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("identifier:%s", identifier);
 
     AssignExpression *assing_expression = NULL;
     assing_expression                   = (AssignExpression *)malloc(sizeof(AssignExpression));
@@ -153,7 +152,7 @@ AssignExpression *create_assign_expression(char *identifier, Expression *express
 }
 
 FunctionCallExpression *create_function_call_expression(char *identifier, ArgumentList *argument_list) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("identifier:%s", identifier);
 
     FunctionCallExpression *function_call_expression = NULL;
     function_call_expression                         = (FunctionCallExpression *)malloc(sizeof(FunctionCallExpression));
@@ -165,7 +164,7 @@ FunctionCallExpression *create_function_call_expression(char *identifier, Argume
 }
 
 ArgumentList *create_argument_list(char *argument) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("argument:%s", argument);
 
     ArgumentList *argument_list = NULL;
     argument_list               = (ArgumentList *)malloc(sizeof(ArgumentList));
@@ -178,7 +177,7 @@ ArgumentList *create_argument_list(char *argument) {
 }
 
 ArgumentList *create_argument_list_from_expression(Expression *expression) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("expression->type:%d", expression->type);
 
     ArgumentList *argument_list = NULL;
     argument_list               = (ArgumentList *)malloc(sizeof(ArgumentList));
@@ -190,7 +189,7 @@ ArgumentList *create_argument_list_from_expression(Expression *expression) {
 }
 
 Identifier *new_identifier(IdentifierType type, char *name) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("identifier name:%s", name);
 
     Identifier *identifier;
     identifier = (Identifier *)malloc(sizeof(Identifier));
@@ -203,7 +202,7 @@ Identifier *new_identifier(IdentifierType type, char *name) {
 }
 
 Function *new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, Statement *block) {
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("identifier:%s", identifier);
 
     Function *function;
     function = (Function *)malloc(sizeof(function));

@@ -4,6 +4,13 @@
         "stdio.h": "c",
         "ring.h": "c",
         "system_error": "c",
-        "inner_func.h": "c"
+        "inner_func.h": "c",
+        "array": "c",
+        "functional": "c",
+        "istream": "c",
+        "ostream": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c"
     }
 }

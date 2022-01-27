@@ -46,5 +46,5 @@ void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
         exit(1);
     }
 
-    debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n");
+    debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n", "");
 }

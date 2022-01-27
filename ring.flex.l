@@ -107,14 +107,14 @@ int yywrap(){
     BEGIN STRING_LITERAL_STATE;
 }
 <INITIAL>\n {
-    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(LF)\n\n");
+    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(LF)\n\n", "");
 
     reset_ring_interpreter_column_number();
     ring_interpreter_reset_current_line_content();
     increase_ring_interpreter_line_number();
 }
 <INITIAL>\r\n {
-    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(CRLF)\n\n");
+    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(CRLF)\n\n", "");
 
     reset_ring_interpreter_column_number();
     ring_interpreter_reset_current_line_content();

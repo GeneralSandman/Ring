@@ -42,7 +42,7 @@ char *get_ring_interpreter_current_file_name() {
     return ring_interpreter->current_file_name;
 }
 
-char *get_ring_interpreter_current_line_content() {
+Ring_String *get_ring_interpreter_current_line_content() {
     assert(ring_interpreter != NULL);
     return ring_interpreter->current_line_content;
 }
@@ -99,7 +99,7 @@ void reset_ring_interpreter_column_number() {
 
 int ring_interpreter_init_statement_list(Statement *statement) {
     assert(ring_interpreter != NULL);
-    debug_log_with_yellow_coloar();
+    debug_log_with_yellow_coloar("statement->type:%d", statement->type);
 
     ring_interpreter->statement_list      = statement;
     ring_interpreter->statement_list_size = 1;
