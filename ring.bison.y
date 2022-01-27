@@ -18,6 +18,7 @@
     ArgumentList*               m_argument_list;
     Variable*                   m_variable;
     VariableType*               m_variable_type;
+    Function*                   m_function_definition;
 }
 
 %token TOKEN_INT 
@@ -53,6 +54,8 @@
 
 %token TOKEN_LP 
 %token TOKEN_RP 
+%token TOKEN_LC 
+%token TOKEN_RC 
 %token TOKEN_COMMA 
 %token TOKEN_SEMICOLON 
 %token TOKEN_ASSIGN
@@ -73,6 +76,7 @@
 %type <m_argument_list> argument_list
 %type <m_variable> variable_definition
 %type <m_variable_type> variable_type
+%type <m_function_definition> function_definition
 
 
 %%
@@ -86,6 +90,11 @@ statement_list
     | statement_list statement
     {
         statement_list_add_item($2);
+    }
+    | function_definition
+    {
+        debug_log_with_green_coloar("[RULE::statement:function_definition]\t ");
+        add_function_definition($1);
     }
     ;
 
@@ -110,6 +119,44 @@ variable_definition
         $$ = new_variable($2, $3);
     }
     ;
+
+function_definition
+    : TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::function_definition]\t ");
+
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, NULL);
+
+    }
+    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::function_definition]\t ");
+
+    }
+    ;
+
+parameter_list
+    :
+    {
+        debug_log_with_green_coloar("[RULE::parameter_list]\t ");
+
+    }
+    ;
+
+return_list
+    :
+    {
+        debug_log_with_green_coloar("[RULE::return_list]\t ");
+    }
+    ;
+
+block
+    : TOKEN_LC TOKEN_RC
+    {
+        debug_log_with_green_coloar("[RULE::block:block]\t ");
+    }
+    ;
+
 
 variable_type
     : TOKEN_INT
@@ -277,7 +324,7 @@ int yyerror(char const *str){
         ring_interpreter_get_current_line_content());
     complie_err_log2("%*s^.....%s", get_ring_interpreter_column_number()+4, "", str);
 
-    printf("%s\n", yytext);
+    // printf("%s\n", yytext);
 
     // va_list ap;
     // va_start(ap, str);

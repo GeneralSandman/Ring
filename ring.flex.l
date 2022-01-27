@@ -50,6 +50,8 @@ int yywrap(){
 
 <INITIAL>"("            { ring_interpreter_update_line_content(yytext); return TOKEN_LP;             }
 <INITIAL>")"            { ring_interpreter_update_line_content(yytext); return TOKEN_RP;             }
+<INITIAL>"{"            { ring_interpreter_update_line_content(yytext); return TOKEN_LC;             }
+<INITIAL>"}"            { ring_interpreter_update_line_content(yytext); return TOKEN_RC;             }
 <INITIAL>","            { ring_interpreter_update_line_content(yytext); return TOKEN_COMMA;          }
 <INITIAL>";"            { ring_interpreter_update_line_content(yytext); return TOKEN_SEMICOLON;      }
 <INITIAL>"="            { ring_interpreter_update_line_content(yytext); return TOKEN_ASSIGN;         }

@@ -42,7 +42,7 @@ void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
     yyin = fp;
     if (yyparse()) {
         /* BUGBUG */
-        // fprintf(stderr, "YYPARSE error\n");
+        fprintf(stderr, "YYPARSE error\n");
         exit(1);
     }
 

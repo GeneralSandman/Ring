@@ -3,6 +3,7 @@
         "stdlib.h": "c",
         "stdio.h": "c",
         "ring.h": "c",
-        "system_error": "c"
+        "system_error": "c",
+        "inner_func.h": "c"
     }
 }

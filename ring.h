@@ -107,6 +107,12 @@ typedef enum {
 } VariableType;
 
 typedef enum {
+    FUNCTION_TYPE_UNKNOW = 0,
+    FUNCTION_TYPE_INNER_LIB,
+    FUNCTION_TYPE_EXTERNAL,
+} FunctionType;
+
+typedef enum {
     BASICVALUE_TYPE_UNKNOW = 0,
     BASICVALUE_TYPE_INT,
     BASICVALUE_TYPE_DOUBLE,
@@ -193,7 +199,17 @@ struct Variable_Tag {
 };
 
 struct Function_Tag {
-    char *          function_name;
+    unsigned int line_number;
+
+    char *       function_name;
+    FunctionType type;
+
+    unsigned int parameter_list_size;
+    Variable *   parameter_list;
+
+    unsigned int block_size;
+    Statement *  block;
+
     Ring_InnerFunc *inner_func;
 
     Function *next;

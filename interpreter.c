@@ -99,6 +99,7 @@ void reset_ring_interpreter_column_number() {
 
 int ring_interpreter_init_statement_list(Statement *statement) {
     assert(ring_interpreter != NULL);
+    debug_log_with_yellow_coloar();
 
     ring_interpreter->statement_list      = statement;
     ring_interpreter->statement_list_size = 1;

@@ -9,6 +9,7 @@ void                    create_statement_list();
 void                    statement_list_add_item();
 Statement *             create_statemen_from_expression();
 Statement *             create_statement_from_variable(Variable *variable);
+void                    add_function_definition(Function *function_definition);
 Expression *            create_expression();
 Expression *            create_expression_identifier(char *identifier);
 Expression *            create_expression_(FunctionCallExpression *function_call_expression);
@@ -19,5 +20,6 @@ AssignExpression *      create_assign_expression(char *identifier, Expression *e
 FunctionCallExpression *create_function_call_expression();
 ArgumentList *          create_argument_list();
 ArgumentList *          create_argument_list_from_expression(Expression *expression);
+Function *              new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, Statement *block);
 
 #endif

@@ -46,6 +46,13 @@ Statement *create_statement_from_variable(Variable *variable) {
     return statement;
 }
 
+void add_function_definition(Function *function_definition) {
+    debug_log_with_yellow_coloar();
+
+    function_definition->next             = get_ring_interpreter()->function_list;
+    get_ring_interpreter()->function_list = function_definition;
+}
+
 Expression *create_expression() {
     debug_log_with_yellow_coloar();
 
@@ -193,4 +200,23 @@ Identifier *new_identifier(IdentifierType type, char *name) {
     identifier->next            = NULL;
 
     return identifier;
+}
+
+Function *new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, Statement *block) {
+    debug_log_with_yellow_coloar();
+
+    Function *function;
+    function = (Function *)malloc(sizeof(function));
+
+    function->line_number         = get_ring_interpreter_line_number();
+    function->type                = type;
+    function->function_name       = identifier;
+    function->parameter_list_size = 0;
+    function->parameter_list      = parameter_list;
+    function->block_size          = 0;
+    function->block               = block;
+    function->inner_func          = NULL;
+    function->next                = NULL;
+
+    return function;
 }
