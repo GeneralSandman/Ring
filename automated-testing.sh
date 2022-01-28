@@ -3,7 +3,7 @@
 # 需要向下兼容，测试之前的所有测试用例
 
 TEST_PATH="./test"
-TEST_VERSION="v0.0.5"
+TEST_VERSION="v0.0.6"
 SOURCE_FILE_PATH=$TEST_PATH"/"$TEST_VERSION
 num=1
 
@@ -27,7 +27,7 @@ autoTestFunc(){
 
     let num++
 
-    # rm $run_result_file_tmp
+    rm $run_result_file_tmp
 }
 
 echo "\t \n"

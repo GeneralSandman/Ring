@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.5-beat"
+#define RING_VERSION "ring-v0.0.6-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -320,6 +320,7 @@ void             ring_interpret(Ring_Interpreter *ring_interpreter);
 void             interpret_statement(Statement *statement);
 void             interpret_statement_list(Statement *statement);
 Ring_BasicValue *interpret_expression(Expression *expression);
+Ring_BasicValue *search_variable_value(char *identifier);
 void             invoke_function(FunctionCallExpression *function_call_expression);
 void             invoke_external_function(Function *function);
 Ring_BasicValue *interpret_variable_expression(char *variable_identifier);

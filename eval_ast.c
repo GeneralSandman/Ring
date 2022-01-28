@@ -210,6 +210,11 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression) {
         result->u.string_value = expression->u.string_literal;
         break;
 
+    case EXPRESSION_TYPE_VARIABLE:
+        // TODO: 找到相应的变量值
+        result = search_variable_value(expression->u.variable_identifier);
+        break;
+
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
     case EXPRESSION_TYPE_ARITHMETIC_SUB:
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
@@ -222,6 +227,22 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression) {
     }
 
     return result;
+}
+
+Ring_BasicValue *search_variable_value(char *identifier) {
+    Variable *variable = NULL;
+
+    for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+        if (0 == strcmp(pos->variable_identifer, identifier)) {
+            variable = pos;
+        }
+    }
+
+    if (variable == NULL) {
+        printf("findn't match variable\n");
+        return NULL;
+    }
+    return variable->u.ring_basic_value;
 }
 
 void invoke_function(FunctionCallExpression *function_call_expression) {

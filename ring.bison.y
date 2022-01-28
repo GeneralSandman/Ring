@@ -291,6 +291,11 @@ literal_term
 
         $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_STRING, $1);
     }
+    | identifier
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:identifier]\t ", "");
+        $$ = create_expression_identifier($1);
+    }
     ;
 
 function_call_expression
