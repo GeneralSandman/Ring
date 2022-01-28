@@ -13,6 +13,20 @@ void statement_list_add_item(Statement *statement) {
     ring_interpreter_add_statement(statement);
 }
 
+Statement *statement_list_add_item2(Statement *statement) {
+    debug_log_with_yellow_coloar("statement->type:%d", statement->type);
+}
+
+Statement *statement_list_add_item3(Statement *statement_list, Statement *statement) {
+    debug_log_with_yellow_coloar("statement->type:%d", statement->type);
+
+    Statement *pos = statement_list;
+    for (; pos->next != NULL; pos = pos->next)
+        ;
+    pos->next = statement;
+    return statement_list;
+}
+
 Statement *create_statemen_from_expression(Expression *expression) {
     debug_log_with_yellow_coloar("expression->type:%d", expression->type);
 
@@ -47,6 +61,7 @@ Statement *create_statement_from_variable(Variable *variable) {
 }
 
 void add_function_definition(Function *function_definition) {
+    assert(function_definition != NULL);
     debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
 
     function_definition->next             = get_ring_interpreter()->function_list;
@@ -202,10 +217,10 @@ Identifier *new_identifier(IdentifierType type, char *name) {
 }
 
 Function *new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, Statement *block) {
-    debug_log_with_yellow_coloar("identifier:%s", identifier);
+    debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier);
 
     Function *function;
-    function = (Function *)malloc(sizeof(function));
+    function = (Function *)malloc(sizeof(Function));
 
     function->line_number         = get_ring_interpreter_line_number();
     function->type                = type;

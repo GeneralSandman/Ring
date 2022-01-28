@@ -6,9 +6,12 @@
 
 void ring_interpret(Ring_Interpreter *ring_interpreter) {
     debug_log_with_blue_coloar("\t interpret statement: statement_list_size(%d)", ring_interpreter->statement_list_size);
+    interpret_statement_list(ring_interpreter->statement_list);
+}
 
+void interpret_statement_list(Statement *statement) {
     Statement *p;
-    for (p = ring_interpreter->statement_list; p != NULL; p = p->next) {
+    for (p = statement; p != NULL; p = p->next) {
         debug_log_with_blue_coloar("\t interpret statement: type(%d),line_number(%d)", p->type, p->line_number);
         interpret_statement(p);
     }
@@ -227,7 +230,7 @@ void invoke_function(FunctionCallExpression *function_call_expression) {
     // search_funcaion
     Function *function = NULL;
 
-    for (Function *pos = get_ring_interpreter()->function_list; pos != NULL; pos = function->next) {
+    for (Function *pos = get_ring_interpreter()->function_list; pos != NULL; pos = pos->next) {
         if (0 == strcmp(pos->function_name, function_call_expression->function_name)) {
             function = pos;
         }
@@ -238,9 +241,25 @@ void invoke_function(FunctionCallExpression *function_call_expression) {
         return;
     }
 
-    function->inner_func(1, function_call_expression->argument_list->u.expression);
+    switch (function->type) {
+    case FUNCTION_TYPE_INNER_LIB:
+        function->inner_func(1, function_call_expression->argument_list->u.expression);
+        break;
+
+    case FUNCTION_TYPE_EXTERNAL:
+        invoke_external_function(function);
+        break;
+
+    default:
+        break;
+    }
 
     // invoke
+}
+
+void invoke_external_function(Function *function) {
+    debug_log_with_blue_coloar("");
+    interpret_statement_list(function->block);
 }
 
 void assign(Expression *expression) {

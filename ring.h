@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.3-beat"
+#define RING_VERSION "ring-v0.0.5-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -311,17 +311,23 @@ char *get_string_literal();
 void insert_identifier(IdentifierType type, char *name);
 
 int       identifier_check_valid(char *identifier);
-Variable *new_variable();
+Variable *new_variable(VariableType type, char *identifier);
 
 Identifier *new_identifier(IdentifierType type, char *name);
+void        check_identifier_valid(char *identifier_name);
 
 void             ring_interpret(Ring_Interpreter *ring_interpreter);
 void             interpret_statement(Statement *statement);
+void             interpret_statement_list(Statement *statement);
 Ring_BasicValue *interpret_expression(Expression *expression);
 void             invoke_function(FunctionCallExpression *function_call_expression);
+void             invoke_external_function(Function *function);
 Ring_BasicValue *interpret_variable_expression(char *variable_identifier);
 Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression);
 Ring_BasicValue *interpret_binary_expression(Expression *expression);
 void             assign(Expression *expression);
+
+// 上下文相关语义检查
+void semantic_check(Ring_Interpreter *ring_interpreter);
 
 #endif

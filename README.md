@@ -1,7 +1,7 @@
 # Ring
 
 
-## ```Ring```语言的展望
+## 一、```Ring```语言的展望
 
 - 需要方便的组织各种依赖、并发编译、链接
 - 静态类型 (Static Typing) 语言
@@ -12,9 +12,10 @@
 - 支持bind 绑定函数
 - auto类型
 - lambda表达式
+- 支持闭包
 
 
-## 为什么以```Ring```命名
+## 二、为什么以```Ring```命名
 
 大学的时候反反复复看了四遍指环王、霍比特人系列的电影，超级喜欢中土世界，所以 ```Ring``` 取自 ```The Lord of the Rings```。
 
@@ -41,28 +42,28 @@ Ash nazg durbatulûk, ash nazg gimbatul, ash nazg thrakatulûk, agh burzum-ishi 
 Reference wikipedia https://zh.wikipedia.org/wiki/%E8%87%B3%E5%B0%8A%E9%AD%94%E6%88%92
 
 
-## 如何使用源代码&运行一个HelloWorld
+## 三、如何使用源代码&运行一个HelloWorld
 
 [如何运行 HelloWorld](./doc/using.md)
 
-## Ring语言语法规范
+## 四、Ring语言语法规范
 
 [Ring语法语义](./doc/语法概念.md)
 
-## 历史版本功能
+## 五、历史版本功能
 
 | 时间       | 版本   | 特性                                                                                                                         |
 | ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | -          | v0.0.6 |                                                                                                                              |
-| 2022-01-27 | v0.0.5 | 支持自定义函数,无返回值，多返回值。编译错误时，打印当前行的内容、并提示错误编译的信息。                                      |
+| 2022-01-27 | v0.0.5 | 支持自定义函数,无参数、无返回值。编译错误时，打印当前行的内容、并提示错误编译的信息。                                        |
 | 2022-01-26 | v0.0.4 | int/double/string 变量的赋值操作，int/double 四则运算，支持打印 int/double/string 变量/常量 ，添加自动化测试脚本             |
 | 2022-01-25 | v0.0.3 | 支持解析 + - * / 运算法表达式，和 int string 变量的赋值操作，支持打印 int变量、string变量、string常量，DEBUG日志支持颜色分类 |
 | 2022-01-20 | v0.0.2 | 支持解析 string变量定义，string变量赋值，print打印string常量                                                                 |
 | 2022-01-19 | v0.0.1 | 支持解析print函数、但是还没有调用成功                                                                                        |
 | 2022-01-18 | v0.0.0 | 支持解析 注释 string变量定义和复制                                                                                           |
 
-## TODO List
+## 六、TODO List
 
 
-## Contributer
+## 七、Contributer
 

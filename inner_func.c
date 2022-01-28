@@ -4,15 +4,19 @@
 #include "inner_func.h"
 
 void register_inner_func(Ring_Interpreter *ring_interpreter) {
-    char *    identifier;
     Function *function;
 
-    identifier = "print";
-    function   = malloc(sizeof(Function));
+    function = malloc(sizeof(Function));
 
-    function->function_name = identifier;
-    function->inner_func    = ring_inner_func_print;
-    function->next          = NULL;
+    function->line_number         = get_ring_interpreter_line_number();
+    function->function_name       = "print";
+    function->type                = FUNCTION_TYPE_INNER_LIB;
+    function->parameter_list_size = 0;
+    function->parameter_list      = NULL;
+    function->block_size          = 0;
+    function->block               = NULL;
+    function->inner_func          = ring_inner_func_print;
+    function->next                = NULL;
 
     ring_interpreter->function_list = function;
 }

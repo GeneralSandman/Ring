@@ -109,7 +109,12 @@ int ring_interpreter_init_statement_list(Statement *statement) {
 
 int ring_interpreter_add_statement(Statement *statement) {
     assert(ring_interpreter != NULL);
-    assert(ring_interpreter->statement_list != NULL);
+
+    if (ring_interpreter->statement_list == NULL) {
+        ring_interpreter->statement_list      = statement;
+        ring_interpreter->statement_list_size = 1;
+        return 0;
+    }
 
     Statement *pos;
     pos = ring_interpreter->statement_list;

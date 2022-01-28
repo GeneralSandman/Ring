@@ -10,9 +10,10 @@ OBJS = \
   eval_ast.o\
   interpreter.o\
   inner_func.o\
-  utils.o
+  utils.o\
+  semantic_check.o
 
-CFLAGS = -c -g -std=c99 -Wall -Wswitch-enum -pedantic
+CFLAGS = -c -g -std=c99 -Wall  -pedantic
 BIN = ./bin
 INCLUDES = \
 
@@ -50,4 +51,6 @@ interpreter.o: interpreter.c ring.h inner_func.h
 inner_func.o: inner_func.c ring.h inner_func.h
 	$(CC) $(CFLAGS) $*.c
 utils.o: utils.c ring.h
+	$(CC) $(CFLAGS) $*.c
+semantic_check.o: semantic_check.c ring.h
 	$(CC) $(CFLAGS) $*.c

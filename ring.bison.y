@@ -70,7 +70,7 @@ int yyerror(char const *str);
 
 %type <m_literal_interface> INT_LITERAL DOUBLE_LITERAL STRING_LITERAL
 %type <m_identifier> identifier IDENTIFIER
-%type <m_statement_list> statement statement_list
+%type <m_statement_list> statement statement_list block
 %type <m_expression> expression 
 %type <m_expression> literal_term
 %type <m_expression> expression_arithmetic_operation_additive 
@@ -85,20 +85,42 @@ int yyerror(char const *str);
 
 %%
 
+translation_unit
+    : definition_or_statement
+    {
+        debug_log_with_green_coloar("[RULE::translation_unit:definition_or_statement]\t ", "");
+    }
+    | translation_unit definition_or_statement
+    {
+        debug_log_with_green_coloar("[RULE::translation_unit:translation_unit]\t ", "");
+    }
+    ;
+
+definition_or_statement
+    : function_definition
+    {
+        debug_log_with_green_coloar("[RULE::statement:function_definition]\t ", "");
+        add_function_definition($1);
+    }
+    | statement
+    {
+        debug_log_with_green_coloar("[RULE::statement:statement]\t ", "");
+        ring_interpreter_add_statement($1);
+    }
+    ;
 
 statement_list
     : statement
     {
-        create_statement_list($1);
+        debug_log_with_green_coloar("[RULE::statement:statement]\t ", "");
+        // $$ = statement_list_add_item2($1);
     }
     | statement_list statement
     {
-        statement_list_add_item($2);
-    }
-    | function_definition
-    {
-        debug_log_with_green_coloar("[RULE::statement:function_definition]\t ", "");
-        add_function_definition($1);
+        // 这个地方不应该加在全局的 statment_list 中
+        // 应该只放到函数的 statement_list 中
+        debug_log_with_green_coloar("[RULE::statement:statement_list]\t ", "");
+        $$ = statement_list_add_item3($1, $2);
     }
     ;
 
@@ -129,12 +151,7 @@ function_definition
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, NULL);
-
-    }
-    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP block
-    {
-        debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, $5);
 
     }
     ;
@@ -155,9 +172,14 @@ return_list
     ;
 
 block
-    : TOKEN_LC TOKEN_RC
+    : TOKEN_LC statement_list TOKEN_RC
     {
-        debug_log_with_green_coloar("[RULE::block:block]\t ", "");
+        debug_log_with_green_coloar("[RULE::block: statment_list]\t ", "");
+        $$ = $2;
+    }
+    | TOKEN_LC TOKEN_RC
+    {
+        debug_log_with_green_coloar("[RULE::block: empty statement_list]\t ", "");
     }
     ;
 
@@ -277,6 +299,12 @@ function_call_expression
         debug_log_with_green_coloar("[RULE::function_call_expression]\t ", "");
 
         $$ = create_function_call_expression($1, $3);
+    }
+    | identifier TOKEN_LP TOKEN_RP
+    {
+        debug_log_with_green_coloar("[RULE::function_call_expression]\t ", "");
+
+        $$ = create_function_call_expression($1, NULL);
     }
     ;
 
