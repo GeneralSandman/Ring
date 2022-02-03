@@ -32,7 +32,7 @@ void ring_inner_func_print(int argc, Expression *expression) {
 
     Ring_BasicValue *result;
 
-    result = interpret_expression(expression);
+    result = interpret_expression(expression, NULL);
     if (result == NULL) {
         printf("error\n");
         exit(1);

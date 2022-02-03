@@ -48,7 +48,7 @@ struct Ring_Interpreter_Tag {
     Function *   function_list;
 
     unsigned int variable_list_size;
-    Variable *   variable_list;
+    Variable *   variable_list; // FIXME: 这里指的是全局变量，需要区分函数中的局部变量。
 
     unsigned int identifier_list_size;
     Identifier * identifier_list;
@@ -207,6 +207,9 @@ struct Function_Tag {
     unsigned int parameter_list_size;
     Variable *   parameter_list;
 
+    unsigned int variable_list_size;
+    Variable *   variable_list;
+
     unsigned int block_size;
     Statement *  block;
 
@@ -317,16 +320,16 @@ Identifier *new_identifier(IdentifierType type, char *name);
 void        check_identifier_valid(char *identifier_name);
 
 void             ring_interpret(Ring_Interpreter *ring_interpreter);
-void             interpret_statement(Statement *statement);
-void             interpret_statement_list(Statement *statement);
-Ring_BasicValue *interpret_expression(Expression *expression);
+void             interpret_statement(Statement *statement, Function *function);
+void             interpret_statement_list(Statement *statement, Function *function);
+Ring_BasicValue *interpret_expression(Expression *expression, Function *function);
 Ring_BasicValue *search_variable_value(char *identifier);
 void             invoke_function(FunctionCallExpression *function_call_expression);
 void             invoke_external_function(Function *function);
-Ring_BasicValue *interpret_variable_expression(char *variable_identifier);
+Ring_BasicValue *interpret_variable_expression(char *variable_identifier, Function *function);
 Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression);
 Ring_BasicValue *interpret_binary_expression(Expression *expression);
-void             assign(Expression *expression);
+void             assign(Expression *expression, Function *function);
 
 // 上下文相关语义检查
 void semantic_check(Ring_Interpreter *ring_interpreter);

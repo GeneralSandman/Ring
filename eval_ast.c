@@ -6,24 +6,24 @@
 
 void ring_interpret(Ring_Interpreter *ring_interpreter) {
     debug_log_with_blue_coloar("\t interpret statement: statement_list_size(%d)", ring_interpreter->statement_list_size);
-    interpret_statement_list(ring_interpreter->statement_list);
+    interpret_statement_list(ring_interpreter->statement_list, NULL);
 }
 
-void interpret_statement_list(Statement *statement) {
+void interpret_statement_list(Statement *statement, Function *function) {
     Statement *p;
     for (p = statement; p != NULL; p = p->next) {
         debug_log_with_blue_coloar("\t interpret statement: type(%d),line_number(%d)", p->type, p->line_number);
-        interpret_statement(p);
+        interpret_statement(p, function);
     }
 }
 
-void interpret_statement(Statement *statement) {
+void interpret_statement(Statement *statement, Function *function) {
     switch (statement->type) {
     case STATEMENT_TYPE_VARIABLE_DEFINITION:
         break;
 
     case STATEMENT_TYPE_EXPRESSION:
-        interpret_expression(statement->u.expression);
+        interpret_expression(statement->u.expression, function);
         break;
 
     default:
@@ -31,7 +31,7 @@ void interpret_statement(Statement *statement) {
     }
 }
 
-Ring_BasicValue *interpret_expression(Expression *expression) {
+Ring_BasicValue *interpret_expression(Expression *expression, Function *function) {
     Ring_BasicValue *result;
 
     result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
@@ -56,14 +56,14 @@ Ring_BasicValue *interpret_expression(Expression *expression) {
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
-        assign(expression);
+        assign(expression, function);
         break;
 
     case EXPRESSION_TYPE_VARIABLE:
         // TODO:
         // result->type = BASICVALUE_TYPE_INT;
         // result->u.int_value =
-        result = interpret_variable_expression(expression->u.variable_identifier);
+        result = interpret_variable_expression(expression->u.variable_identifier, function);
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
@@ -81,19 +81,27 @@ Ring_BasicValue *interpret_expression(Expression *expression) {
 }
 
 // TODO:
-Ring_BasicValue *interpret_variable_expression(char *variable_identifier) {
+Ring_BasicValue *interpret_variable_expression(char *variable_identifier, Function *function) {
     // 查找相应的变量值
     Variable *variable = NULL;
-
-    for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
-        if (0 == strcmp(pos->variable_identifer, variable_identifier)) {
-            variable = pos;
+    // 查找局部变量
+    if (function != NULL) {
+        for (Variable *pos = function->variable_list; pos != NULL; pos = pos->next) {
+            if (0 == strcmp(pos->variable_identifer, variable_identifier)) {
+                variable = pos;
+            }
         }
     }
 
-    if (variable == NULL) {
-        printf("findn't match variable\n");
-        exit(1);
+    if (variable != NULL) {
+        debug_log_with_blue_coloar("find match local variable\n");
+    } else {
+        // 查找全局变量
+        for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+            if (0 == strcmp(pos->variable_identifer, variable_identifier)) {
+                variable = pos;
+            }
+        }
     }
 
     // FIXME: 存在内存泄漏
@@ -280,10 +288,10 @@ void invoke_function(FunctionCallExpression *function_call_expression) {
 
 void invoke_external_function(Function *function) {
     debug_log_with_blue_coloar("");
-    interpret_statement_list(function->block);
+    interpret_statement_list(function->block, function);
 }
 
-void assign(Expression *expression) {
+void assign(Expression *expression, Function *function) {
     debug_log_with_blue_coloar("expression->type:%d", expression->type);
 
     assert(expression->type == EXPRESSION_TYPE_ASSIGN);
@@ -296,15 +304,28 @@ void assign(Expression *expression) {
     identifier = expression->u.assign_expression->assign_identifier;
 
     Variable *variable = NULL;
+    // 查找局部变量
+    if (function != NULL) {
+        for (Variable *pos = function->variable_list; pos != NULL; pos = pos->next) {
+            if (0 == strcmp(pos->variable_identifer, identifier)) {
+                variable = pos;
+            }
+        }
+    }
 
-    for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
-        if (0 == strcmp(pos->variable_identifer, identifier)) {
-            variable = pos;
+    if (variable != NULL) {
+        debug_log_with_blue_coloar("find match local variable\n");
+    } else {
+        // 查找全局变量
+        for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+            if (0 == strcmp(pos->variable_identifer, identifier)) {
+                variable = pos;
+            }
         }
     }
 
     if (variable == NULL) {
-        printf("findn't match variable\n");
+        debug_log_with_blue_coloar("don't find match global variable\n");
         return;
     }
 

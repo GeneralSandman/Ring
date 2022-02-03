@@ -175,6 +175,7 @@ block
     : TOKEN_LC statement_list TOKEN_RC
     {
         debug_log_with_green_coloar("[RULE::block: statment_list]\t ", "");
+        // TODO: 这里不要直接赋值，要扫描statment_list 把变量加到当前变量列表中
         $$ = $2;
     }
     | TOKEN_LC TOKEN_RC

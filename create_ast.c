@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <string.h>
 #include "ring.h"
 #include "parser.h"
 
@@ -51,11 +52,9 @@ Statement *create_statement_from_variable(Variable *variable) {
     statement->u.variable  = variable;
     statement->next        = NULL;
 
-    Variable *old_variable_list = NULL;
-    old_variable_list           = get_ring_interpreter()->variable_list;
-    variable->next              = old_variable_list;
-
+    variable->next                        = get_ring_interpreter()->variable_list;
     get_ring_interpreter()->variable_list = variable;
+    // TODO: 在这里重写，修改变量的可见范围
 
     return statement;
 }
@@ -227,10 +226,24 @@ Function *new_function_definition(FunctionType type, char *identifier, Variable 
     function->function_name       = identifier;
     function->parameter_list_size = 0;
     function->parameter_list      = parameter_list;
+    function->variable_list_size  = 0;
+    function->variable_list       = NULL;
     function->block_size          = 0;
     function->block               = block;
     function->inner_func          = NULL;
     function->next                = NULL;
+
+    // 把block中定义的局部变量加到 variable_list 中
+    Statement *pos;
+    for (pos = block; pos != NULL; pos = pos->next) {
+        if (pos->type == STATEMENT_TYPE_VARIABLE_DEFINITION) {
+            Variable *tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL);
+            memcpy(tmp, pos->u.variable, sizeof(*pos->u.variable));
+
+            tmp->next               = function->variable_list;
+            function->variable_list = tmp;
+        }
+    }
 
     return function;
 }
