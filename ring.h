@@ -314,6 +314,7 @@ char *get_string_literal();
 void insert_identifier(IdentifierType type, char *name);
 
 int       identifier_check_valid(char *identifier);
+Variable *variable_list_add_item(Variable *variable_list, Variable *variable);
 Variable *new_variable(VariableType type, char *identifier);
 
 Identifier *new_identifier(IdentifierType type, char *name);

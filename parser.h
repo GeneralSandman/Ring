@@ -20,6 +20,7 @@ Expression *            create_expression_binary(ExpressionType type, Expression
 Expression *            create_expression_literal(ExpressionType type, char *literal_interface);
 AssignExpression *      create_assign_expression(char *identifier, Expression *expression);
 FunctionCallExpression *create_function_call_expression(char *identifier, ArgumentList *argument_list);
+ArgumentList *          argument_list_add_item3(ArgumentList *argument_list, ArgumentList *argument);
 ArgumentList *          create_argument_list(char *argument);
 ArgumentList *          create_argument_list_from_expression(Expression *expression);
 Identifier *            new_identifier(IdentifierType type, char *name);

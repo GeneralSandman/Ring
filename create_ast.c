@@ -177,6 +177,16 @@ FunctionCallExpression *create_function_call_expression(char *identifier, Argume
     return function_call_expression;
 }
 
+ArgumentList *argument_list_add_item3(ArgumentList *argument_list, ArgumentList *argument) {
+    debug_log_with_yellow_coloar("statement->type:%d", statement->type);
+
+    ArgumentList *pos = argument_list;
+    for (; pos->next != NULL; pos = pos->next)
+        ;
+    pos->next = argument;
+    return argument_list;
+}
+
 ArgumentList *create_argument_list(char *argument) {
     debug_log_with_yellow_coloar("argument:%s", argument);
 
@@ -233,9 +243,17 @@ Function *new_function_definition(FunctionType type, char *identifier, Variable 
     function->inner_func          = NULL;
     function->next                = NULL;
 
+    // 把函数参数的变量添加到 variable_list 中
+    for (Variable *pos = parameter_list; pos != NULL; pos = pos->next) {
+        Variable *tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL);
+        memcpy(tmp, pos, sizeof(*pos));
+
+        tmp->next               = function->variable_list;
+        function->variable_list = tmp;
+    }
+
     // 把block中定义的局部变量加到 variable_list 中
-    Statement *pos;
-    for (pos = block; pos != NULL; pos = pos->next) {
+    for (Statement *pos = block; pos != NULL; pos = pos->next) {
         if (pos->type == STATEMENT_TYPE_VARIABLE_DEFINITION) {
             Variable *tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL);
             memcpy(tmp, pos->u.variable, sizeof(*pos->u.variable));

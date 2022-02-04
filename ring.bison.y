@@ -22,6 +22,7 @@ int yyerror(char const *str);
     Variable*                   m_variable;
     VariableType                m_variable_type;
     Function*                   m_function_definition;
+    Variable*                   m_parameter_list;
 }
 
 %token TOKEN_INT 
@@ -77,10 +78,11 @@ int yyerror(char const *str);
 %type <m_expression> expression_arithmetic_operation_multiplicative 
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
-%type <m_argument_list> argument_list
+%type <m_argument_list> argument_list argument
 %type <m_variable> variable_definition
 %type <m_variable_type> variable_type
 %type <m_function_definition> function_definition
+%type <m_parameter_list> parameter_list
 
 
 %%
@@ -154,12 +156,25 @@ function_definition
         $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, $5);
 
     }
+    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
+
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, $6);
+
+    }
     ;
 
 parameter_list
-    :
+    : variable_definition
     {
         debug_log_with_green_coloar("[RULE::parameter_list]\t ", "");
+
+    }
+    | parameter_list TOKEN_COMMA variable_definition 
+    {
+        debug_log_with_green_coloar("[RULE::parameter_list:parameter_list]\t ", "");
+        $$ = variable_list_add_item($1, $3);
 
     }
     ;
@@ -332,6 +347,19 @@ identifier
     ;
 
 argument_list
+    : argument 
+    {
+
+    }
+    | argument_list TOKEN_COMMA argument
+    {
+        $$ = argument_list_add_item3($1, $3);
+
+    }
+    ;
+
+
+argument
     : STRING_LITERAL 
     {
         debug_log_with_green_coloar("[RULE::argument_list:STRING_LITERAL]\t ", "");

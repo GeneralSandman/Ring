@@ -275,6 +275,42 @@ void invoke_function(FunctionCallExpression *function_call_expression, Function 
         return;
     }
 
+    // 给参数变量赋值
+    if (function->type == FUNCTION_TYPE_EXTERNAL) {
+        ArgumentList *argument_list = function_call_expression->argument_list;
+        for (Variable *pos = function->parameter_list; pos != NULL; pos = pos->next) {
+            Ring_BasicValue *result = interpret_binary_expression(argument_list->u.expression);
+            argument_list           = argument_list->next;
+
+            Variable *variable   = NULL;
+            char *    identifier = pos->variable_identifer;
+            // 查找局部变量
+            if (function != NULL) {
+                for (Variable *pos = function->variable_list; pos != NULL; pos = pos->next) {
+                    if (0 == strcmp(pos->variable_identifer, identifier)) {
+                        variable = pos;
+                    }
+                }
+            }
+            if (variable != NULL) {
+                debug_log_with_blue_coloar("find match local variable\n");
+            } else {
+                // 查找全局变量
+                for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+                    if (0 == strcmp(pos->variable_identifer, identifier)) {
+                        variable = pos;
+                    }
+                }
+            }
+
+            if (variable == NULL) {
+                debug_log_with_blue_coloar("don't find match global variable\n");
+                return;
+            }
+            variable->u.ring_basic_value = result;
+        }
+    }
+
     Ring_BasicValue *value;
 
     switch (function->type) {

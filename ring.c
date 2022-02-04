@@ -10,6 +10,15 @@ int identifier_check_valid(char *identifier) {
     return 0;
 }
 
+Variable *variable_list_add_item(Variable *variable_list, Variable *variable) {
+    Variable *pos = variable_list;
+    for (; pos->next != NULL; pos = pos->next)
+        ;
+    pos->next = variable;
+
+    return variable_list;
+}
+
 Variable *new_variable(VariableType type, char *identifier) {
     debug_log_with_yellow_coloar("\t type(%d),identifier(%s)", type, identifier);
 
@@ -19,6 +28,7 @@ Variable *new_variable(VariableType type, char *identifier) {
     variable->type               = type;
     variable->variable_identifer = identifier;
     variable->u.ring_basic_value = NULL;
+    variable->next               = NULL;
 
     insert_identifier(IDENTIFIER_TYPE_VARIABLE, identifier);
     return variable;
