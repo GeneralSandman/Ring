@@ -4,7 +4,6 @@ OBJS = \
   lex.yy.o\
   y.tab.o\
   main.o\
-  ring.o\
   string.o\
   create_ast.o\
   eval_ast.o\
@@ -33,8 +32,6 @@ lex.yy.c : ring.flex.l ring.bison.y y.tab.h
 y.tab.o: y.tab.c
 	$(CC) $(CFLAGS) $*.c
 lex.yy.o: lex.yy.c ring.h
-	$(CC) $(CFLAGS) $*.c
-ring.o: ring.c
 	$(CC) $(CFLAGS) $*.c
 string.o: string.c
 	$(CC) $(CFLAGS) $*.c
