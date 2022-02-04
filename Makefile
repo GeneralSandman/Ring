@@ -41,7 +41,7 @@ main.o: main.c ring.h
 
 create_ast.o: create_ast.c ring.h
 	$(CC) $(CFLAGS) $*.c
-eval_ast.o: eval_ast.c ring.h parser.h
+eval_ast.o: eval_ast.c ring.h
 	$(CC) $(CFLAGS) $*.c
 interpreter.o: interpreter.c ring.h inner_func.h
 	$(CC) $(CFLAGS) $*.c

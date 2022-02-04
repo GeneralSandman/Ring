@@ -1,7 +1,6 @@
 #include <assert.h>
 #include <string.h>
 #include "ring.h"
-#include "parser.h"
 
 void create_statement_list(Statement *statement) {
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
