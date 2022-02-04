@@ -9,28 +9,24 @@ typedef struct Ring_String_Tag Ring_String;
 
 typedef struct Ring_BasicValue_Tag Ring_BasicValue;
 
-// struct Statement_Tag;
 typedef struct Statement_Tag Statement;
 
-// struct Expression_Tag;
+typedef struct StatementExecResult_Tag StatementExecResult;
+
 typedef struct Expression_Tag Expression;
 
 typedef struct BinaryExpression_Tag BinaryExpression;
 
-// struct FunctionCallExpression_Tag;
 typedef struct FunctionCallExpression_Tag FunctionCallExpression;
 
 typedef struct AssignExpression_Tag AssignExpression;
 
-// struct ArgumentList_Tag;
 typedef struct ArgumentList_Tag ArgumentList;
 
-// struct Variable_Tag;
 typedef struct Variable_Tag Variable;
 
 typedef struct Identifier_Tag Identifier;
 
-// struct Function_Tag;
 typedef struct Function_Tag Function;
 
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue *value);
@@ -74,9 +70,16 @@ struct Ring_String_Tag {
 // } Ring_BasicValue;
 
 typedef enum {
+    STATEMENT_EXEC_RESULT_TYPE_UNKNOW = 0,
+    STATEMENT_EXEC_RESULT_TYPE_EXPRESSION,
+    STATEMENT_EXEC_RESULT_TYPE_RETURN,
+} StatementExecResultType;
+
+typedef enum {
     STATEMENT_TYPE_UNKNOW = 0,
     STATEMENT_TYPE_EXPRESSION,
     STATEMENT_TYPE_VARIABLE_DEFINITION,
+    STATEMENT_TYPE_RETURN,
 } StatementType;
 
 typedef enum {
@@ -136,8 +139,16 @@ struct Statement_Tag {
     union {
         Expression *expression;
         Variable *  variable;
+        Expression *return_expression;
     } u;
     Statement *next;
+};
+
+struct StatementExecResult_Tag {
+    StatementExecResultType type;
+    union {
+        Ring_BasicValue *return_value;
+    } u;
 };
 
 struct Expression_Tag {
@@ -209,6 +220,9 @@ struct Function_Tag {
 
     unsigned int variable_list_size;
     Variable *   variable_list;
+
+    unsigned int return_list_size;
+    // return_list; // TODO:
 
     unsigned int block_size;
     Statement *  block;
@@ -320,17 +334,18 @@ Variable *new_variable(VariableType type, char *identifier);
 Identifier *new_identifier(IdentifierType type, char *name);
 void        check_identifier_valid(char *identifier_name);
 
-void             ring_interpret(Ring_Interpreter *ring_interpreter);
-void             interpret_statement(Statement *statement, Function *function);
-void             interpret_statement_list(Statement *statement, Function *function);
-Ring_BasicValue *interpret_expression(Expression *expression, Function *function);
-Ring_BasicValue *search_variable_value(char *identifier);
-void             invoke_function(FunctionCallExpression *function_call_expression, Function *function);
-void             invoke_external_function(Function *function);
-Ring_BasicValue *interpret_variable_expression(char *variable_identifier, Function *function);
-Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression);
-Ring_BasicValue *interpret_binary_expression(Expression *expression);
-void             assign(Expression *expression, Function *function);
+void                 ring_interpret(Ring_Interpreter *ring_interpreter);
+StatementExecResult *interpret_statement(Statement *statement, Function *function);
+StatementExecResult *interpret_statement_list(Statement *statement, Function *function);
+StatementExecResult *interpret_statement_return(Statement *statement, Function *function);
+Ring_BasicValue *    interpret_expression(Expression *expression, Function *function);
+Ring_BasicValue *    search_variable_value(char *identifier, Function *origin_function);
+StatementExecResult *invoke_function(FunctionCallExpression *function_call_expression, Function *function);
+StatementExecResult *invoke_external_function(Function *function);
+Ring_BasicValue *    interpret_variable_expression(char *variable_identifier, Function *function);
+Ring_BasicValue *    interpret_binary_expression_arithmetic(Expression *expression, Function *origin_function);
+Ring_BasicValue *    interpret_binary_expression(Expression *expression, Function *origin_function);
+void                 assign(Expression *expression, Function *function);
 
 // 上下文相关语义检查
 void semantic_check(Ring_Interpreter *ring_interpreter);
@@ -341,6 +356,7 @@ Statement *             statement_list_add_item2(Statement *statement);
 Statement *             statement_list_add_item3(Statement *statement_list, Statement *statement);
 Statement *             create_statemen_from_expression(Expression *expression);
 Statement *             create_statement_from_variable(Variable *variable);
+Statement *             create_return_statement(Expression *expression);
 void                    add_function_definition(Function *function_definition);
 Expression *            create_expression();
 Expression *            create_expression_identifier(char *identifier);

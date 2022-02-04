@@ -22,6 +22,7 @@ int yywrap(){
 <INITIAL>"struct"       { ring_interpreter_update_line_content(yytext); return TOKEN_STRUCT;         }
 <INITIAL>"bind"         { ring_interpreter_update_line_content(yytext); return TOKEN_BIND;           }
 <INITIAL>"lambda"       { ring_interpreter_update_line_content(yytext); return TOKEN_LAMBDA;         }
+<INITIAL>"return"       { ring_interpreter_update_line_content(yytext); return TOKEN_RETURN;         }
 
 <INITIAL>"true"         { ring_interpreter_update_line_content(yytext); return TOKEN_TRUE;           }
 <INITIAL>"false"        { ring_interpreter_update_line_content(yytext); return TOKEN_FALSE;          }

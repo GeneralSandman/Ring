@@ -30,6 +30,7 @@ int yyerror(char const *str);
 %token TOKEN_STRUCT 
 %token TOKEN_BIND 
 %token TOKEN_LAMBDA 
+%token TOKEN_RETURN
 
 %token TOKEN_TRUE
 %token TOKEN_FALSE
@@ -128,6 +129,8 @@ statement_list
 statement
     : expression TOKEN_SEMICOLON
     {
+        debug_log_with_green_coloar("[RULE::statement:expression]\t ", "");
+
         $$ = create_statemen_from_expression($1);
     }
     | variable_definition TOKEN_SEMICOLON
@@ -135,6 +138,16 @@ statement
         debug_log_with_green_coloar("[RULE::statement]\t ", "");
 
         $$ = create_statement_from_variable($1);
+    }
+    | TOKEN_RETURN expression TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::statement:return_statement]\t ", "");
+        $$ = create_return_statement($2);
+    }
+    | TOKEN_RETURN TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::statement:return_statement]\t ", "");
+        $$ = create_return_statement(NULL);
     }
     ;
 
@@ -162,6 +175,20 @@ function_definition
         $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, $6);
 
     }
+    | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_LP return_list TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
+
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, $8);
+
+    }
+    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_LP return_list TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
+
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, $9);
+
+    }
     ;
 
 parameter_list
@@ -179,7 +206,7 @@ parameter_list
     ;
 
 return_list
-    :
+    : variable_type
     {
         debug_log_with_green_coloar("[RULE::return_list]\t ", "");
     }

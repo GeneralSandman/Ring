@@ -58,6 +58,19 @@ Statement *create_statement_from_variable(Variable *variable) {
     return statement;
 }
 
+Statement *create_return_statement(Expression *expression) {
+    debug_log_with_yellow_coloar("expression->type:%d", expression->type);
+
+    Statement *statement = NULL;
+    statement            = (Statement *)malloc(sizeof(Statement));
+
+    statement->type                = STATEMENT_TYPE_RETURN;
+    statement->line_number         = get_ring_interpreter_line_number();
+    statement->u.return_expression = expression;
+    statement->next                = NULL;
+    return statement;
+}
+
 void add_function_definition(Function *function_definition) {
     assert(function_definition != NULL);
     debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
@@ -177,7 +190,7 @@ FunctionCallExpression *create_function_call_expression(char *identifier, Argume
 }
 
 ArgumentList *argument_list_add_item3(ArgumentList *argument_list, ArgumentList *argument) {
-    debug_log_with_yellow_coloar("statement->type:%d", statement->type);
+    debug_log_with_yellow_coloar("argument->type:%d", argument->type);
 
     ArgumentList *pos = argument_list;
     for (; pos->next != NULL; pos = pos->next)
