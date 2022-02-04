@@ -33,7 +33,7 @@ typedef struct Identifier_Tag Identifier;
 // struct Function_Tag;
 typedef struct Function_Tag Function;
 
-typedef void Ring_InnerFunc(int argc, Expression *expression);
+typedef void Ring_InnerFunc(int argc, Ring_BasicValue *value);
 
 struct Ring_Interpreter_Tag {
     char *       current_file_name;
@@ -324,7 +324,7 @@ void             interpret_statement(Statement *statement, Function *function);
 void             interpret_statement_list(Statement *statement, Function *function);
 Ring_BasicValue *interpret_expression(Expression *expression, Function *function);
 Ring_BasicValue *search_variable_value(char *identifier);
-void             invoke_function(FunctionCallExpression *function_call_expression);
+void             invoke_function(FunctionCallExpression *function_call_expression, Function *function);
 void             invoke_external_function(Function *function);
 Ring_BasicValue *interpret_variable_expression(char *variable_identifier, Function *function);
 Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression);

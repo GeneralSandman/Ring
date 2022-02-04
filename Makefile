@@ -13,7 +13,7 @@ OBJS = \
   utils.o\
   semantic_check.o
 
-CFLAGS = -c -g -std=c99 -Wall  -pedantic -DDEBUG
+CFLAGS = -c -g -std=c99 -Wall  -pedantic
 BIN = ./bin
 INCLUDES = \
 

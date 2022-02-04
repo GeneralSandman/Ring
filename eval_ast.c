@@ -20,6 +20,7 @@ void interpret_statement_list(Statement *statement, Function *function) {
 void interpret_statement(Statement *statement, Function *function) {
     switch (statement->type) {
     case STATEMENT_TYPE_VARIABLE_DEFINITION:
+        // TODO:
         break;
 
     case STATEMENT_TYPE_EXPRESSION:
@@ -32,6 +33,8 @@ void interpret_statement(Statement *statement, Function *function) {
 }
 
 Ring_BasicValue *interpret_expression(Expression *expression, Function *function) {
+    debug_log_with_blue_coloar("\t ");
+
     Ring_BasicValue *result;
 
     result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
@@ -52,7 +55,7 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
 
     case EXPRESSION_TYPE_FUNCTION_CALL:
         /* code */
-        invoke_function(expression->u.function_call_expression);
+        invoke_function(expression->u.function_call_expression, function);
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
@@ -60,9 +63,6 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
         break;
 
     case EXPRESSION_TYPE_VARIABLE:
-        // TODO:
-        // result->type = BASICVALUE_TYPE_INT;
-        // result->u.int_value =
         result = interpret_variable_expression(expression->u.variable_identifier, function);
         break;
 
@@ -102,6 +102,11 @@ Ring_BasicValue *interpret_variable_expression(char *variable_identifier, Functi
                 variable = pos;
             }
         }
+    }
+
+    if (variable == NULL) {
+        debug_log_with_blue_coloar("find not match global variable\n");
+        return NULL;
     }
 
     // FIXME: 存在内存泄漏
@@ -253,7 +258,7 @@ Ring_BasicValue *search_variable_value(char *identifier) {
     return variable->u.ring_basic_value;
 }
 
-void invoke_function(FunctionCallExpression *function_call_expression) {
+void invoke_function(FunctionCallExpression *function_call_expression, Function *origin_function) { // TODO: origin_function这个名字重新取一下
     debug_log_with_blue_coloar("function_call_expression->function_name:%s", function_call_expression->function_name);
 
     // search_funcaion
@@ -270,9 +275,12 @@ void invoke_function(FunctionCallExpression *function_call_expression) {
         return;
     }
 
+    Ring_BasicValue *value;
+
     switch (function->type) {
     case FUNCTION_TYPE_INNER_LIB:
-        function->inner_func(1, function_call_expression->argument_list->u.expression);
+        value = interpret_expression(function_call_expression->argument_list->u.expression, origin_function);
+        function->inner_func(1, value);
         break;
 
     case FUNCTION_TYPE_EXTERNAL:

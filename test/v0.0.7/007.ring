@@ -12,5 +12,5 @@ function useLocalVariable() {
     print("\n");
 }
 useLocalVariable();
-// print(num);
-// print("\n");
+print(num);
+print("\n");
