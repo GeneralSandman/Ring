@@ -164,6 +164,8 @@ struct Expression_Tag {
         AssignExpression *      assign_expression;
         BinaryExpression *      binary_expression;
     } u;
+
+    Expression *next;
 };
 
 struct FunctionCallExpression_Tag {
@@ -177,6 +179,18 @@ struct Identifier_Tag {
 
     IdentifierType type;
     char *         identifier_name;
+
+    Function *parent_scope; //作用域
+    /*
+    代码如 
+    var int a;
+    function add() {
+        var int b;
+    }
+
+    那么 a的作用域为 global
+    b的作用域为 local_function_add
+    */
 
     Identifier *next;
 };
@@ -197,7 +211,7 @@ struct ArgumentList_Tag {
         Ring_BasicValue ring_basic_value; // TODO: 应该把这个删掉，参数应该全都是表达式
         Expression *    expression;
     } u;
-    struct ArgumentList_Tag *next;
+    ArgumentList *next;
 };
 
 struct Variable_Tag {
