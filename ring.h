@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.9-beat"
+#define RING_VERSION "ring-v0.0.10-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -348,7 +348,7 @@ Ring_BasicValue *    interpret_binary_expression(Expression *expression, Functio
 void                 assign(Expression *expression, Function *function);
 
 // 上下文相关语义检查
-void semantic_check(Ring_Interpreter *ring_interpreter);
+int semantic_check(Ring_Interpreter *ring_interpreter);
 
 void                    create_statement_list(Statement *statement);
 void                    statement_list_add_item(Statement *statement);

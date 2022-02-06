@@ -45,5 +45,11 @@ void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
         exit(1);
     }
 
+    int result = semantic_check(ring_interpreter);
+    if (result != 0) {
+        fprintf(stderr, "semantic_check error\n");
+        exit(1);
+    }
+
     debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n", "");
 }

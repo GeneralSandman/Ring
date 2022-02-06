@@ -20,16 +20,27 @@ int yywrap(){
 <INITIAL>"double"       { ring_interpreter_update_line_content(yytext); return TOKEN_DOUBLE;         }
 <INITIAL>"string"       { ring_interpreter_update_line_content(yytext); return TOKEN_STRING;         }
 <INITIAL>"struct"       { ring_interpreter_update_line_content(yytext); return TOKEN_STRUCT;         }
+<INITIAL>"class"        { ring_interpreter_update_line_content(yytext); return TOKEN_CLASS;          }
 <INITIAL>"bind"         { ring_interpreter_update_line_content(yytext); return TOKEN_BIND;           }
 <INITIAL>"lambda"       { ring_interpreter_update_line_content(yytext); return TOKEN_LAMBDA;         }
 <INITIAL>"return"       { ring_interpreter_update_line_content(yytext); return TOKEN_RETURN;         }
+
+<INITIAL>"global"       { ring_interpreter_update_line_content(yytext); return TOKEN_GLOBAL;         }
+<INITIAL>"if"           { ring_interpreter_update_line_content(yytext); return TOKEN_IF;             }
+<INITIAL>"elseif"       { ring_interpreter_update_line_content(yytext); return TOKEN_ELSEIF;         }
+<INITIAL>"else"         { ring_interpreter_update_line_content(yytext); return TOKEN_ELSE;           }
+<INITIAL>"break"        { ring_interpreter_update_line_content(yytext); return TOKEN_BREAK;          }
+<INITIAL>"continue"     { ring_interpreter_update_line_content(yytext); return TOKEN_CONTINUE;       }
+<INITIAL>"null"         { ring_interpreter_update_line_content(yytext); return TOKEN_NULL;           }
 
 <INITIAL>"true"         { ring_interpreter_update_line_content(yytext); return TOKEN_TRUE;           }
 <INITIAL>"false"        { ring_interpreter_update_line_content(yytext); return TOKEN_FALSE;          }
 
 <INITIAL>"var"          { ring_interpreter_update_line_content(yytext); return TOKEN_VAR;            }
+<INITIAL>"auto"         { ring_interpreter_update_line_content(yytext); return TOKEN_AUTO;           }
 <INITIAL>"const"        { ring_interpreter_update_line_content(yytext); return TOKEN_CONST;          }
 <INITIAL>"function"     { ring_interpreter_update_line_content(yytext); return TOKEN_FUNCTION;       }
+<INITIAL>"."            { ring_interpreter_update_line_content(yytext); return TOKEN_DOT;            }
 
 <INITIAL>"+"            { ring_interpreter_update_line_content(yytext); return TOKEN_ADD;            }
 <INITIAL>"-"            { ring_interpreter_update_line_content(yytext); return TOKEN_SUB;            }
@@ -52,7 +63,10 @@ int yywrap(){
 <INITIAL>")"            { ring_interpreter_update_line_content(yytext); return TOKEN_RP;             }
 <INITIAL>"{"            { ring_interpreter_update_line_content(yytext); return TOKEN_LC;             }
 <INITIAL>"}"            { ring_interpreter_update_line_content(yytext); return TOKEN_RC;             }
+<INITIAL>"["            { ring_interpreter_update_line_content(yytext); return TOKEN_LB;             }
+<INITIAL>"]"            { ring_interpreter_update_line_content(yytext); return TOKEN_RB;             }
 <INITIAL>","            { ring_interpreter_update_line_content(yytext); return TOKEN_COMMA;          }
+<INITIAL>":"            { ring_interpreter_update_line_content(yytext); return TOKEN_COLON;          }
 <INITIAL>";"            { ring_interpreter_update_line_content(yytext); return TOKEN_SEMICOLON;      }
 <INITIAL>"="            { ring_interpreter_update_line_content(yytext); return TOKEN_ASSIGN;         }
 

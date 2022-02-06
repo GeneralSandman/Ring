@@ -28,16 +28,27 @@ int yyerror(char const *str);
 %token TOKEN_DOUBLE 
 %token TOKEN_STRING 
 %token TOKEN_STRUCT 
+%token TOKEN_CLASS
 %token TOKEN_BIND 
 %token TOKEN_LAMBDA 
 %token TOKEN_RETURN
+
+%token TOKEN_GLOBAL
+%token TOKEN_IF
+%token TOKEN_ELSEIF
+%token TOKEN_ELSE
+%token TOKEN_BREAK
+%token TOKEN_CONTINUE
+%token TOKEN_NULL
 
 %token TOKEN_TRUE
 %token TOKEN_FALSE
 
 %token TOKEN_VAR
+%token TOKEN_AUTO
 %token TOKEN_CONST
 %token TOKEN_FUNCTION
+%token TOKEN_DOT
 
 %token TOKEN_ADD
 %token TOKEN_SUB
@@ -60,7 +71,10 @@ int yyerror(char const *str);
 %token TOKEN_RP 
 %token TOKEN_LC 
 %token TOKEN_RC 
+%token TOKEN_LB 
+%token TOKEN_RB 
 %token TOKEN_COMMA 
+%token TOKEN_COLON
 %token TOKEN_SEMICOLON 
 %token TOKEN_ASSIGN
 
