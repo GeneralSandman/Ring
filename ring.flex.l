@@ -20,10 +20,14 @@ int yywrap(){
 <INITIAL>"double"       { ring_interpreter_update_line_content(yytext); return TOKEN_DOUBLE;         }
 <INITIAL>"string"       { ring_interpreter_update_line_content(yytext); return TOKEN_STRING;         }
 <INITIAL>"struct"       { ring_interpreter_update_line_content(yytext); return TOKEN_STRUCT;         }
-<INITIAL>"class"        { ring_interpreter_update_line_content(yytext); return TOKEN_CLASS;          }
 <INITIAL>"bind"         { ring_interpreter_update_line_content(yytext); return TOKEN_BIND;           }
 <INITIAL>"lambda"       { ring_interpreter_update_line_content(yytext); return TOKEN_LAMBDA;         }
 <INITIAL>"return"       { ring_interpreter_update_line_content(yytext); return TOKEN_RETURN;         }
+
+<INITIAL>"class"        { ring_interpreter_update_line_content(yytext); return TOKEN_CLASS;          }
+<INITIAL>"private"      { ring_interpreter_update_line_content(yytext); return TOKEN_PRIVATE;        }
+<INITIAL>"public"       { ring_interpreter_update_line_content(yytext); return TOKEN_PUBLIC;         }
+<INITIAL>"this"         { ring_interpreter_update_line_content(yytext); return TOKEN_THIS;           }
 
 <INITIAL>"global"       { ring_interpreter_update_line_content(yytext); return TOKEN_GLOBAL;         }
 <INITIAL>"if"           { ring_interpreter_update_line_content(yytext); return TOKEN_IF;             }

@@ -385,5 +385,6 @@ ArgumentList *          create_argument_list(char *argument);
 ArgumentList *          create_argument_list_from_expression(Expression *expression);
 Identifier *            new_identifier(IdentifierType type, char *name);
 Function *              new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, Statement *block);
-
+// Identifier *            create_identifier(IdentifierType type, char *name);
+// char **identifier_list_add_item(char **identifier_list, char *identifier);
 #endif

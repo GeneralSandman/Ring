@@ -28,10 +28,14 @@ int yyerror(char const *str);
 %token TOKEN_DOUBLE 
 %token TOKEN_STRING 
 %token TOKEN_STRUCT 
-%token TOKEN_CLASS
 %token TOKEN_BIND 
 %token TOKEN_LAMBDA 
 %token TOKEN_RETURN
+
+%token TOKEN_CLASS
+%token TOKEN_PRIVATE
+%token TOKEN_PUBLIC
+%token TOKEN_THIS
 
 %token TOKEN_GLOBAL
 %token TOKEN_IF
@@ -84,9 +88,9 @@ int yyerror(char const *str);
 %token IDENTIFIER
 
 %type <m_literal_interface> INT_LITERAL DOUBLE_LITERAL STRING_LITERAL
-%type <m_identifier> identifier identifier_list IDENTIFIER
+%type <m_identifier> identifier IDENTIFIER
 %type <m_statement_list> statement statement_list block
-%type <m_expression> expression expression_list
+%type <m_expression> expression
 %type <m_expression> literal_term
 %type <m_expression> expression_arithmetic_operation_additive 
 %type <m_expression> expression_arithmetic_operation_multiplicative 
@@ -376,11 +380,6 @@ assign_expression
 
         $$ = create_assign_expression($1, $3);
     }
-    | identifier_list TOKEN_ASSIGN expression_list
-    {
-        debug_log_with_green_coloar("[RULE::assign_expression:identifier_list]\t ", "");
-
-    }
     ;
 
 identifier
@@ -388,29 +387,6 @@ identifier
     {
         debug_log_with_green_coloar("[RULE::identifier]\t identifier(%s)", $1);
 
-    }
-    ;
-
-identifier_list
-    : identifier
-    {
-        debug_log_with_green_coloar("[RULE::identifier_list:identifier]\t ", $1);
-    }
-    | identifier_list TOKEN_COMMA identifier
-    {
-        debug_log_with_green_coloar("[RULE::identifier_list:identifier_list]\t ", $1);
-        // $$ = identifier_list_add_item($1, $3);
-    }
-    ;
-
-expression_list
-    : expression
-    {
-        debug_log_with_green_coloar("[RULE::expression_list]\t ", $1);
-    }
-    | expression_list TOKEN_COMMA expression
-    {
-        debug_log_with_green_coloar("[RULE::expression_list:expression_list]\t ", $1);
     }
     ;
 
