@@ -95,6 +95,10 @@ int yyerror(char const *str);
 %type <m_expression> literal_term
 %type <m_expression> expression_arithmetic_operation_additive 
 %type <m_expression> expression_arithmetic_operation_multiplicative 
+%type <m_expression> logical_expression_or
+%type <m_expression> logical_expression_and
+%type <m_expression> relational_expression
+%type <m_expression> equality_expression
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
 %type <m_argument_list> argument_list argument
@@ -296,6 +300,87 @@ expression
         debug_log_with_green_coloar("[RULE::expression:identifier]\t ", "");
 
         $$ = create_expression_identifier($1);
+    }
+    | logical_expression_or
+    {
+        debug_log_with_green_coloar("[RULE::expression:logical_expression]\t ", "");
+
+    }
+    ;
+
+logical_expression_or
+    : logical_expression_and
+    {
+        debug_log_with_green_coloar("[RULE::logical_expression_or]\t ", "");
+        // $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_AND, $1, $3);
+
+    }
+    | logical_expression_or TOKEN_OR logical_expression_and
+    {
+        debug_log_with_green_coloar("[RULE::logical_expression_or]\t ", "");
+        $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_OR, $1, $3);
+
+    }
+    ;
+
+logical_expression_and
+    : equality_expression
+    {
+        debug_log_with_green_coloar("[RULE::logical_expression_and]\t ", "");
+        // $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_OR, $1, $3);
+
+    }
+    | logical_expression_and TOKEN_AND equality_expression
+    {
+        debug_log_with_green_coloar("[RULE::logical_expression_and]\t ", "");
+        $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_OR, $1, $3);
+        
+    }
+    ;
+
+equality_expression
+        : relational_expression
+        | equality_expression TOKEN_EQ relational_expression
+        {
+            debug_log_with_green_coloar("[RULE::equality_expression]\t ", "");
+            $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_EQ, $1, $3);
+        }
+        | equality_expression TOKEN_NE relational_expression
+        {
+            debug_log_with_green_coloar("[RULE::equality_expression]\t ", "");
+            $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_NE, $1, $3);
+        }
+        ;
+
+relational_expression
+    : expression_arithmetic_operation_additive
+    {
+        debug_log_with_green_coloar("[RULE::relational_expression]\t ", "");
+
+    }
+    | relational_expression TOKEN_GT expression_arithmetic_operation_additive
+    {
+        debug_log_with_green_coloar("[RULE::relational_expression]\t ", "");
+        $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_GT, $1, $3);
+
+    }
+    | relational_expression TOKEN_GE expression_arithmetic_operation_additive
+    {
+        debug_log_with_green_coloar("[RULE::relational_expression]\t ", "");
+        $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_GE, $1, $3);
+
+    }
+    | relational_expression TOKEN_LT expression_arithmetic_operation_additive
+    {
+        debug_log_with_green_coloar("[RULE::relational_expression]\t ", "");
+        $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_LT, $1, $3);
+
+    }
+    | relational_expression TOKEN_LE expression_arithmetic_operation_additive
+    {
+        debug_log_with_green_coloar("[RULE::relational_expression]\t ", "");
+        $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_LE, $1, $3);
+
     }
     ;
 

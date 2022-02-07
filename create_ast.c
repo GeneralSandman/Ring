@@ -167,7 +167,7 @@ create_expression_literal(ExpressionType type, char *literal_interface) {
 
 Expression *
 create_expression_bool_literal(ExpressionType type, Ring_Bool value) {
-    debug_log_with_yellow_coloar("type:%d, boolean:%d", type, boolean);
+    debug_log_with_yellow_coloar("type:%d, boolean:%d", type, value);
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
