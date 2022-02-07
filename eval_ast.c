@@ -300,6 +300,53 @@ Ring_BasicValue *interpret_binary_expression_realational(Expression *expression,
     return result;
 }
 
+Ring_BasicValue *interpret_binary_expression_logical(Expression *expression, Function *function) {
+    debug_log_with_blue_coloar("expression->type:%d", expression->type);
+    Ring_BasicValue *result;
+
+    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+
+    Ring_BasicValue *left  = NULL;
+    Ring_BasicValue *right = NULL;
+
+    left  = interpret_binary_expression(expression->u.binary_expression->left_expression, function);
+    right = interpret_binary_expression(expression->u.binary_expression->right_expression, function);
+
+    double left_value  = 0.0;
+    double right_value = 0.0;
+
+    if (left->type == BASICVALUE_TYPE_BOOL) {
+        left_value = (double)left->u.bool_value;
+    } else if (left->type == BASICVALUE_TYPE_INT) {
+        left_value = (double)left->u.int_value;
+    } else if (left->type == BASICVALUE_TYPE_DOUBLE) {
+        left_value = (double)left->u.double_value;
+    }
+
+    if (right->type == BASICVALUE_TYPE_BOOL) {
+        right_value = (double)right->u.bool_value;
+    } else if (right->type == BASICVALUE_TYPE_INT) {
+        right_value = (double)right->u.int_value;
+    } else if (right->type == BASICVALUE_TYPE_DOUBLE) {
+        right_value = (double)right->u.double_value;
+    }
+
+    result->type = BASICVALUE_TYPE_BOOL;
+
+    switch (expression->type) {
+    case EXPRESSION_TYPE_LOGICAL_AND:
+        result->u.bool_value = left_value && right_value;
+        break;
+    case EXPRESSION_TYPE_LOGICAL_OR:
+        result->u.bool_value = left_value || right_value;
+        break;
+
+    default: break;
+    }
+
+    return result;
+}
+
 Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *origin_function) {
     debug_log_with_blue_coloar("expression->type:%d", expression->type);
     // TODO: 还要考虑各个变量的类型
@@ -364,7 +411,7 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
     case EXPRESSION_TYPE_LOGICAL_AND:
     case EXPRESSION_TYPE_LOGICAL_OR:
     case EXPRESSION_TYPE_LOGICAL_NOT:
-        result = interpret_binary_expression_realational(expression, origin_function);
+        result = interpret_binary_expression_logical(expression, origin_function);
         break;
 
     case EXPRESSION_TYPE_RELATIONAL_EQ:

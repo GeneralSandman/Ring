@@ -333,7 +333,7 @@ logical_expression_and
     | logical_expression_and TOKEN_AND equality_expression
     {
         debug_log_with_green_coloar("[RULE::logical_expression_and]\t ", "");
-        $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_OR, $1, $3);
+        $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_AND, $1, $3);
         
     }
     ;
@@ -425,7 +425,13 @@ expression_arithmetic_operation_multiplicative
     ;
 
 literal_term
-    : INT_LITERAL
+    : TOKEN_NOT literal_term
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_SUB]\t ", "");
+
+        // $$ = create_expression_unitary(EXPRESSION_TYPE_ARITHMETIC_DIV, $1, $3);
+    }
+    | INT_LITERAL
     {
         debug_log_with_green_coloar("[RULE::literal_term:INT_LITERAL]\t ", "");
 
