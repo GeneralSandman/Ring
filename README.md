@@ -72,7 +72,6 @@ Reference wikipedia https://zh.wikipedia.org/wiki/%E8%87%B3%E5%B0%8A%E9%AD%94%E6
 |            |         | 支持逻辑运算操作 and、or、not                                                                                                |
 |            |         | int double bool 变量运算的 类型转换，(int) (double) (bool) 的强制类型转换，是否设计成 不支持隐式类型转换。                   |
 |            |         | 支持关系运算符 > >= < <= == !=                                                                                               |
-|            |         |                                                                                                                              |
 | 2022-02-07 | v0.0.11 | print 支持多个不同类型的参数，如：print(a," ", b," ", c,"\n");                                                               |
 | 2022-02-07 | v0.0.10 | 支持bool型变量 赋值、打印，true、false                                                                                       |
 | 2022-02-05 | v0.0.9  | 支持函数返回值 return语句                                                                                                    |

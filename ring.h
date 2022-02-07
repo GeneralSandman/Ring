@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.10-beat"
+#define RING_VERSION "ring-v0.0.11-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -29,7 +29,7 @@ typedef struct Identifier_Tag Identifier;
 
 typedef struct Function_Tag Function;
 
-typedef void Ring_InnerFunc(int argc, Ring_BasicValue *value);
+typedef void Ring_InnerFunc(int argc, Ring_BasicValue **value);
 
 struct Ring_Interpreter_Tag {
     char *       current_file_name;

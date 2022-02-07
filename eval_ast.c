@@ -383,21 +383,41 @@ StatementExecResult *invoke_function(FunctionCallExpression *function_call_expre
         }
     }
 
-    Ring_BasicValue *value;
+    // Ring_BasicValue *value;
 
-    switch (function->type) {
-    case FUNCTION_TYPE_INNER_LIB:
-        value = interpret_expression(function_call_expression->argument_list->u.expression, origin_function);
-        function->inner_func(1, value);
-        break;
+    if (function->type == FUNCTION_TYPE_INNER_LIB) {
+        // TODO 支持多个参数
+        int               argc   = 0;
+        Ring_BasicValue **values = NULL;
+        for (ArgumentList *pos = function_call_expression->argument_list; pos != NULL; pos = pos->next) {
+            argc += 1;
+            Ring_BasicValue *value = interpret_expression(pos->u.expression, origin_function);
 
-    case FUNCTION_TYPE_EXTERNAL:
+            values           = (Ring_BasicValue **)realloc(values, argc * sizeof(Ring_BasicValue *));
+            values[argc - 1] = value;
+        }
+        function->inner_func(argc, values);
+        if (values != NULL) {
+            free(values);
+        }
+    } else if (function->type == FUNCTION_TYPE_EXTERNAL) {
         result = invoke_external_function(function);
-        break;
-
-    default:
-        break;
     }
+
+    // switch (function->type) {
+    // case FUNCTION_TYPE_INNER_LIB:
+    //     // TODO 支持多个参数
+    //     value = interpret_expression(function_call_expression->argument_list->u.expression, origin_function);
+    //     function->inner_func(1, &value);
+    //     break;
+
+    // case FUNCTION_TYPE_EXTERNAL:
+    //     result = invoke_external_function(function);
+    //     break;
+
+    // default:
+    //     break;
+    // }
 
     // invoke
     return result;
