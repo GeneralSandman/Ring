@@ -11,7 +11,10 @@ int main(int argc, char **argv) {
     FILE *            fp;
 
     if (argc != 2) {
-        fprintf(stderr, "usage:%s <filename>", argv[0]);
+        printf("Ring version: %s \n\n", RING_VERSION);
+
+        printf("usage:\t%s <filename>\n", argv[0]);
+        printf("      \t%s --version\n", argv[0]);
         exit(1);
     }
 
