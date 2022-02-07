@@ -51,6 +51,11 @@ struct Ring_Interpreter_Tag {
 };
 
 typedef enum {
+    BOOL_FALSE = 0,
+    BOOL_TRUE  = 1
+} Ring_Bool;
+
+typedef enum {
     IDENTIFIER_TYPE_UNKNOW = 0,
     IDENTIFIER_TYPE_VARIABLE,
     IDENTIFIER_TYPE_FUNCATION,
@@ -84,6 +89,7 @@ typedef enum {
 
 typedef enum {
     EXPRESSION_TYPE_UNKNOW = 0,
+    EXPRESSION_TYPE_LITERAL_BOOL,
     EXPRESSION_TYPE_LITERAL_INT,
     EXPRESSION_TYPE_LITERAL_DOUBLE,
     EXPRESSION_TYPE_LITERAL_STRING,
@@ -104,6 +110,7 @@ typedef enum {
 
 typedef enum {
     VARIABLE_TYPE_UNKNOW = 0,
+    VARIABLE_TYPE_BOOL,
     VARIABLE_TYPE_INT,
     VARIABLE_TYPE_DOUBLE,
     VARIABLE_TYPE_STRING,
@@ -117,6 +124,7 @@ typedef enum {
 
 typedef enum {
     BASICVALUE_TYPE_UNKNOW = 0,
+    BASICVALUE_TYPE_BOOL,
     BASICVALUE_TYPE_INT,
     BASICVALUE_TYPE_DOUBLE,
     BASICVALUE_TYPE_CHAR,
@@ -126,10 +134,11 @@ typedef enum {
 struct Ring_BasicValue_Tag {
     BasicValueType type;
     union {
-        int    int_value;
-        double double_value;
-        char   char_value;
-        char * string_value;
+        Ring_Bool bool_value;
+        int       int_value;
+        double    double_value;
+        char      char_value;
+        char *    string_value;
     } u;
 };
 
@@ -156,6 +165,7 @@ struct Expression_Tag {
 
     ExpressionType type;
     union {
+        Ring_Bool               bool_literal;
         int                     int_literal;
         double                  double_literal;
         char *                  string_literal;
@@ -378,6 +388,7 @@ Expression *            create_expression_(FunctionCallExpression *function_call
 Expression *            create_expression__(AssignExpression *assign_expression);
 Expression *            create_expression_binary(ExpressionType type, Expression *left, Expression *right);
 Expression *            create_expression_literal(ExpressionType type, char *literal_interface);
+Expression *            create_expression_bool_literal(ExpressionType type, Ring_Bool value);
 AssignExpression *      create_assign_expression(char *identifier, Expression *expression);
 FunctionCallExpression *create_function_call_expression(char *identifier, ArgumentList *argument_list);
 ArgumentList *          argument_list_add_item3(ArgumentList *argument_list, ArgumentList *argument);

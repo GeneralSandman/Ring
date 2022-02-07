@@ -24,6 +24,7 @@ int yyerror(char const *str);
     Variable*                   m_parameter_list;
 }
 
+%token TOKEN_BOOL
 %token TOKEN_INT 
 %token TOKEN_DOUBLE 
 %token TOKEN_STRING 
@@ -87,7 +88,7 @@ int yyerror(char const *str);
 %token STRING_LITERAL
 %token IDENTIFIER
 
-%type <m_literal_interface> INT_LITERAL DOUBLE_LITERAL STRING_LITERAL
+%type <m_literal_interface> INT_LITERAL DOUBLE_LITERAL STRING_LITERAL TOKEN_TRUE TOKEN_FALSE
 %type <m_identifier> identifier IDENTIFIER
 %type <m_statement_list> statement statement_list block
 %type <m_expression> expression
@@ -245,7 +246,13 @@ block
 
 
 variable_type
-    : TOKEN_INT
+    : TOKEN_BOOL
+    {
+        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_BOOL) ", "");
+
+        $$ = VARIABLE_TYPE_BOOL;
+    }
+    | TOKEN_INT
     {
         debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_INT) ", "");
 
@@ -350,6 +357,18 @@ literal_term
         debug_log_with_green_coloar("[RULE::literal_term:STRING_LITERAL]\t ", "");
 
         $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_STRING, $1);
+    }
+    | TOKEN_TRUE
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_TRUE]\t ", "");
+
+        $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, BOOL_TRUE);
+    }
+    | TOKEN_FALSE
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_FALSE]\t ", "");
+
+        $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, BOOL_FALSE);
     }
     | identifier
     {

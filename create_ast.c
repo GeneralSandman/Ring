@@ -165,6 +165,19 @@ create_expression_literal(ExpressionType type, char *literal_interface) {
     return expression;
 }
 
+Expression *
+create_expression_bool_literal(ExpressionType type, Ring_Bool value) {
+    debug_log_with_yellow_coloar("type:%d, boolean:%d", type, boolean);
+
+    Expression *expression = NULL;
+    expression             = (Expression *)malloc(sizeof(Expression));
+
+    expression->type           = type;
+    expression->u.bool_literal = value;
+
+    return expression;
+}
+
 AssignExpression *create_assign_expression(char *identifier, Expression *expression) {
     // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
     debug_log_with_yellow_coloar("identifier:%s", identifier);

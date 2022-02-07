@@ -66,6 +66,10 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
     StatementExecResult *exec_result = NULL;
 
     switch (expression->type) {
+    case EXPRESSION_TYPE_LITERAL_BOOL:
+        result->type         = BASICVALUE_TYPE_BOOL;
+        result->u.bool_value = expression->u.bool_literal;
+        break;
     case EXPRESSION_TYPE_LITERAL_INT:
         result->type        = BASICVALUE_TYPE_INT;
         result->u.int_value = expression->u.int_literal;
@@ -141,6 +145,10 @@ Ring_BasicValue *interpret_variable_expression(char *variable_identifier, Functi
     result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
 
     switch (variable->type) {
+    case VARIABLE_TYPE_BOOL:
+        result->type         = BASICVALUE_TYPE_BOOL;
+        result->u.bool_value = variable->u.ring_basic_value->u.bool_value;
+        break;
     case VARIABLE_TYPE_INT:
         result->type        = BASICVALUE_TYPE_INT;
         result->u.int_value = variable->u.ring_basic_value->u.int_value;
@@ -238,6 +246,10 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
     result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
 
     switch (expression->type) {
+    case EXPRESSION_TYPE_LITERAL_BOOL:
+        result->type         = BASICVALUE_TYPE_BOOL;
+        result->u.bool_value = expression->u.bool_literal;
+        break;
     case EXPRESSION_TYPE_LITERAL_INT:
         result->type        = BASICVALUE_TYPE_INT;
         result->u.int_value = expression->u.int_literal;

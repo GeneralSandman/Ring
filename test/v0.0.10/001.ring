@@ -4,10 +4,14 @@ print(age);
 print("\n");
 
 age = 123456;
+print(123456);
+print("\n");
 print(age);
 print("\n");
 
 age = 123456+234234;
+print(123456+234234);
+print("\n");
 print(age);
 print("\n");
 
@@ -53,3 +57,23 @@ print("\n");
 
 
 print("Hello World!\n");
+
+
+print(true);
+print("\n");
+
+print(false);
+print("\n");
+
+var bool result;
+result = true;
+print(result);
+print("\n");
+
+result = false;
+print(result);
+print("\n");
+
+result = true;
+print(result);
+print("\n");

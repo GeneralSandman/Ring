@@ -39,6 +39,13 @@ void ring_inner_func_print(int argc, Ring_BasicValue *value) {
     // }
 
     switch (value->type) {
+    case BASICVALUE_TYPE_BOOL:
+        if (value->u.bool_value == BOOL_FALSE)
+            printf("%s", "false");
+        else if (value->u.bool_value == BOOL_TRUE)
+            printf("%s", "true");
+        break;
+
     case BASICVALUE_TYPE_INT:
         printf("%d", value->u.int_value);
         break;
