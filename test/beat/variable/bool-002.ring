@@ -12,6 +12,24 @@ print("not false=", bool_value, "\n");
 bool_value = not true;
 print("not true=", bool_value, "\n");
 
+bool_value = not not false;
+print("not not false=", bool_value, "\n");
+
+bool_value = not not true;
+print("not not true=", bool_value, "\n");
+
+bool_value = not not not false;
+print("not not not false=", bool_value, "\n");
+
+bool_value = not not not true;
+print("not not not true=", bool_value, "\n");
+
+bool_value = not not not not false;
+print("not not not not false=", bool_value, "\n");
+
+bool_value = not not not not true;
+print("not not not not true=", bool_value, "\n");
+
 print("\n");
 bool_value = false;
 print("bool_value=", bool_value, "\n");

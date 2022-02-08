@@ -2,6 +2,12 @@ false=false
 true=true
 not false=true
 not true=false
+not not false=false
+not not true=true
+not not not false=true
+not not not true=false
+not not not not false=false
+not not not not true=true
 
 bool_value=false
 not bool_value=true
