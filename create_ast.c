@@ -335,6 +335,36 @@ IfStatement *create_if_statement(Expression *expression, Statement *if_block, St
     return if_statement;
 }
 
+Statement *create_statement_from_for(ForStatement *for_statement) {
+    debug_log_with_yellow_coloar("\t");
+
+    Statement *statement = NULL;
+    statement            = (Statement *)malloc(sizeof(Statement));
+
+    statement->line_number     = get_ring_interpreter_line_number();
+    statement->type            = STATEMENT_TYPE_FOR;
+    statement->u.for_statement = for_statement;
+    statement->next            = NULL;
+
+    return statement;
+}
+
+ForStatement *create_for_statement(Expression *init_expression, Expression *condition_expression, Expression *post_expression, Statement *block) {
+    debug_log_with_yellow_coloar("\t");
+
+    ForStatement *for_statement;
+    for_statement = (ForStatement *)malloc(sizeof(ForStatement));
+
+    for_statement->line_number          = get_ring_interpreter_line_number();
+    for_statement->init_expression      = init_expression;
+    for_statement->condition_expression = condition_expression;
+    for_statement->post_expression      = post_expression;
+    for_statement->block_size           = 0;
+    for_statement->block                = block;
+
+    return for_statement;
+}
+
 // 标识符合法性检查
 // 其实这个用不到，flex是有优先级的，会有语法错误
 // 检查变量是否重复定义

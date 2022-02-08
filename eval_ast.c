@@ -53,6 +53,10 @@ StatementExecResult *interpret_statement(Statement *statement, Function *functio
         result = interpret_statement_if(statement->u.if_statement, function);
         break;
 
+    case STATEMENT_TYPE_FOR:
+        result = interpret_statement_for(statement->u.for_statement, function);
+        break;
+
     default:
         break;
     }
@@ -83,6 +87,41 @@ StatementExecResult *interpret_statement_if(IfStatement *if_statement, Function 
         return interpret_statement_list(if_statement->if_block, function);
     } else {
         return interpret_statement_list(if_statement->else_block, function);
+    }
+
+    return result;
+}
+
+StatementExecResult *interpret_statement_for(ForStatement *for_statement, Function *function) {
+    StatementExecResult *result = NULL;
+    result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+
+    Ring_BasicValue *tmp = NULL;
+
+    if (for_statement->init_expression != NULL) {
+        // TODO:
+        tmp = interpret_expression(for_statement->init_expression, function);
+    }
+
+    while (1) {
+        if (for_statement->condition_expression != NULL) {
+            tmp = interpret_expression(for_statement->condition_expression, function);
+            if (tmp == NULL || tmp->type != BASICVALUE_TYPE_BOOL) {
+                runtime_err_log("the result of for statement condition_expression is not bool!");
+                exit(1);
+            }
+
+            if (tmp->u.bool_value == BOOL_FALSE) {
+                break;
+            }
+        }
+
+        result = interpret_statement_list(for_statement->block, function);
+        // TODO: check continue break return
+
+        if (for_statement->post_expression != NULL) {
+            interpret_expression(for_statement->post_expression, function);
+        }
     }
 
     return result;

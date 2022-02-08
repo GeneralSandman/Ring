@@ -34,6 +34,7 @@ int yywrap(){
 <INITIAL>"if"           { ring_interpreter_update_line_content(yytext); return TOKEN_IF;             }
 <INITIAL>"elseif"       { ring_interpreter_update_line_content(yytext); return TOKEN_ELSEIF;         }
 <INITIAL>"else"         { ring_interpreter_update_line_content(yytext); return TOKEN_ELSE;           }
+<INITIAL>"for"          { ring_interpreter_update_line_content(yytext); return TOKEN_FOR;            }
 <INITIAL>"break"        { ring_interpreter_update_line_content(yytext); return TOKEN_BREAK;          }
 <INITIAL>"continue"     { ring_interpreter_update_line_content(yytext); return TOKEN_CONTINUE;       }
 <INITIAL>"null"         { ring_interpreter_update_line_content(yytext); return TOKEN_NULL;           }

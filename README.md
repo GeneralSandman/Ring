@@ -66,8 +66,9 @@ Reference wikipedia https://zh.wikipedia.org/wiki/%E8%87%B3%E5%B0%8A%E9%AD%94%E6
 |            |         | 优化完善语义分析，扫描各种语义错误。                                                                                         |
 |            |         | int double bool 变量运算的 类型转换，(int) (double) (bool) 的强制类型转换，是否设计成 不支持隐式类型转换。                   |
 |            |         | 支持通过括号来定义操作符的优先级。                                                                                           |
+|            |         | 优化 if else 语句,里边需要支持 return                                                                                        |
 |            |         | 支持 break contitnue语句                                                                                                     |
-|            |         | 支持 for语句                                                                                                                 |
+|            |         | 支持 for语句 ，但是不支持 break 和 continue语句                                                                              |
 | 2022-02-08 | v0.0.17 | 优化 if else 语句                                                                                                            |
 | 2022-02-08 | v0.0.16 | 支持 if else语句                                                                                                             |
 | 2022-02-08 | v0.0.15 | 支持一元运算操作 负号（-）                                                                                                   |

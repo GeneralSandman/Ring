@@ -23,6 +23,7 @@ int yyerror(char const *str);
     Function*                   m_function_definition;
     Variable*                   m_parameter_list;
     IfStatement*                m_if_statement;
+    ForStatement*               m_for_statement;
 }
 
 %token TOKEN_BOOL
@@ -43,6 +44,7 @@ int yyerror(char const *str);
 %token TOKEN_IF
 %token TOKEN_ELSEIF
 %token TOKEN_ELSE
+%token TOKEN_FOR
 %token TOKEN_BREAK
 %token TOKEN_CONTINUE
 %token TOKEN_NULL
@@ -108,6 +110,7 @@ int yyerror(char const *str);
 %type <m_function_definition> function_definition
 %type <m_parameter_list> parameter_list
 %type <m_if_statement> if_statement
+%type <m_for_statement> for_statement
 
 
 %%
@@ -179,6 +182,11 @@ statement
         debug_log_with_green_coloar("[RULE::statement:if_statement]\t ", "");
         $$ = create_statement_from_if($1);
     }
+    | for_statement
+    {
+        debug_log_with_green_coloar("[RULE::statement:for_statement]\t ", "");
+        $$ = create_statement_from_for($1);
+    }
     ;
 
 if_statement
@@ -191,6 +199,15 @@ if_statement
     {
         debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
         $$ = create_if_statement($3, $5, $7);
+    }
+    ;
+
+for_statement
+    : TOKEN_FOR TOKEN_LP expression TOKEN_SEMICOLON expression TOKEN_SEMICOLON expression TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::for_statement]\t ", "");
+        $$ = create_for_statement($3, $5, $7, $9);
+
     }
     ;
 

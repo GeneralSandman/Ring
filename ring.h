@@ -31,6 +31,8 @@ typedef struct Function_Tag Function;
 
 typedef struct IfStatement_Tag IfStatement;
 
+typedef struct ForStatement_Tag ForStatement;
+
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue **value);
 
 struct Ring_Interpreter_Tag {
@@ -88,6 +90,7 @@ typedef enum {
     STATEMENT_TYPE_VARIABLE_DEFINITION,
     STATEMENT_TYPE_RETURN,
     STATEMENT_TYPE_IF,
+    STATEMENT_TYPE_FOR,
 } StatementType;
 
 typedef enum {
@@ -161,10 +164,11 @@ struct Statement_Tag {
 
     StatementType type;
     union {
-        Expression * expression;
-        Variable *   variable;
-        Expression * return_expression;
-        IfStatement *if_statement;
+        Expression *  expression;
+        Variable *    variable;
+        Expression *  return_expression;
+        IfStatement * if_statement;
+        ForStatement *for_statement;
     } u;
     Statement *next;
 };
@@ -285,6 +289,17 @@ struct IfStatement_Tag {
     Statement *  else_block;
 };
 
+struct ForStatement_Tag {
+    unsigned int line_number;
+
+    Expression *init_expression;
+    Expression *condition_expression;
+    Expression *post_expression;
+
+    unsigned int block_size;
+    Statement *  block;
+};
+
 // typedef struct {
 // } ListNode;
 
@@ -392,6 +407,7 @@ StatementExecResult *interpret_statement(Statement *statement, Function *functio
 StatementExecResult *interpret_statement_list(Statement *statement, Function *function);
 StatementExecResult *interpret_statement_return(Statement *statement, Function *function);
 StatementExecResult *interpret_statement_if(IfStatement *if_statement, Function *function);
+StatementExecResult *interpret_statement_for(ForStatement *for_statement, Function *function);
 Ring_BasicValue *    interpret_expression(Expression *expression, Function *function);
 Ring_BasicValue *    search_variable_value(char *identifier, Function *origin_function);
 StatementExecResult *invoke_function(FunctionCallExpression *function_call_expression, Function *function);
@@ -432,6 +448,8 @@ Identifier *            new_identifier(IdentifierType type, char *name);
 Function *              new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, Statement *block);
 Statement *             create_statement_from_if(IfStatement *if_statement);
 IfStatement *           create_if_statement(Expression *expression, Statement *if_block, Statement *else_block);
+Statement *             create_statement_from_for(ForStatement *for_statement);
+ForStatement *          create_for_statement(Expression *init_expression, Expression *condition_expression, Expression *post_expression, Statement *block);
 // Identifier *            create_identifier(IdentifierType type, char *name);
 // char **identifier_list_add_item(char **identifier_list, char *identifier);
 #endif
