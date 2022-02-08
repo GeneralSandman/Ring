@@ -123,10 +123,10 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
         assign(expression, function);
         break;
 
-    case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
-    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
-        result = interpret_unitary_expression(expression, function);
-        break;
+        // case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+        // case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
+        //     result = interpret_unitary_expression(expression, function);
+        //     break;
 
     case EXPRESSION_TYPE_VARIABLE:
         result = interpret_variable_expression(expression->u.variable_identifier, function);
@@ -137,6 +137,25 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
     case EXPRESSION_TYPE_ARITHMETIC_DIV:
         result = interpret_binary_expression(expression, function);
+        break;
+
+    case EXPRESSION_TYPE_LOGICAL_AND:
+    case EXPRESSION_TYPE_LOGICAL_OR:
+        result = interpret_binary_expression_logical(expression, function);
+        break;
+
+    case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
+        result = interpret_unitary_expression(expression, function);
+        break;
+
+    case EXPRESSION_TYPE_RELATIONAL_EQ:
+    case EXPRESSION_TYPE_RELATIONAL_NE:
+    case EXPRESSION_TYPE_RELATIONAL_GT:
+    case EXPRESSION_TYPE_RELATIONAL_GE:
+    case EXPRESSION_TYPE_RELATIONAL_LT:
+    case EXPRESSION_TYPE_RELATIONAL_LE:
+        result = interpret_binary_expression_realational(expression, function);
         break;
 
     default:

@@ -182,12 +182,12 @@ statement
     ;
 
 if_statement
-    : TOKEN_IF TOKEN_LP expression TOKEN_RP block
+    : TOKEN_IF TOKEN_LP expression TOKEN_RP block // if () {}
     {
         debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
         $$ = create_if_statement($3, $5, NULL);
     }
-    | TOKEN_IF TOKEN_LP expression TOKEN_RP block TOKEN_ELSE block
+    | TOKEN_IF TOKEN_LP expression TOKEN_RP block TOKEN_ELSE block // if () {} else {}
     {
         debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
         $$ = create_if_statement($3, $5, $7);
