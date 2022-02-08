@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.ring": "go",
         "stdlib.h": "c",
         "stdio.h": "c",
         "ring.h": "c",
@@ -11,6 +12,8 @@
         "ostream": "c",
         "tuple": "c",
         "type_traits": "c",
-        "utility": "c"
+        "utility": "c",
+        "iostream": "cpp",
+        "typeinfo": "cpp"
     }
 }

@@ -383,7 +383,7 @@ Ring_BasicValue *    interpret_binary_expression(Expression *expression, Functio
 void                 assign(Expression *expression, Function *function);
 
 // 上下文相关语义检查
-int semantic_check(Ring_Interpreter *ring_interpreter);
+int ring_semantic_check(Ring_Interpreter *ring_interpreter);
 
 void                    create_statement_list(Statement *statement);
 void                    statement_list_add_item(Statement *statement);

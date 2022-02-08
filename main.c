@@ -32,12 +32,24 @@ int main(int argc, char **argv) {
     }
 
     ring_interpreter = new_ring_interpreter(file_name);
+
+    // 词法分析，语法分析，构建语法树
     ring_compile(ring_interpreter, fp);
+
+    // 语义分析
+    int result = ring_semantic_check(ring_interpreter);
+    if (result != 0) {
+        fprintf(stderr, "semantic_check error\n");
+        exit(1);
+    }
+
+    // 解释执行
     ring_interpret(ring_interpreter);
 
     return 0;
 }
 
+// 词法分析，语法分析，构建语法树
 void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
     extern int   yyparse(void);
     extern FILE *yyin;
@@ -45,12 +57,6 @@ void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
     yyin = fp;
     if (yyparse()) {
         fprintf(stderr, "YYPARSE error\n");
-        exit(1);
-    }
-
-    int result = semantic_check(ring_interpreter);
-    if (result != 0) {
-        fprintf(stderr, "semantic_check error\n");
         exit(1);
     }
 
