@@ -49,6 +49,10 @@ StatementExecResult *interpret_statement(Statement *statement, Function *functio
         result = interpret_statement_return(statement, function);
         break;
 
+    case STATEMENT_TYPE_IF:
+        result = interpret_statement_if(statement->u.if_statement, function);
+        break;
+
     default:
         break;
     }
@@ -61,6 +65,26 @@ StatementExecResult *interpret_statement_return(Statement *statement, Function *
     result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
     result->type                = STATEMENT_EXEC_RESULT_TYPE_RETURN;
     result->u.return_value      = interpret_expression(statement->u.expression, function);
+    return result;
+}
+
+StatementExecResult *interpret_statement_if(IfStatement *if_statement, Function *function) {
+    StatementExecResult *result = NULL;
+    result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+
+    Ring_BasicValue *cond = interpret_expression(if_statement->expression, function);
+
+    if (cond == NULL || cond->type != BASICVALUE_TYPE_BOOL) {
+        runtime_err_log("the result of if statement expression is not bool!");
+        exit(1);
+    }
+
+    if (cond->u.bool_value) {
+        return interpret_statement_list(if_statement->if_block, function);
+    } else {
+        return interpret_statement_list(if_statement->else_block, function);
+    }
+
     return result;
 }
 

@@ -22,6 +22,7 @@ int yyerror(char const *str);
     VariableType                m_variable_type;
     Function*                   m_function_definition;
     Variable*                   m_parameter_list;
+    IfStatement*                m_if_statement;
 }
 
 %token TOKEN_BOOL
@@ -106,6 +107,7 @@ int yyerror(char const *str);
 %type <m_variable_type> variable_type
 %type <m_function_definition> function_definition
 %type <m_parameter_list> parameter_list
+%type <m_if_statement> if_statement
 
 
 %%
@@ -171,6 +173,24 @@ statement
     {
         debug_log_with_green_coloar("[RULE::statement:return_statement]\t ", "");
         $$ = create_return_statement(NULL);
+    }
+    | if_statement
+    {
+        debug_log_with_green_coloar("[RULE::statement:if_statement]\t ", "");
+        $$ = create_statement_from_if($1);
+    }
+    ;
+
+if_statement
+    : TOKEN_IF TOKEN_LP expression TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
+        $$ = create_if_statement($3, $5, NULL);
+    }
+    | TOKEN_IF TOKEN_LP expression TOKEN_RP block TOKEN_ELSE block
+    {
+        debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
+        $$ = create_if_statement($3, $5, $7);
     }
     ;
 

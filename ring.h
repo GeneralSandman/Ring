@@ -29,6 +29,8 @@ typedef struct Identifier_Tag Identifier;
 
 typedef struct Function_Tag Function;
 
+typedef struct IfStatement_Tag IfStatement;
+
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue **value);
 
 struct Ring_Interpreter_Tag {
@@ -85,6 +87,7 @@ typedef enum {
     STATEMENT_TYPE_EXPRESSION,
     STATEMENT_TYPE_VARIABLE_DEFINITION,
     STATEMENT_TYPE_RETURN,
+    STATEMENT_TYPE_IF,
 } StatementType;
 
 typedef enum {
@@ -154,12 +157,14 @@ struct Ring_BasicValue_Tag {
 };
 
 struct Statement_Tag {
+    unsigned int line_number;
+
     StatementType type;
-    unsigned int  line_number;
     union {
-        Expression *expression;
-        Variable *  variable;
-        Expression *return_expression;
+        Expression * expression;
+        Variable *   variable;
+        Expression * return_expression;
+        IfStatement *if_statement;
     } u;
     Statement *next;
 };
@@ -268,6 +273,18 @@ struct Function_Tag {
     Function *next;
 };
 
+struct IfStatement_Tag {
+    unsigned int line_number;
+
+    Expression *expression;
+
+    unsigned int if_block_size;
+    Statement *  if_block;
+
+    unsigned int else_block_size;
+    Statement *  else_block;
+};
+
 // typedef struct {
 // } ListNode;
 
@@ -374,6 +391,7 @@ void                 ring_interpret(Ring_Interpreter *ring_interpreter);
 StatementExecResult *interpret_statement(Statement *statement, Function *function);
 StatementExecResult *interpret_statement_list(Statement *statement, Function *function);
 StatementExecResult *interpret_statement_return(Statement *statement, Function *function);
+StatementExecResult *interpret_statement_if(IfStatement *if_statement, Function *function);
 Ring_BasicValue *    interpret_expression(Expression *expression, Function *function);
 Ring_BasicValue *    search_variable_value(char *identifier, Function *origin_function);
 StatementExecResult *invoke_function(FunctionCallExpression *function_call_expression, Function *function);
@@ -412,6 +430,8 @@ ArgumentList *          create_argument_list(char *argument);
 ArgumentList *          create_argument_list_from_expression(Expression *expression);
 Identifier *            new_identifier(IdentifierType type, char *name);
 Function *              new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, Statement *block);
+Statement *             create_statement_from_if(IfStatement *if_statement);
+IfStatement *           create_if_statement(Expression *expression, Statement *if_block, Statement *else_block);
 // Identifier *            create_identifier(IdentifierType type, char *name);
 // char **identifier_list_add_item(char **identifier_list, char *identifier);
 #endif

@@ -305,6 +305,36 @@ Function *new_function_definition(FunctionType type, char *identifier, Variable 
     return function;
 }
 
+Statement *create_statement_from_if(IfStatement *if_statement) {
+    debug_log_with_yellow_coloar("\t");
+
+    Statement *statement = NULL;
+    statement            = (Statement *)malloc(sizeof(Statement));
+
+    statement->line_number    = get_ring_interpreter_line_number();
+    statement->type           = STATEMENT_TYPE_IF;
+    statement->u.if_statement = if_statement;
+    statement->next           = NULL;
+
+    return statement;
+}
+
+IfStatement *create_if_statement(Expression *expression, Statement *if_block, Statement *else_block) {
+    debug_log_with_yellow_coloar("\t");
+
+    IfStatement *if_statement;
+    if_statement = (IfStatement *)malloc(sizeof(IfStatement));
+
+    if_statement->line_number     = get_ring_interpreter_line_number();
+    if_statement->expression      = expression;
+    if_statement->if_block_size   = 0;
+    if_statement->if_block        = if_block;
+    if_statement->else_block_size = 0;
+    if_statement->else_block      = else_block;
+
+    return if_statement;
+}
+
 // 标识符合法性检查
 // 其实这个用不到，flex是有优先级的，会有语法错误
 // 检查变量是否重复定义
