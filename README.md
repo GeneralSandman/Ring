@@ -69,7 +69,7 @@ Reference wikipedia https://zh.wikipedia.org/wiki/%E8%87%B3%E5%B0%8A%E9%AD%94%E6
 |            |         | 支持 break contitnue语句                                                                                                     |
 |            |         | 支持 for语句                                                                                                                 |
 |            |         | 支持 if elseif语句                                                                                                           |
-|            |         | 支持 if else语句                                                                                                             |
+| 2022-02-08 | v0.0.16 | 支持 if else语句                                                                                                             |
 | 2022-02-08 | v0.0.15 | 支持一元运算操作 负号（-）                                                                                                   |
 | 2022-02-08 | v0.0.14 | 支持一元运算操作 逻辑非（not）                                                                                               |
 | 2022-02-07 | v0.0.13 | 支持二元逻辑运算操作 and、or                                                                                                 |
