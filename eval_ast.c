@@ -100,10 +100,8 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
         break;
 
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
         result = interpret_unitary_expression(expression, function);
-        break;
-
-    case EXPRESSION_TYPE_UNITARY_MINUS:
         break;
 
     case EXPRESSION_TYPE_VARIABLE:
@@ -421,6 +419,7 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
         break;
 
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
         result = interpret_unitary_expression(expression, origin_function);
         break;
 
@@ -463,6 +462,17 @@ Ring_BasicValue *interpret_unitary_expression(Expression *expression, Function *
         left                 = interpret_expression(expression->u.unitary_expression, origin_function);
         result->type         = BASICVALUE_TYPE_BOOL;
         result->u.bool_value = !left->u.bool_value;
+        break;
+
+    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
+        left         = interpret_expression(expression->u.unitary_expression, origin_function);
+        result->type = left->type;
+        if (left->type == BASICVALUE_TYPE_INT) {
+            result->u.int_value = -left->u.int_value;
+        } else if (left->type == BASICVALUE_TYPE_DOUBLE) {
+            result->u.double_value = -left->u.double_value;
+        }
+
         break;
 
     default:

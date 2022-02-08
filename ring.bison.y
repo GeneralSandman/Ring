@@ -431,6 +431,12 @@ literal_term
 
         $$ = create_expression_unitary(EXPRESSION_TYPE_LOGICAL_UNITARY_NOT, $2);
     }
+    | TOKEN_SUB literal_term
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_SUB]\t ", "");
+
+        $$ = create_expression_unitary(EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS, $2);
+    }
     | INT_LITERAL
     {
         debug_log_with_green_coloar("[RULE::literal_term:INT_LITERAL]\t ", "");
