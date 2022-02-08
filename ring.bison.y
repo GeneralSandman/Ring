@@ -102,6 +102,7 @@ int yyerror(char const *str);
 %type <m_expression> logical_expression_and
 %type <m_expression> relational_expression
 %type <m_expression> equality_expression
+%type <m_expression> maybe_empty_expression
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
 %type <m_argument_list> argument_list argument
@@ -203,12 +204,20 @@ if_statement
     ;
 
 for_statement
-    : TOKEN_FOR TOKEN_LP expression TOKEN_SEMICOLON expression TOKEN_SEMICOLON expression TOKEN_RP block
+    : TOKEN_FOR TOKEN_LP maybe_empty_expression TOKEN_SEMICOLON maybe_empty_expression TOKEN_SEMICOLON maybe_empty_expression TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::for_statement]\t ", "");
         $$ = create_for_statement($3, $5, $7, $9);
 
     }
+    ;
+
+maybe_empty_expression
+    : // empty
+    {
+        $$ = NULL;
+    }
+    | expression
     ;
 
 variable_definition
