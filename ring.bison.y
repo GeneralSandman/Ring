@@ -106,7 +106,7 @@ int yyerror(char const *str);
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
 %type <m_argument_list> argument_list argument
-%type <m_variable> variable_definition
+%type <m_variable> variable_definition variable_definition_with_assign
 %type <m_variable_type> variable_type
 %type <m_function_definition> function_definition
 %type <m_parameter_list> parameter_list
@@ -168,6 +168,13 @@ statement
 
         $$ = create_statement_from_variable($1);
     }
+    | variable_definition_with_assign TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::statement:variable_definition_with_assign]\t ", "");
+        $$ = create_statement_from_variable($1);
+
+
+    }
     | TOKEN_RETURN expression TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::statement:return_statement]\t ", "");
@@ -225,7 +232,16 @@ variable_definition
     {
         debug_log_with_green_coloar("[RULE::variable_definition]\t ", "");
 
-        $$ = new_variable($2, $3);
+        $$ = new_variable($2, $3, NULL);
+    }
+    ;
+
+variable_definition_with_assign
+    : TOKEN_VAR variable_type identifier TOKEN_ASSIGN expression
+    {
+        debug_log_with_green_coloar("[RULE::variable_definition]\t ", "");
+
+        $$ = new_variable($2, $3, $5);
     }
     ;
 

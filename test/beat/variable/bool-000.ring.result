@@ -1,0 +1,4 @@
+bool_value_1(false) = false
+bool_value_2(true) = true
+bool_value_3(not false) = true
+bool_value_4(not true) = false

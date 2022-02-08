@@ -246,12 +246,15 @@ struct ArgumentList_Tag {
 };
 
 struct Variable_Tag {
+    unsigned int line_number;
+
     VariableType type;
     char *       variable_identifer;
     union {
         Ring_BasicValue *ring_basic_value;
     } u;
-    Variable *next;
+    Expression *init_expression;
+    Variable *  next;
 };
 
 struct Function_Tag {
@@ -397,7 +400,7 @@ void insert_identifier(IdentifierType type, char *name);
 
 int       identifier_check_valid(char *identifier);
 Variable *variable_list_add_item(Variable *variable_list, Variable *variable);
-Variable *new_variable(VariableType type, char *identifier);
+Variable *new_variable(VariableType type, char *identifier, Expression *init_expression);
 
 Identifier *new_identifier(IdentifierType type, char *name);
 void        check_identifier_valid(char *identifier_name);

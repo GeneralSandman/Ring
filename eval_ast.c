@@ -42,6 +42,12 @@ StatementExecResult *interpret_statement(Statement *statement, Function *functio
         break;
 
     case STATEMENT_TYPE_VARIABLE_DEFINITION:
+        if (statement->u.variable && statement->u.variable->init_expression) {
+            Ring_BasicValue *tmp = NULL;
+            // TODO:
+            tmp                                       = interpret_binary_expression(statement->u.variable->init_expression, function);
+            statement->u.variable->u.ring_basic_value = tmp;
+        }
         // TODO:
         break;
 

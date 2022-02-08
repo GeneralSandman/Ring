@@ -284,7 +284,7 @@ Function *new_function_definition(FunctionType type, char *identifier, Variable 
 
     // 把函数参数的变量添加到 variable_list 中
     for (Variable *pos = parameter_list; pos != NULL; pos = pos->next) {
-        Variable *tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL);
+        Variable *tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL);
         memcpy(tmp, pos, sizeof(*pos));
 
         tmp->next               = function->variable_list;
@@ -294,7 +294,7 @@ Function *new_function_definition(FunctionType type, char *identifier, Variable 
     // 把block中定义的局部变量加到 variable_list 中
     for (Statement *pos = block; pos != NULL; pos = pos->next) {
         if (pos->type == STATEMENT_TYPE_VARIABLE_DEFINITION) {
-            Variable *tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL);
+            Variable *tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL);
             memcpy(tmp, pos->u.variable, sizeof(*pos->u.variable));
 
             tmp->next               = function->variable_list;
@@ -381,7 +381,7 @@ Variable *variable_list_add_item(Variable *variable_list, Variable *variable) {
     return variable_list;
 }
 
-Variable *new_variable(VariableType type, char *identifier) {
+Variable *new_variable(VariableType type, char *identifier, Expression *init_expression) {
     debug_log_with_yellow_coloar("\t type(%d),identifier(%s)", type, identifier);
 
     Variable *variable;
@@ -390,6 +390,7 @@ Variable *new_variable(VariableType type, char *identifier) {
     variable->type               = type;
     variable->variable_identifer = identifier;
     variable->u.ring_basic_value = NULL;
+    variable->init_expression    = init_expression;
     variable->next               = NULL;
 
     insert_identifier(IDENTIFIER_TYPE_VARIABLE, identifier);
