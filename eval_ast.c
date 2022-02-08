@@ -99,6 +99,13 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
         assign(expression, function);
         break;
 
+    case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+        result = interpret_unitary_expression(expression, function);
+        break;
+
+    case EXPRESSION_TYPE_UNITARY_MINUS:
+        break;
+
     case EXPRESSION_TYPE_VARIABLE:
         result = interpret_variable_expression(expression->u.variable_identifier, function);
         break;
@@ -410,8 +417,11 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
 
     case EXPRESSION_TYPE_LOGICAL_AND:
     case EXPRESSION_TYPE_LOGICAL_OR:
-    case EXPRESSION_TYPE_LOGICAL_NOT:
         result = interpret_binary_expression_logical(expression, origin_function);
+        break;
+
+    case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+        result = interpret_unitary_expression(expression, origin_function);
         break;
 
     case EXPRESSION_TYPE_RELATIONAL_EQ:
@@ -425,6 +435,37 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
 
     default:
         // log error
+        break;
+    }
+
+    return result;
+}
+
+Ring_BasicValue *interpret_unitary_expression(Expression *expression, Function *origin_function) {
+    debug_log_with_blue_coloar("\t expression->type:%d", expression->type);
+    // TODO: 还要考虑各个变量的类型
+    //       是否涉及到强制类型转换
+    //       两边类型不匹配还要编译报错
+
+    // FIXME: 存在内存泄漏
+    Function *function = NULL;
+
+    Ring_BasicValue *result;
+
+    StatementExecResult *tmp = NULL;
+
+    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+
+    Ring_BasicValue *left = NULL;
+
+    switch (expression->type) {
+    case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+        left                 = interpret_expression(expression->u.unitary_expression, origin_function);
+        result->type         = BASICVALUE_TYPE_BOOL;
+        result->u.bool_value = !left->u.bool_value;
+        break;
+
+    default:
         break;
     }
 

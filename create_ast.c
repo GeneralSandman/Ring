@@ -137,6 +137,20 @@ Expression *create_expression_binary(ExpressionType type, Expression *left, Expr
     return expression;
 }
 
+Expression *create_expression_unitary(ExpressionType type, Expression *unitary_expression) {
+    debug_log_with_yellow_coloar("type:%d", type);
+
+    Expression *expression = NULL;
+    expression             = (Expression *)malloc(sizeof(Expression));
+
+    expression->line_number          = get_ring_interpreter_line_number();
+    expression->type                 = type;
+    expression->u.unitary_expression = unitary_expression;
+    expression->next                 = NULL;
+
+    return expression;
+}
+
 Expression *
 create_expression_literal(ExpressionType type, char *literal_interface) {
     debug_log_with_yellow_coloar("type:%d", type);

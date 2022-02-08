@@ -6,12 +6,23 @@ print("false=", bool_value, "\n");
 bool_value = true;
 print("true=", bool_value, "\n");
 
-// bool_value = not false;
-// print("not false=", bool_value, "\n");
+bool_value = not false;
+print("not false=", bool_value, "\n");
 
-// bool_value = not true;
-// print("not true=", bool_value, "\n");
+bool_value = not true;
+print("not true=", bool_value, "\n");
 
+print("\n");
+bool_value = false;
+print("bool_value=", bool_value, "\n");
+bool_value = not bool_value;
+print("not bool_value=", bool_value, "\n");
+
+print("\n");
+bool_value = true;
+print("bool_value=", bool_value, "\n");
+bool_value = not bool_value;
+print("not bool_value=", bool_value, "\n");
 
 print("--------\n");
 

@@ -96,13 +96,16 @@ typedef enum {
     EXPRESSION_TYPE_VARIABLE,
     EXPRESSION_TYPE_FUNCTION_CALL,
     EXPRESSION_TYPE_ASSIGN,
+
+    EXPRESSION_TYPE_UNITARY_MINUS,
+
     EXPRESSION_TYPE_ARITHMETIC_ADD,
     EXPRESSION_TYPE_ARITHMETIC_SUB,
     EXPRESSION_TYPE_ARITHMETIC_MUL,
     EXPRESSION_TYPE_ARITHMETIC_DIV,
     EXPRESSION_TYPE_LOGICAL_AND,
     EXPRESSION_TYPE_LOGICAL_OR,
-    EXPRESSION_TYPE_LOGICAL_NOT,
+    EXPRESSION_TYPE_LOGICAL_UNITARY_NOT, // 一元操作符 非 nots
     EXPRESSION_TYPE_RELATIONAL_EQ,
     EXPRESSION_TYPE_RELATIONAL_NE,
     EXPRESSION_TYPE_RELATIONAL_GT,
@@ -182,6 +185,7 @@ struct Expression_Tag {
         FunctionCallExpression *function_call_expression;
         AssignExpression *      assign_expression;
         BinaryExpression *      binary_expression;
+        Expression *            unitary_expression;
     } u;
 
     Expression *next;
@@ -380,6 +384,7 @@ Ring_BasicValue *    interpret_binary_expression_arithmetic(Expression *expressi
 Ring_BasicValue *    interpret_binary_expression_realational(Expression *expression, Function *function);
 Ring_BasicValue *    interpret_binary_expression_logical(Expression *expression, Function *function);
 Ring_BasicValue *    interpret_binary_expression(Expression *expression, Function *origin_function);
+Ring_BasicValue *    interpret_unitary_expression(Expression *expression, Function *origin_function);
 void                 assign(Expression *expression, Function *function);
 
 // 上下文相关语义检查
@@ -398,6 +403,7 @@ Expression *            create_expression_identifier(char *identifier);
 Expression *            create_expression_(FunctionCallExpression *function_call_expression);
 Expression *            create_expression__(AssignExpression *assign_expression);
 Expression *            create_expression_binary(ExpressionType type, Expression *left, Expression *right);
+Expression *            create_expression_unitary(ExpressionType type, Expression *unitary_expression);
 Expression *            create_expression_literal(ExpressionType type, char *literal_interface);
 Expression *            create_expression_bool_literal(ExpressionType type, Ring_Bool value);
 AssignExpression *      create_assign_expression(char *identifier, Expression *expression);

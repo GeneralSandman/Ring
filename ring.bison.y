@@ -427,9 +427,9 @@ expression_arithmetic_operation_multiplicative
 literal_term
     : TOKEN_NOT literal_term
     {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_SUB]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_NOT]\t ", "");
 
-        // $$ = create_expression_unitary(EXPRESSION_TYPE_ARITHMETIC_DIV, $1, $3);
+        $$ = create_expression_unitary(EXPRESSION_TYPE_LOGICAL_UNITARY_NOT, $2);
     }
     | INT_LITERAL
     {

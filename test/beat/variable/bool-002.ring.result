@@ -1,5 +1,13 @@
 false=false
 true=true
+not false=true
+not true=false
+
+bool_value=false
+not bool_value=true
+
+bool_value=true
+not bool_value=false
 --------
 1 and 2 is true
 1 or 2 is true
