@@ -33,3 +33,10 @@ check (true and false) pass
 check (false and true) pass
 
 check (false and false) pass
+
+
+check (int_value_1 < int_value_2 and int_value_2 < int_value_3) pass
+
+check (int_value_1 <= int_value_2 and int_value_2 < int_value_3) pass
+
+check (int_value_1 > int_value_2 or int_value_2 < int_value_3) pass

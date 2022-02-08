@@ -135,3 +135,33 @@ if(false and false) {
 
 
 
+var int int_value_1;
+var int int_value_2;
+var int int_value_3;
+
+print("\n");
+int_value_1 = 1;
+int_value_2 = 2;
+int_value_3 = 3;
+print("\n");
+if(int_value_1 < int_value_2 and int_value_2 < int_value_3) {
+	print("check (int_value_1 < int_value_2 and int_value_2 < int_value_3) pass\n");
+} else {
+	print("check (int_value_1 < int_value_2 and int_value_2 < int_value_3) failed\n");
+}
+
+
+print("\n");
+if(int_value_1 <= int_value_2 and int_value_2 < int_value_3) {
+	print("check (int_value_1 <= int_value_2 and int_value_2 < int_value_3) pass\n");
+} else {
+	print("check (int_value_1 <= int_value_2 and int_value_2 < int_value_3) failed\n");
+}
+
+
+print("\n");
+if(int_value_1 > int_value_2 or int_value_2 < int_value_3) {
+	print("check (int_value_1 > int_value_2 or int_value_2 < int_value_3) pass\n");
+} else {
+	print("check (int_value_1 > int_value_2 or int_value_2 < int_value_3) failed\n");
+}
