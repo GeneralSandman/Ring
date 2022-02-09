@@ -68,7 +68,7 @@ Reference wikipedia https://zh.wikipedia.org/wiki/%E8%87%B3%E5%B0%8A%E9%AD%94%E6
 |            |         | 优化 if else 语句,里边需要支持 return                                                                                        |
 |            |         | 支持通过括号来定义操作符的优先级。                                                                                           |
 |            |         | 支持 break contitnue语句                                                                                                     |
-|            |         | int double bool 变量运算的 类型转换，bool、int、double 的强制类型转换，还有点bug,是否设计成 不支持隐式类型转换。             |
+|            | v0.0.22 | 不支持隐式类型转换，编程需要 bool、int、double 的强制类型转换, 有点bug                                                       |
 | 2022-02-09 | v0.0.21 | 支持交互式编程 类似 ipython，但是bug有点多                                                                                   |
 | 2022-02-08 | v0.0.20 | 定义 int double bool 支持变量初始化                                                                                          |
 | 2022-02-08 | v0.0.19 | 优化 for语句 ，init condition post 均支持空                                                                                  |

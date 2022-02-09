@@ -19,6 +19,10 @@ INCLUDES = \
 $(TARGET):$(OBJS)
 	$(CC) $(OBJS) -o $(BIN)/$@
 
+install:
+	install -p -m 0755 ./bin/ring /usr/local/bin
+uninstall:
+	cd /usr/local/bin && rm ring
 clean:
 	rm -f *.o lex.yy.c y.tab.c y.tab.h y.output *~
   
