@@ -69,6 +69,7 @@ Reference wikipedia https://zh.wikipedia.org/wiki/%E8%87%B3%E5%B0%8A%E9%AD%94%E6
 |            |         | 优化 if else 语句,里边需要支持 return                                                                                        |
 |            |         | 支持 break contitnue语句                                                                                                     |
 |            |         | int double bool 变量运算的 类型转换，(int) (double) (bool) 的强制类型转换，是否设计成 不支持隐式类型转换。                   |
+|            | v0.0.21 | 支持交互式编程 类似 ipython                                                                                                  |
 | 2022-02-08 | v0.0.20 | 定义 int double bool 支持变量初始化                                                                                          |
 | 2022-02-08 | v0.0.19 | 优化 for语句 ，init condition post 均支持空                                                                                  |
 | 2022-02-08 | v0.0.18 | 支持 for语句 ，但是不支持 break 和 continue语句                                                                              |
