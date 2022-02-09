@@ -487,7 +487,12 @@ expression_arithmetic_operation_multiplicative
     ;
 
 literal_term
-    : TOKEN_NOT literal_term
+    : variable_type TOKEN_LP literal_term TOKEN_RP
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:convert_type]\t ", "");
+        $$ = create_expression_unitary_with_convert_type($1, $3);
+    }
+    | TOKEN_NOT literal_term
     {
         debug_log_with_green_coloar("[RULE::literal_term:TOKEN_NOT]\t ", "");
 

@@ -455,19 +455,24 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
 
     result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
 
+    double tmp_value = 0;
+
     switch (expression->type) {
     case EXPRESSION_TYPE_LITERAL_BOOL:
         result->type         = BASICVALUE_TYPE_BOOL;
         result->u.bool_value = expression->u.bool_literal;
+        tmp_value            = (double)(result->u.bool_value);
         break;
     case EXPRESSION_TYPE_LITERAL_INT:
         result->type        = BASICVALUE_TYPE_INT;
         result->u.int_value = expression->u.int_literal;
+        tmp_value           = (double)(result->u.int_value);
         break;
 
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
         result->type           = BASICVALUE_TYPE_DOUBLE;
         result->u.double_value = expression->u.double_literal;
+        tmp_value              = (double)(result->u.double_value);
         break;
 
     case EXPRESSION_TYPE_LITERAL_STRING:
@@ -522,6 +527,27 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
 
     default:
         // log error
+        break;
+    }
+
+    // TODO: 这里实现的有点难看，需要再修改
+    switch (expression->convert_type) {
+    case BASICVALUE_TYPE_BOOL:
+        result->type         = BASICVALUE_TYPE_BOOL;
+        result->u.bool_value = (Ring_Bool)tmp_value;
+        break;
+
+    case BASICVALUE_TYPE_INT:
+        result->type        = BASICVALUE_TYPE_INT;
+        result->u.int_value = (int)tmp_value;
+        break;
+
+    case BASICVALUE_TYPE_DOUBLE:
+        result->type           = BASICVALUE_TYPE_DOUBLE;
+        result->u.double_value = (double)tmp_value;
+        break;
+
+    default:
         break;
     }
 

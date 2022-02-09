@@ -144,9 +144,22 @@ Expression *create_expression_unitary(ExpressionType type, Expression *unitary_e
     expression             = (Expression *)malloc(sizeof(Expression));
 
     expression->line_number          = get_ring_interpreter_line_number();
+    expression->convert_type         = BASICVALUE_TYPE_UNKNOW;
     expression->type                 = type;
     expression->u.unitary_expression = unitary_expression;
     expression->next                 = NULL;
+
+    return expression;
+}
+
+// ring.bison.y 中 第一个参数是 VariableType
+// 该定义       中 第一个参数是 BasicValueType
+// TODO: 这里以后统一
+Expression *create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression *expression) {
+    debug_log_with_yellow_coloar("convert_type:%d", convert_type);
+
+    assert(expression != NULL);
+    expression->convert_type = convert_type; // enum 转换一下
 
     return expression;
 }

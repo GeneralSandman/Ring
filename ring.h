@@ -130,6 +130,7 @@ typedef enum {
     VARIABLE_TYPE_BOOL,
     VARIABLE_TYPE_INT,
     VARIABLE_TYPE_DOUBLE,
+    VARIABLE_TYPE_CHAR,
     VARIABLE_TYPE_STRING,
 } VariableType;
 
@@ -183,6 +184,7 @@ struct StatementExecResult_Tag {
 struct Expression_Tag {
     unsigned int line_number;
 
+    BasicValueType convert_type;
     ExpressionType type;
     union {
         Ring_Bool               bool_literal;
@@ -440,6 +442,7 @@ Expression *            create_expression_(FunctionCallExpression *function_call
 Expression *            create_expression__(AssignExpression *assign_expression);
 Expression *            create_expression_binary(ExpressionType type, Expression *left, Expression *right);
 Expression *            create_expression_unitary(ExpressionType type, Expression *unitary_expression);
+Expression *            create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression *expression);
 Expression *            create_expression_literal(ExpressionType type, char *literal_interface);
 Expression *            create_expression_bool_literal(ExpressionType type, Ring_Bool value);
 AssignExpression *      create_assign_expression(char *identifier, Expression *expression);

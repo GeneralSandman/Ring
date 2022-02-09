@@ -65,10 +65,10 @@ Reference wikipedia https://zh.wikipedia.org/wiki/%E8%87%B3%E5%B0%8A%E9%AD%94%E6
 |            |         | 在一个子代码块中如果想要实访问全局变量，必须使用global 声明这个变量。否则视为语法错误。                                      |
 |            |         | 优化完善语义分析，扫描各种语义错误。                                                                                         |
 |            |         | 变量支持并行赋值，如 a,b=1231,1.1;                                                                                           |
-|            |         | 支持通过括号来定义操作符的优先级。                                                                                           |
 |            |         | 优化 if else 语句,里边需要支持 return                                                                                        |
+|            |         | 支持通过括号来定义操作符的优先级。                                                                                           |
 |            |         | 支持 break contitnue语句                                                                                                     |
-|            |         | int double bool 变量运算的 类型转换，(int) (double) (bool) 的强制类型转换，是否设计成 不支持隐式类型转换。                   |
+|            |         | int double bool 变量运算的 类型转换，bool、int、double 的强制类型转换，还有点bug,是否设计成 不支持隐式类型转换。             |
 | 2022-02-09 | v0.0.21 | 支持交互式编程 类似 ipython，但是bug有点多                                                                                   |
 | 2022-02-08 | v0.0.20 | 定义 int double bool 支持变量初始化                                                                                          |
 | 2022-02-08 | v0.0.19 | 优化 for语句 ，init condition post 均支持空                                                                                  |
