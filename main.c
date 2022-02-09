@@ -6,6 +6,7 @@
 
 void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp);
 void ring_interactive_program();
+int  write_tmp_source_file(char *tmp_source_file_name, int start_line_num, int line_size, char **input_line_content);
 
 int main(int argc, char **argv) {
     Ring_Interpreter *ring_interpreter;
@@ -15,8 +16,10 @@ int main(int argc, char **argv) {
     if (argc != 2) {
         printf("Ring version: %s \n\n", RING_VERSION);
 
-        printf("usage:\t%s <filename>\n", argv[0]);
-        printf("      \t%s --version\n", argv[0]);
+        printf("usage:\n");
+        printf("      \t%s <filename>       complie ring source file\n", argv[0]);
+        printf("      \t%s --interactive    interactive program\n", argv[0]);
+        printf("      \t%s --version        get version\n", argv[0]);
         exit(1);
     }
 
@@ -75,37 +78,40 @@ void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
 // 交互式编程
 // 从命令行输入
 void ring_interactive_program() {
-    extern int   yyparse(void);
-    extern FILE *yyin;
-
+    extern int        yyparse(void);
+    extern FILE *     yyin;
     Ring_Interpreter *ring_interpreter;
     time_t            rand_int;
     FILE *            tmp_source_file;
     char              tmp_source_file_name[1024];
-    char              current_line_content[1024];
-    unsigned int      line_number = 1;
+    char *            input_line_contents[1024];
+    unsigned int      line_number       = 1;
+    unsigned int      start_line_number = 1;
 
     time(&rand_int);
-    sprintf(tmp_source_file_name, "ring-interactive-%ld.ring.tmp", rand_int);
-    printf("tmp_file_name:%s\n", tmp_source_file_name);
-    tmp_source_file = fopen(tmp_source_file_name, "w+");
-    if (tmp_source_file == NULL) {
-        fprintf(stderr, "open tmp_source_file_name error (%s)\n", tmp_source_file_name);
-        exit(1);
-    }
-
+    sprintf(tmp_source_file_name, "/tmp/ring-interactive-%ld.ring.tmp", rand_int);
+    printf("tmp_file_name:%s\n\n\n", tmp_source_file_name);
+    memset(input_line_contents, 0, sizeof(input_line_contents));
     ring_interpreter = new_ring_interpreter(tmp_source_file_name);
 
     while (1) {
         printf("line[%d]: ", line_number);
-        if (fgets(current_line_content, 1024, stdin) == NULL) {
+
+        char *content = (char *)malloc(1024);
+        if (fgets(content, 1024, stdin) == NULL) {
             printf("get input from stdin error, exit\n");
             exit(1);
         }
 
-        // printf("[DEBUG] line[%d] content:%s\n", line_number++, current_line_content);
+        if (!strncmp(content, "-r", 2)) {
+            // 写入临时文件
 
-        if (!strncmp(current_line_content, "cmd:run", 7)) {
+            if (line_number - start_line_number == 0) {
+                continue;
+            }
+            write_tmp_source_file(tmp_source_file_name, start_line_number, line_number - start_line_number, input_line_contents);
+
+            // 编译临时文件
             yyin = fopen(tmp_source_file_name, "r");
             if (yyin == NULL) {
                 fprintf(stderr, "open tmp_source_file_name error (%s)\n", tmp_source_file_name);
@@ -123,28 +129,32 @@ void ring_interactive_program() {
             ring_interpreter->statement_list_size = 0;
             ring_interpreter->statement_list      = NULL;
             fclose(yyin);
+
+            start_line_number = line_number;
             continue;
-        } else if (!strncmp(current_line_content, "cmd:clear", 9)) {
-            // 初始化一个新实例
-            ring_interpreter = new_ring_interpreter(tmp_source_file_name);
-            line_number      = 1;
-            printf("[cmd:clear] OK\n");
+        } else if (!strncmp(content, "-h", 2)) {
+            printf("[cmd:help] OK\n\n");
             continue;
-        } else if (!strncmp(current_line_content, "cmd:help", 8)) {
-            printf("[cmd:help] OK\n");
+        } else if (!strncmp(content, "\n", 1)) {
+            // empty line
             continue;
         }
 
-        printf("\n");
-        fprintf(tmp_source_file, current_line_content);
-        fprintf(tmp_source_file, "\n");
-        fflush(tmp_source_file);
-        line_number++;
+        input_line_contents[line_number++] = content;
+    }
+}
+
+int write_tmp_source_file(char *tmp_source_file_name, int start_line_num, int line_size, char **input_line_contents) {
+    FILE *tmp_source_file = fopen(tmp_source_file_name, "w+");
+    if (tmp_source_file == NULL) {
+        fprintf(stderr, "open tmp_source_file_name error (%s)\n", tmp_source_file_name);
+        exit(1);
     }
 
-    // if (yyparse()) {
-    //     fprintf(stderr, "YYPARSE error\n");
-    //     printf("--------\n");
-    //     exit(1);
-    // }
+    for (int i = start_line_num; i < start_line_num + line_size; i++) {
+        fprintf(tmp_source_file, (const char *)input_line_contents[i]);
+    }
+
+    fflush(tmp_source_file);
+    fclose(tmp_source_file);
 }
