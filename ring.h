@@ -334,6 +334,13 @@ struct ForStatement_Tag {
 
 #define LOG_COLOR_CLEAR "\033[0m"
 
+#define printf_witch_red(format, ...) \
+    printf("%s" format "%s", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#define printf_witch_green(format, ...) \
+    printf("%s" format "%s", LOG_COLOR_GREEN, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#define printf_witch_blue(format, ...) \
+    printf("%s" format "%s", LOG_COLOR_BLUE, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+
 #define complie_err_log(format, ...) \
     printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 

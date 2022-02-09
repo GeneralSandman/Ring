@@ -29,8 +29,6 @@ int main(int argc, char **argv) {
     }
 
     if (!strcmp(argv[1], "--interactive")) {
-        printf("Ring version: %s \n", RING_VERSION);
-        printf("An enhanced Interactive Python. Type 'cmd:help' for help.\n");
         ring_interactive_program();
         return 0;
     }
@@ -78,6 +76,9 @@ void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
 // 交互式编程
 // 从命令行输入
 void ring_interactive_program() {
+    printf_witch_blue("Ring version: %s \n", RING_VERSION);
+    printf_witch_blue("An enhanced Interactive Ring. Type '-h' for help.\n");
+
     extern int        yyparse(void);
     extern FILE *     yyin;
     Ring_Interpreter *ring_interpreter;
@@ -90,22 +91,21 @@ void ring_interactive_program() {
 
     time(&rand_int);
     sprintf(tmp_source_file_name, "/tmp/ring-interactive-%ld.ring.tmp", rand_int);
-    printf("tmp_file_name:%s\n\n\n", tmp_source_file_name);
+    printf_witch_blue("tmp_file_name:%s\n\n\n", tmp_source_file_name);
     memset(input_line_contents, 0, sizeof(input_line_contents));
     ring_interpreter = new_ring_interpreter(tmp_source_file_name);
 
     while (1) {
-        printf("line[%d]: ", line_number);
+        printf_witch_green("line[%d]: ", line_number);
 
         char *content = (char *)malloc(1024);
         if (fgets(content, 1024, stdin) == NULL) {
-            printf("get input from stdin error, exit\n");
+            printf_witch_red("get input from stdin error, exit\n");
             exit(1);
         }
 
         if (!strncmp(content, "-r", 2)) {
             // 写入临时文件
-
             if (line_number - start_line_number == 0) {
                 continue;
             }
@@ -114,16 +114,16 @@ void ring_interactive_program() {
             // 编译临时文件
             yyin = fopen(tmp_source_file_name, "r");
             if (yyin == NULL) {
-                fprintf(stderr, "open tmp_source_file_name error (%s)\n", tmp_source_file_name);
+                printf_witch_red("open tmp_source_file_name error (%s)\n", tmp_source_file_name);
                 exit(1);
             }
             if (yyparse()) {
-                fprintf(stderr, "YYPARSE error\n");
+                printf_witch_red("YYPARSE error\n");
             }
 
             // 解释执行
             ring_interpret(ring_interpreter);
-            printf("\n");
+            printf_witch_green("\n");
 
             // 只清除相关语句不清楚相关变量
             ring_interpreter->statement_list_size = 0;
@@ -133,7 +133,9 @@ void ring_interactive_program() {
             start_line_number = line_number;
             continue;
         } else if (!strncmp(content, "-h", 2)) {
-            printf("[cmd:help] OK\n\n");
+            printf_witch_blue("-r:\trun this code block\n");
+            printf_witch_blue("-h:\tget help\n");
+            printf_witch_blue("\n\n");
             continue;
         } else if (!strncmp(content, "\n", 1)) {
             // empty line
@@ -147,7 +149,7 @@ void ring_interactive_program() {
 int write_tmp_source_file(char *tmp_source_file_name, int start_line_num, int line_size, char **input_line_contents) {
     FILE *tmp_source_file = fopen(tmp_source_file_name, "w+");
     if (tmp_source_file == NULL) {
-        fprintf(stderr, "open tmp_source_file_name error (%s)\n", tmp_source_file_name);
+        printf_witch_red("open tmp_source_file_name error (%s)\n", tmp_source_file_name);
         exit(1);
     }
 

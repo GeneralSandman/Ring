@@ -9,6 +9,10 @@ mkdir bin
 
 make
 
+make clean
+
+make install
+
 ./bin/ring --version
 
 ./bin/ring test/helloworld.ring
