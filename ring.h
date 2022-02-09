@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.22-beat"
+#define RING_VERSION "ring-v0.0.23-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -30,6 +30,8 @@ typedef struct Identifier_Tag Identifier;
 typedef struct Function_Tag Function;
 
 typedef struct IfStatement_Tag IfStatement;
+
+typedef struct ElseIfStatement_Tag ElseIfStatement;
 
 typedef struct ForStatement_Tag ForStatement;
 
@@ -290,8 +292,21 @@ struct IfStatement_Tag {
     unsigned int if_block_size;
     Statement *  if_block;
 
+    ElseIfStatement *elseif_statement_list;
+
     unsigned int else_block_size;
     Statement *  else_block;
+};
+
+struct ElseIfStatement_Tag {
+    unsigned int line_number;
+
+    Expression *expression;
+
+    unsigned int elseif_block_size;
+    Statement *  elseif_block;
+
+    ElseIfStatement *next;
 };
 
 struct ForStatement_Tag {
@@ -460,7 +475,9 @@ ArgumentList *          create_argument_list_from_expression(Expression *express
 Identifier *            new_identifier(IdentifierType type, char *name);
 Function *              new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, Statement *block);
 Statement *             create_statement_from_if(IfStatement *if_statement);
-IfStatement *           create_if_statement(Expression *expression, Statement *if_block, Statement *else_block);
+IfStatement *           create_if_statement(Expression *expression, Statement *if_block, ElseIfStatement *elseif_statement_list, Statement *else_block);
+ElseIfStatement *       create_elseif_statement(Expression *expression, Statement *elseif_block);
+ElseIfStatement *       elseif_statement_add_item(ElseIfStatement *list, ElseIfStatement *elseif_statement);
 Statement *             create_statement_from_for(ForStatement *for_statement);
 ForStatement *          create_for_statement(Expression *init_expression, Expression *condition_expression, Expression *post_expression, Statement *block);
 // Identifier *            create_identifier(IdentifierType type, char *name);

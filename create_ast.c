@@ -332,20 +332,50 @@ Statement *create_statement_from_if(IfStatement *if_statement) {
     return statement;
 }
 
-IfStatement *create_if_statement(Expression *expression, Statement *if_block, Statement *else_block) {
+IfStatement *create_if_statement(Expression *expression, Statement *if_block, ElseIfStatement *elseif_statement_list, Statement *else_block) {
     debug_log_with_yellow_coloar("\t");
 
     IfStatement *if_statement;
     if_statement = (IfStatement *)malloc(sizeof(IfStatement));
 
-    if_statement->line_number     = get_ring_interpreter_line_number();
-    if_statement->expression      = expression;
-    if_statement->if_block_size   = 0;
-    if_statement->if_block        = if_block;
-    if_statement->else_block_size = 0;
-    if_statement->else_block      = else_block;
+    if_statement->line_number           = get_ring_interpreter_line_number();
+    if_statement->expression            = expression;
+    if_statement->if_block_size         = 0;
+    if_statement->if_block              = if_block;
+    if_statement->elseif_statement_list = elseif_statement_list;
+    if_statement->else_block_size       = 0;
+    if_statement->else_block            = else_block;
 
     return if_statement;
+}
+
+ElseIfStatement *create_elseif_statement(Expression *expression, Statement *elseif_block) {
+    debug_log_with_yellow_coloar("\t");
+
+    ElseIfStatement *elseif_statement;
+    elseif_statement = (ElseIfStatement *)malloc(sizeof(ElseIfStatement));
+
+    elseif_statement->line_number       = get_ring_interpreter_line_number();
+    elseif_statement->expression        = expression;
+    elseif_statement->elseif_block_size = 0;
+    elseif_statement->elseif_block      = elseif_block;
+    elseif_statement->next              = NULL;
+
+    return elseif_statement;
+}
+
+ElseIfStatement *elseif_statement_add_item(ElseIfStatement *list, ElseIfStatement *elseif_statement) {
+    debug_log_with_yellow_coloar("\t");
+
+    assert(list != NULL);
+
+    ElseIfStatement *pos;
+    for (pos = list; pos->next != NULL; pos = pos->next) {
+    }
+
+    pos->next = elseif_statement;
+
+    return list;
 }
 
 Statement *create_statement_from_for(ForStatement *for_statement) {

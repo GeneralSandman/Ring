@@ -23,6 +23,7 @@ int yyerror(char const *str);
     Function*                   m_function_definition;
     Variable*                   m_parameter_list;
     IfStatement*                m_if_statement;
+    ElseIfStatement*            m_elseif_statement;
     ForStatement*               m_for_statement;
 }
 
@@ -45,6 +46,7 @@ int yyerror(char const *str);
 %token TOKEN_ELSEIF
 %token TOKEN_ELSE
 %token TOKEN_FOR
+%token TOKEN_WHILE
 %token TOKEN_BREAK
 %token TOKEN_CONTINUE
 %token TOKEN_NULL
@@ -112,6 +114,8 @@ int yyerror(char const *str);
 %type <m_parameter_list> parameter_list
 %type <m_if_statement> if_statement
 %type <m_for_statement> for_statement
+%type <m_elseif_statement> elseif_statement_list
+%type <m_elseif_statement> elseif_statement
 
 
 %%
@@ -201,12 +205,42 @@ if_statement
     : TOKEN_IF TOKEN_LP expression TOKEN_RP block // if () {}
     {
         debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
-        $$ = create_if_statement($3, $5, NULL);
+        $$ = create_if_statement($3, $5, NULL, NULL);
     }
     | TOKEN_IF TOKEN_LP expression TOKEN_RP block TOKEN_ELSE block // if () {} else {}
     {
         debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
-        $$ = create_if_statement($3, $5, $7);
+        $$ = create_if_statement($3, $5, NULL, $7);
+    }
+    | TOKEN_IF TOKEN_LP expression TOKEN_RP block elseif_statement_list // if () {} elseif() {} elseif {}
+    {
+        debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
+        $$ = create_if_statement($3, $5, $6, NULL);
+    }
+    | TOKEN_IF TOKEN_LP expression TOKEN_RP block elseif_statement_list TOKEN_ELSE block // if () {} elseif() {} elseif {} else {}
+    {
+        debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
+        $$ = create_if_statement($3, $5, $6, $8);
+    }
+    ;
+
+elseif_statement_list
+    : elseif_statement
+    {
+        debug_log_with_green_coloar("[RULE::elseif_list_statement]\t ", "");
+    }
+    | elseif_statement_list elseif_statement
+    {
+        debug_log_with_green_coloar("[RULE::elseif_list_statement]\t ", "");
+        $$ = elseif_statement_add_item($1, $2);
+    }
+    ;
+
+elseif_statement
+    : TOKEN_ELSEIF TOKEN_LP expression TOKEN_RP block // elseif () {}
+    {
+        debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
+        $$ = create_elseif_statement($3, $5);
     }
     ;
 

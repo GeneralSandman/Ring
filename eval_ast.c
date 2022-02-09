@@ -83,18 +83,29 @@ StatementExecResult *interpret_statement_if(IfStatement *if_statement, Function 
     result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
 
     Ring_BasicValue *cond = interpret_expression(if_statement->expression, function);
-
     if (cond == NULL || cond->type != BASICVALUE_TYPE_BOOL) {
         runtime_err_log("the result of if statement expression is not bool!");
         exit(1);
     }
 
     if (cond->u.bool_value) {
-        return interpret_statement_list(if_statement->if_block, function);
+        result = interpret_statement_list(if_statement->if_block, function);
     } else {
-        return interpret_statement_list(if_statement->else_block, function);
+        for (ElseIfStatement *pos = if_statement->elseif_statement_list; pos; pos = pos->next) {
+            Ring_BasicValue *cond = interpret_expression(pos->expression, function);
+            if (cond == NULL || cond->type != BASICVALUE_TYPE_BOOL) {
+                runtime_err_log("the result of if statement expression is not bool!");
+                exit(1);
+            }
+            if (cond->u.bool_value) {
+                result = interpret_statement_list(pos->elseif_block, function);
+                goto END;
+            }
+        }
+        result = interpret_statement_list(if_statement->else_block, function);
     }
 
+END:
     return result;
 }
 
