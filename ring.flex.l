@@ -47,6 +47,8 @@ int yywrap(){
 <INITIAL>"auto"         { ring_interpreter_update_line_content(yytext); return TOKEN_AUTO;           }
 <INITIAL>"const"        { ring_interpreter_update_line_content(yytext); return TOKEN_CONST;          }
 <INITIAL>"function"     { ring_interpreter_update_line_content(yytext); return TOKEN_FUNCTION;       }
+<INITIAL>"new"          { ring_interpreter_update_line_content(yytext); return TOKEN_NEW;            }
+<INITIAL>"delete"       { ring_interpreter_update_line_content(yytext); return TOKEN_DELETE;         }
 <INITIAL>"."            { ring_interpreter_update_line_content(yytext); return TOKEN_DOT;            }
 
 <INITIAL>"+"            { ring_interpreter_update_line_content(yytext); return TOKEN_ADD;            }

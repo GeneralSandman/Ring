@@ -58,6 +58,8 @@ int yyerror(char const *str);
 %token TOKEN_AUTO
 %token TOKEN_CONST
 %token TOKEN_FUNCTION
+%token TOKEN_NEW
+%token TOKEN_DELETE
 %token TOKEN_DOT
 
 %token TOKEN_ADD

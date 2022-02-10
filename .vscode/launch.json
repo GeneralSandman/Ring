@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/bin/ring",
             "args": [
-                "${workspaceFolder}/test/beat/variable/type-convert-000.ring"
+                "${workspaceFolder}/test/beat/control/if-000.ring"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
