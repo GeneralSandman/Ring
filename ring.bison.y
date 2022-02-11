@@ -62,6 +62,7 @@ int yyerror(char const *str);
 %token TOKEN_NEW
 %token TOKEN_DELETE
 %token TOKEN_DOT
+%token TOKEN_ARROW
 
 %token TOKEN_ADD
 %token TOKEN_SUB
@@ -297,18 +298,18 @@ function_definition
         $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, $6);
 
     }
-    | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, $8);
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, $9);
 
     }
-    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, $9);
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, $10);
 
     }
     ;

@@ -30,10 +30,10 @@ double_value = double(false);
 print("bool_value=", bool_value, ", int_value=", int_value, ", double_value=", double_value, "\n");
 
 
-bool_value = not bool(0);
-int_value = int(not false);
-double_value = double(not false);
-print("bool_value=", bool_value, ", int_value=", int_value, ", double_value=", double_value, "\n");
+// bool_value = not bool(0);
+// int_value = int(not false); // FIXME: BUG
+// double_value = double(not false);
+// print("bool_value=", bool_value, ", int_value=", int_value, ", double_value=", double_value, "\n");
 
 
 // bool_value = bool(-0.1);

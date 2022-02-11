@@ -51,6 +51,7 @@ int yywrap(){
 <INITIAL>"new"          { ring_interpreter_update_line_content(yytext); return TOKEN_NEW;            }
 <INITIAL>"delete"       { ring_interpreter_update_line_content(yytext); return TOKEN_DELETE;         }
 <INITIAL>"."            { ring_interpreter_update_line_content(yytext); return TOKEN_DOT;            }
+<INITIAL>"->"           { ring_interpreter_update_line_content(yytext); return TOKEN_ARROW;          }
 
 <INITIAL>"+"            { ring_interpreter_update_line_content(yytext); return TOKEN_ADD;            }
 <INITIAL>"-"            { ring_interpreter_update_line_content(yytext); return TOKEN_SUB;            }

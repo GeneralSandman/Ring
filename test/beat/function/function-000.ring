@@ -40,7 +40,7 @@ var int return_int_value;
 
 
 print("[test-case 005]\n");
-function doit5() (int) {
+function doit5()->(int) {
     print("I'm function doit5, go go go!\n");
 	return 5;
 }
@@ -52,7 +52,7 @@ print("\n\n");
 
 
 print("[test-case 006]\n");
-function doit6(var int arguement1) (int) {
+function doit6(var int arguement1)->(int) {
     print("I'm function doit6, arguement1=", arguement1, "\n");
 	return arguement1;
 }
@@ -63,7 +63,7 @@ print("\n\n");
 
 
 print("[test-case 007]\n");
-function doit7(var int arguement1, var int arguement2) (int) {
+function doit7(var int arguement1, var int arguement2)->(int) {
     print("I'm function doit7, ", "arguement1=", arguement1, ", arguement2=", arguement2, "\n");
 	return arguement1 + arguement2;
 }
