@@ -85,6 +85,7 @@ void ring_interactive_program() {
     time_t            rand_int;
     FILE *            tmp_source_file;
     char              tmp_source_file_name[1024];
+    char              save_file_name[1024];
     char *            input_line_contents[1024];
     unsigned int      line_number       = 1;
     unsigned int      start_line_number = 1;
@@ -132,9 +133,25 @@ void ring_interactive_program() {
 
             start_line_number = line_number;
             continue;
+        } else if (!strncmp(content, "-c", 2)) {
+            ring_interpreter = new_ring_interpreter(tmp_source_file_name);
+            memset(input_line_contents, 0, sizeof(input_line_contents));
+            start_line_number = 1;
+            line_number       = 1;
+            printf_witch_blue("clear code block\n");
+            continue;
+        } else if (!strncmp(content, "-s", 2)) {
+            time(&rand_int);
+            sprintf(save_file_name, "./ring-interactive-%ld.ring", rand_int);
+            write_tmp_source_file(save_file_name, 1, line_number - 1, input_line_contents);
+            printf_witch_blue("save ring source code success: %s\n\n", save_file_name);
+
+            continue;
         } else if (!strncmp(content, "-h", 2)) {
             printf_witch_blue("-r:\trun this code block\n");
-            printf_witch_blue("-h:\tget help\n");
+            printf_witch_blue("-c:\tclear code block\n");
+            printf_witch_blue("-s:\tsave code block to disk\n");
+            printf_witch_blue("-h:\thelp information\n");
             printf_witch_blue("\n\n");
             continue;
         } else if (!strncmp(content, "\n", 1)) {

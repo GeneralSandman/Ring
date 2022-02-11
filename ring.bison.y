@@ -27,6 +27,7 @@ int yyerror(char const *str);
     ForStatement*               m_for_statement;
 }
 
+%token TOKEN_TYPE
 %token TOKEN_BOOL
 %token TOKEN_INT 
 %token TOKEN_DOUBLE 
