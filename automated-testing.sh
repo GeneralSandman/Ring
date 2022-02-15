@@ -3,8 +3,8 @@
 # 需要向下兼容，测试之前的所有测试用例
 
 TEST_PATH="./test/beat"
-# TEST_VERSION="control"
-TEST_VERSION="function"
+TEST_VERSION="control"
+# TEST_VERSION="function"
 # TEST_VERSION="variable"
 SOURCE_FILE_PATH=$TEST_PATH"/"$TEST_VERSION
 num=1

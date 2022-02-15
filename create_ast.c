@@ -113,7 +113,7 @@ Expression *create_expression_(FunctionCallExpression *function_call_expression)
 }
 
 Expression *create_expression__(AssignExpression *assign_expression) {
-    debug_log_with_yellow_coloar("assign_expression->assign_identifier:%s", assign_expression->assign_identifier);
+    // debug_log_with_yellow_coloar("assign_expression->assign_identifier:%s", assign_expression->assign_identifier);
 
     Expression *expression = NULL;
     expression             = (Expression *)malloc(sizeof(Expression));
@@ -212,8 +212,39 @@ AssignExpression *create_assign_expression(char *identifier, Expression *express
     AssignExpression *assing_expression = NULL;
     assing_expression                   = (AssignExpression *)malloc(sizeof(AssignExpression));
 
-    assing_expression->assign_identifier = identifier;
-    assing_expression->expression        = expression;
+    // 这里应该优化一下
+    char **identifiers = malloc(sizeof(char *) * 1);
+    identifiers[0]     = identifier; // 初始化第一个
+
+    assing_expression->assign_identifier_size = 1;
+    assing_expression->assign_identifiers     = identifiers;
+    assing_expression->expression             = expression;
+    return assing_expression;
+}
+
+AssignExpression *create_multi_assign_expression(char *first_identifier, Identifier *identifier_list, Expression *first_expression, Expression *expression_list) {
+    // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
+    debug_log_with_yellow_coloar("");
+
+    AssignExpression *assing_expression = NULL;
+    assing_expression                   = (AssignExpression *)malloc(sizeof(AssignExpression));
+
+    unsigned int size = 1;
+    for (Identifier *pos = identifier_list; pos != NULL; pos = pos->next) {
+        size += 1;
+    }
+
+    char **      identifiers = malloc(sizeof(char *) * size);
+    unsigned int i           = 0;
+    identifiers[i++]         = first_identifier; // 初始化第一个
+    for (Identifier *pos = identifier_list; pos != NULL; pos = pos->next, i++) {
+        identifiers[i] = pos->identifier_name;
+    }
+    first_expression->next = expression_list;
+
+    assing_expression->assign_identifier_size = size;
+    assing_expression->assign_identifiers     = identifiers;
+    assing_expression->expression             = first_expression;
     return assing_expression;
 }
 
@@ -227,6 +258,16 @@ FunctionCallExpression *create_function_call_expression(char *identifier, Argume
     function_call_expression->function_name       = identifier;
     function_call_expression->argument_list       = argument_list;
     return function_call_expression;
+}
+
+Expression *expression_list_add_item(Expression *expression_list, Expression *expression) {
+    debug_log_with_yellow_coloar("");
+
+    Expression *pos = expression_list;
+    for (; pos->next != NULL; pos = pos->next)
+        ;
+    pos->next = expression;
+    return expression_list;
 }
 
 ArgumentList *argument_list_add_item3(ArgumentList *argument_list, ArgumentList *argument) {
@@ -275,6 +316,14 @@ Identifier *new_identifier(IdentifierType type, char *name) {
     identifier->next            = NULL;
 
     return identifier;
+}
+
+Identifier *identifier_list_add_item(Identifier *identifier_list, Identifier *identifier) {
+    Identifier *pos = identifier_list;
+    for (; pos->next != NULL; pos = pos->next)
+        ;
+    pos->next = identifier;
+    return identifier_list;
 }
 
 Function *new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, Statement *block) {

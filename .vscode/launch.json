@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/bin/ring",
             "args": [
-                "${workspaceFolder}/test/beat/function/function-001.ring"
+                "${workspaceFolder}/test/beat/variable/int-003.ring"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

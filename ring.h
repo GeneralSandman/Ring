@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.26-beat"
+#define RING_VERSION "ring-v0.0.27-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -242,8 +242,12 @@ struct Identifier_Tag {
 };
 
 struct AssignExpression_Tag {
-    char *      assign_identifier;
+    char *       assign_identifier; // TODO: 以后不应该使用这个 删除调
+    unsigned int assign_identifier_size;
+    char **      assign_identifiers;
+    // Identifier * assign_identifier_list;// TODO: 重构 最后都使用这个
     Expression *expression;
+    // Expression *expression_list; // TODO: 重构 最后都使用这个
 };
 
 struct BinaryExpression_Tag {
@@ -446,6 +450,7 @@ Variable *variable_list_add_item(Variable *variable_list, Variable *variable);
 Variable *new_variable(VariableType type, char *identifier, Expression *init_expression);
 
 Identifier *new_identifier(IdentifierType type, char *name);
+Identifier *identifier_list_add_item(Identifier *identifier_list, Identifier *identifier);
 void        check_identifier_valid(char *identifier_name);
 
 void                 ring_interpret(Ring_Interpreter *ring_interpreter);
@@ -489,7 +494,9 @@ Expression *            create_expression_unitary_with_convert_type(BasicValueTy
 Expression *            create_expression_literal(ExpressionType type, char *literal_interface);
 Expression *            create_expression_bool_literal(ExpressionType type, Ring_Bool value);
 AssignExpression *      create_assign_expression(char *identifier, Expression *expression);
+AssignExpression *      create_multi_assign_expression(char *first_identifier, Identifier *identifier_list, Expression *first_expression, Expression *expression_list);
 FunctionCallExpression *create_function_call_expression(char *identifier, ArgumentList *argument_list);
+Expression *            expression_list_add_item(Expression *expression_list, Expression *expression);
 ArgumentList *          argument_list_add_item3(ArgumentList *argument_list, ArgumentList *argument);
 ArgumentList *          create_argument_list(char *argument);
 ArgumentList *          create_argument_list_from_expression(Expression *expression);

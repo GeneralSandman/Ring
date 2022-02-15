@@ -8,11 +8,15 @@ int yyerror(char const *str);
 
 %}
 
+%glr-parser     // 使用 GLR 解析
+%expect 2       // TODO: legitimate 2 shift/reduce conflicts
+%expect-rr 0    // TODO: legitimate 8 reduce/reduce conflicts
 
 %union {
     char*                       m_comment_value;
     char*                       m_literal_interface;
-    char*                       m_identifier;
+    char*                       m_identifier; // TODO: 以后不用这个，用下边的
+    Identifier*                 m_identifier_list;
     Statement*                  m_statement_list;
     Expression*                 m_expression;
     AssignExpression*           m_assign_expression;
@@ -100,8 +104,9 @@ int yyerror(char const *str);
 
 %type <m_literal_interface> INT_LITERAL DOUBLE_LITERAL STRING_LITERAL TOKEN_TRUE TOKEN_FALSE
 %type <m_identifier> identifier IDENTIFIER
+%type <m_identifier_list> identifier_list
 %type <m_statement_list> statement statement_list block
-%type <m_expression> expression
+%type <m_expression> expression expression_list
 %type <m_expression> literal_term
 %type <m_expression> expression_arithmetic_operation_additive 
 %type <m_expression> expression_arithmetic_operation_multiplicative 
@@ -407,17 +412,6 @@ expression
         
         $$ = create_expression__($1);
     }
-    | expression_arithmetic_operation_additive
-    {
-        debug_log_with_green_coloar("[RULE::expression:expression_arithmetic_operation_additive]\t ", "");
-
-    }
-    | identifier 
-    {
-        debug_log_with_green_coloar("[RULE::expression:identifier]\t ", "");
-
-        $$ = create_expression_identifier($1);
-    }
     | logical_expression_or
     {
         debug_log_with_green_coloar("[RULE::expression:logical_expression]\t ", "");
@@ -618,6 +612,33 @@ assign_expression
 
         $$ = create_assign_expression($1, $3);
     }
+    | identifier TOKEN_COMMA identifier_list TOKEN_ASSIGN expression TOKEN_COMMA expression_list
+    {
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+        $$ = create_multi_assign_expression($1, $3, $5, $7);
+    }
+    ;
+
+identifier_list
+    : identifier
+    {
+        debug_log_with_green_coloar("[RULE::identifier_list]\t ", "");
+        $$ = new_identifier(IDENTIFIER_TYPE_VARIABLE, $1);
+    }
+    | identifier_list TOKEN_COMMA identifier
+    {
+        debug_log_with_green_coloar("[RULE::identifier_list]\t ", "");
+        $$ = identifier_list_add_item($1, new_identifier(IDENTIFIER_TYPE_VARIABLE, $3));
+    }
+    ;
+
+expression_list
+    : expression
+    | expression_list TOKEN_COMMA expression
+    {
+        debug_log_with_green_coloar("[RULE::expression_list]\t ", "");
+        $$ = expression_list_add_item($1, $3);
+    }
     ;
 
 identifier
@@ -642,13 +663,7 @@ argument_list
 
 
 argument
-    : STRING_LITERAL 
-    {
-        debug_log_with_green_coloar("[RULE::argument_list:STRING_LITERAL]\t ", "");
-
-        $$ = create_argument_list($1);
-    }
-    | expression
+    : expression
     {
         debug_log_with_green_coloar("[RULE::argument_list:expression]\t ", "");
 

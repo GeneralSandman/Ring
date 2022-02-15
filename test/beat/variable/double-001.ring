@@ -1,6 +1,6 @@
 var double double_value;
 
-double_value = 0;
+double_value = 0.0; // TODO: 修复bug后 这里以后要改成 double_value = 0.0;
 print("0=", double_value, "\n");
 
 double_value = -0;

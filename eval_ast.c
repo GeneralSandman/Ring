@@ -490,7 +490,7 @@ Ring_BasicValue *interpret_binary_expression_logical(Expression *expression, Fun
 }
 
 Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *origin_function) {
-    debug_log_with_blue_coloar("expression->type:%d", expression->type);
+    // debug_log_with_blue_coloar("expression->type:%d", expression->type);
     // TODO: 还要考虑各个变量的类型
     //       是否涉及到强制类型转换
     //       两边类型不匹配还要编译报错
@@ -777,44 +777,49 @@ StatementExecResult *invoke_external_function(Function *function) {
     return result;
 }
 
+// TODO: 重构
 void assign(Expression *expression, Function *function) {
     debug_log_with_blue_coloar("expression->type:%d", expression->type);
 
     assert(expression->type == EXPRESSION_TYPE_ASSIGN);
 
-    Ring_BasicValue *result = NULL;
-    // TODO:
-    result = interpret_binary_expression(expression->u.assign_expression->expression, function);
+    Expression *pos = expression->u.assign_expression->expression;
 
-    char *identifier;
-    identifier = expression->u.assign_expression->assign_identifier;
+    for (unsigned int identifier_list_index = 0; identifier_list_index < expression->u.assign_expression->assign_identifier_size; identifier_list_index++, pos = pos->next) {
+        Ring_BasicValue *result = NULL;
+        // TODO:
+        result = interpret_binary_expression(pos, function);
 
-    Variable *variable = NULL;
-    // 查找局部变量
-    if (function != NULL) {
-        for (Variable *pos = function->variable_list; pos != NULL; pos = pos->next) {
-            if (0 == strcmp(pos->variable_identifer, identifier)) {
-                variable = pos;
+        char *identifier;
+        identifier = expression->u.assign_expression->assign_identifiers[identifier_list_index];
+
+        Variable *variable = NULL;
+        // 查找局部变量
+        if (function != NULL) {
+            for (Variable *pos = function->variable_list; pos != NULL; pos = pos->next) {
+                if (0 == strcmp(pos->variable_identifer, identifier)) {
+                    variable = pos;
+                }
             }
         }
-    }
 
-    if (variable != NULL) {
-        debug_log_with_blue_coloar("find match local variable\n");
-    } else {
-        // 查找全局变量
-        for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
-            if (0 == strcmp(pos->variable_identifer, identifier)) {
-                variable = pos;
+        if (variable != NULL) {
+            debug_log_with_blue_coloar("find match local variable\n");
+        } else {
+            // 查找全局变量
+            for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+                if (0 == strcmp(pos->variable_identifer, identifier)) {
+                    variable = pos;
+                }
             }
         }
-    }
 
-    if (variable == NULL) {
-        debug_log_with_blue_coloar("don't find match global variable\n");
-        return;
-    }
+        if (variable == NULL) {
+            debug_log_with_blue_coloar("don't find match global variable\n");
+            return;
+        }
 
-    // TODO:
-    variable->u.ring_basic_value = result;
+        // TODO:
+        variable->u.ring_basic_value = result;
+    }
 }
