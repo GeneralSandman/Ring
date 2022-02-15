@@ -1,6 +1,10 @@
 #!/bin/bash
 
 
+# 通过 docsify 渲染
+
+# 通过 cos-bucket website 功能部署
+
 
 # coscmd config -a secretID  -s secretKEY -b ring-1252697766 -r ap-beijing
 coscmd upload -r ./ / 
