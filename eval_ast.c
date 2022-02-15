@@ -97,10 +97,19 @@ StatementExecResult *interpret_statement_continue(ContinueStatement *statement, 
 }
 
 StatementExecResult *interpret_statement_return(Statement *statement, Function *function) {
-    StatementExecResult *result = NULL;
-    result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
-    result->type                = STATEMENT_EXEC_RESULT_TYPE_RETURN;
-    result->u.return_value      = interpret_expression(statement->u.expression, function);
+    StatementExecResult *result    = NULL;
+    result                         = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+    result->type                   = STATEMENT_EXEC_RESULT_TYPE_RETURN;
+    result->return_value_list_size = 0;
+    result->return_value_list      = NULL;
+
+    int index = 0;
+    for (Expression *pos = statement->u.return_expression; pos != NULL; pos = pos->next, index++) {
+        result->return_value_list        = (Ring_BasicValue **)realloc(result->return_value_list, (index + 1) * sizeof(Ring_BasicValue *));
+        Ring_BasicValue *tmp             = interpret_expression(pos, function);
+        result->return_value_list[index] = tmp;
+    }
+    result->return_value_list_size = index;
     return result;
 }
 
@@ -187,7 +196,8 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
 
     Ring_BasicValue *result;
 
-    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result->next = NULL;
 
     StatementExecResult *exec_result = NULL;
 
@@ -291,7 +301,8 @@ Ring_BasicValue *interpret_variable_expression(char *variable_identifier, Functi
     // FIXME: 存在内存泄漏
     Ring_BasicValue *result;
 
-    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result->next = NULL;
 
     switch (variable->type) {
     case VARIABLE_TYPE_BOOL:
@@ -322,7 +333,8 @@ Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression, 
     debug_log_with_blue_coloar("expression->type:%d", expression->type);
     Ring_BasicValue *result;
 
-    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result->next = NULL;
 
     Ring_BasicValue *left  = NULL;
     Ring_BasicValue *right = NULL;
@@ -383,7 +395,8 @@ Ring_BasicValue *interpret_binary_expression_realational(Expression *expression,
     debug_log_with_blue_coloar("expression->type:%d", expression->type);
     Ring_BasicValue *result;
 
-    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result->next = NULL;
 
     Ring_BasicValue *left  = NULL;
     Ring_BasicValue *right = NULL;
@@ -446,7 +459,8 @@ Ring_BasicValue *interpret_binary_expression_logical(Expression *expression, Fun
     debug_log_with_blue_coloar("expression->type:%d", expression->type);
     Ring_BasicValue *result;
 
-    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result->next = NULL;
 
     Ring_BasicValue *left  = NULL;
     Ring_BasicValue *right = NULL;
@@ -502,7 +516,8 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
 
     StatementExecResult *tmp = NULL;
 
-    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result->next = NULL;
 
     double tmp_value = 0;
 
@@ -543,9 +558,29 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
         //     }
         // }
         tmp = invoke_function(expression->u.function_call_expression, origin_function);
-        if (tmp != NULL) {
-            result = tmp->u.return_value;
+        { // 这个地方写的太难看了，得重构一下
+            Ring_BasicValue *head = NULL;
+            Ring_BasicValue *dest = result;
+            Ring_BasicValue *pre  = NULL;
+
+            for (unsigned int i = 0; i < tmp->return_value_list_size; i++) {
+                dest = tmp->return_value_list[i];
+                if (pre != NULL) {
+                    pre->next = dest;
+                }
+
+                if (i == 0) {
+                    head = dest;
+                }
+
+                pre = dest;
+            }
+            return head;
         }
+        // FIXME: 不能使用return_value
+        // if (tmp != NULL) {
+        //     result = tmp->u.return_value;
+        // }
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
@@ -616,7 +651,8 @@ Ring_BasicValue *interpret_unitary_expression(Expression *expression, Function *
 
     StatementExecResult *tmp = NULL;
 
-    result = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result->next = NULL;
 
     Ring_BasicValue *left = NULL;
 
@@ -785,41 +821,43 @@ void assign(Expression *expression, Function *function) {
 
     Expression *pos = expression->u.assign_expression->expression;
 
-    for (unsigned int identifier_list_index = 0; identifier_list_index < expression->u.assign_expression->assign_identifier_size; identifier_list_index++, pos = pos->next) {
-        Ring_BasicValue *result = NULL;
-        // TODO:
-        result = interpret_binary_expression(pos, function);
+    unsigned int identifier_list_index = 0;
 
-        char *identifier;
-        identifier = expression->u.assign_expression->assign_identifiers[identifier_list_index];
+    for (; pos != NULL; pos = pos->next) {
+        Ring_BasicValue *result = interpret_binary_expression(pos, function);
 
-        Variable *variable = NULL;
-        // 查找局部变量
-        if (function != NULL) {
-            for (Variable *pos = function->variable_list; pos != NULL; pos = pos->next) {
-                if (0 == strcmp(pos->variable_identifer, identifier)) {
-                    variable = pos;
+        for (; result != NULL; result = result->next, identifier_list_index++) {
+            char *identifier;
+            identifier = expression->u.assign_expression->assign_identifiers[identifier_list_index];
+
+            Variable *variable = NULL;
+            // 查找局部变量
+            if (function != NULL) {
+                for (Variable *pos_ = function->variable_list; pos_ != NULL; pos_ = pos_->next) {
+                    if (0 == strcmp(pos_->variable_identifer, identifier)) {
+                        variable = pos_;
+                    }
                 }
             }
-        }
 
-        if (variable != NULL) {
-            debug_log_with_blue_coloar("find match local variable\n");
-        } else {
-            // 查找全局变量
-            for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
-                if (0 == strcmp(pos->variable_identifer, identifier)) {
-                    variable = pos;
+            if (variable != NULL) {
+                debug_log_with_blue_coloar("find match local variable\n");
+            } else {
+                // 查找全局变量
+                for (Variable *pos_ = get_ring_interpreter()->variable_list; pos_ != NULL; pos_ = pos_->next) {
+                    if (0 == strcmp(pos_->variable_identifer, identifier)) {
+                        variable = pos_;
+                    }
                 }
             }
-        }
 
-        if (variable == NULL) {
-            debug_log_with_blue_coloar("don't find match global variable\n");
-            return;
-        }
+            if (variable == NULL) {
+                debug_log_with_blue_coloar("don't find match global variable\n");
+                return;
+            }
 
-        // TODO:
-        variable->u.ring_basic_value = result;
+            // TODO:
+            variable->u.ring_basic_value = result;
+        }
     }
 }

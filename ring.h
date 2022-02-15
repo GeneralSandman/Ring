@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.27-beat"
+#define RING_VERSION "ring-v0.0.28-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -28,6 +28,8 @@ typedef struct Variable_Tag Variable;
 typedef struct Identifier_Tag Identifier;
 
 typedef struct Function_Tag Function;
+
+typedef struct FunctionReturnList_Tag FunctionReturnList;
 
 typedef struct IfStatement_Tag IfStatement;
 
@@ -169,6 +171,8 @@ struct Ring_BasicValue_Tag {
         char      char_value;
         char *    string_value;
     } u;
+    Ring_BasicValue *next; // FIXME: 这个用在 return 多个的时候 return 1,2; 见 interpret_binary_expression:invoke_function
+    // FIXME: 以后更改这个地方
 };
 
 struct Statement_Tag {
@@ -191,7 +195,9 @@ struct StatementExecResult_Tag {
     StatementExecResultType type;
     union {
         Ring_BasicValue *return_value;
-    } u;
+    } u; // TODO: 这个没办法兼容多 返回值，重构的时候废弃，使用return_value_list_size & return_value_list
+    unsigned int      return_value_list_size;
+    Ring_BasicValue **return_value_list;
 };
 
 struct Expression_Tag {
@@ -285,10 +291,13 @@ struct Function_Tag {
     unsigned int parameter_list_size;
     Variable *   parameter_list;
 
+    unsigned int        return_list_size;
+    FunctionReturnList *return_list;
+
     unsigned int variable_list_size;
     Variable *   variable_list;
 
-    unsigned int return_list_size;
+    // unsigned int return_list_size;
     // return_list; // TODO:
 
     unsigned int block_size;
@@ -297,6 +306,11 @@ struct Function_Tag {
     Ring_InnerFunc *inner_func;
 
     Function *next;
+};
+
+struct FunctionReturnList_Tag {
+    VariableType        variable_type;
+    FunctionReturnList *next;
 };
 
 struct IfStatement_Tag {
@@ -449,9 +463,11 @@ int       identifier_check_valid(char *identifier);
 Variable *variable_list_add_item(Variable *variable_list, Variable *variable);
 Variable *new_variable(VariableType type, char *identifier, Expression *init_expression);
 
-Identifier *new_identifier(IdentifierType type, char *name);
-Identifier *identifier_list_add_item(Identifier *identifier_list, Identifier *identifier);
-void        check_identifier_valid(char *identifier_name);
+Identifier *        new_identifier(IdentifierType type, char *name);
+Identifier *        identifier_list_add_item(Identifier *identifier_list, Identifier *identifier);
+FunctionReturnList *create_function_return_list(VariableType variable_type);
+FunctionReturnList *function_return_list_add_item(FunctionReturnList *return_list, VariableType variable_type);
+void                check_identifier_valid(char *identifier_name);
 
 void                 ring_interpret(Ring_Interpreter *ring_interpreter);
 StatementExecResult *interpret_statement(Statement *statement, Function *function);
@@ -501,7 +517,7 @@ ArgumentList *          argument_list_add_item3(ArgumentList *argument_list, Arg
 ArgumentList *          create_argument_list(char *argument);
 ArgumentList *          create_argument_list_from_expression(Expression *expression);
 Identifier *            new_identifier(IdentifierType type, char *name);
-Function *              new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, Statement *block);
+Function *              new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, FunctionReturnList *return_list, Statement *block);
 Statement *             create_statement_from_if(IfStatement *if_statement);
 IfStatement *           create_if_statement(Expression *expression, Statement *if_block, ElseIfStatement *elseif_statement_list, Statement *else_block);
 ElseIfStatement *       create_elseif_statement(Expression *expression, Statement *elseif_block);

@@ -29,6 +29,7 @@ int yyerror(char const *str);
     IfStatement*                m_if_statement;
     ElseIfStatement*            m_elseif_statement;
     ForStatement*               m_for_statement;
+    FunctionReturnList*         m_return_list;
 }
 
 %token TOKEN_TYPE
@@ -126,6 +127,7 @@ int yyerror(char const *str);
 %type <m_for_statement> for_statement
 %type <m_elseif_statement> elseif_statement_list
 %type <m_elseif_statement> elseif_statement
+%type <m_return_list> return_list
 
 
 %%
@@ -189,7 +191,7 @@ statement
 
 
     }
-    | TOKEN_RETURN expression TOKEN_SEMICOLON
+    | TOKEN_RETURN expression_list TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::statement:return_statement]\t ", "");
         $$ = create_return_statement($2);
@@ -310,28 +312,28 @@ function_definition
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, $5);
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, NULL, $5);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, $6);
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, NULL, $6);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, $9);
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, $7, $9);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, $10);
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, $8, $10);
 
     }
     ;
@@ -353,7 +355,11 @@ parameter_list
 return_list
     : variable_type
     {
-        debug_log_with_green_coloar("[RULE::return_list]\t ", "");
+        $$ = create_function_return_list($1);
+    }
+    | return_list TOKEN_COMMA variable_type
+    {
+        $$ = function_return_list_add_item($1, $3);
     }
     ;
 
@@ -612,10 +618,10 @@ assign_expression
 
         $$ = create_assign_expression($1, $3);
     }
-    | identifier TOKEN_COMMA identifier_list TOKEN_ASSIGN expression TOKEN_COMMA expression_list
+    | identifier TOKEN_COMMA identifier_list TOKEN_ASSIGN expression_list
     {
         debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
-        $$ = create_multi_assign_expression($1, $3, $5, $7);
+        $$ = create_multi_assign_expression($1, $3, NULL, $5);
     }
     ;
 

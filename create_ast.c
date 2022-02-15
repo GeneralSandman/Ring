@@ -240,7 +240,11 @@ AssignExpression *create_multi_assign_expression(char *first_identifier, Identif
     for (Identifier *pos = identifier_list; pos != NULL; pos = pos->next, i++) {
         identifiers[i] = pos->identifier_name;
     }
-    first_expression->next = expression_list;
+
+    if (first_expression != NULL)
+        first_expression->next = expression_list;
+    else
+        first_expression = expression_list;
 
     assing_expression->assign_identifier_size = size;
     assing_expression->assign_identifiers     = identifiers;
@@ -326,7 +330,25 @@ Identifier *identifier_list_add_item(Identifier *identifier_list, Identifier *id
     return identifier_list;
 }
 
-Function *new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, Statement *block) {
+FunctionReturnList *create_function_return_list(VariableType variable_type) {
+    FunctionReturnList *return_list = NULL;
+    return_list                     = (FunctionReturnList *)malloc(sizeof(FunctionReturnList *));
+
+    return_list->variable_type = variable_type;
+    return_list->next          = NULL;
+
+    return return_list;
+}
+
+FunctionReturnList *function_return_list_add_item(FunctionReturnList *return_list, VariableType variable_type) {
+    FunctionReturnList *pos = return_list;
+    for (; pos->next != NULL; pos = pos->next)
+        ;
+    pos->next = create_function_return_list(variable_type);
+    return return_list;
+}
+
+Function *new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, FunctionReturnList *return_list, Statement *block) {
     debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier);
 
     Function *function;
