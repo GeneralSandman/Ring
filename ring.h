@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.25-beat"
+#define RING_VERSION "ring-v0.0.26-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -34,6 +34,10 @@ typedef struct IfStatement_Tag IfStatement;
 typedef struct ElseIfStatement_Tag ElseIfStatement;
 
 typedef struct ForStatement_Tag ForStatement;
+
+typedef struct BreakStatement_Tag BreakStatement;
+
+typedef struct ContinueStatement_Tag ContinueStatement;
 
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue **value);
 
@@ -82,8 +86,11 @@ struct Ring_String_Tag {
 
 typedef enum {
     STATEMENT_EXEC_RESULT_TYPE_UNKNOW = 0,
+    STATEMENT_EXEC_RESULT_TYPE_NORMAL,
     STATEMENT_EXEC_RESULT_TYPE_EXPRESSION,
     STATEMENT_EXEC_RESULT_TYPE_RETURN,
+    STATEMENT_EXEC_RESULT_TYPE_BREAK,
+    STATEMENT_EXEC_RESULT_TYPE_CONTINUE,
 } StatementExecResultType;
 
 typedef enum {
@@ -93,6 +100,8 @@ typedef enum {
     STATEMENT_TYPE_RETURN,
     STATEMENT_TYPE_IF,
     STATEMENT_TYPE_FOR,
+    STATEMENT_TYPE_BREAK,
+    STATEMENT_TYPE_CONTINUE,
 } StatementType;
 
 typedef enum {
@@ -167,11 +176,13 @@ struct Statement_Tag {
 
     StatementType type;
     union {
-        Expression *  expression;
-        Variable *    variable;
-        Expression *  return_expression;
-        IfStatement * if_statement;
-        ForStatement *for_statement;
+        Expression *       expression;
+        Variable *         variable;
+        Expression *       return_expression;
+        IfStatement *      if_statement;
+        ForStatement *     for_statement;
+        BreakStatement *   break_statement;
+        ContinueStatement *continue_statement;
     } u;
     Statement *next;
 };
@@ -320,6 +331,14 @@ struct ForStatement_Tag {
     Statement *  block;
 };
 
+struct BreakStatement_Tag {
+    unsigned int line_number;
+};
+
+struct ContinueStatement_Tag {
+    unsigned int line_number;
+};
+
 // typedef struct {
 // } ListNode;
 
@@ -432,6 +451,8 @@ void        check_identifier_valid(char *identifier_name);
 void                 ring_interpret(Ring_Interpreter *ring_interpreter);
 StatementExecResult *interpret_statement(Statement *statement, Function *function);
 StatementExecResult *interpret_statement_list(Statement *statement, Function *function);
+StatementExecResult *interpret_statement_break(BreakStatement *statement, Function *function);
+StatementExecResult *interpret_statement_continue(ContinueStatement *statement, Function *function);
 StatementExecResult *interpret_statement_return(Statement *statement, Function *function);
 StatementExecResult *interpret_statement_if(IfStatement *if_statement, Function *function);
 StatementExecResult *interpret_statement_for(ForStatement *for_statement, Function *function);
@@ -480,6 +501,8 @@ ElseIfStatement *       create_elseif_statement(Expression *expression, Statemen
 ElseIfStatement *       elseif_statement_add_item(ElseIfStatement *list, ElseIfStatement *elseif_statement);
 Statement *             create_statement_from_for(ForStatement *for_statement);
 ForStatement *          create_for_statement(Expression *init_expression, Expression *condition_expression, Expression *post_expression, Statement *block);
+Statement *             create_statement_from_break();
+Statement *             create_statement_from_continue();
 // Identifier *            create_identifier(IdentifierType type, char *name);
 // char **identifier_list_add_item(char **identifier_list, char *identifier);
 #endif

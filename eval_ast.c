@@ -23,8 +23,12 @@ StatementExecResult *interpret_statement_list(Statement *statement, Function *fu
     for (p = statement; p != NULL; p = p->next) {
         debug_log_with_blue_coloar("\t interpret statement: type(%d),line_number(%d)", p->type, p->line_number);
         result = interpret_statement(p, function);
-        if (result != NULL && result->type == STATEMENT_EXEC_RESULT_TYPE_RETURN) {
-            return result;
+        if (result != NULL) {
+            if (result->type == STATEMENT_EXEC_RESULT_TYPE_RETURN
+                || result->type == STATEMENT_EXEC_RESULT_TYPE_BREAK
+                || result->type == STATEMENT_EXEC_RESULT_TYPE_CONTINUE) {
+                return result;
+            }
         }
     }
     return result;
@@ -63,10 +67,32 @@ StatementExecResult *interpret_statement(Statement *statement, Function *functio
         result = interpret_statement_for(statement->u.for_statement, function);
         break;
 
+    case STATEMENT_TYPE_BREAK:
+        result = interpret_statement_break(statement->u.break_statement, function);
+        break;
+
+    case STATEMENT_TYPE_CONTINUE:
+        result = interpret_statement_continue(statement->u.continue_statement, function);
+        break;
+
     default:
         break;
     }
 
+    return result;
+}
+
+StatementExecResult *interpret_statement_break(BreakStatement *statement, Function *function) {
+    StatementExecResult *result = NULL;
+    result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+    result->type                = STATEMENT_EXEC_RESULT_TYPE_BREAK;
+    return result;
+}
+
+StatementExecResult *interpret_statement_continue(ContinueStatement *statement, Function *function) {
+    StatementExecResult *result = NULL;
+    result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+    result->type                = STATEMENT_EXEC_RESULT_TYPE_CONTINUE;
     return result;
 }
 
@@ -91,7 +117,7 @@ StatementExecResult *interpret_statement_if(IfStatement *if_statement, Function 
     if (cond->u.bool_value) {
         result = interpret_statement_list(if_statement->if_block, function);
     } else {
-        for (ElseIfStatement *pos = if_statement->elseif_statement_list; pos; pos = pos->next) {
+        for (ElseIfStatement *pos = if_statement->elseif_statement_list; pos != NULL; pos = pos->next) {
             Ring_BasicValue *cond = interpret_expression(pos->expression, function);
             if (cond == NULL || cond->type != BASICVALUE_TYPE_BOOL) {
                 runtime_err_log("the result of if statement expression is not bool!");
@@ -102,7 +128,9 @@ StatementExecResult *interpret_statement_if(IfStatement *if_statement, Function 
                 goto END;
             }
         }
-        result = interpret_statement_list(if_statement->else_block, function);
+        if (if_statement->else_block != NULL) {
+            result = interpret_statement_list(if_statement->else_block, function);
+        }
     }
 
 END:
@@ -134,13 +162,23 @@ StatementExecResult *interpret_statement_for(ForStatement *for_statement, Functi
         }
 
         result = interpret_statement_list(for_statement->block, function);
-        // TODO: check continue break return
+        if (result != NULL) {
+            if (result->type == STATEMENT_EXEC_RESULT_TYPE_BREAK) {
+                result->type = STATEMENT_EXEC_RESULT_TYPE_NORMAL;
+                goto ENDFOR;
+            } else if (result->type == STATEMENT_EXEC_RESULT_TYPE_CONTINUE) {
+                result->type = STATEMENT_EXEC_RESULT_TYPE_NORMAL;
+            } else if (result->type == STATEMENT_EXEC_RESULT_TYPE_RETURN) {
+                goto ENDFOR;
+            }
+        }
 
         if (for_statement->post_expression != NULL) {
             interpret_expression(for_statement->post_expression, function);
         }
     }
 
+ENDFOR:
     return result;
 }
 

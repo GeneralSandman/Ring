@@ -408,6 +408,34 @@ ForStatement *create_for_statement(Expression *init_expression, Expression *cond
     return for_statement;
 }
 
+Statement *create_statement_from_break() {
+    debug_log_with_yellow_coloar("\t");
+
+    Statement *statement = NULL;
+    statement            = (Statement *)malloc(sizeof(Statement));
+
+    statement->line_number       = get_ring_interpreter_line_number();
+    statement->type              = STATEMENT_TYPE_BREAK;
+    statement->u.break_statement = NULL;
+    statement->next              = NULL;
+
+    return statement;
+}
+
+Statement *create_statement_from_continue() {
+    debug_log_with_yellow_coloar("\t");
+
+    Statement *statement = NULL;
+    statement            = (Statement *)malloc(sizeof(Statement));
+
+    statement->line_number          = get_ring_interpreter_line_number();
+    statement->type                 = STATEMENT_TYPE_CONTINUE;
+    statement->u.continue_statement = NULL;
+    statement->next                 = NULL;
+
+    return statement;
+}
+
 // 标识符合法性检查
 // 其实这个用不到，flex是有优先级的，会有语法错误
 // 检查变量是否重复定义

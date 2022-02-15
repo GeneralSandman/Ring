@@ -203,6 +203,16 @@ statement
         debug_log_with_green_coloar("[RULE::statement:for_statement]\t ", "");
         $$ = create_statement_from_for($1);
     }
+    | break_statement TOKEN_SEMICOLON
+    {
+        $$ = create_statement_from_break();
+
+    }
+    | continue_statement TOKEN_SEMICOLON
+    {
+        $$ = create_statement_from_continue();
+
+    }
     ;
 
 if_statement
@@ -256,6 +266,12 @@ for_statement
 
     }
     ;
+
+break_statement
+    : TOKEN_BREAK ;
+
+continue_statement
+    : TOKEN_CONTINUE ;
 
 maybe_empty_expression
     : // empty
