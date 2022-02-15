@@ -29,7 +29,8 @@ int yywrap(){
 <INITIAL>"class"        { ring_interpreter_update_line_content(yytext); return TOKEN_CLASS;          }
 <INITIAL>"private"      { ring_interpreter_update_line_content(yytext); return TOKEN_PRIVATE;        }
 <INITIAL>"public"       { ring_interpreter_update_line_content(yytext); return TOKEN_PUBLIC;         }
-<INITIAL>"this"         { ring_interpreter_update_line_content(yytext); return TOKEN_THIS;           }
+<INITIAL>"self"         { ring_interpreter_update_line_content(yytext); return TOKEN_SELF;           }
+<INITIAL>"@"            { ring_interpreter_update_line_content(yytext); return TOKEN_ATTRIBUTE;      }
 
 <INITIAL>"global"       { ring_interpreter_update_line_content(yytext); return TOKEN_GLOBAL;         }
 <INITIAL>"if"           { ring_interpreter_update_line_content(yytext); return TOKEN_IF;             }

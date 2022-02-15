@@ -40,7 +40,8 @@ int yyerror(char const *str);
 %token TOKEN_CLASS
 %token TOKEN_PRIVATE
 %token TOKEN_PUBLIC
-%token TOKEN_THIS
+%token TOKEN_SELF
+%token TOKEN_ATTRIBUTE
 
 %token TOKEN_GLOBAL
 %token TOKEN_IF
