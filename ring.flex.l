@@ -16,7 +16,7 @@ int yywrap(){
 
 
 
-<INITIAL>"type"         { ring_interpreter_update_line_content(yytext); return TOKEN_TYPE;           }
+<INITIAL>"typedef"      { ring_interpreter_update_line_content(yytext); return TOKEN_TYPEDEF;           }
 <INITIAL>"bool"         { ring_interpreter_update_line_content(yytext); return TOKEN_BOOL;           }
 <INITIAL>"int"          { ring_interpreter_update_line_content(yytext); return TOKEN_INT;            }
 <INITIAL>"double"       { ring_interpreter_update_line_content(yytext); return TOKEN_DOUBLE;         }

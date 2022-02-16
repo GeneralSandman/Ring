@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.29-beat"
+#define RING_VERSION "ring-v0.0.30-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -273,6 +273,7 @@ struct ArgumentList_Tag {
 struct Variable_Tag {
     unsigned int line_number;
 
+    int          is_const;
     VariableType type;
     char *       variable_identifer;
     union {
@@ -461,7 +462,7 @@ void insert_identifier(IdentifierType type, char *name);
 
 int       identifier_check_valid(char *identifier);
 Variable *variable_list_add_item(Variable *variable_list, Variable *variable);
-Variable *new_variable(VariableType type, char *identifier, Expression *init_expression);
+Variable *new_variable(VariableType type, char *identifier, Expression *init_expression, int is_const);
 
 Identifier *        new_identifier(IdentifierType type, char *name);
 Identifier *        identifier_list_add_item(Identifier *identifier_list, Identifier *identifier);
