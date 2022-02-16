@@ -46,11 +46,30 @@ StatementExecResult *interpret_statement(Statement *statement, Function *functio
         break;
 
     case STATEMENT_TYPE_VARIABLE_DEFINITION:
-        if (statement->u.variable && statement->u.variable->init_expression) {
-            Ring_BasicValue *tmp = NULL;
-            // TODO:
-            tmp                                       = interpret_binary_expression(statement->u.variable->init_expression, function);
-            statement->u.variable->u.ring_basic_value = tmp;
+        if (statement->u.variable) {
+            if (statement->u.variable->init_expression) {
+                Ring_BasicValue *tmp = NULL;
+                // TODO:
+                tmp                                       = interpret_binary_expression(statement->u.variable->init_expression, function);
+                statement->u.variable->u.ring_basic_value = tmp;
+
+                // 初始化默认值
+            } else if (statement->u.variable->type == VARIABLE_TYPE_BOOL) {
+                Ring_BasicValue *tmp                      = malloc(sizeof(Ring_BasicValue));
+                tmp->type                                 = BASICVALUE_TYPE_BOOL;
+                tmp->u.bool_value                         = BOOL_FALSE;
+                statement->u.variable->u.ring_basic_value = tmp;
+            } else if (statement->u.variable->type == VARIABLE_TYPE_INT) {
+                Ring_BasicValue *tmp                      = malloc(sizeof(Ring_BasicValue));
+                tmp->type                                 = BASICVALUE_TYPE_INT;
+                tmp->u.int_value                          = 0;
+                statement->u.variable->u.ring_basic_value = tmp;
+            } else if (statement->u.variable->type == VARIABLE_TYPE_DOUBLE) {
+                Ring_BasicValue *tmp                      = malloc(sizeof(Ring_BasicValue));
+                tmp->type                                 = BASICVALUE_TYPE_DOUBLE;
+                tmp->u.double_value                       = 0.0;
+                statement->u.variable->u.ring_basic_value = tmp;
+            }
         }
         // TODO:
         break;
