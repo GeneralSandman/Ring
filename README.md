@@ -47,9 +47,7 @@ Reference wikipedia https://zh.wikipedia.org/wiki/%E8%87%B3%E5%B0%8A%E9%AD%94%E6
 
 [如何运行 HelloWorld](./doc/using.md)
 
-## 四、Ring语言语法规范
-
-[Ring语法语义](./doc/语法概念.md)
+## 四、Ring Wiki
 
 https://ring-1252697766.cos-website.ap-beijing.myqcloud.com
 
