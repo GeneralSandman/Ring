@@ -24,14 +24,14 @@ autoTestFunc(){
 	else
 		result="FAILED"
 	fi
-    printf "%-7s %-30s %-30s %-30s\n" $all_num $source_code_file $run_result_file $result
+    printf "%-4s %-60s %-60s [%s]\n" $all_num $source_code_file $run_result_file $result
     let all_num++
     rm $run_result_file_tmp
 }
 
 
 
-printf "%-7s %-30s %-30s %-30s\n" num source_code_file run_result_file result
+printf "%-4s %-60s %-60s %s\n" num source_code_file run_result_file result
 
 for model in "control" "function" "variable"
 do
@@ -48,4 +48,4 @@ do
 done
 
 
-printf "\n\n[pass/all]=%s/%s\n" $pass_num $all_num 
+printf "\n\n pass/all=%s/%s\n" $pass_num $all_num 
