@@ -12,6 +12,7 @@
 * [控制语句for循环](./markdown/控制语句for.md)
 * [函数](./markdown/函数.md)
 * [面向对象](./markdown/面向对象.md)
+* [Ring关键字](./markdown/Ring关键字.md)
 * [Contributer](./markdown/contributer.md)
 * [历史版本](./markdown/历史版本.md)
 * [未来展望](./markdown/未来展望.md)
