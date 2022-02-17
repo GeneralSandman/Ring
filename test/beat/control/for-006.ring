@@ -21,9 +21,9 @@ print("num=", num, "\n");
 
 num = 0;
 
-for(x=0; x<102; x=x+1) {
-	for(y=0; y<103; y=y+1) {
-		for(z=0; z<104; z=z+1) {
+for(x=0; x<11; x=x+1) {
+	for(y=0; y<120; y=y+1) {
+		for(z=0; z<13; z=z+1) {
 			num = num + 1;
 		}
 	}
