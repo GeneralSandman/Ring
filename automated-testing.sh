@@ -44,6 +44,7 @@ do
         autoTestFunc $source_file_path $file
         fi
     done
+    printf "\n"
 
 done
 

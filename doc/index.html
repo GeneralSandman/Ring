@@ -8,7 +8,19 @@
   <meta name="description" content="Description">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
-  <link href="prism-atom-dark.css" rel="stylesheet">
+
+  <!--重置浏览器样式-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css">
+  <!--代码块主题-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.26.0/themes/prism-coy.min.css">
+  <!--工具栏插件-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.26.0/plugins/toolbar/prism-toolbar.min.css">
+  <!--行号插件-->
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.26.0/plugins/line-numbers/prism-line-numbers.min.css">
+
+  <!-- <link href="prism.css" rel="stylesheet" /> -->
+
 </head>
 
 <body>
@@ -18,7 +30,23 @@
       loadSidebar: true,
       loadNavbar: true,
       name: 'Ring',
-      repo: 'https://github.com/GeneralSandman/Ring'
+      repo: 'https://github.com/GeneralSandman/Ring',
+
+      plantuml: {
+        skin: 'classic',
+      },
+      markdown: {
+        renderer: {
+          // 图片居中
+          image: function (href, title, text) {
+            var image_html = this.origin.image.apply(this, arguments)
+            return '<figure>' + image_html + '<figcaption>' + text +
+              '</figcaption></figure>'
+          }
+        }
+      },
+
+
     }
   </script>
 
@@ -26,6 +54,32 @@
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code"></script>
   <script src="//cdn.jsdelivr.net/gh/jerryc127/butterfly_cdn@2.1.0/js/click_heart.js"></script>
+
+  <script src="prism-ring.js"></script>
+
+  <!--prism核心js (用于渲染代码块)-->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.26.0/prism.min.js"></script>
+  <!--显示代码块行号-->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.26.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+  <!--工具栏(一些插件的前置依赖)-->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.26.0/plugins/toolbar/prism-toolbar.min.js"></script>
+  <!--代码块显示语言名称-->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.26.0/plugins/show-language/prism-show-language.min.js"></script>
+  <!--自动去cdn加载对应语言的代码高亮js-->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.26.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+
+
+  <script src="//unpkg.com/docsify-plantuml/dist/docsify-plantuml.min.js"></script>
+
+
+  <!-- <script src="prism.js"></script> -->
+
+  <style>
+    figure {
+      text-align: center
+    }
+  </style>
 
 
 

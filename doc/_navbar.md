@@ -1,3 +1,1 @@
 - **Version:ring-v0.0.30-beat**
-- **Contributer**
-  - 李振虎（zhenhuli/generalsandman）

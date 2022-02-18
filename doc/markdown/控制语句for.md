@@ -1,8 +1,9 @@
 # ```Ring``` 控制语句for
 
-for条件控制语句的语法：
+## for条件控制语句的语法：
 
-```
+
+```ring
 for(init_expression; condition_expression; post_expression) {
     code_block;
 }
@@ -15,8 +16,31 @@ for(init_expression; condition_expression; post_expression) {
 - ```condition_expression```再次检测布尔表达式。循环执行上面的过程。
 
 
-测例：
+## for循环执行流程图：
+
+```plantuml
+@startuml
+
+
+start
+
+:init_expression;
+
+while (condition_expression) is (true)
+  :code_block;
+  :post_expression;
+endwhile (false)
+
+stop
+
+@enduml
 ```
+
+
+
+
+测例：
+```ring
 var int int_value = 0;
 
 for(int_value=1; int_value<10; int_value = int_value+1) {
@@ -26,4 +50,20 @@ for(int_value=1; int_value<10; int_value = int_value+1) {
 ```
 
 
-如果 ```init_expression``` ```condition_expression``` ```post_expression```
+如果 ```init_expression```、```condition_expression```、```post_expression``` 都是空的话，就相当与死循环，相当于 ```while(true)``` ：
+
+```plantuml
+@startuml
+
+
+start
+
+
+while (true) is (true)
+  :code_block;
+endwhile (false)
+
+stop
+
+@enduml
+```
