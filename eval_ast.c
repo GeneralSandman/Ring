@@ -86,6 +86,10 @@ StatementExecResult *interpret_statement(Statement *statement, Function *functio
         result = interpret_statement_for(statement->u.for_statement, function);
         break;
 
+    case STATEMENT_TYPE_DOWHILE:
+        result = interpret_statement_dowhile(statement->u.dowhile_statement, function);
+        break;
+
     case STATEMENT_TYPE_BREAK:
         result = interpret_statement_break(statement->u.break_statement, function);
         break;
@@ -205,6 +209,40 @@ StatementExecResult *interpret_statement_for(ForStatement *for_statement, Functi
             interpret_expression(for_statement->post_expression, function);
         }
     }
+
+ENDFOR:
+    return result;
+}
+
+StatementExecResult *interpret_statement_dowhile(DoWhileStatement *dowhile_statement, Function *function) {
+    StatementExecResult *result = NULL;
+    result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+
+    Ring_BasicValue *tmp = NULL;
+
+    do {
+        result = interpret_statement_list(dowhile_statement->block, function);
+        if (result != NULL) {
+            if (result->type == STATEMENT_EXEC_RESULT_TYPE_BREAK) {
+                result->type = STATEMENT_EXEC_RESULT_TYPE_NORMAL;
+                goto ENDFOR;
+            } else if (result->type == STATEMENT_EXEC_RESULT_TYPE_CONTINUE) {
+                result->type = STATEMENT_EXEC_RESULT_TYPE_NORMAL;
+            } else if (result->type == STATEMENT_EXEC_RESULT_TYPE_RETURN) {
+                goto ENDFOR;
+            }
+        }
+
+        tmp = interpret_expression(dowhile_statement->condition_expression, function);
+        if (tmp == NULL || tmp->type != BASICVALUE_TYPE_BOOL) {
+            runtime_err_log("the result of for statement condition_expression is not bool!");
+            exit(1);
+        }
+
+        if (tmp->u.bool_value == BOOL_FALSE) {
+            break;
+        }
+    } while (1);
 
 ENDFOR:
     return result;

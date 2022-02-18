@@ -16,7 +16,7 @@ int yywrap(){
 
 
 
-<INITIAL>"typedef"      { ring_interpreter_update_line_content(yytext); return TOKEN_TYPEDEF;           }
+<INITIAL>"typedef"      { ring_interpreter_update_line_content(yytext); return TOKEN_TYPEDEF;        }
 <INITIAL>"bool"         { ring_interpreter_update_line_content(yytext); return TOKEN_BOOL;           }
 <INITIAL>"int"          { ring_interpreter_update_line_content(yytext); return TOKEN_INT;            }
 <INITIAL>"double"       { ring_interpreter_update_line_content(yytext); return TOKEN_DOUBLE;         }
@@ -37,6 +37,7 @@ int yywrap(){
 <INITIAL>"elseif"       { ring_interpreter_update_line_content(yytext); return TOKEN_ELSEIF;         }
 <INITIAL>"else"         { ring_interpreter_update_line_content(yytext); return TOKEN_ELSE;           }
 <INITIAL>"for"          { ring_interpreter_update_line_content(yytext); return TOKEN_FOR;            }
+<INITIAL>"do"           { ring_interpreter_update_line_content(yytext); return TOKEN_DO;             }
 <INITIAL>"while"        { ring_interpreter_update_line_content(yytext); return TOKEN_WHILE;          }
 <INITIAL>"break"        { ring_interpreter_update_line_content(yytext); return TOKEN_BREAK;          }
 <INITIAL>"continue"     { ring_interpreter_update_line_content(yytext); return TOKEN_CONTINUE;       }

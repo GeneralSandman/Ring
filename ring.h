@@ -37,6 +37,8 @@ typedef struct ElseIfStatement_Tag ElseIfStatement;
 
 typedef struct ForStatement_Tag ForStatement;
 
+typedef struct DoWhileStatement_Tag DoWhileStatement;
+
 typedef struct BreakStatement_Tag BreakStatement;
 
 typedef struct ContinueStatement_Tag ContinueStatement;
@@ -102,6 +104,7 @@ typedef enum {
     STATEMENT_TYPE_RETURN,
     STATEMENT_TYPE_IF,
     STATEMENT_TYPE_FOR,
+    STATEMENT_TYPE_DOWHILE,
     STATEMENT_TYPE_BREAK,
     STATEMENT_TYPE_CONTINUE,
 } StatementType;
@@ -185,6 +188,7 @@ struct Statement_Tag {
         Expression *       return_expression;
         IfStatement *      if_statement;
         ForStatement *     for_statement;
+        DoWhileStatement * dowhile_statement;
         BreakStatement *   break_statement;
         ContinueStatement *continue_statement;
     } u;
@@ -350,6 +354,15 @@ struct ForStatement_Tag {
     Statement *  block;
 };
 
+struct DoWhileStatement_Tag {
+    unsigned int line_number;
+
+    Expression *condition_expression;
+
+    unsigned int block_size;
+    Statement *  block;
+};
+
 struct BreakStatement_Tag {
     unsigned int line_number;
 };
@@ -478,6 +491,7 @@ StatementExecResult *interpret_statement_continue(ContinueStatement *statement, 
 StatementExecResult *interpret_statement_return(Statement *statement, Function *function);
 StatementExecResult *interpret_statement_if(IfStatement *if_statement, Function *function);
 StatementExecResult *interpret_statement_for(ForStatement *for_statement, Function *function);
+StatementExecResult *interpret_statement_dowhile(DoWhileStatement *dowhile_statement, Function *function);
 Ring_BasicValue *    interpret_expression(Expression *expression, Function *function);
 Ring_BasicValue *    search_variable_value(char *identifier, Function *origin_function);
 StatementExecResult *invoke_function(FunctionCallExpression *function_call_expression, Function *function);
@@ -525,6 +539,8 @@ ElseIfStatement *       create_elseif_statement(Expression *expression, Statemen
 ElseIfStatement *       elseif_statement_add_item(ElseIfStatement *list, ElseIfStatement *elseif_statement);
 Statement *             create_statement_from_for(ForStatement *for_statement);
 ForStatement *          create_for_statement(Expression *init_expression, Expression *condition_expression, Expression *post_expression, Statement *block);
+Statement *             create_statement_from_dowhile(DoWhileStatement *dowhile_statement);
+DoWhileStatement *      create_dowhile_statement(Statement *block, Expression *condition_expression);
 Statement *             create_statement_from_break();
 Statement *             create_statement_from_continue();
 // Identifier *            create_identifier(IdentifierType type, char *name);
