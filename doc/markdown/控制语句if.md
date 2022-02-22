@@ -3,7 +3,7 @@
 ## if条件控制语句的语法：
 
 ```ring
-if(condition_expression_1)) {
+if(condition_expression_1) {
     code_block_1;
 }
 ```
@@ -34,7 +34,7 @@ stop
 
 
 ```ring
-if(condition_expression_1)) {
+if(condition_expression_1) {
     code_block_1;
 } else {
     code_block_2;
@@ -70,7 +70,7 @@ stop
 
 
 ```ring
-if(condition_expression_1)) {
+if(condition_expression_1) {
     code_block_1;
 } elseif(condition_expression_2) {
     code_block_2;
