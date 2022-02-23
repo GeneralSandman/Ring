@@ -42,6 +42,7 @@ int yyerror(char const *str);
 %token TOKEN_BIND 
 %token TOKEN_LAMBDA 
 %token TOKEN_RETURN
+%token TOKEN_DEFER
 
 %token TOKEN_CLASS
 %token TOKEN_PRIVATE

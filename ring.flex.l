@@ -25,6 +25,7 @@ int yywrap(){
 <INITIAL>"bind"         { ring_interpreter_update_line_content(yytext); return TOKEN_BIND;           }
 <INITIAL>"lambda"       { ring_interpreter_update_line_content(yytext); return TOKEN_LAMBDA;         }
 <INITIAL>"return"       { ring_interpreter_update_line_content(yytext); return TOKEN_RETURN;         }
+<INITIAL>"defer"        { ring_interpreter_update_line_content(yytext); return TOKEN_DEFER;          }
 
 <INITIAL>"class"        { ring_interpreter_update_line_content(yytext); return TOKEN_CLASS;          }
 <INITIAL>"private"      { ring_interpreter_update_line_content(yytext); return TOKEN_PRIVATE;        }
