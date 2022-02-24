@@ -4,7 +4,7 @@ Prism.languages.ring = Prism.languages.extend('clike', {
         lookbehind: true,
         greedy: true
     },
-    'keyword': /\b(?:break|case|chan|const|continue|int|default|defer|else|elseif|fallthrough|for|func|ring(?:to)?|if|return|switch|var|public|private|typedef|class|function)\b/,
+    'keyword': /\b(?:break|case|chan|const|continue|int|default|defer|else|elseif|fallthrough|for|do|while|func|ring(?:to)?|if|return|switch|var|public|private|typedef|class|function)\b/,
     'boolean': /\b(?:_|false|true)\b/,
     'number': [
         // binary and octal integers

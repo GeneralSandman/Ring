@@ -14,9 +14,15 @@
 
 ```
 
-Ash nazg durbatulûk, ash nazg gimbatul, ash nazg thrakatulûk, agh burzum-ishi krimpatul.
+Ash nazg durbatulûk
+Ash nazg gimbatul
+Ash nazg thrakatulûk
+Agh burzum-ishi krimpatul
 
-魔戒全属至尊御，至尊指引诸魔戒，至尊魔戒唤众戒，众戒归一黑暗中。
+魔戒全属至尊御
+至尊指引诸魔戒
+至尊魔戒唤众戒
+众戒归一黑暗中
 
 ```
 
