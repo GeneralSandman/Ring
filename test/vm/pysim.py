@@ -64,6 +64,7 @@ def assemb(asmfilename):
             ist = line
 
         dire, sep, arg = ist.partition(' ')
+        print(dire, sep, arg)
 
         if len(dire) > 4 and \
                 (dire[-4:] == '.arg' or dire[-4:] == '.var'):

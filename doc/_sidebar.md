@@ -25,5 +25,8 @@
   - [**历史版本**](./markdown/历史版本.md)
   - [**未来展望**](./markdown/未来展望.md)
   - [**Contributer**](./markdown/contributer.md)
+* [**番外篇**](./markdown/番外篇.md)
+  - [**如何用C++11实现一个简单的栈式虚拟机**](./markdown/如何用C++11实现一个简单的栈式虚拟机.md)
+
 
 

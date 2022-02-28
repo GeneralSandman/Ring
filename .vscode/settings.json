@@ -19,6 +19,9 @@
         "cmath": "c",
         "complex": "c",
         "string_view": "c",
-        "initializer_list": "c"
+        "initializer_list": "c",
+        "unordered_map": "cpp",
+        "stack": "cpp",
+        "iosfwd": "cpp"
     }
 }
