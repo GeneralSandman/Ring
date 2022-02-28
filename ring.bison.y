@@ -316,6 +316,13 @@ variable_definition
 
         $$ = new_variable($2, $3, NULL, 0);
     }
+    | TOKEN_VAR variable_type TOKEN_LB literal_term TOKEN_RB identifier
+    {
+        debug_log_with_green_coloar("[RULE::variable_definition]\t ", "");
+
+        $$ = new_variable_array($2, $4, $6, NULL, 0);
+
+    }
     ;
 
 variable_definition_with_assign
@@ -623,6 +630,11 @@ literal_term
         debug_log_with_green_coloar("[RULE::literal_term:identifier]\t ", "");
         $$ = create_expression_identifier($1);
     }
+    | identifier TOKEN_LB expression TOKEN_RB
+    {
+        $$ = create_expression_identifier_with_index($1, $3);
+
+    }
     ;
 
 function_call_expression
@@ -651,6 +663,11 @@ assign_expression
     {
         debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
         $$ = create_multi_assign_expression($1, $3, NULL, $5);
+    }
+    | identifier TOKEN_LB expression TOKEN_RB TOKEN_ASSIGN expression
+    {
+        // $$ = create_multi_
+
     }
     ;
 

@@ -101,6 +101,22 @@ Expression *create_expression_identifier(char *identifier) {
     return expression;
 }
 
+Expression *create_expression_identifier_with_index(char *identifier, Expression *index) {
+    debug_log_with_yellow_coloar("identifier:%s", identifier);
+
+    ArrayIndexExpression *array_index_expression = malloc(sizeof(ArrayIndexExpression));
+    array_index_expression->line_number          = get_ring_interpreter_line_number();
+    array_index_expression->variable_identifier  = identifier;
+    array_index_expression->index_expression     = index;
+
+    Expression *expression               = malloc(sizeof(Expression));
+    expression->line_number              = get_ring_interpreter_line_number();
+    expression->type                     = EXPRESSION_TYPE_ARRAY_INDEX;
+    expression->u.array_index_expression = array_index_expression;
+
+    return expression;
+}
+
 Expression *create_expression_(FunctionCallExpression *function_call_expression) {
     debug_log_with_yellow_coloar("function_call_expression->name:%s", function_call_expression->function_name);
 
@@ -559,6 +575,26 @@ Variable *new_variable(VariableType type, char *identifier, Expression *init_exp
 
     variable->is_const           = is_const;
     variable->type               = type;
+    variable->variable_identifer = identifier;
+    variable->u.ring_basic_value = NULL;
+    variable->init_expression    = init_expression;
+    variable->next               = NULL;
+
+    insert_identifier(IDENTIFIER_TYPE_VARIABLE, identifier);
+    return variable;
+}
+
+Variable *new_variable_array(VariableType type, Expression *size, char *identifier, Expression *init_expression, int is_const) {
+    debug_log_with_yellow_coloar("\t type(%d),size(%d),identifier(%s)", type, size, identifier);
+
+    // 这个应该放到解释的时候
+
+    Variable *variable = malloc(sizeof(Variable));
+
+    variable->line_number        = get_ring_interpreter_line_number();
+    variable->is_const           = is_const;
+    variable->type               = VARIABLE_TYPE_ARRAY;
+    variable->array_member_type  = type;
     variable->variable_identifer = identifier;
     variable->u.ring_basic_value = NULL;
     variable->init_expression    = init_expression;

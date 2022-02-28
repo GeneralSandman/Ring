@@ -69,6 +69,27 @@ StatementExecResult *interpret_statement(Statement *statement, Function *functio
                 tmp->type                                 = BASICVALUE_TYPE_DOUBLE;
                 tmp->u.double_value                       = 0.0;
                 statement->u.variable->u.ring_basic_value = tmp;
+            } else if (statement->u.variable->type == VARIABLE_TYPE_ARRAY) {
+                // 找到size值
+                // 确定存储空间
+                // 同时确定存储类型
+
+                unsigned int size = 10; // FIXME:
+
+                Ring_BasicValue *value     = malloc(sizeof(Ring_BasicValue));
+                value->type                = BASICVALUE_TYPE_ARRAY;
+                value->array_member_type   = BASICVALUE_TYPE_INT; // FIXME:
+                value->u.array_value       = (Ring_Array *)malloc(sizeof(Ring_Array));
+                value->u.array_value->size = size;
+                value->u.array_value->data = malloc(sizeof(Ring_BasicValue) * size);
+
+                for (unsigned int i = 0; i < size; i++) {
+                    Ring_BasicValue *tmp = value->u.array_value->data + i;
+                    tmp->type            = BASICVALUE_TYPE_INT;
+                    tmp->u.int_value     = 0; // 初始化默认值
+                    tmp->next            = NULL;
+                }
+                statement->u.variable->u.ring_basic_value = value;
             }
         }
         // TODO:
@@ -319,6 +340,10 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
         result = interpret_binary_expression_realational(expression, function);
         break;
 
+    case EXPRESSION_TYPE_ARRAY_INDEX:
+        result = interpret_array_index_expression(expression->u.array_index_expression, function);
+        break;
+
     default:
         break;
     }
@@ -378,6 +403,76 @@ Ring_BasicValue *interpret_variable_expression(char *variable_identifier, Functi
     case VARIABLE_TYPE_STRING:
         result->type           = BASICVALUE_TYPE_STRING;
         result->u.string_value = variable->u.ring_basic_value->u.string_value;
+        break;
+    default:
+        break;
+    }
+
+    return result;
+}
+
+// TODO:
+Ring_BasicValue *interpret_array_index_expression(ArrayIndexExpression *expression, Function *function) {
+    // 查找相应的变量值
+    char *    variable_identifier = expression->variable_identifier;
+    Variable *variable            = NULL;
+    // 查找局部变量
+    if (function != NULL) {
+        for (Variable *pos = function->variable_list; pos != NULL; pos = pos->next) {
+            if (0 == strcmp(pos->variable_identifer, variable_identifier)) {
+                variable = pos;
+            }
+        }
+    }
+
+    if (variable != NULL) {
+        debug_log_with_blue_coloar("find match local variable\n");
+    } else {
+        // 查找全局变量
+        for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+            if (0 == strcmp(pos->variable_identifer, variable_identifier)) {
+                variable = pos;
+            }
+        }
+    }
+
+    if (variable == NULL) {
+        debug_log_with_blue_coloar("find not match global variable\n");
+        return NULL;
+    }
+
+    // FIXME: 存在内存泄漏
+    Ring_BasicValue *result;
+
+    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result->next = NULL;
+
+    Ring_BasicValue *tmp = NULL;
+    switch (variable->type) {
+    case VARIABLE_TYPE_BOOL:
+        result->type         = BASICVALUE_TYPE_BOOL;
+        result->u.bool_value = variable->u.ring_basic_value->u.bool_value;
+        break;
+    case VARIABLE_TYPE_INT:
+        result->type        = BASICVALUE_TYPE_INT;
+        result->u.int_value = variable->u.ring_basic_value->u.int_value;
+        break;
+    case VARIABLE_TYPE_DOUBLE:
+        result->type           = BASICVALUE_TYPE_DOUBLE;
+        result->u.double_value = variable->u.ring_basic_value->u.double_value;
+        break;
+
+    case VARIABLE_TYPE_STRING:
+        result->type           = BASICVALUE_TYPE_STRING;
+        result->u.string_value = variable->u.ring_basic_value->u.string_value;
+        break;
+
+    case VARIABLE_TYPE_ARRAY:
+        // FIXME: 详细检查 index 的类型
+        tmp                 = interpret_expression(expression->index_expression, function);
+        unsigned int index  = tmp->u.int_value;
+        result->type        = BASICVALUE_TYPE_INT;                                                  // FIXME:
+        result->u.int_value = variable->u.ring_basic_value->u.array_value->data[index].u.int_value; // FIXME:
         break;
     default:
         break;

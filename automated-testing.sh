@@ -33,7 +33,7 @@ autoTestFunc(){
 
 printf "%-4s %-60s %-60s %s\n" num source_code_file run_result_file result
 
-for model in "control" "function" "variable"
+for model in "control" "function" "variable" "array"
 do
 
     source_file_path=$TEST_PATH"/"$model

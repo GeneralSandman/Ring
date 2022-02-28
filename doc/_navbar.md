@@ -1,1 +1,1 @@
-- **Version:ring-v0.0.31-beat**
+- **Version:ring-v0.0.32-beat**

@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.31-beat"
+#define RING_VERSION "ring-v0.0.32-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -9,11 +9,15 @@ typedef struct Ring_String_Tag Ring_String;
 
 typedef struct Ring_BasicValue_Tag Ring_BasicValue;
 
+typedef struct Ring_Array_Tag Ring_Array;
+
 typedef struct Statement_Tag Statement;
 
 typedef struct StatementExecResult_Tag StatementExecResult;
 
 typedef struct Expression_Tag Expression;
+
+typedef struct ArrayIndexExpression_Tag ArrayIndexExpression;
 
 typedef struct BinaryExpression_Tag BinaryExpression;
 
@@ -72,6 +76,7 @@ typedef enum {
 typedef enum {
     IDENTIFIER_TYPE_UNKNOW = 0,
     IDENTIFIER_TYPE_VARIABLE,
+    IDENTIFIER_TYPE_VARIABLE_ARRAY,
     IDENTIFIER_TYPE_FUNCATION,
 } IdentifierType;
 
@@ -133,6 +138,8 @@ typedef enum {
     EXPRESSION_TYPE_RELATIONAL_GE,
     EXPRESSION_TYPE_RELATIONAL_LT,
     EXPRESSION_TYPE_RELATIONAL_LE,
+
+    EXPRESSION_TYPE_ARRAY_INDEX,
 } ExpressionType;
 
 typedef enum {
@@ -148,6 +155,8 @@ typedef enum {
     VARIABLE_TYPE_DOUBLE,
     VARIABLE_TYPE_CHAR,
     VARIABLE_TYPE_STRING,
+    VARIABLE_TYPE_ARRAY,
+    VARIABLE_TYPE_CLASS,
 } VariableType;
 
 typedef enum {
@@ -163,19 +172,34 @@ typedef enum {
     BASICVALUE_TYPE_DOUBLE,
     BASICVALUE_TYPE_CHAR,
     BASICVALUE_TYPE_STRING,
+    BASICVALUE_TYPE_ARRAY,
 } BasicValueType;
 
 struct Ring_BasicValue_Tag {
     BasicValueType type;
+    BasicValueType array_member_type;
+
     union {
-        Ring_Bool bool_value;
-        int       int_value;
-        double    double_value;
-        char      char_value;
-        char *    string_value;
+        Ring_Bool   bool_value;
+        int         int_value;
+        double      double_value;
+        char        char_value;
+        char *      string_value; // 暂时没用到
+        Ring_Array *array_value;
     } u;
     Ring_BasicValue *next; // FIXME: 这个用在 return 多个的时候 return 1,2; 见 interpret_binary_expression:invoke_function
     // FIXME: 以后更改这个地方
+};
+
+struct Ring_String {
+    unsigned int size;
+    unsigned int capacity;
+    char *       data;
+};
+
+struct Ring_Array_Tag {
+    unsigned int     size;
+    Ring_BasicValue *data;
 };
 
 struct Statement_Tag {
@@ -219,9 +243,17 @@ struct Expression_Tag {
         AssignExpression *      assign_expression;
         BinaryExpression *      binary_expression;
         Expression *            unitary_expression;
+        ArrayIndexExpression *  array_index_expression;
     } u;
 
     Expression *next;
+};
+
+struct ArrayIndexExpression_Tag {
+    unsigned int line_number;
+
+    char *      variable_identifier;
+    Expression *index_expression;
 };
 
 struct FunctionCallExpression_Tag {
@@ -235,6 +267,7 @@ struct Identifier_Tag {
 
     IdentifierType type;
     char *         identifier_name;
+    unsigned int   array_index; // 供数组使用，还要考虑一下负值索引的问题
 
     Function *parent_scope; //作用域
     /*
@@ -251,6 +284,7 @@ struct Identifier_Tag {
     Identifier *next;
 };
 
+// TODO: 这里还要兼容 数组元素赋值
 struct AssignExpression_Tag {
     char *       assign_identifier; // TODO: 以后不应该使用这个 删除调
     unsigned int assign_identifier_size;
@@ -277,9 +311,12 @@ struct ArgumentList_Tag {
 struct Variable_Tag {
     unsigned int line_number;
 
-    int          is_const;
+    char *variable_identifer;
+    int   is_const;
+
     VariableType type;
-    char *       variable_identifer;
+    VariableType array_member_type; // 数组里的内置类型
+
     union {
         Ring_BasicValue *ring_basic_value;
     } u;
@@ -476,6 +513,7 @@ void insert_identifier(IdentifierType type, char *name);
 int       identifier_check_valid(char *identifier);
 Variable *variable_list_add_item(Variable *variable_list, Variable *variable);
 Variable *new_variable(VariableType type, char *identifier, Expression *init_expression, int is_const);
+Variable *new_variable_array(VariableType type, Expression *size, char *identifier, Expression *init_expression, int is_const);
 
 Identifier *        new_identifier(IdentifierType type, char *name);
 Identifier *        identifier_list_add_item(Identifier *identifier_list, Identifier *identifier);
@@ -497,6 +535,7 @@ Ring_BasicValue *    search_variable_value(char *identifier, Function *origin_fu
 StatementExecResult *invoke_function(FunctionCallExpression *function_call_expression, Function *function);
 StatementExecResult *invoke_external_function(Function *function);
 Ring_BasicValue *    interpret_variable_expression(char *variable_identifier, Function *function);
+Ring_BasicValue *    interpret_array_index_expression(ArrayIndexExpression *expression, Function *function);
 Ring_BasicValue *    interpret_binary_expression_arithmetic(Expression *expression, Function *origin_function);
 Ring_BasicValue *    interpret_binary_expression_realational(Expression *expression, Function *function);
 Ring_BasicValue *    interpret_binary_expression_logical(Expression *expression, Function *function);
@@ -517,6 +556,7 @@ Statement *             create_return_statement(Expression *expression);
 void                    add_function_definition(Function *function_definition);
 Expression *            create_expression();
 Expression *            create_expression_identifier(char *identifier);
+Expression *            create_expression_identifier_with_index(char *identifier, Expression *index);
 Expression *            create_expression_(FunctionCallExpression *function_call_expression);
 Expression *            create_expression__(AssignExpression *assign_expression);
 Expression *            create_expression_binary(ExpressionType type, Expression *left, Expression *right);
