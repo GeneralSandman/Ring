@@ -60,6 +60,14 @@ int yywrap(){
 <INITIAL>"-"            { ring_interpreter_update_line_content(yytext); return TOKEN_SUB;            }
 <INITIAL>"*"            { ring_interpreter_update_line_content(yytext); return TOKEN_MUL;            }
 <INITIAL>"/"            { ring_interpreter_update_line_content(yytext); return TOKEN_DIV;            }
+<INITIAL>"%"            { ring_interpreter_update_line_content(yytext); return TOKEN_MOD;            }
+<INITIAL>"++"           { ring_interpreter_update_line_content(yytext); return TOKEN_INCREASE;       }
+<INITIAL>"--"           { ring_interpreter_update_line_content(yytext); return TOKEN_DECREASE;       }
+<INITIAL>"+="           { ring_interpreter_update_line_content(yytext); return TOKEN_ADD_ASSIGN;     }
+<INITIAL>"-="           { ring_interpreter_update_line_content(yytext); return TOKEN_SUB_ASSIGN;     }
+<INITIAL>"*="           { ring_interpreter_update_line_content(yytext); return TOKEN_MUL_ASSIGN;     }
+<INITIAL>"/="           { ring_interpreter_update_line_content(yytext); return TOKEN_DIV_ASSIGN;     }
+<INITIAL>"%="           { ring_interpreter_update_line_content(yytext); return TOKEN_MOD_ASSIGN;     }
 
 <INITIAL>"and"          { ring_interpreter_update_line_content(yytext); return TOKEN_AND;            }
 <INITIAL>"or"           { ring_interpreter_update_line_content(yytext); return TOKEN_OR;             }

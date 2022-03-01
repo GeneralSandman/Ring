@@ -77,6 +77,14 @@ int yyerror(char const *str);
 %token TOKEN_SUB
 %token TOKEN_MUL
 %token TOKEN_DIV
+%token TOKEN_MOD
+%token TOKEN_INCREASE
+%token TOKEN_DECREASE
+%token TOKEN_ADD_ASSIGN
+%token TOKEN_SUB_ASSIGN
+%token TOKEN_MUL_ASSIGN
+%token TOKEN_DIV_ASSIGN
+%token TOKEN_MOD_ASSIGN
 
 %token TOKEN_AND
 %token TOKEN_OR
@@ -636,6 +644,16 @@ literal_term
     {
         debug_log_with_green_coloar("[RULE::literal_term:identifier]\t ", "");
         $$ = create_expression_identifier($1);
+    }
+    | identifier TOKEN_INCREASE
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ", "");
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE, create_expression_identifier($1));
+    }
+    | identifier TOKEN_DECREASE
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ", "");
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE, create_expression_identifier($1));
     }
     | identifier TOKEN_LB expression TOKEN_RB
     {

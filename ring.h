@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.33-beat"
+#define RING_VERSION "ring-v0.0.34-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -135,7 +135,9 @@ typedef enum {
     EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS, // 一元操作符 负号
     EXPRESSION_TYPE_LOGICAL_AND,
     EXPRESSION_TYPE_LOGICAL_OR,
-    EXPRESSION_TYPE_LOGICAL_UNITARY_NOT, // 一元操作符 非 not
+    EXPRESSION_TYPE_LOGICAL_UNITARY_NOT, // 一元操作符 逻辑 非 not
+    EXPRESSION_TYPE_UNITARY_INCREASE,    // 一元操作符 ++
+    EXPRESSION_TYPE_UNITARY_DECREASE,    // 一元操作符 ++
     EXPRESSION_TYPE_RELATIONAL_EQ,
     EXPRESSION_TYPE_RELATIONAL_NE,
     EXPRESSION_TYPE_RELATIONAL_GT,
@@ -554,6 +556,7 @@ Ring_BasicValue *    interpret_binary_expression_logical(Expression *expression,
 Ring_BasicValue *    interpret_ternary_condition_expression(Expression *expression, Function *origin_function);
 Ring_BasicValue *    interpret_binary_expression(Expression *expression, Function *origin_function);
 Ring_BasicValue *    interpret_unitary_expression(Expression *expression, Function *origin_function);
+Ring_BasicValue *    interpret_unitary_expression_(Expression *expression, Function *origin_function);
 void                 assign(Expression *expression, Function *function);
 
 // 上下文相关语义检查
