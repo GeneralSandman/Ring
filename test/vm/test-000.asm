@@ -41,7 +41,7 @@ println a=%d
 ; 实现 a = 2 / 2
 push 2
 push 2
-sub
+div
 pop a
 
 push a

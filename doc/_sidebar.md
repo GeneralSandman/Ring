@@ -21,12 +21,12 @@
 * [**面向对象**](./markdown/面向对象.md)
 * [**Ring关键字**](./markdown/Ring关键字.md)
 * [**Ring设计**](./markdown/Ring设计.md)
-  - [**Ring设计思想**](./markdown/Ring设计思想.md)
-  - [**历史版本**](./markdown/历史版本.md)
-  - [**未来展望**](./markdown/未来展望.md)
-  - [**Contributer**](./markdown/contributer.md)
+  - [Ring设计思想](./markdown/Ring设计思想.md)
+  - [历史版本](./markdown/历史版本.md)
+  - [未来展望](./markdown/未来展望.md)
+  - [Contributer](./markdown/contributer.md)
 * [**番外篇**](./markdown/番外篇.md)
-  - [**如何用C++11实现一个简单的栈式虚拟机**](./markdown/如何用C++11实现一个简单的栈式虚拟机.md)
+  - [如何用C++11实现一个简单的栈式虚拟机](./markdown/如何用C++11实现一个简单的栈式虚拟机.md)
 
 
 
