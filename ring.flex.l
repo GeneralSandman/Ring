@@ -82,6 +82,7 @@ int yywrap(){
 <INITIAL>","            { ring_interpreter_update_line_content(yytext); return TOKEN_COMMA;          }
 <INITIAL>":"            { ring_interpreter_update_line_content(yytext); return TOKEN_COLON;          }
 <INITIAL>";"            { ring_interpreter_update_line_content(yytext); return TOKEN_SEMICOLON;      }
+<INITIAL>"?"            { ring_interpreter_update_line_content(yytext); return TOKEN_QUESTION_MARK;  }
 <INITIAL>"="            { ring_interpreter_update_line_content(yytext); return TOKEN_ASSIGN;         }
 
 <INITIAL>[A-Za-z_][A-Za-z_0-9]* {

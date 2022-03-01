@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/bin/ring",
             "args": [
-                "${workspaceFolder}/test/beat/array/array-000.ring"
+                "${workspaceFolder}/test/beat/variable/ternary-operation-000.ring"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.32-beat"
+#define RING_VERSION "ring-v0.0.33-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 
@@ -20,6 +20,8 @@ typedef struct Expression_Tag Expression;
 typedef struct ArrayIndexExpression_Tag ArrayIndexExpression;
 
 typedef struct BinaryExpression_Tag BinaryExpression;
+
+typedef struct TernaryExpression_Tag TernaryExpression;
 
 typedef struct FunctionCallExpression_Tag FunctionCallExpression;
 
@@ -123,6 +125,8 @@ typedef enum {
     EXPRESSION_TYPE_VARIABLE,
     EXPRESSION_TYPE_FUNCTION_CALL,
     EXPRESSION_TYPE_ASSIGN,
+
+    EXPRESSION_TYPE_TERNARY, // 三目运算
 
     EXPRESSION_TYPE_ARITHMETIC_ADD,
     EXPRESSION_TYPE_ARITHMETIC_SUB,
@@ -241,6 +245,7 @@ struct Expression_Tag {
         char *                  variable_identifier;
         FunctionCallExpression *function_call_expression;
         AssignExpression *      assign_expression;
+        TernaryExpression *     ternary_expression;
         BinaryExpression *      binary_expression;
         Expression *            unitary_expression;
         ArrayIndexExpression *  array_index_expression;
@@ -297,6 +302,13 @@ struct AssignExpression_Tag {
 struct BinaryExpression_Tag {
     Expression *left_expression;
     Expression *right_expression;
+};
+
+// 三元运算符
+struct TernaryExpression_Tag {
+    Expression *condition_expression;
+    Expression *true_expression;
+    Expression *false_expression;
 };
 
 struct ArgumentList_Tag {
@@ -539,6 +551,7 @@ Ring_BasicValue *    interpret_array_index_expression(ArrayIndexExpression *expr
 Ring_BasicValue *    interpret_binary_expression_arithmetic(Expression *expression, Function *origin_function);
 Ring_BasicValue *    interpret_binary_expression_realational(Expression *expression, Function *function);
 Ring_BasicValue *    interpret_binary_expression_logical(Expression *expression, Function *function);
+Ring_BasicValue *    interpret_ternary_condition_expression(Expression *expression, Function *origin_function);
 Ring_BasicValue *    interpret_binary_expression(Expression *expression, Function *origin_function);
 Ring_BasicValue *    interpret_unitary_expression(Expression *expression, Function *origin_function);
 void                 assign(Expression *expression, Function *function);
@@ -559,6 +572,7 @@ Expression *            create_expression_identifier(char *identifier);
 Expression *            create_expression_identifier_with_index(char *identifier, Expression *index);
 Expression *            create_expression_(FunctionCallExpression *function_call_expression);
 Expression *            create_expression__(AssignExpression *assign_expression);
+Expression *            create_expression_ternary(Expression *condition, Expression * true, Expression * false);
 Expression *            create_expression_binary(ExpressionType type, Expression *left, Expression *right);
 Expression *            create_expression_unitary(ExpressionType type, Expression *unitary_expression);
 Expression *            create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression *expression);

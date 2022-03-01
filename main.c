@@ -83,7 +83,6 @@ void ring_interactive_program() {
     extern FILE *     yyin;
     Ring_Interpreter *ring_interpreter;
     time_t            rand_int;
-    FILE *            tmp_source_file;
     char              tmp_source_file_name[1024];
     char              save_file_name[1024];
     char *            input_line_contents[1024];
@@ -171,9 +170,10 @@ int write_tmp_source_file(char *tmp_source_file_name, int start_line_num, int li
     }
 
     for (int i = start_line_num; i < start_line_num + line_size; i++) {
-        fprintf(tmp_source_file, (const char *)input_line_contents[i]);
+        fprintf(tmp_source_file, "%s", input_line_contents[i]);
     }
 
     fflush(tmp_source_file);
     fclose(tmp_source_file);
+    return 0;
 }

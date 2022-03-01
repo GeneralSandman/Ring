@@ -305,6 +305,10 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
         assign(expression, function);
         break;
 
+    case EXPRESSION_TYPE_TERNARY:
+        result = interpret_ternary_condition_expression(expression, function);
+        break;
+
         // case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
         // case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
         //     result = interpret_unitary_expression(expression, function);
@@ -655,6 +659,34 @@ Ring_BasicValue *interpret_binary_expression_logical(Expression *expression, Fun
     return result;
 }
 
+Ring_BasicValue *interpret_ternary_condition_expression(Expression *expression, Function *origin_function) {
+    Ring_BasicValue *result;
+
+    Expression *condition_expression = expression->u.ternary_expression->condition_expression;
+    Expression *true_expression      = expression->u.ternary_expression->true_expression;
+    Expression *false_expression     = expression->u.ternary_expression->false_expression;
+
+    if (condition_expression == NULL) {
+        // error
+        // TODO:
+        exit(1);
+    }
+
+    Ring_BasicValue *cond = interpret_expression(condition_expression, origin_function);
+    if (cond == NULL || cond->type != BASICVALUE_TYPE_BOOL) {
+        runtime_err_log("the result of if statement expression is not bool!");
+        exit(1);
+    }
+
+    if (cond->u.bool_value) {
+        result = interpret_expression(true_expression, origin_function);
+    } else {
+        result = interpret_expression(false_expression, origin_function);
+    }
+
+    return result;
+}
+
 Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *origin_function) {
     // debug_log_with_blue_coloar("expression->type:%d", expression->type);
     // TODO: 还要考虑各个变量的类型
@@ -733,6 +765,10 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
         // if (tmp != NULL) {
         //     result = tmp->u.return_value;
         // }
+        break;
+
+    case EXPRESSION_TYPE_TERNARY:
+        result = interpret_ternary_condition_expression(expression, origin_function);
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_ADD:

@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 #include "ring.h"
 
 void create_statement_list(Statement *statement) {
@@ -30,8 +31,7 @@ Statement *statement_list_add_item3(Statement *statement_list, Statement *statem
 Statement *create_statemen_from_expression(Expression *expression) {
     debug_log_with_yellow_coloar("expression->type:%d", expression->type);
 
-    Statement *statement = NULL;
-    statement            = (Statement *)malloc(sizeof(Statement));
+    Statement *statement = malloc(sizeof(Statement));
 
     statement->type         = STATEMENT_TYPE_EXPRESSION;
     statement->line_number  = get_ring_interpreter_line_number();
@@ -136,6 +136,17 @@ Expression *create_expression__(AssignExpression *assign_expression) {
 
     expression->type                = EXPRESSION_TYPE_ASSIGN;
     expression->u.assign_expression = assign_expression;
+    return expression;
+}
+
+Expression *create_expression_ternary(Expression *condition, Expression * true, Expression * false) {
+    Expression *expression = malloc(sizeof(Expression));
+
+    expression->type                                       = EXPRESSION_TYPE_TERNARY;
+    expression->u.ternary_expression                       = malloc(sizeof(TernaryExpression));
+    expression->u.ternary_expression->condition_expression = condition;
+    expression->u.ternary_expression->true_expression      = true;
+    expression->u.ternary_expression->false_expression     = false;
     return expression;
 }
 

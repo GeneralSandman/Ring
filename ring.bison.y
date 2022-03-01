@@ -9,8 +9,8 @@ int yyerror(char const *str);
 %}
 
 %glr-parser     // 使用 GLR 解析
-%expect 2       // TODO: legitimate 2 shift/reduce conflicts
-%expect-rr 0    // TODO: legitimate 8 reduce/reduce conflicts
+%expect 1       // TODO: legitimate 0 shift/reduce conflicts
+%expect-rr 0    // legitimate 0 reduce/reduce conflicts
 
 %union {
     char*                       m_comment_value;
@@ -99,6 +99,7 @@ int yyerror(char const *str);
 %token TOKEN_COMMA 
 %token TOKEN_COLON
 %token TOKEN_SEMICOLON 
+%token TOKEN_QUESTION_MARK
 %token TOKEN_ASSIGN
 
 %token INT_LITERAL
@@ -175,8 +176,22 @@ statement_list
     }
     ;
 
+maybe_empty_expression
+    :
+    {
+        $$ = NULL;
+    }
+    | expression
+    | assign_expression
+    {
+        debug_log_with_green_coloar("[RULE:expression-assign_expression]\t ", "");
+        
+        $$ = create_expression__($1);
+    }
+    ;
+
 statement
-    : expression TOKEN_SEMICOLON
+    : maybe_empty_expression TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::statement:expression]\t ", "");
 
@@ -301,13 +316,6 @@ break_statement
 continue_statement
     : TOKEN_CONTINUE ;
 
-maybe_empty_expression
-    : // empty
-    {
-        $$ = NULL;
-    }
-    | expression
-    ;
 
 variable_definition
     : TOKEN_VAR variable_type identifier
@@ -448,16 +456,15 @@ expression
 
         $$ = create_expression_($1);
     }
-    | assign_expression
-    {
-        debug_log_with_green_coloar("[RULE:expression-assign_expression]\t ", "");
-        
-        $$ = create_expression__($1);
-    }
     | logical_expression_or
     {
         debug_log_with_green_coloar("[RULE::expression:logical_expression]\t ", "");
 
+    }
+    | expression TOKEN_QUESTION_MARK expression TOKEN_COLON expression
+    {
+        debug_log_with_green_coloar("[RULE::expression ? : ]\t ", "");
+        $$ = create_expression_ternary($1, $3, $5);
     }
     ;
 
