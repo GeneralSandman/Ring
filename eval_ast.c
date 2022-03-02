@@ -849,11 +849,8 @@ Ring_BasicValue *interpret_unitary_expression(Expression *expression, Function *
     //       两边类型不匹配还要编译报错
 
     // FIXME: 存在内存泄漏
-    Function *function = NULL;
 
     Ring_BasicValue *result;
-
-    StatementExecResult *tmp = NULL;
 
     result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
     result->next = NULL;
@@ -893,7 +890,6 @@ Ring_BasicValue *interpret_unitary_expression_(Expression *expression, Function 
     //       两边类型不匹配还要编译报错
 
     // FIXME: 存在内存泄漏
-    Function *function = NULL;
 
     Ring_BasicValue *result;
 
@@ -1126,8 +1122,6 @@ Variable *search_variable(char *variable_identifier, Function *function) {
     }
 
     debug_log_with_blue_coloar("don't find match local variable\n");
-
-    Variable *tmp = get_ring_interpreter()->variable_list;
 
     // 查找全局变量
     for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {

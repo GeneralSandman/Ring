@@ -12,7 +12,7 @@ OBJS = \
   utils.o\
   semantic_check.o
 
-CFLAGS = -c -g -std=c99 -Wall  -pedantic
+CFLAGS = -c -g -std=c99 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function  -pedantic
 BIN = ./bin
 INCLUDES = \
 

@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "ring.h"
 
@@ -16,6 +17,7 @@ void statement_list_add_item(Statement *statement) {
 
 Statement *statement_list_add_item2(Statement *statement) {
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
+    return NULL;
 }
 
 Statement *statement_list_add_item3(Statement *statement_list, Statement *statement) {
