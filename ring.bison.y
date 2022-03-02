@@ -590,6 +590,12 @@ expression_arithmetic_operation_multiplicative
 
         $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_DIV, $1, $3);
     }
+    | expression_arithmetic_operation_multiplicative TOKEN_MOD literal_term
+    {
+        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ", "");
+
+        $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_MOD, $1, $3);
+    }
     ;
 
 literal_term

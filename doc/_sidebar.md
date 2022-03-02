@@ -1,10 +1,6 @@
 <!-- doc/_sidebar.md -->
 
 * [**Ring简介**](/)
-  - [Ring名字来源](./markdown/Ring名字来源.md)
-* [**环境设置与使用**](./markdown/环境设置.md)
-  - [快速运行HelloWorld](./markdown/快速运行HelloWorld.md)
-  - [交互式编程](./markdown/交互式编程.md)
 * [**基本概念**](./markdown/基本概念.md)
 * [**程序结构**](./markdown/程序结构.md)
 * [**基本数据类型**](./markdown/基本数据类型.md)
@@ -20,13 +16,5 @@
 * [**函数**](./markdown/函数.md)
 * [**面向对象**](./markdown/面向对象.md)
 * [**Ring关键字**](./markdown/Ring关键字.md)
-* [**Ring设计**](./markdown/Ring设计.md)
-  - [Ring设计思想](./markdown/Ring设计思想.md)
-  - [历史版本](./markdown/历史版本.md)
-  - [未来展望](./markdown/未来展望.md)
-  - [Contributer](./markdown/contributer.md)
-* [**番外篇**](./markdown/番外篇.md)
-  - [如何用C++11实现一个简单的栈式虚拟机](./markdown/如何用C++11实现一个简单的栈式虚拟机.md)
-
 
 

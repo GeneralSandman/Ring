@@ -37,3 +37,13 @@ print(int_value, "\n");
 
 int_value = int_value / 10;
 print(int_value, "\n");
+
+int_value = int_value % 10;
+print(int_value, "\n");
+
+int_value = int_value % 7;
+print(int_value, "\n");
+
+int_value = int_value % 5;
+print(int_value, "\n");
+
