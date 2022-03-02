@@ -1,0 +1,31 @@
+2
+
+test add-assign operation
+3
+5
+15
+43
+
+test sub-assign operation
+42
+41
+37
+33
+
+test mul-assign operation
+3300
+6600
+198000
+396000
+
+test div-assign operation
+79200
+19800
+6600
+1100
+
+test mod-assign operation
+38
+8
+2
+0

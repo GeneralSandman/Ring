@@ -22,6 +22,11 @@
         "initializer_list": "c",
         "unordered_map": "cpp",
         "stack": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "*.tcc": "c",
+        "deque": "c",
+        "string": "c",
+        "sstream": "c",
+        "streambuf": "c"
     }
 }

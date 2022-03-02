@@ -302,7 +302,9 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
-        assign(expression, function);
+    case EXPRESSION_TYPE_UNITARY_INCREASE:
+    case EXPRESSION_TYPE_UNITARY_DECREASE:
+        interpret_assign_expression(expression, function);
         break;
 
     case EXPRESSION_TYPE_TERNARY:
@@ -322,6 +324,7 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
     case EXPRESSION_TYPE_ARITHMETIC_SUB:
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
     case EXPRESSION_TYPE_ARITHMETIC_DIV:
+    case EXPRESSION_TYPE_ARITHMETIC_MOD:
         result = interpret_binary_expression(expression, function);
         break;
 
@@ -334,6 +337,11 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
     case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
         result = interpret_unitary_expression(expression, function);
         break;
+
+        // case EXPRESSION_TYPE_UNITARY_INCREASE:
+        // case EXPRESSION_TYPE_UNITARY_DECREASE:
+        //     result = interpret_unitary_expression_(expression, function);
+        //     break;
 
     case EXPRESSION_TYPE_RELATIONAL_EQ:
     case EXPRESSION_TYPE_RELATIONAL_NE:
@@ -533,6 +541,8 @@ Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression, 
     case EXPRESSION_TYPE_ARITHMETIC_DIV:
         result_value = left_value / right_value;
         break;
+    case EXPRESSION_TYPE_ARITHMETIC_MOD:
+        result_value = (int)left_value % (int)right_value;
     default:
         // log error
         break;
@@ -775,6 +785,7 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
     case EXPRESSION_TYPE_ARITHMETIC_SUB:
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
     case EXPRESSION_TYPE_ARITHMETIC_DIV:
+    case EXPRESSION_TYPE_ARITHMETIC_MOD:
         result = interpret_binary_expression_arithmetic(expression, origin_function);
         break;
 
@@ -786,6 +797,11 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
     case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
         result = interpret_unitary_expression(expression, origin_function);
+        break;
+
+    case EXPRESSION_TYPE_UNITARY_INCREASE:
+    case EXPRESSION_TYPE_UNITARY_DECREASE:
+        result = interpret_unitary_expression_(expression, function);
         break;
 
     case EXPRESSION_TYPE_RELATIONAL_EQ:
@@ -864,6 +880,55 @@ Ring_BasicValue *interpret_unitary_expression(Expression *expression, Function *
 
     default:
         break;
+    }
+
+    return result;
+}
+
+// TODO: 改名字
+Ring_BasicValue *interpret_unitary_expression_(Expression *expression, Function *origin_function) {
+    debug_log_with_blue_coloar("\t expression->type:%d", expression->type);
+    // TODO: 还要考虑各个变量的类型
+    //       是否涉及到强制类型转换
+    //       两边类型不匹配还要编译报错
+
+    // FIXME: 存在内存泄漏
+    Function *function = NULL;
+
+    Ring_BasicValue *result;
+
+    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
+    result->next = NULL;
+
+    Ring_BasicValue *right = NULL;
+    right                  = interpret_expression(expression->u.unitary_expression, origin_function);
+
+    double tmp = 0;
+    switch (right->type) {
+    case BASICVALUE_TYPE_INT: tmp = (double)right->u.int_value; break;
+    case BASICVALUE_TYPE_DOUBLE: tmp = right->u.double_value; break;
+    default:
+        runtime_err_log("the type of increase/decrease target must be int/double.");
+        exit(1);
+        break;
+    }
+
+    switch (expression->type) {
+    case EXPRESSION_TYPE_UNITARY_INCREASE: tmp++; break;
+    case EXPRESSION_TYPE_UNITARY_DECREASE: tmp--; break;
+    default: break;
+    }
+
+    switch (right->type) {
+    case BASICVALUE_TYPE_INT:
+        result->type        = BASICVALUE_TYPE_INT;
+        result->u.int_value = (int)tmp;
+        break;
+    case BASICVALUE_TYPE_DOUBLE:
+        result->type           = BASICVALUE_TYPE_DOUBLE;
+        result->u.double_value = tmp;
+        break;
+    default: break;
     }
 
     return result;
@@ -1002,7 +1067,7 @@ StatementExecResult *invoke_external_function(Function *function) {
 }
 
 // TODO: 重构
-void assign(Expression *expression, Function *function) {
+void interpret_assign_expression(Expression *expression, Function *function) {
     debug_log_with_blue_coloar("expression->type:%d", expression->type);
 
     assert(expression->type == EXPRESSION_TYPE_ASSIGN);
@@ -1019,33 +1084,59 @@ void assign(Expression *expression, Function *function) {
             identifier = expression->u.assign_expression->assign_identifiers[identifier_list_index];
 
             Variable *variable = NULL;
-            // 查找局部变量
-            if (function != NULL) {
-                for (Variable *pos_ = function->variable_list; pos_ != NULL; pos_ = pos_->next) {
-                    if (0 == strcmp(pos_->variable_identifer, identifier)) {
-                        variable = pos_;
-                    }
-                }
-            }
-
-            if (variable != NULL) {
-                debug_log_with_blue_coloar("find match local variable\n");
-            } else {
-                // 查找全局变量
-                for (Variable *pos_ = get_ring_interpreter()->variable_list; pos_ != NULL; pos_ = pos_->next) {
-                    if (0 == strcmp(pos_->variable_identifer, identifier)) {
-                        variable = pos_;
-                    }
-                }
-            }
-
+            variable           = search_variable(identifier, function);
             if (variable == NULL) {
-                debug_log_with_blue_coloar("don't find match global variable\n");
                 return;
             }
 
-            // TODO:
-            variable->u.ring_basic_value = result;
+            assign_identifier(variable, result, expression->u.assign_expression->type);
         }
     }
+}
+
+void assign_identifier(Variable *variable, Ring_BasicValue *new_value, AssignExpressionType type) {
+    Ring_BasicValue *old = variable->u.ring_basic_value;
+
+    if (new_value->type != BASICVALUE_TYPE_INT && type != ASSIGN_EXPRESSION_TYPE_ASSIGN) {
+        // TODO: 暂时不支持 对于 += -= %= /= *= 支持int，后续支持
+        return;
+    }
+
+    switch (type) {
+    case ASSIGN_EXPRESSION_TYPE_ASSIGN: break;
+    case ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN: new_value->u.int_value = old->u.int_value + new_value->u.int_value; break;
+    case ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN: new_value->u.int_value = old->u.int_value - new_value->u.int_value; break;
+    case ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN: new_value->u.int_value = old->u.int_value * new_value->u.int_value; break;
+    case ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN: new_value->u.int_value = old->u.int_value / new_value->u.int_value; break;
+    case ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN: new_value->u.int_value = old->u.int_value % new_value->u.int_value; break;
+    default: break;
+    }
+
+    variable->u.ring_basic_value = new_value;
+}
+
+Variable *search_variable(char *variable_identifier, Function *function) {
+    // 查找 function 里局部变量
+    if (function != NULL) {
+        for (Variable *pos = function->variable_list; pos != NULL; pos = pos->next) {
+            if (0 == strcmp(pos->variable_identifer, variable_identifier)) {
+                return pos;
+            }
+        }
+    }
+
+    debug_log_with_blue_coloar("don't find match local variable\n");
+
+    Variable *tmp = get_ring_interpreter()->variable_list;
+
+    // 查找全局变量
+    for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+        if (0 == strcmp(pos->variable_identifer, variable_identifier)) {
+            return pos;
+        }
+    }
+
+    debug_log_with_blue_coloar("don't find match global variable\n");
+
+    return NULL;
 }

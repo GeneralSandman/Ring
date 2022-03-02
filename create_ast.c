@@ -219,8 +219,7 @@ create_expression_literal(ExpressionType type, char *literal_interface) {
     return expression;
 }
 
-Expression *
-create_expression_bool_literal(ExpressionType type, Ring_Bool value) {
+Expression *create_expression_bool_literal(ExpressionType type, Ring_Bool value) {
     debug_log_with_yellow_coloar("type:%d, boolean:%d", type, value);
 
     Expression *expression = NULL;
@@ -232,17 +231,17 @@ create_expression_bool_literal(ExpressionType type, Ring_Bool value) {
     return expression;
 }
 
-AssignExpression *create_assign_expression(char *identifier, Expression *expression) {
+AssignExpression *create_assign_expression(AssignExpressionType type, char *identifier, Expression *expression) {
     // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
-    AssignExpression *assing_expression = NULL;
-    assing_expression                   = (AssignExpression *)malloc(sizeof(AssignExpression));
+    AssignExpression *assing_expression = malloc(sizeof(AssignExpression));
 
     // 这里应该优化一下
     char **identifiers = malloc(sizeof(char *) * 1);
     identifiers[0]     = identifier; // 初始化第一个
 
+    assing_expression->type                   = type;
     assing_expression->assign_identifier_size = 1;
     assing_expression->assign_identifiers     = identifiers;
     assing_expression->expression             = expression;
@@ -253,8 +252,7 @@ AssignExpression *create_multi_assign_expression(char *first_identifier, Identif
     // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
     debug_log_with_yellow_coloar("");
 
-    AssignExpression *assing_expression = NULL;
-    assing_expression                   = (AssignExpression *)malloc(sizeof(AssignExpression));
+    AssignExpression *assing_expression = malloc(sizeof(AssignExpression));
 
     unsigned int size = 1;
     for (Identifier *pos = identifier_list; pos != NULL; pos = pos->next) {
@@ -273,6 +271,7 @@ AssignExpression *create_multi_assign_expression(char *first_identifier, Identif
     else
         first_expression = expression_list;
 
+    assing_expression->type                   = ASSIGN_EXPRESSION_TYPE_ASSIGN;
     assing_expression->assign_identifier_size = size;
     assing_expression->assign_identifiers     = identifiers;
     assing_expression->expression             = first_expression;

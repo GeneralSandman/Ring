@@ -688,7 +688,37 @@ assign_expression
     {
         debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
 
-        $$ = create_assign_expression($1, $3);
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ASSIGN, $1, $3);
+    }
+    | identifier TOKEN_ADD_ASSIGN expression
+    {
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN, $1, $3);
+    }
+    | identifier TOKEN_SUB_ASSIGN expression
+    {
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN, $1, $3);
+    }
+    | identifier TOKEN_MUL_ASSIGN expression
+    {
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN, $1, $3);
+    }
+    | identifier TOKEN_DIV_ASSIGN expression
+    {
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN, $1, $3);
+    }
+    | identifier TOKEN_MOD_ASSIGN expression
+    {
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN, $1, $3);
     }
     | identifier TOKEN_COMMA identifier_list TOKEN_ASSIGN expression_list
     {

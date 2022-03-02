@@ -182,6 +182,16 @@ typedef enum {
     BASICVALUE_TYPE_ARRAY,
 } BasicValueType;
 
+typedef enum {
+    ASSIGN_EXPRESSION_TYPE_UNKNOW = 0,
+    ASSIGN_EXPRESSION_TYPE_ASSIGN,     // =
+    ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN, // +=
+    ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN, // -=
+    ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN, // *=
+    ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN, // /=
+    ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN, // %=
+} AssignExpressionType;
+
 struct Ring_BasicValue_Tag {
     BasicValueType type;
     BasicValueType array_member_type;
@@ -294,9 +304,10 @@ struct Identifier_Tag {
 
 // TODO: 这里还要兼容 数组元素赋值
 struct AssignExpression_Tag {
-    char *       assign_identifier; // TODO: 以后不应该使用这个 删除调
-    unsigned int assign_identifier_size;
-    char **      assign_identifiers;
+    AssignExpressionType type;
+    char *               assign_identifier; // TODO: 以后不应该使用这个 删除调
+    unsigned int         assign_identifier_size;
+    char **              assign_identifiers;
     // Identifier * assign_identifier_list;// TODO: 重构 最后都使用这个
     Expression *expression;
     // Expression *expression_list; // TODO: 重构 最后都使用这个
@@ -558,7 +569,9 @@ Ring_BasicValue *    interpret_ternary_condition_expression(Expression *expressi
 Ring_BasicValue *    interpret_binary_expression(Expression *expression, Function *origin_function);
 Ring_BasicValue *    interpret_unitary_expression(Expression *expression, Function *origin_function);
 Ring_BasicValue *    interpret_unitary_expression_(Expression *expression, Function *origin_function);
-void                 assign(Expression *expression, Function *function);
+void                 interpret_assign_expression(Expression *expression, Function *function);
+void                 assign_identifier(Variable *variable, Ring_BasicValue *new_value, AssignExpressionType type);
+Variable *           search_variable(char *variable_identifier, Function *function);
 
 // 上下文相关语义检查
 int ring_semantic_check(Ring_Interpreter *ring_interpreter);
@@ -582,7 +595,7 @@ Expression *            create_expression_unitary(ExpressionType type, Expressio
 Expression *            create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression *expression);
 Expression *            create_expression_literal(ExpressionType type, char *literal_interface);
 Expression *            create_expression_bool_literal(ExpressionType type, Ring_Bool value);
-AssignExpression *      create_assign_expression(char *identifier, Expression *expression);
+AssignExpression *      create_assign_expression(AssignExpressionType type, char *identifier, Expression *expression);
 AssignExpression *      create_multi_assign_expression(char *first_identifier, Identifier *identifier_list, Expression *first_expression, Expression *expression_list);
 FunctionCallExpression *create_function_call_expression(char *identifier, ArgumentList *argument_list);
 Expression *            expression_list_add_item(Expression *expression_list, Expression *expression);
