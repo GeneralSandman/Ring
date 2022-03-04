@@ -9,9 +9,10 @@ all_num=0
 
 
 autoTestFunc(){
-    source_code_file=$1"/"$2
-    run_result_file=$1"/"$2".result"
-    run_result_file_tmp=$1"/"$2".result.tmp"
+    model=$1
+    source_code_file=$2"/"$3
+    run_result_file=$2"/"$3".result"
+    run_result_file_tmp=$2"/"$3".result.tmp"
     result=""
 
 
@@ -24,14 +25,14 @@ autoTestFunc(){
 	else
 		result="FAILED"
 	fi
-    printf "%-4s %-60s %-60s [%s]\n" $all_num $source_code_file $run_result_file $result
+    printf "%-4s %-15s %-60s %-60s [%s]\n" $all_num $model $source_code_file $run_result_file $result
     let all_num++
     rm $run_result_file_tmp
 }
 
 
 
-printf "%-4s %-60s %-60s %s\n" num source_code_file run_result_file result
+printf "%-4s %-15s %-60s %-60s %s\n" num model source_code_file run_result_file result
 
 for model in "array" "control" "function" "variable" 
 do
@@ -41,7 +42,7 @@ do
         extension=${file##*.}
         if [ $extension == "ring" ]
         then
-        autoTestFunc $source_file_path $file
+        autoTestFunc $model $source_file_path $file
         fi
     done
     printf "\n"
