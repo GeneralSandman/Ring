@@ -98,7 +98,7 @@ void ring_interactive_program() {
     while (1) {
         printf_witch_green("line[%d]: ", line_number);
 
-        char *content = (char *)malloc(1024);
+        char *content = malloc(1024);
         if (fgets(content, 1024, stdin) == NULL) {
             printf_witch_red("get input from stdin error, exit\n");
             exit(1);

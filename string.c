@@ -10,7 +10,7 @@ static int   string_literal_buffer_size     = 0;
 static int   string_literal_buffer_capacity = 0;
 
 Ring_String *new_ring_string() {
-    Ring_String *string = (Ring_String *)malloc(sizeof(Ring_String));
+    Ring_String *string = malloc(sizeof(Ring_String));
 
     string->buffer   = malloc(STRING_LITERAL_CAPACITY);
     string->size     = 0;

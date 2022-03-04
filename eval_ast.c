@@ -35,9 +35,7 @@ StatementExecResult *interpret_statement_list(Statement *statement, Function *fu
 }
 
 StatementExecResult *interpret_statement(Statement *statement, Function *function) {
-    StatementExecResult *result = NULL;
-
-    result = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+    StatementExecResult *result = malloc(sizeof(StatementExecResult));
 
     switch (statement->type) {
     case STATEMENT_TYPE_EXPRESSION:
@@ -79,7 +77,7 @@ StatementExecResult *interpret_statement(Statement *statement, Function *functio
                 Ring_BasicValue *value     = malloc(sizeof(Ring_BasicValue));
                 value->type                = BASICVALUE_TYPE_ARRAY;
                 value->array_member_type   = BASICVALUE_TYPE_INT; // FIXME:
-                value->u.array_value       = (Ring_Array *)malloc(sizeof(Ring_Array));
+                value->u.array_value       = malloc(sizeof(Ring_Array));
                 value->u.array_value->size = size;
                 value->u.array_value->data = malloc(sizeof(Ring_BasicValue) * size);
 
@@ -127,22 +125,19 @@ StatementExecResult *interpret_statement(Statement *statement, Function *functio
 }
 
 StatementExecResult *interpret_statement_break(BreakStatement *statement, Function *function) {
-    StatementExecResult *result = NULL;
-    result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+    StatementExecResult *result = malloc(sizeof(StatementExecResult));
     result->type                = STATEMENT_EXEC_RESULT_TYPE_BREAK;
     return result;
 }
 
 StatementExecResult *interpret_statement_continue(ContinueStatement *statement, Function *function) {
-    StatementExecResult *result = NULL;
-    result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+    StatementExecResult *result = malloc(sizeof(StatementExecResult));
     result->type                = STATEMENT_EXEC_RESULT_TYPE_CONTINUE;
     return result;
 }
 
 StatementExecResult *interpret_statement_return(Statement *statement, Function *function) {
-    StatementExecResult *result    = NULL;
-    result                         = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+    StatementExecResult *result    = malloc(sizeof(StatementExecResult));
     result->type                   = STATEMENT_EXEC_RESULT_TYPE_RETURN;
     result->return_value_list_size = 0;
     result->return_value_list      = NULL;
@@ -158,8 +153,7 @@ StatementExecResult *interpret_statement_return(Statement *statement, Function *
 }
 
 StatementExecResult *interpret_statement_if(IfStatement *if_statement, Function *function) {
-    StatementExecResult *result = NULL;
-    result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+    StatementExecResult *result = malloc(sizeof(StatementExecResult));
 
     Ring_BasicValue *cond = interpret_expression(if_statement->expression, function);
     if (cond == NULL || cond->type != BASICVALUE_TYPE_BOOL) {
@@ -191,8 +185,7 @@ END:
 }
 
 StatementExecResult *interpret_statement_for(ForStatement *for_statement, Function *function) {
-    StatementExecResult *result = NULL;
-    result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+    StatementExecResult *result = malloc(sizeof(StatementExecResult));
 
     Ring_BasicValue *tmp = NULL;
 
@@ -236,8 +229,7 @@ ENDFOR:
 }
 
 StatementExecResult *interpret_statement_dowhile(DoWhileStatement *dowhile_statement, Function *function) {
-    StatementExecResult *result = NULL;
-    result                      = (StatementExecResult *)malloc(sizeof(StatementExecResult));
+    StatementExecResult *result = malloc(sizeof(StatementExecResult));
 
     Ring_BasicValue *tmp = NULL;
 
@@ -272,10 +264,8 @@ ENDFOR:
 Ring_BasicValue *interpret_expression(Expression *expression, Function *function) {
     debug_log_with_blue_coloar("\t ");
 
-    Ring_BasicValue *result;
-
-    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-    result->next = NULL;
+    Ring_BasicValue *result = malloc(sizeof(Ring_BasicValue));
+    result->next            = NULL;
 
     StatementExecResult *exec_result = NULL;
 
@@ -393,10 +383,8 @@ Ring_BasicValue *interpret_variable_expression(char *variable_identifier, Functi
     }
 
     // FIXME: 存在内存泄漏
-    Ring_BasicValue *result;
-
-    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-    result->next = NULL;
+    Ring_BasicValue *result = malloc(sizeof(Ring_BasicValue));
+    result->next            = NULL;
 
     switch (variable->type) {
     case VARIABLE_TYPE_BOOL:
@@ -454,10 +442,8 @@ Ring_BasicValue *interpret_array_index_expression(ArrayIndexExpression *expressi
     }
 
     // FIXME: 存在内存泄漏
-    Ring_BasicValue *result;
-
-    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-    result->next = NULL;
+    Ring_BasicValue *result = malloc(sizeof(Ring_BasicValue));
+    result->next            = NULL;
 
     Ring_BasicValue *tmp = NULL;
     switch (variable->type) {
@@ -495,10 +481,8 @@ Ring_BasicValue *interpret_array_index_expression(ArrayIndexExpression *expressi
 
 Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression, Function *function) {
     debug_log_with_blue_coloar("expression->type:%d", expression->type);
-    Ring_BasicValue *result;
-
-    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-    result->next = NULL;
+    Ring_BasicValue *result = malloc(sizeof(Ring_BasicValue));
+    result->next            = NULL;
 
     Ring_BasicValue *left  = NULL;
     Ring_BasicValue *right = NULL;
@@ -559,10 +543,8 @@ Ring_BasicValue *interpret_binary_expression_arithmetic(Expression *expression, 
 
 Ring_BasicValue *interpret_binary_expression_realational(Expression *expression, Function *function) {
     debug_log_with_blue_coloar("expression->type:%d", expression->type);
-    Ring_BasicValue *result;
-
-    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-    result->next = NULL;
+    Ring_BasicValue *result = malloc(sizeof(Ring_BasicValue));
+    result->next            = NULL;
 
     Ring_BasicValue *left  = NULL;
     Ring_BasicValue *right = NULL;
@@ -623,10 +605,8 @@ Ring_BasicValue *interpret_binary_expression_realational(Expression *expression,
 
 Ring_BasicValue *interpret_binary_expression_logical(Expression *expression, Function *function) {
     debug_log_with_blue_coloar("expression->type:%d", expression->type);
-    Ring_BasicValue *result;
-
-    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-    result->next = NULL;
+    Ring_BasicValue *result = malloc(sizeof(Ring_BasicValue));
+    result->next            = NULL;
 
     Ring_BasicValue *left  = NULL;
     Ring_BasicValue *right = NULL;
@@ -706,12 +686,9 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
     // FIXME: 存在内存泄漏
     Function *function = NULL;
 
-    Ring_BasicValue *result;
-
-    StatementExecResult *tmp = NULL;
-
-    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-    result->next = NULL;
+    StatementExecResult *tmp    = NULL;
+    Ring_BasicValue *    result = malloc(sizeof(Ring_BasicValue));
+    result->next                = NULL;
 
     double tmp_value = 0;
 
@@ -850,10 +827,8 @@ Ring_BasicValue *interpret_unitary_expression(Expression *expression, Function *
 
     // FIXME: 存在内存泄漏
 
-    Ring_BasicValue *result;
-
-    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-    result->next = NULL;
+    Ring_BasicValue *result = malloc(sizeof(Ring_BasicValue));
+    result->next            = NULL;
 
     Ring_BasicValue *left = NULL;
 
@@ -891,10 +866,8 @@ Ring_BasicValue *interpret_unitary_expression_(Expression *expression, Function 
 
     // FIXME: 存在内存泄漏
 
-    Ring_BasicValue *result;
-
-    result       = (Ring_BasicValue *)malloc(sizeof(Ring_BasicValue));
-    result->next = NULL;
+    Ring_BasicValue *result = malloc(sizeof(Ring_BasicValue));
+    result->next            = NULL;
 
     Ring_BasicValue *right = NULL;
     right                  = interpret_expression(expression->u.unitary_expression, origin_function);
