@@ -4,6 +4,8 @@
 
 TEST_PATH="./test/beat"
 
+TEST_RESULT="./automated-testing.sh.result"
+
 pass_num=0
 all_num=0
 
@@ -24,6 +26,7 @@ autoTestFunc(){
         let pass_num++
 	else
 		result="FAILED"
+        echo $source_code_file >> $TEST_RESULT
 	fi
     printf "%-4s %-15s %-60s %-60s [%s]\n" $all_num $model $source_code_file $run_result_file $result
     let all_num++
@@ -31,23 +34,39 @@ autoTestFunc(){
 }
 
 
+printNotPassCase(){
+    if [ ! -f "$TEST_RESULT" ]; then
+    return 0
+    fi
+    echo "[NotPassCase]"
+    printf "%-60s %-60s\n" source_code_file err_nums
+    awk '{count[$0]++;} END {for(i in count) {printf("%-60s %-60s\n",i,count[i])}}' $TEST_RESULT
+    rm $TEST_RESULT
+}
+
 
 printf "%-4s %-15s %-60s %-60s %s\n" num model source_code_file run_result_file result
 
-for model in "array" "control" "function" "variable" 
-do
+for i in {1..200}; do {
 
-    source_file_path=$TEST_PATH"/"$model
-    for file in `ls $source_file_path`; do
-        extension=${file##*.}
-        if [ $extension == "ring" ]
-        then
-        autoTestFunc $model $source_file_path $file
-        fi
+    for model in "array" "control" "function" "variable"; do
+        source_file_path=$TEST_PATH"/"$model
+        for file in `ls $source_file_path`; do
+            extension=${file##*.}
+            if [ $extension == "ring" ]
+            then
+            autoTestFunc $model $source_file_path $file
+            fi
+        done
+        printf "\n"
     done
-    printf "\n"
 
+}
 done
 
 
-printf "\n\n pass/all=%s/%s\n" $pass_num $all_num 
+printf "\n\n[pass/all=%s/%s]\n\n" $pass_num $all_num 
+
+
+printNotPassCase
+
