@@ -1,0 +1,1 @@
+// ./test/beat/variable/ternary-operation-000.ring 有偶发 core-dump
