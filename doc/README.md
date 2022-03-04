@@ -1,6 +1,10 @@
 # The ```Ring``` Programming Language
 
 
+## What is ```Ring```
+
+```Ring```是一个轻量级的编程语言，支持**过程式编程（Procedural programming）**，**面向对象**。
+
 ## ```Ring```编程语言语言的功能
 
 - 静态类型 (Static Typing) 语言
