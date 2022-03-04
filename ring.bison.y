@@ -654,12 +654,22 @@ literal_term
     | identifier TOKEN_INCREASE
     {
         debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ", "");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE, create_expression_identifier($1));
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX, create_expression_identifier($1));
+    }
+    | TOKEN_INCREASE identifier
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ", "");
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX, create_expression_identifier($2));
     }
     | identifier TOKEN_DECREASE
     {
         debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ", "");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE, create_expression_identifier($1));
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX, create_expression_identifier($1));
+    }
+    | TOKEN_DECREASE identifier
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ", "");
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX, create_expression_identifier($2));
     }
     | identifier TOKEN_LB expression TOKEN_RB
     {

@@ -292,19 +292,12 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
-    case EXPRESSION_TYPE_UNITARY_INCREASE:
-    case EXPRESSION_TYPE_UNITARY_DECREASE:
         interpret_assign_expression(expression, function);
         break;
 
     case EXPRESSION_TYPE_TERNARY:
         result = interpret_ternary_condition_expression(expression, function);
         break;
-
-        // case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
-        // case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
-        //     result = interpret_unitary_expression(expression, function);
-        //     break;
 
     case EXPRESSION_TYPE_VARIABLE:
         result = interpret_variable_expression(expression->u.variable_identifier, function);
@@ -325,13 +318,12 @@ Ring_BasicValue *interpret_expression(Expression *expression, Function *function
 
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
     case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
+    case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
+    case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
+    case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
+    case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
         result = interpret_unitary_expression(expression, function);
         break;
-
-        // case EXPRESSION_TYPE_UNITARY_INCREASE:
-        // case EXPRESSION_TYPE_UNITARY_DECREASE:
-        //     result = interpret_unitary_expression_(expression, function);
-        //     break;
 
     case EXPRESSION_TYPE_RELATIONAL_EQ:
     case EXPRESSION_TYPE_RELATIONAL_NE:
@@ -773,12 +765,11 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
 
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
     case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
+    case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
+    case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
+    case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
+    case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
         result = interpret_unitary_expression(expression, origin_function);
-        break;
-
-    case EXPRESSION_TYPE_UNITARY_INCREASE:
-    case EXPRESSION_TYPE_UNITARY_DECREASE:
-        result = interpret_unitary_expression_(expression, function);
         break;
 
     case EXPRESSION_TYPE_RELATIONAL_EQ:
@@ -847,7 +838,13 @@ Ring_BasicValue *interpret_unitary_expression(Expression *expression, Function *
         } else if (left->type == BASICVALUE_TYPE_DOUBLE) {
             result->u.double_value = -left->u.double_value;
         }
+        break;
 
+    case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
+    case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
+    case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
+    case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
+        result = interpret_unitary_expression_(expression, origin_function);
         break;
 
     default:
@@ -860,22 +857,25 @@ Ring_BasicValue *interpret_unitary_expression(Expression *expression, Function *
 // TODO: 改名字
 Ring_BasicValue *interpret_unitary_expression_(Expression *expression, Function *origin_function) {
     debug_log_with_blue_coloar("\t expression->type:%d", expression->type);
-    // TODO: 还要考虑各个变量的类型
-    //       是否涉及到强制类型转换
-    //       两边类型不匹配还要编译报错
 
-    // FIXME: 存在内存泄漏
+    assert(expression->type == EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX
+           || expression->type == EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX
+           || expression->type == EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX
+           || expression->type == EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX);
+    assert(expression->u.unitary_expression != NULL);
+    assert(expression->u.unitary_expression->type == EXPRESSION_TYPE_VARIABLE);
 
-    Ring_BasicValue *result = malloc(sizeof(Ring_BasicValue));
-    result->next            = NULL;
+    Ring_BasicValue *return_value = NULL;
 
-    Ring_BasicValue *right = NULL;
-    right                  = interpret_expression(expression->u.unitary_expression, origin_function);
+    Ring_BasicValue *new_value = malloc(sizeof(Ring_BasicValue));
+    new_value->next            = NULL;
+
+    Ring_BasicValue *old_value = interpret_expression(expression->u.unitary_expression, origin_function);
 
     double tmp = 0;
-    switch (right->type) {
-    case BASICVALUE_TYPE_INT: tmp = (double)right->u.int_value; break;
-    case BASICVALUE_TYPE_DOUBLE: tmp = right->u.double_value; break;
+    switch (old_value->type) {
+    case BASICVALUE_TYPE_INT: tmp = (double)old_value->u.int_value; break;
+    case BASICVALUE_TYPE_DOUBLE: tmp = old_value->u.double_value; break;
     default:
         runtime_err_log("the type of increase/decrease target must be int/double.");
         exit(1);
@@ -883,24 +883,48 @@ Ring_BasicValue *interpret_unitary_expression_(Expression *expression, Function 
     }
 
     switch (expression->type) {
-    case EXPRESSION_TYPE_UNITARY_INCREASE: tmp++; break;
-    case EXPRESSION_TYPE_UNITARY_DECREASE: tmp--; break;
+    case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
+        tmp++;
+        return_value = old_value;
+        break;
+    case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
+        tmp++;
+        return_value = new_value;
+        break;
+    case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
+        tmp--;
+        return_value = old_value;
+        break;
+    case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
+        tmp--;
+        return_value = new_value;
+        break;
     default: break;
     }
 
-    switch (right->type) {
+    switch (old_value->type) {
     case BASICVALUE_TYPE_INT:
-        result->type        = BASICVALUE_TYPE_INT;
-        result->u.int_value = (int)tmp;
+        new_value->type        = BASICVALUE_TYPE_INT;
+        new_value->u.int_value = (int)tmp;
         break;
     case BASICVALUE_TYPE_DOUBLE:
-        result->type           = BASICVALUE_TYPE_DOUBLE;
-        result->u.double_value = tmp;
+        new_value->type           = BASICVALUE_TYPE_DOUBLE;
+        new_value->u.double_value = tmp;
         break;
     default: break;
     }
 
-    return result;
+    char *identifier = expression->u.unitary_expression->u.variable_identifier;
+
+    Variable *variable = NULL;
+    variable           = search_variable(identifier, origin_function);
+    if (variable == NULL) {
+        exit(1);
+    }
+
+    assign_identifier(variable, new_value, ASSIGN_EXPRESSION_TYPE_ASSIGN);
+
+    return return_value;
 }
 
 Ring_BasicValue *search_variable_value(char *identifier, Function *origin_function) {
