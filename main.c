@@ -5,6 +5,7 @@
 #include "ring.h"
 
 void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp);
+void ring_generate_vm_code(Ring_Interpreter *ring_interpreter);
 void ring_interactive_program();
 int  write_tmp_source_file(char *tmp_source_file_name, int start_line_num, int line_size, char **input_line_content);
 
@@ -59,7 +60,8 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-// 词法分析，语法分析，构建语法树
+// Step-1: 词法分析
+// Step-2: 上下文无关-语法分析，构建语法数AST
 void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
     extern int   yyparse(void);
     extern FILE *yyin;
@@ -71,6 +73,11 @@ void ring_compile(Ring_Interpreter *ring_interpreter, FILE *fp) {
     }
 
     debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n", "");
+}
+
+// 修正ast
+void ring_fix_ast(Ring_Interpreter *ring_interpreter) {
+    // TODO:
 }
 
 // 交互式编程

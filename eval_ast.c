@@ -676,8 +676,6 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
     //       两边类型不匹配还要编译报错
 
     // FIXME: 存在内存泄漏
-    Function *function = NULL;
-
     StatementExecResult *tmp    = NULL;
     Ring_BasicValue *    result = malloc(sizeof(Ring_BasicValue));
     result->next                = NULL;

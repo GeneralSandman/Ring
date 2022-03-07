@@ -618,4 +618,9 @@ Statement *             create_statement_from_break();
 Statement *             create_statement_from_continue();
 // Identifier *            create_identifier(IdentifierType type, char *name);
 // char **identifier_list_add_item(char **identifier_list, char *identifier);
+
+// generate.c
+void ring_fix_ast(Ring_Interpreter *ring_interpreter);
+// generate.c
+
 #endif
