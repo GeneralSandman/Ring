@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.35-beat"
+#define RING_VERSION "ring-v0.0.36-beat"
 
 typedef struct Ring_Interpreter_Tag Ring_Interpreter;
 

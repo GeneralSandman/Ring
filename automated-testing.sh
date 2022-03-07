@@ -47,7 +47,7 @@ printNotPassCase(){
 
 printf "%-4s %-15s %-60s %-60s %s\n" num model source_code_file run_result_file result
 
-for i in {1..200}; do {
+for i in {1..1}; do {
 
     for model in "array" "control" "function" "variable"; do
         source_file_path=$TEST_PATH"/"$model
