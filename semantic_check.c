@@ -7,8 +7,8 @@
 
 // 语义检查
 // 上下文语义分析
-int ring_semantic_check(Ring_Interpreter *ring_interpreter) {
-    assert(ring_interpreter != NULL);
+int ring_semantic_check(Ring_Compiler *ring_compiler) {
+    assert(ring_compiler != NULL);
 
     // exit(1);
     return 0;

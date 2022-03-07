@@ -6,13 +6,13 @@
 
 void create_statement_list(Statement *statement) {
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
-    ring_interpreter_init_statement_list(statement);
+    ring_compiler_init_statement_list(statement);
 }
 
 void statement_list_add_item(Statement *statement) {
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
 
-    ring_interpreter_add_statement(statement);
+    ring_compiler_add_statement(statement);
 }
 
 Statement *statement_list_add_item2(Statement *statement) {
@@ -36,7 +36,7 @@ Statement *create_statemen_from_expression(Expression *expression) {
     Statement *statement = malloc(sizeof(Statement));
 
     statement->type         = STATEMENT_TYPE_EXPRESSION;
-    statement->line_number  = get_ring_interpreter_line_number();
+    statement->line_number  = get_ring_compiler_line_number();
     statement->u.expression = expression;
     statement->next         = NULL;
     return statement;
@@ -48,12 +48,12 @@ Statement *create_statement_from_variable(Variable *variable) {
     Statement *statement = malloc(sizeof(Statement));
 
     statement->type        = STATEMENT_TYPE_VARIABLE_DEFINITION;
-    statement->line_number = get_ring_interpreter_line_number();
+    statement->line_number = get_ring_compiler_line_number();
     statement->u.variable  = variable;
     statement->next        = NULL;
 
-    variable->next                        = get_ring_interpreter()->variable_list;
-    get_ring_interpreter()->variable_list = variable;
+    variable->next                     = get_ring_compiler()->variable_list;
+    get_ring_compiler()->variable_list = variable;
     // TODO: 在这里重写，修改变量的可见范围
 
     return statement;
@@ -65,7 +65,7 @@ Statement *create_return_statement(Expression *expression) {
     Statement *statement = malloc(sizeof(Statement));
 
     statement->type                = STATEMENT_TYPE_RETURN;
-    statement->line_number         = get_ring_interpreter_line_number();
+    statement->line_number         = get_ring_compiler_line_number();
     statement->u.return_expression = expression;
     statement->next                = NULL;
     return statement;
@@ -75,8 +75,8 @@ void add_function_definition(Function *function_definition) {
     assert(function_definition != NULL);
     debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
 
-    function_definition->next             = get_ring_interpreter()->function_list;
-    get_ring_interpreter()->function_list = function_definition;
+    function_definition->next          = get_ring_compiler()->function_list;
+    get_ring_compiler()->function_list = function_definition;
 }
 
 Expression *create_expression() {
@@ -92,7 +92,7 @@ Expression *create_expression_identifier(char *identifier) {
 
     Expression *expression = malloc(sizeof(Expression));
 
-    expression->line_number           = get_ring_interpreter_line_number();
+    expression->line_number           = get_ring_compiler_line_number();
     expression->type                  = EXPRESSION_TYPE_VARIABLE;
     expression->u.variable_identifier = identifier;
 
@@ -103,12 +103,12 @@ Expression *create_expression_identifier_with_index(char *identifier, Expression
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
     ArrayIndexExpression *array_index_expression = malloc(sizeof(ArrayIndexExpression));
-    array_index_expression->line_number          = get_ring_interpreter_line_number();
+    array_index_expression->line_number          = get_ring_compiler_line_number();
     array_index_expression->variable_identifier  = identifier;
     array_index_expression->index_expression     = index;
 
     Expression *expression               = malloc(sizeof(Expression));
-    expression->line_number              = get_ring_interpreter_line_number();
+    expression->line_number              = get_ring_compiler_line_number();
     expression->type                     = EXPRESSION_TYPE_ARRAY_INDEX;
     expression->u.array_index_expression = array_index_expression;
 
@@ -164,7 +164,7 @@ Expression *create_expression_unitary(ExpressionType type, Expression *unitary_e
 
     Expression *expression = malloc(sizeof(Expression));
 
-    expression->line_number          = get_ring_interpreter_line_number();
+    expression->line_number          = get_ring_compiler_line_number();
     expression->convert_type         = BASICVALUE_TYPE_UNKNOW;
     expression->type                 = type;
     expression->u.unitary_expression = unitary_expression;
@@ -366,7 +366,7 @@ Function *new_function_definition(FunctionType type, char *identifier, Variable 
 
     Function *function = malloc(sizeof(Function));
 
-    function->line_number         = get_ring_interpreter_line_number();
+    function->line_number         = get_ring_compiler_line_number();
     function->type                = type;
     function->function_name       = identifier;
     function->parameter_list_size = 0;
@@ -406,7 +406,7 @@ Statement *create_statement_from_if(IfStatement *if_statement) {
 
     Statement *statement = malloc(sizeof(Statement));
 
-    statement->line_number    = get_ring_interpreter_line_number();
+    statement->line_number    = get_ring_compiler_line_number();
     statement->type           = STATEMENT_TYPE_IF;
     statement->u.if_statement = if_statement;
     statement->next           = NULL;
@@ -419,7 +419,7 @@ IfStatement *create_if_statement(Expression *expression, Statement *if_block, El
 
     IfStatement *if_statement = malloc(sizeof(IfStatement));
 
-    if_statement->line_number           = get_ring_interpreter_line_number();
+    if_statement->line_number           = get_ring_compiler_line_number();
     if_statement->expression            = expression;
     if_statement->if_block_size         = 0;
     if_statement->if_block              = if_block;
@@ -435,7 +435,7 @@ ElseIfStatement *create_elseif_statement(Expression *expression, Statement *else
 
     ElseIfStatement *elseif_statement = malloc(sizeof(ElseIfStatement));
 
-    elseif_statement->line_number       = get_ring_interpreter_line_number();
+    elseif_statement->line_number       = get_ring_compiler_line_number();
     elseif_statement->expression        = expression;
     elseif_statement->elseif_block_size = 0;
     elseif_statement->elseif_block      = elseif_block;
@@ -463,7 +463,7 @@ Statement *create_statement_from_for(ForStatement *for_statement) {
 
     Statement *statement = malloc(sizeof(Statement));
 
-    statement->line_number     = get_ring_interpreter_line_number();
+    statement->line_number     = get_ring_compiler_line_number();
     statement->type            = STATEMENT_TYPE_FOR;
     statement->u.for_statement = for_statement;
     statement->next            = NULL;
@@ -476,7 +476,7 @@ ForStatement *create_for_statement(Expression *init_expression, Expression *cond
 
     ForStatement *for_statement = malloc(sizeof(ForStatement));
 
-    for_statement->line_number          = get_ring_interpreter_line_number();
+    for_statement->line_number          = get_ring_compiler_line_number();
     for_statement->init_expression      = init_expression;
     for_statement->condition_expression = condition_expression;
     for_statement->post_expression      = post_expression;
@@ -491,7 +491,7 @@ Statement *create_statement_from_dowhile(DoWhileStatement *dowhile_statement) {
 
     Statement *statement = malloc(sizeof(Statement));
 
-    statement->line_number         = get_ring_interpreter_line_number();
+    statement->line_number         = get_ring_compiler_line_number();
     statement->type                = STATEMENT_TYPE_DOWHILE;
     statement->u.dowhile_statement = dowhile_statement;
     statement->next                = NULL;
@@ -504,7 +504,7 @@ DoWhileStatement *create_dowhile_statement(Statement *block, Expression *conditi
 
     DoWhileStatement *dowhile_statement = malloc(sizeof(DoWhileStatement));
 
-    dowhile_statement->line_number          = get_ring_interpreter_line_number();
+    dowhile_statement->line_number          = get_ring_compiler_line_number();
     dowhile_statement->condition_expression = condition_expression;
     dowhile_statement->block_size           = 0;
     dowhile_statement->block                = block;
@@ -517,7 +517,7 @@ Statement *create_statement_from_break() {
 
     Statement *statement = malloc(sizeof(Statement));
 
-    statement->line_number       = get_ring_interpreter_line_number();
+    statement->line_number       = get_ring_compiler_line_number();
     statement->type              = STATEMENT_TYPE_BREAK;
     statement->u.break_statement = NULL;
     statement->next              = NULL;
@@ -530,7 +530,7 @@ Statement *create_statement_from_continue() {
 
     Statement *statement = malloc(sizeof(Statement));
 
-    statement->line_number          = get_ring_interpreter_line_number();
+    statement->line_number          = get_ring_compiler_line_number();
     statement->type                 = STATEMENT_TYPE_CONTINUE;
     statement->u.continue_statement = NULL;
     statement->next                 = NULL;
@@ -577,7 +577,7 @@ Variable *new_variable_array(VariableType type, Expression *size, char *identifi
 
     Variable *variable = malloc(sizeof(Variable));
 
-    variable->line_number        = get_ring_interpreter_line_number();
+    variable->line_number        = get_ring_compiler_line_number();
     variable->is_const           = is_const;
     variable->type               = VARIABLE_TYPE_ARRAY;
     variable->array_member_type  = type;
@@ -599,8 +599,8 @@ void insert_identifier(IdentifierType type, char *name) {
     Identifier *identifier;
     identifier = new_identifier(type, name);
 
-    identifier->next                        = get_ring_interpreter()->identifier_list;
-    get_ring_interpreter()->identifier_list = identifier;
+    identifier->next                     = get_ring_compiler()->identifier_list;
+    get_ring_compiler()->identifier_list = identifier;
 }
 
 void check_identifier_valid(char *identifier_name) {

@@ -4,17 +4,17 @@
 #include <string.h>
 #include "ring.h"
 
-void ring_interpret(Ring_Interpreter *ring_interpreter) {
+void ring_interpret(Ring_Compiler *ring_compiler) {
     debug_log_with_blue_coloar("\t interpret statement: "
                                "statement_list_size(%d)"
                                ",function_list_size(%d)"
                                ",variable_list_size(%d)"
                                ",identifier_list_size(%d)",
-                               ring_interpreter->statement_list_size,
-                               ring_interpreter->function_list_size,
-                               ring_interpreter->variable_list_size,
-                               ring_interpreter->identifier_list_size);
-    interpret_statement_list(ring_interpreter->statement_list, NULL);
+                               ring_compiler->statement_list_size,
+                               ring_compiler->function_list_size,
+                               ring_compiler->variable_list_size,
+                               ring_compiler->identifier_list_size);
+    interpret_statement_list(ring_compiler->statement_list, NULL);
 }
 
 StatementExecResult *interpret_statement_list(Statement *statement, Function *function) {
@@ -362,7 +362,7 @@ Ring_BasicValue *interpret_variable_expression(char *variable_identifier, Functi
         debug_log_with_blue_coloar("find match local variable\n");
     } else {
         // 查找全局变量
-        for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+        for (Variable *pos = get_ring_compiler()->variable_list; pos != NULL; pos = pos->next) {
             if (0 == strcmp(pos->variable_identifer, variable_identifier)) {
                 variable = pos;
             }
@@ -421,7 +421,7 @@ Ring_BasicValue *interpret_array_index_expression(ArrayIndexExpression *expressi
         debug_log_with_blue_coloar("find match local variable\n");
     } else {
         // 查找全局变量
-        for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+        for (Variable *pos = get_ring_compiler()->variable_list; pos != NULL; pos = pos->next) {
             if (0 == strcmp(pos->variable_identifer, variable_identifier)) {
                 variable = pos;
             }
@@ -713,7 +713,7 @@ Ring_BasicValue *interpret_binary_expression(Expression *expression, Function *o
     case EXPRESSION_TYPE_FUNCTION_CALL:
         // result =
 
-        // for (Function *pos = get_ring_interpreter()->function_list; pos != NULL; pos = pos->next) {
+        // for (Function *pos = get_ring_compiler()->function_list; pos != NULL; pos = pos->next) {
         //     if (0 == strcmp(pos->function_name, expression->u.function_call_expression->function_name)) {
         //         function = pos;
         //     }
@@ -941,7 +941,7 @@ Ring_BasicValue *search_variable_value(char *identifier, Function *origin_functi
         return variable->u.ring_basic_value;
     }
 
-    for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+    for (Variable *pos = get_ring_compiler()->variable_list; pos != NULL; pos = pos->next) {
         if (0 == strcmp(pos->variable_identifer, identifier)) {
             variable = pos;
         }
@@ -963,7 +963,7 @@ StatementExecResult *invoke_function(FunctionCallExpression *function_call_expre
     // search_funcaion
     Function *function = NULL;
 
-    for (Function *pos = get_ring_interpreter()->function_list; pos != NULL; pos = pos->next) {
+    for (Function *pos = get_ring_compiler()->function_list; pos != NULL; pos = pos->next) {
         if (0 == strcmp(pos->function_name, function_call_expression->function_name)) {
             function = pos;
         }
@@ -995,7 +995,7 @@ StatementExecResult *invoke_function(FunctionCallExpression *function_call_expre
                 debug_log_with_blue_coloar("find match local variable\n");
             } else {
                 // 查找全局变量
-                for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+                for (Variable *pos = get_ring_compiler()->variable_list; pos != NULL; pos = pos->next) {
                     if (0 == strcmp(pos->variable_identifer, identifier)) {
                         variable = pos;
                     }
@@ -1119,7 +1119,7 @@ Variable *search_variable(char *variable_identifier, Function *function) {
     debug_log_with_blue_coloar("don't find match local variable\n");
 
     // 查找全局变量
-    for (Variable *pos = get_ring_interpreter()->variable_list; pos != NULL; pos = pos->next) {
+    for (Variable *pos = get_ring_compiler()->variable_list; pos != NULL; pos = pos->next) {
         if (0 == strcmp(pos->variable_identifer, variable_identifier)) {
             return pos;
         }

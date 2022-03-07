@@ -3,12 +3,12 @@
 #include "ring.h"
 #include "inner_func.h"
 
-void register_inner_func(Ring_Interpreter *ring_interpreter) {
+void register_inner_func(Ring_Compiler *ring_compiler) {
     Function *function;
 
     function = malloc(sizeof(Function));
 
-    function->line_number         = get_ring_interpreter_line_number();
+    function->line_number         = get_ring_compiler_line_number();
     function->function_name       = "print";
     function->type                = FUNCTION_TYPE_INNER_LIB;
     function->parameter_list_size = 0;
@@ -18,7 +18,7 @@ void register_inner_func(Ring_Interpreter *ring_interpreter) {
     function->inner_func          = ring_inner_func_print;
     function->next                = NULL;
 
-    ring_interpreter->function_list = function;
+    ring_compiler->function_list = function;
 }
 
 void ring_inner_func_print1(int argc, Ring_BasicValue *value) {

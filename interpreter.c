@@ -5,126 +5,126 @@
 #include "ring.h"
 #include "inner_func.h"
 
-static Ring_Interpreter *ring_interpreter = NULL;
+static Ring_Compiler *ring_compiler = NULL;
 
-Ring_Interpreter *new_ring_interpreter(char *file_name) {
-    if (ring_interpreter == NULL) {
-        ring_interpreter = malloc(sizeof(Ring_Interpreter));
+Ring_Compiler *new_ring_compiler(char *file_name) {
+    if (ring_compiler == NULL) {
+        ring_compiler = malloc(sizeof(Ring_Compiler));
     }
 
-    ring_interpreter->current_file_name     = file_name;
-    ring_interpreter->current_line_number   = 1;
-    ring_interpreter->current_column_number = 1;
-    ring_interpreter->current_line_content  = new_ring_string();
+    ring_compiler->current_file_name     = file_name;
+    ring_compiler->current_line_number   = 1;
+    ring_compiler->current_column_number = 1;
+    ring_compiler->current_line_content  = new_ring_string();
 
-    ring_interpreter->statement_list_size = 0;
-    ring_interpreter->statement_list      = NULL;
+    ring_compiler->statement_list_size = 0;
+    ring_compiler->statement_list      = NULL;
 
-    ring_interpreter->function_list_size = 0;
-    ring_interpreter->function_list      = NULL;
+    ring_compiler->function_list_size = 0;
+    ring_compiler->function_list      = NULL;
 
-    ring_interpreter->variable_list_size = 0;
-    ring_interpreter->variable_list      = NULL;
+    ring_compiler->variable_list_size = 0;
+    ring_compiler->variable_list      = NULL;
 
-    ring_interpreter->identifier_list_size = 0;
-    ring_interpreter->identifier_list      = NULL;
+    ring_compiler->identifier_list_size = 0;
+    ring_compiler->identifier_list      = NULL;
 
-    ring_interpreter_registe_inner_func();
-    return ring_interpreter;
+    ring_compiler_registe_inner_func();
+    return ring_compiler;
 }
 
-Ring_Interpreter *get_ring_interpreter() {
-    return ring_interpreter;
+Ring_Compiler *get_ring_compiler() {
+    return ring_compiler;
 }
 
-char *get_ring_interpreter_current_file_name() {
-    assert(ring_interpreter != NULL);
-    return ring_interpreter->current_file_name;
+char *get_ring_compiler_current_file_name() {
+    assert(ring_compiler != NULL);
+    return ring_compiler->current_file_name;
 }
 
-Ring_String *get_ring_interpreter_current_line_content() {
-    assert(ring_interpreter != NULL);
-    return ring_interpreter->current_line_content;
+Ring_String *get_ring_compiler_current_line_content() {
+    assert(ring_compiler != NULL);
+    return ring_compiler->current_line_content;
 }
 
-unsigned int get_ring_interpreter_line_number() {
-    if (ring_interpreter == NULL) {
+unsigned int get_ring_compiler_line_number() {
+    if (ring_compiler == NULL) {
         // TODO: asser();
         return 0;
     }
-    return ring_interpreter->current_line_number;
+    return ring_compiler->current_line_number;
 }
 
-unsigned int increase_ring_interpreter_line_number() {
-    if (ring_interpreter == NULL) {
+unsigned int increase_ring_compiler_line_number() {
+    if (ring_compiler == NULL) {
         // TODO: asser();
         return 0;
     }
-    ring_interpreter->current_line_number++;
-    return ring_interpreter->current_line_number;
+    ring_compiler->current_line_number++;
+    return ring_compiler->current_line_number;
 }
 
-unsigned int get_ring_interpreter_column_number() {
-    assert(ring_interpreter != NULL);
-    return ring_interpreter->current_column_number;
+unsigned int get_ring_compiler_column_number() {
+    assert(ring_compiler != NULL);
+    return ring_compiler->current_column_number;
 }
 
-unsigned int increase_ring_interpreter_column_number(unsigned int len) {
-    assert(ring_interpreter != NULL);
-    ring_interpreter->current_column_number += len;
-    return ring_interpreter->current_column_number;
+unsigned int increase_ring_compiler_column_number(unsigned int len) {
+    assert(ring_compiler != NULL);
+    ring_compiler->current_column_number += len;
+    return ring_compiler->current_column_number;
 }
 
-void ring_interpreter_update_line_content(char *str) {
-    assert(ring_interpreter != NULL);
+void ring_compiler_update_line_content(char *str) {
+    assert(ring_compiler != NULL);
 
     for (int i = 0; i < strlen(str); i++) {
-        ring_string_add_char(ring_interpreter->current_line_content, str[i]);
+        ring_string_add_char(ring_compiler->current_line_content, str[i]);
     }
 
-    ring_interpreter->current_column_number += strlen(str);
+    ring_compiler->current_column_number += strlen(str);
 }
 
-void ring_interpreter_reset_current_line_content() {
-    reset_ring_string(ring_interpreter->current_line_content);
+void ring_compiler_reset_current_line_content() {
+    reset_ring_string(ring_compiler->current_line_content);
 }
 
-char *ring_interpreter_get_current_line_content() {
-    return get_ring_string(ring_interpreter->current_line_content);
+char *ring_compiler_get_current_line_content() {
+    return get_ring_string(ring_compiler->current_line_content);
 }
 
-void reset_ring_interpreter_column_number() {
-    ring_interpreter->current_column_number = 1;
+void reset_ring_compiler_column_number() {
+    ring_compiler->current_column_number = 1;
 }
 
-int ring_interpreter_init_statement_list(Statement *statement) {
-    assert(ring_interpreter != NULL);
+int ring_compiler_init_statement_list(Statement *statement) {
+    assert(ring_compiler != NULL);
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
 
-    ring_interpreter->statement_list      = statement;
-    ring_interpreter->statement_list_size = 1;
+    ring_compiler->statement_list      = statement;
+    ring_compiler->statement_list_size = 1;
 
     return 0;
 }
 
-int ring_interpreter_add_statement(Statement *statement) {
-    assert(ring_interpreter != NULL);
+int ring_compiler_add_statement(Statement *statement) {
+    assert(ring_compiler != NULL);
 
-    if (ring_interpreter->statement_list == NULL) {
-        ring_interpreter->statement_list      = statement;
-        ring_interpreter->statement_list_size = 1;
+    if (ring_compiler->statement_list == NULL) {
+        ring_compiler->statement_list      = statement;
+        ring_compiler->statement_list_size = 1;
         return 0;
     }
 
     Statement *pos;
-    pos = ring_interpreter->statement_list;
+    pos = ring_compiler->statement_list;
     for (; pos->next != NULL; pos = pos->next) {
     }
     pos->next = statement;
-    ring_interpreter->statement_list_size++;
+    ring_compiler->statement_list_size++;
     return 0;
 }
 
-void ring_interpreter_registe_inner_func() {
-    register_inner_func(ring_interpreter);
+void ring_compiler_registe_inner_func() {
+    register_inner_func(ring_compiler);
 }

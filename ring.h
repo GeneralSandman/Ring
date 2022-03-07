@@ -3,7 +3,7 @@
 
 #define RING_VERSION "ring-v0.0.36-beat"
 
-typedef struct Ring_Interpreter_Tag Ring_Interpreter;
+typedef struct Ring_Compiler_Tag Ring_Compiler;
 
 typedef struct Ring_String_Tag Ring_String;
 
@@ -51,7 +51,7 @@ typedef struct ContinueStatement_Tag ContinueStatement;
 
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue **value);
 
-struct Ring_Interpreter_Tag {
+struct Ring_Compiler_Tag {
     char *       current_file_name;
     unsigned int current_line_number;
     unsigned int current_column_number;
@@ -515,21 +515,21 @@ void         reset_ring_string(Ring_String *string);
 void         ring_string_add_char(Ring_String *string, char ch);
 char *       get_ring_string(Ring_String *string);
 
-Ring_Interpreter *new_ring_interpreter(char *file_name);
-Ring_Interpreter *get_ring_interpreter();
-char *            get_ring_interpreter_current_file_name();
-Ring_String *     get_ring_interpreter_current_line_content();
-unsigned int      get_ring_interpreter_line_number();
-unsigned int      increase_ring_interpreter_line_number();
-unsigned int      get_ring_interpreter_column_number();
-unsigned int      increase_ring_interpreter_column_number(unsigned int len);
-void              ring_interpreter_update_line_content(char *str);
-void              ring_interpreter_reset_current_line_content();
-char *            ring_interpreter_get_current_line_content();
-void              reset_ring_interpreter_column_number();
-int               ring_interpreter_init_statement_list(Statement *statement);
-int               ring_interpreter_add_statement(Statement *statement);
-void              ring_interpreter_registe_inner_func();
+Ring_Compiler *new_ring_compiler(char *file_name);
+Ring_Compiler *get_ring_compiler();
+char *         get_ring_compiler_current_file_name();
+Ring_String *  get_ring_compiler_current_line_content();
+unsigned int   get_ring_compiler_line_number();
+unsigned int   increase_ring_compiler_line_number();
+unsigned int   get_ring_compiler_column_number();
+unsigned int   increase_ring_compiler_column_number(unsigned int len);
+void           ring_compiler_update_line_content(char *str);
+void           ring_compiler_reset_current_line_content();
+char *         ring_compiler_get_current_line_content();
+void           reset_ring_compiler_column_number();
+int            ring_compiler_init_statement_list(Statement *statement);
+int            ring_compiler_add_statement(Statement *statement);
+void           ring_compiler_registe_inner_func();
 
 void  init_string_literal_buffer();
 void  reset_string_literal_buffer();
@@ -549,7 +549,7 @@ FunctionReturnList *create_function_return_list(VariableType variable_type);
 FunctionReturnList *function_return_list_add_item(FunctionReturnList *return_list, VariableType variable_type);
 void                check_identifier_valid(char *identifier_name);
 
-void                 ring_interpret(Ring_Interpreter *ring_interpreter);
+void                 ring_interpret(Ring_Compiler *ring_compiler);
 StatementExecResult *interpret_statement(Statement *statement, Function *function);
 StatementExecResult *interpret_statement_list(Statement *statement, Function *function);
 StatementExecResult *interpret_statement_break(BreakStatement *statement, Function *function);
@@ -576,7 +576,7 @@ void                 assign_identifier(Variable *variable, Ring_BasicValue *new_
 Variable *           search_variable(char *variable_identifier, Function *function);
 
 // 上下文相关语义检查
-int ring_semantic_check(Ring_Interpreter *ring_interpreter);
+int ring_semantic_check(Ring_Compiler *ring_compiler);
 
 void                    create_statement_list(Statement *statement);
 void                    statement_list_add_item(Statement *statement);
@@ -620,7 +620,7 @@ Statement *             create_statement_from_continue();
 // char **identifier_list_add_item(char **identifier_list, char *identifier);
 
 // generate.c
-void ring_fix_ast(Ring_Interpreter *ring_interpreter);
+void ring_fix_ast(Ring_Compiler *ring_compiler);
 // generate.c
 
 #endif

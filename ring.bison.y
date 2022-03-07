@@ -165,7 +165,7 @@ definition_or_statement
     | statement
     {
         debug_log_with_green_coloar("[RULE::statement:statement]\t ", "");
-        ring_interpreter_add_statement($1);
+        ring_compiler_add_statement($1);
     }
     ;
 
@@ -805,10 +805,10 @@ int yyerror(char const *str){
     complie_err_log("file(%s) \n"
         "    line(%d) column(%d): \n"
         "    %s", 
-        get_ring_interpreter_current_file_name(),
-        get_ring_interpreter_line_number(), get_ring_interpreter_column_number(), 
-        ring_interpreter_get_current_line_content());
-    complie_err_log2("%*s^.....%s", get_ring_interpreter_column_number()+4, "", str);
+        get_ring_compiler_current_file_name(),
+        get_ring_compiler_line_number(), get_ring_compiler_column_number(), 
+        ring_compiler_get_current_line_content());
+    complie_err_log2("%*s^.....%s", get_ring_compiler_column_number()+4, "", str);
 
     // printf("%s\n", yytext);
 
