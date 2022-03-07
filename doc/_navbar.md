@@ -6,6 +6,7 @@
 - **Ring**编译器设计🔨
   - [**Ring**名字来源⚡](./markdown/Ring名字来源.md)
   - [**Ring**设计思想🔥](./markdown/Ring设计思想.md)
+  - [**Ring**VM虚拟机🚀](./markdown/Ring虚拟机.md)
   - [**Ring**历史版本🗑](./markdown/历史版本.md)
   - [**Ring**未来展望📈](./markdown/未来展望.md)
   - [Contributer    🧠](./markdown/contributer.md)
