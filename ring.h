@@ -5,6 +5,8 @@
 
 typedef struct Ring_Compiler_Tag Ring_Compiler;
 
+typedef struct Ring_VirtualMachine_Executer_Tag Ring_VirtualMachine_Executer;
+
 typedef struct Ring_String_Tag Ring_String;
 
 typedef struct Ring_BasicValue_Tag Ring_BasicValue;
@@ -68,6 +70,9 @@ struct Ring_Compiler_Tag {
 
     unsigned int identifier_list_size;
     Identifier * identifier_list;
+};
+
+struct Ring_VirtualMachine_Executer_Tag {
 };
 
 typedef enum {
