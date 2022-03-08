@@ -289,7 +289,8 @@ struct ArrayIndexExpression_Tag {
 };
 
 struct FunctionCallExpression_Tag {
-    unsigned int  current_line_number;
+    unsigned int line_number;
+
     char *        function_name;
     ArgumentList *argument_list;
 };
@@ -318,6 +319,8 @@ struct Identifier_Tag {
 
 // TODO: 这里还要兼容 数组元素赋值
 struct AssignExpression_Tag {
+    unsigned int line_number;
+
     AssignExpressionType type;
     char *               assign_identifier; // TODO: 以后不应该使用这个 删除调
     unsigned int         assign_identifier_size;
