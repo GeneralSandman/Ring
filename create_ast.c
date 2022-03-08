@@ -56,6 +56,11 @@ Statement *create_statement_from_variable(Variable *variable) {
     get_ring_compiler()->variable_list = variable;
     // TODO: 在这里重写，修改变量的可见范围
 
+    get_ring_compiler()->variable_list_size = 0;
+    for (Variable *pos = variable; pos; pos = pos->next) {
+        get_ring_compiler()->variable_list_size++;
+    }
+
     return statement;
 }
 
@@ -77,6 +82,7 @@ void add_function_definition(Function *function_definition) {
 
     function_definition->next          = get_ring_compiler()->function_list;
     get_ring_compiler()->function_list = function_definition;
+    get_ring_compiler()->function_list_size++;
 }
 
 Expression *create_expression() {

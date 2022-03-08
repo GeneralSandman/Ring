@@ -19,6 +19,7 @@ void register_inner_func(Ring_Compiler *ring_compiler) {
     function->next                = NULL;
 
     ring_compiler->function_list = function;
+    ring_compiler->function_list_size++;
 }
 
 void ring_inner_func_print1(int argc, Ring_BasicValue *value) {

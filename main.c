@@ -34,9 +34,9 @@ int main(int argc, char **argv) {
         return 0;
     }
 
+    // Step-0: 读取文件
     file_name = argv[1];
-
-    fp = fopen(file_name, "r");
+    fp        = fopen(file_name, "r");
     if (fp == NULL) {
         fprintf(stderr, "%s not found.\n", argv[1]);
         exit(1);
