@@ -96,8 +96,7 @@ Expression *create_expression() {
 Expression *create_expression_identifier(char *identifier) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
-    Expression *expression = malloc(sizeof(Expression));
-
+    Expression *expression            = malloc(sizeof(Expression));
     expression->line_number           = get_ring_compiler_line_number();
     expression->type                  = EXPRESSION_TYPE_VARIABLE;
     expression->u.variable_identifier = identifier;
@@ -124,8 +123,8 @@ Expression *create_expression_identifier_with_index(char *identifier, Expression
 Expression *create_expression_(FunctionCallExpression *function_call_expression) {
     debug_log_with_yellow_coloar("function_call_expression->name:%s", function_call_expression->function_name);
 
-    Expression *expression = malloc(sizeof(Expression));
-
+    Expression *expression                 = malloc(sizeof(Expression));
+    expression->line_number                = get_ring_compiler_line_number();
     expression->type                       = EXPRESSION_TYPE_FUNCTION_CALL;
     expression->u.function_call_expression = function_call_expression;
     return expression;
@@ -134,16 +133,16 @@ Expression *create_expression_(FunctionCallExpression *function_call_expression)
 Expression *create_expression__(AssignExpression *assign_expression) {
     // debug_log_with_yellow_coloar("assign_expression->assign_identifier:%s", assign_expression->assign_identifier);
 
-    Expression *expression = malloc(sizeof(Expression));
-
+    Expression *expression          = malloc(sizeof(Expression));
+    expression->line_number         = get_ring_compiler_line_number();
     expression->type                = EXPRESSION_TYPE_ASSIGN;
     expression->u.assign_expression = assign_expression;
     return expression;
 }
 
 Expression *create_expression_ternary(Expression *condition, Expression * true, Expression * false) {
-    Expression *expression = malloc(sizeof(Expression));
-
+    Expression *expression                                 = malloc(sizeof(Expression));
+    expression->line_number                                = get_ring_compiler_line_number();
     expression->type                                       = EXPRESSION_TYPE_TERNARY;
     expression->u.ternary_expression                       = malloc(sizeof(TernaryExpression));
     expression->u.ternary_expression->condition_expression = condition;
@@ -155,8 +154,8 @@ Expression *create_expression_ternary(Expression *condition, Expression * true, 
 Expression *create_expression_binary(ExpressionType type, Expression *left, Expression *right) {
     debug_log_with_yellow_coloar("type:%d", type);
 
-    Expression *expression = malloc(sizeof(Expression));
-
+    Expression *expression                            = malloc(sizeof(Expression));
+    expression->line_number                           = get_ring_compiler_line_number();
     expression->type                                  = type;
     expression->u.binary_expression                   = malloc(sizeof(BinaryExpression));
     expression->u.binary_expression->left_expression  = left;
@@ -168,8 +167,8 @@ Expression *create_expression_binary(ExpressionType type, Expression *left, Expr
 Expression *create_expression_unitary(ExpressionType type, Expression *unitary_expression) {
     debug_log_with_yellow_coloar("type:%d", type);
 
-    Expression *expression = malloc(sizeof(Expression));
-
+    Expression *expression           = malloc(sizeof(Expression));
+    expression->line_number          = get_ring_compiler_line_number();
     expression->line_number          = get_ring_compiler_line_number();
     expression->convert_type         = BASICVALUE_TYPE_UNKNOW;
     expression->type                 = type;
@@ -196,7 +195,8 @@ create_expression_literal(ExpressionType type, char *literal_interface) {
     debug_log_with_yellow_coloar("type:%d", type);
 
     assert(literal_interface != NULL);
-    Expression *expression = malloc(sizeof(Expression));
+    Expression *expression  = malloc(sizeof(Expression));
+    expression->line_number = get_ring_compiler_line_number();
 
     expression->type = type;
     switch (type) {
@@ -221,7 +221,8 @@ create_expression_literal(ExpressionType type, char *literal_interface) {
 Expression *create_expression_bool_literal(ExpressionType type, Ring_Bool value) {
     debug_log_with_yellow_coloar("type:%d, boolean:%d", type, value);
 
-    Expression *expression = malloc(sizeof(Expression));
+    Expression *expression  = malloc(sizeof(Expression));
+    expression->line_number = get_ring_compiler_line_number();
 
     expression->type           = type;
     expression->u.bool_literal = value;
