@@ -635,7 +635,9 @@ Statement *             create_statement_from_continue();
 void ring_fix_ast(Ring_Compiler *ring_compiler);
 
 // generate.c
-void ring_generate_vm_code(Ring_Compiler *ring_compiler);
+Ring_VirtualMachine_Executer *new_ring_executer();
+
+void ring_generate_vm_code(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *ring_executer);
 void add_global_variable(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
 void add_functions(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
 void add_top_level_code(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);

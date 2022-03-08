@@ -9,9 +9,10 @@ void ring_interactive_program();
 int  write_tmp_source_file(char *tmp_source_file_name, int start_line_num, int line_size, char **input_line_content);
 
 int main(int argc, char **argv) {
-    Ring_Compiler *ring_compiler;
-    char *         file_name;
-    FILE *         fp;
+    Ring_Compiler *               ring_compiler;
+    Ring_VirtualMachine_Executer *ring_executer;
+    char *                        file_name;
+    FILE *                        fp;
 
     if (argc != 2) {
         printf("Ring version: %s \n\n", RING_VERSION);
@@ -57,8 +58,10 @@ int main(int argc, char **argv) {
     // Step-4: 修正语法树
     ring_fix_ast(ring_compiler);
 
+    ring_executer = new_ring_executer();
+
     // Step-5: 生成虚拟机中间代码
-    // ring_generate_vm_code(ring_compiler);
+    ring_generate_vm_code(ring_compiler, ring_executer);
 
     // Step-6: 运行虚拟机
     ring_execute_vm_code(ring_compiler);
