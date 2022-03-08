@@ -5,6 +5,8 @@
 
 typedef struct Ring_Compiler_Tag Ring_Compiler;
 
+typedef struct Ring_VirtualMachine_Tag Ring_VirtualMachine;
+
 typedef struct Ring_VirtualMachine_Executer_Tag Ring_VirtualMachine_Executer;
 
 typedef struct Ring_String_Tag Ring_String;
@@ -72,7 +74,12 @@ struct Ring_Compiler_Tag {
     Identifier * identifier_list;
 };
 
+struct Ring_VirtualMachine_Tag {
+    Ring_VirtualMachine_Executer *executer;
+};
+
 struct Ring_VirtualMachine_Executer_Tag {
+    int a;
 };
 
 typedef enum {
@@ -624,8 +631,18 @@ Statement *             create_statement_from_continue();
 // Identifier *            create_identifier(IdentifierType type, char *name);
 // char **identifier_list_add_item(char **identifier_list, char *identifier);
 
-// generate.c
+// fix.c
 void ring_fix_ast(Ring_Compiler *ring_compiler);
+
 // generate.c
+void ring_generate_vm_code(Ring_Compiler *ring_compiler);
+void add_global_variable(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
+void add_functions(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
+void add_top_level_code(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
+// generate.c
+
+// execute.c
+void ring_execute_vm_code(Ring_Compiler *ring_compiler);
+// execute.c
 
 #endif

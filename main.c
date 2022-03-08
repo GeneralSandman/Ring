@@ -5,7 +5,6 @@
 #include "ring.h"
 
 void ring_compile(Ring_Compiler *ring_compiler, FILE *fp);
-void ring_generate_vm_code(Ring_Compiler *ring_compiler);
 void ring_interactive_program();
 int  write_tmp_source_file(char *tmp_source_file_name, int start_line_num, int line_size, char **input_line_content);
 
@@ -44,24 +43,34 @@ int main(int argc, char **argv) {
 
     ring_compiler = new_ring_compiler(file_name);
 
-    // 词法分析，语法分析，构建语法树
+    // Step-1: flex 词法分析，
+    // Step-2: bison 语法分析，构建语法树
     ring_compile(ring_compiler, fp);
 
-    // 语义分析
+    // Step-3: 语义分析
     int result = ring_semantic_check(ring_compiler);
     if (result != 0) {
         fprintf(stderr, "semantic_check error\n");
         exit(1);
     }
 
-    // 解释执行
+    // Step-4: 修正语法树
+    ring_fix_ast(ring_compiler);
+
+    // Step-5: 生成虚拟机中间代码
+    // ring_generate_vm_code(ring_compiler);
+
+    // Step-6: 运行虚拟机
+    ring_execute_vm_code(ring_compiler);
+
+    // Step-6: 直接解释执行
     ring_interpret(ring_compiler);
 
     return 0;
 }
 
-// Step-1: 词法分析
-// Step-2: 上下文无关-语法分析，构建语法数AST
+// Step-1: flex 词法分析，
+// Step-2: bison 语法分析，构建语法树
 void ring_compile(Ring_Compiler *ring_compiler, FILE *fp) {
     extern int   yyparse(void);
     extern FILE *yyin;
@@ -73,11 +82,6 @@ void ring_compile(Ring_Compiler *ring_compiler, FILE *fp) {
     }
 
     debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n", "");
-}
-
-// 修正ast
-void ring_fix_ast(Ring_Compiler *ring_compiler) {
-    // TODO:
 }
 
 // 交互式编程

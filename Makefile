@@ -3,14 +3,17 @@ CC=gcc
 OBJS = \
   lex.yy.o\
   y.tab.o\
-  main.o\
   string.o\
   create_ast.o\
+  semantic_check.o\
+  fix.o\
   eval_ast.o\
+  generate.o\
+  execute.o\
   interpreter.o\
   inner_func.o\
   utils.o\
-  semantic_check.o
+  main.o
 
 CFLAGS = -c -g -std=c99 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function  -pedantic
 BIN = ./bin
@@ -33,13 +36,17 @@ y.tab.c : ring.bison.y
 lex.yy.c : ring.flex.l ring.bison.y y.tab.h
 	flex ring.flex.l
 
-y.tab.o: y.tab.c
+
 lex.yy.o: lex.yy.c ring.h
+y.tab.o: y.tab.c
 string.o: string.c
-main.o: main.c ring.h
 create_ast.o: create_ast.c ring.h
+semantic_check.o: semantic_check.c ring.h
+fix.o: fix.c ring.h
 eval_ast.o: eval_ast.c ring.h
+generate.o: generate.c ring.h
+execute.o: execute.c ring.h
 interpreter.o: interpreter.c ring.h inner_func.h
 inner_func.o: inner_func.c ring.h inner_func.h
 utils.o: utils.c ring.h
-semantic_check.o: semantic_check.c ring.h
+main.o: main.c ring.h
