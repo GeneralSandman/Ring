@@ -130,6 +130,10 @@ typedef enum {
 
     //
     RVM_CODE_ADD_INT,
+    RVM_CODE_SUB_INT,
+    RVM_CODE_MUL_INT,
+    RVM_CODE_DIV_INT,
+    RVM_CODE_MOD_INT,
 
 } RVM_Opcode;
 
@@ -699,9 +703,9 @@ void              vm_executer_dump(Ring_VirtualMachine_Executer *vm_executer);
 RVM_OpcodeBuffer *new_opcode_buffer();
 void              generate_vmcode_from_statement_list(Ring_Compiler *compiler, Ring_VirtualMachine_Executer *vm_executer, RVM_OpcodeBuffer *opcode_buffer);
 void              generate_vmcode_from_expression(Expression *expression, RVM_OpcodeBuffer *opcode_buffer);
-void              generate_vmcode_from_binary_expression(BinaryExpression *expression, RVM_OpcodeBuffer *opcode_buffer);
+void              generate_vmcode_from_binary_expression(BinaryExpression *expression, RVM_OpcodeBuffer *opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_int_expression(Expression *expression, RVM_OpcodeBuffer *opcode_buffer);
-void              generate_vmcode(RVM_OpcodeBuffer *opcode_buffer, RVM_Opcode opcode);
+void              generate_vmcode(RVM_OpcodeBuffer *opcode_buffer, RVM_Opcode opcode, int int_literal);
 // generate.c
 
 // execute.c

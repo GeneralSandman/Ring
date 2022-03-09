@@ -11,6 +11,10 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_POP_STATIC_INT, "pop_static_int"},
 
     {RVM_CODE_ADD_INT, "add_int"},
+    {RVM_CODE_SUB_INT, "sub_int"},
+    {RVM_CODE_MUL_INT, "mul_int"},
+    {RVM_CODE_DIV_INT, "div_int"},
+    {RVM_CODE_MOD_INT, "mod_int"},
 };
 
 Ring_VirtualMachine_Executer *new_ring_vm_executer() {
@@ -61,7 +65,6 @@ void add_top_level_code(Ring_Compiler *compiler, Ring_VirtualMachine_Executer *v
 }
 
 void vm_executer_dump(Ring_VirtualMachine_Executer *vm_executer) {
-    debug_log_with_purple_coloar("");
 }
 
 RVM_OpcodeBuffer *new_opcode_buffer() {
@@ -79,7 +82,6 @@ void generate_vmcode_from_statement_list(Ring_Compiler *compiler, Ring_VirtualMa
     assert(compiler != NULL);
 
     for (Statement *statement = compiler->statement_list; statement != NULL; statement = statement->next) {
-        debug_log_with_purple_coloar("statement->type:%d\n", statement->type);
         switch (statement->type) {
         case STATEMENT_TYPE_EXPRESSION:
             generate_vmcode_from_expression(statement->u.expression, opcode_buffer);
@@ -93,14 +95,28 @@ void generate_vmcode_from_statement_list(Ring_Compiler *compiler, Ring_VirtualMa
 void generate_vmcode_from_expression(Expression *expression, RVM_OpcodeBuffer *opcode_buffer) {
     assert(expression != NULL);
 
-    debug_log_with_purple_coloar("expression->type:%d", expression->type);
-
     switch (expression->type) {
     case EXPRESSION_TYPE_LITERAL_INT:
         generate_vmcode_from_int_expression(expression, opcode_buffer);
         break;
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
-        generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer);
+        generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer, RVM_CODE_ADD_INT);
+        break;
+
+    case EXPRESSION_TYPE_ARITHMETIC_SUB:
+        generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer, RVM_CODE_SUB_INT);
+        break;
+
+    case EXPRESSION_TYPE_ARITHMETIC_MUL:
+        generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer, RVM_CODE_MUL_INT);
+        break;
+
+    case EXPRESSION_TYPE_ARITHMETIC_DIV:
+        generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer, RVM_CODE_DIV_INT);
+        break;
+
+    case EXPRESSION_TYPE_ARITHMETIC_MOD:
+        generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer, RVM_CODE_MOD_INT);
         break;
 
     default:
@@ -108,23 +124,21 @@ void generate_vmcode_from_expression(Expression *expression, RVM_OpcodeBuffer *o
     }
 }
 
-void generate_vmcode_from_binary_expression(BinaryExpression *expression, RVM_OpcodeBuffer *opcode_buffer) {
-    debug_log_with_purple_coloar("");
-
+void generate_vmcode_from_binary_expression(BinaryExpression *expression, RVM_OpcodeBuffer *opcode_buffer, RVM_Opcode opcode) {
     Expression *left  = expression->left_expression;
     Expression *right = expression->right_expression;
 
     generate_vmcode_from_expression(left, opcode_buffer);
     generate_vmcode_from_expression(right, opcode_buffer);
+
+    generate_vmcode(opcode_buffer, opcode, 0);
 }
 
 void generate_vmcode_from_int_expression(Expression *expression, RVM_OpcodeBuffer *opcode_buffer) {
-    debug_log_with_purple_coloar("");
-
-    generate_vmcode(opcode_buffer, RVM_CODE_PUSH_INT);
+    generate_vmcode(opcode_buffer, RVM_CODE_PUSH_INT, expression->u.int_literal);
 }
 
-void generate_vmcode(RVM_OpcodeBuffer *opcode_buffer, RVM_Opcode opcode) {
+void generate_vmcode(RVM_OpcodeBuffer *opcode_buffer, RVM_Opcode opcode, int int_literal) {
     if (opcode_buffer->code_capacity == 0) {
         opcode_buffer->code_capacity = 2;
     }
@@ -133,6 +147,6 @@ void generate_vmcode(RVM_OpcodeBuffer *opcode_buffer, RVM_Opcode opcode) {
     }
 
     opcode_buffer->code_list                             = realloc(opcode_buffer->code_list, opcode_buffer->code_capacity * sizeof(RVM_Byte));
-    opcode_buffer->code_list[opcode_buffer->code_size++] = opcode;
-    opcode_buffer->code_list[opcode_buffer->code_size++] = 123; // FIXME:
+    opcode_buffer->code_list[opcode_buffer->code_size++] = opcode;      // 操作码
+    opcode_buffer->code_list[opcode_buffer->code_size++] = int_literal; // 操作数 FIXME:
 }
