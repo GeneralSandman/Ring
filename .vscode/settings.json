@@ -27,6 +27,15 @@
         "deque": "c",
         "string": "c",
         "sstream": "c",
-        "streambuf": "c"
+        "streambuf": "c",
+        "atomic": "c",
+        "exception": "c",
+        "algorithm": "c",
+        "memory": "c",
+        "optional": "c",
+        "random": "c",
+        "fstream": "c",
+        "limits": "c",
+        "new": "c"
     }
 }

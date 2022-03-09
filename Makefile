@@ -10,7 +10,7 @@ OBJS = \
   eval_ast.o\
   generate.o\
   execute.o\
-  interpreter.o\
+  compiler.o\
   inner_func.o\
   utils.o\
   main.o
@@ -46,7 +46,7 @@ fix.o: fix.c ring.h
 eval_ast.o: eval_ast.c ring.h
 generate.o: generate.c ring.h
 execute.o: execute.c ring.h
-interpreter.o: interpreter.c ring.h inner_func.h
+compiler.o: compiler.c ring.h inner_func.h
 inner_func.o: inner_func.c ring.h inner_func.h
 utils.o: utils.c ring.h
 main.o: main.c ring.h

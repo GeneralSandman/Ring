@@ -1,13 +1,19 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#define RING_VERSION "ring-v0.0.36-beat"
+#define RING_VERSION "ring-v0.1.0-beat"
 
 typedef struct Ring_Compiler_Tag Ring_Compiler;
 
 typedef struct Ring_VirtualMachine_Tag Ring_VirtualMachine;
 
 typedef struct Ring_VirtualMachine_Executer_Tag Ring_VirtualMachine_Executer;
+
+typedef struct RVM_OpcodeBuffer_Tag RVM_OpcodeBuffer;
+
+typedef struct RVM_Opcode_Info_Tag RVM_Opcode_Info;
+
+typedef struct RVM_LabelTable_Tag RVM_LabelTable;
 
 typedef struct Ring_String_Tag Ring_String;
 
@@ -55,6 +61,8 @@ typedef struct ContinueStatement_Tag ContinueStatement;
 
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue **value);
 
+typedef unsigned char RVM_Byte;
+
 struct Ring_Compiler_Tag {
     char *       current_file_name;
     unsigned int current_line_number;
@@ -79,8 +87,51 @@ struct Ring_VirtualMachine_Tag {
 };
 
 struct Ring_VirtualMachine_Executer_Tag {
-    int a;
+    // 连续数组，非链表
+    unsigned int global_variable_size;
+    Variable *   global_variable;
+
+    // 连续数组，非链表
+    unsigned int function_size;
+    Function *   function;
+
+    // 连续数组，非链表
+    unsigned int code_size;
+    RVM_Byte *   code;
 };
+
+struct RVM_LabelTable_Tag {
+    unsigned int label_address;
+};
+
+struct RVM_OpcodeBuffer_Tag {
+    RVM_Byte *   code_list;
+    unsigned int code_size;
+    unsigned int code_capacity;
+
+    RVM_LabelTable *lable_list;
+    unsigned int    lable_size;
+    unsigned int    lable_capacity;
+};
+
+struct RVM_Opcode_Info_Tag {
+    RVM_Byte code;
+    char *   name;
+};
+
+typedef enum {
+    RVM_CODE_UNKNOW = 0,
+
+    // push
+    RVM_CODE_PUSH_INT,
+
+    // pop
+    RVM_CODE_POP_STATIC_INT,
+
+    //
+    RVM_CODE_ADD_INT,
+
+} RVM_Opcode;
 
 typedef enum {
     BOOL_FALSE = 0,
@@ -497,19 +548,19 @@ struct ContinueStatement_Tag {
     printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
 #ifdef DEBUG
-// 编译错误
+// debug 词法分析
 #define debug_log_with_red_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_RED, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-// 标示错误的地址
+// debug 语法分析
 #define debug_log_with_green_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_GREEN, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-//
+// debug 语法分析构建AST
 #define debug_log_with_yellow_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_YELLOW, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-//
+// debug 解释执行AST
 #define debug_log_with_blue_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_BLUE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-// 编译告警
+// debug 生成 vm opcode
 #define debug_log_with_purple_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_PURPLE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 #else
@@ -638,16 +689,24 @@ Statement *             create_statement_from_continue();
 void ring_fix_ast(Ring_Compiler *ring_compiler);
 
 // generate.c
-Ring_VirtualMachine_Executer *new_ring_executer();
+Ring_VirtualMachine_Executer *new_ring_vm_executer();
 
-void ring_generate_vm_code(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *ring_executer);
-void add_global_variable(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
-void add_functions(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
-void add_top_level_code(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
+void              ring_generate_vm_code(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *ring_executer);
+void              add_global_variable(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
+void              add_functions(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
+void              add_top_level_code(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
+void              vm_executer_dump(Ring_VirtualMachine_Executer *vm_executer);
+RVM_OpcodeBuffer *new_opcode_buffer();
+void              generate_vmcode_from_statement_list(Ring_Compiler *compiler, Ring_VirtualMachine_Executer *vm_executer, RVM_OpcodeBuffer *opcode_buffer);
+void              generate_vmcode_from_expression(Expression *expression, RVM_OpcodeBuffer *opcode_buffer);
+void              generate_vmcode_from_binary_expression(BinaryExpression *expression, RVM_OpcodeBuffer *opcode_buffer);
+void              generate_vmcode_from_int_expression(Expression *expression, RVM_OpcodeBuffer *opcode_buffer);
+void              generate_vmcode(RVM_OpcodeBuffer *opcode_buffer, RVM_Opcode opcode);
 // generate.c
 
 // execute.c
-void ring_execute_vm_code(Ring_Compiler *ring_compiler);
+Ring_VirtualMachine *new_ring_virtualmachine();
+void                 ring_execute_vm_code(Ring_Compiler *ring_compiler);
 // execute.c
 
 #endif
