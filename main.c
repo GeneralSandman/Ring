@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
     ring_execute_vm_code(ring_compiler);
 
     // Step-6: 直接解释执行
-    // ring_interpret(ring_compiler);
+    ring_interpret(ring_compiler);
 
     return 0;
 }
@@ -86,7 +86,7 @@ void ring_compile(Ring_Compiler *ring_compiler, FILE *fp) {
         exit(1);
     }
 
-    debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n", "");
+    debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n");
 }
 
 // 交互式编程

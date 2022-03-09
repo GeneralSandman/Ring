@@ -560,7 +560,7 @@ Variable *new_variable(VariableType type, char *identifier, Expression *init_exp
 }
 
 Variable *new_variable_array(VariableType type, Expression *size, char *identifier, Expression *init_expression, int is_const) {
-    debug_log_with_yellow_coloar("\t type(%d),size(%d),identifier(%s)", type, size, identifier);
+    debug_log_with_yellow_coloar("\t type(%d),identifier(%s)", type, identifier);
 
     // 这个应该放到解释的时候
 

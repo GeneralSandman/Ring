@@ -148,23 +148,23 @@ int yyerror(char const *str);
 translation_unit
     : definition_or_statement
     {
-        debug_log_with_green_coloar("[RULE::translation_unit:definition_or_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::translation_unit:definition_or_statement]\t ");
     }
     | translation_unit definition_or_statement
     {
-        debug_log_with_green_coloar("[RULE::translation_unit:translation_unit]\t ", "");
+        debug_log_with_green_coloar("[RULE::translation_unit:translation_unit]\t ");
     }
     ;
 
 definition_or_statement
     : function_definition
     {
-        debug_log_with_green_coloar("[RULE::statement:function_definition]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:function_definition]\t ");
         add_function_definition($1);
     }
     | statement
     {
-        debug_log_with_green_coloar("[RULE::statement:statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:statement]\t ");
         ring_compiler_add_statement($1);
     }
     ;
@@ -172,14 +172,14 @@ definition_or_statement
 statement_list
     : statement
     {
-        debug_log_with_green_coloar("[RULE::statement:statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:statement]\t ");
         // $$ = statement_list_add_item2($1);
     }
     | statement_list statement
     {
         // 这个地方不应该加在全局的 statment_list 中
         // 应该只放到函数的 statement_list 中
-        debug_log_with_green_coloar("[RULE::statement:statement_list]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:statement_list]\t ");
         $$ = statement_list_add_item3($1, $2);
     }
     ;
@@ -192,7 +192,7 @@ maybe_empty_expression
     | expression
     | assign_expression
     {
-        debug_log_with_green_coloar("[RULE:expression-assign_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE:expression-assign_expression]\t ");
         
         $$ = create_expression__($1);
     }
@@ -201,49 +201,49 @@ maybe_empty_expression
 statement
     : maybe_empty_expression TOKEN_SEMICOLON
     {
-        debug_log_with_green_coloar("[RULE::statement:expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:expression]\t ");
 
         $$ = create_statemen_from_expression($1);
     }
     | variable_definition TOKEN_SEMICOLON
     {
-        debug_log_with_green_coloar("[RULE::statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement]\t ");
 
         $$ = create_statement_from_variable($1);
     }
     | variable_definition_with_assign TOKEN_SEMICOLON
     {
-        debug_log_with_green_coloar("[RULE::statement:variable_definition_with_assign]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:variable_definition_with_assign]\t ");
         $$ = create_statement_from_variable($1);
     }
     | const_definition_with_assign TOKEN_SEMICOLON
     {
-        debug_log_with_green_coloar("[RULE::statement:const_definition_with_assign]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:const_definition_with_assign]\t ");
         $$ = create_statement_from_variable($1);
     }
     | TOKEN_RETURN expression_list TOKEN_SEMICOLON
     {
-        debug_log_with_green_coloar("[RULE::statement:return_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:return_statement]\t ");
         $$ = create_return_statement($2);
     }
     | TOKEN_RETURN TOKEN_SEMICOLON
     {
-        debug_log_with_green_coloar("[RULE::statement:return_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:return_statement]\t ");
         $$ = create_return_statement(NULL);
     }
     | if_statement
     {
-        debug_log_with_green_coloar("[RULE::statement:if_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:if_statement]\t ");
         $$ = create_statement_from_if($1);
     }
     | for_statement
     {
-        debug_log_with_green_coloar("[RULE::statement:for_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:for_statement]\t ");
         $$ = create_statement_from_for($1);
     }
     | do_while_statement TOKEN_SEMICOLON
     {
-        debug_log_with_green_coloar("[RULE::statement:do_while_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::statement:do_while_statement]\t ");
         $$ = create_statement_from_dowhile($1);
     }
     | break_statement TOKEN_SEMICOLON
@@ -261,22 +261,22 @@ statement
 if_statement
     : TOKEN_IF TOKEN_LP expression TOKEN_RP block // if () {}
     {
-        debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::if_statement]\t ");
         $$ = create_if_statement($3, $5, NULL, NULL);
     }
     | TOKEN_IF TOKEN_LP expression TOKEN_RP block TOKEN_ELSE block // if () {} else {}
     {
-        debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::if_statement]\t ");
         $$ = create_if_statement($3, $5, NULL, $7);
     }
     | TOKEN_IF TOKEN_LP expression TOKEN_RP block elseif_statement_list // if () {} elseif() {} elseif {}
     {
-        debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::if_statement]\t ");
         $$ = create_if_statement($3, $5, $6, NULL);
     }
     | TOKEN_IF TOKEN_LP expression TOKEN_RP block elseif_statement_list TOKEN_ELSE block // if () {} elseif() {} elseif {} else {}
     {
-        debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::if_statement]\t ");
         $$ = create_if_statement($3, $5, $6, $8);
     }
     ;
@@ -284,11 +284,11 @@ if_statement
 elseif_statement_list
     : elseif_statement
     {
-        debug_log_with_green_coloar("[RULE::elseif_list_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::elseif_list_statement]\t ");
     }
     | elseif_statement_list elseif_statement
     {
-        debug_log_with_green_coloar("[RULE::elseif_list_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::elseif_list_statement]\t ");
         $$ = elseif_statement_add_item($1, $2);
     }
     ;
@@ -296,7 +296,7 @@ elseif_statement_list
 elseif_statement
     : TOKEN_ELSEIF TOKEN_LP expression TOKEN_RP block // elseif () {}
     {
-        debug_log_with_green_coloar("[RULE::if_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::if_statement]\t ");
         $$ = create_elseif_statement($3, $5);
     }
     ;
@@ -304,7 +304,7 @@ elseif_statement
 for_statement
     : TOKEN_FOR TOKEN_LP maybe_empty_expression TOKEN_SEMICOLON maybe_empty_expression TOKEN_SEMICOLON maybe_empty_expression TOKEN_RP block
     {
-        debug_log_with_green_coloar("[RULE::for_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::for_statement]\t ");
         $$ = create_for_statement($3, $5, $7, $9);
 
     }
@@ -313,7 +313,7 @@ for_statement
 do_while_statement
     : TOKEN_DO block TOKEN_WHILE TOKEN_LP expression TOKEN_RP
     {
-        debug_log_with_green_coloar("[RULE::do_while_statement]\t ", "");
+        debug_log_with_green_coloar("[RULE::do_while_statement]\t ");
         $$ = create_dowhile_statement($2, $5);
     }
     ;
@@ -328,13 +328,13 @@ continue_statement
 variable_definition
     : TOKEN_VAR variable_type identifier
     {
-        debug_log_with_green_coloar("[RULE::variable_definition]\t ", "");
+        debug_log_with_green_coloar("[RULE::variable_definition]\t ");
 
         $$ = new_variable($2, $3, NULL, 0);
     }
     | TOKEN_VAR variable_type TOKEN_LB literal_term TOKEN_RB identifier
     {
-        debug_log_with_green_coloar("[RULE::variable_definition]\t ", "");
+        debug_log_with_green_coloar("[RULE::variable_definition]\t ");
 
         $$ = new_variable_array($2, $4, $6, NULL, 0);
 
@@ -344,7 +344,7 @@ variable_definition
 variable_definition_with_assign
     : TOKEN_VAR variable_type identifier TOKEN_ASSIGN expression
     {
-        debug_log_with_green_coloar("[RULE::variable_definition]\t ", "");
+        debug_log_with_green_coloar("[RULE::variable_definition]\t ");
 
         $$ = new_variable($2, $3, $5, 0);
     }
@@ -353,7 +353,7 @@ variable_definition_with_assign
 const_definition_with_assign
     : TOKEN_CONST variable_type identifier TOKEN_ASSIGN expression
     {
-        debug_log_with_green_coloar("[RULE::variable_definition]\t ", "");
+        debug_log_with_green_coloar("[RULE::variable_definition]\t ");
 
         $$ = new_variable($2, $3, $5, 1);
     }
@@ -362,28 +362,28 @@ const_definition_with_assign
 function_definition
     : TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP block
     {
-        debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
+        debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
         $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, NULL, $5);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP block
     {
-        debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
+        debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
         $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, NULL, $6);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
-        debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
+        debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
         $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, $7, $9);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
-        debug_log_with_green_coloar("[RULE::function_definition]\t ", "");
+        debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
         $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, $8, $10);
 
@@ -393,12 +393,12 @@ function_definition
 parameter_list
     : variable_definition
     {
-        debug_log_with_green_coloar("[RULE::parameter_list]\t ", "");
+        debug_log_with_green_coloar("[RULE::parameter_list]\t ");
 
     }
     | parameter_list TOKEN_COMMA variable_definition 
     {
-        debug_log_with_green_coloar("[RULE::parameter_list:parameter_list]\t ", "");
+        debug_log_with_green_coloar("[RULE::parameter_list:parameter_list]\t ");
         $$ = variable_list_add_item($1, $3);
 
     }
@@ -418,13 +418,13 @@ return_list
 block
     : TOKEN_LC statement_list TOKEN_RC
     {
-        debug_log_with_green_coloar("[RULE::block: statment_list]\t ", "");
+        debug_log_with_green_coloar("[RULE::block: statment_list]\t ");
         // TODO: 这里不要直接赋值，要扫描statment_list 把变量加到当前变量列表中
         $$ = $2;
     }
     | TOKEN_LC TOKEN_RC
     {
-        debug_log_with_green_coloar("[RULE::block: empty statement_list]\t ", "");
+        debug_log_with_green_coloar("[RULE::block: empty statement_list]\t ");
     }
     ;
 
@@ -432,25 +432,25 @@ block
 variable_type
     : TOKEN_BOOL
     {
-        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_BOOL) ", "");
+        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_BOOL) ");
 
         $$ = VARIABLE_TYPE_BOOL;
     }
     | TOKEN_INT
     {
-        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_INT) ", "");
+        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_INT) ");
 
         $$ = VARIABLE_TYPE_INT;
     }
     | TOKEN_DOUBLE
     {
-        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_DOUBLE) ", "");
+        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_DOUBLE) ");
 
         $$ = VARIABLE_TYPE_DOUBLE;
     }
     | TOKEN_STRING
     {
-        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_STRING) ", "");
+        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_STRING) ");
 
         $$ = VARIABLE_TYPE_STRING;
     }
@@ -460,18 +460,18 @@ variable_type
 expression
     : function_call_expression 
     {
-        debug_log_with_green_coloar("[RULE::expression:function_call_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::expression:function_call_expression]\t ");
 
         $$ = create_expression_($1);
     }
     | logical_expression_or
     {
-        debug_log_with_green_coloar("[RULE::expression:logical_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::expression:logical_expression]\t ");
 
     }
     | expression TOKEN_QUESTION_MARK expression TOKEN_COLON expression
     {
-        debug_log_with_green_coloar("[RULE::expression ? : ]\t ", "");
+        debug_log_with_green_coloar("[RULE::expression ? : ]\t ");
         $$ = create_expression_ternary($1, $3, $5);
     }
     ;
@@ -479,13 +479,13 @@ expression
 logical_expression_or
     : logical_expression_and
     {
-        debug_log_with_green_coloar("[RULE::logical_expression_or]\t ", "");
+        debug_log_with_green_coloar("[RULE::logical_expression_or]\t ");
         // $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_AND, $1, $3);
 
     }
     | logical_expression_or TOKEN_OR logical_expression_and
     {
-        debug_log_with_green_coloar("[RULE::logical_expression_or]\t ", "");
+        debug_log_with_green_coloar("[RULE::logical_expression_or]\t ");
         $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_OR, $1, $3);
 
     }
@@ -494,13 +494,13 @@ logical_expression_or
 logical_expression_and
     : equality_expression
     {
-        debug_log_with_green_coloar("[RULE::logical_expression_and]\t ", "");
+        debug_log_with_green_coloar("[RULE::logical_expression_and]\t ");
         // $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_OR, $1, $3);
 
     }
     | logical_expression_and TOKEN_AND equality_expression
     {
-        debug_log_with_green_coloar("[RULE::logical_expression_and]\t ", "");
+        debug_log_with_green_coloar("[RULE::logical_expression_and]\t ");
         $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_AND, $1, $3);
         
     }
@@ -510,12 +510,12 @@ equality_expression
         : relational_expression
         | equality_expression TOKEN_EQ relational_expression
         {
-            debug_log_with_green_coloar("[RULE::equality_expression]\t ", "");
+            debug_log_with_green_coloar("[RULE::equality_expression]\t ");
             $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_EQ, $1, $3);
         }
         | equality_expression TOKEN_NE relational_expression
         {
-            debug_log_with_green_coloar("[RULE::equality_expression]\t ", "");
+            debug_log_with_green_coloar("[RULE::equality_expression]\t ");
             $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_NE, $1, $3);
         }
         ;
@@ -523,30 +523,30 @@ equality_expression
 relational_expression
     : expression_arithmetic_operation_additive
     {
-        debug_log_with_green_coloar("[RULE::relational_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::relational_expression]\t ");
 
     }
     | relational_expression TOKEN_GT expression_arithmetic_operation_additive
     {
-        debug_log_with_green_coloar("[RULE::relational_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::relational_expression]\t ");
         $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_GT, $1, $3);
 
     }
     | relational_expression TOKEN_GE expression_arithmetic_operation_additive
     {
-        debug_log_with_green_coloar("[RULE::relational_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::relational_expression]\t ");
         $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_GE, $1, $3);
 
     }
     | relational_expression TOKEN_LT expression_arithmetic_operation_additive
     {
-        debug_log_with_green_coloar("[RULE::relational_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::relational_expression]\t ");
         $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_LT, $1, $3);
 
     }
     | relational_expression TOKEN_LE expression_arithmetic_operation_additive
     {
-        debug_log_with_green_coloar("[RULE::relational_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::relational_expression]\t ");
         $$ = create_expression_binary(EXPRESSION_TYPE_RELATIONAL_LE, $1, $3);
 
     }
@@ -555,18 +555,18 @@ relational_expression
 expression_arithmetic_operation_additive
     : expression_arithmetic_operation_multiplicative 
     {
-        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_additive]\t ", "");
+        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_additive]\t ");
 
     }
     | expression_arithmetic_operation_additive TOKEN_ADD expression_arithmetic_operation_multiplicative
     {
-        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_additive]\t ", "");
+        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_additive]\t ");
 
         $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_ADD, $1, $3);
     }
     | expression_arithmetic_operation_additive TOKEN_SUB expression_arithmetic_operation_multiplicative
     {
-        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_additive]\t ", "");
+        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_additive]\t ");
 
         $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_SUB, $1, $3);
     }
@@ -575,24 +575,24 @@ expression_arithmetic_operation_additive
 expression_arithmetic_operation_multiplicative
     : literal_term
     {
-        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ", "");
+        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ");
 
     }
     | expression_arithmetic_operation_multiplicative TOKEN_MUL literal_term
     {
-        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ", "");
+        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ");
 
         $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_MUL, $1, $3);
     }
     | expression_arithmetic_operation_multiplicative TOKEN_DIV literal_term
     {
-        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ", "");
+        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ");
 
         $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_DIV, $1, $3);
     }
     | expression_arithmetic_operation_multiplicative TOKEN_MOD literal_term
     {
-        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ", "");
+        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ");
 
         $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_MOD, $1, $3);
     }
@@ -601,74 +601,74 @@ expression_arithmetic_operation_multiplicative
 literal_term
     : variable_type TOKEN_LP literal_term TOKEN_RP
     {
-        debug_log_with_green_coloar("[RULE::literal_term:convert_type]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:convert_type]\t ");
         $$ = create_expression_unitary_with_convert_type($1, $3);
     }
     | TOKEN_NOT literal_term
     {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_NOT]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_NOT]\t ");
 
         $$ = create_expression_unitary(EXPRESSION_TYPE_LOGICAL_UNITARY_NOT, $2);
     }
     | TOKEN_SUB literal_term
     {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_SUB]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_SUB]\t ");
 
         $$ = create_expression_unitary(EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS, $2);
     }
     | INT_LITERAL
     {
-        debug_log_with_green_coloar("[RULE::literal_term:INT_LITERAL]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:INT_LITERAL]\t ");
 
         $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_INT, $1);
     }
     | DOUBLE_LITERAL
     {
-        debug_log_with_green_coloar("[RULE::literal_term:DOUBLE_LITERAL]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:DOUBLE_LITERAL]\t ");
 
         $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_DOUBLE, $1);
     }
     | STRING_LITERAL
     {
-        debug_log_with_green_coloar("[RULE::literal_term:STRING_LITERAL]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:STRING_LITERAL]\t ");
 
         $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_STRING, $1);
     }
     | TOKEN_TRUE
     {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_TRUE]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_TRUE]\t ");
 
         $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, BOOL_TRUE);
     }
     | TOKEN_FALSE
     {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_FALSE]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_FALSE]\t ");
 
         $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, BOOL_FALSE);
     }
     | identifier
     {
-        debug_log_with_green_coloar("[RULE::literal_term:identifier]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:identifier]\t ");
         $$ = create_expression_identifier($1);
     }
     | identifier TOKEN_INCREASE
     {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ");
         $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX, create_expression_identifier($1));
     }
     | TOKEN_INCREASE identifier
     {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ");
         $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX, create_expression_identifier($2));
     }
     | identifier TOKEN_DECREASE
     {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ");
         $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX, create_expression_identifier($1));
     }
     | TOKEN_DECREASE identifier
     {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ", "");
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ");
         $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX, create_expression_identifier($2));
     }
     | identifier TOKEN_LB expression TOKEN_RB
@@ -681,13 +681,13 @@ literal_term
 function_call_expression
     : identifier TOKEN_LP argument_list TOKEN_RP
     {
-        debug_log_with_green_coloar("[RULE::function_call_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::function_call_expression]\t ");
 
         $$ = create_function_call_expression($1, $3);
     }
     | identifier TOKEN_LP TOKEN_RP
     {
-        debug_log_with_green_coloar("[RULE::function_call_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::function_call_expression]\t ");
 
         $$ = create_function_call_expression($1, NULL);
     }
@@ -696,43 +696,43 @@ function_call_expression
 assign_expression
     : identifier TOKEN_ASSIGN expression
     {
-        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ASSIGN, $1, $3);
     }
     | identifier TOKEN_ADD_ASSIGN expression
     {
-        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN, $1, $3);
     }
     | identifier TOKEN_SUB_ASSIGN expression
     {
-        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN, $1, $3);
     }
     | identifier TOKEN_MUL_ASSIGN expression
     {
-        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN, $1, $3);
     }
     | identifier TOKEN_DIV_ASSIGN expression
     {
-        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN, $1, $3);
     }
     | identifier TOKEN_MOD_ASSIGN expression
     {
-        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN, $1, $3);
     }
     | identifier TOKEN_COMMA identifier_list TOKEN_ASSIGN expression_list
     {
-        debug_log_with_green_coloar("[RULE::assign_expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::assign_expression]\t ");
         $$ = create_multi_assign_expression($1, $3, NULL, $5);
     }
     | identifier TOKEN_LB expression TOKEN_RB TOKEN_ASSIGN expression
@@ -745,12 +745,12 @@ assign_expression
 identifier_list
     : identifier
     {
-        debug_log_with_green_coloar("[RULE::identifier_list]\t ", "");
+        debug_log_with_green_coloar("[RULE::identifier_list]\t ");
         $$ = new_identifier(IDENTIFIER_TYPE_VARIABLE, $1);
     }
     | identifier_list TOKEN_COMMA identifier
     {
-        debug_log_with_green_coloar("[RULE::identifier_list]\t ", "");
+        debug_log_with_green_coloar("[RULE::identifier_list]\t ");
         $$ = identifier_list_add_item($1, new_identifier(IDENTIFIER_TYPE_VARIABLE, $3));
     }
     ;
@@ -759,7 +759,7 @@ expression_list
     : expression
     | expression_list TOKEN_COMMA expression
     {
-        debug_log_with_green_coloar("[RULE::expression_list]\t ", "");
+        debug_log_with_green_coloar("[RULE::expression_list]\t ");
         $$ = expression_list_add_item($1, $3);
     }
     ;
@@ -788,7 +788,7 @@ argument_list
 argument
     : expression
     {
-        debug_log_with_green_coloar("[RULE::argument_list:expression]\t ", "");
+        debug_log_with_green_coloar("[RULE::argument_list:expression]\t ");
 
         $$ = create_argument_list_from_expression($1);
     }

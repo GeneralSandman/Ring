@@ -6,10 +6,13 @@
 RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_UNKNOW, ""},
 
+    // push
     {RVM_CODE_PUSH_INT, "push_int"},
 
+    // pop
     {RVM_CODE_POP_STATIC_INT, "pop_static_int"},
 
+    //
     {RVM_CODE_ADD_INT, "add_int"},
     {RVM_CODE_SUB_INT, "sub_int"},
     {RVM_CODE_MUL_INT, "mul_int"},
@@ -58,9 +61,12 @@ void add_top_level_code(Ring_Compiler *compiler, Ring_VirtualMachine_Executer *v
 
     debug_log_with_purple_coloar("----------top level code----------");
     debug_log_with_purple_coloar("code_size:%d, code_capacity:%d", size, capacity);
-    for (int i = 0; i < size; i++) {
-        char *name = RVM_Opcode_Infos[code_list[i]].name;
-        debug_log_with_purple_coloar("[opcode] %10d %15s %10d", i, name, code_list[++i]);
+    for (int i = 0; i < size;) {
+        RVM_Byte op_code  = code_list[i];
+        char *   name     = RVM_Opcode_Infos[op_code].name;
+        int      oper_num = code_list[i + 1];
+        debug_log_with_purple_coloar("[opcode] %10d %15s %10d", i, name, oper_num);
+        i += 2;
     }
 }
 
