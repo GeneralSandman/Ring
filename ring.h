@@ -107,7 +107,8 @@ struct Ring_VirtualMachine_Executer_Tag {
 };
 
 typedef union {
-    int int_value;
+    int    int_value;
+    double double_value;
 } RuntimeStackValue;
 
 struct RuntimeStack_Tag {

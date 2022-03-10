@@ -4,11 +4,32 @@
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
-#define STACK_GET_INT(rvm, offset) \
-    (rvm->runtime_stack->data[rvm->runtime_stack->top_index + offset].int_value)
 
-#define STACK_SET_INT(rvm, offset, value) \
-    (rvm->runtime_stack->data[rvm->runtime_stack->top_index + offset].int_value = value)
+// 通过绝对索引 获取
+#define STACK_GET_INT_INDEX(rvm, index) \
+    ((rvm)->runtime_stack->data[(index)].int_value)
+#define STACK_GET_DOUBLE_INDEX(rvm, index) \
+    ((rvm)->runtime_stack->data[(index)].double_value)
+
+// 通过栈顶偏移 offset 获取
+#define STACK_GET_INT_OFFSET(rvm, offset) \
+    STACK_GET_INT_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
+#define STACK_GET_DOUBLE_OFFSET(rvm, offset) \
+    STACK_GET_DOUBLE_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
+
+
+// 通过绝对索引 设置
+#define STACK_SET_INT_INDEX(rvm, index, value) \
+    ((rvm)->runtime_stack->data[(index)].int_value = (value))
+#define STACK_SET_DOUBLE_INDEX(rvm, index, value) \
+    ((rvm)->runtime_stack->data[(index)].double_value = (value))
+
+// 通过栈顶偏移 offset 设置
+#define STACK_SET_INT_OFFSET(rvm, offset, value) \
+    STACK_SET_INT_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), value)
+#define STACK_SET_DOUBLE_OFFSET(rvm, offset, double_value) \
+    STACK_SET_DOUBLE_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), value)
+
 
 RuntimeStack* new_runtime_stack() {
     RuntimeStack* stack = malloc(sizeof(RuntimeStack));
@@ -40,39 +61,39 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         switch (opcode) {
         case RVM_CODE_PUSH_INT:
-            STACK_SET_INT(rvm, 0, code_list[rvm->pc + 1]); // FIXME:
+            STACK_SET_INT_OFFSET(rvm, 0, code_list[rvm->pc + 1]); // FIXME:
             runtime_stack->top_index++;
             rvm->pc += 2;
             break;
 
         case RVM_CODE_ADD_INT:
-            STACK_GET_INT(rvm, -2) = STACK_GET_INT(rvm, -2) + STACK_GET_INT(rvm, -1);
+            STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) + STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc += 2; // FIXME:  没有操作数
+            rvm->pc += 2; // FIXME:  没有操作数不需要占用重复的空间
             break;
 
         case RVM_CODE_SUB_INT:
-            STACK_GET_INT(rvm, -2) = STACK_GET_INT(rvm, -2) - STACK_GET_INT(rvm, -1);
+            STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) - STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc += 2; // FIXME:  没有操作数
+            rvm->pc += 2; // FIXME:  没有操作数不需要占用重复的空间
             break;
 
         case RVM_CODE_MUL_INT:
-            STACK_GET_INT(rvm, -2) = STACK_GET_INT(rvm, -2) * STACK_GET_INT(rvm, -1);
+            STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) * STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc += 2; // FIXME:  没有操作数
+            rvm->pc += 2; // FIXME:  没有操作数不需要占用重复的空间
             break;
 
         case RVM_CODE_DIV_INT:
-            STACK_GET_INT(rvm, -2) = STACK_GET_INT(rvm, -2) / STACK_GET_INT(rvm, -1);
+            STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) / STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc += 2; // FIXME:  没有操作数
+            rvm->pc += 2; // FIXME:  没有操作数不需要占用重复的空间
             break;
 
         case RVM_CODE_MOD_INT:
-            STACK_GET_INT(rvm, -2) = STACK_GET_INT(rvm, -2) % STACK_GET_INT(rvm, -1);
+            STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) % STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc += 2; // FIXME:  没有操作数
+            rvm->pc += 2; // FIXME:  没有操作数不需要占用重复的空间
             break;
 
         default:
