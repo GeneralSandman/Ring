@@ -4,7 +4,6 @@
 #include <string.h>
 #include <time.h>
 
-void ring_compile(Ring_Compiler* ring_compiler, FILE* fp);
 void ring_interactive_program();
 int  write_tmp_source_file(char* tmp_source_file_name, int start_line_num, int line_size, char** input_line_content);
 
@@ -74,20 +73,6 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-// Step-1: flex 词法分析，
-// Step-2: bison 语法分析，构建语法树
-void ring_compile(Ring_Compiler* ring_compiler, FILE* fp) {
-    extern int   yyparse(void);
-    extern FILE* yyin;
-
-    yyin = fp;
-    if (yyparse()) {
-        fprintf(stderr, "YYPARSE error\n");
-        exit(1);
-    }
-
-    debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n");
-}
 
 // 交互式编程
 // 从命令行输入

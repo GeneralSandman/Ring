@@ -37,6 +37,22 @@ Ring_Compiler* get_ring_compiler() {
     return ring_compiler;
 }
 
+// Step-1: flex 词法分析，
+// Step-2: bison 语法分析，构建语法树
+void ring_compile(Ring_Compiler* ring_compiler, FILE* fp) {
+    extern int   yyparse(void);
+    extern FILE* yyin;
+
+    yyin = fp;
+    if (yyparse()) {
+        fprintf(stderr, "YYPARSE error\n");
+        exit(1);
+    }
+
+    debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n");
+}
+
+
 char* get_ring_compiler_current_file_name() {
     assert(ring_compiler != NULL);
     return ring_compiler->current_file_name;
@@ -48,18 +64,12 @@ Ring_String* get_ring_compiler_current_line_content() {
 }
 
 unsigned int get_ring_compiler_line_number() {
-    if (ring_compiler == NULL) {
-        // TODO: asser();
-        return 0;
-    }
+    assert(ring_compiler != NULL);
     return ring_compiler->current_line_number;
 }
 
 unsigned int increase_ring_compiler_line_number() {
-    if (ring_compiler == NULL) {
-        // TODO: asser();
-        return 0;
-    }
+    assert(ring_compiler != NULL);
     ring_compiler->current_line_number++;
     return ring_compiler->current_line_number;
 }

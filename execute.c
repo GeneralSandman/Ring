@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+extern RVM_Opcode_Info RVM_Opcode_Infos[];
+
 #define STACK_GET_INT(rvm, offset) \
     (rvm->runtime_stack->data[rvm->runtime_stack->top_index + offset].int_value)
 
@@ -31,49 +33,46 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RuntimeStack* runtime_stack = rvm->runtime_stack;
 
     while (rvm->pc < code_size) {
-        RVM_Byte opcode = code_list[rvm->pc];
+        RVM_Byte opcode   = code_list[rvm->pc];
+        char*    name     = RVM_Opcode_Infos[opcode].name;
+        int      oper_num = code_list[rvm->pc + 1];
+        debug_log_with_purple_coloar("[opcode] %10d %15s %10d", rvm->pc, name, oper_num);
+
         switch (opcode) {
         case RVM_CODE_PUSH_INT:
             STACK_SET_INT(rvm, 0, code_list[rvm->pc + 1]); // FIXME:
             runtime_stack->top_index++;
             rvm->pc += 2;
-            dump_runtime_stack(runtime_stack);
-
             break;
 
         case RVM_CODE_ADD_INT:
             STACK_GET_INT(rvm, -2) = STACK_GET_INT(rvm, -2) + STACK_GET_INT(rvm, -1);
             runtime_stack->top_index--;
             rvm->pc += 2; // FIXME:  没有操作数
-            dump_runtime_stack(runtime_stack);
             break;
 
         case RVM_CODE_SUB_INT:
             STACK_GET_INT(rvm, -2) = STACK_GET_INT(rvm, -2) - STACK_GET_INT(rvm, -1);
             runtime_stack->top_index--;
             rvm->pc += 2; // FIXME:  没有操作数
-            dump_runtime_stack(runtime_stack);
             break;
 
         case RVM_CODE_MUL_INT:
             STACK_GET_INT(rvm, -2) = STACK_GET_INT(rvm, -2) * STACK_GET_INT(rvm, -1);
             runtime_stack->top_index--;
             rvm->pc += 2; // FIXME:  没有操作数
-            dump_runtime_stack(runtime_stack);
             break;
 
         case RVM_CODE_DIV_INT:
             STACK_GET_INT(rvm, -2) = STACK_GET_INT(rvm, -2) / STACK_GET_INT(rvm, -1);
             runtime_stack->top_index--;
             rvm->pc += 2; // FIXME:  没有操作数
-            dump_runtime_stack(runtime_stack);
             break;
 
         case RVM_CODE_MOD_INT:
             STACK_GET_INT(rvm, -2) = STACK_GET_INT(rvm, -2) % STACK_GET_INT(rvm, -1);
             runtime_stack->top_index--;
             rvm->pc += 2; // FIXME:  没有操作数
-            dump_runtime_stack(runtime_stack);
             break;
 
         default:
@@ -87,11 +86,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 }
 
 void dump_runtime_stack(RuntimeStack* runtime_stack) {
-    debug_log_with_purple_coloar("****  runtime_stack  ****\n");
-    debug_log_with_purple_coloar("%7s %10s\n", "index", "oper_num");
+    debug_log_with_purple_coloar("****  runtime_stack  ****");
+    debug_log_with_purple_coloar("%7s %10s", "index", "oper_num");
     for (int i = 0; i < runtime_stack->top_index;) {
-        debug_log_with_purple_coloar("%7d %10d\n", i, runtime_stack->data[i].int_value);
+        debug_log_with_purple_coloar("%7d %10d", i, runtime_stack->data[i].int_value);
         i++;
     }
-    debug_log_with_purple_coloar("\n");
+    debug_log_with_purple_coloar("");
 }

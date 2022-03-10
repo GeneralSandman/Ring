@@ -1,6 +1,8 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
+#include <stdio.h>
+
 #define RING_VERSION "ring-v0.1.0-beat"
 
 typedef struct Ring_Compiler_Tag Ring_Compiler;
@@ -602,6 +604,7 @@ char*        get_ring_string(Ring_String* string);
 
 Ring_Compiler* new_ring_compiler(char* file_name);
 Ring_Compiler* get_ring_compiler();
+void           ring_compile(Ring_Compiler* ring_compiler, FILE* fp);
 char*          get_ring_compiler_current_file_name();
 Ring_String*   get_ring_compiler_current_line_content();
 unsigned int   get_ring_compiler_line_number();

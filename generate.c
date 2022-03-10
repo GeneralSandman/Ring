@@ -157,5 +157,5 @@ void generate_vmcode(RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, int int
 
     opcode_buffer->code_list                             = realloc(opcode_buffer->code_list, opcode_buffer->code_capacity * sizeof(RVM_Byte));
     opcode_buffer->code_list[opcode_buffer->code_size++] = opcode;      // 操作码
-    opcode_buffer->code_list[opcode_buffer->code_size++] = int_literal; // 操作数 FIXME:
+    opcode_buffer->code_list[opcode_buffer->code_size++] = int_literal; // 操作数 FIXME: 有些opcode 后边是没有操作数的
 }
