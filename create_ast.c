@@ -1,39 +1,39 @@
+#include "ring.h"
 #include <assert.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "ring.h"
+#include <string.h>
 
-void create_statement_list(Statement *statement) {
+void create_statement_list(Statement* statement) {
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
     ring_compiler_init_statement_list(statement);
 }
 
-void statement_list_add_item(Statement *statement) {
+void statement_list_add_item(Statement* statement) {
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
 
     ring_compiler_add_statement(statement);
 }
 
-Statement *statement_list_add_item2(Statement *statement) {
+Statement* statement_list_add_item2(Statement* statement) {
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
     return NULL;
 }
 
-Statement *statement_list_add_item3(Statement *statement_list, Statement *statement) {
+Statement* statement_list_add_item3(Statement* statement_list, Statement* statement) {
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
 
-    Statement *pos = statement_list;
+    Statement* pos = statement_list;
     for (; pos->next != NULL; pos = pos->next)
         ;
     pos->next = statement;
     return statement_list;
 }
 
-Statement *create_statemen_from_expression(Expression *expression) {
+Statement* create_statemen_from_expression(Expression* expression) {
     debug_log_with_yellow_coloar("expression->type:%d", expression->type);
 
-    Statement *statement    = malloc(sizeof(Statement));
+    Statement* statement    = malloc(sizeof(Statement));
     statement->type         = STATEMENT_TYPE_EXPRESSION;
     statement->line_number  = get_ring_compiler_line_number();
     statement->u.expression = expression;
@@ -41,10 +41,10 @@ Statement *create_statemen_from_expression(Expression *expression) {
     return statement;
 }
 
-Statement *create_statement_from_variable(Variable *variable) {
+Statement* create_statement_from_variable(Variable* variable) {
     debug_log_with_yellow_coloar("variable->type:%d", variable->type);
 
-    Statement *statement   = malloc(sizeof(Statement));
+    Statement* statement   = malloc(sizeof(Statement));
     statement->type        = STATEMENT_TYPE_VARIABLE_DEFINITION;
     statement->line_number = get_ring_compiler_line_number();
     statement->u.variable  = variable;
@@ -55,17 +55,17 @@ Statement *create_statement_from_variable(Variable *variable) {
     // TODO: 在这里重写，修改变量的可见范围
 
     get_ring_compiler()->variable_list_size = 0;
-    for (Variable *pos = variable; pos; pos = pos->next) {
+    for (Variable* pos = variable; pos; pos = pos->next) {
         get_ring_compiler()->variable_list_size++;
     }
 
     return statement;
 }
 
-Statement *create_return_statement(Expression *expression) {
+Statement* create_return_statement(Expression* expression) {
     debug_log_with_yellow_coloar("expression->type:%d", expression->type);
 
-    Statement *statement           = malloc(sizeof(Statement));
+    Statement* statement           = malloc(sizeof(Statement));
     statement->type                = STATEMENT_TYPE_RETURN;
     statement->line_number         = get_ring_compiler_line_number();
     statement->u.return_expression = expression;
@@ -73,7 +73,7 @@ Statement *create_return_statement(Expression *expression) {
     return statement;
 }
 
-void add_function_definition(Function *function_definition) {
+void add_function_definition(Function* function_definition) {
     assert(function_definition != NULL);
     debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
 
@@ -82,18 +82,18 @@ void add_function_definition(Function *function_definition) {
     get_ring_compiler()->function_list_size++;
 }
 
-Expression *create_expression() {
+Expression* create_expression() {
     // debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
 
-    Expression *expression = malloc(sizeof(Expression));
+    Expression* expression = malloc(sizeof(Expression));
 
     return expression;
 }
 
-Expression *create_expression_identifier(char *identifier) {
+Expression* create_expression_identifier(char* identifier) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
-    Expression *expression            = malloc(sizeof(Expression));
+    Expression* expression            = malloc(sizeof(Expression));
     expression->line_number           = get_ring_compiler_line_number();
     expression->type                  = EXPRESSION_TYPE_VARIABLE;
     expression->u.variable_identifier = identifier;
@@ -101,15 +101,15 @@ Expression *create_expression_identifier(char *identifier) {
     return expression;
 }
 
-Expression *create_expression_identifier_with_index(char *identifier, Expression *index) {
+Expression* create_expression_identifier_with_index(char* identifier, Expression* index) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
-    ArrayIndexExpression *array_index_expression = malloc(sizeof(ArrayIndexExpression));
+    ArrayIndexExpression* array_index_expression = malloc(sizeof(ArrayIndexExpression));
     array_index_expression->line_number          = get_ring_compiler_line_number();
     array_index_expression->variable_identifier  = identifier;
     array_index_expression->index_expression     = index;
 
-    Expression *expression               = malloc(sizeof(Expression));
+    Expression* expression               = malloc(sizeof(Expression));
     expression->line_number              = get_ring_compiler_line_number();
     expression->type                     = EXPRESSION_TYPE_ARRAY_INDEX;
     expression->u.array_index_expression = array_index_expression;
@@ -117,28 +117,28 @@ Expression *create_expression_identifier_with_index(char *identifier, Expression
     return expression;
 }
 
-Expression *create_expression_(FunctionCallExpression *function_call_expression) {
+Expression* create_expression_(FunctionCallExpression* function_call_expression) {
     debug_log_with_yellow_coloar("function_call_expression->name:%s", function_call_expression->function_name);
 
-    Expression *expression                 = malloc(sizeof(Expression));
+    Expression* expression                 = malloc(sizeof(Expression));
     expression->line_number                = get_ring_compiler_line_number();
     expression->type                       = EXPRESSION_TYPE_FUNCTION_CALL;
     expression->u.function_call_expression = function_call_expression;
     return expression;
 }
 
-Expression *create_expression__(AssignExpression *assign_expression) {
+Expression* create_expression__(AssignExpression* assign_expression) {
     // debug_log_with_yellow_coloar("assign_expression->assign_identifier:%s", assign_expression->assign_identifier);
 
-    Expression *expression          = malloc(sizeof(Expression));
+    Expression* expression          = malloc(sizeof(Expression));
     expression->line_number         = get_ring_compiler_line_number();
     expression->type                = EXPRESSION_TYPE_ASSIGN;
     expression->u.assign_expression = assign_expression;
     return expression;
 }
 
-Expression *create_expression_ternary(Expression *condition, Expression * true, Expression * false) {
-    Expression *expression                                 = malloc(sizeof(Expression));
+Expression* create_expression_ternary(Expression* condition, Expression * true, Expression * false) {
+    Expression* expression                                 = malloc(sizeof(Expression));
     expression->line_number                                = get_ring_compiler_line_number();
     expression->type                                       = EXPRESSION_TYPE_TERNARY;
     expression->u.ternary_expression                       = malloc(sizeof(TernaryExpression));
@@ -148,10 +148,10 @@ Expression *create_expression_ternary(Expression *condition, Expression * true, 
     return expression;
 }
 
-Expression *create_expression_binary(ExpressionType type, Expression *left, Expression *right) {
+Expression* create_expression_binary(ExpressionType type, Expression* left, Expression* right) {
     debug_log_with_yellow_coloar("type:%d", type);
 
-    Expression *expression                            = malloc(sizeof(Expression));
+    Expression* expression                            = malloc(sizeof(Expression));
     expression->line_number                           = get_ring_compiler_line_number();
     expression->type                                  = type;
     expression->u.binary_expression                   = malloc(sizeof(BinaryExpression));
@@ -161,10 +161,10 @@ Expression *create_expression_binary(ExpressionType type, Expression *left, Expr
     return expression;
 }
 
-Expression *create_expression_unitary(ExpressionType type, Expression *unitary_expression) {
+Expression* create_expression_unitary(ExpressionType type, Expression* unitary_expression) {
     debug_log_with_yellow_coloar("type:%d", type);
 
-    Expression *expression           = malloc(sizeof(Expression));
+    Expression* expression           = malloc(sizeof(Expression));
     expression->line_number          = get_ring_compiler_line_number();
     expression->convert_type         = BASICVALUE_TYPE_UNKNOW;
     expression->type                 = type;
@@ -177,7 +177,7 @@ Expression *create_expression_unitary(ExpressionType type, Expression *unitary_e
 // ring.bison.y 中 第一个参数是 VariableType
 // 该定义       中 第一个参数是 BasicValueType
 // TODO: 这里以后统一
-Expression *create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression *expression) {
+Expression* create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression* expression) {
     debug_log_with_yellow_coloar("convert_type:%d", convert_type);
 
     assert(expression != NULL);
@@ -186,12 +186,12 @@ Expression *create_expression_unitary_with_convert_type(BasicValueType convert_t
     return expression;
 }
 
-Expression *
-create_expression_literal(ExpressionType type, char *literal_interface) {
+Expression*
+create_expression_literal(ExpressionType type, char* literal_interface) {
     debug_log_with_yellow_coloar("type:%d", type);
 
     assert(literal_interface != NULL);
-    Expression *expression  = malloc(sizeof(Expression));
+    Expression* expression  = malloc(sizeof(Expression));
     expression->line_number = get_ring_compiler_line_number();
 
     expression->type = type;
@@ -214,10 +214,10 @@ create_expression_literal(ExpressionType type, char *literal_interface) {
     return expression;
 }
 
-Expression *create_expression_bool_literal(ExpressionType type, Ring_Bool value) {
+Expression* create_expression_bool_literal(ExpressionType type, Ring_Bool value) {
     debug_log_with_yellow_coloar("type:%d, boolean:%d", type, value);
 
-    Expression *expression     = malloc(sizeof(Expression));
+    Expression* expression     = malloc(sizeof(Expression));
     expression->line_number    = get_ring_compiler_line_number();
     expression->type           = type;
     expression->u.bool_literal = value;
@@ -225,14 +225,14 @@ Expression *create_expression_bool_literal(ExpressionType type, Ring_Bool value)
     return expression;
 }
 
-AssignExpression *create_assign_expression(AssignExpressionType type, char *identifier, Expression *expression) {
+AssignExpression* create_assign_expression(AssignExpressionType type, char* identifier, Expression* expression) {
     // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
-    AssignExpression *assing_expression = malloc(sizeof(AssignExpression));
+    AssignExpression* assing_expression = malloc(sizeof(AssignExpression));
 
     // 这里应该优化一下
-    char **identifiers                        = malloc(sizeof(char *) * 1);
+    char** identifiers                        = malloc(sizeof(char*) * 1);
     identifiers[0]                            = identifier; // 初始化第一个
     assing_expression->line_number            = get_ring_compiler_line_number();
     assing_expression->type                   = type;
@@ -242,21 +242,21 @@ AssignExpression *create_assign_expression(AssignExpressionType type, char *iden
     return assing_expression;
 }
 
-AssignExpression *create_multi_assign_expression(char *first_identifier, Identifier *identifier_list, Expression *first_expression, Expression *expression_list) {
+AssignExpression* create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* first_expression, Expression* expression_list) {
     // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
     debug_log_with_yellow_coloar("");
 
-    AssignExpression *assing_expression = malloc(sizeof(AssignExpression));
+    AssignExpression* assing_expression = malloc(sizeof(AssignExpression));
 
     unsigned int size = 1;
-    for (Identifier *pos = identifier_list; pos != NULL; pos = pos->next) {
+    for (Identifier* pos = identifier_list; pos != NULL; pos = pos->next) {
         size += 1;
     }
 
-    char **      identifiers = malloc(sizeof(char *) * size);
+    char**       identifiers = malloc(sizeof(char*) * size);
     unsigned int i           = 0;
     identifiers[i++]         = first_identifier; // 初始化第一个
-    for (Identifier *pos = identifier_list; pos != NULL; pos = pos->next, i++) {
+    for (Identifier* pos = identifier_list; pos != NULL; pos = pos->next, i++) {
         identifiers[i] = pos->identifier_name;
     }
 
@@ -273,40 +273,40 @@ AssignExpression *create_multi_assign_expression(char *first_identifier, Identif
     return assing_expression;
 }
 
-FunctionCallExpression *create_function_call_expression(char *identifier, ArgumentList *argument_list) {
+FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
-    FunctionCallExpression *function_call_expression = malloc(sizeof(FunctionCallExpression));
+    FunctionCallExpression* function_call_expression = malloc(sizeof(FunctionCallExpression));
     function_call_expression->line_number            = get_ring_compiler_line_number();
     function_call_expression->function_name          = identifier;
     function_call_expression->argument_list          = argument_list;
     return function_call_expression;
 }
 
-Expression *expression_list_add_item(Expression *expression_list, Expression *expression) {
+Expression* expression_list_add_item(Expression* expression_list, Expression* expression) {
     debug_log_with_yellow_coloar("");
 
-    Expression *pos = expression_list;
+    Expression* pos = expression_list;
     for (; pos->next != NULL; pos = pos->next)
         ;
     pos->next = expression;
     return expression_list;
 }
 
-ArgumentList *argument_list_add_item3(ArgumentList *argument_list, ArgumentList *argument) {
+ArgumentList* argument_list_add_item3(ArgumentList* argument_list, ArgumentList* argument) {
     debug_log_with_yellow_coloar("argument->type:%d", argument->type);
 
-    ArgumentList *pos = argument_list;
+    ArgumentList* pos = argument_list;
     for (; pos->next != NULL; pos = pos->next)
         ;
     pos->next = argument;
     return argument_list;
 }
 
-ArgumentList *create_argument_list(char *argument) {
+ArgumentList* create_argument_list(char* argument) {
     debug_log_with_yellow_coloar("argument:%s", argument);
 
-    ArgumentList *argument_list                      = malloc(sizeof(ArgumentList));
+    ArgumentList* argument_list                      = malloc(sizeof(ArgumentList));
     argument_list->type                              = ARGUMENT_TYPE_RING_BASICVALUE;
     argument_list->u.ring_basic_value.type           = BASICVALUE_TYPE_STRING;
     argument_list->u.ring_basic_value.u.string_value = argument;
@@ -314,20 +314,20 @@ ArgumentList *create_argument_list(char *argument) {
     return argument_list;
 }
 
-ArgumentList *create_argument_list_from_expression(Expression *expression) {
+ArgumentList* create_argument_list_from_expression(Expression* expression) {
     debug_log_with_yellow_coloar("expression->type:%d", expression->type);
 
-    ArgumentList *argument_list = malloc(sizeof(ArgumentList));
+    ArgumentList* argument_list = malloc(sizeof(ArgumentList));
     argument_list->type         = ARGUMENT_TYPE_EXPRESSION;
     argument_list->u.expression = expression;
     argument_list->next         = NULL;
     return argument_list;
 }
 
-Identifier *new_identifier(IdentifierType type, char *name) {
+Identifier* new_identifier(IdentifierType type, char* name) {
     debug_log_with_yellow_coloar("identifier name:%s", name);
 
-    Identifier *identifier      = malloc(sizeof(Identifier));
+    Identifier* identifier      = malloc(sizeof(Identifier));
     identifier->type            = type;
     identifier->identifier_name = name;
     identifier->next            = NULL;
@@ -335,16 +335,16 @@ Identifier *new_identifier(IdentifierType type, char *name) {
     return identifier;
 }
 
-Identifier *identifier_list_add_item(Identifier *identifier_list, Identifier *identifier) {
-    Identifier *pos = identifier_list;
+Identifier* identifier_list_add_item(Identifier* identifier_list, Identifier* identifier) {
+    Identifier* pos = identifier_list;
     for (; pos->next != NULL; pos = pos->next)
         ;
     pos->next = identifier;
     return identifier_list;
 }
 
-FunctionReturnList *create_function_return_list(VariableType variable_type) {
-    FunctionReturnList *return_list = malloc(sizeof(FunctionReturnList *));
+FunctionReturnList* create_function_return_list(VariableType variable_type) {
+    FunctionReturnList* return_list = malloc(sizeof(FunctionReturnList*));
 
     return_list->variable_type = variable_type;
     return_list->next          = NULL;
@@ -352,18 +352,18 @@ FunctionReturnList *create_function_return_list(VariableType variable_type) {
     return return_list;
 }
 
-FunctionReturnList *function_return_list_add_item(FunctionReturnList *return_list, VariableType variable_type) {
-    FunctionReturnList *pos = return_list;
+FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type) {
+    FunctionReturnList* pos = return_list;
     for (; pos->next != NULL; pos = pos->next)
         ;
     pos->next = create_function_return_list(variable_type);
     return return_list;
 }
 
-Function *new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, FunctionReturnList *return_list, Statement *block) {
+Function* new_function_definition(FunctionType type, char* identifier, Variable* parameter_list, FunctionReturnList* return_list, Statement* block) {
     debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier);
 
-    Function *function            = malloc(sizeof(Function));
+    Function* function            = malloc(sizeof(Function));
     function->line_number         = get_ring_compiler_line_number();
     function->type                = type;
     function->function_name       = identifier;
@@ -377,8 +377,8 @@ Function *new_function_definition(FunctionType type, char *identifier, Variable 
     function->next                = NULL;
 
     // 把函数参数的变量添加到 variable_list 中
-    for (Variable *pos = parameter_list; pos != NULL; pos = pos->next) {
-        Variable *tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL, 0);
+    for (Variable* pos = parameter_list; pos != NULL; pos = pos->next) {
+        Variable* tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL, 0);
         memcpy(tmp, pos, sizeof(*pos));
 
         tmp->next               = function->variable_list;
@@ -386,9 +386,9 @@ Function *new_function_definition(FunctionType type, char *identifier, Variable 
     }
 
     // 把block中定义的局部变量加到 variable_list 中
-    for (Statement *pos = block; pos != NULL; pos = pos->next) {
+    for (Statement* pos = block; pos != NULL; pos = pos->next) {
         if (pos->type == STATEMENT_TYPE_VARIABLE_DEFINITION) {
-            Variable *tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL, 0);
+            Variable* tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL, 0);
             memcpy(tmp, pos->u.variable, sizeof(*pos->u.variable));
 
             tmp->next               = function->variable_list;
@@ -399,10 +399,10 @@ Function *new_function_definition(FunctionType type, char *identifier, Variable 
     return function;
 }
 
-Statement *create_statement_from_if(IfStatement *if_statement) {
+Statement* create_statement_from_if(IfStatement* if_statement) {
     debug_log_with_yellow_coloar("\t");
 
-    Statement *statement      = malloc(sizeof(Statement));
+    Statement* statement      = malloc(sizeof(Statement));
     statement->line_number    = get_ring_compiler_line_number();
     statement->type           = STATEMENT_TYPE_IF;
     statement->u.if_statement = if_statement;
@@ -411,10 +411,10 @@ Statement *create_statement_from_if(IfStatement *if_statement) {
     return statement;
 }
 
-IfStatement *create_if_statement(Expression *expression, Statement *if_block, ElseIfStatement *elseif_statement_list, Statement *else_block) {
+IfStatement* create_if_statement(Expression* expression, Statement* if_block, ElseIfStatement* elseif_statement_list, Statement* else_block) {
     debug_log_with_yellow_coloar("\t");
 
-    IfStatement *if_statement           = malloc(sizeof(IfStatement));
+    IfStatement* if_statement           = malloc(sizeof(IfStatement));
     if_statement->line_number           = get_ring_compiler_line_number();
     if_statement->expression            = expression;
     if_statement->if_block_size         = 0;
@@ -426,10 +426,10 @@ IfStatement *create_if_statement(Expression *expression, Statement *if_block, El
     return if_statement;
 }
 
-ElseIfStatement *create_elseif_statement(Expression *expression, Statement *elseif_block) {
+ElseIfStatement* create_elseif_statement(Expression* expression, Statement* elseif_block) {
     debug_log_with_yellow_coloar("\t");
 
-    ElseIfStatement *elseif_statement   = malloc(sizeof(ElseIfStatement));
+    ElseIfStatement* elseif_statement   = malloc(sizeof(ElseIfStatement));
     elseif_statement->line_number       = get_ring_compiler_line_number();
     elseif_statement->expression        = expression;
     elseif_statement->elseif_block_size = 0;
@@ -439,12 +439,12 @@ ElseIfStatement *create_elseif_statement(Expression *expression, Statement *else
     return elseif_statement;
 }
 
-ElseIfStatement *elseif_statement_add_item(ElseIfStatement *list, ElseIfStatement *elseif_statement) {
+ElseIfStatement* elseif_statement_add_item(ElseIfStatement* list, ElseIfStatement* elseif_statement) {
     debug_log_with_yellow_coloar("\t");
 
     assert(list != NULL);
 
-    ElseIfStatement *pos;
+    ElseIfStatement* pos;
     for (pos = list; pos->next != NULL; pos = pos->next) {
     }
 
@@ -453,10 +453,10 @@ ElseIfStatement *elseif_statement_add_item(ElseIfStatement *list, ElseIfStatemen
     return list;
 }
 
-Statement *create_statement_from_for(ForStatement *for_statement) {
+Statement* create_statement_from_for(ForStatement* for_statement) {
     debug_log_with_yellow_coloar("\t");
 
-    Statement *statement       = malloc(sizeof(Statement));
+    Statement* statement       = malloc(sizeof(Statement));
     statement->line_number     = get_ring_compiler_line_number();
     statement->type            = STATEMENT_TYPE_FOR;
     statement->u.for_statement = for_statement;
@@ -465,10 +465,10 @@ Statement *create_statement_from_for(ForStatement *for_statement) {
     return statement;
 }
 
-ForStatement *create_for_statement(Expression *init_expression, Expression *condition_expression, Expression *post_expression, Statement *block) {
+ForStatement* create_for_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Statement* block) {
     debug_log_with_yellow_coloar("\t");
 
-    ForStatement *for_statement         = malloc(sizeof(ForStatement));
+    ForStatement* for_statement         = malloc(sizeof(ForStatement));
     for_statement->line_number          = get_ring_compiler_line_number();
     for_statement->init_expression      = init_expression;
     for_statement->condition_expression = condition_expression;
@@ -479,10 +479,10 @@ ForStatement *create_for_statement(Expression *init_expression, Expression *cond
     return for_statement;
 }
 
-Statement *create_statement_from_dowhile(DoWhileStatement *dowhile_statement) {
+Statement* create_statement_from_dowhile(DoWhileStatement* dowhile_statement) {
     debug_log_with_yellow_coloar("\t");
 
-    Statement *statement           = malloc(sizeof(Statement));
+    Statement* statement           = malloc(sizeof(Statement));
     statement->line_number         = get_ring_compiler_line_number();
     statement->type                = STATEMENT_TYPE_DOWHILE;
     statement->u.dowhile_statement = dowhile_statement;
@@ -491,10 +491,10 @@ Statement *create_statement_from_dowhile(DoWhileStatement *dowhile_statement) {
     return statement;
 }
 
-DoWhileStatement *create_dowhile_statement(Statement *block, Expression *condition_expression) {
+DoWhileStatement* create_dowhile_statement(Statement* block, Expression* condition_expression) {
     debug_log_with_yellow_coloar("\t");
 
-    DoWhileStatement *dowhile_statement     = malloc(sizeof(DoWhileStatement));
+    DoWhileStatement* dowhile_statement     = malloc(sizeof(DoWhileStatement));
     dowhile_statement->line_number          = get_ring_compiler_line_number();
     dowhile_statement->condition_expression = condition_expression;
     dowhile_statement->block_size           = 0;
@@ -503,10 +503,10 @@ DoWhileStatement *create_dowhile_statement(Statement *block, Expression *conditi
     return dowhile_statement;
 }
 
-Statement *create_statement_from_break() {
+Statement* create_statement_from_break() {
     debug_log_with_yellow_coloar("\t");
 
-    Statement *statement         = malloc(sizeof(Statement));
+    Statement* statement         = malloc(sizeof(Statement));
     statement->line_number       = get_ring_compiler_line_number();
     statement->type              = STATEMENT_TYPE_BREAK;
     statement->u.break_statement = NULL;
@@ -515,10 +515,10 @@ Statement *create_statement_from_break() {
     return statement;
 }
 
-Statement *create_statement_from_continue() {
+Statement* create_statement_from_continue() {
     debug_log_with_yellow_coloar("\t");
 
-    Statement *statement            = malloc(sizeof(Statement));
+    Statement* statement            = malloc(sizeof(Statement));
     statement->line_number          = get_ring_compiler_line_number();
     statement->type                 = STATEMENT_TYPE_CONTINUE;
     statement->u.continue_statement = NULL;
@@ -530,12 +530,12 @@ Statement *create_statement_from_continue() {
 // 标识符合法性检查
 // 其实这个用不到，flex是有优先级的，会有语法错误
 // 检查变量是否重复定义
-int identifier_check_valid(char *identifier) {
+int identifier_check_valid(char* identifier) {
     return 0;
 }
 
-Variable *variable_list_add_item(Variable *variable_list, Variable *variable) {
-    Variable *pos = variable_list;
+Variable* variable_list_add_item(Variable* variable_list, Variable* variable) {
+    Variable* pos = variable_list;
     for (; pos->next != NULL; pos = pos->next)
         ;
     pos->next = variable;
@@ -543,10 +543,10 @@ Variable *variable_list_add_item(Variable *variable_list, Variable *variable) {
     return variable_list;
 }
 
-Variable *new_variable(VariableType type, char *identifier, Expression *init_expression, int is_const) {
+Variable* new_variable(VariableType type, char* identifier, Expression* init_expression, int is_const) {
     debug_log_with_yellow_coloar("\t type(%d),identifier(%s)", type, identifier);
 
-    Variable *variable           = malloc(sizeof(Variable));
+    Variable* variable           = malloc(sizeof(Variable));
     variable->line_number        = get_ring_compiler_line_number();
     variable->is_const           = is_const;
     variable->type               = type;
@@ -559,12 +559,12 @@ Variable *new_variable(VariableType type, char *identifier, Expression *init_exp
     return variable;
 }
 
-Variable *new_variable_array(VariableType type, Expression *size, char *identifier, Expression *init_expression, int is_const) {
+Variable* new_variable_array(VariableType type, Expression* size, char* identifier, Expression* init_expression, int is_const) {
     debug_log_with_yellow_coloar("\t type(%d),identifier(%s)", type, identifier);
 
     // 这个应该放到解释的时候
 
-    Variable *variable           = malloc(sizeof(Variable));
+    Variable* variable           = malloc(sizeof(Variable));
     variable->line_number        = get_ring_compiler_line_number();
     variable->is_const           = is_const;
     variable->type               = VARIABLE_TYPE_ARRAY;
@@ -583,13 +583,13 @@ Variable *new_variable_array(VariableType type, Expression *size, char *identifi
 //   1. 名称不能重复
 //   2. 不能给函数复制
 //   3. 不能用变量去调用函数
-void insert_identifier(IdentifierType type, char *name) {
-    Identifier *identifier;
+void insert_identifier(IdentifierType type, char* name) {
+    Identifier* identifier;
     identifier = new_identifier(type, name);
 
     identifier->next                     = get_ring_compiler()->identifier_list;
     get_ring_compiler()->identifier_list = identifier;
 }
 
-void check_identifier_valid(char *identifier_name) {
+void check_identifier_valid(char* identifier_name) {
 }

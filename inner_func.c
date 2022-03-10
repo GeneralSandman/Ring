@@ -1,10 +1,10 @@
+#include "inner_func.h"
+#include "ring.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "ring.h"
-#include "inner_func.h"
 
-void register_inner_func(Ring_Compiler *ring_compiler) {
-    Function *function;
+void register_inner_func(Ring_Compiler* ring_compiler) {
+    Function* function;
 
     function = malloc(sizeof(Function));
 
@@ -22,7 +22,7 @@ void register_inner_func(Ring_Compiler *ring_compiler) {
     ring_compiler->function_list_size++;
 }
 
-void ring_inner_func_print1(int argc, Ring_BasicValue *value) {
+void ring_inner_func_print1(int argc, Ring_BasicValue* value) {
     debug_log_with_blue_coloar("\t argc(%d)", argc);
     if (argc != 1) {
         printf("error\n");
@@ -64,11 +64,11 @@ void ring_inner_func_print1(int argc, Ring_BasicValue *value) {
     }
 }
 
-void ring_inner_func_print(int argc, Ring_BasicValue **values) {
+void ring_inner_func_print(int argc, Ring_BasicValue** values) {
     debug_log_with_blue_coloar("\t argc(%d)", argc);
 
     for (int i = 0; i < argc; i++) {
-        Ring_BasicValue *value = values[i];
+        Ring_BasicValue* value = values[i];
         switch (value->type) {
         case BASICVALUE_TYPE_BOOL:
             if (value->u.bool_value == BOOL_FALSE)

@@ -1,13 +1,13 @@
+#include "inner_func.h"
+#include "ring.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
-#include "ring.h"
-#include "inner_func.h"
 
-static Ring_Compiler *ring_compiler = NULL;
+static Ring_Compiler* ring_compiler = NULL;
 
-Ring_Compiler *new_ring_compiler(char *file_name) {
+Ring_Compiler* new_ring_compiler(char* file_name) {
     if (ring_compiler == NULL) {
         ring_compiler = malloc(sizeof(Ring_Compiler));
     }
@@ -33,16 +33,16 @@ Ring_Compiler *new_ring_compiler(char *file_name) {
     return ring_compiler;
 }
 
-Ring_Compiler *get_ring_compiler() {
+Ring_Compiler* get_ring_compiler() {
     return ring_compiler;
 }
 
-char *get_ring_compiler_current_file_name() {
+char* get_ring_compiler_current_file_name() {
     assert(ring_compiler != NULL);
     return ring_compiler->current_file_name;
 }
 
-Ring_String *get_ring_compiler_current_line_content() {
+Ring_String* get_ring_compiler_current_line_content() {
     assert(ring_compiler != NULL);
     return ring_compiler->current_line_content;
 }
@@ -75,7 +75,7 @@ unsigned int increase_ring_compiler_column_number(unsigned int len) {
     return ring_compiler->current_column_number;
 }
 
-void ring_compiler_update_line_content(char *str) {
+void ring_compiler_update_line_content(char* str) {
     assert(ring_compiler != NULL);
 
     for (int i = 0; i < strlen(str); i++) {
@@ -89,7 +89,7 @@ void ring_compiler_reset_current_line_content() {
     reset_ring_string(ring_compiler->current_line_content);
 }
 
-char *ring_compiler_get_current_line_content() {
+char* ring_compiler_get_current_line_content() {
     return get_ring_string(ring_compiler->current_line_content);
 }
 
@@ -97,7 +97,7 @@ void reset_ring_compiler_column_number() {
     ring_compiler->current_column_number = 1;
 }
 
-int ring_compiler_init_statement_list(Statement *statement) {
+int ring_compiler_init_statement_list(Statement* statement) {
     assert(ring_compiler != NULL);
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
 
@@ -107,7 +107,7 @@ int ring_compiler_init_statement_list(Statement *statement) {
     return 0;
 }
 
-int ring_compiler_add_statement(Statement *statement) {
+int ring_compiler_add_statement(Statement* statement) {
     assert(ring_compiler != NULL);
 
     if (ring_compiler->statement_list == NULL) {
@@ -116,7 +116,7 @@ int ring_compiler_add_statement(Statement *statement) {
         return 0;
     }
 
-    Statement *pos;
+    Statement* pos;
     pos = ring_compiler->statement_list;
     for (; pos->next != NULL; pos = pos->next) {
     }
