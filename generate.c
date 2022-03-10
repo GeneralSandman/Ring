@@ -149,7 +149,9 @@ void generate_vmcode_from_expression(Expression* expression, RVM_OpcodeBuffer* o
 
 void generate_vmcode_from_assign_expression(AssignExpression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     generate_vmcode_from_expression(expression->expression, opcode_buffer);
-    generate_vmcode(opcode_buffer, RVM_CODE_POP_STATIC_INT, 0); // FIXME: 0 这里写死
+
+    unsigned int index = 0; // FIXME: TODO: 找到全局变量所在的偏移量
+    generate_vmcode(opcode_buffer, RVM_CODE_POP_STATIC_INT, index);
 }
 
 void generate_vmcode_from_binary_expression(BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {

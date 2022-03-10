@@ -545,6 +545,9 @@ struct ContinueStatement_Tag {
 
 // };
 
+#define CLEAR_SCREEN printf("\e[1;1H\e[2J")
+#define MOVE_CURSOR(row, col) printf("%c[%d;%dH", 27, (row), (col))
+
 #define print_debug_info(format, ...) \
     printf("[DEBUG][%s:%d][function:%s]\t " format "\n", __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
@@ -752,7 +755,9 @@ RuntimeStack*        new_runtime_stack();
 Ring_VirtualMachine* new_ring_virtualmachine();
 void                 add_global_variables(Ring_VirtualMachine_Executer* executer, RuntimeStatic* runtime_static);
 void                 ring_execute_vm_code(Ring_VirtualMachine* ring_vm);
+void                 debug_rvm(Ring_VirtualMachine* rvm);
 void                 dump_runtime_stack(RuntimeStack* runtime_stack);
+void                 dump_vm_code(Ring_VirtualMachine* rvm);
 // execute.c
 
 #endif

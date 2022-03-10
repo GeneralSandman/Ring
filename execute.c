@@ -86,7 +86,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_POP_STATIC_INT:
-            index                                      = 0;                             //  在操作符后边获取
+            index                                      = oper_num;                      //  在操作符后边获取
             rvm->runtime_static->data[index].int_value = STACK_GET_INT_OFFSET(rvm, -1); // 找到对应的 static 变量
             runtime_stack->top_index--;
             rvm->pc += 2;
@@ -128,16 +128,61 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         }
 
-        dump_runtime_stack(runtime_stack);
+        debug_rvm(rvm);
+    }
+}
+
+
+void debug_rvm(Ring_VirtualMachine* rvm) {
+#ifndef DEBUG_RVM
+    return;
+#endif
+
+    CLEAR_SCREEN;
+    dump_runtime_stack(rvm->runtime_stack);
+    dump_vm_code(rvm);
+
+    printf("press enter to step, 'q' to quit.\n");
+    char ch = getchar();
+    if (ch == 'q') {
+        exit(1);
     }
 }
 
 void dump_runtime_stack(RuntimeStack* runtime_stack) {
-    debug_log_with_darkgreen_coloar("****  runtime_stack  ****");
-    debug_log_with_darkgreen_coloar("%7s %10s", "index", "oper_num");
+    printf("****  runtime_stack  ****\n");
+    printf("%7s | %10s\n", "index", "oper_num");
     for (int i = 0; i < runtime_stack->top_index;) {
-        debug_log_with_darkgreen_coloar("%7d %10d", i, runtime_stack->data[i].int_value);
+        printf("%7d | %10d\n", i, runtime_stack->data[i].int_value);
         i++;
     }
-    debug_log_with_darkgreen_coloar("");
+    printf("\n");
+}
+
+void dump_vm_code(Ring_VirtualMachine* rvm) {
+    Ring_VirtualMachine_Executer* executer  = rvm->executer;
+    RVM_Byte*                     code_list = rvm->executer->code_list;
+    unsigned int                  code_size = rvm->executer->code_size;
+
+    int col = 60;
+    int row = 1;
+
+    MOVE_CURSOR(row++, col);
+    printf("+++++ ************  rvm opcode  ****\n");
+
+    MOVE_CURSOR(row++, col);
+    printf("+++++ %10s | %15s | %10s | %5s\n", "index", "opcode", "oper num", "pointer");
+    for (int i = 0; i < code_size; i++) {
+        RVM_Byte opcode   = code_list[i];
+        char*    name     = RVM_Opcode_Infos[opcode].name;
+        int      oper_num = code_list[i + 1];
+
+
+        char* pointer = "";
+        if (i == rvm->pc) {
+            pointer = "<--";
+        }
+        MOVE_CURSOR(row++, col);
+        printf("+++++ %10d | %15s | %10d | %5s\n", i, name, oper_num, pointer);
+    }
 }
