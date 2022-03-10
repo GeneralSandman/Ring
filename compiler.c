@@ -39,7 +39,7 @@ Ring_Compiler* get_ring_compiler() {
 
 // Step-1: flex 词法分析，
 // Step-2: bison 语法分析，构建语法树
-void ring_compile(Ring_Compiler* ring_compiler, FILE* fp) {
+void ring_compiler_compile(Ring_Compiler* ring_compiler, FILE* fp) {
     extern int   yyparse(void);
     extern FILE* yyin;
 

@@ -40,12 +40,27 @@ RuntimeStack* new_runtime_stack() {
     return stack;
 }
 
+RuntimeStatic* new_runtime_static() {
+    RuntimeStatic* runtime_static = malloc(sizeof(RuntimeStatic));
+    runtime_static->data          = NULL;
+    runtime_static->size          = 0;
+    return runtime_static;
+}
+
 Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* executer) {
     Ring_VirtualMachine* vm = malloc(sizeof(Ring_VirtualMachine));
     vm->executer            = executer;
+    vm->runtime_static      = new_runtime_static();
     vm->runtime_stack       = new_runtime_stack();
     vm->pc                  = 0;
+
+    add_global_variables(executer, vm->runtime_static);
     return vm;
+}
+
+void add_global_variables(Ring_VirtualMachine_Executer* executer, RuntimeStatic* runtime_static) {
+    runtime_static->size = executer->global_variable_size;
+    runtime_static->data = malloc(runtime_static->size * sizeof(RuntimeStackValue));
 }
 
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
@@ -53,16 +68,27 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int  code_size     = rvm->executer->code_size;
     RuntimeStack* runtime_stack = rvm->runtime_stack;
 
+    RuntimeStatic* runtime_static = rvm->runtime_static;
+
+    unsigned int index;
+
     while (rvm->pc < code_size) {
         RVM_Byte opcode   = code_list[rvm->pc];
         char*    name     = RVM_Opcode_Infos[opcode].name;
         int      oper_num = code_list[rvm->pc + 1];
-        debug_log_with_purple_coloar("[opcode] %10d %15s %10d", rvm->pc, name, oper_num);
+        debug_log_with_darkgreen_coloar("[opcode] %10d %15s %10d", rvm->pc, name, oper_num);
 
         switch (opcode) {
         case RVM_CODE_PUSH_INT:
             STACK_SET_INT_OFFSET(rvm, 0, code_list[rvm->pc + 1]); // FIXME:
             runtime_stack->top_index++;
+            rvm->pc += 2;
+            break;
+
+        case RVM_CODE_POP_STATIC_INT:
+            index                                      = 0;                             //  在操作符后边获取
+            rvm->runtime_static->data[index].int_value = STACK_GET_INT_OFFSET(rvm, -1); // 找到对应的 static 变量
+            runtime_stack->top_index--;
             rvm->pc += 2;
             break;
 
@@ -107,11 +133,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 }
 
 void dump_runtime_stack(RuntimeStack* runtime_stack) {
-    debug_log_with_purple_coloar("****  runtime_stack  ****");
-    debug_log_with_purple_coloar("%7s %10s", "index", "oper_num");
+    debug_log_with_darkgreen_coloar("****  runtime_stack  ****");
+    debug_log_with_darkgreen_coloar("%7s %10s", "index", "oper_num");
     for (int i = 0; i < runtime_stack->top_index;) {
-        debug_log_with_purple_coloar("%7d %10d", i, runtime_stack->data[i].int_value);
+        debug_log_with_darkgreen_coloar("%7d %10d", i, runtime_stack->data[i].int_value);
         i++;
     }
-    debug_log_with_purple_coloar("");
+    debug_log_with_darkgreen_coloar("");
 }

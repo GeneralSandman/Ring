@@ -23,9 +23,9 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 Ring_VirtualMachine_Executer* new_ring_vm_executer() {
     Ring_VirtualMachine_Executer* executer = malloc(sizeof(Ring_VirtualMachine_Executer));
     executer->global_variable_size         = 0;
-    executer->global_variable              = NULL;
+    executer->global_variable_list         = NULL;
     executer->function_size                = 0;
-    executer->function                     = NULL;
+    executer->function_list                = NULL;
     executer->code_size                    = 0;
     executer->code_list                    = NULL;
     return executer;
@@ -44,6 +44,16 @@ void ring_generate_vm_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer
 
 // 添加全局变量
 void add_global_variable(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* vm_executer) {
+    // FIXME: 这里以后可能得想一下
+    // 有的地方是链表
+    // 有的地方是数组
+    // 如果 不一致，很多地方都完蛋
+    vm_executer->global_variable_size = compiler->variable_list_size;
+
+    // for (Variable* pos = compiler->variable_list; pos; pos = pos->next) {
+    // }
+
+    vm_executer->global_variable_list = compiler->variable_list;
 }
 
 // 添加函数定义
@@ -128,9 +138,18 @@ void generate_vmcode_from_expression(Expression* expression, RVM_OpcodeBuffer* o
         generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer, RVM_CODE_MOD_INT);
         break;
 
+    case EXPRESSION_TYPE_ASSIGN:
+        generate_vmcode_from_assign_expression(expression->u.assign_expression, opcode_buffer);
+        break;
+
     default:
         break;
     }
+}
+
+void generate_vmcode_from_assign_expression(AssignExpression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+    generate_vmcode_from_expression(expression->expression, opcode_buffer);
+    generate_vmcode(opcode_buffer, RVM_CODE_POP_STATIC_INT, 0); // FIXME: 0 这里写死
 }
 
 void generate_vmcode_from_binary_expression(BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {

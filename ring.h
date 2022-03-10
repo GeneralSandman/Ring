@@ -13,6 +13,8 @@ typedef struct Ring_VirtualMachine_Executer_Tag Ring_VirtualMachine_Executer;
 
 typedef struct RuntimeStack_Tag RuntimeStack;
 
+typedef struct RuntimeStatic_Tag RuntimeStatic;
+
 typedef struct RVM_OpcodeBuffer_Tag RVM_OpcodeBuffer;
 
 typedef struct RVM_Opcode_Info_Tag RVM_Opcode_Info;
@@ -88,18 +90,20 @@ struct Ring_Compiler_Tag {
 
 struct Ring_VirtualMachine_Tag {
     Ring_VirtualMachine_Executer* executer;
-    RuntimeStack*                 runtime_stack;
-    unsigned int                  pc; // pc 用来偏移 executer->code_list[pc]
+
+    RuntimeStatic* runtime_static;
+    RuntimeStack*  runtime_stack;
+    unsigned int   pc; // pc 用来偏移 executer->code_list[pc]
 };
 
 struct Ring_VirtualMachine_Executer_Tag {
     // 连续数组，非链表
     unsigned int global_variable_size;
-    Variable*    global_variable;
+    Variable*    global_variable_list;
 
     // 连续数组，非链表
     unsigned int function_size;
-    Function*    function;
+    Function*    function_list;
 
     // 连续数组，非链表
     unsigned int code_size;
@@ -109,13 +113,18 @@ struct Ring_VirtualMachine_Executer_Tag {
 typedef union {
     int    int_value;
     double double_value;
-} RuntimeStackValue;
+} RuntimeStackValue; // 这个名字得改一改
 
 struct RuntimeStack_Tag {
     RuntimeStackValue* data;
     unsigned int       top_index;
     unsigned int       size;
     unsigned int       capacity;
+};
+
+struct RuntimeStatic_Tag {
+    RuntimeStackValue* data;
+    unsigned int       size;
 };
 
 struct RVM_LabelTable_Tag {
@@ -550,6 +559,8 @@ struct ContinueStatement_Tag {
 #define LOG_COLOR_YELLOW "\033[0;33m"
 #define LOG_COLOR_BLUE "\033[0;34m"
 #define LOG_COLOR_PURPLE "\033[0;35m"
+#define LOG_COLOR_DARKGREEN "\033[0;36m"
+#define LOG_COLOR_WHITE "\033[0;37m"
 
 #define LOG_COLOR_CLEAR "\033[0m"
 
@@ -585,6 +596,12 @@ struct ContinueStatement_Tag {
 // debug 生成 vm opcode
 #define debug_log_with_purple_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_PURPLE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+// debug 生成 vm opcode
+#define debug_log_with_darkgreen_coloar(format, ...) \
+    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_DARKGREEN, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+// debug 生成 vm opcode
+#define debug_log_with_white_coloar(format, ...) \
+    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_WHITE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 #else
 // 编译错误
 #define debug_log_with_red_coloar(format, ...)
@@ -594,6 +611,8 @@ struct ContinueStatement_Tag {
 #define debug_log_with_blue_coloar(format, ...)
 // 编译告警
 #define debug_log_with_purple_coloar(format, ...)
+#define debug_log_with_darkgreen_coloar(format, ...)
+#define debug_log_with_white_coloar(format, ...)
 #endif
 
 void         init_current_line_content();
@@ -605,7 +624,7 @@ char*        get_ring_string(Ring_String* string);
 
 Ring_Compiler* new_ring_compiler(char* file_name);
 Ring_Compiler* get_ring_compiler();
-void           ring_compile(Ring_Compiler* ring_compiler, FILE* fp);
+void           ring_compiler_compile(Ring_Compiler* ring_compiler, FILE* fp);
 char*          get_ring_compiler_current_file_name();
 Ring_String*   get_ring_compiler_current_line_content();
 unsigned int   get_ring_compiler_line_number();
@@ -722,6 +741,7 @@ void              vm_executer_dump(Ring_VirtualMachine_Executer* vm_executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
 void              generate_vmcode_from_statement_list(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* vm_executer, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_expression(Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_assign_expression(AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
 void              generate_vmcode_from_binary_expression(BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_int_expression(Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode(RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, int int_literal);
@@ -730,6 +750,7 @@ void              generate_vmcode(RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode op
 // execute.c
 RuntimeStack*        new_runtime_stack();
 Ring_VirtualMachine* new_ring_virtualmachine();
+void                 add_global_variables(Ring_VirtualMachine_Executer* executer, RuntimeStatic* runtime_static);
 void                 ring_execute_vm_code(Ring_VirtualMachine* ring_vm);
 void                 dump_runtime_stack(RuntimeStack* runtime_stack);
 // execute.c
