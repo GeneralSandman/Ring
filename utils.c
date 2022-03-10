@@ -1,2 +1,2 @@
-#include <stdio.h>
 #include "ring.h"
+#include <stdio.h>

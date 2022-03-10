@@ -9,6 +9,8 @@ typedef struct Ring_VirtualMachine_Tag Ring_VirtualMachine;
 
 typedef struct Ring_VirtualMachine_Executer_Tag Ring_VirtualMachine_Executer;
 
+typedef struct RuntimeStack_Tag RuntimeStack;
+
 typedef struct RVM_OpcodeBuffer_Tag RVM_OpcodeBuffer;
 
 typedef struct RVM_Opcode_Info_Tag RVM_Opcode_Info;
@@ -59,45 +61,58 @@ typedef struct BreakStatement_Tag BreakStatement;
 
 typedef struct ContinueStatement_Tag ContinueStatement;
 
-typedef void Ring_InnerFunc(int argc, Ring_BasicValue **value);
+typedef void Ring_InnerFunc(int argc, Ring_BasicValue** value);
 
 typedef unsigned char RVM_Byte;
 
 struct Ring_Compiler_Tag {
-    char *       current_file_name;
+    char*        current_file_name;
     unsigned int current_line_number;
     unsigned int current_column_number;
-    Ring_String *current_line_content;
+    Ring_String* current_line_content;
 
     unsigned int statement_list_size;
-    Statement *  statement_list;
+    Statement*   statement_list;
 
     unsigned int function_list_size;
-    Function *   function_list;
+    Function*    function_list;
 
     unsigned int variable_list_size;
-    Variable *   variable_list; // FIXME: 这里指的是全局变量，需要区分函数中的局部变量。
+    Variable*    variable_list; // FIXME: 这里指的是全局变量，需要区分函数中的局部变量。
 
     unsigned int identifier_list_size;
-    Identifier * identifier_list;
+    Identifier*  identifier_list;
 };
 
 struct Ring_VirtualMachine_Tag {
-    Ring_VirtualMachine_Executer *executer;
+    Ring_VirtualMachine_Executer* executer;
+    RuntimeStack*                 runtime_stack;
+    unsigned int                  pc; // pc 用来偏移 executer->code_list[pc]
 };
 
 struct Ring_VirtualMachine_Executer_Tag {
     // 连续数组，非链表
     unsigned int global_variable_size;
-    Variable *   global_variable;
+    Variable*    global_variable;
 
     // 连续数组，非链表
     unsigned int function_size;
-    Function *   function;
+    Function*    function;
 
     // 连续数组，非链表
     unsigned int code_size;
-    RVM_Byte *   code;
+    RVM_Byte*    code_list;
+};
+
+typedef union {
+    int int_value;
+} RuntimeStackValue;
+
+struct RuntimeStack_Tag {
+    RuntimeStackValue* data;
+    unsigned int       top_index;
+    unsigned int       size;
+    unsigned int       capacity;
 };
 
 struct RVM_LabelTable_Tag {
@@ -105,18 +120,18 @@ struct RVM_LabelTable_Tag {
 };
 
 struct RVM_OpcodeBuffer_Tag {
-    RVM_Byte *   code_list;
+    RVM_Byte*    code_list;
     unsigned int code_size;
     unsigned int code_capacity;
 
-    RVM_LabelTable *lable_list;
+    RVM_LabelTable* lable_list;
     unsigned int    lable_size;
     unsigned int    lable_capacity;
 };
 
 struct RVM_Opcode_Info_Tag {
     RVM_Byte code;
-    char *   name;
+    char*    name;
 };
 
 typedef enum {
@@ -150,7 +165,7 @@ typedef enum {
 } IdentifierType;
 
 struct Ring_String_Tag {
-    char *buffer;
+    char* buffer;
     int   size;
     int   capacity;
 };
@@ -270,22 +285,22 @@ struct Ring_BasicValue_Tag {
         int         int_value;
         double      double_value;
         char        char_value;
-        char *      string_value; // 暂时没用到
-        Ring_Array *array_value;
+        char*       string_value; // 暂时没用到
+        Ring_Array* array_value;
     } u;
-    Ring_BasicValue *next; // FIXME: 这个用在 return 多个的时候 return 1,2; 见 interpret_binary_expression:invoke_function
+    Ring_BasicValue* next; // FIXME: 这个用在 return 多个的时候 return 1,2; 见 interpret_binary_expression:invoke_function
     // FIXME: 以后更改这个地方
 };
 
 struct Ring_String {
     unsigned int size;
     unsigned int capacity;
-    char *       data;
+    char*        data;
 };
 
 struct Ring_Array_Tag {
     unsigned int     size;
-    Ring_BasicValue *data;
+    Ring_BasicValue* data;
 };
 
 struct Statement_Tag {
@@ -293,25 +308,25 @@ struct Statement_Tag {
 
     StatementType type;
     union {
-        Expression *       expression;
-        Variable *         variable;
-        Expression *       return_expression;
-        IfStatement *      if_statement;
-        ForStatement *     for_statement;
-        DoWhileStatement * dowhile_statement;
-        BreakStatement *   break_statement;
-        ContinueStatement *continue_statement;
+        Expression*        expression;
+        Variable*          variable;
+        Expression*        return_expression;
+        IfStatement*       if_statement;
+        ForStatement*      for_statement;
+        DoWhileStatement*  dowhile_statement;
+        BreakStatement*    break_statement;
+        ContinueStatement* continue_statement;
     } u;
-    Statement *next;
+    Statement* next;
 };
 
 struct StatementExecResult_Tag {
     StatementExecResultType type;
     union {
-        Ring_BasicValue *return_value;
+        Ring_BasicValue* return_value;
     } u; // TODO: 这个没办法兼容多 返回值，重构的时候废弃，使用return_value_list_size & return_value_list
     unsigned int      return_value_list_size;
-    Ring_BasicValue **return_value_list;
+    Ring_BasicValue** return_value_list;
 };
 
 struct Expression_Tag {
@@ -323,41 +338,41 @@ struct Expression_Tag {
         Ring_Bool               bool_literal;
         int                     int_literal;
         double                  double_literal;
-        char *                  string_literal;
-        char *                  variable_identifier;
-        FunctionCallExpression *function_call_expression;
-        AssignExpression *      assign_expression;
-        TernaryExpression *     ternary_expression;
-        BinaryExpression *      binary_expression;
-        Expression *            unitary_expression;
-        ArrayIndexExpression *  array_index_expression;
+        char*                   string_literal;
+        char*                   variable_identifier;
+        FunctionCallExpression* function_call_expression;
+        AssignExpression*       assign_expression;
+        TernaryExpression*      ternary_expression;
+        BinaryExpression*       binary_expression;
+        Expression*             unitary_expression;
+        ArrayIndexExpression*   array_index_expression;
     } u;
 
-    Expression *next;
+    Expression* next;
 };
 
 struct ArrayIndexExpression_Tag {
     unsigned int line_number;
 
-    char *      variable_identifier;
-    Expression *index_expression;
+    char*       variable_identifier;
+    Expression* index_expression;
 };
 
 struct FunctionCallExpression_Tag {
     unsigned int line_number;
 
-    char *        function_name;
-    ArgumentList *argument_list;
+    char*         function_name;
+    ArgumentList* argument_list;
 };
 
 struct Identifier_Tag {
     unsigned int line_number;
 
     IdentifierType type;
-    char *         identifier_name;
+    char*          identifier_name;
     unsigned int   array_index; // 供数组使用，还要考虑一下负值索引的问题
 
-    Function *parent_scope; //作用域
+    Function* parent_scope; //作用域
     /*
     代码如 
     var int a;
@@ -369,7 +384,7 @@ struct Identifier_Tag {
     b的作用域为 local_function_add
     */
 
-    Identifier *next;
+    Identifier* next;
 };
 
 // TODO: 这里还要兼容 数组元素赋值
@@ -377,125 +392,125 @@ struct AssignExpression_Tag {
     unsigned int line_number;
 
     AssignExpressionType type;
-    char *               assign_identifier; // TODO: 以后不应该使用这个 删除调
+    char*                assign_identifier; // TODO: 以后不应该使用这个 删除调
     unsigned int         assign_identifier_size;
-    char **              assign_identifiers;
+    char**               assign_identifiers;
     // Identifier * assign_identifier_list;// TODO: 重构 最后都使用这个
-    Expression *expression;
+    Expression* expression;
     // Expression *expression_list; // TODO: 重构 最后都使用这个
 };
 
 struct BinaryExpression_Tag {
-    Expression *left_expression;
-    Expression *right_expression;
+    Expression* left_expression;
+    Expression* right_expression;
 };
 
 // 三元运算符
 struct TernaryExpression_Tag {
-    Expression *condition_expression;
-    Expression *true_expression;
-    Expression *false_expression;
+    Expression* condition_expression;
+    Expression* true_expression;
+    Expression* false_expression;
 };
 
 struct ArgumentList_Tag {
     ArgumentType type;
     union {
         Ring_BasicValue ring_basic_value; // TODO: 应该把这个删掉，参数应该全都是表达式
-        Expression *    expression;
+        Expression*     expression;
     } u;
-    ArgumentList *next;
+    ArgumentList* next;
 };
 
 struct Variable_Tag {
     unsigned int line_number;
 
-    char *variable_identifer;
+    char* variable_identifer;
     int   is_const;
 
     VariableType type;
     VariableType array_member_type; // 数组里的内置类型
 
     union {
-        Ring_BasicValue *ring_basic_value;
+        Ring_BasicValue* ring_basic_value;
     } u;
-    Expression *init_expression;
-    Variable *  next;
+    Expression* init_expression;
+    Variable*   next;
 };
 
 struct Function_Tag {
     unsigned int line_number;
 
-    char *       function_name;
+    char*        function_name;
     FunctionType type;
 
     unsigned int parameter_list_size;
-    Variable *   parameter_list;
+    Variable*    parameter_list;
 
     unsigned int        return_list_size;
-    FunctionReturnList *return_list;
+    FunctionReturnList* return_list;
 
     unsigned int variable_list_size;
-    Variable *   variable_list;
+    Variable*    variable_list;
 
     // unsigned int return_list_size;
     // return_list; // TODO:
 
     unsigned int block_size;
-    Statement *  block;
+    Statement*   block;
 
-    Ring_InnerFunc *inner_func;
+    Ring_InnerFunc* inner_func;
 
-    Function *next;
+    Function* next;
 };
 
 struct FunctionReturnList_Tag {
     VariableType        variable_type;
-    FunctionReturnList *next;
+    FunctionReturnList* next;
 };
 
 struct IfStatement_Tag {
     unsigned int line_number;
 
-    Expression *expression;
+    Expression* expression;
 
     unsigned int if_block_size;
-    Statement *  if_block;
+    Statement*   if_block;
 
-    ElseIfStatement *elseif_statement_list;
+    ElseIfStatement* elseif_statement_list;
 
     unsigned int else_block_size;
-    Statement *  else_block;
+    Statement*   else_block;
 };
 
 struct ElseIfStatement_Tag {
     unsigned int line_number;
 
-    Expression *expression;
+    Expression* expression;
 
     unsigned int elseif_block_size;
-    Statement *  elseif_block;
+    Statement*   elseif_block;
 
-    ElseIfStatement *next;
+    ElseIfStatement* next;
 };
 
 struct ForStatement_Tag {
     unsigned int line_number;
 
-    Expression *init_expression;
-    Expression *condition_expression;
-    Expression *post_expression;
+    Expression* init_expression;
+    Expression* condition_expression;
+    Expression* post_expression;
 
     unsigned int block_size;
-    Statement *  block;
+    Statement*   block;
 };
 
 struct DoWhileStatement_Tag {
     unsigned int line_number;
 
-    Expression *condition_expression;
+    Expression* condition_expression;
 
     unsigned int block_size;
-    Statement *  block;
+    Statement*   block;
 };
 
 struct BreakStatement_Tag {
@@ -579,138 +594,140 @@ struct ContinueStatement_Tag {
 #endif
 
 void         init_current_line_content();
-Ring_String *get_current_line_content_string();
-Ring_String *new_ring_string();
-void         reset_ring_string(Ring_String *string);
-void         ring_string_add_char(Ring_String *string, char ch);
-char *       get_ring_string(Ring_String *string);
+Ring_String* get_current_line_content_string();
+Ring_String* new_ring_string();
+void         reset_ring_string(Ring_String* string);
+void         ring_string_add_char(Ring_String* string, char ch);
+char*        get_ring_string(Ring_String* string);
 
-Ring_Compiler *new_ring_compiler(char *file_name);
-Ring_Compiler *get_ring_compiler();
-char *         get_ring_compiler_current_file_name();
-Ring_String *  get_ring_compiler_current_line_content();
+Ring_Compiler* new_ring_compiler(char* file_name);
+Ring_Compiler* get_ring_compiler();
+char*          get_ring_compiler_current_file_name();
+Ring_String*   get_ring_compiler_current_line_content();
 unsigned int   get_ring_compiler_line_number();
 unsigned int   increase_ring_compiler_line_number();
 unsigned int   get_ring_compiler_column_number();
 unsigned int   increase_ring_compiler_column_number(unsigned int len);
-void           ring_compiler_update_line_content(char *str);
+void           ring_compiler_update_line_content(char* str);
 void           ring_compiler_reset_current_line_content();
-char *         ring_compiler_get_current_line_content();
+char*          ring_compiler_get_current_line_content();
 void           reset_ring_compiler_column_number();
-int            ring_compiler_init_statement_list(Statement *statement);
-int            ring_compiler_add_statement(Statement *statement);
+int            ring_compiler_init_statement_list(Statement* statement);
+int            ring_compiler_add_statement(Statement* statement);
 void           ring_compiler_registe_inner_func();
 
 void  init_string_literal_buffer();
 void  reset_string_literal_buffer();
 void  string_literal_add_char(char ch);
-char *get_string_literal();
+char* get_string_literal();
 
-void insert_identifier(IdentifierType type, char *name);
+void insert_identifier(IdentifierType type, char* name);
 
-int       identifier_check_valid(char *identifier);
-Variable *variable_list_add_item(Variable *variable_list, Variable *variable);
-Variable *new_variable(VariableType type, char *identifier, Expression *init_expression, int is_const);
-Variable *new_variable_array(VariableType type, Expression *size, char *identifier, Expression *init_expression, int is_const);
+int       identifier_check_valid(char* identifier);
+Variable* variable_list_add_item(Variable* variable_list, Variable* variable);
+Variable* new_variable(VariableType type, char* identifier, Expression* init_expression, int is_const);
+Variable* new_variable_array(VariableType type, Expression* size, char* identifier, Expression* init_expression, int is_const);
 
-Identifier *        new_identifier(IdentifierType type, char *name);
-Identifier *        identifier_list_add_item(Identifier *identifier_list, Identifier *identifier);
-FunctionReturnList *create_function_return_list(VariableType variable_type);
-FunctionReturnList *function_return_list_add_item(FunctionReturnList *return_list, VariableType variable_type);
-void                check_identifier_valid(char *identifier_name);
+Identifier*         new_identifier(IdentifierType type, char* name);
+Identifier*         identifier_list_add_item(Identifier* identifier_list, Identifier* identifier);
+FunctionReturnList* create_function_return_list(VariableType variable_type);
+FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type);
+void                check_identifier_valid(char* identifier_name);
 
-void                 ring_interpret(Ring_Compiler *ring_compiler);
-StatementExecResult *interpret_statement(Statement *statement, Function *function);
-StatementExecResult *interpret_statement_list(Statement *statement, Function *function);
-StatementExecResult *interpret_statement_break(BreakStatement *statement, Function *function);
-StatementExecResult *interpret_statement_continue(ContinueStatement *statement, Function *function);
-StatementExecResult *interpret_statement_return(Statement *statement, Function *function);
-StatementExecResult *interpret_statement_if(IfStatement *if_statement, Function *function);
-StatementExecResult *interpret_statement_for(ForStatement *for_statement, Function *function);
-StatementExecResult *interpret_statement_dowhile(DoWhileStatement *dowhile_statement, Function *function);
-Ring_BasicValue *    interpret_expression(Expression *expression, Function *function);
-Ring_BasicValue *    search_variable_value(char *identifier, Function *origin_function);
-StatementExecResult *invoke_function(FunctionCallExpression *function_call_expression, Function *function);
-StatementExecResult *invoke_external_function(Function *function);
-Ring_BasicValue *    interpret_variable_expression(char *variable_identifier, Function *function);
-Ring_BasicValue *    interpret_array_index_expression(ArrayIndexExpression *expression, Function *function);
-Ring_BasicValue *    interpret_binary_expression_arithmetic(Expression *expression, Function *origin_function);
-Ring_BasicValue *    interpret_binary_expression_realational(Expression *expression, Function *function);
-Ring_BasicValue *    interpret_binary_expression_logical(Expression *expression, Function *function);
-Ring_BasicValue *    interpret_ternary_condition_expression(Expression *expression, Function *origin_function);
-Ring_BasicValue *    interpret_binary_expression(Expression *expression, Function *origin_function);
-Ring_BasicValue *    interpret_unitary_expression(Expression *expression, Function *origin_function);
-Ring_BasicValue *    interpret_unitary_expression_(Expression *expression, Function *origin_function);
-void                 interpret_assign_expression(Expression *expression, Function *function);
-void                 assign_identifier(Variable *variable, Ring_BasicValue *new_value, AssignExpressionType type);
-Variable *           search_variable(char *variable_identifier, Function *function);
+void                 ring_interpret(Ring_Compiler* ring_compiler);
+StatementExecResult* interpret_statement(Statement* statement, Function* function);
+StatementExecResult* interpret_statement_list(Statement* statement, Function* function);
+StatementExecResult* interpret_statement_break(BreakStatement* statement, Function* function);
+StatementExecResult* interpret_statement_continue(ContinueStatement* statement, Function* function);
+StatementExecResult* interpret_statement_return(Statement* statement, Function* function);
+StatementExecResult* interpret_statement_if(IfStatement* if_statement, Function* function);
+StatementExecResult* interpret_statement_for(ForStatement* for_statement, Function* function);
+StatementExecResult* interpret_statement_dowhile(DoWhileStatement* dowhile_statement, Function* function);
+Ring_BasicValue*     interpret_expression(Expression* expression, Function* function);
+Ring_BasicValue*     search_variable_value(char* identifier, Function* origin_function);
+StatementExecResult* invoke_function(FunctionCallExpression* function_call_expression, Function* function);
+StatementExecResult* invoke_external_function(Function* function);
+Ring_BasicValue*     interpret_variable_expression(char* variable_identifier, Function* function);
+Ring_BasicValue*     interpret_array_index_expression(ArrayIndexExpression* expression, Function* function);
+Ring_BasicValue*     interpret_binary_expression_arithmetic(Expression* expression, Function* origin_function);
+Ring_BasicValue*     interpret_binary_expression_realational(Expression* expression, Function* function);
+Ring_BasicValue*     interpret_binary_expression_logical(Expression* expression, Function* function);
+Ring_BasicValue*     interpret_ternary_condition_expression(Expression* expression, Function* origin_function);
+Ring_BasicValue*     interpret_binary_expression(Expression* expression, Function* origin_function);
+Ring_BasicValue*     interpret_unitary_expression(Expression* expression, Function* origin_function);
+Ring_BasicValue*     interpret_unitary_expression_(Expression* expression, Function* origin_function);
+void                 interpret_assign_expression(Expression* expression, Function* function);
+void                 assign_identifier(Variable* variable, Ring_BasicValue* new_value, AssignExpressionType type);
+Variable*            search_variable(char* variable_identifier, Function* function);
 
 // 上下文相关语义检查
-int ring_semantic_check(Ring_Compiler *ring_compiler);
+int ring_semantic_check(Ring_Compiler* ring_compiler);
 
-void                    create_statement_list(Statement *statement);
-void                    statement_list_add_item(Statement *statement);
-Statement *             statement_list_add_item2(Statement *statement);
-Statement *             statement_list_add_item3(Statement *statement_list, Statement *statement);
-Statement *             create_statemen_from_expression(Expression *expression);
-Statement *             create_statement_from_variable(Variable *variable);
-Statement *             create_return_statement(Expression *expression);
-void                    add_function_definition(Function *function_definition);
-Expression *            create_expression();
-Expression *            create_expression_identifier(char *identifier);
-Expression *            create_expression_identifier_with_index(char *identifier, Expression *index);
-Expression *            create_expression_(FunctionCallExpression *function_call_expression);
-Expression *            create_expression__(AssignExpression *assign_expression);
-Expression *            create_expression_ternary(Expression *condition, Expression * true, Expression * false);
-Expression *            create_expression_binary(ExpressionType type, Expression *left, Expression *right);
-Expression *            create_expression_unitary(ExpressionType type, Expression *unitary_expression);
-Expression *            create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression *expression);
-Expression *            create_expression_literal(ExpressionType type, char *literal_interface);
-Expression *            create_expression_bool_literal(ExpressionType type, Ring_Bool value);
-AssignExpression *      create_assign_expression(AssignExpressionType type, char *identifier, Expression *expression);
-AssignExpression *      create_multi_assign_expression(char *first_identifier, Identifier *identifier_list, Expression *first_expression, Expression *expression_list);
-FunctionCallExpression *create_function_call_expression(char *identifier, ArgumentList *argument_list);
-Expression *            expression_list_add_item(Expression *expression_list, Expression *expression);
-ArgumentList *          argument_list_add_item3(ArgumentList *argument_list, ArgumentList *argument);
-ArgumentList *          create_argument_list(char *argument);
-ArgumentList *          create_argument_list_from_expression(Expression *expression);
-Identifier *            new_identifier(IdentifierType type, char *name);
-Function *              new_function_definition(FunctionType type, char *identifier, Variable *parameter_list, FunctionReturnList *return_list, Statement *block);
-Statement *             create_statement_from_if(IfStatement *if_statement);
-IfStatement *           create_if_statement(Expression *expression, Statement *if_block, ElseIfStatement *elseif_statement_list, Statement *else_block);
-ElseIfStatement *       create_elseif_statement(Expression *expression, Statement *elseif_block);
-ElseIfStatement *       elseif_statement_add_item(ElseIfStatement *list, ElseIfStatement *elseif_statement);
-Statement *             create_statement_from_for(ForStatement *for_statement);
-ForStatement *          create_for_statement(Expression *init_expression, Expression *condition_expression, Expression *post_expression, Statement *block);
-Statement *             create_statement_from_dowhile(DoWhileStatement *dowhile_statement);
-DoWhileStatement *      create_dowhile_statement(Statement *block, Expression *condition_expression);
-Statement *             create_statement_from_break();
-Statement *             create_statement_from_continue();
+void                    create_statement_list(Statement* statement);
+void                    statement_list_add_item(Statement* statement);
+Statement*              statement_list_add_item2(Statement* statement);
+Statement*              statement_list_add_item3(Statement* statement_list, Statement* statement);
+Statement*              create_statemen_from_expression(Expression* expression);
+Statement*              create_statement_from_variable(Variable* variable);
+Statement*              create_return_statement(Expression* expression);
+void                    add_function_definition(Function* function_definition);
+Expression*             create_expression();
+Expression*             create_expression_identifier(char* identifier);
+Expression*             create_expression_identifier_with_index(char* identifier, Expression* index);
+Expression*             create_expression_(FunctionCallExpression* function_call_expression);
+Expression*             create_expression__(AssignExpression* assign_expression);
+Expression*             create_expression_ternary(Expression* condition, Expression * true, Expression * false);
+Expression*             create_expression_binary(ExpressionType type, Expression* left, Expression* right);
+Expression*             create_expression_unitary(ExpressionType type, Expression* unitary_expression);
+Expression*             create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression* expression);
+Expression*             create_expression_literal(ExpressionType type, char* literal_interface);
+Expression*             create_expression_bool_literal(ExpressionType type, Ring_Bool value);
+AssignExpression*       create_assign_expression(AssignExpressionType type, char* identifier, Expression* expression);
+AssignExpression*       create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* first_expression, Expression* expression_list);
+FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list);
+Expression*             expression_list_add_item(Expression* expression_list, Expression* expression);
+ArgumentList*           argument_list_add_item3(ArgumentList* argument_list, ArgumentList* argument);
+ArgumentList*           create_argument_list(char* argument);
+ArgumentList*           create_argument_list_from_expression(Expression* expression);
+Identifier*             new_identifier(IdentifierType type, char* name);
+Function*               new_function_definition(FunctionType type, char* identifier, Variable* parameter_list, FunctionReturnList* return_list, Statement* block);
+Statement*              create_statement_from_if(IfStatement* if_statement);
+IfStatement*            create_if_statement(Expression* expression, Statement* if_block, ElseIfStatement* elseif_statement_list, Statement* else_block);
+ElseIfStatement*        create_elseif_statement(Expression* expression, Statement* elseif_block);
+ElseIfStatement*        elseif_statement_add_item(ElseIfStatement* list, ElseIfStatement* elseif_statement);
+Statement*              create_statement_from_for(ForStatement* for_statement);
+ForStatement*           create_for_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Statement* block);
+Statement*              create_statement_from_dowhile(DoWhileStatement* dowhile_statement);
+DoWhileStatement*       create_dowhile_statement(Statement* block, Expression* condition_expression);
+Statement*              create_statement_from_break();
+Statement*              create_statement_from_continue();
 // Identifier *            create_identifier(IdentifierType type, char *name);
 // char **identifier_list_add_item(char **identifier_list, char *identifier);
 
 // fix.c
-void ring_fix_ast(Ring_Compiler *ring_compiler);
+void ring_fix_ast(Ring_Compiler* ring_compiler);
 
 // generate.c
-Ring_VirtualMachine_Executer *new_ring_vm_executer();
+Ring_VirtualMachine_Executer* new_ring_vm_executer();
 
-void              ring_generate_vm_code(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *ring_executer);
-void              add_global_variable(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
-void              add_functions(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
-void              add_top_level_code(Ring_Compiler *ring_compiler, Ring_VirtualMachine_Executer *executer);
-void              vm_executer_dump(Ring_VirtualMachine_Executer *vm_executer);
-RVM_OpcodeBuffer *new_opcode_buffer();
-void              generate_vmcode_from_statement_list(Ring_Compiler *compiler, Ring_VirtualMachine_Executer *vm_executer, RVM_OpcodeBuffer *opcode_buffer);
-void              generate_vmcode_from_expression(Expression *expression, RVM_OpcodeBuffer *opcode_buffer);
-void              generate_vmcode_from_binary_expression(BinaryExpression *expression, RVM_OpcodeBuffer *opcode_buffer, RVM_Opcode opcode);
-void              generate_vmcode_from_int_expression(Expression *expression, RVM_OpcodeBuffer *opcode_buffer);
-void              generate_vmcode(RVM_OpcodeBuffer *opcode_buffer, RVM_Opcode opcode, int int_literal);
+void              ring_generate_vm_code(Ring_Compiler* ring_compiler, Ring_VirtualMachine_Executer* ring_executer);
+void              add_global_variable(Ring_Compiler* ring_compiler, Ring_VirtualMachine_Executer* executer);
+void              add_functions(Ring_Compiler* ring_compiler, Ring_VirtualMachine_Executer* executer);
+void              add_top_level_code(Ring_Compiler* ring_compiler, Ring_VirtualMachine_Executer* executer);
+void              vm_executer_dump(Ring_VirtualMachine_Executer* vm_executer);
+RVM_OpcodeBuffer* new_opcode_buffer();
+void              generate_vmcode_from_statement_list(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* vm_executer, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_expression(Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_binary_expression(BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
+void              generate_vmcode_from_int_expression(Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode(RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, int int_literal);
 // generate.c
 
 // execute.c
-Ring_VirtualMachine *new_ring_virtualmachine();
-void                 ring_execute_vm_code(Ring_Compiler *ring_compiler);
+RuntimeStack*        new_runtime_stack();
+Ring_VirtualMachine* new_ring_virtualmachine();
+void                 ring_execute_vm_code(Ring_VirtualMachine* ring_vm);
+void                 dump_runtime_stack(RuntimeStack* runtime_stack);
 // execute.c
 
 #endif

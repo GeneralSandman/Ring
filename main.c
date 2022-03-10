@@ -1,19 +1,19 @@
+#include "ring.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "ring.h"
 
-void ring_compile(Ring_Compiler *ring_compiler, FILE *fp);
+void ring_compile(Ring_Compiler* ring_compiler, FILE* fp);
 void ring_interactive_program();
-int  write_tmp_source_file(char *tmp_source_file_name, int start_line_num, int line_size, char **input_line_content);
+int  write_tmp_source_file(char* tmp_source_file_name, int start_line_num, int line_size, char** input_line_content);
 
-int main(int argc, char **argv) {
-    Ring_Compiler *               ring_compiler;
-    Ring_VirtualMachine_Executer *ring_vm_executer;
-    Ring_VirtualMachine *         ring_vm;
-    char *                        file_name;
-    FILE *                        fp;
+int main(int argc, char** argv) {
+    Ring_Compiler*                ring_compiler;
+    Ring_VirtualMachine_Executer* ring_vm_executer;
+    Ring_VirtualMachine*          ring_vm;
+    char*                         file_name;
+    FILE*                         fp;
 
     if (argc != 2) {
         printf("Ring version: %s \n\n", RING_VERSION);
@@ -65,8 +65,8 @@ int main(int argc, char **argv) {
     ring_generate_vm_code(ring_compiler, ring_vm_executer);
 
     // Step-6: 运行虚拟机
-    ring_vm = new_ring_virtualmachine();
-    ring_execute_vm_code(ring_compiler);
+    ring_vm = new_ring_virtualmachine(ring_vm_executer);
+    ring_execute_vm_code(ring_vm);
 
     // Step-6: 直接解释执行
     ring_interpret(ring_compiler);
@@ -76,9 +76,9 @@ int main(int argc, char **argv) {
 
 // Step-1: flex 词法分析，
 // Step-2: bison 语法分析，构建语法树
-void ring_compile(Ring_Compiler *ring_compiler, FILE *fp) {
+void ring_compile(Ring_Compiler* ring_compiler, FILE* fp) {
     extern int   yyparse(void);
-    extern FILE *yyin;
+    extern FILE* yyin;
 
     yyin = fp;
     if (yyparse()) {
@@ -96,12 +96,12 @@ void ring_interactive_program() {
     printf_witch_blue("An enhanced Interactive Ring. Type '-h' for help.\n");
 
     extern int     yyparse(void);
-    extern FILE *  yyin;
-    Ring_Compiler *ring_compiler;
+    extern FILE*   yyin;
+    Ring_Compiler* ring_compiler;
     time_t         rand_int;
     char           tmp_source_file_name[1024];
     char           save_file_name[1024];
-    char *         input_line_contents[1024];
+    char*          input_line_contents[1024];
     unsigned int   line_number       = 1;
     unsigned int   start_line_number = 1;
 
@@ -114,7 +114,7 @@ void ring_interactive_program() {
     while (1) {
         printf_witch_green("line[%d]: ", line_number);
 
-        char *content = malloc(1024);
+        char* content = malloc(1024);
         if (fgets(content, 1024, stdin) == NULL) {
             printf_witch_red("get input from stdin error, exit\n");
             exit(1);
@@ -178,8 +178,8 @@ void ring_interactive_program() {
     }
 }
 
-int write_tmp_source_file(char *tmp_source_file_name, int start_line_num, int line_size, char **input_line_contents) {
-    FILE *tmp_source_file = fopen(tmp_source_file_name, "w+");
+int write_tmp_source_file(char* tmp_source_file_name, int start_line_num, int line_size, char** input_line_contents) {
+    FILE* tmp_source_file = fopen(tmp_source_file_name, "w+");
     if (tmp_source_file == NULL) {
         printf_witch_red("open tmp_source_file_name error (%s)\n", tmp_source_file_name);
         exit(1);

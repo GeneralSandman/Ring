@@ -1,16 +1,16 @@
+#include "ring.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ring.h"
 
 #define STRING_LITERAL_CAPACITY (1024)
 
-static char *string_literal_buffer          = NULL;
+static char* string_literal_buffer          = NULL;
 static int   string_literal_buffer_size     = 0;
 static int   string_literal_buffer_capacity = 0;
 
-Ring_String *new_ring_string() {
-    Ring_String *string = malloc(sizeof(Ring_String));
+Ring_String* new_ring_string() {
+    Ring_String* string = malloc(sizeof(Ring_String));
 
     string->buffer   = malloc(STRING_LITERAL_CAPACITY);
     string->size     = 0;
@@ -18,11 +18,11 @@ Ring_String *new_ring_string() {
     return string;
 }
 
-void reset_ring_string(Ring_String *string) {
+void reset_ring_string(Ring_String* string) {
     string->size = 0;
 }
 
-void ring_string_add_char(Ring_String *string, char ch) {
+void ring_string_add_char(Ring_String* string, char ch) {
     if (string->size == string->capacity) {
         string->capacity += STRING_LITERAL_CAPACITY;
         string->buffer = realloc(string->buffer, string->capacity);
@@ -31,8 +31,8 @@ void ring_string_add_char(Ring_String *string, char ch) {
     string->size++;
 }
 
-char *get_ring_string(Ring_String *string) {
-    char *new_str;
+char* get_ring_string(Ring_String* string) {
+    char* new_str;
 
     new_str = malloc(string->size + 1);
     memcpy(new_str, string->buffer, string->size);
@@ -65,8 +65,8 @@ void string_literal_add_char(char ch) {
     string_literal_buffer_size++;
 }
 
-char *get_string_literal() {
-    char *new_str;
+char* get_string_literal() {
+    char* new_str;
 
     new_str = malloc(string_literal_buffer_size + 1);
     if (new_str == NULL) {
