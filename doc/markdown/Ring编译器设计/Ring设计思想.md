@@ -1,28 +1,74 @@
 # ```Ring``` 开发思想与大方向规划
 
-- 词法分析 ```-->``` token （工具flex）
-- 上下文无关-语法分析 ```-->``` 生成AST （工具bison）
-- 上下文相关-语义分析 ```-->``` 检查AST，折叠常量表达式，推断表达式类型转换，修正优化语法树
-- 中间代码生成 ```-->``` 对AST进行自上而下递归遍历，生成中间代码
-- 中间代码优化 ```-->``` 
-- 栈虚拟机执行 ```-->``` 实现栈虚拟机对中间代码进行执行
-- 目标代码生成 ```-->```
+
+## ```Ring``` 编译器 编译流程
 
 ```plantuml
-
-
 @startuml
-(*) --> "词法分析"
--->[token] "上下文无关-语法分析"
--->[AST] "上下文相关-语义分析"
--->[修正后的AST] "中间代码生成"
--->[IR] "中间代码优化"
--->[修正后的IR] "栈虚拟机执行"
---> (*)
+
+
+:
+= Ring源代码
+;
+
+
+:
+= **     词 法 分 析 **
+== "" Lexical Analysis ""
+....
+// 工具flex   有限状态机//
+;
+-> <color:red>Token Stream;
+
+
+:
+= **语 法 分 析**-上下文无关
+== ""   Synax Analysis ""
+....
+// 工具bison GLR文法 //
+;
+-> <color:red>AST;
+
+
+:
+= **语 义 分 析**-理解上下文
+== "" Semantic Analysis""
+....
+理解作用域，冲突，优化
+;
+-> <color:red>修正后AST;
+
+
+:
+=  **     中 间 代 码 生 成**
+== ""Intermediate code generate""
+....
+后续遍历AST
+;
+-> <color:red>Opcode;
+
+
+:
+= **       中 间 代 码 优 化**
+== ""Intermediate code optimization""
+;
+-> <color:red>Opcode;
+
+
+:
+= **         RVM 栈虚拟机**
+== ""Ring Virtual Machine base stack""
+;
+-> <color:red>Execute Result;
+
+
+stop
+
+
 @enduml
-
-
 ```
+
+
 
 
 
