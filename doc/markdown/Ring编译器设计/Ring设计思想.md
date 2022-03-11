@@ -40,7 +40,7 @@
 
 
 :
-=  **     中 间 代 码 生 成**
+=  **       中 间 代 码 生 成**
 == ""Intermediate code generate""
 ....
 后续遍历AST
@@ -49,14 +49,14 @@
 
 
 :
-= **       中 间 代 码 优 化**
+= **           中 间 代 码 优 化**
 == ""Intermediate code optimization""
 ;
 -> <color:red>Opcode;
 
 
 :
-= **         RVM 栈虚拟机**
+= **              RVM 栈虚拟机**
 == ""Ring Virtual Machine base stack""
 ;
 -> <color:red>Execute Result;
