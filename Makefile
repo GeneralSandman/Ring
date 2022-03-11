@@ -15,7 +15,10 @@ OBJS = \
   utils.o\
   main.o
 
-CFLAGS = -c -g -std=c99 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function  -pedantic
+# CFLAGS -g 打开调试信息
+# CFLAGS -DDEBUG 开启 debug 编译信息
+# CFLAGS -DDEBUG_RVM 开启 debug ring virtual machine 信息
+CFLAGS = -c -std=c99 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -pedantic
 BIN = ./bin
 INCLUDES = \
 

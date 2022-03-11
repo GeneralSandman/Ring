@@ -77,6 +77,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         char*    name     = RVM_Opcode_Infos[opcode].name;
         int      oper_num = code_list[rvm->pc + 1];
         debug_log_with_darkgreen_coloar("[opcode] %10d %15s %10d", rvm->pc, name, oper_num);
+        debug_rvm(rvm);
 
         switch (opcode) {
         case RVM_CODE_PUSH_INT:
@@ -95,31 +96,31 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_ADD_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) + STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc += 2; // FIXME:  没有操作数不需要占用重复的空间
+            rvm->pc++; // FIXME:  没有操作数不需要占用重复的空间
             break;
 
         case RVM_CODE_SUB_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) - STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc += 2; // FIXME:  没有操作数不需要占用重复的空间
+            rvm->pc++; // FIXME:  没有操作数不需要占用重复的空间
             break;
 
         case RVM_CODE_MUL_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) * STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc += 2; // FIXME:  没有操作数不需要占用重复的空间
+            rvm->pc++; // FIXME:  没有操作数不需要占用重复的空间
             break;
 
         case RVM_CODE_DIV_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) / STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc += 2; // FIXME:  没有操作数不需要占用重复的空间
+            rvm->pc++; // FIXME:  没有操作数不需要占用重复的空间
             break;
 
         case RVM_CODE_MOD_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) % STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc += 2; // FIXME:  没有操作数不需要占用重复的空间
+            rvm->pc++; // FIXME:  没有操作数不需要占用重复的空间
             break;
 
         default:
@@ -127,9 +128,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             exit(1);
             break;
         }
-
-        debug_rvm(rvm);
     }
+
+    debug_rvm(rvm);
 }
 
 
@@ -151,10 +152,14 @@ void debug_rvm(Ring_VirtualMachine* rvm) {
 
 void dump_runtime_stack(RuntimeStack* runtime_stack) {
     printf("****  runtime_stack  ****\n");
-    printf("%7s | %10s\n", "index", "oper_num");
-    for (int i = 0; i < runtime_stack->top_index;) {
-        printf("%7d | %10d\n", i, runtime_stack->data[i].int_value);
-        i++;
+    printf("%7s | %10s | %5s\n", "index", "oper_num", "pointer");
+    for (int i = 0; i < runtime_stack->top_index; i++) {
+        char* pointer = "";
+        if (i == runtime_stack->top_index - 1) {
+            pointer = "<--";
+        }
+
+        printf("%7d | %10d | %5s\n", i, runtime_stack->data[i].int_value, pointer);
     }
     printf("\n");
 }
@@ -172,17 +177,21 @@ void dump_vm_code(Ring_VirtualMachine* rvm) {
 
     MOVE_CURSOR(row++, col);
     printf("+++++ %10s | %15s | %10s | %5s\n", "index", "opcode", "oper num", "pointer");
-    for (int i = 0; i < code_size; i++) {
-        RVM_Byte opcode   = code_list[i];
-        char*    name     = RVM_Opcode_Infos[opcode].name;
-        int      oper_num = code_list[i + 1];
-
-
+    for (int i = 0; i < code_size;) {
         char* pointer = "";
         if (i == rvm->pc) {
             pointer = "<--";
         }
+
+        RVM_Byte opcode      = code_list[i++];
+        char*    opcode_name = RVM_Opcode_Infos[opcode].name;
+        char     oper_num[]  = "         ";
+        if (opcode == RVM_CODE_PUSH_INT) {
+            sprintf(oper_num, "%d", code_list[i++]);
+        }
+
+
         MOVE_CURSOR(row++, col);
-        printf("+++++ %10d | %15s | %10d | %5s\n", i, name, oper_num, pointer);
+        printf("+++++ %10d | %15s | %10s | %5s\n", i, opcode_name, oper_num, pointer);
     }
 }
