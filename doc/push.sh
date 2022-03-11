@@ -11,4 +11,5 @@ coscmd upload -r ./ /
 
 #--ignore "./.git/*,./leetcode/leetcode-crawler/*"%
 
-echo "open https://ring-1252697766.cos-website.ap-beijing.myqcloud.com"
+echo "open https://ring-1252697766.cos-website.ap-beijing.myqcloud.com\n"
+echo "open http://ring.wiki\n"

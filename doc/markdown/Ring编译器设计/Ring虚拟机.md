@@ -41,3 +41,22 @@
 [opcode]         44         mod_int          0
 
 ```
+
+
+# 如何调试栈虚拟机
+
+编译 Ring 时，在makefile中添加 -DDEBUG_RVM
+
+
+编辑如下 Ring 源码：
+
+```ring
+
+1+2*3*4*5-6*7+8*9;
+
+```
+
+Debug 虚拟机演示：
+
+
+演示图：
