@@ -45,8 +45,8 @@ void ring_compiler_compile(Ring_Compiler* ring_compiler, FILE* fp) {
 
     yyin = fp;
     if (yyparse()) {
-        fprintf(stderr, "YYPARSE error\n");
-        exit(1);
+        fprintf(stderr, "COMPLIE ERROR\n");
+        exit(EXIT_CODE_COMPILE_ERROR);
     }
 
     debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n");
@@ -125,6 +125,8 @@ int ring_compiler_add_statement(Statement* statement) {
         ring_compiler->statement_list_size = 1;
         return 0;
     }
+
+    Ring_Compiler* tmp = ring_compiler;
 
     Statement* pos;
     pos = ring_compiler->statement_list;

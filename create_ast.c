@@ -93,10 +93,16 @@ Expression* create_expression() {
 Expression* create_expression_identifier(char* identifier) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
-    Expression* expression            = malloc(sizeof(Expression));
-    expression->line_number           = get_ring_compiler_line_number();
-    expression->type                  = EXPRESSION_TYPE_VARIABLE;
-    expression->u.variable_identifier = identifier;
+    IdentifierExpression* identifier_expression = malloc(sizeof(IdentifierExpression));
+    identifier_expression->line_number          = get_ring_compiler_line_number();
+    identifier_expression->type                 = IDENTIFIER_EXPRESSION_TYPE_VARIABLE;
+    identifier_expression->identifier           = identifier;
+    identifier_expression->u.declaration        = NULL;
+
+    Expression* expression              = malloc(sizeof(Expression));
+    expression->line_number             = get_ring_compiler_line_number();
+    expression->type                    = EXPRESSION_TYPE_IDENTIFIER;
+    expression->u.identifier_expression = identifier_expression;
 
     return expression;
 }
@@ -225,20 +231,14 @@ Expression* create_expression_bool_literal(ExpressionType type, Ring_Bool value)
     return expression;
 }
 
-AssignExpression* create_assign_expression(AssignExpressionType type, char* identifier, Expression* expression) {
-    // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
-    debug_log_with_yellow_coloar("identifier:%s", identifier);
-
+AssignExpression* create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand) {
     AssignExpression* assing_expression = malloc(sizeof(AssignExpression));
 
     // 这里应该优化一下
-    char** identifiers                        = malloc(sizeof(char*) * 1);
-    identifiers[0]                            = identifier; // 初始化第一个
-    assing_expression->line_number            = get_ring_compiler_line_number();
-    assing_expression->type                   = type;
-    assing_expression->assign_identifier_size = 1;
-    assing_expression->assign_identifiers     = identifiers;
-    assing_expression->expression             = expression;
+    assing_expression->line_number = get_ring_compiler_line_number();
+    assing_expression->type        = type;
+    assing_expression->left        = left;
+    assing_expression->operand     = operand;
     return assing_expression;
 }
 
@@ -592,4 +592,53 @@ void insert_identifier(IdentifierType type, char* name) {
 }
 
 void check_identifier_valid(char* identifier_name) {
+}
+
+// -
+TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
+    debug_log_with_yellow_coloar("basic_type:%d", basic_type);
+
+    TypeSpecifier* type_specifier = malloc(sizeof(TypeSpecifier));
+    type_specifier->basic_type    = basic_type;
+    type_specifier->derive_type   = NULL;
+    return type_specifier;
+}
+
+Declaration* create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer) {
+    debug_log_with_yellow_coloar("identifier:%s", identifier);
+
+    Declaration* declaration    = malloc(sizeof(Declaration));
+    declaration->line_number    = get_ring_compiler_line_number();
+    declaration->type           = type;
+    declaration->identifier     = identifier;
+    declaration->initializer    = initializer;
+    declaration->is_const       = 0;
+    declaration->is_local       = 0;
+    declaration->variable_index = -1; // fix in fix_ast.c
+    declaration->next           = NULL;
+    return declaration;
+}
+
+Declaration* declaration_list_add_item(Declaration* head, Declaration* declaration) {
+    if (head == NULL) {
+        return declaration;
+    }
+
+    Declaration* pos = head;
+    for (; pos->next != NULL; pos = pos->next) {}
+    pos->next = declaration;
+    return head;
+}
+
+
+Statement* create_declaration_statement(TypeSpecifier* type, char* identifier, Expression* initializer) {
+    debug_log_with_yellow_coloar("identifier:%s", identifier);
+
+    Statement* statement               = malloc(sizeof(Statement));
+    statement->line_number             = get_ring_compiler_line_number();
+    statement->type                    = STATEMENT_TYPE_DECLARATION;
+    statement->u.declaration_statement = create_declaration(type, identifier, initializer);
+    statement->next                    = NULL;
+
+    return statement;
 }

@@ -10,6 +10,13 @@
 int ring_semantic_check(Ring_Compiler* ring_compiler) {
     assert(ring_compiler != NULL);
 
+    int result = 0;
+
+    if (result != 0) {
+        fprintf(stderr, "semantic_check error\n");
+        exit(EXIT_CODE_SEMANTIC_CHECH_ERROR);
+    }
+
     // exit(1);
     return 0;
 }

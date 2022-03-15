@@ -9,8 +9,8 @@ int yyerror(char const *str);
 %}
 
 %glr-parser     // 使用 GLR 解析
-%expect 1       // TODO: legitimate 0 shift/reduce conflicts
-%expect-rr 0    // legitimate 0 reduce/reduce conflicts
+// %expect 1       // TODO: legitimate 0 shift/reduce conflicts
+// %expect-rr 0    // legitimate 0 reduce/reduce conflicts
 
 %union {
     char*                       m_comment_value;
@@ -31,6 +31,9 @@ int yyerror(char const *str);
     ForStatement*               m_for_statement;
     DoWhileStatement*           m_do_while_statement;
     FunctionReturnList*         m_return_list;
+
+    TypeSpecifier*              m_type_specifier;
+    Ring_BasicType              m_basic_type_specifier;
 }
 
 %token TOKEN_TYPEDEF
@@ -119,6 +122,7 @@ int yyerror(char const *str);
 %type <m_identifier> identifier IDENTIFIER
 %type <m_identifier_list> identifier_list
 %type <m_statement_list> statement statement_list block
+%type <m_statement_list> variable_definition_statement
 %type <m_expression> expression expression_list
 %type <m_expression> literal_term
 %type <m_expression> expression_arithmetic_operation_additive 
@@ -131,7 +135,7 @@ int yyerror(char const *str);
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
 %type <m_argument_list> argument_list argument
-%type <m_variable> variable_definition variable_definition_with_assign const_definition_with_assign
+%type <m_variable> variable_definition
 %type <m_variable_type> variable_type
 %type <m_function_definition> function_definition
 %type <m_parameter_list> parameter_list
@@ -141,6 +145,9 @@ int yyerror(char const *str);
 %type <m_elseif_statement> elseif_statement_list
 %type <m_elseif_statement> elseif_statement
 %type <m_return_list> return_list
+
+%type <m_type_specifier>        type_specifier
+%type <m_basic_type_specifier>  basic_type_specifier
 
 
 %%
@@ -205,22 +212,7 @@ statement
 
         $$ = create_statemen_from_expression($1);
     }
-    | variable_definition TOKEN_SEMICOLON
-    {
-        debug_log_with_green_coloar("[RULE::statement]\t ");
-
-        $$ = create_statement_from_variable($1);
-    }
-    | variable_definition_with_assign TOKEN_SEMICOLON
-    {
-        debug_log_with_green_coloar("[RULE::statement:variable_definition_with_assign]\t ");
-        $$ = create_statement_from_variable($1);
-    }
-    | const_definition_with_assign TOKEN_SEMICOLON
-    {
-        debug_log_with_green_coloar("[RULE::statement:const_definition_with_assign]\t ");
-        $$ = create_statement_from_variable($1);
-    }
+    | variable_definition_statement TOKEN_SEMICOLON
     | TOKEN_RETURN expression_list TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::statement:return_statement]\t ");
@@ -325,6 +317,20 @@ continue_statement
     : TOKEN_CONTINUE ;
 
 
+variable_definition_statement
+    : TOKEN_VAR type_specifier IDENTIFIER
+    {
+        debug_log_with_green_coloar("[RULE::variable_definition_statement]\t ");
+        $$ = create_declaration_statement($2, $3, NULL);
+    }
+    | TOKEN_VAR type_specifier IDENTIFIER TOKEN_ASSIGN expression
+    {
+        debug_log_with_green_coloar("[RULE::variable_definition_statement]\t ");
+        $$ = create_declaration_statement($2, $3, $5);
+    }
+    ;
+
+// TODO: 以后删除调
 variable_definition
     : TOKEN_VAR variable_type identifier
     {
@@ -341,23 +347,6 @@ variable_definition
     }
     ;
 
-variable_definition_with_assign
-    : TOKEN_VAR variable_type identifier TOKEN_ASSIGN expression
-    {
-        debug_log_with_green_coloar("[RULE::variable_definition]\t ");
-
-        $$ = new_variable($2, $3, $5, 0);
-    }
-    ;
-
-const_definition_with_assign
-    : TOKEN_CONST variable_type identifier TOKEN_ASSIGN expression
-    {
-        debug_log_with_green_coloar("[RULE::variable_definition]\t ");
-
-        $$ = new_variable($2, $3, $5, 1);
-    }
-    ;
 
 function_definition
     : TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP block
@@ -456,6 +445,36 @@ variable_type
     }
     ;
 
+type_specifier
+    : basic_type_specifier
+    {
+        debug_log_with_green_coloar("[RULE::type_specifier]");
+        $$ = create_type_specifier($1);
+    }
+    ;
+
+basic_type_specifier
+    : TOKEN_BOOL
+    {
+        debug_log_with_green_coloar("[RULE::basic_type_specifier]\t variable_type(TOKEN_BOOL) ");
+        $$ = RING_BASIC_TYPE_BOOL;
+    }
+    | TOKEN_INT
+    {
+        debug_log_with_green_coloar("[RULE::basic_type_specifier]\t variable_type(TOKEN_INT) ");
+        $$ = RING_BASIC_TYPE_INT;
+    }
+    | TOKEN_DOUBLE
+    {
+        debug_log_with_green_coloar("[RULE::basic_type_specifier]\t variable_type(TOKEN_DOUBLE) ");
+        $$ = RING_BASIC_TYPE_DOUBLE;
+    }
+    | TOKEN_STRING
+    {
+        debug_log_with_green_coloar("[RULE::basic_type_specifier]\t variable_type(TOKEN_STRING) ");
+        $$ = RING_BASIC_TYPE_STRING;
+    }
+    ;
 
 expression
     : function_call_expression 
@@ -698,37 +717,37 @@ assign_expression
     {
         debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
-        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ASSIGN, $1, $3);
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ASSIGN, create_expression_identifier($1), $3);
     }
     | identifier TOKEN_ADD_ASSIGN expression
     {
         debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
-        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN, $1, $3);
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN, create_expression_identifier($1), $3);
     }
     | identifier TOKEN_SUB_ASSIGN expression
     {
         debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
-        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN, $1, $3);
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN, create_expression_identifier($1), $3);
     }
     | identifier TOKEN_MUL_ASSIGN expression
     {
         debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
-        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN, $1, $3);
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN, create_expression_identifier($1), $3);
     }
     | identifier TOKEN_DIV_ASSIGN expression
     {
         debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
-        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN, $1, $3);
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN, create_expression_identifier($1), $3);
     }
     | identifier TOKEN_MOD_ASSIGN expression
     {
         debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
-        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN, $1, $3);
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN, create_expression_identifier($1), $3);
     }
     | identifier TOKEN_COMMA identifier_list TOKEN_ASSIGN expression_list
     {

@@ -6,7 +6,7 @@ OBJS = \
   string.o\
   create_ast.o\
   semantic_check.o\
-  fix.o\
+  fix_ast.o\
   eval_ast.o\
   generate.o\
   execute.o\
@@ -18,7 +18,7 @@ OBJS = \
 # CFLAGS -g 打开调试信息
 # CFLAGS -DDEBUG 开启 debug 编译信息
 # CFLAGS -DDEBUG_RVM 开启 debug ring virtual machine 信息
-CFLAGS = -c -std=c99 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -pedantic
+CFLAGS = -c -std=c99 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -pedantic -g -DDEBUG
 BIN = ./bin
 INCLUDES = \
 
@@ -45,7 +45,7 @@ y.tab.o: y.tab.c
 string.o: string.c
 create_ast.o: create_ast.c ring.h
 semantic_check.o: semantic_check.c ring.h
-fix.o: fix.c ring.h
+fix_ast.o: fix_ast.c ring.h
 eval_ast.o: eval_ast.c ring.h
 generate.o: generate.c ring.h
 execute.o: execute.c ring.h

@@ -65,6 +65,14 @@ typedef struct BreakStatement_Tag BreakStatement;
 
 typedef struct ContinueStatement_Tag ContinueStatement;
 
+typedef struct Ring_DeriveType_Tag Ring_DeriveType;
+
+typedef struct Declaration_Tag Declaration;
+
+typedef struct TypeSpecifier_Tag TypeSpecifier;
+
+typedef struct IdentifierExpression_Tag IdentifierExpression;
+
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue** value);
 
 typedef unsigned char RVM_Byte;
@@ -84,8 +92,11 @@ struct Ring_Compiler_Tag {
     unsigned int variable_list_size;
     Variable*    variable_list; // FIXME: 这里指的是全局变量，需要区分函数中的局部变量。
 
-    unsigned int identifier_list_size;
-    Identifier*  identifier_list;
+    unsigned int identifier_list_size; // TODO:后续删除调
+    Identifier*  identifier_list;      // TODO:后续删除调
+
+    unsigned int declaration_list_size;
+    Declaration* declaration_list;
 };
 
 struct Ring_VirtualMachine_Tag {
@@ -208,6 +219,7 @@ typedef enum {
     STATEMENT_TYPE_DOWHILE,
     STATEMENT_TYPE_BREAK,
     STATEMENT_TYPE_CONTINUE,
+    STATEMENT_TYPE_DECLARATION,
 } StatementType;
 
 typedef enum {
@@ -217,6 +229,7 @@ typedef enum {
     EXPRESSION_TYPE_LITERAL_DOUBLE,
     EXPRESSION_TYPE_LITERAL_STRING,
     EXPRESSION_TYPE_VARIABLE,
+    EXPRESSION_TYPE_IDENTIFIER,
     EXPRESSION_TYPE_FUNCTION_CALL,
     EXPRESSION_TYPE_ASSIGN,
 
@@ -321,13 +334,14 @@ struct Statement_Tag {
     StatementType type;
     union {
         Expression*        expression;
-        Variable*          variable;
+        Variable*          variable; // TODO: 以后废弃 使用 declaration_statement
         Expression*        return_expression;
         IfStatement*       if_statement;
         ForStatement*      for_statement;
         DoWhileStatement*  dowhile_statement;
         BreakStatement*    break_statement;
         ContinueStatement* continue_statement;
+        Declaration*       declaration_statement;
     } u;
     Statement* next;
 };
@@ -351,7 +365,8 @@ struct Expression_Tag {
         int                     int_literal;
         double                  double_literal;
         char*                   string_literal;
-        char*                   variable_identifier;
+        char*                   variable_identifier; // 后续废弃，使用下边的
+        IdentifierExpression*   identifier_expression;
         FunctionCallExpression* function_call_expression;
         AssignExpression*       assign_expression;
         TernaryExpression*      ternary_expression;
@@ -361,6 +376,23 @@ struct Expression_Tag {
     } u;
 
     Expression* next;
+};
+
+typedef enum {
+    IDENTIFIER_EXPRESSION_TYPE_UNKNOW,
+    IDENTIFIER_EXPRESSION_TYPE_VARIABLE,
+    IDENTIFIER_EXPRESSION_TYPE_FUNCTION,
+} IdentifierExpressionType;
+
+struct IdentifierExpression_Tag {
+    unsigned int line_number;
+
+    IdentifierExpressionType type;
+    char*                    identifier;
+    union {
+        Declaration* declaration;
+        // Function // TODO:
+    } u;
 };
 
 struct ArrayIndexExpression_Tag {
@@ -377,7 +409,7 @@ struct FunctionCallExpression_Tag {
     ArgumentList* argument_list;
 };
 
-struct Identifier_Tag {
+struct Identifier_Tag { // TODO: 以后废弃这个东西
     unsigned int line_number;
 
     IdentifierType type;
@@ -404,12 +436,19 @@ struct AssignExpression_Tag {
     unsigned int line_number;
 
     AssignExpressionType type;
-    char*                assign_identifier; // TODO: 以后不应该使用这个 删除调
-    unsigned int         assign_identifier_size;
-    char**               assign_identifiers;
-    // Identifier * assign_identifier_list;// TODO: 重构 最后都使用这个
-    Expression* expression;
-    // Expression *expression_list; // TODO: 重构 最后都使用这个
+
+
+    char*        assign_identifier;      // TODO: delete
+    unsigned int assign_identifier_size; // TODO: delete
+    char**       assign_identifiers;     // TODO: delete
+    // Identifier * assign_identifier_list;// TODO: delete
+    Expression* expression; // TODO: delete
+    // Expression *expression_list; // TODO: delete
+
+    // 上边的4个以后都不要使用，全部使用下边最新的
+    // 只使用 line_number type left operand
+    Expression* left;
+    Expression* operand;
 };
 
 struct BinaryExpression_Tag {
@@ -447,6 +486,18 @@ struct Variable_Tag {
     } u;
     Expression* init_expression;
     Variable*   next;
+};
+
+struct Declaration_Tag {
+    unsigned int line_number;
+
+    TypeSpecifier* type;
+    char*          identifier;
+    Expression*    initializer;
+    int            is_const;
+    int            is_local;
+    int            variable_index;
+    Declaration*   next;
 };
 
 struct Function_Tag {
@@ -533,17 +584,42 @@ struct ContinueStatement_Tag {
     unsigned int line_number;
 };
 
-// typedef struct {
-// } ListNode;
 
-// struct List {
-//     ListNode *node;
-//     ListNode *next;
-// };
+typedef enum {
+    RING_BASIC_TYPE_UNKNOW,
+    RING_BASIC_TYPE_BOOL,
+    RING_BASIC_TYPE_INT,
+    RING_BASIC_TYPE_DOUBLE,
+    RING_BASIC_TYPE_STRING,
+    RING_BASIC_TYPE_NULL,
+} Ring_BasicType;
 
-// struct IdentifierDefinition_Tag {
+typedef enum {
+    RING_DERIVE_TYPE_UNKNOW,
+    RING_DERIVE_TYPE_FUNCTION,
+    RING_DERIVE_TYPE_ARRAY,
+} Ring_DeriveTypeKind;
 
-// };
+struct Ring_DeriveType_Tag {
+    Ring_DeriveTypeKind kind;
+    Ring_DeriveType*    next;
+};
+
+struct TypeSpecifier_Tag {
+    Ring_BasicType   basic_type;
+    Ring_DeriveType* derive_type;
+};
+
+typedef enum {
+    EXIT_CODE_OK,
+    EXIT_CODE_COMPILE_ERROR,          // 编译错误
+    EXIT_CODE_SEMANTIC_CHECH_ERROR,   // 语义分析错误
+    EXIT_CODE_OPTIMIZATION_AST_ERROR, // 优化AST错误
+    EXIT_CODE_GENERATE_OPCODE_ERROR,  // 生成虚拟机代码错误
+    EXIT_CODE_LOAD_OPCODE_ERROR,      // 加载虚拟机代码错误
+    EXIT_CODE_RUN_VM_ERROR,           // 虚拟机执行失败
+
+} ExitCode;
 
 #define CLEAR_SCREEN printf("\e[1;1H\e[2J")
 #define MOVE_CURSOR(row, col) printf("%c[%d;%dH", 27, (row), (col))
@@ -708,7 +784,7 @@ Expression*             create_expression_unitary(ExpressionType type, Expressio
 Expression*             create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression* expression);
 Expression*             create_expression_literal(ExpressionType type, char* literal_interface);
 Expression*             create_expression_bool_literal(ExpressionType type, Ring_Bool value);
-AssignExpression*       create_assign_expression(AssignExpressionType type, char* identifier, Expression* expression);
+AssignExpression*       create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
 AssignExpression*       create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* first_expression, Expression* expression_list);
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list);
 Expression*             expression_list_add_item(Expression* expression_list, Expression* expression);
@@ -730,8 +806,21 @@ Statement*              create_statement_from_continue();
 // Identifier *            create_identifier(IdentifierType type, char *name);
 // char **identifier_list_add_item(char **identifier_list, char *identifier);
 
+TypeSpecifier* create_type_specifier(Ring_BasicType basic_type);
+Declaration*   create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
+Declaration*   declaration_list_add_item(Declaration* head, Declaration* declaration);
+Statement*     create_declaration_statement(TypeSpecifier* type_specifier, char* identifier, Expression* initializer);
+// create_ast.c
+
 // fix.c
-void ring_fix_ast(Ring_Compiler* ring_compiler);
+void         ring_compiler_fix_ast(Ring_Compiler* ring_compiler);
+void         fix_statement_list(Statement* statement_list);
+void         fix_statement(Statement* statement);
+void         fix_expression(Expression* expression);
+void         fix_declaration(Declaration* declaration);
+void         fix_identifier_expression(IdentifierExpression* expression);
+void         fix_assign_expression(AssignExpression* expression);
+Declaration* search_declaration(char* identifier);
 
 // generate.c
 Ring_VirtualMachine_Executer* new_ring_vm_executer();

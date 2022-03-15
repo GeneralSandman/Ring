@@ -48,7 +48,8 @@ void add_global_variable(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* 
     // 有的地方是链表
     // 有的地方是数组
     // 如果 不一致，很多地方都完蛋
-    vm_executer->global_variable_size = compiler->variable_list_size;
+    vm_executer->global_variable_size = compiler->declaration_list_size;
+    // vm_executer->global_variable_list = malloc(sizeof());
 
     // for (Variable* pos = compiler->variable_list; pos; pos = pos->next) {
     // }
