@@ -76,7 +76,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         RVM_Byte opcode   = code_list[rvm->pc];
         char*    name     = RVM_Opcode_Infos[opcode].name;
         int      oper_num = code_list[rvm->pc + 1];
-        debug_log_with_darkgreen_coloar("[opcode] %10d %15s %10d", rvm->pc, name, oper_num);
         debug_rvm(rvm);
 
         switch (opcode) {
@@ -140,58 +139,12 @@ void debug_rvm(Ring_VirtualMachine* rvm) {
 #endif
 
     CLEAR_SCREEN;
-    dump_runtime_stack(rvm->runtime_stack);
-    dump_vm_code(rvm);
+    ring_vm_dump_runtime_stack(rvm->runtime_stack, 1, 0);
+    ring_vm_code_dump(rvm->executer, rvm->pc, 1, 60);
 
     printf("press enter to step, 'q' to quit.\n");
     char ch = getchar();
     if (ch == 'q') {
         exit(1);
-    }
-}
-
-void dump_runtime_stack(RuntimeStack* runtime_stack) {
-    printf("****  runtime_stack  ****\n");
-    printf("%7s | %10s | %5s\n", "index", "oper_num", "pointer");
-    for (int i = 0; i < runtime_stack->top_index; i++) {
-        char* pointer = "";
-        if (i == runtime_stack->top_index - 1) {
-            pointer = "<--";
-        }
-
-        printf("%7d | %10d | %5s\n", i, runtime_stack->data[i].int_value, pointer);
-    }
-    printf("\n");
-}
-
-void dump_vm_code(Ring_VirtualMachine* rvm) {
-    Ring_VirtualMachine_Executer* executer  = rvm->executer;
-    RVM_Byte*                     code_list = rvm->executer->code_list;
-    unsigned int                  code_size = rvm->executer->code_size;
-
-    int col = 60;
-    int row = 1;
-
-    MOVE_CURSOR(row++, col);
-    printf("+++++ ************  rvm opcode  ****\n");
-
-    MOVE_CURSOR(row++, col);
-    printf("+++++ %10s | %15s | %10s | %5s\n", "index", "opcode", "oper num", "pointer");
-    for (int i = 0; i < code_size;) {
-        char* pointer = "";
-        if (i == rvm->pc) {
-            pointer = "<--";
-        }
-
-        RVM_Byte opcode      = code_list[i++];
-        char*    opcode_name = RVM_Opcode_Infos[opcode].name;
-        char     oper_num[]  = "         ";
-        if (opcode == RVM_CODE_PUSH_INT) {
-            sprintf(oper_num, "%d", code_list[i++]);
-        }
-
-
-        MOVE_CURSOR(row++, col);
-        printf("+++++ %10d | %15s | %10s | %5s\n", i, opcode_name, oper_num, pointer);
     }
 }

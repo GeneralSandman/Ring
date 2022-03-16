@@ -4,20 +4,20 @@
 #include <stdlib.h>
 
 RVM_Opcode_Info RVM_Opcode_Infos[] = {
-    {RVM_CODE_UNKNOW, ""},
+    {RVM_CODE_UNKNOW, "", OPCODE_OPERAND_TYPE_UNKNOW},
 
     // push
-    {RVM_CODE_PUSH_INT, "push_int"},
+    {RVM_CODE_PUSH_INT, "push_int", OPCODE_OPERAND_TYPE_1_BYTE}, // TODO: 根据操作数的大小，自动选择不同的opcode
 
     // pop
-    {RVM_CODE_POP_STATIC_INT, "pop_static_int"},
+    {RVM_CODE_POP_STATIC_INT, "pop_static_int", OPCODE_OPERAND_TYPE_1_BYTE}, // 全局变量的赋值
 
     //
-    {RVM_CODE_ADD_INT, "add_int"},
-    {RVM_CODE_SUB_INT, "sub_int"},
-    {RVM_CODE_MUL_INT, "mul_int"},
-    {RVM_CODE_DIV_INT, "div_int"},
-    {RVM_CODE_MOD_INT, "mod_int"},
+    {RVM_CODE_ADD_INT, "add_int", OPCODE_OPERAND_TYPE_0_BYTE},
+    {RVM_CODE_SUB_INT, "sub_int", OPCODE_OPERAND_TYPE_0_BYTE},
+    {RVM_CODE_MUL_INT, "mul_int", OPCODE_OPERAND_TYPE_0_BYTE},
+    {RVM_CODE_DIV_INT, "div_int", OPCODE_OPERAND_TYPE_0_BYTE},
+    {RVM_CODE_MOD_INT, "mod_int", OPCODE_OPERAND_TYPE_0_BYTE},
 };
 
 Ring_VirtualMachine_Executer* new_ring_vm_executer() {
@@ -50,11 +50,10 @@ void add_global_variable(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* 
     // 如果 不一致，很多地方都完蛋
     vm_executer->global_variable_size = compiler->declaration_list_size;
     // vm_executer->global_variable_list = malloc(sizeof());
+    // TODO:
 
     // for (Variable* pos = compiler->variable_list; pos; pos = pos->next) {
     // }
-
-    vm_executer->global_variable_list = compiler->variable_list;
 }
 
 // 添加函数定义
@@ -73,15 +72,8 @@ void add_top_level_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* v
     vm_executer->code_list = code_list;
     vm_executer->code_size = code_size;
 
-    debug_log_with_purple_coloar("----------top level code----------");
-    debug_log_with_purple_coloar("code_size:%d, code_capacity:%d", code_size, code_capacity);
-    for (int i = 0; i < code_size;) {
-        RVM_Byte op_code  = code_list[i];
-        char*    name     = RVM_Opcode_Infos[op_code].name;
-        int      oper_num = code_list[i + 1];
-        debug_log_with_purple_coloar("[opcode] %10d %15s %10d", i, name, oper_num);
-        i += 2;
-    }
+    CLEAR_SCREEN;
+    ring_vm_code_dump(vm_executer, 0, 1, 1);
 }
 
 void vm_executer_dump(Ring_VirtualMachine_Executer* vm_executer) {
@@ -149,10 +141,21 @@ void generate_vmcode_from_expression(Expression* expression, RVM_OpcodeBuffer* o
 }
 
 void generate_vmcode_from_assign_expression(AssignExpression* expression, RVM_OpcodeBuffer* opcode_buffer) {
-    generate_vmcode_from_expression(expression->expression, opcode_buffer);
+    generate_vmcode_from_expression(expression->operand, opcode_buffer);
 
-    unsigned int index = 0; // FIXME: TODO: 找到全局变量所在的偏移量
-    generate_vmcode(opcode_buffer, RVM_CODE_POP_STATIC_INT, index);
+    if (expression->left->type != EXPRESSION_TYPE_IDENTIFIER) {
+        fprintf(stderr, "generate opcode error\n");
+        exit(EXIT_CODE_GENERATE_OPCODE_ERROR);
+    }
+
+    generate_pop_to_leftvalue(expression->left->u.identifier_expression, opcode_buffer);
+}
+
+void generate_pop_to_leftvalue(IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    Declaration* declaration = identifier_expression->u.declaration;
+
+    unsigned int variable_index = declaration->variable_index;
+    generate_vmcode(opcode_buffer, RVM_CODE_POP_STATIC_INT, variable_index);
 }
 
 void generate_vmcode_from_binary_expression(BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
@@ -173,13 +176,26 @@ void generate_vmcode(RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, int int
     if (opcode_buffer->code_capacity == 0) {
         opcode_buffer->code_capacity = 2;
     }
-    if (opcode_buffer->code_capacity == opcode_buffer->code_size) {
+    if (opcode_buffer->code_capacity == opcode_buffer->code_size + 2) {
         opcode_buffer->code_capacity *= 2;
     }
 
     opcode_buffer->code_list                             = realloc(opcode_buffer->code_list, opcode_buffer->code_capacity * sizeof(RVM_Byte));
     opcode_buffer->code_list[opcode_buffer->code_size++] = opcode; // 操作码
-    if (int_literal) {                                             // 操作数 FIXME: 有些opcode 后边是没有操作数的
+
+    RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
+    switch (opcode_info.type) {
+    case OPCODE_OPERAND_TYPE_0_BYTE:
+        break;
+
+    case OPCODE_OPERAND_TYPE_1_BYTE:
         opcode_buffer->code_list[opcode_buffer->code_size++] = int_literal;
+        break;
+
+    case OPCODE_OPERAND_TYPE_2_BYTE:
+        // TODO: 位运算，从高位开始填充
+        break;
+
+    default: break;
     }
 }

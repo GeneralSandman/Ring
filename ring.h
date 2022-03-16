@@ -152,9 +152,17 @@ struct RVM_OpcodeBuffer_Tag {
     unsigned int    lable_capacity;
 };
 
+typedef enum {
+    OPCODE_OPERAND_TYPE_UNKNOW,
+    OPCODE_OPERAND_TYPE_0_BYTE, // 后边没有操作数
+    OPCODE_OPERAND_TYPE_1_BYTE,
+    OPCODE_OPERAND_TYPE_2_BYTE,
+} OpcodeOperandType;
+
 struct RVM_Opcode_Info_Tag {
-    RVM_Byte code;
-    char*    name;
+    RVM_Byte          code;
+    char*             name;
+    OpcodeOperandType type;
 };
 
 typedef enum {
@@ -622,6 +630,7 @@ typedef enum {
 } ExitCode;
 
 #define CLEAR_SCREEN printf("\e[1;1H\e[2J")
+
 #define MOVE_CURSOR(row, col) printf("%c[%d;%dH", 27, (row), (col))
 
 #define print_debug_info(format, ...) \
@@ -834,6 +843,7 @@ RVM_OpcodeBuffer* new_opcode_buffer();
 void              generate_vmcode_from_statement_list(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* vm_executer, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_expression(Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_assign_expression(AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
+void              generate_pop_to_leftvalue(IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_binary_expression(BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_int_expression(Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode(RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, int int_literal);
@@ -846,7 +856,11 @@ void                 add_global_variables(Ring_VirtualMachine_Executer* executer
 void                 ring_execute_vm_code(Ring_VirtualMachine* ring_vm);
 void                 debug_rvm(Ring_VirtualMachine* rvm);
 void                 dump_runtime_stack(RuntimeStack* runtime_stack);
-void                 dump_vm_code(Ring_VirtualMachine* rvm);
 // execute.c
+
+// utils.c
+void ring_vm_code_dump(Ring_VirtualMachine_Executer* executer, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
+void ring_vm_dump_runtime_stack(RuntimeStack* runtime_stack, unsigned int screen_row, unsigned int screen_col);
+// utils.c
 
 #endif
