@@ -852,7 +852,7 @@ void              generate_vmcode(RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode op
 // execute.c
 RuntimeStack*        new_runtime_stack();
 Ring_VirtualMachine* new_ring_virtualmachine();
-void                 add_global_variables(Ring_VirtualMachine_Executer* executer, RuntimeStatic* runtime_static);
+void                 add_static_variable(Ring_VirtualMachine_Executer* executer, RuntimeStatic* runtime_static);
 void                 ring_execute_vm_code(Ring_VirtualMachine* ring_vm);
 void                 debug_rvm(Ring_VirtualMachine* rvm);
 void                 dump_runtime_stack(RuntimeStack* runtime_stack);

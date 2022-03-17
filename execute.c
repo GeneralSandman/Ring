@@ -54,11 +54,11 @@ Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* execu
     vm->runtime_stack       = new_runtime_stack();
     vm->pc                  = 0;
 
-    add_global_variables(executer, vm->runtime_static);
+    add_static_variable(executer, vm->runtime_static);
     return vm;
 }
 
-void add_global_variables(Ring_VirtualMachine_Executer* executer, RuntimeStatic* runtime_static) {
+void add_static_variable(Ring_VirtualMachine_Executer* executer, RuntimeStatic* runtime_static) {
     runtime_static->size = executer->global_variable_size;
     runtime_static->data = malloc(runtime_static->size * sizeof(RuntimeStackValue));
 }
