@@ -7,21 +7,30 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_UNKNOW, "", OPCODE_OPERAND_TYPE_UNKNOW},
 
     // push
-    {RVM_CODE_PUSH_INT, "push_int", OPCODE_OPERAND_TYPE_1_BYTE}, // TODO: 根据操作数的大小，自动选择不同的opcode
+    {RVM_CODE_PUSH_INT_1BYTE, "push_int_1byte", OPCODE_OPERAND_TYPE_1BYTE}, // 后边紧跟 int 常量 1 type
+    {RVM_CODE_PUSH_INT_2BYTE, "push_int_2byte", OPCODE_OPERAND_TYPE_2BYTE}, // 后边紧跟 int 常量 2 type
+    {RVM_CODE_PUSH_INT, "push_int", OPCODE_OPERAND_TYPE_2BYTE},             // 后边紧跟 int 常量 2 的索引 这里的还要 改一下 OPCODE_OPERAND_TYPE_2BYTE
+
+    {RVM_CODE_PUSH_DOUBLE, "push_double", OPCODE_OPERAND_TYPE_2BYTE}, // 后边紧跟 int 常量 2 的索引
 
     // pop
-    {RVM_CODE_POP_STATIC_INT, "pop_static_int", OPCODE_OPERAND_TYPE_1_BYTE}, // 全局变量的赋值
+    {RVM_CODE_POP_STATIC_INT, "pop_static_int", OPCODE_OPERAND_TYPE_2BYTE}, // 全局变量的赋值  这里后续要扩展成2 byte，面的index不够
+
+    {RVM_CODE_PUSH_STATIC_INT, "push_static_int", OPCODE_OPERAND_TYPE_2BYTE},
+
 
     //
-    {RVM_CODE_ADD_INT, "add_int", OPCODE_OPERAND_TYPE_0_BYTE},
-    {RVM_CODE_SUB_INT, "sub_int", OPCODE_OPERAND_TYPE_0_BYTE},
-    {RVM_CODE_MUL_INT, "mul_int", OPCODE_OPERAND_TYPE_0_BYTE},
-    {RVM_CODE_DIV_INT, "div_int", OPCODE_OPERAND_TYPE_0_BYTE},
-    {RVM_CODE_MOD_INT, "mod_int", OPCODE_OPERAND_TYPE_0_BYTE},
+    {RVM_CODE_ADD_INT, "add_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_SUB_INT, "sub_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_MUL_INT, "mul_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_DIV_INT, "div_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_MOD_INT, "mod_int", OPCODE_OPERAND_TYPE_0BYTE},
 };
 
 Ring_VirtualMachine_Executer* new_ring_vm_executer() {
     Ring_VirtualMachine_Executer* executer = malloc(sizeof(Ring_VirtualMachine_Executer));
+    executer->constant_pool_size           = 0;
+    executer->constant_pool_list           = NULL;
     executer->global_variable_size         = 0;
     executer->global_variable_list         = NULL;
     executer->function_size                = 0;
@@ -44,16 +53,21 @@ void ring_generate_vm_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer
 
 // 添加全局变量
 void add_global_variable(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* vm_executer) {
-    // FIXME: 这里以后可能得想一下
-    // 有的地方是链表
-    // 有的地方是数组
-    // 如果 不一致，很多地方都完蛋
-    vm_executer->global_variable_size = compiler->declaration_list_size;
-    // vm_executer->global_variable_list = malloc(sizeof());
-    // TODO:
+    // FIXME: 在 Compiler 中大部分是链表：因为在编译的时候不确定存储空间
+    // 在 Executer 中 大部分是数组，因为编译完成，存储空间的数量都已经确认了。
+    if (compiler->declaration_list_size == 0) {
+        return;
+    }
 
-    // for (Variable* pos = compiler->variable_list; pos; pos = pos->next) {
-    // }
+    vm_executer->global_variable_size = compiler->declaration_list_size;
+    vm_executer->global_variable_list = malloc(vm_executer->global_variable_size * sizeof(RVM_Variable));
+
+    Declaration* pos = compiler->declaration_list;
+    int          i   = 0;
+    for (; pos; pos = pos->next, i++) {
+        vm_executer->global_variable_list[i].identifier = pos->identifier;
+        vm_executer->global_variable_list[i].type       = pos->type; // TODO: 这里考虑要深度复制
+    }
 }
 
 // 添加函数定义
@@ -71,12 +85,12 @@ void add_top_level_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* v
 
     vm_executer->code_list = code_list;
     vm_executer->code_size = code_size;
-
-    CLEAR_SCREEN;
-    ring_vm_code_dump(vm_executer, 0, 1, 1);
 }
 
 void vm_executer_dump(Ring_VirtualMachine_Executer* vm_executer) {
+    // CLEAR_SCREEN;
+    ring_vm_constantpool_dump(vm_executer);
+    // ring_vm_code_dump(vm_executer, 0, 60, 1);
 }
 
 RVM_OpcodeBuffer* new_opcode_buffer() {
@@ -96,7 +110,7 @@ void generate_vmcode_from_statement_list(Ring_Compiler* compiler, Ring_VirtualMa
     for (Statement* statement = compiler->statement_list; statement != NULL; statement = statement->next) {
         switch (statement->type) {
         case STATEMENT_TYPE_EXPRESSION:
-            generate_vmcode_from_expression(statement->u.expression, opcode_buffer);
+            generate_vmcode_from_expression(vm_executer, statement->u.expression, opcode_buffer);
             break;
 
         default: break;
@@ -104,35 +118,41 @@ void generate_vmcode_from_statement_list(Ring_Compiler* compiler, Ring_VirtualMa
     }
 }
 
-void generate_vmcode_from_expression(Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     assert(expression != NULL);
 
     switch (expression->type) {
+    case EXPRESSION_TYPE_LITERAL_BOOL:
+        generate_vmcode_from_bool_expression(executer, expression, opcode_buffer);
+        break;
     case EXPRESSION_TYPE_LITERAL_INT:
-        generate_vmcode_from_int_expression(expression, opcode_buffer);
+        generate_vmcode_from_int_expression(executer, expression, opcode_buffer);
+        break;
+    case EXPRESSION_TYPE_IDENTIFIER:
+        generate_vmcode_from_identifier_expression(executer, expression->u.identifier_expression, opcode_buffer);
         break;
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
-        generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer, RVM_CODE_ADD_INT);
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_ADD_INT);
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_SUB:
-        generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer, RVM_CODE_SUB_INT);
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_SUB_INT);
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
-        generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer, RVM_CODE_MUL_INT);
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_MUL_INT);
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_DIV:
-        generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer, RVM_CODE_DIV_INT);
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_DIV_INT);
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_MOD:
-        generate_vmcode_from_binary_expression(expression->u.binary_expression, opcode_buffer, RVM_CODE_MOD_INT);
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_MOD_INT);
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
-        generate_vmcode_from_assign_expression(expression->u.assign_expression, opcode_buffer);
+        generate_vmcode_from_assign_expression(executer, expression->u.assign_expression, opcode_buffer);
         break;
 
     default:
@@ -140,39 +160,109 @@ void generate_vmcode_from_expression(Expression* expression, RVM_OpcodeBuffer* o
     }
 }
 
-void generate_vmcode_from_assign_expression(AssignExpression* expression, RVM_OpcodeBuffer* opcode_buffer) {
-    generate_vmcode_from_expression(expression->operand, opcode_buffer);
+void generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+    printf("expression->type:%d\n", expression->type);
+
+    if (expression->type != ASSIGN_EXPRESSION_TYPE_ASSIGN) {
+        // += -= *= /=
+        generate_vmcode_from_expression(executer, expression->left, opcode_buffer);
+    }
+
+    generate_vmcode_from_expression(executer, expression->operand, opcode_buffer);
+
+    switch (expression->type) {
+    case ASSIGN_EXPRESSION_TYPE_ASSIGN:
+        /* code */
+        break;
+
+    case ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN:
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_ADD_INT, 0);
+        break;
+
+    case ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN:
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_SUB_INT, 0);
+        break;
+
+    case ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN:
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_MUL_INT, 0);
+        break;
+
+    case ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN:
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_DIV_INT, 0);
+        break;
+
+    case ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN:
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_MOD_INT, 0);
+        break;
+
+    default:
+        break;
+    }
 
     if (expression->left->type != EXPRESSION_TYPE_IDENTIFIER) {
         fprintf(stderr, "generate opcode error\n");
-        exit(EXIT_CODE_GENERATE_OPCODE_ERROR);
+        exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
     }
 
-    generate_pop_to_leftvalue(expression->left->u.identifier_expression, opcode_buffer);
+    generate_pop_to_leftvalue(executer, expression->left->u.identifier_expression, opcode_buffer);
 }
 
-void generate_pop_to_leftvalue(IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
     Declaration* declaration = identifier_expression->u.declaration;
 
     unsigned int variable_index = declaration->variable_index;
-    generate_vmcode(opcode_buffer, RVM_CODE_POP_STATIC_INT, variable_index);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_STATIC_INT, variable_index);
 }
 
-void generate_vmcode_from_binary_expression(BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
     Expression* left  = expression->left_expression;
     Expression* right = expression->right_expression;
 
-    generate_vmcode_from_expression(left, opcode_buffer);
-    generate_vmcode_from_expression(right, opcode_buffer);
+    generate_vmcode_from_expression(executer, left, opcode_buffer);
+    generate_vmcode_from_expression(executer, right, opcode_buffer);
 
-    generate_vmcode(opcode_buffer, opcode, 0);
+    generate_vmcode(executer, opcode_buffer, opcode, 0);
 }
 
-void generate_vmcode_from_int_expression(Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
-    generate_vmcode(opcode_buffer, RVM_CODE_PUSH_INT, expression->u.int_literal);
+void generate_vmcode_from_identifier_expression(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    unsigned int offset = identifier_expression->u.declaration->variable_index;
+
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STATIC_INT, offset);
 }
 
-void generate_vmcode(RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, int int_literal) {
+void generate_vmcode_from_bool_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+    if (!expression->u.bool_literal) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT_1BYTE, 0);
+    } else {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT_1BYTE, 1);
+    }
+}
+
+void generate_vmcode_from_int_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+    assert(expression->type = EXPRESSION_TYPE_LITERAL_INT);
+
+    if (0 <= expression->u.int_literal && expression->u.int_literal < 256) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT_1BYTE, expression->u.int_literal);
+    } else if (expression->u.int_literal < 65536) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT_2BYTE, expression->u.int_literal);
+    } else {
+        int constant_index = constant_pool_add_int(executer, expression->u.int_literal);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT, constant_index);
+    }
+}
+
+void generate_vmcode_from_double_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+    assert(expression->type = EXPRESSION_TYPE_LITERAL_DOUBLE);
+
+    int constant_index = constant_pool_add_int(executer, expression->u.double_literal);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_DOUBLE, constant_index);
+}
+
+void generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+    // 都放在常量区
+}
+
+void generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, int int_literal) {
     if (opcode_buffer->code_capacity == 0) {
         opcode_buffer->code_capacity = 2;
     }
@@ -180,22 +270,66 @@ void generate_vmcode(RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, int int
         opcode_buffer->code_capacity *= 2;
     }
 
+    RVM_Opcode_Info opcode_info                          = RVM_Opcode_Infos[opcode];
     opcode_buffer->code_list                             = realloc(opcode_buffer->code_list, opcode_buffer->code_capacity * sizeof(RVM_Byte));
     opcode_buffer->code_list[opcode_buffer->code_size++] = opcode; // 操作码
 
-    RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
     switch (opcode_info.type) {
-    case OPCODE_OPERAND_TYPE_0_BYTE:
+    case OPCODE_OPERAND_TYPE_0BYTE:
         break;
 
-    case OPCODE_OPERAND_TYPE_1_BYTE:
+    case OPCODE_OPERAND_TYPE_1BYTE:
         opcode_buffer->code_list[opcode_buffer->code_size++] = int_literal;
         break;
 
-    case OPCODE_OPERAND_TYPE_2_BYTE:
-        // TODO: 位运算，从高位开始填充
+    case OPCODE_OPERAND_TYPE_2BYTE:
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(int_literal >> 8);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(int_literal & 0Xff);
         break;
 
     default: break;
     }
+}
+
+int constant_pool_grow(Ring_VirtualMachine_Executer* executer, unsigned int growth_size) {
+    int old_size = executer->constant_pool_size;
+    executer->constant_pool_size += growth_size;
+
+    executer->constant_pool_list = realloc(executer->constant_pool_list,
+                                           executer->constant_pool_size * sizeof(RVM_ConstantPool));
+
+    return old_size;
+}
+
+int constant_pool_add_int(Ring_VirtualMachine_Executer* executer, int int_literal) {
+    int index = constant_pool_grow(executer, 1);
+
+    RVM_ConstantPool new_value;
+    new_value.type                      = CONSTANTPOOL_TYPE_INT;
+    new_value.u.int_value               = int_literal;
+    executer->constant_pool_list[index] = new_value;
+
+    return index;
+}
+
+int constant_pool_add_double(Ring_VirtualMachine_Executer* executer, double double_literal) {
+    int index = constant_pool_grow(executer, 1);
+
+    RVM_ConstantPool new_value;
+    new_value.type                      = CONSTANTPOOL_TYPE_DOUBLE;
+    new_value.u.double_value            = double_literal;
+    executer->constant_pool_list[index] = new_value;
+
+    return index;
+}
+
+int constant_pool_add_string(Ring_VirtualMachine_Executer* executer, char* string_literal) {
+    int index = constant_pool_grow(executer, 1);
+
+    RVM_ConstantPool new_value;
+    new_value.type                      = CONSTANTPOOL_TYPE_STRING;
+    new_value.u.string_value            = string_literal;
+    executer->constant_pool_list[index] = new_value;
+
+    return index;
 }

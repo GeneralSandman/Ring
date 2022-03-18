@@ -46,7 +46,7 @@ void ring_compiler_compile(Ring_Compiler* ring_compiler, FILE* fp) {
     yyin = fp;
     if (yyparse()) {
         fprintf(stderr, "COMPLIE ERROR\n");
-        exit(EXIT_CODE_COMPILE_ERROR);
+        exit(ERROR_CODE_COMPILE_ERROR);
     }
 
     debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n");

@@ -65,6 +65,7 @@ void fix_identifier_expression(IdentifierExpression* expression) {
 
 void fix_assign_expression(AssignExpression* expression) {
     fix_expression(expression->left);
+    fix_expression(expression->operand);
 }
 
 

@@ -11,9 +11,13 @@ typedef struct Ring_VirtualMachine_Tag Ring_VirtualMachine;
 
 typedef struct Ring_VirtualMachine_Executer_Tag Ring_VirtualMachine_Executer;
 
-typedef struct RuntimeStack_Tag RuntimeStack;
+typedef struct RVM_Variable_Tag RVM_Variable;
 
-typedef struct RuntimeStatic_Tag RuntimeStatic;
+typedef struct RVM_RuntimeStack_Tag RVM_RuntimeStack;
+
+typedef struct RVM_RuntimeStatic_Tag RVM_RuntimeStatic;
+
+typedef struct RVM_RuntimeHeap_Tag RVM_RuntimeHeap;
 
 typedef struct RVM_OpcodeBuffer_Tag RVM_OpcodeBuffer;
 
@@ -73,9 +77,12 @@ typedef struct TypeSpecifier_Tag TypeSpecifier;
 
 typedef struct IdentifierExpression_Tag IdentifierExpression;
 
+typedef struct RVM_String_Tag RVM_String;
+typedef struct RVM_Array_Tag  RVM_Array;
+typedef struct RVM_Object_Tag RVM_Object;
+
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue** value);
 
-typedef unsigned char RVM_Byte;
 
 struct Ring_Compiler_Tag {
     char*        current_file_name;
@@ -102,15 +109,37 @@ struct Ring_Compiler_Tag {
 struct Ring_VirtualMachine_Tag {
     Ring_VirtualMachine_Executer* executer;
 
-    RuntimeStatic* runtime_static;
-    RuntimeStack*  runtime_stack;
-    unsigned int   pc; // pc 用来偏移 executer->code_list[pc]
+    RVM_RuntimeStatic* runtime_static;
+    RVM_RuntimeStack*  runtime_stack;
+    RVM_RuntimeHeap*   runtime_heap;
+    unsigned int       pc; // pc 用来偏移 executer->code_list[pc]
 };
 
+// generate.c
+typedef unsigned char RVM_Byte;
+
+typedef enum {
+    CONSTANTPOOL_TYPE_UNKNOW,
+    CONSTANTPOOL_TYPE_INT,
+    CONSTANTPOOL_TYPE_DOUBLE,
+    CONSTANTPOOL_TYPE_STRING,
+} ConstantPoolType;
+
+typedef struct {
+    ConstantPoolType type;
+    union {
+        int    int_value;
+        double double_value;
+        char*  string_value;
+    } u;
+} RVM_ConstantPool;
+
 struct Ring_VirtualMachine_Executer_Tag {
+    unsigned int      constant_pool_size;
+    RVM_ConstantPool* constant_pool_list;
     // 连续数组，非链表
-    unsigned int global_variable_size;
-    Variable*    global_variable_list;
+    unsigned int  global_variable_size;
+    RVM_Variable* global_variable_list;
 
     // 连续数组，非链表
     unsigned int function_size;
@@ -121,21 +150,63 @@ struct Ring_VirtualMachine_Executer_Tag {
     RVM_Byte*    code_list;
 };
 
-typedef union {
-    int    int_value;
-    double double_value;
-} RuntimeStackValue; // 这个名字得改一改
 
-struct RuntimeStack_Tag {
-    RuntimeStackValue* data;
-    unsigned int       top_index;
-    unsigned int       size;
-    unsigned int       capacity;
+// generate.c
+
+
+struct RVM_Variable_Tag {
+    char*          identifier;
+    TypeSpecifier* type;
 };
 
-struct RuntimeStatic_Tag {
-    RuntimeStackValue* data;
-    unsigned int       size;
+typedef union {
+    // TODO: 补充 bool
+    int         int_value;
+    double      double_value;
+    RVM_Object* object;
+} RVM_Value; // 这个名字得改一改
+
+typedef enum {
+    RVM_OBJECT_TYPE_UNKNOW,
+    RVM_OBJECT_TYPE_STRING,
+    RVM_OBJECT_TYPE_ARRAY,
+} RVM_Object_Type;
+
+
+struct RVM_String_Tag {
+    // TODO:
+    char* data;
+};
+
+struct RVM_Array_Tag {
+    // TODO:
+    unsigned int i;
+};
+
+struct RVM_Object_Tag {
+    RVM_Object_Type type;
+    union {
+        RVM_String* string;
+        RVM_Array*  array;
+    } u;
+};
+
+// 支持线性寻址
+struct RVM_RuntimeStack_Tag {
+    RVM_Value*   data;
+    unsigned int top_index;
+    unsigned int size;
+    unsigned int capacity;
+};
+
+struct RVM_RuntimeStatic_Tag {
+    RVM_Value*   data;
+    unsigned int size;
+};
+
+struct RVM_RuntimeHeap_Tag {
+    // TODO: 稍后实现
+    unsigned int i;
 };
 
 struct RVM_LabelTable_Tag {
@@ -154,9 +225,9 @@ struct RVM_OpcodeBuffer_Tag {
 
 typedef enum {
     OPCODE_OPERAND_TYPE_UNKNOW,
-    OPCODE_OPERAND_TYPE_0_BYTE, // 后边没有操作数
-    OPCODE_OPERAND_TYPE_1_BYTE,
-    OPCODE_OPERAND_TYPE_2_BYTE,
+    OPCODE_OPERAND_TYPE_0BYTE, // 后边没有操作数
+    OPCODE_OPERAND_TYPE_1BYTE,
+    OPCODE_OPERAND_TYPE_2BYTE,
 } OpcodeOperandType;
 
 struct RVM_Opcode_Info_Tag {
@@ -169,10 +240,17 @@ typedef enum {
     RVM_CODE_UNKNOW = 0,
 
     // push
-    RVM_CODE_PUSH_INT,
+    RVM_CODE_PUSH_INT_1BYTE, // operand 0-255
+    RVM_CODE_PUSH_INT_2BYTE, // operand 256-65535
+    RVM_CODE_PUSH_INT,       // bigger 65535
+
+    RVM_CODE_PUSH_DOUBLE,
 
     // pop
     RVM_CODE_POP_STATIC_INT,
+
+    // push
+    RVM_CODE_PUSH_STATIC_INT,
 
     //
     RVM_CODE_ADD_INT,
@@ -619,15 +697,19 @@ struct TypeSpecifier_Tag {
 };
 
 typedef enum {
-    EXIT_CODE_OK,
-    EXIT_CODE_COMPILE_ERROR,          // 编译错误
-    EXIT_CODE_SEMANTIC_CHECH_ERROR,   // 语义分析错误
-    EXIT_CODE_OPTIMIZATION_AST_ERROR, // 优化AST错误
-    EXIT_CODE_GENERATE_OPCODE_ERROR,  // 生成虚拟机代码错误
-    EXIT_CODE_LOAD_OPCODE_ERROR,      // 加载虚拟机代码错误
-    EXIT_CODE_RUN_VM_ERROR,           // 虚拟机执行失败
+    ERROR_CODE_SUCCESS,
+    ERROR_CODE_COMPILE_ERROR,          // 编译错误
+    ERROR_CODE_SEMANTIC_CHECH_ERROR,   // 语义分析错误
+    ERROR_CODE_OPTIMIZATION_AST_ERROR, // 优化AST错误
+    ERROR_CODE_GENERATE_OPCODE_ERROR,  // 生成虚拟机代码错误
+    ERROR_CODE_LOAD_OPCODE_ERROR,      // 加载虚拟机代码错误
+    ERROR_CODE_RUN_VM_ERROR,           // 虚拟机执行失败
+} ErrorCode;
 
-} ExitCode;
+struct ErrorMessageInfo {
+    ErrorCode error_code;
+    char*     error_messaage;
+};
 
 #define CLEAR_SCREEN printf("\e[1;1H\e[2J")
 
@@ -841,26 +923,36 @@ void              add_top_level_code(Ring_Compiler* ring_compiler, Ring_VirtualM
 void              vm_executer_dump(Ring_VirtualMachine_Executer* vm_executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
 void              generate_vmcode_from_statement_list(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* vm_executer, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_expression(Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_assign_expression(AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
-void              generate_pop_to_leftvalue(IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_binary_expression(BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
-void              generate_vmcode_from_int_expression(Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode(RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, int int_literal);
+void              generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
+void              generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
+void              generate_vmcode_from_identifier_expression(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_bool_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_int_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_double_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, int int_literal);
+
+int constant_pool_grow(Ring_VirtualMachine_Executer* executer, unsigned int growth_size);
+int constant_pool_add_int(Ring_VirtualMachine_Executer* executer, int int_literal);
+int constant_pool_add_double(Ring_VirtualMachine_Executer* executer, double double_literal);
+int constant_pool_add_string(Ring_VirtualMachine_Executer* executer, char* string_literal);
 // generate.c
 
 // execute.c
-RuntimeStack*        new_runtime_stack();
+RVM_RuntimeStack*    new_runtime_stack();
 Ring_VirtualMachine* new_ring_virtualmachine();
-void                 add_static_variable(Ring_VirtualMachine_Executer* executer, RuntimeStatic* runtime_static);
+void                 add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 ring_execute_vm_code(Ring_VirtualMachine* ring_vm);
 void                 debug_rvm(Ring_VirtualMachine* rvm);
-void                 dump_runtime_stack(RuntimeStack* runtime_stack);
+void                 dump_runtime_stack(RVM_RuntimeStack* runtime_stack);
 // execute.c
 
 // utils.c
+void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer);
 void ring_vm_code_dump(Ring_VirtualMachine_Executer* executer, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
-void ring_vm_dump_runtime_stack(RuntimeStack* runtime_stack, unsigned int screen_row, unsigned int screen_col);
+void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int screen_row, unsigned int screen_col);
 // utils.c
 
 #endif

@@ -14,7 +14,7 @@ int ring_semantic_check(Ring_Compiler* ring_compiler) {
 
     if (result != 0) {
         fprintf(stderr, "semantic_check error\n");
-        exit(EXIT_CODE_SEMANTIC_CHECH_ERROR);
+        exit(ERROR_CODE_SEMANTIC_CHECH_ERROR);
     }
 
     // exit(1);

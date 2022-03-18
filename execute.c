@@ -31,19 +31,19 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     STACK_SET_DOUBLE_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), value)
 
 
-RuntimeStack* new_runtime_stack() {
-    RuntimeStack* stack = malloc(sizeof(RuntimeStack));
-    stack->top_index    = 0;
-    stack->capacity     = 1024 * 1024; // FIXME: 先开辟一个大的空间
-    stack->data         = malloc(stack->capacity * sizeof(RuntimeStackValue));
-    stack->size         = 0;
+RVM_RuntimeStack* new_runtime_stack() {
+    RVM_RuntimeStack* stack = malloc(sizeof(RVM_RuntimeStack));
+    stack->top_index        = 0;
+    stack->capacity         = 1024 * 1024; // FIXME: 先开辟一个大的空间
+    stack->data             = malloc(stack->capacity * sizeof(RVM_Value));
+    stack->size             = 0;
     return stack;
 }
 
-RuntimeStatic* new_runtime_static() {
-    RuntimeStatic* runtime_static = malloc(sizeof(RuntimeStatic));
-    runtime_static->data          = NULL;
-    runtime_static->size          = 0;
+RVM_RuntimeStatic* new_runtime_static() {
+    RVM_RuntimeStatic* runtime_static = malloc(sizeof(RVM_RuntimeStatic));
+    runtime_static->data              = NULL;
+    runtime_static->size              = 0;
     return runtime_static;
 }
 
@@ -58,17 +58,17 @@ Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* execu
     return vm;
 }
 
-void add_static_variable(Ring_VirtualMachine_Executer* executer, RuntimeStatic* runtime_static) {
+void add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static) {
     runtime_static->size = executer->global_variable_size;
-    runtime_static->data = malloc(runtime_static->size * sizeof(RuntimeStackValue));
+    runtime_static->data = malloc(runtime_static->size * sizeof(RVM_Value));
 }
 
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
-    RVM_Byte*     code_list     = rvm->executer->code_list;
-    unsigned int  code_size     = rvm->executer->code_size;
-    RuntimeStack* runtime_stack = rvm->runtime_stack;
+    RVM_Byte*         code_list     = rvm->executer->code_list;
+    unsigned int      code_size     = rvm->executer->code_size;
+    RVM_RuntimeStack* runtime_stack = rvm->runtime_stack;
 
-    RuntimeStatic* runtime_static = rvm->runtime_static;
+    RVM_RuntimeStatic* runtime_static = rvm->runtime_static;
 
     unsigned int index;
 
@@ -123,8 +123,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         default:
-            printf("error\n");
-            exit(1);
+            fprintf(stderr, "execute error\n");
+            exit(ERROR_CODE_RUN_VM_ERROR);
             break;
         }
     }
