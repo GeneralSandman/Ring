@@ -167,7 +167,7 @@ int yywrap(){
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
 
-    debug_log_with_red_coloar("[STATUS:COMMENT]\t new comment(%s) line_number(%d)", yylval.m_comment_value, get_ring_compiler_line_number());
+    // debug_log_with_red_coloar("[STATUS:COMMENT]\t new comment(%s) line_number(%d)", yylval.m_comment_value, get_ring_compiler_line_number());
 
     reset_ring_compiler_column_number();
     ring_compiler_reset_current_line_content();
@@ -178,7 +178,7 @@ int yywrap(){
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
 
-    debug_log_with_red_coloar("[STATUS:COMMENT]\t new comment(%s) line_number(%d)", yylval.m_comment_value, get_ring_compiler_line_number());
+    // debug_log_with_red_coloar("[STATUS:COMMENT]\t new comment(%s) line_number(%d)", yylval.m_comment_value, get_ring_compiler_line_number());
 
     reset_ring_compiler_column_number();
     ring_compiler_reset_current_line_content();

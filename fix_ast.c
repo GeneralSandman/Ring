@@ -8,6 +8,9 @@ void ring_compiler_fix_ast(Ring_Compiler* ring_compiler) {
 }
 
 void fix_statement_list(Statement* statement_list) {
+    if (statement_list == NULL) {
+        return;
+    }
     for (Statement* pos = statement_list; pos; pos = pos->next) {
         fix_statement(pos);
     }
@@ -23,8 +26,11 @@ void fix_statement(Statement* statement) {
         fix_declaration(statement->u.declaration_statement);
         break;
 
-    default:
-        break;
+    case STATEMENT_TYPE_IF:
+        fix_expression(statement->u.if_statement->condition_expression);
+        fix_statement_list(statement->u.if_statement->if_block);
+
+    default: break;
     }
 }
 

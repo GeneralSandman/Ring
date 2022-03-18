@@ -155,7 +155,7 @@ StatementExecResult* interpret_statement_return(Statement* statement, Function* 
 StatementExecResult* interpret_statement_if(IfStatement* if_statement, Function* function) {
     StatementExecResult* result = malloc(sizeof(StatementExecResult));
 
-    Ring_BasicValue* cond = interpret_expression(if_statement->expression, function);
+    Ring_BasicValue* cond = interpret_expression(if_statement->condition_expression, function);
     if (cond == NULL || cond->type != BASICVALUE_TYPE_BOOL) {
         runtime_err_log("the result of if statement expression is not bool!");
         exit(1);

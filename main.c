@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 
     // Step-6: 运行虚拟机
     ring_vm = new_ring_virtualmachine(ring_vm_executer);
-    ring_execute_vm_code(ring_vm);
+    // ring_execute_vm_code(ring_vm);
 
     // Step-6: 直接解释执行
     // ring_interpret(ring_compiler);

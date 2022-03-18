@@ -210,8 +210,17 @@ struct RVM_RuntimeHeap_Tag {
 };
 
 struct RVM_LabelTable_Tag {
+    char*        label_name;
     unsigned int label_address;
 };
+
+typedef struct {
+    char*        source_file_name;
+    unsigned int source_code_line_number; // 对应Ring源代码文件的行数
+
+    unsigned int opcode_begin_index; // 对应 opcode 的 开始索引
+    unsigned int opcode_size;        // 一行Ring源代码 对应 opcode size
+} RVM_LineMap;
 
 struct RVM_OpcodeBuffer_Tag {
     RVM_Byte*    code_list;
@@ -258,6 +267,10 @@ typedef enum {
     RVM_CODE_MUL_INT,
     RVM_CODE_DIV_INT,
     RVM_CODE_MOD_INT,
+
+    //
+    RVM_CODE_JUMP,
+    RVM_CODE_JUMP_IF_FALSE,
 
 } RVM_Opcode;
 
@@ -620,7 +633,7 @@ struct FunctionReturnList_Tag {
 struct IfStatement_Tag {
     unsigned int line_number;
 
-    Expression* expression;
+    Expression* condition_expression; // TODO: 这个名字得改一下 conidtion_expression;
 
     unsigned int if_block_size;
     Statement*   if_block;
@@ -634,7 +647,7 @@ struct IfStatement_Tag {
 struct ElseIfStatement_Tag {
     unsigned int line_number;
 
-    Expression* expression;
+    Expression* expression; // TODO: 这个名字得改一下 conidtion_expression;
 
     unsigned int elseif_block_size;
     Statement*   elseif_block;
@@ -922,7 +935,8 @@ void              add_functions(Ring_Compiler* ring_compiler, Ring_VirtualMachin
 void              add_top_level_code(Ring_Compiler* ring_compiler, Ring_VirtualMachine_Executer* executer);
 void              vm_executer_dump(Ring_VirtualMachine_Executer* vm_executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
-void              generate_vmcode_from_statement_list(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* vm_executer, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* vm_executer, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
 void              generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
@@ -932,12 +946,17 @@ void              generate_vmcode_from_bool_expression(Ring_VirtualMachine_Execu
 void              generate_vmcode_from_int_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_double_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, int int_literal);
+void              generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal);
 
 int constant_pool_grow(Ring_VirtualMachine_Executer* executer, unsigned int growth_size);
 int constant_pool_add_int(Ring_VirtualMachine_Executer* executer, int int_literal);
 int constant_pool_add_double(Ring_VirtualMachine_Executer* executer, double double_literal);
 int constant_pool_add_string(Ring_VirtualMachine_Executer* executer, char* string_literal);
+
+
+unsigned int opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer);
+void         opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address);
+void         opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer);
 // generate.c
 
 // execute.c

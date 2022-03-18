@@ -416,7 +416,7 @@ IfStatement* create_if_statement(Expression* expression, Statement* if_block, El
 
     IfStatement* if_statement           = malloc(sizeof(IfStatement));
     if_statement->line_number           = get_ring_compiler_line_number();
-    if_statement->expression            = expression;
+    if_statement->condition_expression  = expression;
     if_statement->if_block_size         = 0;
     if_statement->if_block              = if_block;
     if_statement->elseif_statement_list = elseif_statement_list;

@@ -64,18 +64,17 @@ void add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStat
 }
 
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
-    RVM_Byte*         code_list     = rvm->executer->code_list;
-    unsigned int      code_size     = rvm->executer->code_size;
-    RVM_RuntimeStack* runtime_stack = rvm->runtime_stack;
-
+    RVM_Byte*          code_list      = rvm->executer->code_list;
+    unsigned int       code_size      = rvm->executer->code_size;
+    RVM_RuntimeStack*  runtime_stack  = rvm->runtime_stack;
     RVM_RuntimeStatic* runtime_static = rvm->runtime_static;
 
     unsigned int index;
 
     while (rvm->pc < code_size) {
-        RVM_Byte opcode   = code_list[rvm->pc];
-        char*    name     = RVM_Opcode_Infos[opcode].name;
-        int      oper_num = code_list[rvm->pc + 1];
+        RVM_Byte opcode = code_list[rvm->pc];
+        // char*    name     = RVM_Opcode_Infos[opcode].name;
+        int oper_num = code_list[rvm->pc + 1];
         debug_rvm(rvm);
 
         switch (opcode) {
@@ -86,8 +85,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_POP_STATIC_INT:
-            index                                      = oper_num;                      //  在操作符后边获取
-            rvm->runtime_static->data[index].int_value = STACK_GET_INT_OFFSET(rvm, -1); // 找到对应的 static 变量
+            index                                 = oper_num;                      //  在操作符后边获取
+            runtime_static->data[index].int_value = STACK_GET_INT_OFFSET(rvm, -1); // 找到对应的 static 变量
             runtime_stack->top_index--;
             rvm->pc += 2;
             break;

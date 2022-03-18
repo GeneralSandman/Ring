@@ -9,8 +9,8 @@ int yyerror(char const *str);
 %}
 
 %glr-parser     // 使用 GLR 解析
-// %expect 1       // TODO: legitimate 0 shift/reduce conflicts
-// %expect-rr 0    // legitimate 0 reduce/reduce conflicts
+%expect 1       // TODO: legitimate 0 shift/reduce conflicts
+%expect-rr 0    // legitimate 0 reduce/reduce conflicts
 
 %union {
     char*                       m_comment_value;

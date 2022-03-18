@@ -126,7 +126,6 @@ int ring_compiler_add_statement(Statement* statement) {
         return 0;
     }
 
-    Ring_Compiler* tmp = ring_compiler;
 
     Statement* pos;
     pos = ring_compiler->statement_list;

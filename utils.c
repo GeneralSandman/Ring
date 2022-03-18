@@ -60,7 +60,8 @@ void ring_vm_code_dump(Ring_VirtualMachine_Executer* executer, unsigned int pc, 
 
         case OPCODE_OPERAND_TYPE_2BYTE:
             // TODO: 位运算，从高位开始填充
-            tmp = (code_list[i++] << 8) + code_list[i++];
+            tmp = code_list[i++] << 8;
+            tmp += code_list[i++];
             sprintf(oper_num, "%d", tmp);
             break;
 
