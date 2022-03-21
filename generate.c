@@ -13,6 +13,8 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
     {RVM_CODE_PUSH_DOUBLE, "push_double", OPCODE_OPERAND_TYPE_2BYTE}, // 后边紧跟 int 常量 2 的索引
 
+    {RVM_CODE_PUSH_STRING, "push_string", OPCODE_OPERAND_TYPE_2BYTE}, // 后边紧跟 int 常量 2 的索引
+
     // pop
     {RVM_CODE_POP_STATIC_INT, "pop_static_int", OPCODE_OPERAND_TYPE_2BYTE}, // 全局变量的赋值  这里后续要扩展成2 byte，面的index不够
 
@@ -143,6 +145,30 @@ void generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, I
 
 
     opcode_buffer_set_label(opcode_buffer, if_false_jump_label, opcode_buffer->code_size);
+
+    // handle elseif list
+    ElseIfStatement* pos = if_statement->elseif_statement_list;
+    for (; pos; pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->condition_expression, opcode_buffer);
+
+        unsigned int elseif_false_jump_label = 0;
+        elseif_false_jump_label              = opcode_buffer_get_label(opcode_buffer);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, elseif_false_jump_label);
+
+        generate_vmcode_from_statement_list(executer, pos->elseif_block, opcode_buffer);
+
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label);
+
+        opcode_buffer_set_label(opcode_buffer, elseif_false_jump_label, opcode_buffer->code_size);
+    }
+
+    // handle else
+    if (if_statement->else_block != NULL) {
+        generate_vmcode_from_statement_list(executer, if_statement->else_block, opcode_buffer);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label);
+    }
+
+
     opcode_buffer_set_label(opcode_buffer, if_end_label, opcode_buffer->code_size);
 }
 
@@ -158,6 +184,9 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
         break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
         generate_vmcode_from_double_expression(executer, expression, opcode_buffer);
+        break;
+    case EXPRESSION_TYPE_LITERAL_STRING:
+        generate_vmcode_from_string_expression(executer, expression, opcode_buffer);
         break;
     case EXPRESSION_TYPE_IDENTIFIER:
         generate_vmcode_from_identifier_expression(executer, expression->u.identifier_expression, opcode_buffer);
@@ -268,7 +297,7 @@ void generate_vmcode_from_bool_expression(Ring_VirtualMachine_Executer* executer
 }
 
 void generate_vmcode_from_int_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
-    assert(expression->type = EXPRESSION_TYPE_LITERAL_INT);
+    assert(expression->type == EXPRESSION_TYPE_LITERAL_INT);
 
     if (0 <= expression->u.int_literal && expression->u.int_literal < 256) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT_1BYTE, expression->u.int_literal);
@@ -281,7 +310,7 @@ void generate_vmcode_from_int_expression(Ring_VirtualMachine_Executer* executer,
 }
 
 void generate_vmcode_from_double_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
-    assert(expression->type = EXPRESSION_TYPE_LITERAL_DOUBLE);
+    assert(expression->type == EXPRESSION_TYPE_LITERAL_DOUBLE);
 
     int constant_index = constant_pool_add_double(executer, expression->u.double_literal);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_DOUBLE, constant_index);
@@ -289,6 +318,9 @@ void generate_vmcode_from_double_expression(Ring_VirtualMachine_Executer* execut
 
 void generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     // 都放在常量区
+    assert(expression->type == EXPRESSION_TYPE_LITERAL_STRING);
+    int constant_index = constant_pool_add_string(executer, expression->u.string_literal);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING, constant_index);
 }
 
 void generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal) {

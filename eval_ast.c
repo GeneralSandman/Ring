@@ -165,7 +165,7 @@ StatementExecResult* interpret_statement_if(IfStatement* if_statement, Function*
         result = interpret_statement_list(if_statement->if_block, function);
     } else {
         for (ElseIfStatement* pos = if_statement->elseif_statement_list; pos != NULL; pos = pos->next) {
-            Ring_BasicValue* cond = interpret_expression(pos->expression, function);
+            Ring_BasicValue* cond = interpret_expression(pos->condition_expression, function);
             if (cond == NULL || cond->type != BASICVALUE_TYPE_BOOL) {
                 runtime_err_log("the result of if statement expression is not bool!");
                 exit(1);

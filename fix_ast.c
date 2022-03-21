@@ -27,8 +27,8 @@ void fix_statement(Statement* statement) {
         break;
 
     case STATEMENT_TYPE_IF:
-        fix_expression(statement->u.if_statement->condition_expression);
-        fix_statement_list(statement->u.if_statement->if_block);
+        fix_if_statement(statement->u.if_statement);
+        break;
 
     default: break;
     }
@@ -63,6 +63,17 @@ void fix_declaration(Declaration* declaration) {
     pos->next = declaration;
 }
 
+void fix_if_statement(IfStatement* if_statement) {
+    fix_expression(if_statement->condition_expression);
+    fix_statement_list(if_statement->if_block);
+    fix_statement_list(if_statement->else_block);
+
+    ElseIfStatement* pos = if_statement->elseif_statement_list;
+    for (; pos; pos = pos->next) {
+        fix_expression(pos->condition_expression);
+        fix_statement_list(pos->elseif_block);
+    }
+}
 
 void fix_identifier_expression(IdentifierExpression* expression) {
     Declaration* declaration  = search_declaration(expression->identifier);

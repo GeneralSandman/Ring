@@ -255,6 +255,8 @@ typedef enum {
 
     RVM_CODE_PUSH_DOUBLE,
 
+    RVM_CODE_PUSH_STRING,
+
     // pop
     RVM_CODE_POP_STATIC_INT,
 
@@ -633,21 +635,22 @@ struct FunctionReturnList_Tag {
 struct IfStatement_Tag {
     unsigned int line_number;
 
-    Expression* condition_expression; // TODO: 这个名字得改一下 conidtion_expression;
+    Expression* condition_expression;
 
     unsigned int if_block_size;
     Statement*   if_block;
 
+    unsigned int     elseif_statement_size; // TODO: 以后在 create_ast 中更新这个值
     ElseIfStatement* elseif_statement_list;
 
-    unsigned int else_block_size;
-    Statement*   else_block;
+    // unsigned int else_block_size; // 这个删掉。只能是 1
+    Statement* else_block;
 };
 
 struct ElseIfStatement_Tag {
     unsigned int line_number;
 
-    Expression* expression; // TODO: 这个名字得改一下 conidtion_expression;
+    Expression* condition_expression; // TODO: 这个名字得改一下 conidtion_expression;
 
     unsigned int elseif_block_size;
     Statement*   elseif_block;
@@ -922,6 +925,7 @@ void         fix_statement_list(Statement* statement_list);
 void         fix_statement(Statement* statement);
 void         fix_expression(Expression* expression);
 void         fix_declaration(Declaration* declaration);
+void         fix_if_statement(IfStatement* if_statement);
 void         fix_identifier_expression(IdentifierExpression* expression);
 void         fix_assign_expression(AssignExpression* expression);
 Declaration* search_declaration(char* identifier);
