@@ -30,11 +30,18 @@ void fix_statement(Statement* statement) {
         fix_if_statement(statement->u.if_statement);
         break;
 
+    case STATEMENT_TYPE_FOR:
+        fix_for_statement(statement->u.for_statement);
+        break;
+
     default: break;
     }
 }
 
 void fix_expression(Expression* expression) {
+    if (expression == NULL) {
+        return;
+    }
     switch (expression->type) {
     case EXPRESSION_TYPE_IDENTIFIER:
         fix_identifier_expression(expression->u.identifier_expression);
@@ -42,6 +49,15 @@ void fix_expression(Expression* expression) {
 
     case EXPRESSION_TYPE_ASSIGN:
         fix_assign_expression(expression->u.assign_expression);
+        break;
+
+    case EXPRESSION_TYPE_ARITHMETIC_ADD:
+    case EXPRESSION_TYPE_ARITHMETIC_SUB:
+    case EXPRESSION_TYPE_ARITHMETIC_MUL:
+    case EXPRESSION_TYPE_ARITHMETIC_DIV:
+    case EXPRESSION_TYPE_ARITHMETIC_MOD:
+        fix_binary_expression(expression->u.binary_expression);
+        break;
 
     default: break;
     }
@@ -75,6 +91,13 @@ void fix_if_statement(IfStatement* if_statement) {
     }
 }
 
+void fix_for_statement(ForStatement* for_statement) {
+    fix_expression(for_statement->init_expression);
+    fix_expression(for_statement->condition_expression);
+    fix_expression(for_statement->post_expression);
+    fix_statement_list(for_statement->block);
+}
+
 void fix_identifier_expression(IdentifierExpression* expression) {
     Declaration* declaration  = search_declaration(expression->identifier);
     expression->u.declaration = declaration;
@@ -83,6 +106,11 @@ void fix_identifier_expression(IdentifierExpression* expression) {
 void fix_assign_expression(AssignExpression* expression) {
     fix_expression(expression->left);
     fix_expression(expression->operand);
+}
+
+void fix_binary_expression(BinaryExpression* expression) {
+    fix_expression(expression->left_expression);
+    fix_expression(expression->right_expression);
 }
 
 

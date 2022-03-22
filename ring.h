@@ -926,8 +926,10 @@ void         fix_statement(Statement* statement);
 void         fix_expression(Expression* expression);
 void         fix_declaration(Declaration* declaration);
 void         fix_if_statement(IfStatement* if_statement);
+void         fix_for_statement(ForStatement* for_statement);
 void         fix_identifier_expression(IdentifierExpression* expression);
 void         fix_assign_expression(AssignExpression* expression);
+void         fix_binary_expression(BinaryExpression* expression);
 Declaration* search_declaration(char* identifier);
 
 // generate.c
@@ -941,6 +943,8 @@ void              vm_executer_dump(Ring_VirtualMachine_Executer* vm_executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
 void              generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* vm_executer, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_dowhile_statement(Ring_VirtualMachine_Executer* executer, DoWhileStatement* dowhile_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
 void              generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
