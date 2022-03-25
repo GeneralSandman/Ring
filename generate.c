@@ -29,8 +29,13 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_MOD_INT, "mod_int", OPCODE_OPERAND_TYPE_0BYTE},
 
     //
+    {RVM_CODE_LOGICAL_AND, "logical_and", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_LOGICAL_OR, "logical_or", OPCODE_OPERAND_TYPE_0BYTE},
+
+    //
     {RVM_CODE_JUMP, "jump", OPCODE_OPERAND_TYPE_2BYTE},
     {RVM_CODE_JUMP_IF_FALSE, "jump_if_false", OPCODE_OPERAND_TYPE_2BYTE},
+    {RVM_CODE_JUMP_IF_TRUE, "jump_if_true", OPCODE_OPERAND_TYPE_2BYTE},
 
 };
 
@@ -294,6 +299,14 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
         generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_MOD_INT);
         break;
 
+    case EXPRESSION_TYPE_LOGICAL_AND:
+        generate_vmcode_from_logical_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_LOGICAL_AND);
+        break;
+
+    case EXPRESSION_TYPE_LOGICAL_OR:
+        generate_vmcode_from_logical_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_LOGICAL_OR);
+        break;
+
     case EXPRESSION_TYPE_ASSIGN:
         generate_vmcode_from_assign_expression(executer, expression->u.assign_expression, opcode_buffer);
         break;
@@ -353,6 +366,34 @@ void generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, Identifie
 
     unsigned int variable_index = declaration->variable_index;
     generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_STATIC_INT, variable_index);
+}
+
+void generate_vmcode_from_logical_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+    Expression*  left      = expression->left_expression;
+    Expression*  right     = expression->right_expression;
+    unsigned int end_label = 0;
+
+    if (opcode == RVM_CODE_LOGICAL_AND) {
+        generate_vmcode_from_expression(executer, left, opcode_buffer);
+
+        end_label = opcode_buffer_get_label(opcode_buffer);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label);
+
+        generate_vmcode_from_expression(executer, right, opcode_buffer);
+
+        generate_vmcode(executer, opcode_buffer, opcode, 0);
+    } else if (opcode == RVM_CODE_LOGICAL_OR) {
+        generate_vmcode_from_expression(executer, left, opcode_buffer);
+
+        end_label = opcode_buffer_get_label(opcode_buffer);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_TRUE, end_label);
+
+        generate_vmcode_from_expression(executer, right, opcode_buffer);
+
+        generate_vmcode(executer, opcode_buffer, opcode, 0);
+    }
+
+    opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
 }
 
 void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
@@ -511,6 +552,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         switch (opcode) {
         case RVM_CODE_JUMP:
         case RVM_CODE_JUMP_IF_FALSE:
+        case RVM_CODE_JUMP_IF_TRUE:
             label         = (opcode_buffer->code_list[i + 1] << 8) + (opcode_buffer->code_list[i + 2]);
             label_address = opcode_buffer->lable_list[label].label_address;
 

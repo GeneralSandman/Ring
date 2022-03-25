@@ -273,8 +273,13 @@ typedef enum {
     RVM_CODE_MOD_INT,
 
     //
+    RVM_CODE_LOGICAL_AND,
+    RVM_CODE_LOGICAL_OR,
+
+    //
     RVM_CODE_JUMP,
     RVM_CODE_JUMP_IF_FALSE,
+    RVM_CODE_JUMP_IF_TRUE,
 
 } RVM_Opcode;
 
@@ -965,6 +970,7 @@ void              generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Execu
 void              generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
 void              generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_logical_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_identifier_expression(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_bool_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
