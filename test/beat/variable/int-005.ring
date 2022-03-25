@@ -1,33 +1,53 @@
 
-// ----------- for
-
-var int sum;
-
-var int i;
 
 
-for(i=0; true; i=i+1) {
-	sum = sum + i;
-}
 
-sum = 0;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ----------- for dofor
+
+// var int sum;
+
+// var int i;
+
+
+// for(i=0; true; i=i+1) {
+// 	sum = sum + i;
+// }
+
+// do(i=1){
+// 	sum = sum + i;
+// }for(true; i=i+2);
+
+// sum = 0;
 
 // -----------
-
-
-
-
-
-
-
-
-
-// ------------- dofor
-
-// -------------
-
-
 
 
 

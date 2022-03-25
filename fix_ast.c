@@ -60,6 +60,8 @@ void fix_expression(Expression* expression) {
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
     case EXPRESSION_TYPE_ARITHMETIC_DIV:
     case EXPRESSION_TYPE_ARITHMETIC_MOD:
+    case EXPRESSION_TYPE_LOGICAL_AND:
+    case EXPRESSION_TYPE_LOGICAL_OR:
         fix_binary_expression(expression->u.binary_expression);
         break;
 
