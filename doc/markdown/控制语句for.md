@@ -16,6 +16,19 @@ for(init_expression; condition_expression; post_expression) {
 - ```condition_expression```再次检测布尔表达式。循环执行上面的过程。
 
 
+
+
+do-for 类似与 C语言，do-while，但是为了扩展 do-for，所以设计成如下：
+
+
+```ring
+
+do(init_expression){
+	block_list;
+}for(condition_expression; post_expression);
+```ring
+
+
 ## for循环执行流程图：
 
 ```plantuml

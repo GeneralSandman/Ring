@@ -36,6 +36,7 @@
         "random": "c",
         "fstream": "c",
         "limits": "c",
-        "new": "c"
+        "new": "c",
+        "assert.h": "c"
     }
 }
