@@ -128,8 +128,8 @@ void generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* vm_execut
             generate_vmcode_from_for_statement(vm_executer, statement->u.for_statement, opcode_buffer);
             break;
 
-        case STATEMENT_TYPE_DOWHILE:
-            generate_vmcode_from_dowhile_statement(vm_executer, statement->u.for_statement, opcode_buffer);
+        case STATEMENT_TYPE_DOFOR:
+            generate_vmcode_from_dofor_statement(vm_executer, statement->u.dofor_statement, opcode_buffer);
             break;
 
         default: break;
@@ -217,40 +217,41 @@ void generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, 
 }
 
 // TODO: 暂时不支持 break continue
-void generate_vmcode_from_dowhile_statement(Ring_VirtualMachine_Executer* executer, DoWhileStatement* dowhile_statement, RVM_OpcodeBuffer* opcode_buffer) {
-    // unsigned int end_label  = 0;
-    // unsigned int loop_label = 0;
+void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer, DoForStatement* dofor_statement, RVM_OpcodeBuffer* opcode_buffer) {
+    unsigned int end_label  = 0;
+    unsigned int loop_label = 0;
 
 
-    // // Step-1:
-    // if (for_statement->init_expression) {
-    //     generate_vmcode_from_expression(executer, for_statement->init_expression, opcode_buffer);
-    // }
-    // loop_label = opcode_buffer_get_label(opcode_buffer);
-    // opcode_buffer_set_label(opcode_buffer, loop_label, opcode_buffer->code_size);
+    // Step-1:
+    if (dofor_statement->init_expression) {
+        generate_vmcode_from_expression(executer, dofor_statement->init_expression, opcode_buffer);
+    }
+    loop_label = opcode_buffer_get_label(opcode_buffer);
+    opcode_buffer_set_label(opcode_buffer, loop_label, opcode_buffer->code_size);
 
 
-    // // Step-2:
-    // generate_vmcode_from_statement_list(executer, for_statement->block, opcode_buffer);
+    // Step-2:
+    generate_vmcode_from_statement_list(executer, dofor_statement->block, opcode_buffer);
 
 
-    // // Step-3:
-    // if (for_statement->condition_expression) {
-    //     generate_vmcode_from_expression(executer, for_statement->condition_expression, opcode_buffer);
-    //     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label);
-    // }
+    // Step-3:
+    end_label = opcode_buffer_get_label(opcode_buffer);
+    if (dofor_statement->condition_expression) {
+        generate_vmcode_from_expression(executer, dofor_statement->condition_expression, opcode_buffer);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label);
+    }
 
 
-    // // Step-4:
-    // if (for_statement->post_expression) {
-    //     generate_vmcode_from_expression(executer, for_statement->post_expression, opcode_buffer);
-    // }
+    // Step-4:
+    if (dofor_statement->post_expression) {
+        generate_vmcode_from_expression(executer, dofor_statement->post_expression, opcode_buffer);
+    }
 
-    // // Step-5;
-    // generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, loop_label);
+    // Step-5;
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, loop_label);
 
-    // // Step-End;
-    // opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
+    // Step-End;
+    opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
 }
 
 

@@ -34,6 +34,10 @@ void fix_statement(Statement* statement) {
         fix_for_statement(statement->u.for_statement);
         break;
 
+    case STATEMENT_TYPE_DOFOR:
+        fix_dofor_statement(statement->u.dofor_statement);
+        break;
+
     default: break;
     }
 }
@@ -96,6 +100,13 @@ void fix_for_statement(ForStatement* for_statement) {
     fix_expression(for_statement->condition_expression);
     fix_expression(for_statement->post_expression);
     fix_statement_list(for_statement->block);
+}
+
+void fix_dofor_statement(DoForStatement* dofor_statement) {
+    fix_expression(dofor_statement->init_expression);
+    fix_statement_list(dofor_statement->block);
+    fix_expression(dofor_statement->condition_expression);
+    fix_expression(dofor_statement->post_expression);
 }
 
 void fix_identifier_expression(IdentifierExpression* expression) {

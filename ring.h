@@ -63,6 +63,8 @@ typedef struct ElseIfStatement_Tag ElseIfStatement;
 
 typedef struct ForStatement_Tag ForStatement;
 
+typedef struct DoForStatement_Tag DoForStatement;
+
 typedef struct DoWhileStatement_Tag DoWhileStatement;
 
 typedef struct BreakStatement_Tag BreakStatement;
@@ -317,6 +319,7 @@ typedef enum {
     STATEMENT_TYPE_RETURN,
     STATEMENT_TYPE_IF,
     STATEMENT_TYPE_FOR,
+    STATEMENT_TYPE_DOFOR,
     STATEMENT_TYPE_DOWHILE,
     STATEMENT_TYPE_BREAK,
     STATEMENT_TYPE_CONTINUE,
@@ -439,6 +442,7 @@ struct Statement_Tag {
         Expression*        return_expression;
         IfStatement*       if_statement;
         ForStatement*      for_statement;
+        DoForStatement*    dofor_statement;
         DoWhileStatement*  dowhile_statement;
         BreakStatement*    break_statement;
         ContinueStatement* continue_statement;
@@ -667,6 +671,16 @@ struct ForStatement_Tag {
 
     unsigned int block_size;
     Statement*   block;
+};
+
+struct DoForStatement_Tag {
+    unsigned int line_number;
+
+    Expression*  init_expression;
+    unsigned int block_size;
+    Statement*   block;
+    Expression*  condition_expression;
+    Expression*  post_expression;
 };
 
 struct DoWhileStatement_Tag {
@@ -906,6 +920,8 @@ ElseIfStatement*        create_elseif_statement(Expression* expression, Statemen
 ElseIfStatement*        elseif_statement_add_item(ElseIfStatement* list, ElseIfStatement* elseif_statement);
 Statement*              create_statement_from_for(ForStatement* for_statement);
 ForStatement*           create_for_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Statement* block);
+Statement*              create_statement_from_dofor(DoForStatement* dofor_statement);
+DoForStatement*         create_dofor_statement(Expression* init_expression, Statement* block, Expression* condition_expression, Expression* post_expression);
 Statement*              create_statement_from_dowhile(DoWhileStatement* dowhile_statement);
 DoWhileStatement*       create_dowhile_statement(Statement* block, Expression* condition_expression);
 Statement*              create_statement_from_break();
@@ -927,6 +943,7 @@ void         fix_expression(Expression* expression);
 void         fix_declaration(Declaration* declaration);
 void         fix_if_statement(IfStatement* if_statement);
 void         fix_for_statement(ForStatement* for_statement);
+void         fix_dofor_statement(DoForStatement* dofor_statement);
 void         fix_identifier_expression(IdentifierExpression* expression);
 void         fix_assign_expression(AssignExpression* expression);
 void         fix_binary_expression(BinaryExpression* expression);
@@ -944,7 +961,7 @@ RVM_OpcodeBuffer* new_opcode_buffer();
 void              generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* vm_executer, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_dowhile_statement(Ring_VirtualMachine_Executer* executer, DoWhileStatement* dowhile_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer, DoForStatement* dofor_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
 void              generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);

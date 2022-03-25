@@ -29,6 +29,7 @@ int yyerror(char const *str);
     IfStatement*                m_if_statement;
     ElseIfStatement*            m_elseif_statement;
     ForStatement*               m_for_statement;
+    DoForStatement*             m_dofor_statement;
     DoWhileStatement*           m_do_while_statement;
     FunctionReturnList*         m_return_list;
 
@@ -141,6 +142,7 @@ int yyerror(char const *str);
 %type <m_parameter_list> parameter_list
 %type <m_if_statement> if_statement
 %type <m_for_statement> for_statement
+%type <m_dofor_statement> dofor_statement
 %type <m_do_while_statement> do_while_statement
 %type <m_elseif_statement> elseif_statement_list
 %type <m_elseif_statement> elseif_statement
@@ -233,6 +235,11 @@ statement
         debug_log_with_green_coloar("[RULE::statement:for_statement]\t ");
         $$ = create_statement_from_for($1);
     }
+    | dofor_statement TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::statement:dofor_statement]\t ");
+        $$ = create_statement_from_dofor($1);
+    }
     | do_while_statement TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::statement:do_while_statement]\t ");
@@ -299,6 +306,14 @@ for_statement
         debug_log_with_green_coloar("[RULE::for_statement]\t ");
         $$ = create_for_statement($3, $5, $7, $9);
 
+    }
+    ;
+
+dofor_statement
+    : TOKEN_DO TOKEN_LP maybe_empty_expression TOKEN_RP block TOKEN_FOR TOKEN_LP maybe_empty_expression TOKEN_SEMICOLON maybe_empty_expression TOKEN_RP
+    {
+        debug_log_with_green_coloar("[RULE::for_statement]\t ");
+        $$ = create_dofor_statement($3, $5, $8, $10);
     }
     ;
 

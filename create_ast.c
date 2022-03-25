@@ -479,6 +479,31 @@ ForStatement* create_for_statement(Expression* init_expression, Expression* cond
     return for_statement;
 }
 
+Statement* create_statement_from_dofor(DoForStatement* dofor_statement) {
+    debug_log_with_yellow_coloar("\t");
+
+    Statement* statement         = malloc(sizeof(Statement));
+    statement->line_number       = get_ring_compiler_line_number();
+    statement->type              = STATEMENT_TYPE_DOFOR;
+    statement->u.dofor_statement = dofor_statement;
+    statement->next              = NULL;
+
+    return statement;
+}
+
+DoForStatement* create_dofor_statement(Expression* init_expression, Statement* block, Expression* condition_expression, Expression* post_expression) {
+    debug_log_with_yellow_coloar("\t");
+
+    DoForStatement* dofor_statement       = malloc(sizeof(DoForStatement));
+    dofor_statement->line_number          = get_ring_compiler_line_number();
+    dofor_statement->init_expression      = init_expression;
+    dofor_statement->block                = block;
+    dofor_statement->condition_expression = condition_expression;
+    dofor_statement->post_expression      = post_expression;
+
+    return dofor_statement;
+}
+
 Statement* create_statement_from_dowhile(DoWhileStatement* dowhile_statement) {
     debug_log_with_yellow_coloar("\t");
 
