@@ -956,7 +956,7 @@ Ring_BasicValue* search_variable_value(char* identifier, Function* origin_functi
 }
 
 StatementExecResult* invoke_function(FunctionCallExpression* function_call_expression, Function* origin_function) { // TODO: origin_function这个名字重新取一下
-    debug_log_with_blue_coloar("function_call_expression->function_name:%s", function_call_expression->function_name);
+    debug_log_with_blue_coloar("function_call_expression->function_name");
 
     StatementExecResult* result = NULL;
 
@@ -964,9 +964,9 @@ StatementExecResult* invoke_function(FunctionCallExpression* function_call_expre
     Function* function = NULL;
 
     for (Function* pos = get_ring_compiler()->function_list; pos != NULL; pos = pos->next) {
-        if (0 == strcmp(pos->function_name, function_call_expression->function_name)) {
-            function = pos;
-        }
+        // if (0 == strcmp(pos->function_name, function_call_expression->function_name)) {
+        //     function = pos;
+        // }
     }
 
     if (function == NULL) {

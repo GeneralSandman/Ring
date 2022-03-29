@@ -281,6 +281,9 @@ typedef enum {
     RVM_CODE_JUMP_IF_FALSE,
     RVM_CODE_JUMP_IF_TRUE,
 
+    //
+    RVM_CODE_INVOKE_FUNC,
+
 } RVM_Opcode;
 
 typedef enum {
@@ -515,7 +518,7 @@ struct ArrayIndexExpression_Tag {
 struct FunctionCallExpression_Tag {
     unsigned int line_number;
 
-    char*         function_name;
+    Expression*   function_identifier_expression;
     ArgumentList* argument_list;
 };
 
@@ -952,6 +955,7 @@ void         fix_dofor_statement(DoForStatement* dofor_statement);
 void         fix_identifier_expression(IdentifierExpression* expression);
 void         fix_assign_expression(AssignExpression* expression);
 void         fix_binary_expression(BinaryExpression* expression);
+void         fix_function_call_expression(FunctionCallExpression* function_call_expression);
 Declaration* search_declaration(char* identifier);
 
 // generate.c
@@ -977,6 +981,7 @@ void              generate_vmcode_from_bool_expression(Ring_VirtualMachine_Execu
 void              generate_vmcode_from_int_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_double_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal);
 
 int constant_pool_grow(Ring_VirtualMachine_Executer* executer, unsigned int growth_size);

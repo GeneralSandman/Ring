@@ -37,6 +37,10 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_JUMP_IF_FALSE, "jump_if_false", OPCODE_OPERAND_TYPE_2BYTE},
     {RVM_CODE_JUMP_IF_TRUE, "jump_if_true", OPCODE_OPERAND_TYPE_2BYTE},
 
+    //
+    {RVM_CODE_INVOKE_FUNC, "invoke_func", OPCODE_OPERAND_TYPE_0BYTE},
+
+
 };
 
 Ring_VirtualMachine_Executer* new_ring_vm_executer() {
@@ -311,6 +315,10 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
         generate_vmcode_from_assign_expression(executer, expression->u.assign_expression, opcode_buffer);
         break;
 
+    case EXPRESSION_TYPE_FUNCTION_CALL:
+        generate_vmcode_from_function_call_expression(executer, expression->u.function_call_expression, opcode_buffer);
+        break;
+
     default:
         break;
     }
@@ -445,6 +453,16 @@ void generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* execut
     assert(expression->type == EXPRESSION_TYPE_LITERAL_STRING);
     int constant_index = constant_pool_add_string(executer, expression->u.string_literal);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING, constant_index);
+}
+
+void generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    ArgumentList* pos = function_call_expression->argument_list;
+    for (; pos != NULL; pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->u.expression, opcode_buffer);
+    }
+
+    generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0);
 }
 
 void generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal) {

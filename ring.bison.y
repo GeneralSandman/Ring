@@ -371,6 +371,13 @@ function_definition
         $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, NULL, $5);
 
     }
+    | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::function_definition]\t ");
+
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, NULL, NULL);
+
+    }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");

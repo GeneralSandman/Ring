@@ -55,6 +55,9 @@ void fix_expression(Expression* expression) {
         fix_assign_expression(expression->u.assign_expression);
         break;
 
+    case EXPRESSION_TYPE_LITERAL_STRING:
+        break;
+
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
     case EXPRESSION_TYPE_ARITHMETIC_SUB:
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
@@ -63,6 +66,10 @@ void fix_expression(Expression* expression) {
     case EXPRESSION_TYPE_LOGICAL_AND:
     case EXPRESSION_TYPE_LOGICAL_OR:
         fix_binary_expression(expression->u.binary_expression);
+        break;
+
+    case EXPRESSION_TYPE_FUNCTION_CALL:
+        fix_function_call_expression(expression->u.function_call_expression);
         break;
 
     default: break;
@@ -124,6 +131,15 @@ void fix_assign_expression(AssignExpression* expression) {
 void fix_binary_expression(BinaryExpression* expression) {
     fix_expression(expression->left_expression);
     fix_expression(expression->right_expression);
+}
+
+void fix_function_call_expression(FunctionCallExpression* function_call_expression) {
+    fix_expression(function_call_expression->function_identifier_expression);
+
+    ArgumentList* pos = function_call_expression->argument_list;
+    for (; pos != NULL; pos = pos->next) {
+        fix_expression(pos->u.expression);
+    }
 }
 
 

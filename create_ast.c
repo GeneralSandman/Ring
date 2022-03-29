@@ -124,7 +124,7 @@ Expression* create_expression_identifier_with_index(char* identifier, Expression
 }
 
 Expression* create_expression_(FunctionCallExpression* function_call_expression) {
-    debug_log_with_yellow_coloar("function_call_expression->name:%s", function_call_expression->function_name);
+    debug_log_with_yellow_coloar("function_call_expression->name:");
 
     Expression* expression                 = malloc(sizeof(Expression));
     expression->line_number                = get_ring_compiler_line_number();
@@ -276,10 +276,12 @@ AssignExpression* create_multi_assign_expression(char* first_identifier, Identif
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
-    FunctionCallExpression* function_call_expression = malloc(sizeof(FunctionCallExpression));
-    function_call_expression->line_number            = get_ring_compiler_line_number();
-    function_call_expression->function_name          = identifier;
-    function_call_expression->argument_list          = argument_list;
+    Expression* function_identifier_expression = create_expression_identifier(identifier);
+
+    FunctionCallExpression* function_call_expression         = malloc(sizeof(FunctionCallExpression));
+    function_call_expression->line_number                    = get_ring_compiler_line_number();
+    function_call_expression->function_identifier_expression = function_identifier_expression;
+    function_call_expression->argument_list                  = argument_list;
     return function_call_expression;
 }
 
