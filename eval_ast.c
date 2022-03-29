@@ -978,7 +978,7 @@ StatementExecResult* invoke_function(FunctionCallExpression* function_call_expre
     if (function->type == FUNCTION_TYPE_EXTERNAL) {
         ArgumentList* argument_list = function_call_expression->argument_list;
         for (Variable* pos = function->parameter_list; pos != NULL; pos = pos->next) {
-            Ring_BasicValue* result = interpret_binary_expression(argument_list->u.expression, origin_function);
+            Ring_BasicValue* result = interpret_binary_expression(argument_list->expression, origin_function);
             argument_list           = argument_list->next;
 
             Variable* variable   = NULL;
@@ -1018,7 +1018,7 @@ StatementExecResult* invoke_function(FunctionCallExpression* function_call_expre
         Ring_BasicValue** values = NULL;
         for (ArgumentList* pos = function_call_expression->argument_list; pos != NULL; pos = pos->next) {
             argc += 1;
-            Ring_BasicValue* value = interpret_expression(pos->u.expression, origin_function);
+            Ring_BasicValue* value = interpret_expression(pos->expression, origin_function);
 
             values           = (Ring_BasicValue**)realloc(values, argc * sizeof(Ring_BasicValue*));
             values[argc - 1] = value;

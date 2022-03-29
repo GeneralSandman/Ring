@@ -296,8 +296,6 @@ Expression* expression_list_add_item(Expression* expression_list, Expression* ex
 }
 
 ArgumentList* argument_list_add_item3(ArgumentList* argument_list, ArgumentList* argument) {
-    debug_log_with_yellow_coloar("argument->type:%d", argument->type);
-
     ArgumentList* pos = argument_list;
     for (; pos->next != NULL; pos = pos->next)
         ;
@@ -305,23 +303,11 @@ ArgumentList* argument_list_add_item3(ArgumentList* argument_list, ArgumentList*
     return argument_list;
 }
 
-ArgumentList* create_argument_list(char* argument) {
-    debug_log_with_yellow_coloar("argument:%s", argument);
-
-    ArgumentList* argument_list                      = malloc(sizeof(ArgumentList));
-    argument_list->type                              = ARGUMENT_TYPE_RING_BASICVALUE;
-    argument_list->u.ring_basic_value.type           = BASICVALUE_TYPE_STRING;
-    argument_list->u.ring_basic_value.u.string_value = argument;
-    argument_list->next                              = NULL;
-    return argument_list;
-}
-
 ArgumentList* create_argument_list_from_expression(Expression* expression) {
     debug_log_with_yellow_coloar("expression->type:%d", expression->type);
 
     ArgumentList* argument_list = malloc(sizeof(ArgumentList));
-    argument_list->type         = ARGUMENT_TYPE_EXPRESSION;
-    argument_list->u.expression = expression;
+    argument_list->expression   = expression;
     argument_list->next         = NULL;
     return argument_list;
 }

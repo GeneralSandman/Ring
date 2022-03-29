@@ -458,7 +458,7 @@ void generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* execut
 void generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
     ArgumentList* pos = function_call_expression->argument_list;
     for (; pos != NULL; pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->u.expression, opcode_buffer);
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
     }
 
     generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer);

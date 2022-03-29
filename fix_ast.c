@@ -138,7 +138,7 @@ void fix_function_call_expression(FunctionCallExpression* function_call_expressi
 
     ArgumentList* pos = function_call_expression->argument_list;
     for (; pos != NULL; pos = pos->next) {
-        fix_expression(pos->u.expression);
+        fix_expression(pos->expression);
     }
 }
 
