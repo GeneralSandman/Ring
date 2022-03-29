@@ -371,12 +371,6 @@ typedef enum {
 } ExpressionType;
 
 typedef enum {
-    ARGUMENT_TYPE_UNKNOW = 0,
-    ARGUMENT_TYPE_RING_BASICVALUE,
-    ARGUMENT_TYPE_EXPRESSION,
-} ArgumentType;
-
-typedef enum {
     VARIABLE_TYPE_UNKNOW = 0,
     VARIABLE_TYPE_BOOL,
     VARIABLE_TYPE_INT,
@@ -577,11 +571,7 @@ struct TernaryExpression_Tag {
 };
 
 struct ArgumentList_Tag {
-    ArgumentType type;
-    union {
-        Ring_BasicValue ring_basic_value; // TODO: 应该把这个删掉，参数应该全都是表达式
-        Expression*     expression;
-    } u;
+    Expression*   expression;
     ArgumentList* next;
 };
 
@@ -918,7 +908,6 @@ AssignExpression*       create_multi_assign_expression(char* first_identifier, I
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list);
 Expression*             expression_list_add_item(Expression* expression_list, Expression* expression);
 ArgumentList*           argument_list_add_item3(ArgumentList* argument_list, ArgumentList* argument);
-ArgumentList*           create_argument_list(char* argument);
 ArgumentList*           create_argument_list_from_expression(Expression* expression);
 Identifier*             new_identifier(IdentifierType type, char* name);
 Function*               new_function_definition(FunctionType type, char* identifier, Variable* parameter_list, FunctionReturnList* return_list, Statement* block);
