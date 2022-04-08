@@ -119,6 +119,10 @@ void fix_dofor_statement(DoForStatement* dofor_statement) {
 }
 
 void fix_identifier_expression(IdentifierExpression* expression) {
+    // TODO: 在这里要判断 identifier 是function 还是变量，
+    // 然后从不同地方进行搜索
+    // 并判断当前代码片段是否已经声明过相关的变量和函数
+    // 报错提示
     Declaration* declaration  = search_declaration(expression->identifier);
     expression->u.declaration = declaration;
 }

@@ -29,7 +29,7 @@ Ring_Compiler* new_ring_compiler(char* file_name) {
     ring_compiler->identifier_list_size = 0;
     ring_compiler->identifier_list      = NULL;
 
-    ring_compiler_registe_inner_func();
+    // ring_compiler_registe_inner_func();
     return ring_compiler;
 }
 

@@ -603,6 +603,17 @@ struct Declaration_Tag {
     Declaration*   next;
 };
 
+typedef struct Block_Tag Block;
+struct Block_Tag {
+    unsigned int declaration_list_size;
+    Declaration* declaration_list;
+
+    unsigned int statement_list_size;
+    Statement*   statement_list;
+
+    Block* parent_block;
+};
+
 struct Function_Tag {
     unsigned int line_number;
 

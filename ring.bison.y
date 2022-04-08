@@ -32,6 +32,7 @@ int yyerror(char const *str);
     DoForStatement*             m_dofor_statement;
     DoWhileStatement*           m_do_while_statement;
     FunctionReturnList*         m_return_list;
+    Block*                      m_block;
 
     TypeSpecifier*              m_type_specifier;
     Ring_BasicType              m_basic_type_specifier;
@@ -122,7 +123,7 @@ int yyerror(char const *str);
 %type <m_literal_interface> INT_LITERAL DOUBLE_LITERAL STRING_LITERAL TOKEN_TRUE TOKEN_FALSE
 %type <m_identifier> identifier IDENTIFIER
 %type <m_identifier_list> identifier_list
-%type <m_statement_list> statement statement_list block
+%type <m_statement_list> statement statement_list
 %type <m_statement_list> variable_definition_statement
 %type <m_expression> expression expression_list
 %type <m_expression> literal_term
@@ -147,6 +148,7 @@ int yyerror(char const *str);
 %type <m_elseif_statement> elseif_statement_list
 %type <m_elseif_statement> elseif_statement
 %type <m_return_list> return_list
+%type <m_block> block
 
 %type <m_type_specifier>        type_specifier
 %type <m_basic_type_specifier>  basic_type_specifier
@@ -379,6 +381,13 @@ function_definition
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::function_definition]\t ");
+
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, NULL, $6);
+
+    }
+    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
