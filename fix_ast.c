@@ -123,8 +123,26 @@ void fix_identifier_expression(IdentifierExpression* expression) {
     // 然后从不同地方进行搜索
     // 并判断当前代码片段是否已经声明过相关的变量和函数
     // 报错提示
-    Declaration* declaration  = search_declaration(expression->identifier);
+    //
+    Declaration* declaration  = NULL;
+    Function* function = NULL;
+  switch(expression->type) {
+    case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
+    declaration  = search_declaration(expression->identifier);
     expression->u.declaration = declaration;
+      break;
+
+    case IDENTIFIER_EXPRESSION_TYPE_VARIABLE_ARRAY:
+      break;
+
+    case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
+      function = search_function(expression->identifier);
+      expression->u.function = function;
+      break;
+      
+    default:
+      break;
+  }
 }
 
 void fix_assign_expression(AssignExpression* expression) {
@@ -156,5 +174,16 @@ Declaration* search_declaration(char* identifier) {
         }
     }
 
+    return NULL;
+}
+
+Function* search_function(char* identifier) {
+    Function*pos = get_ring_compiler()->function_list;
+    for(;pos;pos=pos->next) {
+
+        if (!strcmp(identifier, pos->function_name)) {
+            return pos;
+        }
+    }
     return NULL;
 }

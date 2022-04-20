@@ -38,6 +38,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_JUMP_IF_TRUE, "jump_if_true", OPCODE_OPERAND_TYPE_2BYTE},
 
     //
+    {RVM_CODE_PUSH_FUNC, "push_func", OPCODE_OPERAND_TYPE_1BYTE}, // TODO: update to 2 byte
     {RVM_CODE_INVOKE_FUNC, "invoke_func", OPCODE_OPERAND_TYPE_0BYTE},
 
 
@@ -88,6 +89,22 @@ void add_global_variable(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* 
 
 // 添加函数定义
 void add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* vm_executer) {
+    Function* pos = compiler->function_list;
+    unsigned int function_list_size = compiler->function_list_size;
+    unsigned int i = 0;
+
+    vm_executer->function_size = function_list_size;
+    vm_executer->function_list = malloc(sizeof(RVM_Function) * function_list_size);
+
+    // 暂时只处理 native function
+    for(;pos;pos = pos->next, i++) {
+        copy_function(pos, &vm_executer->function_list[i]);
+    }
+    
+}
+
+void copy_function(Function* src, RVM_Function* dest) {
+
 }
 
 // 添加顶层代码
@@ -415,9 +432,27 @@ void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* execut
 }
 
 void generate_vmcode_from_identifier_expression(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
-    unsigned int offset = identifier_expression->u.declaration->variable_index;
 
+    unsigned int offset = 0;
+  switch (identifier_expression->type) {
+    case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
+    offset = identifier_expression->u.declaration->variable_index;
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STATIC_INT, offset);
+      break;
+
+    case IDENTIFIER_EXPRESSION_TYPE_VARIABLE_ARRAY:
+      break;
+
+    case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
+      // find func index 
+      offset = identifier_expression->u.function->func_index;
+      generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, offset);
+      break;
+
+    default:
+        break;
+
+  }
 }
 
 void generate_vmcode_from_bool_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {

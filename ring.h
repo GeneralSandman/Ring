@@ -85,6 +85,9 @@ typedef struct RVM_Object_Tag RVM_Object;
 
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue** value);
 
+typedef struct NativeFunction NativeFunction;
+typedef struct DeriveFunction DeriveFunction;
+typedef struct RVM_Function RVM_Function;
 
 struct Ring_Compiler_Tag {
     char*        current_file_name;
@@ -108,6 +111,13 @@ struct Ring_Compiler_Tag {
     Declaration* declaration_list;
 };
 
+typedef union {
+    // TODO: 补充 bool
+    int         int_value;
+    double      double_value;
+    RVM_Object* object;
+} RVM_Value; // 这个名字得改一改
+
 struct Ring_VirtualMachine_Tag {
     Ring_VirtualMachine_Executer* executer;
 
@@ -115,7 +125,39 @@ struct Ring_VirtualMachine_Tag {
     RVM_RuntimeStack*  runtime_stack;
     RVM_RuntimeHeap*   runtime_heap;
     unsigned int       pc; // pc 用来偏移 executer->code_list[pc]
+
+    RVM_Function* function_list;
+    unsigned int function_size;
 };
+
+typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine *rvm, unsigned int arg_cout, RVM_Value* args);
+
+typedef enum {
+    RVM_FUNCTION_TYPE_UNKNOW, 
+    RVM_FUNCTION_TYPE_NATIVE,  // 原生函数
+    RVM_FUNCTION_TYPE_DERIVE,  // 派生函数，库函数，Ring编写的库函数
+} RVMFunctionType;
+
+struct NativeFunction {
+    RVM_NativeFuncProc *func_proc; 
+    unsigned int arg_count;
+
+};
+
+struct DeriveFunction {
+    // TODO:
+};
+
+struct RVM_Function {
+    char* func_name;
+    RVMFunctionType type;
+
+    union {
+        NativeFunction *native_func;
+        DeriveFunction *derive_func;
+    }u;
+};
+
 
 // generate.c
 typedef unsigned char RVM_Byte;
@@ -145,7 +187,7 @@ struct Ring_VirtualMachine_Executer_Tag {
 
     // 连续数组，非链表
     unsigned int function_size;
-    Function*    function_list;
+    RVM_Function*    function_list;
 
     // 连续数组，非链表
     unsigned int code_size;
@@ -161,12 +203,6 @@ struct RVM_Variable_Tag {
     TypeSpecifier* type;
 };
 
-typedef union {
-    // TODO: 补充 bool
-    int         int_value;
-    double      double_value;
-    RVM_Object* object;
-} RVM_Value; // 这个名字得改一改
 
 typedef enum {
     RVM_OBJECT_TYPE_UNKNOW,
@@ -282,6 +318,7 @@ typedef enum {
     RVM_CODE_JUMP_IF_TRUE,
 
     //
+    RVM_CODE_PUSH_FUNC,
     RVM_CODE_INVOKE_FUNC,
 
 } RVM_Opcode;
@@ -295,7 +332,7 @@ typedef enum {
     IDENTIFIER_TYPE_UNKNOW = 0,
     IDENTIFIER_TYPE_VARIABLE,
     IDENTIFIER_TYPE_VARIABLE_ARRAY,
-    IDENTIFIER_TYPE_FUNCATION,
+    IDENTIFIER_TYPE_FUNCTION,
 } IdentifierType;
 
 struct Ring_String_Tag {
@@ -488,6 +525,7 @@ struct Expression_Tag {
 typedef enum {
     IDENTIFIER_EXPRESSION_TYPE_UNKNOW,
     IDENTIFIER_EXPRESSION_TYPE_VARIABLE,
+    IDENTIFIER_EXPRESSION_TYPE_VARIABLE_ARRAY, 
     IDENTIFIER_EXPRESSION_TYPE_FUNCTION,
 } IdentifierExpressionType;
 
@@ -498,7 +536,7 @@ struct IdentifierExpression_Tag {
     char*                    identifier;
     union {
         Declaration* declaration;
-        // Function // TODO:
+        Function* function;
     } u;
 };
 
@@ -616,6 +654,8 @@ struct Block_Tag {
 
 struct Function_Tag {
     unsigned int line_number;
+
+    unsigned int func_index;
 
     char*        function_name;
     FunctionType type;
@@ -846,7 +886,6 @@ char*          ring_compiler_get_current_line_content();
 void           reset_ring_compiler_column_number();
 int            ring_compiler_init_statement_list(Statement* statement);
 int            ring_compiler_add_statement(Statement* statement);
-void           ring_compiler_registe_inner_func();
 
 void  init_string_literal_buffer();
 void  reset_string_literal_buffer();
@@ -905,10 +944,11 @@ Statement*              create_return_statement(Expression* expression);
 void                    add_function_definition(Function* function_definition);
 Expression*             create_expression();
 Expression*             create_expression_identifier(char* identifier);
+Expression*             create_expression_identifier2(char* identifier, IdentifierExpressionType type);
 Expression*             create_expression_identifier_with_index(char* identifier, Expression* index);
 Expression*             create_expression_(FunctionCallExpression* function_call_expression);
 Expression*             create_expression__(AssignExpression* assign_expression);
-Expression*             create_expression_ternary(Expression* condition, Expression * true, Expression * false);
+Expression*             create_expression_ternary(Expression* condition, Expression * true_expression, Expression * false_expression);
 Expression*             create_expression_binary(ExpressionType type, Expression* left, Expression* right);
 Expression*             create_expression_unitary(ExpressionType type, Expression* unitary_expression);
 Expression*             create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression* expression);
@@ -957,6 +997,7 @@ void         fix_assign_expression(AssignExpression* expression);
 void         fix_binary_expression(BinaryExpression* expression);
 void         fix_function_call_expression(FunctionCallExpression* function_call_expression);
 Declaration* search_declaration(char* identifier);
+Function* search_function(char* identifier);
 
 // generate.c
 Ring_VirtualMachine_Executer* new_ring_vm_executer();
@@ -964,6 +1005,7 @@ Ring_VirtualMachine_Executer* new_ring_vm_executer();
 void              ring_generate_vm_code(Ring_Compiler* ring_compiler, Ring_VirtualMachine_Executer* ring_executer);
 void              add_global_variable(Ring_Compiler* ring_compiler, Ring_VirtualMachine_Executer* executer);
 void              add_functions(Ring_Compiler* ring_compiler, Ring_VirtualMachine_Executer* executer);
+void copy_function(Function* src, RVM_Function* dest);
 void              add_top_level_code(Ring_Compiler* ring_compiler, Ring_VirtualMachine_Executer* executer);
 void              vm_executer_dump(Ring_VirtualMachine_Executer* vm_executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
@@ -993,6 +1035,12 @@ int constant_pool_add_string(Ring_VirtualMachine_Executer* executer, char* strin
 unsigned int opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer);
 void         opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address);
 void         opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer);
+
+RVM_Value native_proc_print(Ring_VirtualMachine *rvm, unsigned int arg_cout, RVM_Value* args);
+RVM_Value native_proc_println(Ring_VirtualMachine *rvm, unsigned int arg_cout, RVM_Value* args);
+void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc *func_proc, unsigned int arg_count);
+void rvm_register_native_functions(Ring_VirtualMachine* rvm);
+
 // generate.c
 
 // execute.c
@@ -1000,6 +1048,8 @@ RVM_RuntimeStack*    new_runtime_stack();
 Ring_VirtualMachine* new_ring_virtualmachine();
 void                 add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 ring_execute_vm_code(Ring_VirtualMachine* ring_vm);
+void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function);
+void invoke_derive_function(Ring_VirtualMachine* rvm);
 void                 debug_rvm(Ring_VirtualMachine* rvm);
 void                 dump_runtime_stack(RVM_RuntimeStack* runtime_stack);
 // execute.c

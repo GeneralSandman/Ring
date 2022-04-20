@@ -391,7 +391,7 @@ function_definition
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, NULL, $6);
+        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, NULL, NULL);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block

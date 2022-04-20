@@ -107,6 +107,23 @@ Expression* create_expression_identifier(char* identifier) {
     return expression;
 }
 
+Expression* create_expression_identifier2(char* identifier, IdentifierExpressionType type) {
+    debug_log_with_yellow_coloar("identifier:%s", identifier);
+
+    IdentifierExpression* identifier_expression = malloc(sizeof(IdentifierExpression));
+    identifier_expression->line_number          = get_ring_compiler_line_number();
+    identifier_expression->type                 = type;
+    identifier_expression->identifier           = identifier;
+    identifier_expression->u.declaration        = NULL;
+
+    Expression* expression              = malloc(sizeof(Expression));
+    expression->line_number             = get_ring_compiler_line_number();
+    expression->type                    = EXPRESSION_TYPE_IDENTIFIER;
+    expression->u.identifier_expression = identifier_expression;
+
+    return expression;
+}
+
 Expression* create_expression_identifier_with_index(char* identifier, Expression* index) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
@@ -276,7 +293,7 @@ AssignExpression* create_multi_assign_expression(char* first_identifier, Identif
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
-    Expression* function_identifier_expression = create_expression_identifier(identifier);
+    Expression* function_identifier_expression = create_expression_identifier2(identifier, IDENTIFIER_EXPRESSION_TYPE_FUNCTION);
 
     FunctionCallExpression* function_call_expression         = malloc(sizeof(FunctionCallExpression));
     function_call_expression->line_number                    = get_ring_compiler_line_number();
@@ -353,6 +370,7 @@ Function* new_function_definition(FunctionType type, char* identifier, Variable*
 
     Function* function            = malloc(sizeof(Function));
     function->line_number         = get_ring_compiler_line_number();
+    function->func_index          = get_ring_compiler()->function_list_size;
     function->type                = type;
     function->function_name       = identifier;
     function->parameter_list_size = 0;
