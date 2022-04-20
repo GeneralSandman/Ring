@@ -48,20 +48,28 @@ RVM_RuntimeStatic* new_runtime_static() {
 }
 
 Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* executer) {
-    Ring_VirtualMachine* vm = malloc(sizeof(Ring_VirtualMachine));
-    vm->executer            = executer;
-    vm->runtime_static      = new_runtime_static();
-    vm->runtime_stack       = new_runtime_stack();
-    vm->pc                  = 0;
+    Ring_VirtualMachine* rvm = malloc(sizeof(Ring_VirtualMachine));
+    rvm->executer            = executer;
+    rvm->runtime_static      = new_runtime_static();
+    rvm->runtime_stack       = new_runtime_stack();
+    rvm->pc                  = 0;
 
     // init something
-    add_static_variable(executer, vm->runtime_static);
-    return vm;
+    rvm_add_static_variable(executer, rvm->runtime_static);
+    rvm_register_native_functions(rvm);
+    // rvm_add_functions(executer, rvm);
+
+    return rvm;
 }
 
-void add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static) {
+void rvm_add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static) {
     runtime_static->size = executer->global_variable_size;
     runtime_static->data = malloc(runtime_static->size * sizeof(RVM_Value));
+}
+
+void rvm_add_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm) {
+    rvm->function_list = executer->function_list;
+    rvm->function_size = executer->function_size;
 }
 
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
@@ -80,7 +88,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         debug_rvm(rvm);
 
         switch (opcode) {
-
         case RVM_CODE_PUSH_INT_1BYTE:
             STACK_SET_INT_OFFSET(rvm, 0, code_list[rvm->pc + 1]);
             runtime_stack->top_index++;
@@ -142,12 +149,12 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_INVOKE_FUNC:
-            if(rvm->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE) {
+            if (rvm->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE) {
                 invoke_native_function(rvm, &rvm->function_list[func_index]);
                 rvm->pc++;
             } else if (rvm->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE) {
                 invoke_derive_function(rvm);
-            } 
+            }
             break;
 
         default:
@@ -164,20 +171,20 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function) {
     RVM_Value ret;
 
-    RVM_NativeFuncProc *native_func_proc = function->u.native_func->func_proc;
-    unsigned int arg_count = function->u.native_func->func_proc;
-    RVM_Value * tmp; // TODO:
+    RVM_NativeFuncProc* native_func_proc = function->u.native_func->func_proc;
+    unsigned int        arg_count        = function->u.native_func->arg_count;
+    RVM_Value*          args; // TODO:
 
-    ret = native_func_proc(rvm, arg_count, tmp);
+    args = &rvm->runtime_stack->data[rvm->runtime_stack->top_index];
+
+    ret = native_func_proc(rvm, arg_count, args);
 
 
     rvm->runtime_stack->top_index -= arg_count;
-    rvm->runtime_stack->data[rvm->runtime_stack->top_index-1] = ret;
-
+    rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1] = ret;
 }
 
 void invoke_derive_function(Ring_VirtualMachine* rvm) {
-
 }
 
 void debug_rvm(Ring_VirtualMachine* rvm) {
@@ -197,19 +204,17 @@ void debug_rvm(Ring_VirtualMachine* rvm) {
 }
 
 
-
-RVM_Value native_proc_print(Ring_VirtualMachine *rvm, unsigned int arg_cout, RVM_Value* args) {
-
+RVM_Value native_proc_print(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
     RVM_Value ret;
 
     ret.int_value = 0;
 
 
-    if(arg_cout != 1) {
+    if (arg_cout != 1) {
         printf("native_proc_print only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
-    
+
 
     // TODO: 暂时只打印int, 以后都强制转换成int_value
     printf("%d", args->int_value);
@@ -218,27 +223,39 @@ RVM_Value native_proc_print(Ring_VirtualMachine *rvm, unsigned int arg_cout, RVM
     return ret;
 }
 
-RVM_Value native_proc_println(Ring_VirtualMachine *rvm, unsigned int arg_cout, RVM_Value* args) {
+RVM_Value native_proc_println(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
+    RVM_Value ret;
 
+    ret.int_value = 0;
+
+
+    if (arg_cout != 1) {
+        printf("native_proc_print only one arguement\n");
+        exit(ERROR_CODE_RUN_VM_ERROR);
+    }
+
+
+    // TODO: 暂时只打印int, 以后都强制转换成int_value
+    printf("%d\n", args->int_value);
+    fflush(stdout);
+
+    return ret;
 }
 
-void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc *func_proc, unsigned int arg_count) {
+void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, unsigned int arg_count) {
+    rvm->function_list = realloc(rvm->function_list, sizeof(Function) * (rvm->function_size + 1));
 
-    rvm->function_list = realloc(rvm->function_list, sizeof(Function) * (rvm->function_size+1));
-
-    rvm->function_list[rvm->function_size].func_name = func_name;
-    rvm->function_list[rvm->function_size].type = RVM_FUNCTION_TYPE_NATIVE;
-    rvm->function_list[rvm->function_size].u.native_func = malloc(sizeof(NativeFunction));
+    rvm->function_list[rvm->function_size].func_name                = func_name;
+    rvm->function_list[rvm->function_size].type                     = RVM_FUNCTION_TYPE_NATIVE;
+    rvm->function_list[rvm->function_size].u.native_func            = malloc(sizeof(NativeFunction));
     rvm->function_list[rvm->function_size].u.native_func->func_proc = func_proc;
     rvm->function_list[rvm->function_size].u.native_func->arg_count = arg_count;
 
-    rvm->function_size ++;
+    rvm->function_size++;
 }
 
 void rvm_register_native_functions(Ring_VirtualMachine* rvm) {
-    
     rvm_register_native_function(rvm, "print", native_proc_print, 1);
     rvm_register_native_function(rvm, "println", native_proc_println, 1);
-
 }
 

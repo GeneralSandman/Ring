@@ -77,9 +77,18 @@ void add_function_definition(Function* function_definition) {
     assert(function_definition != NULL);
     debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
 
-    function_definition->next          = get_ring_compiler()->function_list;
-    get_ring_compiler()->function_list = function_definition;
+    Function* pos = get_ring_compiler()->function_list;
+
     get_ring_compiler()->function_list_size++;
+    if (pos == NULL) {
+        get_ring_compiler()->function_list = function_definition;
+        return;
+    }
+
+    for (; pos->next; pos = pos->next) {
+    }
+
+    pos->next = function_definition;
 }
 
 Expression* create_expression() {

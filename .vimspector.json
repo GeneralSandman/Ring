@@ -14,7 +14,7 @@
         "stopAtEntry": true,
         "MIMode": "lldb",
         "logging": {
-          "engineLogging": true
+          "engineLogging": false
         }
       }
     }

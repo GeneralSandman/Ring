@@ -89,22 +89,22 @@ void add_global_variable(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* 
 
 // 添加函数定义
 void add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* vm_executer) {
-    Function* pos = compiler->function_list;
+    Function*    pos                = compiler->function_list;
     unsigned int function_list_size = compiler->function_list_size;
-    unsigned int i = 0;
+    unsigned int i                  = 0;
 
     vm_executer->function_size = function_list_size;
     vm_executer->function_list = malloc(sizeof(RVM_Function) * function_list_size);
 
     // 暂时只处理 native function
-    for(;pos;pos = pos->next, i++) {
+    for (; pos; pos = pos->next, i++) {
         copy_function(pos, &vm_executer->function_list[i]);
     }
-    
 }
 
 void copy_function(Function* src, RVM_Function* dest) {
-
+    dest->type      = RVM_FUNCTION_TYPE_NATIVE;
+    dest->func_name = src->function_name;
 }
 
 // 添加顶层代码
@@ -432,27 +432,25 @@ void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* execut
 }
 
 void generate_vmcode_from_identifier_expression(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
-
     unsigned int offset = 0;
-  switch (identifier_expression->type) {
+    switch (identifier_expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
-    offset = identifier_expression->u.declaration->variable_index;
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STATIC_INT, offset);
-      break;
+        offset = identifier_expression->u.declaration->variable_index;
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STATIC_INT, offset);
+        break;
 
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE_ARRAY:
-      break;
+        break;
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
-      // find func index 
-      offset = identifier_expression->u.function->func_index;
-      generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, offset);
-      break;
+        // find func index
+        offset = identifier_expression->u.function->func_index;
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, offset);
+        break;
 
     default:
         break;
-
-  }
+    }
 }
 
 void generate_vmcode_from_bool_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
