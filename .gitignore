@@ -11,3 +11,5 @@ y.tab.h
 .idea/*
 
 *tmp
+
+.vimspector.session

@@ -242,6 +242,23 @@ RVM_Value native_proc_println(Ring_VirtualMachine* rvm, unsigned int arg_cout, R
     return ret;
 }
 
+RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
+    RVM_Value ret;
+
+    ret.int_value = 0;
+
+
+    if (arg_cout != 1) {
+        printf("native_proc_print only one arguement\n");
+        exit(ERROR_CODE_RUN_VM_ERROR);
+    }
+
+    // TODO: 暂时只打印int, 以后都强制转换成int_value
+    exit(args->int_value);
+
+    return ret;
+}
+
 void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, unsigned int arg_count) {
     rvm->function_list = realloc(rvm->function_list, sizeof(Function) * (rvm->function_size + 1));
 
@@ -257,5 +274,6 @@ void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM
 void rvm_register_native_functions(Ring_VirtualMachine* rvm) {
     rvm_register_native_function(rvm, "print", native_proc_print, 1);
     rvm_register_native_function(rvm, "println", native_proc_println, 1);
+    rvm_register_native_function(rvm, "exit", native_proc_exit, 1);
 }
 

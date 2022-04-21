@@ -8,7 +8,7 @@ int yywrap(){
 }
 
 %}
-%start COMMENT STRING_LITERAL_STATE
+%start LINE_COMMENT BLOCK_COMMENT STRING_LITERAL_STATE
 
 %option yylineno
 
@@ -157,37 +157,57 @@ int yywrap(){
     ring_compiler_reset_current_line_content();
     increase_ring_compiler_line_number();
 }
-<INITIAL>"//" BEGIN COMMENT;
+<INITIAL>"//" BEGIN LINE_COMMENT;
+<INITIAL>"/*" BEGIN BLOCK_COMMENT;
+
 <INITIAL>. {
     ring_compiler_update_line_content(yytext);
 }
 
 
-<COMMENT>\n {
+<LINE_COMMENT>\n {
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
-
-    // debug_log_with_red_coloar("[STATUS:COMMENT]\t new comment(%s) line_number(%d)", yylval.m_comment_value, get_ring_compiler_line_number());
-
     reset_ring_compiler_column_number();
     ring_compiler_reset_current_line_content();
     increase_ring_compiler_line_number();
     BEGIN INITIAL;
 }
-<COMMENT>\r\n {
+<LINE_COMMENT>\r\n {
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
-
-    // debug_log_with_red_coloar("[STATUS:COMMENT]\t new comment(%s) line_number(%d)", yylval.m_comment_value, get_ring_compiler_line_number());
-
     reset_ring_compiler_column_number();
     ring_compiler_reset_current_line_content();
     increase_ring_compiler_line_number();
     BEGIN INITIAL;
 }
-<COMMENT>. {
+<LINE_COMMENT>. {
     string_literal_add_char(yytext[0]);
-};
+}
+
+
+<BLOCK_COMMENT>\n {
+    yylval.m_comment_value = get_string_literal();
+    reset_string_literal_buffer();
+    reset_ring_compiler_column_number();
+    ring_compiler_reset_current_line_content();
+    increase_ring_compiler_line_number();
+}
+<BLOCK_COMMENT>\r\n {
+    yylval.m_comment_value = get_string_literal();
+    reset_string_literal_buffer();
+    reset_ring_compiler_column_number();
+    ring_compiler_reset_current_line_content();
+    increase_ring_compiler_line_number();
+}
+<BLOCK_COMMENT>. {
+    string_literal_add_char(yytext[0]);
+}
+<BLOCK_COMMENT>"*/" {
+    yylval.m_comment_value = get_string_literal();
+    reset_string_literal_buffer();
+    BEGIN INITIAL;
+}
 
 
 <STRING_LITERAL_STATE>\" {
