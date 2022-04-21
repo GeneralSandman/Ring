@@ -1,8 +1,8 @@
+//
 // File:    int-007.ring
-// Author:  zhenhuli
+// Author:  zhenhuli - generalsandman@163.com
 // Date:    2022-04-19
-
-
+//
 
 
 function print(var string str);

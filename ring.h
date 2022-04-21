@@ -459,7 +459,7 @@ struct Ring_BasicValue_Tag {
     // FIXME: 以后更改这个地方
 };
 
-struct Ring_String {
+struct Ring_String1 {
     unsigned int size;
     unsigned int capacity;
     char*        data;

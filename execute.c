@@ -142,7 +142,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         case RVM_CODE_PUSH_FUNC:
             func_index = code_list[rvm->pc + 1];
-            printf("func_index:%d\n", func_index);
             STACK_SET_INT_OFFSET(rvm, 0, func_index);
             runtime_stack->top_index++;
             rvm->pc += 2;
@@ -175,7 +174,8 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function) {
     unsigned int        arg_count        = function->u.native_func->arg_count;
     RVM_Value*          args; // TODO:
 
-    args = &rvm->runtime_stack->data[rvm->runtime_stack->top_index];
+    // TODO: how to handle arg_count > 1
+    args = &rvm->runtime_stack->data[rvm->runtime_stack->top_index - 2];
 
     ret = native_func_proc(rvm, arg_count, args);
 
