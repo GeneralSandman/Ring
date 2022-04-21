@@ -92,70 +92,99 @@ void fix_declaration(Declaration* declaration) {
     pos->next = declaration;
 }
 
+void fix_block(Block* block) {
+    fix_statement_list(block->statement_list);
+}
+
 void fix_if_statement(IfStatement* if_statement) {
     fix_expression(if_statement->condition_expression);
-    fix_statement_list(if_statement->if_block);
-    fix_statement_list(if_statement->else_block);
 
-    ElseIfStatement* pos = if_statement->elseif_statement_list;
+    fix_block(if_statement->if_block);
+    fix_block(if_statement->else_block);
+
+    ElseIfStatement* pos = if_statement->elseif_list;
     for (; pos; pos = pos->next) {
         fix_expression(pos->condition_expression);
-        fix_statement_list(pos->elseif_block);
+        fix_block(pos->elseif_block);
     }
 }
 
+
 void fix_for_statement(ForStatement* for_statement) {
+    if (for_statement == NULL) {
+        return;
+    }
+
     fix_expression(for_statement->init_expression);
     fix_expression(for_statement->condition_expression);
     fix_expression(for_statement->post_expression);
-    fix_statement_list(for_statement->block);
+    fix_block(for_statement->block);
 }
 
 void fix_dofor_statement(DoForStatement* dofor_statement) {
+    if (dofor_statement == NULL) {
+        return;
+    }
+
     fix_expression(dofor_statement->init_expression);
-    fix_statement_list(dofor_statement->block);
+    fix_block(dofor_statement->block);
     fix_expression(dofor_statement->condition_expression);
     fix_expression(dofor_statement->post_expression);
 }
 
 void fix_identifier_expression(IdentifierExpression* expression) {
+    if (expression == NULL) {
+        return;
+    }
     // TODO: 在这里要判断 identifier 是function 还是变量，
     // 然后从不同地方进行搜索
     // 并判断当前代码片段是否已经声明过相关的变量和函数
     // 报错提示
     //
-    Declaration* declaration  = NULL;
-    Function* function = NULL;
-  switch(expression->type) {
+    Declaration* declaration = NULL;
+    Function*    function    = NULL;
+    switch (expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
-    declaration  = search_declaration(expression->identifier);
-    expression->u.declaration = declaration;
-      break;
+        declaration               = search_declaration(expression->identifier);
+        expression->u.declaration = declaration;
+        break;
 
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE_ARRAY:
-      break;
+        break;
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
-      function = search_function(expression->identifier);
-      expression->u.function = function;
-      break;
-      
+        function               = search_function(expression->identifier);
+        expression->u.function = function;
+        break;
+
     default:
-      break;
-  }
+        break;
+    }
 }
 
 void fix_assign_expression(AssignExpression* expression) {
+    if (expression == NULL) {
+        return;
+    }
+
     fix_expression(expression->left);
     fix_expression(expression->operand);
 }
 
 void fix_binary_expression(BinaryExpression* expression) {
+    if (expression == NULL) {
+        return;
+    }
+
     fix_expression(expression->left_expression);
     fix_expression(expression->right_expression);
 }
 
 void fix_function_call_expression(FunctionCallExpression* function_call_expression) {
+    if (function_call_expression == NULL) {
+        return;
+    }
+
     fix_expression(function_call_expression->function_identifier_expression);
 
     ArgumentList* pos = function_call_expression->argument_list;
@@ -178,9 +207,8 @@ Declaration* search_declaration(char* identifier) {
 }
 
 Function* search_function(char* identifier) {
-    Function*pos = get_ring_compiler()->function_list;
-    for(;pos;pos=pos->next) {
-
+    Function* pos = get_ring_compiler()->function_list;
+    for (; pos; pos = pos->next) {
         if (!strcmp(identifier, pos->function_name)) {
             return pos;
         }

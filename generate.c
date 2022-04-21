@@ -139,6 +139,10 @@ RVM_OpcodeBuffer* new_opcode_buffer() {
     return buffer;
 }
 
+void generate_vmcode_from_block(Ring_VirtualMachine_Executer* vm_executer, Block* block, RVM_OpcodeBuffer* opcode_buffer) {
+    generate_vmcode_from_statement_list(vm_executer, block->statement_list, opcode_buffer);
+}
+
 void generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* vm_executer, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer) {
     for (Statement* statement = statement_list; statement != NULL; statement = statement->next) {
         switch (statement->type) {
@@ -172,7 +176,7 @@ void generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, I
     if_false_jump_label = opcode_buffer_get_label(opcode_buffer);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, if_false_jump_label);
 
-    generate_vmcode_from_statement_list(executer, if_statement->if_block, opcode_buffer);
+    generate_vmcode_from_block(executer, if_statement->if_block, opcode_buffer);
 
     if_end_label = opcode_buffer_get_label(opcode_buffer);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label);
@@ -181,7 +185,7 @@ void generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, I
     opcode_buffer_set_label(opcode_buffer, if_false_jump_label, opcode_buffer->code_size);
 
     // handle elseif list
-    ElseIfStatement* pos = if_statement->elseif_statement_list;
+    ElseIfStatement* pos = if_statement->elseif_list;
     for (; pos; pos = pos->next) {
         generate_vmcode_from_expression(executer, pos->condition_expression, opcode_buffer);
 
@@ -189,7 +193,7 @@ void generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, I
         elseif_false_jump_label              = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, elseif_false_jump_label);
 
-        generate_vmcode_from_statement_list(executer, pos->elseif_block, opcode_buffer);
+        generate_vmcode_from_block(executer, pos->elseif_block, opcode_buffer);
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label);
 
@@ -198,7 +202,7 @@ void generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, I
 
     // handle else
     if (if_statement->else_block != NULL) {
-        generate_vmcode_from_statement_list(executer, if_statement->else_block, opcode_buffer);
+        generate_vmcode_from_block(executer, if_statement->else_block, opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label);
     }
 
@@ -226,7 +230,7 @@ void generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, 
     }
 
     // Step-3:
-    generate_vmcode_from_statement_list(executer, for_statement->block, opcode_buffer);
+    generate_vmcode_from_block(executer, for_statement->block, opcode_buffer);
 
     // Step-4:
     if (for_statement->post_expression) {
@@ -257,7 +261,7 @@ void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer
 
 
     // Step-2:
-    generate_vmcode_from_statement_list(executer, dofor_statement->block, opcode_buffer);
+    generate_vmcode_from_block(executer, dofor_statement->block, opcode_buffer);
 
 
     // Step-3:

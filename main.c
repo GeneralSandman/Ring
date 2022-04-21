@@ -118,7 +118,7 @@ void ring_interactive_program() {
             }
 
             // 解释执行
-            ring_interpret(ring_compiler);
+            // ring_interpret(ring_compiler);
             printf_witch_green("\n");
 
             // 只清除相关语句不清楚相关变量

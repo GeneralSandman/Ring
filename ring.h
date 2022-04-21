@@ -145,6 +145,7 @@ struct NativeFunction {
 
 struct DeriveFunction {
     // TODO:
+    unsigned int arg_count;
 };
 
 struct RVM_Function {
@@ -642,6 +643,8 @@ struct Declaration_Tag {
 
 typedef struct Block_Tag Block;
 struct Block_Tag {
+    unsigned int line_number;
+
     unsigned int declaration_list_size;
     Declaration* declaration_list;
 
@@ -671,8 +674,7 @@ struct Function_Tag {
     // unsigned int return_list_size;
     // return_list; // TODO:
 
-    unsigned int block_size;
-    Statement*   block;
+    Block* block;
 
     Ring_InnerFunc* inner_func;
 
@@ -689,14 +691,9 @@ struct IfStatement_Tag {
 
     Expression* condition_expression;
 
-    unsigned int if_block_size;
-    Statement*   if_block;
-
-    unsigned int     elseif_statement_size; // TODO: 以后在 create_ast 中更新这个值
-    ElseIfStatement* elseif_statement_list;
-
-    // unsigned int else_block_size; // 这个删掉。只能是 1
-    Statement* else_block;
+    Block*           if_block;
+    ElseIfStatement* elseif_list;
+    Block*           else_block;
 };
 
 struct ElseIfStatement_Tag {
@@ -704,8 +701,7 @@ struct ElseIfStatement_Tag {
 
     Expression* condition_expression; // TODO: 这个名字得改一下 conidtion_expression;
 
-    unsigned int elseif_block_size;
-    Statement*   elseif_block;
+    Block* elseif_block;
 
     ElseIfStatement* next;
 };
@@ -717,18 +713,16 @@ struct ForStatement_Tag {
     Expression* condition_expression;
     Expression* post_expression;
 
-    unsigned int block_size;
-    Statement*   block;
+    Block* block;
 };
 
 struct DoForStatement_Tag {
     unsigned int line_number;
 
-    Expression*  init_expression;
-    unsigned int block_size;
-    Statement*   block;
-    Expression*  condition_expression;
-    Expression*  post_expression;
+    Expression* init_expression;
+    Block*      block;
+    Expression* condition_expression;
+    Expression* post_expression;
 };
 
 struct DoWhileStatement_Tag {
@@ -736,8 +730,7 @@ struct DoWhileStatement_Tag {
 
     Expression* condition_expression;
 
-    unsigned int block_size;
-    Statement*   block;
+    Block* block;
 };
 
 struct BreakStatement_Tag {
@@ -960,19 +953,20 @@ Expression*             expression_list_add_item(Expression* expression_list, Ex
 ArgumentList*           argument_list_add_item3(ArgumentList* argument_list, ArgumentList* argument);
 ArgumentList*           create_argument_list_from_expression(Expression* expression);
 Identifier*             new_identifier(IdentifierType type, char* name);
-Function*               new_function_definition(FunctionType type, char* identifier, Variable* parameter_list, FunctionReturnList* return_list, Statement* block);
+Function*               new_function_definition(FunctionType type, char* identifier, Variable* parameter_list, FunctionReturnList* return_list, Block* block);
 Statement*              create_statement_from_if(IfStatement* if_statement);
-IfStatement*            create_if_statement(Expression* expression, Statement* if_block, ElseIfStatement* elseif_statement_list, Statement* else_block);
-ElseIfStatement*        create_elseif_statement(Expression* expression, Statement* elseif_block);
+IfStatement*            create_if_statement(Expression* expression, Block* if_block, ElseIfStatement* elseif_statement_list, Block* else_block);
+ElseIfStatement*        create_elseif_statement(Expression* expression, Block* elseif_block);
 ElseIfStatement*        elseif_statement_add_item(ElseIfStatement* list, ElseIfStatement* elseif_statement);
 Statement*              create_statement_from_for(ForStatement* for_statement);
-ForStatement*           create_for_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Statement* block);
+ForStatement*           create_for_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Block* block);
 Statement*              create_statement_from_dofor(DoForStatement* dofor_statement);
-DoForStatement*         create_dofor_statement(Expression* init_expression, Statement* block, Expression* condition_expression, Expression* post_expression);
+DoForStatement*         create_dofor_statement(Expression* init_expression, Block* block, Expression* condition_expression, Expression* post_expression);
 Statement*              create_statement_from_dowhile(DoWhileStatement* dowhile_statement);
-DoWhileStatement*       create_dowhile_statement(Statement* block, Expression* condition_expression);
+DoWhileStatement*       create_dowhile_statement(Block* block, Expression* condition_expression);
 Statement*              create_statement_from_break();
 Statement*              create_statement_from_continue();
+Block*                  create_block(Statement* statement_list);
 // Identifier *            create_identifier(IdentifierType type, char *name);
 // char **identifier_list_add_item(char **identifier_list, char *identifier);
 
@@ -988,6 +982,7 @@ void         fix_statement_list(Statement* statement_list);
 void         fix_statement(Statement* statement);
 void         fix_expression(Expression* expression);
 void         fix_declaration(Declaration* declaration);
+void         fix_block(Block* block);
 void         fix_if_statement(IfStatement* if_statement);
 void         fix_for_statement(ForStatement* for_statement);
 void         fix_dofor_statement(DoForStatement* dofor_statement);
@@ -1008,6 +1003,7 @@ void              copy_function(Function* src, RVM_Function* dest);
 void              add_top_level_code(Ring_Compiler* ring_compiler, Ring_VirtualMachine_Executer* executer);
 void              vm_executer_dump(Ring_VirtualMachine_Executer* vm_executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
+void              generate_vmcode_from_block(Ring_VirtualMachine_Executer* vm_executer, Block* block, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* vm_executer, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);

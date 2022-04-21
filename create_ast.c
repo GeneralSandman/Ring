@@ -374,7 +374,7 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
     return return_list;
 }
 
-Function* new_function_definition(FunctionType type, char* identifier, Variable* parameter_list, FunctionReturnList* return_list, Statement* block) {
+Function* new_function_definition(FunctionType type, char* identifier, Variable* parameter_list, FunctionReturnList* return_list, Block* block) {
     debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier);
 
     Function* function            = malloc(sizeof(Function));
@@ -386,7 +386,6 @@ Function* new_function_definition(FunctionType type, char* identifier, Variable*
     function->parameter_list      = parameter_list;
     function->variable_list_size  = 0;
     function->variable_list       = NULL;
-    function->block_size          = 0;
     function->block               = block;
     function->inner_func          = NULL;
     function->next                = NULL;
@@ -401,7 +400,7 @@ Function* new_function_definition(FunctionType type, char* identifier, Variable*
     }
 
     // 把block中定义的局部变量加到 variable_list 中
-    for (Statement* pos = block; pos != NULL; pos = pos->next) {
+    for (Statement* pos = block->statement_list; pos != NULL; pos = pos->next) {
         if (pos->type == STATEMENT_TYPE_VARIABLE_DEFINITION) {
             Variable* tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL, 0);
             memcpy(tmp, pos->u.variable, sizeof(*pos->u.variable));
@@ -426,28 +425,25 @@ Statement* create_statement_from_if(IfStatement* if_statement) {
     return statement;
 }
 
-IfStatement* create_if_statement(Expression* expression, Statement* if_block, ElseIfStatement* elseif_statement_list, Statement* else_block) {
+IfStatement* create_if_statement(Expression* expression, Block* if_block, ElseIfStatement* elseif_statement_list, Block* else_block) {
     debug_log_with_yellow_coloar("\t");
 
-    IfStatement* if_statement           = malloc(sizeof(IfStatement));
-    if_statement->line_number           = get_ring_compiler_line_number();
-    if_statement->condition_expression  = expression;
-    if_statement->if_block_size         = 0;
-    if_statement->if_block              = if_block;
-    if_statement->elseif_statement_size = 0;
-    if_statement->elseif_statement_list = elseif_statement_list;
-    if_statement->else_block            = else_block;
+    IfStatement* if_statement          = malloc(sizeof(IfStatement));
+    if_statement->line_number          = get_ring_compiler_line_number();
+    if_statement->condition_expression = expression;
+    if_statement->if_block             = if_block;
+    if_statement->elseif_list          = elseif_statement_list;
+    if_statement->else_block           = else_block;
 
     return if_statement;
 }
 
-ElseIfStatement* create_elseif_statement(Expression* expression, Statement* elseif_block) {
+ElseIfStatement* create_elseif_statement(Expression* expression, Block* elseif_block) {
     debug_log_with_yellow_coloar("\t");
 
     ElseIfStatement* elseif_statement      = malloc(sizeof(ElseIfStatement));
     elseif_statement->line_number          = get_ring_compiler_line_number();
     elseif_statement->condition_expression = expression;
-    elseif_statement->elseif_block_size    = 0;
     elseif_statement->elseif_block         = elseif_block;
     elseif_statement->next                 = NULL;
 
@@ -480,7 +476,7 @@ Statement* create_statement_from_for(ForStatement* for_statement) {
     return statement;
 }
 
-ForStatement* create_for_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Statement* block) {
+ForStatement* create_for_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Block* block) {
     debug_log_with_yellow_coloar("\t");
 
     ForStatement* for_statement         = malloc(sizeof(ForStatement));
@@ -488,7 +484,6 @@ ForStatement* create_for_statement(Expression* init_expression, Expression* cond
     for_statement->init_expression      = init_expression;
     for_statement->condition_expression = condition_expression;
     for_statement->post_expression      = post_expression;
-    for_statement->block_size           = 0;
     for_statement->block                = block;
 
     return for_statement;
@@ -506,7 +501,7 @@ Statement* create_statement_from_dofor(DoForStatement* dofor_statement) {
     return statement;
 }
 
-DoForStatement* create_dofor_statement(Expression* init_expression, Statement* block, Expression* condition_expression, Expression* post_expression) {
+DoForStatement* create_dofor_statement(Expression* init_expression, Block* block, Expression* condition_expression, Expression* post_expression) {
     debug_log_with_yellow_coloar("\t");
 
     DoForStatement* dofor_statement       = malloc(sizeof(DoForStatement));
@@ -531,13 +526,12 @@ Statement* create_statement_from_dowhile(DoWhileStatement* dowhile_statement) {
     return statement;
 }
 
-DoWhileStatement* create_dowhile_statement(Statement* block, Expression* condition_expression) {
+DoWhileStatement* create_dowhile_statement(Block* block, Expression* condition_expression) {
     debug_log_with_yellow_coloar("\t");
 
     DoWhileStatement* dowhile_statement     = malloc(sizeof(DoWhileStatement));
     dowhile_statement->line_number          = get_ring_compiler_line_number();
     dowhile_statement->condition_expression = condition_expression;
-    dowhile_statement->block_size           = 0;
     dowhile_statement->block                = block;
 
     return dowhile_statement;
@@ -565,6 +559,25 @@ Statement* create_statement_from_continue() {
     statement->next                 = NULL;
 
     return statement;
+}
+
+Block* create_block(Statement* statement_list) {
+    debug_log_with_yellow_coloar("\t");
+
+    Block* block                 = malloc(sizeof(Block));
+    block->line_number           = get_ring_compiler_line_number();
+    block->declaration_list_size = 0;
+    block->declaration_list      = NULL;
+    block->statement_list_size   = 0;
+    block->statement_list        = statement_list;
+    block->parent_block          = NULL;
+
+    for (Statement* pos = statement_list; pos; pos = pos->next) {
+        block->statement_list_size++;
+    }
+
+    // TODO: 这里不要直接赋值，要扫描statment_list 把变量加到当前变量列表中
+    return block;
 }
 
 // 标识符合法性检查
