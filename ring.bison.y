@@ -443,6 +443,7 @@ block
     }
     | TOKEN_LC TOKEN_RC
     {
+        $$ = NULL;
         debug_log_with_green_coloar("[RULE::block: empty statement_list]\t ");
     }
     ;

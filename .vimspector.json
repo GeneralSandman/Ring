@@ -7,7 +7,7 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "${fileDirname}/bin/ring",
-        "args": ["${fileDirname}/test/beat/variable/int-007.ring"],
+        "args": ["${fileDirname}/test/beat/variable/int-008.ring"],
         "cwd": "${workspaceRoot}",
         "environment": [],
         "externalConsole": false,

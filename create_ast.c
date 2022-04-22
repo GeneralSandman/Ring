@@ -400,16 +400,17 @@ Function* new_function_definition(FunctionType type, char* identifier, Variable*
     }
 
     // 把block中定义的局部变量加到 variable_list 中
-    for (Statement* pos = block->statement_list; pos != NULL; pos = pos->next) {
-        if (pos->type == STATEMENT_TYPE_VARIABLE_DEFINITION) {
-            Variable* tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL, 0);
-            memcpy(tmp, pos->u.variable, sizeof(*pos->u.variable));
+    if (block != NULL) {
+        for (Statement* pos = block->statement_list; pos != NULL; pos = pos->next) {
+            if (pos->type == STATEMENT_TYPE_VARIABLE_DEFINITION) {
+                Variable* tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL, 0);
+                memcpy(tmp, pos->u.variable, sizeof(*pos->u.variable));
 
-            tmp->next               = function->variable_list;
-            function->variable_list = tmp;
+                tmp->next               = function->variable_list;
+                function->variable_list = tmp;
+            }
         }
     }
-
     return function;
 }
 

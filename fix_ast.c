@@ -93,6 +93,9 @@ void fix_declaration(Declaration* declaration) {
 }
 
 void fix_block(Block* block) {
+    if (block == NULL) {
+        return;
+    }
     fix_statement_list(block->statement_list);
 }
 

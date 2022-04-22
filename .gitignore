@@ -8,6 +8,8 @@ y.output
 y.tab.c
 y.tab.h
 
+ring.bison.tab.c
+
 .idea/*
 
 *tmp
