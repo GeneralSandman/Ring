@@ -31,6 +31,13 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     STACK_SET_DOUBLE_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), value)
 
 
+// 从后边获取 2BYTE的操作数
+#define OPCODE_GET_2BYTE(p) \
+    (((p)[0] << 8) + (p)[1])
+// 把两BYTE的操作数放到后边
+#define OPCODE_SET_2BYTE(p, value) \
+    (((p)[0] = (value) >> 8), ((p)[1] = value & 0xff))
+
 RVM_RuntimeStack* new_runtime_stack() {
     debug_log_with_white_coloar("\t");
 
@@ -132,6 +139,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_PUSH_STATIC_INT:
+            // STACK_SET_INT_OFFSET(rvm, 0, );
+            runtime_stack->top_index++;
+            rvm->pc += 3;
             break;
 
         case RVM_CODE_ADD_INT:
@@ -171,10 +181,23 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_JUMP:
+            rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             break;
         case RVM_CODE_JUMP_IF_FALSE:
+            if (!STACK_GET_INT_OFFSET(rvm, -1)) {
+                rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            } else {
+                rvm->pc += 3;
+            }
+            runtime_stack->top_index--;
             break;
         case RVM_CODE_JUMP_IF_TRUE:
+            if (STACK_GET_INT_OFFSET(rvm, -1)) {
+                rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            } else {
+                rvm->pc += 3;
+            }
+            runtime_stack->top_index--;
             break;
 
         case RVM_CODE_PUSH_FUNC:
@@ -229,11 +252,10 @@ void invoke_derive_function(Ring_VirtualMachine* rvm) {
 }
 
 void debug_rvm(Ring_VirtualMachine* rvm) {
-    debug_log_with_white_coloar("\t");
-
 #ifndef DEBUG_RVM
     return;
 #endif
+    debug_log_with_white_coloar("\t");
 
     CLEAR_SCREEN;
     ring_vm_dump_runtime_stack(rvm->runtime_stack, 1, 0);

@@ -17,12 +17,19 @@ int_value = 1;
 var bool bool_value;
 bool_value = true;
 
-// println(123);
-// println(222);
+println(123);
+println(222);
 
-/* exit(0); */
-/* if(bool_value) { */
-    /* println("bool_value is true"); */
-/* } else { */
-    /* println("bool_value is false"); */
-/* } */
+// exit(0);
+if(false) {
+    println(12);
+} else {
+    println(23);
+}
+
+
+if(true) {
+    println(12);
+} else {
+    println(23);
+}
