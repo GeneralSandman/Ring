@@ -98,6 +98,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int       code_size      = rvm->executer->code_size;
     RVM_RuntimeStack*  runtime_stack  = rvm->runtime_stack;
     RVM_RuntimeStatic* runtime_static = rvm->runtime_static;
+    unsigned int       opcode_num     = 0;
 
     unsigned int index;
     unsigned int func_index;
@@ -139,7 +140,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_PUSH_STATIC_INT:
-            // STACK_SET_INT_OFFSET(rvm, 0, );
+            oper_num = (code_list[rvm->pc + 1] >> 8) + code_list[rvm->pc + 2];
+            index    = oper_num; //  在操作符后边获取
+            STACK_SET_INT_OFFSET(rvm, 0, rvm->runtime_static->data[index].int_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
@@ -147,31 +150,31 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_ADD_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) + STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc++; // FIXME:  没有操作数不需要占用重复的空间
+            rvm->pc++;
             break;
 
         case RVM_CODE_SUB_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) - STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc++; // FIXME:  没有操作数不需要占用重复的空间
+            rvm->pc++;
             break;
 
         case RVM_CODE_MUL_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) * STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc++; // FIXME:  没有操作数不需要占用重复的空间
+            rvm->pc++;
             break;
 
         case RVM_CODE_DIV_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) / STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc++; // FIXME:  没有操作数不需要占用重复的空间
+            rvm->pc++;
             break;
 
         case RVM_CODE_MOD_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) % STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
-            rvm->pc++; // FIXME:  没有操作数不需要占用重复的空间
+            rvm->pc++;
             break;
 
 
@@ -209,19 +212,24 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_INVOKE_FUNC:
+            func_index = STACK_GET_INT_OFFSET(rvm, -1);
+            runtime_stack->top_index--;
             if (rvm->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE) {
                 invoke_native_function(rvm, &rvm->function_list[func_index]);
-                rvm->pc++;
             } else if (rvm->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE) {
                 invoke_derive_function(rvm);
             }
+            rvm->pc += 1;
             break;
 
         default:
             fprintf(stderr, "execute error: invalid opcode (%d)\n", opcode);
+            fprintf(stderr, "opcode num (%d)\n", opcode_num);
             exit(ERROR_CODE_RUN_VM_ERROR);
             break;
         }
+
+        opcode_num++;
     }
 
     debug_rvm(rvm);
@@ -238,13 +246,13 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function) {
     RVM_Value*          args; // TODO:
 
     // TODO: how to handle arg_count > 1
-    args = &rvm->runtime_stack->data[rvm->runtime_stack->top_index - 2];
+    args = &rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1];
 
     ret = native_func_proc(rvm, arg_count, args);
 
 
     rvm->runtime_stack->top_index -= arg_count;
-    rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1] = ret;
+    rvm->runtime_stack->data[rvm->runtime_stack->top_index] = ret;
 }
 
 void invoke_derive_function(Ring_VirtualMachine* rvm) {
@@ -268,6 +276,23 @@ void debug_rvm(Ring_VirtualMachine* rvm) {
     }
 }
 
+
+// RVM_Value native_proc_to_string(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
+// debug_log_with_white_coloar("\t");
+//
+// RVM_Value ret;
+//
+// if (arg_cout != 1) {
+// printf("native_proc_print only one arguement\n");
+// exit(ERROR_CODE_RUN_VM_ERROR);
+// }
+//
+//
+// printf("%d", args->int_value);
+// fflush(stdout);
+//
+// return ret;
+// }
 
 RVM_Value native_proc_print(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
     debug_log_with_white_coloar("\t");
