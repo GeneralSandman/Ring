@@ -15,3 +15,10 @@ ring.bison.tab.c
 *tmp
 
 .vimspector.session
+
+.ccls-cache/*
+.local_history/*
+
+.DS_Store
+
+.cache/*

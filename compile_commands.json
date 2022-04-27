@@ -1,0 +1,242 @@
+[
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "lex.yy.o",
+   "lex.yy.c"
+  ],
+  "file": "lex.yy.c"
+ },
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "y.tab.o",
+   "y.tab.c"
+  ],
+  "file": "y.tab.c"
+ },
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "string.o",
+   "string.c"
+  ],
+  "file": "string.c"
+ },
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "create_ast.o",
+   "create_ast.c"
+  ],
+  "file": "create_ast.c"
+ },
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "semantic_check.o",
+   "semantic_check.c"
+  ],
+  "file": "semantic_check.c"
+ },
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "fix_ast.o",
+   "fix_ast.c"
+  ],
+  "file": "fix_ast.c"
+ },
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "generate.o",
+   "generate.c"
+  ],
+  "file": "generate.c"
+ },
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "execute.o",
+   "execute.c"
+  ],
+  "file": "execute.c"
+ },
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "compiler.o",
+   "compiler.c"
+  ],
+  "file": "compiler.c"
+ },
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "inner_func.o",
+   "inner_func.c"
+  ],
+  "file": "inner_func.c"
+ },
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "utils.o",
+   "utils.c"
+  ],
+  "file": "utils.c"
+ },
+ {
+  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "arguments": [
+   "gcc",
+   "-c",
+   "-std=c99",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "-c",
+   "-o",
+   "main.o",
+   "main.c"
+  ],
+  "file": "main.c"
+ }
+]
