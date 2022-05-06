@@ -436,15 +436,15 @@ return_list
     ;
 
 block
-    : TOKEN_LC statement_list TOKEN_RC
+    : TOKEN_LC { $<m_block>$ = start_new_block(); } statement_list TOKEN_RC
     {
         debug_log_with_green_coloar("[RULE::block: statment_list]\t ");
-        $$ = create_block($2);
+        $<m_block>$ = finish_block($<m_block>2, $3);
     }
     | TOKEN_LC TOKEN_RC
     {
-        $$ = NULL;
         debug_log_with_green_coloar("[RULE::block: empty statement_list]\t ");
+        $$ = finish_block(start_new_block(), NULL);
     }
     ;
 

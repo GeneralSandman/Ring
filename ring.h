@@ -55,6 +55,8 @@ typedef struct Identifier_Tag Identifier;
 
 typedef struct Function_Tag Function;
 
+typedef struct Block_Tag Block;
+
 typedef struct FunctionReturnList_Tag FunctionReturnList;
 
 typedef struct IfStatement_Tag IfStatement;
@@ -109,6 +111,8 @@ struct Ring_Compiler_Tag {
 
     unsigned int declaration_list_size;
     Declaration* declaration_list;
+
+    Block* current_block;
 };
 
 typedef union {
@@ -619,9 +623,10 @@ struct Declaration_Tag {
     Declaration*   next;
 };
 
-typedef struct Block_Tag Block;
 struct Block_Tag {
     unsigned int line_number;
+
+    // BlockType type;
 
     unsigned int declaration_list_size;
     Declaration* declaration_list;
@@ -650,7 +655,7 @@ struct Function_Tag {
     Variable*    variable_list;
 
     // unsigned int return_list_size;
-    // return_list; // TODO:
+    // return_list; // TODO: d
 
     Block* block;
 
@@ -944,7 +949,8 @@ Statement*              create_statement_from_dowhile(DoWhileStatement* dowhile_
 DoWhileStatement*       create_dowhile_statement(Block* block, Expression* condition_expression);
 Statement*              create_statement_from_break();
 Statement*              create_statement_from_continue();
-Block*                  create_block(Statement* statement_list);
+Block*                  start_new_block();
+Block*                  finish_block(Block* block, Statement* statement_list);
 // Identifier *            create_identifier(IdentifierType type, char *name);
 // char **identifier_list_add_item(char **identifier_list, char *identifier);
 
