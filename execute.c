@@ -72,7 +72,7 @@ Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* execu
     // init something
     rvm_add_static_variable(executer, rvm->runtime_static);
     rvm_register_native_functions(rvm);
-    // rvm_add_functions(executer, rvm);
+    rvm_add_derive_functions(executer, rvm);
 
     return rvm;
 }
@@ -84,11 +84,14 @@ void rvm_add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_Runtime
     runtime_static->data = malloc(runtime_static->size * sizeof(RVM_Value));
 }
 
-void rvm_add_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm) {
+void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
 
-    rvm->function_list = executer->function_list;
-    rvm->function_size = executer->function_size;
+    for (int i = 0; i < executer->function_size; i++) {
+        RVM_Function function = executer->function_list[i];
+        if (function.type == RVM_FUNCTION_TYPE_NATIVE) {
+        }
+    }
 }
 
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
@@ -379,7 +382,7 @@ void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM
     if (rvm->function_list == NULL) {
         rvm->function_list = malloc(sizeof(Function));
     } else {
-        rvm->function_list = realloc(rvm->function_list, sizeof(Function) * (rvm->function_size + 1));
+        rvm->function_list = realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
     }
     rvm->function_list[rvm->function_size].func_name                = func_name;
     rvm->function_list[rvm->function_size].type                     = RVM_FUNCTION_TYPE_NATIVE;

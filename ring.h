@@ -418,8 +418,8 @@ typedef enum {
 
 typedef enum {
     FUNCTION_TYPE_UNKNOW = 0,
-    FUNCTION_TYPE_INNER_LIB,
-    FUNCTION_TYPE_EXTERNAL,
+    FUNCTION_TYPE_NATIVE, 
+    FUNCTION_TYPE_DERIVE, 
 } FunctionType;
 
 typedef enum {
@@ -1023,7 +1023,7 @@ RVM_RuntimeStack*    new_runtime_stack();
 RVM_RuntimeStatic*   new_runtime_static();
 Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* executer);
 void                 rvm_add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static);
-void                 rvm_add_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm);
+void                 rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm);

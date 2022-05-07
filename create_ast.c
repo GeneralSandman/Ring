@@ -377,6 +377,11 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
 Function* new_function_definition(FunctionType type, char* identifier, Variable* parameter_list, FunctionReturnList* return_list, Block* block) {
     debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier);
 
+    // FIXME:
+    if (!strcmp(identifier, "println_bool") || !strcmp(identifier, "println_int") || !strcmp(identifier, "println_double")) {
+        type = FUNCTION_TYPE_NATIVE;
+    }
+
     Function* function            = malloc(sizeof(Function));
     function->line_number         = get_ring_compiler_line_number();
     function->func_index          = get_ring_compiler()->function_list_size;
@@ -584,6 +589,7 @@ Statement* create_statement_from_continue() {
 Block* start_new_block() {
     debug_log_with_yellow_coloar("\t");
 
+
     Block* block                 = malloc(sizeof(Block));
     block->line_number           = get_ring_compiler_line_number();
     block->declaration_list_size = 0;
@@ -595,7 +601,6 @@ Block* start_new_block() {
     /* printf("[start] parent:%p, current:%p\n", block->parent_block, block); */
 
     get_ring_compiler()->current_block = block;
-
 
     return block;
 }

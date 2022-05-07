@@ -108,7 +108,12 @@ void add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* execut
 
 void copy_function(Function* src, RVM_Function* dest) {
     debug_log_with_darkgreen_coloar("\t");
-    dest->type      = RVM_FUNCTION_TYPE_NATIVE;
+    // FIXME: rewrite it generatly.
+    if (src->type == FUNCTION_TYPE_NATIVE) {
+        dest->type = RVM_FUNCTION_TYPE_NATIVE;
+    } else if (src->type == FUNCTION_TYPE_DERIVE) {
+        dest->type = RVM_FUNCTION_TYPE_DERIVE;
+    }
     dest->func_name = src->function_name;
 }
 

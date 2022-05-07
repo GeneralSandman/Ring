@@ -370,42 +370,42 @@ function_definition
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, NULL, $5);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, NULL, NULL, $5);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, NULL, NULL);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, NULL, NULL, NULL);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, NULL, $6);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, NULL, $6);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, NULL, NULL);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, NULL, NULL);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, NULL, $7, $9);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, NULL, $7, $9);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_EXTERNAL, $2, $4, $8, $10);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, $10);
 
     }
     ;
