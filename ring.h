@@ -291,7 +291,7 @@ struct RVM_Opcode_Info_Tag {
 typedef enum {
     RVM_CODE_UNKNOW = 0,
 
-    // init double string const
+    // int double string const
     RVM_CODE_PUSH_INT_1BYTE, // operand 0-255
     RVM_CODE_PUSH_INT_2BYTE, // operand 256-65535
     RVM_CODE_PUSH_INT,       // bigger 65535
@@ -315,26 +315,38 @@ typedef enum {
     RVM_CODE_PUSH_STACK_DOUBLE,
     RVM_CODE_PUSH_STACK_OBJECT,
 
-    //
+    // arithmetic
     RVM_CODE_ADD_INT,
+    RVM_CODE_ADD_DOUBLE,
+    RVM_CODE_ADD_STRING,
     RVM_CODE_SUB_INT,
+    RVM_CODE_SUB_DOUBLE,
     RVM_CODE_MUL_INT,
+    RVM_CODE_MUL_DOUBLE,
     RVM_CODE_DIV_INT,
+    RVM_CODE_DIV_DOUBLE,
     RVM_CODE_MOD_INT,
+    RVM_CODE_MOD_DOUBLE,
+    RVM_CODE_MINUS_INT,
+    RVM_CODE_MINUS_DOUBLE,
+    RVM_CODE_INCREASE,
+    RVM_CODE_DECREASE,
 
-    //
+    // logical
     RVM_CODE_LOGICAL_AND,
     RVM_CODE_LOGICAL_OR,
 
-    //
+    // jump
     RVM_CODE_JUMP,
     RVM_CODE_JUMP_IF_FALSE,
     RVM_CODE_JUMP_IF_TRUE,
 
-    //
+    // func
     RVM_CODE_PUSH_FUNC,
     RVM_CODE_INVOKE_FUNC,
 
+    // 不能在生成代码的时候使用
+    RVM_CODES_NUM, // 用来标记RVM CODE 的数量
 } RVM_Opcode;
 
 typedef enum {
@@ -761,12 +773,28 @@ struct TypeSpecifier_Tag {
 
 typedef enum {
     ERROR_CODE_SUCCESS,
-    ERROR_CODE_COMPILE_ERROR,          // 编译错误
-    ERROR_CODE_SEMANTIC_CHECH_ERROR,   // 语义分析错误
-    ERROR_CODE_OPTIMIZATION_AST_ERROR, // 优化AST错误
-    ERROR_CODE_GENERATE_OPCODE_ERROR,  // 生成虚拟机代码错误
-    ERROR_CODE_LOAD_OPCODE_ERROR,      // 加载虚拟机代码错误
-    ERROR_CODE_RUN_VM_ERROR,           // 虚拟机执行失败
+
+    // 编译错误
+    ERROR_CODE_COMPILE_ERROR,
+
+    // 语义分析错误
+    ERROR_CODE_SEMANTIC_CHECH_ERROR,
+
+    // 优化AST错误
+    ERROR_CODE_OPTIMIZATION_AST_ERROR,
+
+
+    // 生成虚拟机代码错误
+    ERROR_CODE_GENERATE_OPCODE_ERROR,
+    ERROR_CODE_FIX_LABEL,
+    ERROR_CODE_INVALID_OPCODE,
+    ERROR_CODE_INVALID_OPCODE_TYPE,
+
+    // 加载虚拟机代码错误
+    ERROR_CODE_LOAD_OPCODE_ERROR,
+
+    // 虚拟机执行失败
+    ERROR_CODE_RUN_VM_ERROR,
 } ErrorCode;
 
 struct ErrorMessageInfo {

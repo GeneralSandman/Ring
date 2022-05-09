@@ -6,7 +6,9 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer) {
     printf(" ************  rvm constant pool  ****\n");
+    /* printf("constant_pool_size:%u\n", executer->constant_pool_size); */
     for (int i = 0; i < executer->constant_pool_size; i++) {
+        /* RVM_ConstantPool tmp = executer->constant_pool_list[i]; */
         printf("%10d | ", i);
         switch (executer->constant_pool_list[i].type) {
         case CONSTANTPOOL_TYPE_INT:
@@ -19,6 +21,7 @@ void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer) {
             printf("<string> %15s\n", executer->constant_pool_list[i].u.string_value);
             break;
         default:
+            fprintf(stderr, "error-----------");
             break;
         }
     }
@@ -35,7 +38,7 @@ void ring_vm_code_dump(Ring_VirtualMachine_Executer* executer, unsigned int pc, 
     printf(" ************  rvm opcode  ****\n");
 
     MOVE_CURSOR(screen_row++, screen_col);
-    printf(" %10s | %15s | %10s | %5s\n", "index", "opcode", "oper num", "pc");
+    printf(" %10s | %20s | %10s | %5s\n", "index", "opcode", "oper num", "pc");
     for (unsigned int i = 0; i < code_size;) {
         char* pointer = "";
         if (i == pc) {
@@ -69,7 +72,7 @@ void ring_vm_code_dump(Ring_VirtualMachine_Executer* executer, unsigned int pc, 
         }
 
         MOVE_CURSOR(screen_row++, screen_col);
-        printf(" %10d | %15s | %10s | %5s\n", index, opcode_name, oper_num, pointer);
+        printf(" %10d | %20s | %10s | %5s\n", index, opcode_name, oper_num, pointer);
     }
 }
 
