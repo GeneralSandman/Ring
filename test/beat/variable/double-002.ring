@@ -1,5 +1,5 @@
 //
-// File:    double-000.ring
+// File:    double-002.ring
 // Author:  zhenhuli - generalsandman@163.com
 // Date:    2022-05-09
 //
@@ -12,11 +12,13 @@ function println_string(var string string_value);
 
 var double double_value;
 
+
+
 double_value = 1.1;
-print("1.1=", double_value, "\n");
+println_double(double_value);
 
-double_value = -1.1;
-print("-1.1=", double_value, "\n");
+double_value = 1.23456;
+println_double(double_value);
 
-double_value = 0-1.1;
-print("0-1.1=", double_value, "\n");
+/* double_value = 0-1.1; */
+/* println_double(double_value); */

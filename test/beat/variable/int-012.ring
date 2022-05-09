@@ -10,11 +10,9 @@ function println_double(var double double_value);
 
 
 function test() {
-    var int int_value;
-
-    if(int_value == 1) {
-
-    } else {
-
-    }
+    println_int(123);
 }
+
+println_int(1);
+test();
+println_int(2);

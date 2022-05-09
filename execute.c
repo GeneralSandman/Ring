@@ -10,12 +10,16 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     ((rvm)->runtime_stack->data[(index)].int_value)
 #define STACK_GET_DOUBLE_INDEX(rvm, index) \
     ((rvm)->runtime_stack->data[(index)].double_value)
+#define STACK_GET_STRING_INDEX(rvm, index) \
+    ((rvm)->runtime_stack->data[(index)].string_value)
 
 // 通过栈顶偏移 offset 获取
 #define STACK_GET_INT_OFFSET(rvm, offset) \
     STACK_GET_INT_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 #define STACK_GET_DOUBLE_OFFSET(rvm, offset) \
     STACK_GET_DOUBLE_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
+#define STACK_GET_STRING_OFFSET(rvm, offset) \
+    STACK_GET_STRING_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 
 
 // 通过绝对索引 设置
@@ -23,12 +27,16 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     ((rvm)->runtime_stack->data[(index)].int_value = (value))
 #define STACK_SET_DOUBLE_INDEX(rvm, index, value) \
     ((rvm)->runtime_stack->data[(index)].double_value = (value))
+#define STACK_SET_STRING_INDEX(rvm, index, value) \
+    ((rvm)->runtime_stack->data[(index)].string_value = (value))
 
 // 通过栈顶偏移 offset 设置
 #define STACK_SET_INT_OFFSET(rvm, offset, value) \
-    STACK_SET_INT_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), value)
-#define STACK_SET_DOUBLE_OFFSET(rvm, offset, double_value) \
-    STACK_SET_DOUBLE_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), value)
+    STACK_SET_INT_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
+#define STACK_SET_DOUBLE_OFFSET(rvm, offset, value) \
+    STACK_SET_DOUBLE_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
+#define STACK_SET_STRING_OFFSET(rvm, offset, value) \
+    STACK_SET_STRING_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
 
 
 // 从后边获取 2BYTE的操作数
@@ -97,15 +105,18 @@ void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_Virtu
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
 
-    RVM_Byte*          code_list      = rvm->executer->code_list;
-    unsigned int       code_size      = rvm->executer->code_size;
-    RVM_RuntimeStack*  runtime_stack  = rvm->runtime_stack;
-    RVM_RuntimeStatic* runtime_static = rvm->runtime_static;
-    unsigned int       opcode_num     = 0;
+    RVM_Byte*          code_list       = rvm->executer->code_list;
+    unsigned int       code_size       = rvm->executer->code_size;
+    RVM_ConstantPool*  const_pool_list = rvm->executer->constant_pool_list;
+    unsigned int       const_pool_size = rvm->executer->constant_pool_size;
+    RVM_RuntimeStack*  runtime_stack   = rvm->runtime_stack;
+    RVM_RuntimeStatic* runtime_static  = rvm->runtime_static;
+    unsigned int       opcode_num      = 0;
 
     unsigned int index;
     unsigned int func_index;
     unsigned int oper_num;
+    unsigned int const_index;
 
     while (rvm->pc < code_size) {
         RVM_Byte opcode = code_list[rvm->pc];
@@ -113,41 +124,67 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         debug_rvm(rvm);
 
         switch (opcode) {
+        // init double string const
         case RVM_CODE_PUSH_INT_1BYTE:
             STACK_SET_INT_OFFSET(rvm, 0, code_list[rvm->pc + 1]);
             runtime_stack->top_index++;
             rvm->pc += 2;
             break;
-
         case RVM_CODE_PUSH_INT_2BYTE:
             break;
-
         case RVM_CODE_PUSH_INT:
-            STACK_SET_INT_OFFSET(rvm, 0, code_list[rvm->pc + 1]); // FIXME: 需要取两个
+            const_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_INT_OFFSET(rvm, 0, const_pool_list[const_index].u.int_value);
             runtime_stack->top_index++;
-            rvm->pc += 2;
+            rvm->pc += 3;
             break;
-
         case RVM_CODE_PUSH_DOUBLE:
+            const_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_DOUBLE_OFFSET(rvm, 0, const_pool_list[const_index].u.double_value);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
             break;
-
         case RVM_CODE_PUSH_STRING:
+            const_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            // TODO:
+            // STACK_SET_STRING_OFFSET(rvm, 0, const_pool_list[const_index].u.string_value);
             break;
 
+
+        // static
         case RVM_CODE_POP_STATIC_INT:
-            oper_num                              = (code_list[rvm->pc + 1] >> 8) + code_list[rvm->pc + 2];
+            oper_num                              = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             index                                 = oper_num;                      //  在操作符后边获取
             runtime_static->data[index].int_value = STACK_GET_INT_OFFSET(rvm, -1); // 找到对应的 static 变量
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
-
+        case RVM_CODE_POP_STATIC_DOUBLE:
+            oper_num                                 = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            index                                    = oper_num;                         //  在操作符后边获取
+            runtime_static->data[index].double_value = STACK_GET_DOUBLE_OFFSET(rvm, -1); // 找到对应的 static 变量
+            runtime_stack->top_index--;
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_POP_STATIC_OBJECT:
+            // TODO:
+            break;
         case RVM_CODE_PUSH_STATIC_INT:
-            oper_num = (code_list[rvm->pc + 1] >> 8) + code_list[rvm->pc + 2];
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             index    = oper_num; //  在操作符后边获取
             STACK_SET_INT_OFFSET(rvm, 0, rvm->runtime_static->data[index].int_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
+            break;
+        case RVM_CODE_PUSH_STATIC_DOUBLE:
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            index    = oper_num; //  在操作符后边获取
+            STACK_SET_DOUBLE_OFFSET(rvm, 0, rvm->runtime_static->data[index].double_value);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_PUSH_STATIC_OBJECT:
+            // TODO:
             break;
 
         case RVM_CODE_ADD_INT:

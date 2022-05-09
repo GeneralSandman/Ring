@@ -291,20 +291,29 @@ struct RVM_Opcode_Info_Tag {
 typedef enum {
     RVM_CODE_UNKNOW = 0,
 
-    // push
+    // init double string const
     RVM_CODE_PUSH_INT_1BYTE, // operand 0-255
     RVM_CODE_PUSH_INT_2BYTE, // operand 256-65535
     RVM_CODE_PUSH_INT,       // bigger 65535
-
     RVM_CODE_PUSH_DOUBLE,
-
     RVM_CODE_PUSH_STRING,
 
-    // pop
+    // static
     RVM_CODE_POP_STATIC_INT,
-
-    // push
+    RVM_CODE_POP_STATIC_DOUBLE,
+    RVM_CODE_POP_STATIC_OBJECT,
     RVM_CODE_PUSH_STATIC_INT,
+    RVM_CODE_PUSH_STATIC_DOUBLE,
+    RVM_CODE_PUSH_STATIC_OBJECT,
+
+
+    // stack
+    RVM_CODE_POP_STACK_INT,
+    RVM_CODE_POP_STACK_DOUBLE,
+    RVM_CODE_POP_STACK_OBJECT,
+    RVM_CODE_PUSH_STACK_INT,
+    RVM_CODE_PUSH_STACK_DOUBLE,
+    RVM_CODE_PUSH_STACK_OBJECT,
 
     //
     RVM_CODE_ADD_INT,
@@ -418,8 +427,8 @@ typedef enum {
 
 typedef enum {
     FUNCTION_TYPE_UNKNOW = 0,
-    FUNCTION_TYPE_NATIVE, 
-    FUNCTION_TYPE_DERIVE, 
+    FUNCTION_TYPE_NATIVE,
+    FUNCTION_TYPE_DERIVE,
 } FunctionType;
 
 typedef enum {
@@ -1014,8 +1023,7 @@ int constant_pool_add_string(Ring_VirtualMachine_Executer* executer, char* strin
 unsigned int opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer);
 void         opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address);
 void         opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer);
-
-
+RVM_Opcode   convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type);
 // generate.c
 
 // execute.c

@@ -6,19 +6,27 @@
 RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_UNKNOW, "", OPCODE_OPERAND_TYPE_UNKNOW},
 
-    // push
     {RVM_CODE_PUSH_INT_1BYTE, "push_int_1byte", OPCODE_OPERAND_TYPE_1BYTE}, // 后边紧跟 int 常量 1 type
     {RVM_CODE_PUSH_INT_2BYTE, "push_int_2byte", OPCODE_OPERAND_TYPE_2BYTE}, // 后边紧跟 int 常量 2 type
     {RVM_CODE_PUSH_INT, "push_int", OPCODE_OPERAND_TYPE_2BYTE},             // 后边紧跟 int 常量 2 的索引 这里的还要 改一下 OPCODE_OPERAND_TYPE_2BYTE
+    {RVM_CODE_PUSH_DOUBLE, "push_double", OPCODE_OPERAND_TYPE_2BYTE},       // 后边紧跟 double 常量
+    {RVM_CODE_PUSH_STRING, "push_string", OPCODE_OPERAND_TYPE_2BYTE},       // 后边紧跟 string 常量
 
-    {RVM_CODE_PUSH_DOUBLE, "push_double", OPCODE_OPERAND_TYPE_2BYTE}, // 后边紧跟 int 常量 2 的索引
-
-    {RVM_CODE_PUSH_STRING, "push_string", OPCODE_OPERAND_TYPE_2BYTE}, // 后边紧跟 int 常量 2 的索引
-
-    // pop
-    {RVM_CODE_POP_STATIC_INT, "pop_static_int", OPCODE_OPERAND_TYPE_2BYTE}, // 全局变量的赋值  这里后续要扩展成2 byte，面的index不够
-
+    // static
+    {RVM_CODE_POP_STATIC_INT, "pop_static_int", OPCODE_OPERAND_TYPE_2BYTE},
+    {RVM_CODE_POP_STATIC_DOUBLE, "pop_static_double", OPCODE_OPERAND_TYPE_2BYTE},
+    {RVM_CODE_POP_STATIC_OBJECT, "pop_static_object", OPCODE_OPERAND_TYPE_2BYTE},
     {RVM_CODE_PUSH_STATIC_INT, "push_static_int", OPCODE_OPERAND_TYPE_2BYTE},
+    {RVM_CODE_PUSH_STATIC_DOUBLE, "push_static_double", OPCODE_OPERAND_TYPE_2BYTE},
+    {RVM_CODE_PUSH_STATIC_OBJECT, "push_static_object", OPCODE_OPERAND_TYPE_2BYTE},
+
+    // stack
+    {RVM_CODE_POP_STACK_INT, "pop_stack_int", OPCODE_OPERAND_TYPE_2BYTE},
+    {RVM_CODE_POP_STACK_DOUBLE, "pop_stack_double", OPCODE_OPERAND_TYPE_2BYTE},
+    {RVM_CODE_POP_STACK_OBJECT, "pop_stack_object", OPCODE_OPERAND_TYPE_2BYTE},
+    {RVM_CODE_PUSH_STACK_INT, "push_stack_int", OPCODE_OPERAND_TYPE_2BYTE},
+    {RVM_CODE_PUSH_STACK_DOUBLE, "push_stack_double", OPCODE_OPERAND_TYPE_2BYTE},
+    {RVM_CODE_PUSH_STACK_OBJECT, "push_stack_object", OPCODE_OPERAND_TYPE_2BYTE},
 
 
     //
@@ -108,7 +116,6 @@ void add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* execut
 
 void copy_function(Function* src, RVM_Function* dest) {
     debug_log_with_darkgreen_coloar("\t");
-    // FIXME: rewrite it generatly.
     if (src->type == FUNCTION_TYPE_NATIVE) {
         dest->type = RVM_FUNCTION_TYPE_NATIVE;
     } else if (src->type == FUNCTION_TYPE_DERIVE) {
@@ -435,8 +442,10 @@ void generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, Identifie
     }
     Declaration* declaration = identifier_expression->u.declaration;
 
+    // TODO: 还需要区分 static stack
     unsigned int variable_index = declaration->variable_index;
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_STATIC_INT, variable_index);
+    RVM_Opcode   opcode         = convert_opcode_by_rvm_type(RVM_CODE_POP_STATIC_INT, declaration->type);
+    generate_vmcode(executer, opcode_buffer, opcode, variable_index);
 }
 
 void generate_vmcode_from_logical_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
@@ -624,6 +633,7 @@ int constant_pool_add_int(Ring_VirtualMachine_Executer* executer, int int_litera
     new_value.u.int_value               = int_literal;
     executer->constant_pool_list[index] = new_value;
 
+
     return index;
 }
 
@@ -631,11 +641,13 @@ int constant_pool_add_double(Ring_VirtualMachine_Executer* executer, double doub
     debug_log_with_darkgreen_coloar("\t");
     int index = constant_pool_grow(executer, 1);
 
-    RVM_ConstantPool new_value;
-    new_value.type                      = CONSTANTPOOL_TYPE_DOUBLE;
-    new_value.u.double_value            = double_literal;
-    executer->constant_pool_list[index] = new_value;
+    /* RVM_ConstantPool new_value; */
+    /* new_value.type                      = CONSTANTPOOL_TYPE_DOUBLE; */
+    /* new_value.u.double_value            = double_literal; */
+    /* executer->constant_pool_list[index] = new_value; */
 
+    executer->constant_pool_list[index].type           = CONSTANTPOOL_TYPE_DOUBLE;
+    executer->constant_pool_list[index].u.double_value = double_literal;
     return index;
 }
 
@@ -717,3 +729,38 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         }
     }
 }
+
+RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
+    debug_log_with_darkgreen_coloar("\t");
+    assert(type != NULL);
+
+    if (!(opcode == RVM_CODE_POP_STATIC_INT
+          || opcode == RVM_CODE_PUSH_STATIC_INT
+          || opcode == RVM_CODE_POP_STACK_INT
+          || opcode == RVM_CODE_PUSH_STACK_INT)) {
+        fprintf(stderr, "convert_opcode_by_rvm_type error(opcode is valid:%d)\n", opcode);
+        exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+        return RVM_CODE_UNKNOW;
+    }
+
+    switch (type->basic_type) {
+    case RING_BASIC_TYPE_BOOL:
+    case RING_BASIC_TYPE_INT:
+        return opcode;
+        break;
+    case RING_BASIC_TYPE_DOUBLE:
+        return opcode + 1;
+        break;
+    case RING_BASIC_TYPE_STRING:
+        return opcode + 2;
+        break;
+
+    default:
+        fprintf(stderr, "generate opcode error\n");
+        exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+        break;
+    }
+
+    return RVM_CODE_UNKNOW;
+}
+
