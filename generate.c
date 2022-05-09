@@ -6,6 +6,7 @@
 RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_UNKNOW, "", OPCODE_OPERAND_TYPE_UNKNOW},
 
+    // init double string const
     {RVM_CODE_PUSH_INT_1BYTE, "push_int_1byte", OPCODE_OPERAND_TYPE_1BYTE}, // 后边紧跟 int 常量 1 type
     {RVM_CODE_PUSH_INT_2BYTE, "push_int_2byte", OPCODE_OPERAND_TYPE_2BYTE}, // 后边紧跟 int 常量 2 type
     {RVM_CODE_PUSH_INT, "push_int", OPCODE_OPERAND_TYPE_2BYTE},             // 后边紧跟 int 常量 2 的索引 这里的还要 改一下 OPCODE_OPERAND_TYPE_2BYTE
@@ -29,27 +30,38 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_STACK_OBJECT, "push_stack_object", OPCODE_OPERAND_TYPE_2BYTE},
 
 
-    //
+    // arithmetic
     {RVM_CODE_ADD_INT, "add_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_ADD_DOUBLE, "add_double", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_ADD_STRING, "add_string", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_SUB_INT, "sub_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_SUB_DOUBLE, "sub_double", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_MUL_INT, "mul_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_MUL_DOUBLE, "mul_double", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_DIV_INT, "div_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_DIV_DOUBLE, "div_double", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_MOD_INT, "mod_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_MOD_DOUBLE, "mod_double", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_MINUS_INT, "minus_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_MINUS_DOUBLE, "minus_double", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_INCREASE, "increase", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_DECREASE, "decrease", OPCODE_OPERAND_TYPE_0BYTE},
 
-    //
+    // logical
     {RVM_CODE_LOGICAL_AND, "logical_and", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_LOGICAL_OR, "logical_or", OPCODE_OPERAND_TYPE_0BYTE},
 
-    //
+    // jump
     {RVM_CODE_JUMP, "jump", OPCODE_OPERAND_TYPE_2BYTE},
     {RVM_CODE_JUMP_IF_FALSE, "jump_if_false", OPCODE_OPERAND_TYPE_2BYTE},
     {RVM_CODE_JUMP_IF_TRUE, "jump_if_true", OPCODE_OPERAND_TYPE_2BYTE},
 
-    //
+    // func
     {RVM_CODE_PUSH_FUNC, "push_func", OPCODE_OPERAND_TYPE_1BYTE}, // TODO: update to 2 byte
     {RVM_CODE_INVOKE_FUNC, "invoke_func", OPCODE_OPERAND_TYPE_0BYTE},
 
 
+    {RVM_CODES_NUM, "", OPCODE_OPERAND_TYPE_0BYTE},
 };
 
 Ring_VirtualMachine_Executer* new_ring_vm_executer() {
@@ -131,6 +143,7 @@ void add_top_level_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* e
     generate_vmcode_from_statement_list(executer, compiler->statement_list, opcode_buffer);
 
     opcode_buffer_fix_label(opcode_buffer);
+
 
     RVM_Byte*    code_list = opcode_buffer->code_list;
     unsigned int code_size = opcode_buffer->code_size;
@@ -365,6 +378,10 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
         generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_MOD_INT);
         break;
 
+    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
+        generate_vmcode_from_unitary_expression(executer, expression->u.unitary_expression, opcode_buffer, RVM_CODE_MINUS_INT);
+        break;
+
     case EXPRESSION_TYPE_LOGICAL_AND:
         generate_vmcode_from_logical_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_LOGICAL_AND);
         break;
@@ -495,6 +512,17 @@ void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* execut
     generate_vmcode(executer, opcode_buffer, opcode, 0);
 }
 
+void generate_vmcode_from_unitary_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (expression == NULL) {
+        return;
+    }
+
+    generate_vmcode_from_expression(executer, expression, opcode_buffer);
+
+    generate_vmcode(executer, opcode_buffer, opcode, 0);
+}
+
 void generate_vmcode_from_identifier_expression(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (identifier_expression == NULL) {
@@ -542,7 +570,7 @@ void generate_vmcode_from_int_expression(Ring_VirtualMachine_Executer* executer,
 
     if (0 <= expression->u.int_literal && expression->u.int_literal < 256) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT_1BYTE, expression->u.int_literal);
-    } else if (expression->u.int_literal < 65536) {
+    } else if (256 <= expression->u.int_literal && expression->u.int_literal < 65536) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT_2BYTE, expression->u.int_literal);
     } else {
         int constant_index = constant_pool_add_int(executer, expression->u.int_literal);
@@ -628,23 +656,14 @@ int constant_pool_add_int(Ring_VirtualMachine_Executer* executer, int int_litera
     debug_log_with_darkgreen_coloar("\t");
     int index = constant_pool_grow(executer, 1);
 
-    RVM_ConstantPool new_value;
-    new_value.type                      = CONSTANTPOOL_TYPE_INT;
-    new_value.u.int_value               = int_literal;
-    executer->constant_pool_list[index] = new_value;
-
-
+    executer->constant_pool_list[index].type        = CONSTANTPOOL_TYPE_INT;
+    executer->constant_pool_list[index].u.int_value = int_literal;
     return index;
 }
 
 int constant_pool_add_double(Ring_VirtualMachine_Executer* executer, double double_literal) {
     debug_log_with_darkgreen_coloar("\t");
     int index = constant_pool_grow(executer, 1);
-
-    /* RVM_ConstantPool new_value; */
-    /* new_value.type                      = CONSTANTPOOL_TYPE_DOUBLE; */
-    /* new_value.u.double_value            = double_literal; */
-    /* executer->constant_pool_list[index] = new_value; */
 
     executer->constant_pool_list[index].type           = CONSTANTPOOL_TYPE_DOUBLE;
     executer->constant_pool_list[index].u.double_value = double_literal;
@@ -660,6 +679,8 @@ int constant_pool_add_string(Ring_VirtualMachine_Executer* executer, char* strin
     new_value.u.string_value            = string_literal;
     executer->constant_pool_list[index] = new_value;
 
+    executer->constant_pool_list[index].type           = CONSTANTPOOL_TYPE_STRING;
+    executer->constant_pool_list[index].u.string_value = string_literal;
     return index;
 }
 
@@ -689,11 +710,16 @@ void opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label
 
 void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
+
     unsigned int label;
     unsigned int label_address;
 
     for (unsigned int i = 0; i < opcode_buffer->code_size;) {
-        RVM_Byte        opcode      = opcode_buffer->code_list[i];
+        RVM_Byte opcode = opcode_buffer->code_list[i];
+        if (opcode <= RVM_CODE_UNKNOW || opcode >= RVM_CODES_NUM) {
+            fprintf(stderr, "opcode_buffer_fix_label(opcode is valid:%d)\n", opcode);
+            exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+        }
         RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
 
         switch (opcode) {
@@ -725,7 +751,10 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
             i += 3;
             break;
 
-        default: break;
+        default:
+            fprintf(stderr, "opcode_buffer_fix_label(opcode is valid:%d)\n", opcode);
+            exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+            break;
         }
     }
 }

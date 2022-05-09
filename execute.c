@@ -1,4 +1,5 @@
 #include "ring.h"
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -105,13 +106,13 @@ void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_Virtu
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
 
-    RVM_Byte*          code_list       = rvm->executer->code_list;
-    unsigned int       code_size       = rvm->executer->code_size;
-    RVM_ConstantPool*  const_pool_list = rvm->executer->constant_pool_list;
-    unsigned int       const_pool_size = rvm->executer->constant_pool_size;
-    RVM_RuntimeStack*  runtime_stack   = rvm->runtime_stack;
-    RVM_RuntimeStatic* runtime_static  = rvm->runtime_static;
-    unsigned int       opcode_num      = 0;
+    RVM_Byte*         code_list       = rvm->executer->code_list;
+    unsigned int      code_size       = rvm->executer->code_size;
+    RVM_ConstantPool* const_pool_list = rvm->executer->constant_pool_list;
+    /* unsigned int       const_pool_size = rvm->executer->constant_pool_size; */
+    RVM_RuntimeStack*  runtime_stack  = rvm->runtime_stack;
+    RVM_RuntimeStatic* runtime_static = rvm->runtime_static;
+    unsigned int       opcode_num     = 0;
 
     unsigned int index;
     unsigned int func_index;
@@ -124,13 +125,16 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         debug_rvm(rvm);
 
         switch (opcode) {
-        // init double string const
+        // int double string const
         case RVM_CODE_PUSH_INT_1BYTE:
             STACK_SET_INT_OFFSET(rvm, 0, code_list[rvm->pc + 1]);
             runtime_stack->top_index++;
             rvm->pc += 2;
             break;
         case RVM_CODE_PUSH_INT_2BYTE:
+            STACK_SET_INT_OFFSET(rvm, 0, OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]));
+            runtime_stack->top_index++;
+            rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_INT:
             const_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
@@ -187,42 +191,77 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // TODO:
             break;
 
+        // arithmetic
         case RVM_CODE_ADD_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) + STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
-
+        case RVM_CODE_ADD_DOUBLE:
+            STACK_GET_DOUBLE_OFFSET(rvm, -2) = STACK_GET_DOUBLE_OFFSET(rvm, -2) + STACK_GET_DOUBLE_OFFSET(rvm, -1);
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
         case RVM_CODE_SUB_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) - STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
-
+        case RVM_CODE_SUB_DOUBLE:
+            STACK_GET_DOUBLE_OFFSET(rvm, -2) = STACK_GET_DOUBLE_OFFSET(rvm, -2) - STACK_GET_DOUBLE_OFFSET(rvm, -1);
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
         case RVM_CODE_MUL_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) * STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
-
+        case RVM_CODE_MUL_DOUBLE:
+            STACK_GET_DOUBLE_OFFSET(rvm, -2) = STACK_GET_DOUBLE_OFFSET(rvm, -2) * STACK_GET_DOUBLE_OFFSET(rvm, -1);
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
         case RVM_CODE_DIV_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) / STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
-
+        case RVM_CODE_DIV_DOUBLE:
+            STACK_GET_DOUBLE_OFFSET(rvm, -2) = STACK_GET_DOUBLE_OFFSET(rvm, -2) / STACK_GET_DOUBLE_OFFSET(rvm, -1);
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
         case RVM_CODE_MOD_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) % STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+        case RVM_CODE_MOD_DOUBLE:
+            STACK_GET_DOUBLE_OFFSET(rvm, -2) = fmod(STACK_GET_DOUBLE_OFFSET(rvm, -2), STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_MINUS_INT:
+            STACK_GET_INT_OFFSET(rvm, -1) = -STACK_GET_INT_OFFSET(rvm, -1);
+            rvm->pc++;
+            break;
+        case RVM_CODE_MINUS_DOUBLE:
+            STACK_GET_DOUBLE_OFFSET(rvm, -1) = -STACK_GET_DOUBLE_OFFSET(rvm, -1);
+            rvm->pc++;
+            break;
+        case RVM_CODE_INCREASE:
+            break;
+        case RVM_CODE_DECREASE:
+            break;
 
-
+        // logical
         case RVM_CODE_LOGICAL_AND:
             break;
         case RVM_CODE_LOGICAL_OR:
             break;
 
+        // jump
         case RVM_CODE_JUMP:
             rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             break;
@@ -243,6 +282,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             break;
 
+        // func
         case RVM_CODE_PUSH_FUNC:
             oper_num   = code_list[rvm->pc + 1];
             func_index = oper_num;
@@ -250,7 +290,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 2;
             break;
-
         case RVM_CODE_INVOKE_FUNC:
             func_index = STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
