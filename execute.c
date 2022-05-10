@@ -284,11 +284,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // func
         case RVM_CODE_PUSH_FUNC:
-            oper_num   = code_list[rvm->pc + 1];
+            oper_num   = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             func_index = oper_num;
             STACK_SET_INT_OFFSET(rvm, 0, func_index);
             runtime_stack->top_index++;
-            rvm->pc += 2;
+            rvm->pc += 3;
             break;
         case RVM_CODE_INVOKE_FUNC:
             func_index = STACK_GET_INT_OFFSET(rvm, -1);
@@ -302,8 +302,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         default:
-            fprintf(stderr, "execute error: invalid opcode (%d)\n", opcode);
-            fprintf(stderr, "opcode num (%d)\n", opcode_num);
+            fprintf(stderr,
+                    "execute error: pc(%d)\n"
+                    "\tinvalid opcode (%d)\n",
+                    rvm->pc,
+                    opcode);
             exit(ERROR_CODE_RUN_VM_ERROR);
             break;
         }
