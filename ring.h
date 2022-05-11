@@ -1077,6 +1077,12 @@ void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM
 void rvm_register_native_functions(Ring_VirtualMachine* rvm);
 // execute.c
 
+
+// interactive.c
+void ring_interactive_program();
+int  write_tmp_source_file(char* tmp_source_file_name, int start_line_num, int line_size, char** input_line_content);
+// interactive.c
+
 // utils.c
 void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer);
 void ring_vm_code_dump(Ring_VirtualMachine_Executer* executer, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
