@@ -261,6 +261,37 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_LOGICAL_OR:
             break;
 
+        // relational
+        case RVM_CODE_RELATIONAL_EQ_INT:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) == STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_NE_INT:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) != STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_GT_INT:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) > STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_GE_INT:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) >= STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_LT_INT:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) < STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_LE_INT:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) <= STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
         // jump
         case RVM_CODE_JUMP:
             rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);

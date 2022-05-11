@@ -61,6 +61,13 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_LOGICAL_AND, "logical_and", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_LOGICAL_OR, "logical_or", OPCODE_OPERAND_TYPE_0BYTE},
 
+    // relational
+    {RVM_CODE_RELATIONAL_EQ_INT, "eq_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RELATIONAL_NE_INT, "ne_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RELATIONAL_GT_INT, "gt_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RELATIONAL_GE_INT, "ge_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RELATIONAL_LT_INT, "lt_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RELATIONAL_LE_INT, "le_int", OPCODE_OPERAND_TYPE_0BYTE},
 
     // jump
     {RVM_CODE_JUMP, "jump", OPCODE_OPERAND_TYPE_2BYTE},
@@ -400,6 +407,20 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
 
     case EXPRESSION_TYPE_LOGICAL_OR:
         generate_vmcode_from_logical_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_LOGICAL_OR);
+        break;
+
+    case EXPRESSION_TYPE_RELATIONAL_EQ:
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_EQ_INT);
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_NE:
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_GT:
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_GE:
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_LT:
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_LE:
         break;
 
     case EXPRESSION_TYPE_ASSIGN:

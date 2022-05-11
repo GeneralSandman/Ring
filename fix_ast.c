@@ -65,6 +65,12 @@ void fix_expression(Expression* expression) {
     case EXPRESSION_TYPE_ARITHMETIC_MOD:
     case EXPRESSION_TYPE_LOGICAL_AND:
     case EXPRESSION_TYPE_LOGICAL_OR:
+    case EXPRESSION_TYPE_RELATIONAL_EQ:
+    case EXPRESSION_TYPE_RELATIONAL_NE:
+    case EXPRESSION_TYPE_RELATIONAL_GT:
+    case EXPRESSION_TYPE_RELATIONAL_GE:
+    case EXPRESSION_TYPE_RELATIONAL_LT:
+    case EXPRESSION_TYPE_RELATIONAL_LE:
         fix_binary_expression(expression->u.binary_expression);
         break;
 
