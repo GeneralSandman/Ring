@@ -413,14 +413,19 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
         generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_EQ_INT);
         break;
     case EXPRESSION_TYPE_RELATIONAL_NE:
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_NE_INT);
         break;
     case EXPRESSION_TYPE_RELATIONAL_GT:
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_GT_INT);
         break;
     case EXPRESSION_TYPE_RELATIONAL_GE:
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_GE_INT);
         break;
     case EXPRESSION_TYPE_RELATIONAL_LT:
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_LT_INT);
         break;
     case EXPRESSION_TYPE_RELATIONAL_LE:
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_LE_INT);
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
