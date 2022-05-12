@@ -20,5 +20,9 @@ println_double(double_value);
 double_value = 1.23456;
 println_double(double_value);
 
+double_value = 1.1 + 1.23456;
+println_double(double_value);
+
+
 /* double_value = 0-1.1; */
 /* println_double(double_value); */
