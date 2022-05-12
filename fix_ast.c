@@ -78,6 +78,14 @@ void fix_expression(Expression* expression) {
         fix_function_call_expression(expression->u.function_call_expression);
         break;
 
+    case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+    case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
+    case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
+    case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
+    case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
+        fix_expression(expression->u.unitary_expression);
+        break;
+
     default: break;
     }
 }

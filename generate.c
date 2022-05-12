@@ -53,8 +53,10 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_MINUS_INT, "minus_int", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_MINUS_DOUBLE, "minus_double", OPCODE_OPERAND_TYPE_0BYTE},
 
-    {RVM_CODE_INCREASE, "increase", OPCODE_OPERAND_TYPE_0BYTE},
-    {RVM_CODE_DECREASE, "decrease", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_INCREASE_SUFFIX, "increase_suffix", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_INCREASE_PREFIX, "increase_prefix", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_DECREASE_SUFFIX, "decrease_suffix", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_DECREASE_PREFIX, "decrease_prefix", OPCODE_OPERAND_TYPE_0BYTE},
 
 
     // logical
@@ -404,9 +406,17 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
     case EXPRESSION_TYPE_LOGICAL_AND:
         generate_vmcode_from_logical_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_LOGICAL_AND);
         break;
-
     case EXPRESSION_TYPE_LOGICAL_OR:
         generate_vmcode_from_logical_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_LOGICAL_OR);
+        break;
+    case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+        break;
+
+    case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
+    case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
+    case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
+    case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
+        generate_vmcode_from_increase_decrease_expression(executer, expression, opcode_buffer);
         break;
 
     case EXPRESSION_TYPE_RELATIONAL_EQ:
@@ -548,6 +558,35 @@ void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* execut
     generate_vmcode_from_expression(executer, right, opcode_buffer);
 
     generate_vmcode(executer, opcode_buffer, opcode, 0);
+}
+
+void generate_vmcode_from_increase_decrease_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (expression == NULL) {
+        return;
+    }
+
+    Expression* unitary_expression = expression->u.unitary_expression;
+    generate_vmcode_from_expression(executer, unitary_expression, opcode_buffer);
+
+    switch (expression->type) {
+    case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
+        /* generate_vmcode(executer, opcode_buffer, ); */
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_INCREASE_SUFFIX, 0);
+        break;
+    case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_INCREASE_PREFIX, 0);
+        break;
+    case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_DECREASE_SUFFIX, 0);
+        break;
+    case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_DECREASE_PREFIX, 0);
+        break;
+    default: break;
+    }
+
+    generate_pop_to_leftvalue(executer, unitary_expression->u.identifier_expression, opcode_buffer);
 }
 
 void generate_vmcode_from_unitary_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {

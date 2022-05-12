@@ -329,8 +329,10 @@ typedef enum {
     RVM_CODE_MOD_DOUBLE,
     RVM_CODE_MINUS_INT,
     RVM_CODE_MINUS_DOUBLE,
-    RVM_CODE_INCREASE,
-    RVM_CODE_DECREASE,
+    RVM_CODE_INCREASE_SUFFIX,
+    RVM_CODE_INCREASE_PREFIX,
+    RVM_CODE_DECREASE_SUFFIX,
+    RVM_CODE_DECREASE_PREFIX,
 
     // logical
     RVM_CODE_LOGICAL_AND,
@@ -592,19 +594,8 @@ struct AssignExpression_Tag {
     unsigned int line_number;
 
     AssignExpressionType type;
-
-
-    char*        assign_identifier;      // TODO: delete
-    unsigned int assign_identifier_size; // TODO: delete
-    char**       assign_identifiers;     // TODO: delete
-    // Identifier * assign_identifier_list;// TODO: delete
-    Expression* expression; // TODO: delete
-    // Expression *expression_list; // TODO: delete
-
-    // 上边的4个以后都不要使用，全部使用下边最新的
-    // 只使用 line_number type left operand
-    Expression* left;
-    Expression* operand;
+    Expression*          left;
+    Expression*          operand;
 };
 
 struct BinaryExpression_Tag {
@@ -1043,6 +1034,7 @@ void              generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* execut
 void              generate_vmcode_from_logical_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_unitary_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
+void              generate_vmcode_from_increase_decrease_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_identifier_expression(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_bool_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_int_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);

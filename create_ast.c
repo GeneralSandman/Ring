@@ -112,6 +112,7 @@ Expression* create_expression_identifier(char* identifier) {
     expression->line_number             = get_ring_compiler_line_number();
     expression->type                    = EXPRESSION_TYPE_IDENTIFIER;
     expression->u.identifier_expression = identifier_expression;
+    expression->next                    = NULL;
 
     return expression;
 }
@@ -291,11 +292,12 @@ AssignExpression* create_multi_assign_expression(char* first_identifier, Identif
     else
         first_expression = expression_list;
 
-    assing_expression->line_number            = get_ring_compiler_line_number();
-    assing_expression->type                   = ASSIGN_EXPRESSION_TYPE_ASSIGN;
-    assing_expression->assign_identifier_size = size;
-    assing_expression->assign_identifiers     = identifiers;
-    assing_expression->expression             = first_expression;
+    assing_expression->line_number = get_ring_compiler_line_number();
+    assing_expression->type        = ASSIGN_EXPRESSION_TYPE_ASSIGN;
+    // FIXME:
+    /* assing_expression->assign_identifier_size = size; */
+    /* assing_expression->assign_identifiers     = identifiers; */
+    /* assing_expression->expression             = first_expression; */
     return assing_expression;
 }
 
