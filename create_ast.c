@@ -383,7 +383,8 @@ Function* new_function_definition(FunctionType type, char* identifier, Variable*
     if (!strcmp(identifier, "println_bool")
         || !strcmp(identifier, "println_int")
         || !strcmp(identifier, "println_double")
-        || !strcmp(identifier, "println_string")) {
+        || !strcmp(identifier, "println_string")
+        || !strcmp(identifier, "exit")) {
         type = FUNCTION_TYPE_NATIVE;
     }
 

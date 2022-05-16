@@ -531,24 +531,24 @@ RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     return ret;
 }
 
-// RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
-// debug_log_with_white_coloar("\t");
-//
-// RVM_Value ret;
-//
-// ret.int_value = 0;
-//
-//
-// if (arg_cout != 1) {
-//     printf("native_proc_print only one arguement\n");
-//     exit(ERROR_CODE_RUN_VM_ERROR);
-//     }
-//
-//     // TODO: 暂时只打印int, 以后都强制转换成int_value
-//     exit(args->int_value);
-//
-//     return ret;
-// }
+RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
+    debug_log_with_white_coloar("\t");
+
+    RVM_Value ret;
+
+    ret.int_value = 0;
+
+
+    if (arg_cout != 1) {
+        printf("native_proc_print only one arguement\n");
+        exit(ERROR_CODE_RUN_VM_ERROR);
+    }
+
+    // TODO: 暂时只打印int, 以后都强制转换成int_value
+    exit(args->int_value);
+
+    return ret;
+}
 
 void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, unsigned int arg_count) {
     debug_log_with_white_coloar("\t");
@@ -572,9 +572,9 @@ void rvm_register_native_functions(Ring_VirtualMachine* rvm) {
 
     // rvm_register_native_function(rvm, "print", native_proc_print, 1);
     // rvm_register_native_function(rvm, "println", native_proc_println, 1);
-    // rvm_register_native_function(rvm, "exit", native_proc_exit, 1);
     rvm_register_native_function(rvm, "println_bool", native_proc_println_bool, 1);
     rvm_register_native_function(rvm, "println_int", native_proc_println_int, 1);
     rvm_register_native_function(rvm, "println_double", native_proc_println_double, 1);
     rvm_register_native_function(rvm, "println_string", native_proc_println_string, 1);
+    rvm_register_native_function(rvm, "exit", native_proc_exit, 1);
 }
