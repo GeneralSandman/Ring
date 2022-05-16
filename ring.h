@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#define RING_VERSION "ring-v0.1.2-beat"
+#define RING_VERSION "ring-v0.1.3-beat"
 
 typedef struct Ring_Compiler_Tag Ring_Compiler;
 
@@ -337,7 +337,7 @@ typedef enum {
     // logical
     RVM_CODE_LOGICAL_AND,
     RVM_CODE_LOGICAL_OR,
-    RVM_CODE_LOGICAL_NOT, 
+    RVM_CODE_LOGICAL_NOT,
 
     // relational
     RVM_CODE_RELATIONAL_EQ_INT,
@@ -353,7 +353,7 @@ typedef enum {
     RVM_CODE_JUMP_IF_TRUE,
 
     // duplicate
-    RVM_CODE_DUPLICATE, 
+    RVM_CODE_DUPLICATE,
 
     // func
     RVM_CODE_PUSH_FUNC,
@@ -1071,7 +1071,7 @@ void                 invoke_derive_function(Ring_VirtualMachine* rvm);
 void                 debug_rvm(Ring_VirtualMachine* rvm);
 
 RVM_Object* create_rvm_object();
-RVM_Object* string_literal_to_rvm_object(char *string_literal);
+RVM_Object* string_literal_to_rvm_object(char* string_literal);
 
 
 // RVM_Value native_proc_to_string(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
