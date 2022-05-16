@@ -380,7 +380,10 @@ Function* new_function_definition(FunctionType type, char* identifier, Variable*
     debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier);
 
     // FIXME:
-    if (!strcmp(identifier, "println_bool") || !strcmp(identifier, "println_int") || !strcmp(identifier, "println_double")) {
+    if (!strcmp(identifier, "println_bool")
+        || !strcmp(identifier, "println_int")
+        || !strcmp(identifier, "println_double")
+        || !strcmp(identifier, "println_string")) {
         type = FUNCTION_TYPE_NATIVE;
     }
 

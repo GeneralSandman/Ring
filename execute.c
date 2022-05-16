@@ -11,16 +11,16 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     ((rvm)->runtime_stack->data[(index)].int_value)
 #define STACK_GET_DOUBLE_INDEX(rvm, index) \
     ((rvm)->runtime_stack->data[(index)].double_value)
-#define STACK_GET_STRING_INDEX(rvm, index) \
-    ((rvm)->runtime_stack->data[(index)].string_value)
+#define STACK_GET_OBJECT_INDEX(rvm, index) \
+    ((rvm)->runtime_stack->data[(index)].object)
 
 // 通过栈顶偏移 offset 获取
 #define STACK_GET_INT_OFFSET(rvm, offset) \
     STACK_GET_INT_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 #define STACK_GET_DOUBLE_OFFSET(rvm, offset) \
     STACK_GET_DOUBLE_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
-#define STACK_GET_STRING_OFFSET(rvm, offset) \
-    STACK_GET_STRING_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
+#define STACK_GET_OBJECT_OFFSET(rvm, offset) \
+    STACK_GET_OBJECT_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 
 
 // 通过绝对索引 设置
@@ -28,17 +28,23 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     ((rvm)->runtime_stack->data[(index)].int_value = (value))
 #define STACK_SET_DOUBLE_INDEX(rvm, index, value) \
     ((rvm)->runtime_stack->data[(index)].double_value = (value))
-#define STACK_SET_STRING_INDEX(rvm, index, value) \
-    ((rvm)->runtime_stack->data[(index)].string_value = (value))
+#define STACK_SET_OBJECT_INDEX(rvm, index, value) \
+    ((rvm)->runtime_stack->data[(index)].object = (value))
 
 // 通过栈顶偏移 offset 设置
 #define STACK_SET_INT_OFFSET(rvm, offset, value) \
     STACK_SET_INT_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
 #define STACK_SET_DOUBLE_OFFSET(rvm, offset, value) \
     STACK_SET_DOUBLE_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
-#define STACK_SET_STRING_OFFSET(rvm, offset, value) \
-    STACK_SET_STRING_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
+#define STACK_SET_OBJECT_OFFSET(rvm, offset, value) \
+    STACK_SET_OBJECT_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
 
+
+#define STACK_COPY_INDEX(rvm, src_index, dest_index) \
+    ((rvm)->runtime_stack->data[(dest_index)] = (rvm)->runtime_stack->data[(src_index)])
+
+#define STACK_COPY_OFFSET(rvm, src_offset, dest_offset) \
+    STACK_COPY_INDEX((rvm), (rvm)->runtime_stack->top_index + (src_offset), (rvm)->runtime_stack->top_index + (dest_offset))
 
 // 从后边获取 2BYTE的操作数
 #define OPCODE_GET_2BYTE(p) \
@@ -150,8 +156,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_PUSH_STRING:
             const_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            // TODO:
-            // STACK_SET_STRING_OFFSET(rvm, 0, const_pool_list[const_index].u.string_value);
+            STACK_SET_OBJECT_OFFSET(rvm, 0,
+                                    string_literal_to_rvm_object(const_pool_list[const_index].u.string_value));
+            runtime_stack->top_index++;
+            rvm->pc += 3;
             break;
 
 
@@ -171,7 +179,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_STATIC_OBJECT:
-            // TODO:
+            oper_num                           = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            index                              = oper_num; //  在操作符后边获取
+            runtime_static->data[index].object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            runtime_stack->top_index--;
+            rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STATIC_INT:
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
@@ -279,8 +291,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // logical
         case RVM_CODE_LOGICAL_AND:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) && STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
             break;
         case RVM_CODE_LOGICAL_OR:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) || STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
             break;
         case RVM_CODE_LOGICAL_NOT:
             STACK_GET_INT_OFFSET(rvm, -1) = !(STACK_GET_INT_OFFSET(rvm, -1));
@@ -318,6 +336,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+
         // jump
         case RVM_CODE_JUMP:
             rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
@@ -337,6 +356,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 rvm->pc += 3;
             }
             runtime_stack->top_index--;
+            break;
+
+        // duplicate
+        case RVM_CODE_DUPLICATE:
+            STACK_COPY_OFFSET(rvm, -1, 0);
+            runtime_stack->top_index++;
+            rvm->pc++;
             break;
 
         // func
@@ -396,6 +422,18 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function) {
 
 void invoke_derive_function(Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
+}
+
+RVM_Object* create_rvm_object() {
+    RVM_Object* object = malloc(sizeof(RVM_Object));
+    return object;
+}
+
+RVM_Object* string_literal_to_rvm_object(char* string_literal) {
+    RVM_Object* object    = create_rvm_object();
+    object->type          = RVM_OBJECT_TYPE_STRING;
+    object->u.string.data = string_literal;
+    return object;
 }
 
 void debug_rvm(Ring_VirtualMachine* rvm) {
@@ -472,26 +510,26 @@ RVM_Value native_proc_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
     return ret;
 }
 
-// RVM_Value native_proc_println(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
-// debug_log_with_white_coloar("\t");
-//
-// RVM_Value ret;
-//
-// ret.int_value = 0;
-//
-//
-// if (arg_cout != 1) {
-//     printf("native_proc_print only one arguement\n");
-//     exit(ERROR_CODE_RUN_VM_ERROR);
-//     }
-//
-//
-//     // TODO: 暂时只打印int, 以后都强制转换成int_value
-//     printf("%d\n", args->int_value);
-//     fflush(stdout);
-//
-//     return ret;
-// }
+RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
+    debug_log_with_white_coloar("\t");
+
+    if (arg_cout != 1) {
+        printf("native_proc_print only one arguement\n");
+        exit(ERROR_CODE_RUN_VM_ERROR);
+    }
+
+    RVM_Value ret;
+    ret.int_value = 0;
+
+    if (args->object == NULL || args->object->u.string.data == NULL) {
+        printf("\n");
+    } else {
+        printf("%s\n", args->object->u.string.data);
+    }
+    fflush(stdout);
+
+    return ret;
+}
 
 // RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
 // debug_log_with_white_coloar("\t");
@@ -538,4 +576,5 @@ void rvm_register_native_functions(Ring_VirtualMachine* rvm) {
     rvm_register_native_function(rvm, "println_bool", native_proc_println_bool, 1);
     rvm_register_native_function(rvm, "println_int", native_proc_println_int, 1);
     rvm_register_native_function(rvm, "println_double", native_proc_println_double, 1);
+    rvm_register_native_function(rvm, "println_string", native_proc_println_string, 1);
 }

@@ -77,6 +77,9 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_JUMP_IF_FALSE, "jump_if_false", OPCODE_OPERAND_TYPE_2BYTE},
     {RVM_CODE_JUMP_IF_TRUE, "jump_if_true", OPCODE_OPERAND_TYPE_2BYTE},
 
+    // duplicate
+    {RVM_CODE_DUPLICATE, "duplicate", OPCODE_OPERAND_TYPE_0BYTE},
+
 
     // func
     {RVM_CODE_PUSH_FUNC, "push_func", OPCODE_OPERAND_TYPE_2BYTE}, // TODO: update to 2 byte
@@ -528,6 +531,7 @@ void generate_vmcode_from_logical_expression(Ring_VirtualMachine_Executer* execu
     if (opcode == RVM_CODE_LOGICAL_AND) {
         generate_vmcode_from_expression(executer, left, opcode_buffer);
 
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0);
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label);
 
@@ -537,6 +541,7 @@ void generate_vmcode_from_logical_expression(Ring_VirtualMachine_Executer* execu
     } else if (opcode == RVM_CODE_LOGICAL_OR) {
         generate_vmcode_from_expression(executer, left, opcode_buffer);
 
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0);
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_TRUE, end_label);
 
@@ -693,7 +698,7 @@ void generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer*
 void generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int oper_num) {
     debug_log_with_darkgreen_coloar("\t");
     if (opcode_buffer->code_capacity == opcode_buffer->code_size) {
-        opcode_buffer->code_capacity += 3;
+        opcode_buffer->code_capacity += 300;
     }
 
     RVM_Opcode_Info opcode_info                          = RVM_Opcode_Infos[opcode];
