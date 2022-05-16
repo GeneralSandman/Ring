@@ -509,7 +509,7 @@ struct Statement_Tag {
         IfStatement*       if_statement;
         ForStatement*      for_statement;
         DoForStatement*    dofor_statement;
-        DoWhileStatement*  dowhile_statement;
+        DoWhileStatement*  dowhile_statement; // TODO: delete
         BreakStatement*    break_statement;
         ContinueStatement* continue_statement;
         Declaration*       declaration_statement;
@@ -732,6 +732,7 @@ struct DoForStatement_Tag {
     Expression* post_expression;
 };
 
+// TODO: delete
 struct DoWhileStatement_Tag {
     unsigned int line_number;
 
