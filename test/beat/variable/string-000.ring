@@ -10,16 +10,25 @@ function println_double(var double double_value);
 function println_string(var string string_value);
 
 
-var bool bool_value;
-var int int_value;
-var double double_value;
 var string string_value;
 
-/* bool_value = true; */
-/* int_value = 2; */
-double_value = 3.0;
-/* string_value = "Hello World"; */
+string_value = "1";
+println_string(string_value);
 
-println_double(double_value);
-/* string_value = "Hello World"; */
-/* println_string(string_value); */
+string_value = "2";
+println_string(string_value);
+
+string_value = "3";
+println_string(string_value);
+
+string_value = "4";
+println_string(string_value);
+
+string_value = "5";
+println_string(string_value);
+
+string_value = "hello world!";
+println_string(string_value);
+
+
+println_string("hello world");
