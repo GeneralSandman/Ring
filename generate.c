@@ -62,6 +62,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     // logical
     {RVM_CODE_LOGICAL_AND, "logical_and", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_LOGICAL_OR, "logical_or", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_LOGICAL_NOT, "logical_not", OPCODE_OPERAND_TYPE_0BYTE},
 
     // relational
     {RVM_CODE_RELATIONAL_EQ_INT, "eq_int", OPCODE_OPERAND_TYPE_0BYTE},
@@ -410,6 +411,7 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
         generate_vmcode_from_logical_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_LOGICAL_OR);
         break;
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+        generate_vmcode_from_unitary_expression(executer, expression->u.unitary_expression, opcode_buffer, RVM_CODE_LOGICAL_NOT);
         break;
 
     case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:

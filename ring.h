@@ -337,6 +337,7 @@ typedef enum {
     // logical
     RVM_CODE_LOGICAL_AND,
     RVM_CODE_LOGICAL_OR,
+    RVM_CODE_LOGICAL_NOT, 
 
     // relational
     RVM_CODE_RELATIONAL_EQ_INT,

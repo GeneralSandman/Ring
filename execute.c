@@ -282,6 +282,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_LOGICAL_OR:
             break;
+        case RVM_CODE_LOGICAL_NOT:
+            STACK_GET_INT_OFFSET(rvm, -1) = !(STACK_GET_INT_OFFSET(rvm, -1));
+            rvm->pc++;
+            break;
 
         // relational
         case RVM_CODE_RELATIONAL_EQ_INT:
