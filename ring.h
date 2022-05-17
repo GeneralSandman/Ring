@@ -67,8 +67,6 @@ typedef struct ForStatement_Tag ForStatement;
 
 typedef struct DoForStatement_Tag DoForStatement;
 
-typedef struct DoWhileStatement_Tag DoWhileStatement;
-
 typedef struct BreakStatement_Tag BreakStatement;
 
 typedef struct ContinueStatement_Tag ContinueStatement;
@@ -509,7 +507,6 @@ struct Statement_Tag {
         IfStatement*       if_statement;
         ForStatement*      for_statement;
         DoForStatement*    dofor_statement;
-        DoWhileStatement*  dowhile_statement; // TODO: delete
         BreakStatement*    break_statement;
         ContinueStatement* continue_statement;
         Declaration*       declaration_statement;
@@ -732,14 +729,6 @@ struct DoForStatement_Tag {
     Expression* post_expression;
 };
 
-// TODO: delete
-struct DoWhileStatement_Tag {
-    unsigned int line_number;
-
-    Expression* condition_expression;
-
-    Block* block;
-};
 
 struct BreakStatement_Tag {
     unsigned int line_number;
@@ -929,7 +918,6 @@ StatementExecResult* interpret_statement_continue(ContinueStatement* statement, 
 StatementExecResult* interpret_statement_return(Statement* statement, Function* function);
 StatementExecResult* interpret_statement_if(IfStatement* if_statement, Function* function);
 StatementExecResult* interpret_statement_for(ForStatement* for_statement, Function* function);
-StatementExecResult* interpret_statement_dowhile(DoWhileStatement* dowhile_statement, Function* function);
 Ring_BasicValue*     interpret_expression(Expression* expression, Function* function);
 Ring_BasicValue*     search_variable_value(char* identifier, Function* origin_function);
 StatementExecResult* invoke_function(FunctionCallExpression* function_call_expression, Function* function);
@@ -986,8 +974,6 @@ Statement*              create_statement_from_for(ForStatement* for_statement);
 ForStatement*           create_for_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Block* block);
 Statement*              create_statement_from_dofor(DoForStatement* dofor_statement);
 DoForStatement*         create_dofor_statement(Expression* init_expression, Block* block, Expression* condition_expression, Expression* post_expression);
-Statement*              create_statement_from_dowhile(DoWhileStatement* dowhile_statement);
-DoWhileStatement*       create_dowhile_statement(Block* block, Expression* condition_expression);
 Statement*              create_statement_from_break();
 Statement*              create_statement_from_continue();
 Block*                  start_new_block();

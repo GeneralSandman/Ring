@@ -526,29 +526,6 @@ DoForStatement* create_dofor_statement(Expression* init_expression, Block* block
     return dofor_statement;
 }
 
-Statement* create_statement_from_dowhile(DoWhileStatement* dowhile_statement) {
-    debug_log_with_yellow_coloar("\t");
-
-    Statement* statement           = malloc(sizeof(Statement));
-    statement->line_number         = get_ring_compiler_line_number();
-    statement->type                = STATEMENT_TYPE_DOWHILE;
-    statement->u.dowhile_statement = dowhile_statement;
-    statement->next                = NULL;
-
-    return statement;
-}
-
-DoWhileStatement* create_dowhile_statement(Block* block, Expression* condition_expression) {
-    debug_log_with_yellow_coloar("\t");
-
-    DoWhileStatement* dowhile_statement     = malloc(sizeof(DoWhileStatement));
-    dowhile_statement->line_number          = get_ring_compiler_line_number();
-    dowhile_statement->condition_expression = condition_expression;
-    dowhile_statement->block                = block;
-
-    return dowhile_statement;
-}
-
 Statement* create_statement_from_break() {
     debug_log_with_yellow_coloar("\t");
 

@@ -30,7 +30,6 @@ int yyerror(char const *str);
     ElseIfStatement*            m_elseif_statement;
     ForStatement*               m_for_statement;
     DoForStatement*             m_dofor_statement;
-    DoWhileStatement*           m_do_while_statement;
     FunctionReturnList*         m_return_list;
     Block*                      m_block;
 
@@ -144,7 +143,6 @@ int yyerror(char const *str);
 %type <m_if_statement> if_statement
 %type <m_for_statement> for_statement
 %type <m_dofor_statement> dofor_statement
-%type <m_do_while_statement> do_while_statement
 %type <m_elseif_statement> elseif_statement_list
 %type <m_elseif_statement> elseif_statement
 %type <m_return_list> return_list
@@ -242,11 +240,6 @@ statement
         debug_log_with_green_coloar("[RULE::statement:dofor_statement]\t ");
         $$ = create_statement_from_dofor($1);
     }
-    | do_while_statement TOKEN_SEMICOLON
-    {
-        debug_log_with_green_coloar("[RULE::statement:do_while_statement]\t ");
-        $$ = create_statement_from_dowhile($1);
-    }
     | break_statement TOKEN_SEMICOLON
     {
         $$ = create_statement_from_break();
@@ -319,13 +312,6 @@ dofor_statement
     }
     ;
 
-do_while_statement
-    : TOKEN_DO block TOKEN_WHILE TOKEN_LP expression TOKEN_RP
-    {
-        debug_log_with_green_coloar("[RULE::do_while_statement]\t ");
-        $$ = create_dowhile_statement($2, $5);
-    }
-    ;
 
 break_statement
     : TOKEN_BREAK ;
