@@ -1064,11 +1064,11 @@ RVM_Object* string_literal_to_rvm_object(char* string_literal);
 // RVM_Value native_proc_to_string(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
 // RVM_Value native_proc_print(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
 // RVM_Value native_proc_println(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
-RVM_Value native_proc_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
-RVM_Value native_proc_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
-RVM_Value native_proc_println_double(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
-RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
-RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
+RVM_Value native_proc_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value native_proc_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value native_proc_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 void      rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, unsigned int arg_count);
 void      rvm_register_native_functions(Ring_VirtualMachine* rvm);
 // execute.c

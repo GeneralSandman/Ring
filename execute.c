@@ -454,10 +454,10 @@ void debug_rvm(Ring_VirtualMachine* rvm) {
 }
 
 
-RVM_Value native_proc_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
+RVM_Value native_proc_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     debug_log_with_white_coloar("\t");
 
-    if (arg_cout != 1) {
+    if (arg_count != 1) {
         printf("native_proc_print only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
@@ -475,10 +475,10 @@ RVM_Value native_proc_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_co
     return ret;
 }
 
-RVM_Value native_proc_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
+RVM_Value native_proc_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     debug_log_with_white_coloar("\t");
 
-    if (arg_cout != 1) {
+    if (arg_count != 1) {
         printf("native_proc_print only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
@@ -493,10 +493,10 @@ RVM_Value native_proc_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
     return ret;
 }
 
-RVM_Value native_proc_println_double(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
+RVM_Value native_proc_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     debug_log_with_white_coloar("\t");
 
-    if (arg_cout != 1) {
+    if (arg_count != 1) {
         printf("native_proc_print only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
@@ -510,10 +510,10 @@ RVM_Value native_proc_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
     return ret;
 }
 
-RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
+RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     debug_log_with_white_coloar("\t");
 
-    if (arg_cout != 1) {
+    if (arg_count != 1) {
         printf("native_proc_print only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
@@ -531,7 +531,7 @@ RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     return ret;
 }
 
-RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args) {
+RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     debug_log_with_white_coloar("\t");
 
     RVM_Value ret;
@@ -539,7 +539,7 @@ RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_
     ret.int_value = 0;
 
 
-    if (arg_cout != 1) {
+    if (arg_count != 1) {
         printf("native_proc_print only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
