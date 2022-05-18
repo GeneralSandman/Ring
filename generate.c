@@ -58,6 +58,12 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_DECREASE_SUFFIX, "decrease_suffix", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_DECREASE_PREFIX, "decrease_prefix", OPCODE_OPERAND_TYPE_0BYTE},
 
+    
+    // type cast
+    {RVM_CODE_CAST_BOOL_TO_STRING, "cast_bool_to_string", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_CAST_INT_TO_STRING, "cast_int_to_string", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_CAST_DOUBLE_TO_STRING, "cast_double_to_string", OPCODE_OPERAND_TYPE_0BYTE},
+
 
     // logical
     {RVM_CODE_LOGICAL_AND, "logical_and", OPCODE_OPERAND_TYPE_0BYTE},
@@ -560,6 +566,17 @@ void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* execut
     }
     Expression* left  = expression->left_expression;
     Expression* right = expression->right_expression;
+
+    // FIXME:
+    if(left->type == EXPRESSION_TYPE_LITERAL_STRING 
+        && right->type == EXPRESSION_TYPE_LITERAL_STRING
+        && opcode == RVM_CODE_ADD_INT) {
+        opcode = RVM_CODE_ADD_STRING;
+    }
+    // TODO:
+    // 算术运算符 类型转换
+    // 应该 在 fix_ast 中 先优化一部分
+    // 这样在 生成vm code 的时候就方便了许多。
 
     generate_vmcode_from_expression(executer, left, opcode_buffer);
     generate_vmcode_from_expression(executer, right, opcode_buffer);

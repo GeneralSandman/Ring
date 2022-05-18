@@ -1,5 +1,6 @@
 #include "ring.h"
 #include <math.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -214,6 +215,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+        case RVM_CODE_ADD_STRING:
+            STACK_SET_OBJECT_OFFSET(rvm, -2, concat_string(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
         case RVM_CODE_SUB_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) - STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
@@ -287,6 +293,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_GET_INT_OFFSET(rvm, -1)
             --;
             rvm->pc++;
+            break;
+
+        // type cast
+        case RVM_CODE_CAST_BOOL_TO_STRING:
+            break;
+        case RVM_CODE_CAST_INT_TO_STRING:
+            break;
+        case RVM_CODE_CAST_DOUBLE_TO_STRING:
             break;
 
         // logical
@@ -433,6 +447,31 @@ RVM_Object* string_literal_to_rvm_object(char* string_literal) {
     RVM_Object* object    = create_rvm_object();
     object->type          = RVM_OBJECT_TYPE_STRING;
     object->u.string.data = string_literal;
+    return object;
+}
+
+RVM_Object* concat_string(RVM_Object *a, RVM_Object *b) {
+    char *left = NULL;
+    char *right = NULL;
+    char *result = NULL;
+    unsigned int result_len = 0;
+
+    if(a!=NULL) {
+       left = a->u.string.data; 
+    }
+    if(b!=NULL) {
+       right = b->u.string.data; 
+    }
+
+    result_len = strlen(left) + strlen(right);
+    result = malloc(sizeof(char)*(result_len+1));
+
+    strcpy(result, left);
+    strcpy(result+strlen(left), right);
+
+    RVM_Object* object    = create_rvm_object();
+    object->type          = RVM_OBJECT_TYPE_STRING;
+    object->u.string.data = result;
     return object;
 }
 

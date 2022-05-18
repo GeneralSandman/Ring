@@ -332,6 +332,11 @@ typedef enum {
     RVM_CODE_DECREASE_SUFFIX,
     RVM_CODE_DECREASE_PREFIX,
 
+    // type cast
+    RVM_CODE_CAST_BOOL_TO_STRING,
+    RVM_CODE_CAST_INT_TO_STRING,
+    RVM_CODE_CAST_DOUBLE_TO_STRING,
+
     // logical
     RVM_CODE_LOGICAL_AND,
     RVM_CODE_LOGICAL_OR,
@@ -1059,6 +1064,7 @@ void                 debug_rvm(Ring_VirtualMachine* rvm);
 
 RVM_Object* create_rvm_object();
 RVM_Object* string_literal_to_rvm_object(char* string_literal);
+RVM_Object* concat_string(RVM_Object* a, RVM_Object* b);
 
 
 // RVM_Value native_proc_to_string(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
