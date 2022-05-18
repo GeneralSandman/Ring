@@ -614,6 +614,27 @@ RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     return ret;
 }
 
+RVM_Value native_proc_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    debug_log_with_white_coloar("\t");
+
+    if (arg_count != 1) {
+        printf("native_proc_print only one arguement\n");
+        exit(ERROR_CODE_RUN_VM_ERROR);
+    }
+
+    RVM_Value ret;
+    ret.int_value = 0;
+
+    if (args->int_value) {
+        printf("debug_assert PASS\n");
+    } else {
+        printf("debug_assert FAILED\n");
+    }
+    fflush(stdout);
+
+    return ret;
+}
+
 RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     debug_log_with_white_coloar("\t");
 
@@ -659,5 +680,6 @@ void rvm_register_native_functions(Ring_VirtualMachine* rvm) {
     rvm_register_native_function(rvm, "println_int", native_proc_println_int, 1);
     rvm_register_native_function(rvm, "println_double", native_proc_println_double, 1);
     rvm_register_native_function(rvm, "println_string", native_proc_println_string, 1);
+    rvm_register_native_function(rvm, "debug_assert", native_proc_debug_assert, 1);
     rvm_register_native_function(rvm, "exit", native_proc_exit, 1);
 }

@@ -399,6 +399,7 @@ Function* new_function_definition(FunctionType type, char* identifier, Variable*
         || !strcmp(identifier, "println_int")
         || !strcmp(identifier, "println_double")
         || !strcmp(identifier, "println_string")
+        || !strcmp(identifier, "debug_assert")
         || !strcmp(identifier, "exit")) {
         type = FUNCTION_TYPE_NATIVE;
     }
