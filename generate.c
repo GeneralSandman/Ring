@@ -463,6 +463,10 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
         generate_vmcode_from_function_call_expression(executer, expression->u.function_call_expression, opcode_buffer);
         break;
 
+    case EXPRESSION_TYPE_CAST:
+        generate_vmcode_from_cast_expression(executer, expression->u.cast_expression, opcode_buffer);
+        break;
+
     default:
         break;
     }
@@ -734,6 +738,25 @@ void generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer*
 
     generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0);
+}
+
+void generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (cast_expression == NULL) {
+        return;
+    }
+
+    generate_vmcode_from_expression(executer, cast_expression->operand, opcode_buffer);
+    RVM_Opcode opcode = RVM_CODE_UNKNOW;
+    switch (cast_expression->type) {
+    case CAST_TYPE_TO_STRING:
+        opcode = RVM_CODE_CAST_BOOL_TO_STRING;
+        break;
+
+    default:
+        break;
+    }
+    generate_vmcode(executer, opcode_buffer, opcode, 0);
 }
 
 void generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int oper_num) {

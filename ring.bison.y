@@ -9,7 +9,7 @@ int yyerror(char const *str);
 %}
 
 %glr-parser     // 使用 GLR 解析
-%expect 1       // TODO: legitimate 0 shift/reduce conflicts
+%expect 2       // TODO: legitimate 0 shift/reduce conflicts
 %expect-rr 0    // legitimate 0 reduce/reduce conflicts
 
 %union {
@@ -32,6 +32,7 @@ int yyerror(char const *str);
     DoForStatement*             m_dofor_statement;
     FunctionReturnList*         m_return_list;
     Block*                      m_block;
+    CastExpression*             m_cast;
 
     TypeSpecifier*              m_type_specifier;
     Ring_BasicType              m_basic_type_specifier;
@@ -147,6 +148,7 @@ int yyerror(char const *str);
 %type <m_elseif_statement> elseif_statement
 %type <m_return_list> return_list
 %type <m_block> block
+%type <m_cast> cast
 
 %type <m_type_specifier>        type_specifier
 %type <m_basic_type_specifier>  basic_type_specifier
@@ -510,6 +512,11 @@ expression
         debug_log_with_green_coloar("[RULE::expression ? : ]\t ");
         $$ = create_expression_ternary($1, $3, $5);
     }
+    | TOKEN_LT variable_type TOKEN_GT expression
+    {
+        debug_log_with_green_coloar("[RULE::cast expression ? : ]\t ");
+        $$ = create_cast_expression($2, $4);
+    }
     ;
 
 logical_expression_or
@@ -635,12 +642,7 @@ expression_arithmetic_operation_multiplicative
     ;
 
 literal_term
-    : variable_type TOKEN_LP literal_term TOKEN_RP
-    {
-        debug_log_with_green_coloar("[RULE::literal_term:convert_type]\t ");
-        $$ = create_expression_unitary_with_convert_type($1, $3);
-    }
-    | TOKEN_NOT literal_term
+    : TOKEN_NOT literal_term
     {
         debug_log_with_green_coloar("[RULE::literal_term:TOKEN_NOT]\t ");
 
@@ -830,6 +832,13 @@ argument
     }
     ;
 
+cast
+    : TOKEN_LT variable_type TOKEN_GT expression
+    {
+        debug_log_with_green_coloar("[RULE::cast %d] \t ", $2);
+        /* $$ = create_cast_expression($2); */
+    }
+    ;
 
 
 %%

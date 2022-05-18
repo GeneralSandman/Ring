@@ -126,6 +126,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int oper_num;
     unsigned int const_index;
 
+    char* string_buf;
+
     while (rvm->pc < code_size) {
         RVM_Byte opcode = code_list[rvm->pc];
         // char*    name     = RVM_Opcode_Infos[opcode].name;
@@ -301,6 +303,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // type cast
         case RVM_CODE_CAST_BOOL_TO_STRING:
+            string_buf = malloc(sizeof(char) * 1024);
+            if (!STACK_GET_INT_OFFSET(rvm, -1)) {
+                sprintf(string_buf, "%s", "false");
+            } else {
+                sprintf(string_buf, "%s", "true");
+            }
+            STACK_SET_OBJECT_OFFSET(rvm, -1, string_literal_to_rvm_object((string_buf)));
+            rvm->pc++;
             break;
         case RVM_CODE_CAST_INT_TO_STRING:
             break;

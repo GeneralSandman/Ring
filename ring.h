@@ -39,6 +39,8 @@ typedef struct Expression_Tag Expression;
 
 typedef struct ArrayIndexExpression_Tag ArrayIndexExpression;
 
+typedef struct CastExpression_Tag CastExpression;
+
 typedef struct BinaryExpression_Tag BinaryExpression;
 
 typedef struct TernaryExpression_Tag TernaryExpression;
@@ -447,6 +449,8 @@ typedef enum {
     EXPRESSION_TYPE_RELATIONAL_LE,
 
     EXPRESSION_TYPE_ARRAY_INDEX,
+
+    EXPRESSION_TYPE_CAST,
 } ExpressionType;
 
 typedef enum {
@@ -454,7 +458,6 @@ typedef enum {
     VARIABLE_TYPE_BOOL,
     VARIABLE_TYPE_INT,
     VARIABLE_TYPE_DOUBLE,
-    VARIABLE_TYPE_CHAR,
     VARIABLE_TYPE_STRING,
     VARIABLE_TYPE_ARRAY,
     VARIABLE_TYPE_CLASS,
@@ -552,6 +555,7 @@ struct Expression_Tag {
         BinaryExpression*       binary_expression;
         Expression*             unitary_expression;
         ArrayIndexExpression*   array_index_expression;
+        CastExpression*         cast_expression;
     } u;
 
     Expression* next;
@@ -580,6 +584,24 @@ struct ArrayIndexExpression_Tag {
 
     char*       variable_identifier;
     Expression* index_expression;
+};
+
+// TODO: 这里应该是设计重复了 应该跟 basic type一致
+// 统一
+typedef enum {
+    CAST_TYPE_UNKNOW,
+
+    CAST_TYPE_TO_BOOL,
+    CAST_TYPE_TO_INT,
+    CAST_TYPE_TO_DOUBLE,
+    CAST_TYPE_TO_STRING,
+} CastType;
+
+struct CastExpression_Tag {
+    unsigned int line_number;
+
+    CastType    type;
+    Expression* operand;
 };
 
 struct FunctionCallExpression_Tag {
@@ -969,6 +991,7 @@ Expression*             create_expression_unitary(ExpressionType type, Expressio
 Expression*             create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression* expression);
 Expression*             create_expression_literal(ExpressionType type, char* literal_interface);
 Expression*             create_expression_bool_literal(ExpressionType type, Ring_Bool value);
+Expression*             create_cast_expression(CastType cast_type, Expression* operand);
 AssignExpression*       create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
 AssignExpression*       create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* first_expression, Expression* expression_list);
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list);
@@ -1043,6 +1066,7 @@ void              generate_vmcode_from_int_expression(Ring_VirtualMachine_Execut
 void              generate_vmcode_from_double_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal);
 
 int constant_pool_grow(Ring_VirtualMachine_Executer* executer, unsigned int growth_size);

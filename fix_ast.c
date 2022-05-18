@@ -86,6 +86,10 @@ void fix_expression(Expression* expression) {
         fix_expression(expression->u.unitary_expression);
         break;
 
+    case EXPRESSION_TYPE_CAST:
+        fix_expression(expression->u.cast_expression->operand);
+        break;
+
     default: break;
     }
 }
