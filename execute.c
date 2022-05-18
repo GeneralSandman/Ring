@@ -1,8 +1,8 @@
 #include "ring.h"
 #include <math.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
@@ -201,7 +201,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STATIC_OBJECT:
-            // TODO:
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            index    = oper_num; //  在操作符后边获取
+            STACK_SET_OBJECT_OFFSET(rvm, 0, rvm->runtime_static->data[index].object);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
             break;
 
         // arithmetic
@@ -325,8 +329,18 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+        case RVM_CODE_RELATIONAL_EQ_STRING:
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) == 0);
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
         case RVM_CODE_RELATIONAL_NE_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) != STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_NE_STRING:
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) != 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -335,8 +349,18 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+        case RVM_CODE_RELATIONAL_GT_STRING:
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) > 0);
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
         case RVM_CODE_RELATIONAL_GE_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) >= STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_GE_STRING:
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) >= 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -345,8 +369,18 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+        case RVM_CODE_RELATIONAL_LT_STRING:
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) < 0);
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
         case RVM_CODE_RELATIONAL_LE_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) <= STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_LE_STRING:
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) <= 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -450,24 +484,24 @@ RVM_Object* string_literal_to_rvm_object(char* string_literal) {
     return object;
 }
 
-RVM_Object* concat_string(RVM_Object *a, RVM_Object *b) {
-    char *left = NULL;
-    char *right = NULL;
-    char *result = NULL;
+RVM_Object* concat_string(RVM_Object* a, RVM_Object* b) {
+    char*        left       = NULL;
+    char*        right      = NULL;
+    char*        result     = NULL;
     unsigned int result_len = 0;
 
-    if(a!=NULL) {
-       left = a->u.string.data; 
+    if (a != NULL) {
+        left = a->u.string.data;
     }
-    if(b!=NULL) {
-       right = b->u.string.data; 
+    if (b != NULL) {
+        right = b->u.string.data;
     }
 
     result_len = strlen(left) + strlen(right);
-    result = malloc(sizeof(char)*(result_len+1));
+    result     = malloc(sizeof(char) * (result_len + 1));
 
     strcpy(result, left);
-    strcpy(result+strlen(left), right);
+    strcpy(result + strlen(left), right);
 
     RVM_Object* object    = create_rvm_object();
     object->type          = RVM_OBJECT_TYPE_STRING;

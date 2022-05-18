@@ -58,7 +58,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_DECREASE_SUFFIX, "decrease_suffix", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_DECREASE_PREFIX, "decrease_prefix", OPCODE_OPERAND_TYPE_0BYTE},
 
-    
+
     // type cast
     {RVM_CODE_CAST_BOOL_TO_STRING, "cast_bool_to_string", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_CAST_INT_TO_STRING, "cast_int_to_string", OPCODE_OPERAND_TYPE_0BYTE},
@@ -72,11 +72,17 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
     // relational
     {RVM_CODE_RELATIONAL_EQ_INT, "eq_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RELATIONAL_EQ_STRING, "eq_string", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_RELATIONAL_NE_INT, "ne_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RELATIONAL_NE_STRING, "ne_string", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_RELATIONAL_GT_INT, "gt_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RELATIONAL_GT_STRING, "gt_string", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_RELATIONAL_GE_INT, "ge_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RELATIONAL_GE_STRING, "ge_string", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_RELATIONAL_LT_INT, "lt_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RELATIONAL_LT_STRING, "lt_string", OPCODE_OPERAND_TYPE_0BYTE},
     {RVM_CODE_RELATIONAL_LE_INT, "le_int", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RELATIONAL_LE_STRING, "le_string", OPCODE_OPERAND_TYPE_0BYTE},
 
     // jump
     {RVM_CODE_JUMP, "jump", OPCODE_OPERAND_TYPE_2BYTE},
@@ -567,16 +573,32 @@ void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* execut
     Expression* left  = expression->left_expression;
     Expression* right = expression->right_expression;
 
-    // FIXME:
-    if(left->type == EXPRESSION_TYPE_LITERAL_STRING 
-        && right->type == EXPRESSION_TYPE_LITERAL_STRING
-        && opcode == RVM_CODE_ADD_INT) {
-        opcode = RVM_CODE_ADD_STRING;
-    }
     // TODO:
     // 算术运算符 类型转换
     // 应该 在 fix_ast 中 先优化一部分
     // 这样在 生成vm code 的时候就方便了许多。
+    // FIXME:
+    if (left->type == EXPRESSION_TYPE_LITERAL_STRING
+        && right->type == EXPRESSION_TYPE_LITERAL_STRING) {
+        switch (opcode) {
+        case RVM_CODE_ADD_INT:
+            opcode = RVM_CODE_ADD_STRING;
+            break;
+        case RVM_CODE_RELATIONAL_EQ_INT:
+        case RVM_CODE_RELATIONAL_NE_INT:
+        case RVM_CODE_RELATIONAL_GT_INT:
+        case RVM_CODE_RELATIONAL_GE_INT:
+        case RVM_CODE_RELATIONAL_LT_INT:
+        case RVM_CODE_RELATIONAL_LE_INT:
+            opcode += 1;
+            break;
+        }
+    } else if (left->type == EXPRESSION_TYPE_LITERAL_STRING
+               || right->type == EXPRESSION_TYPE_LITERAL_STRING) {
+        if (opcode == RVM_CODE_ADD_INT) {
+            opcode = RVM_CODE_ADD_STRING;
+        }
+    }
 
     generate_vmcode_from_expression(executer, left, opcode_buffer);
     generate_vmcode_from_expression(executer, right, opcode_buffer);
@@ -629,11 +651,13 @@ void generate_vmcode_from_identifier_expression(Ring_VirtualMachine_Executer* ex
     if (identifier_expression == NULL) {
         return;
     }
+    RVM_Opcode   opcode = RVM_CODE_UNKNOW;
     unsigned int offset = 0;
     switch (identifier_expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
         offset = identifier_expression->u.declaration->variable_index;
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STATIC_INT, offset);
+        opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_INT, identifier_expression->u.declaration->type);
+        generate_vmcode(executer, opcode_buffer, opcode, offset);
         break;
 
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE_ARRAY:

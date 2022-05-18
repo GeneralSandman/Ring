@@ -31,6 +31,9 @@ uninstall:
 	cd /usr/local/bin && rm ring
 clean:
 	rm -f *.o lex.yy.c y.tab.c y.tab.h y.output *~
+
+testall:
+	sh ./automated-testing.sh
   
 y.tab.h : ring.bison.y
 	bison --yacc -dv ring.bison.y
