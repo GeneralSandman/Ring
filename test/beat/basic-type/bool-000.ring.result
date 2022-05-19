@@ -1,0 +1,40 @@
+false
+true
+
+false
+true
+
+false
+true
+
+false
+true
+
+false
+true
+
+---------
+false
+debug_assert PASS
+true
+debug_assert PASS
+
+false
+debug_assert PASS
+true
+debug_assert PASS
+
+false
+debug_assert PASS
+true
+debug_assert PASS
+
+false
+debug_assert PASS
+true
+debug_assert PASS
+
+false
+debug_assert PASS
+true
+debug_assert PASS
