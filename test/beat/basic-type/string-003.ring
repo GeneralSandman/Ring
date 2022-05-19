@@ -31,6 +31,7 @@ println_string(string_value_1);
 println_string(string_value_2);
 
 
+// FIXME:
 if(string_value_1 == string_value_2) {
     println_string("string_value_1 == string_value_2");
 } else {
