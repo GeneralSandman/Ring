@@ -1,0 +1,71 @@
+0
+0
+1
+-1
+255
+-255
+256
+-256
+65535
+-65535
+65536
+-65536
+65537
+-65537
+2147483647
+-2147483647
+-2147483648
+-2147483648
+--------
+
+0
+debug_assert PASS
+
+1
+debug_assert PASS
+
+2
+debug_assert PASS
+
+255
+debug_assert PASS
+
+256
+debug_assert PASS
+
+65535
+debug_assert PASS
+
+65536
+debug_assert PASS
+
+2147483647
+debug_assert PASS
+
+-2147483648
+debug_assert PASS
+
+0
+debug_assert PASS
+
+-1
+debug_assert PASS
+
+-255
+debug_assert PASS
+
+-256
+debug_assert PASS
+
+-65535
+debug_assert PASS
+
+-65536
+debug_assert PASS
+
+-2147483647
+debug_assert PASS
+
+-2147483648
+debug_assert PASS
+
