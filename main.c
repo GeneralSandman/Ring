@@ -21,12 +21,14 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    if (!strcmp(argv[1], "--version")) {
+    if (!strcmp(argv[1], "--version") 
+        || !strcmp(argv[1], "-v")) {
         printf("Ring version: %s \n", RING_VERSION);
         return 0;
     }
 
-    if (!strcmp(argv[1], "--interactive")) {
+    if (!strcmp(argv[1], "--interactive")
+        || !strcmp(argv[1], "-i")) {
         ring_interactive_program();
         return 0;
     }

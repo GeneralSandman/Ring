@@ -18,12 +18,13 @@ OBJS = \
 # CFLAGS -g 打开调试信息
 # CFLAGS -DDEBUG 开启 debug 编译信息
 # CFLAGS -DDEBUG_RVM 开启 debug ring virtual machine 信息
+# -lm for fmod function
 CFLAGS = -c -std=c99 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic -g -DDEBUG1 -DDEBUG_RVM1
 BIN = ./bin
 INCLUDES = \
 
 $(TARGET):$(OBJS)
-	$(CC) $(OBJS) -o $(BIN)/$@
+	$(CC) $(OBJS) -lm -o $(BIN)/$@
 
 install:
 	install -p -m 0755 ./bin/ring /usr/local/bin

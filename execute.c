@@ -99,6 +99,7 @@ void rvm_add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_Runtime
 
     runtime_static->size = executer->global_variable_size;
     runtime_static->data = malloc(runtime_static->size * sizeof(RVM_Value));
+    memset(runtime_static->data, 0, runtime_static->size * sizeof(RVM_Value));
 }
 
 void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm) {
