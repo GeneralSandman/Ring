@@ -147,9 +147,11 @@ struct NativeFunction {
     unsigned int        arg_count;
 };
 
+typedef unsigned char RVM_Byte;
+
 struct DeriveFunction {
-    // TODO:
-    unsigned int arg_count;
+    unsigned int code_size;
+    RVM_Byte*    code_list;
 };
 
 struct RVM_Function {
@@ -164,7 +166,6 @@ struct RVM_Function {
 
 
 // generate.c
-typedef unsigned char RVM_Byte;
 
 typedef enum {
     CONSTANTPOOL_TYPE_UNKNOW,
@@ -369,6 +370,8 @@ typedef enum {
     // func
     RVM_CODE_PUSH_FUNC,
     RVM_CODE_INVOKE_FUNC,
+    RVM_CODE_RETURN,
+    RVM_CODE_FUNCTION_FINISH,
 
     // 不能在生成代码的时候使用
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
@@ -385,6 +388,15 @@ typedef enum {
     IDENTIFIER_TYPE_VARIABLE_ARRAY,
     IDENTIFIER_TYPE_FUNCTION,
 } IdentifierType;
+
+typedef struct {
+    unsigned int  magic_number;
+    RVM_Function* caller_function;
+    unsigned int  caller_pc; // 调用者的地址
+} RVM_CallInfo;
+
+#define CALL_INFO_MAGIC_NUMBER (0x8421)
+#define CALL_INFO_SIZE ((sizeof(RVM_CallInfo) - 1) / sizeof(RVM_Value) + 1)
 
 struct Ring_String_Tag {
     char* buffer;
@@ -1046,6 +1058,7 @@ void              add_global_variable(Ring_Compiler* compiler, Ring_VirtualMachi
 void              add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
 void              copy_function(Function* src, RVM_Function* dest);
 void              add_top_level_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
+void              generate_code_from_function_definition(Ring_VirtualMachine_Executer* executer, Function* src, RVM_Function* dest);
 void              vm_executer_dump(Ring_VirtualMachine_Executer* executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
 void              generate_vmcode_from_block(Ring_VirtualMachine_Executer* executer, Block* block, RVM_OpcodeBuffer* opcode_buffer);
@@ -1089,12 +1102,22 @@ void                 rvm_add_static_variable(Ring_VirtualMachine_Executer* execu
 void                 rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function);
-void                 invoke_derive_function(Ring_VirtualMachine* rvm);
-void                 debug_rvm(Ring_VirtualMachine* rvm);
+void invoke_derive_function(Ring_VirtualMachine* rvm,
+                            RVM_Function** caller_function, RVM_Function* callee_function,
+                            RVM_Byte** code_list, unsigned int* code_size,
+                            unsigned int* pc);
+void derive_function_finish(Ring_VirtualMachine* rvm,
+                            RVM_Function** caller_function, RVM_Function* callee_function,
+                            RVM_Byte** code_list, unsigned int* code_size,
+                            unsigned int* pc);
+void debug_rvm(Ring_VirtualMachine* rvm);
 
 RVM_Object* create_rvm_object();
 RVM_Object* string_literal_to_rvm_object(char* string_literal);
 RVM_Object* concat_string(RVM_Object* a, RVM_Object* b);
+
+void store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo);
+void restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo);
 
 
 // RVM_Value native_proc_to_string(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
@@ -1118,7 +1141,7 @@ int  write_tmp_source_file(char* tmp_source_file_name, int start_line_num, int l
 
 // utils.c
 void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer);
-void ring_vm_code_dump(Ring_VirtualMachine_Executer* executer, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
+void ring_vm_code_dump(RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
 void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int screen_row, unsigned int screen_col);
 // utils.c
 

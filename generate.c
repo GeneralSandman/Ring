@@ -96,6 +96,8 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     // func
     {RVM_CODE_PUSH_FUNC, "push_func", OPCODE_OPERAND_TYPE_2BYTE}, // TODO: update to 2 byte
     {RVM_CODE_INVOKE_FUNC, "invoke_func", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_RETURN, "return", OPCODE_OPERAND_TYPE_0BYTE},
+    {RVM_CODE_FUNCTION_FINISH, "function_finish", OPCODE_OPERAND_TYPE_0BYTE},
 
 
     {RVM_CODES_NUM, "", OPCODE_OPERAND_TYPE_0BYTE},
@@ -118,6 +120,7 @@ Ring_VirtualMachine_Executer* new_ring_vm_executer() {
 // 生成 RVM 虚拟机代码
 void ring_generate_vm_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
+
     add_global_variable(compiler, executer);
     add_functions(compiler, executer);
     add_top_level_code(compiler, executer);
@@ -160,15 +163,20 @@ void add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* execut
     // 暂时只处理 native function
     for (; pos; pos = pos->next, i++) {
         copy_function(pos, &executer->function_list[i]);
+        if (pos->block != NULL) {
+            generate_code_from_function_definition(executer, pos, &executer->function_list[i]);
+        }
     }
 }
 
 void copy_function(Function* src, RVM_Function* dest) {
     debug_log_with_darkgreen_coloar("\t");
+
     if (src->type == FUNCTION_TYPE_NATIVE) {
         dest->type = RVM_FUNCTION_TYPE_NATIVE;
     } else if (src->type == FUNCTION_TYPE_DERIVE) {
-        dest->type = RVM_FUNCTION_TYPE_DERIVE;
+        dest->type          = RVM_FUNCTION_TYPE_DERIVE;
+        dest->u.derive_func = malloc(sizeof(DeriveFunction));
     }
     dest->func_name = src->function_name;
 }
@@ -176,6 +184,7 @@ void copy_function(Function* src, RVM_Function* dest) {
 // 添加顶层代码
 void add_top_level_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
+
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
     generate_vmcode_from_statement_list(executer, compiler->statement_list, opcode_buffer);
 
@@ -190,11 +199,30 @@ void add_top_level_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* e
     executer->code_size = code_size;
 }
 
+void generate_code_from_function_definition(Ring_VirtualMachine_Executer* executer, Function* src, RVM_Function* dest) {
+    debug_log_with_darkgreen_coloar("\t");
+
+    RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
+    generate_vmcode_from_statement_list(executer, src->block->statement_list, opcode_buffer);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_FUNCTION_FINISH, 0);
+
+    opcode_buffer_fix_label(opcode_buffer);
+
+
+    dest->u.derive_func->code_list = opcode_buffer->code_list;
+    dest->u.derive_func->code_size = opcode_buffer->code_size;
+
+#ifdef DEBUG
+    ring_vm_code_dump(opcode_buffer->code_list, opcode_buffer->code_size, 0, 60, 1);
+#endif
+}
+
+
 void vm_executer_dump(Ring_VirtualMachine_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
     // CLEAR_SCREEN;
     ring_vm_constantpool_dump(executer);
-    ring_vm_code_dump(executer, 0, 60, 1);
+    ring_vm_code_dump(executer->code_list, executer->code_size, 0, 60, 1);
 }
 
 RVM_OpcodeBuffer* new_opcode_buffer() {
@@ -762,7 +790,8 @@ void generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer
 void generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int oper_num) {
     debug_log_with_darkgreen_coloar("\t");
     if (opcode_buffer->code_capacity == opcode_buffer->code_size) {
-        opcode_buffer->code_capacity += 300;
+        // FIXME:
+        opcode_buffer->code_capacity += 3000;
     }
 
     RVM_Opcode_Info opcode_info                          = RVM_Opcode_Infos[opcode];

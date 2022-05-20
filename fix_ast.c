@@ -2,9 +2,17 @@
 #include <string.h>
 
 // 修正ast
-void ring_compiler_fix_ast(Ring_Compiler* ring_compiler) {
+void ring_compiler_fix_ast(Ring_Compiler* compiler) {
     // TODO: 目前只 修复 declaration_list
-    fix_statement_list(ring_compiler->statement_list);
+    Function* pos;
+
+    fix_statement_list(compiler->statement_list);
+
+    for (pos = compiler->function_list; pos; pos = pos->next) {
+        if (pos->block) {
+            fix_statement_list(pos->block->statement_list);
+        }
+    }
 }
 
 void fix_statement_list(Statement* statement_list) {

@@ -1,4 +1,5 @@
 #include "ring.h"
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -105,7 +106,14 @@ void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_Virtu
 
     for (int i = 0; i < executer->function_size; i++) {
         RVM_Function function = executer->function_list[i];
-        if (function.type == RVM_FUNCTION_TYPE_NATIVE) {
+        if (function.type == RVM_FUNCTION_TYPE_DERIVE) {
+            rvm->function_list = realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
+
+            rvm->function_list[rvm->function_size].func_name     = function.func_name;
+            rvm->function_list[rvm->function_size].type          = RVM_FUNCTION_TYPE_DERIVE;
+            rvm->function_list[rvm->function_size].u.derive_func = function.u.derive_func;
+
+            rvm->function_size++;
         }
     }
 }
@@ -113,18 +121,20 @@ void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_Virtu
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
 
-    RVM_Byte*         code_list       = rvm->executer->code_list;
-    unsigned int      code_size       = rvm->executer->code_size;
-    RVM_ConstantPool* const_pool_list = rvm->executer->constant_pool_list;
+    RVM_Byte*          code_list       = rvm->executer->code_list;
+    unsigned int       code_size       = rvm->executer->code_size;
+    RVM_ConstantPool*  const_pool_list = rvm->executer->constant_pool_list;
+    RVM_RuntimeStack*  runtime_stack   = rvm->runtime_stack;
+    RVM_RuntimeStatic* runtime_static  = rvm->runtime_static;
+    unsigned int       opcode_num      = 0;
     /* unsigned int       const_pool_size = rvm->executer->constant_pool_size; */
-    RVM_RuntimeStack*  runtime_stack  = rvm->runtime_stack;
-    RVM_RuntimeStatic* runtime_static = rvm->runtime_static;
-    unsigned int       opcode_num     = 0;
 
     unsigned int index;
     unsigned int func_index;
     unsigned int oper_num;
     unsigned int const_index;
+
+    RVM_Function* function = NULL;
 
     char* string_buf;
 
@@ -433,13 +443,25 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_INVOKE_FUNC:
             func_index = STACK_GET_INT_OFFSET(rvm, -1);
+            /* printf("func_index:%d\n", func_index); */
             runtime_stack->top_index--;
             if (rvm->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE) {
                 invoke_native_function(rvm, &rvm->function_list[func_index]);
+                rvm->pc += 1;
             } else if (rvm->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE) {
-                invoke_derive_function(rvm);
+                invoke_derive_function(rvm,
+                                       &function, &rvm->function_list[func_index],
+                                       &code_list, &code_size,
+                                       &rvm->pc);
+                // printf("after change code_size:%d\n", code_size);
             }
-            rvm->pc += 1;
+            break;
+        case RVM_CODE_RETURN:
+        case RVM_CODE_FUNCTION_FINISH:
+            derive_function_finish(rvm,
+                                   &function, NULL,
+                                   &code_list, &code_size,
+                                   &rvm->pc);
             break;
 
         default:
@@ -478,8 +500,59 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function) {
     rvm->runtime_stack->data[rvm->runtime_stack->top_index] = ret;
 }
 
-void invoke_derive_function(Ring_VirtualMachine* rvm) {
+void invoke_derive_function(Ring_VirtualMachine* rvm,
+                            RVM_Function** caller_function, RVM_Function* callee_function,
+                            RVM_Byte** code_list, unsigned int* code_size,
+                            unsigned int* pc) {
     debug_log_with_white_coloar("\t");
+    // TODO:
+    // 1. store call info
+    //      call info: - caller_function
+    //                 - caller_pc
+    // 2. expan runtime stack
+    // 3. change vm code to callee
+    // 4. change pc
+
+    RVM_CallInfo callinfo;
+    callinfo.magic_number    = CALL_INFO_MAGIC_NUMBER;
+    callinfo.caller_function = *caller_function;
+    callinfo.caller_pc       = *pc;
+    store_callinfo(rvm->runtime_stack, &callinfo);
+
+
+    *caller_function = callee_function;
+    *code_list       = callee_function->u.derive_func->code_list;
+    *code_size       = callee_function->u.derive_func->code_size;
+    *pc              = 0;
+}
+
+void derive_function_finish(Ring_VirtualMachine* rvm,
+                            RVM_Function** caller_function, RVM_Function* callee_function,
+                            RVM_Byte** code_list, unsigned int* code_size,
+                            unsigned int* pc) {
+    debug_log_with_white_coloar("\t");
+    // TODO:
+    // 1. restore call info
+    //      call info: caller_pc
+    // 3. change vm code to callee
+    // 4. change pc
+
+    RVM_CallInfo* callinfo;
+    restore_callinfo(rvm->runtime_stack, &callinfo);
+    assert(callinfo->magic_number == CALL_INFO_MAGIC_NUMBER);
+
+    *caller_function = callinfo->caller_function;
+    *pc              = callinfo->caller_pc + 1;
+
+    if (*caller_function == NULL) {
+        debug_log_with_white_coloar("\tcaller is top level\n");
+        *code_list = rvm->executer->code_list;
+        *code_size = rvm->executer->code_size;
+    } else {
+        debug_log_with_white_coloar("\tcaller function is derive function, func_name:%s\n", (*caller_function)->func_name);
+        *code_list = (*caller_function)->u.derive_func->code_list;
+        *code_size = (*caller_function)->u.derive_func->code_size;
+    }
 }
 
 RVM_Object* create_rvm_object() {
@@ -519,6 +592,18 @@ RVM_Object* concat_string(RVM_Object* a, RVM_Object* b) {
     return object;
 }
 
+void store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo) {
+    RVM_CallInfo* dest;
+    dest = (RVM_CallInfo*)(&runtime_stack->data[runtime_stack->top_index]);
+    memcpy(dest, callinfo, sizeof(RVM_CallInfo));
+    runtime_stack->top_index += CALL_INFO_SIZE;
+}
+
+void restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo) {
+    runtime_stack->top_index -= CALL_INFO_SIZE;
+    *callinfo = (RVM_CallInfo*)(&runtime_stack->data[runtime_stack->top_index]);
+}
+
 void debug_rvm(Ring_VirtualMachine* rvm) {
 #ifndef DEBUG_RVM
     return;
@@ -527,7 +612,7 @@ void debug_rvm(Ring_VirtualMachine* rvm) {
 
     CLEAR_SCREEN;
     ring_vm_dump_runtime_stack(rvm->runtime_stack, 1, 0);
-    ring_vm_code_dump(rvm->executer, rvm->pc, 1, 60);
+    ring_vm_code_dump(rvm->executer->code_list, rvm->executer->code_size, rvm->pc, 1, 60);
 
     printf("press enter to step, 'q' to quit.\n");
     char ch = getchar();
@@ -658,7 +743,7 @@ void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM
     debug_log_with_white_coloar("\t");
 
     if (rvm->function_list == NULL) {
-        rvm->function_list = malloc(sizeof(Function));
+        rvm->function_list = malloc(sizeof(RVM_Function));
     } else {
         rvm->function_list = realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
     }
@@ -673,6 +758,7 @@ void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM
 
 void rvm_register_native_functions(Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
+    // FIXME: 如果 println_bool 和 println_string 生命的顺序不一致怎么办
 
     // rvm_register_native_function(rvm, "print", native_proc_print, 1);
     // rvm_register_native_function(rvm, "println", native_proc_println, 1);

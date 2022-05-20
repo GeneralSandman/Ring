@@ -27,9 +27,9 @@ void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer) {
     }
 }
 
-void ring_vm_code_dump(Ring_VirtualMachine_Executer* executer, unsigned int pc, unsigned int screen_row, unsigned int screen_col) {
-    RVM_Byte*    code_list = executer->code_list;
-    unsigned int code_size = executer->code_size;
+void ring_vm_code_dump(RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col) {
+    /* RVM_Byte*    code_list = executer->code_list; */
+    /* unsigned int code_size = executer->code_size; */
 
     // int col = 60;
     // int row = 1;
