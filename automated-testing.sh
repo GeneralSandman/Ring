@@ -28,7 +28,7 @@ autoTestFunc(){
 		result="FAILED"
         echo $source_code_file >> $TEST_RESULT
 	fi
-    printf "%-4s %-15s %-60s %-60s [%s]\n" $all_num $model $source_code_file $run_result_file $result
+    printf "%-4s *%-15s %-60s %-60s [%s]\n" $all_num $model $source_code_file $run_result_file $result
     let all_num++
     rm $run_result_file_tmp
 }
@@ -45,11 +45,11 @@ printNotPassCase(){
 }
 
 
-printf "%-4s %-15s %-60s %-60s %s\n" num model source_code_file run_result_file result
+printf "%-4s %-16s %-60s %-60s %s\n" num model source_code_file run_result_file result
 
 for i in {1..1}; do {
 
-    for model in "array" "control" "function" "variable"; do
+    for model in "basic-type" "derive-function" "native-function"; do
         source_file_path=$TEST_PATH"/"$model
         for file in `ls $source_file_path`; do
             extension=${file##*.}

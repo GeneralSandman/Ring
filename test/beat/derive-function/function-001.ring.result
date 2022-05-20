@@ -1,0 +1,12 @@
+function doit6 BEGIN
+function doit5 BEGIN
+function doit4 BEGIN
+function doit3 BEGIN
+function doit2 BEGIN
+function doit1 BEGIN
+function doit1 END
+function doit2 END
+function doit3 END
+function doit4 END
+function doit5 END
+function doit6 END

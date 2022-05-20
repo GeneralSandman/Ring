@@ -1,0 +1,15 @@
+invoke doit1
+I'm function doit1, go go go!
+
+invoke doit2
+I'm function doit2, go go go!
+
+invoke doit3
+I'm function doit3, go go go!
+
+invoke doit4
+doit4 begin
+I'm function doit1, go go go!
+I'm function doit2, go go go!
+I'm function doit3, go go go!
+doit4 end
