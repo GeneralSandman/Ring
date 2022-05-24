@@ -13,7 +13,6 @@
 在平常，至尊魔戒的表面平滑，毫无特色，但在火炎燃烧时，戒指内外也会显现如火的文字：
 
 ```
-
 Ash nazg durbatulûk
 Ash nazg gimbatul
 Ash nazg thrakatulûk
@@ -23,9 +22,10 @@ Agh burzum-ishi krimpatul
 至尊指引诸魔戒
 至尊魔戒唤众戒
 众戒归一黑暗中
-
 ```
 
 
+> [!TIP|style:callout|label:Reference The Lord of the Rings wikipedia]
+> 
+> https://zh.wikipedia.org/wiki/%E8%87%B3%E5%B0%8A%E9%AD%94%E6%88%92
 
-Reference wikipedia https://zh.wikipedia.org/wiki/%E8%87%B3%E5%B0%8A%E9%AD%94%E6%88%92
