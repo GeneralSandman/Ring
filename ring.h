@@ -162,6 +162,8 @@ struct RVM_Function {
         NativeFunction* native_func;
         DeriveFunction* derive_func;
     } u;
+
+    unsigned int estimate_runtime_stack_capacity;
 };
 
 
@@ -197,6 +199,8 @@ struct Ring_VirtualMachine_Executer_Tag {
     // 连续数组，非链表
     unsigned int code_size;
     RVM_Byte*    code_list;
+
+    unsigned int estimate_runtime_stack_capacity;
 };
 
 
@@ -392,10 +396,11 @@ typedef enum {
 typedef struct {
     unsigned int  magic_number;
     RVM_Function* caller_function;
-    unsigned int  caller_pc; // 调用者的地址
+    unsigned int  caller_pc; // 调用者的返回地址
+    unsigned int  callee_stack_base;
 } RVM_CallInfo;
 
-#define CALL_INFO_MAGIC_NUMBER (0x8421)
+#define CALL_INFO_MAGIC_NUMBER (0x8421) // 33852
 #define CALL_INFO_SIZE ((sizeof(RVM_CallInfo) - 1) / sizeof(RVM_Value) + 1)
 
 struct Ring_String_Tag {
@@ -692,6 +697,7 @@ struct Declaration_Tag {
 struct Block_Tag {
     unsigned int line_number;
 
+    // TODO:
     // BlockType type;
 
     unsigned int declaration_list_size;
@@ -1035,19 +1041,20 @@ Statement*     create_declaration_statement(TypeSpecifier* type_specifier, char*
 
 // fix.c
 void         ring_compiler_fix_ast(Ring_Compiler* ring_compiler);
-void         fix_statement_list(Statement* statement_list);
-void         fix_statement(Statement* statement);
-void         fix_expression(Expression* expression);
-void         fix_declaration(Declaration* declaration);
-void         fix_block(Block* block);
-void         fix_if_statement(IfStatement* if_statement);
-void         fix_for_statement(ForStatement* for_statement);
-void         fix_dofor_statement(DoForStatement* dofor_statement);
-void         fix_identifier_expression(IdentifierExpression* expression);
-void         fix_assign_expression(AssignExpression* expression);
-void         fix_binary_expression(BinaryExpression* expression);
-void         fix_function_call_expression(FunctionCallExpression* function_call_expression);
-Declaration* search_declaration(char* identifier);
+void         fix_statement_list(Statement* statement_list, Block* block, Function* func);
+void         fix_statement(Statement* statement, Block* block, Function* func);
+void         fix_expression(Expression* expression, Block* block, Function* func);
+void         add_declaration(Declaration* declaration, Block* block, Function* func);
+void         fix_block(Block* block, Function* func);
+void         fix_if_statement(IfStatement* if_statement, Block* block, Function* func);
+void         fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
+void         fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
+void         fix_identifier_expression(IdentifierExpression* expression, Block* block);
+void         fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
+void         fix_binary_expression(BinaryExpression* expression, Block* block, Function* func);
+void         fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
+void         add_parameter_to_declaration(Variable* parameter);
+Declaration* search_declaration(char* identifier, Block* block);
 Function*    search_function(char* identifier);
 
 // generate.c
@@ -1092,6 +1099,7 @@ unsigned int opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer);
 void         opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address);
 void         opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer);
 RVM_Opcode   convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type);
+unsigned int calc_runtime_stack_capacity(RVM_Byte* code_list, unsigned int code_size);
 // generate.c
 
 // execute.c
@@ -1102,15 +1110,17 @@ void                 rvm_add_static_variable(Ring_VirtualMachine_Executer* execu
 void                 rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function);
-void invoke_derive_function(Ring_VirtualMachine* rvm,
-                            RVM_Function** caller_function, RVM_Function* callee_function,
-                            RVM_Byte** code_list, unsigned int* code_size,
-                            unsigned int* pc);
-void derive_function_finish(Ring_VirtualMachine* rvm,
-                            RVM_Function** caller_function, RVM_Function* callee_function,
-                            RVM_Byte** code_list, unsigned int* code_size,
-                            unsigned int* pc);
-void debug_rvm(Ring_VirtualMachine* rvm);
+void                 invoke_derive_function(Ring_VirtualMachine* rvm,
+                                            RVM_Function** caller_function, RVM_Function* callee_function,
+                                            RVM_Byte** code_list, unsigned int* code_size,
+                                            unsigned int* pc,
+                                            unsigned int* callee_stack_base);
+void                 derive_function_finish(Ring_VirtualMachine* rvm,
+                                            RVM_Function** caller_function, RVM_Function* callee_function,
+                                            RVM_Byte** code_list, unsigned int* code_size,
+                                            unsigned int* pc,
+                                            unsigned int* callee_stack_base);
+void                 debug_rvm(Ring_VirtualMachine* rvm);
 
 RVM_Object* create_rvm_object();
 RVM_Object* string_literal_to_rvm_object(char* string_literal);
@@ -1140,6 +1150,7 @@ int  write_tmp_source_file(char* tmp_source_file_name, int start_line_num, int l
 // interactive.c
 
 // utils.c
+void ring_compiler_functions_dump(Ring_Compiler* compiler);
 void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer);
 void ring_vm_code_dump(RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
 void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int screen_row, unsigned int screen_col);

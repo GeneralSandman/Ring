@@ -105,15 +105,16 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
 Ring_VirtualMachine_Executer* new_ring_vm_executer() {
     debug_log_with_darkgreen_coloar("\t");
-    Ring_VirtualMachine_Executer* executer = malloc(sizeof(Ring_VirtualMachine_Executer));
-    executer->constant_pool_size           = 0;
-    executer->constant_pool_list           = NULL;
-    executer->global_variable_size         = 0;
-    executer->global_variable_list         = NULL;
-    executer->function_size                = 0;
-    executer->function_list                = NULL;
-    executer->code_size                    = 0;
-    executer->code_list                    = NULL;
+    Ring_VirtualMachine_Executer* executer    = malloc(sizeof(Ring_VirtualMachine_Executer));
+    executer->constant_pool_size              = 0;
+    executer->constant_pool_list              = NULL;
+    executer->global_variable_size            = 0;
+    executer->global_variable_list            = NULL;
+    executer->function_size                   = 0;
+    executer->function_list                   = NULL;
+    executer->code_size                       = 0;
+    executer->code_list                       = NULL;
+    executer->estimate_runtime_stack_capacity = 0;
     return executer;
 }
 
@@ -556,9 +557,15 @@ void generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, Identifie
     }
     Declaration* declaration = identifier_expression->u.declaration;
 
-    // TODO: 还需要区分 static stack
     unsigned int variable_index = declaration->variable_index;
-    RVM_Opcode   opcode         = convert_opcode_by_rvm_type(RVM_CODE_POP_STATIC_INT, declaration->type);
+    RVM_Opcode   opcode         = RVM_CODE_UNKNOW;
+    if (declaration->is_local) {
+        // 局部变量
+        opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STACK_INT, declaration->type);
+    } else {
+        // 全局变量
+        opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STATIC_INT, declaration->type);
+    }
     generate_vmcode(executer, opcode_buffer, opcode, variable_index);
 }
 
@@ -624,6 +631,8 @@ void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* execut
         case RVM_CODE_RELATIONAL_LE_INT:
             opcode += 1;
             break;
+        default:
+            break;
         }
     } else if (left->type == EXPRESSION_TYPE_LITERAL_STRING
                || right->type == EXPRESSION_TYPE_LITERAL_STRING) {
@@ -687,8 +696,12 @@ void generate_vmcode_from_identifier_expression(Ring_VirtualMachine_Executer* ex
     unsigned int offset = 0;
     switch (identifier_expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
+        if (identifier_expression->u.declaration->is_local) {
+            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_INT, identifier_expression->u.declaration->type);
+        } else {
+            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_INT, identifier_expression->u.declaration->type);
+        }
         offset = identifier_expression->u.declaration->variable_index;
-        opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_INT, identifier_expression->u.declaration->type);
         generate_vmcode(executer, opcode_buffer, opcode, offset);
         break;
 
@@ -965,5 +978,9 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
     }
 
     return RVM_CODE_UNKNOW;
+}
+
+unsigned int calc_runtime_stack_capacity(RVM_Byte* code_list, unsigned int code_size) {
+    return 0;
 }
 

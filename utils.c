@@ -3,6 +3,29 @@
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
+void ring_compiler_functions_dump(Ring_Compiler* compiler) {
+    printf(" ************  compiler functions dump ****\n");
+    Function*    func;
+    Declaration* decl;
+    int          i = 0;
+    int          j = 0;
+
+    for (j = 0, decl = compiler->declaration_list; decl; decl = decl->next, j++) {
+        printf("global-variable[%d]: name:%s\n", j, decl->identifier);
+    }
+    printf("\n");
+
+    for (func = compiler->function_list; func; func = func->next, i++) {
+        printf("function[%d]: name:%s\n", i, func->function_name);
+        if (func->block) {
+            decl = func->block->declaration_list;
+            for (j = 0, decl = func->block->declaration_list; decl; decl = decl->next, j++) {
+                printf("\tlocal-variable[%d]: name:%s\n", j, decl->identifier);
+            }
+        }
+    }
+}
+
 
 void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer) {
     printf(" ************  rvm constant pool  ****\n");
