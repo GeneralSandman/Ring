@@ -1,167 +1,55 @@
 //
-// Created by Zhenhu Li on 2022/2/8.
+// File:    int-000.ring
+// Author:  zhenhuli - generalsandman@163.com
+// Date:    2022-05-19
 //
+
+function println_bool(var bool bool_value);
+function println_int(var int int_value);
+function println_double(var double double_value);
+function println_string(var string string_value);
+function debug_assert(var bool bool_value);
+function exit(var int int_value);
+
+// -----------------------------
 
 
 var bool bool_value;
 
-bool_value = true;
-print("set bool_value = true\n");
-if(bool_value) {
-	print("bool_value is true\n");
-} else {
-	print("bool_value is false\n");
-}
-
-print("\n");
-
-bool_value = false;
-print("set bool_value = false\n");
-if(bool_value) {
-	print("bool_value is true\n");
-} else {
-	print("bool_value is false\n");
-}
-
-
-print("\n");
+debug_assert(true == true);
 if(true) {
-	print("check true pass\n");
+	println_string("check pass");
 } else {
-	print("check true failed\n");
+	println_string("check pass [failed]");
 }
 
-print("\n");
+println_string("");
+
+debug_assert(false == false);
 if(false) {
-	print("check false failed\n");
+	println_string("check pass [failed]\n");
 } else {
-	print("check false pass\n");
+	println_string("check pass\n");
 }
 
 
-print("\n");
+println_string("");
+println_string("");
+
+
+debug_assert(not false == true);
 if(not false) {
-	print("check not false pass\n");
+	println_string("check pass");
 } else {
-	print("check not false failed\n");
+	println_string("check pass [failed]");
 }
 
+println_string("");
 
-print("\n");
+debug_assert(not true == false);
 if(not true) {
-	print("check not true failed\n");
+	println_string("check pass [failed]\n");
 } else {
-	print("check not true pass\n");
+	println_string("check pass\n");
 }
 
-print("\n");
-if(2>1) {
-	print("check 2>1 pass\n");
-} else {
-	print("check 2>1 failed\n");
-}
-
-
-print("\n");
-if(2<1) {
-	print("check 2<1 failed\n");
-} else {
-	print("check 2<1 pass\n");
-}
-
-
-print("\n");
-if(true or true) {
-	print("check (true or true) pass\n");
-} else {
-	print("check (true or true) failed\n");
-}
-
-print("\n");
-if(false or true) {
-	print("check (false or true) pass\n");
-} else {
-	print("check (false or true) failed\n");
-}
-
-print("\n");
-if(true or false) {
-	print("check (true or false) pass\n");
-} else {
-	print("check (true or false) failed\n");
-}
-
-print("\n");
-if(false or false) {
-	print("check (false or false) failed\n");
-} else {
-	print("check (false or false) pass\n");
-}
-
-
-print("\n");
-print("\n");
-
-
-print("\n");
-if(true and true) {
-	print("check (true and true) pass\n");
-} else {
-	print("check (true and true) failed\n");
-}
-
-
-print("\n");
-if(true and false) {
-	print("check (true and false) failed\n");
-} else {
-	print("check (true and false) pass\n");
-}
-
-print("\n");
-if(false and true) {
-	print("check (false and true) failed\n");
-} else {
-	print("check (false and true) pass\n");
-}
-
-print("\n");
-if(false and false) {
-	print("check (false and false) failed\n");
-} else {
-	print("check (false and false) pass\n");
-}
-
-
-
-
-var int int_value_1;
-var int int_value_2;
-var int int_value_3;
-
-print("\n");
-int_value_1 = 1;
-int_value_2 = 2;
-int_value_3 = 3;
-print("\n");
-if(int_value_1 < int_value_2 and int_value_2 < int_value_3) {
-	print("check (int_value_1 < int_value_2 and int_value_2 < int_value_3) pass\n");
-} else {
-	print("check (int_value_1 < int_value_2 and int_value_2 < int_value_3) failed\n");
-}
-
-
-print("\n");
-if(int_value_1 <= int_value_2 and int_value_2 < int_value_3) {
-	print("check (int_value_1 <= int_value_2 and int_value_2 < int_value_3) pass\n");
-} else {
-	print("check (int_value_1 <= int_value_2 and int_value_2 < int_value_3) failed\n");
-}
-
-
-print("\n");
-if(int_value_1 > int_value_2 or int_value_2 < int_value_3) {
-	print("check (int_value_1 > int_value_2 or int_value_2 < int_value_3) pass\n");
-} else {
-	print("check (int_value_1 > int_value_2 or int_value_2 < int_value_3) failed\n");
-}

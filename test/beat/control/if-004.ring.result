@@ -1,0 +1,4 @@
+debug_assert PASS
+check 2>1 pass
+
+check 2<1 pass

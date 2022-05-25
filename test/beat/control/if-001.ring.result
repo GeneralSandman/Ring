@@ -1,42 +1,14 @@
-set bool_value = true
-bool_value is true
+debug_assert PASS
+check pass
 
-set bool_value = false
-bool_value is false
-
-check true pass
-
-check false pass
-
-check not false pass
-
-check not true pass
-
-check 2>1 pass
-
-check 2<1 pass
-
-check (true or true) pass
-
-check (false or true) pass
-
-check (true or false) pass
-
-check (false or false) pass
+debug_assert PASS
+check pass
 
 
 
-check (true and true) pass
+debug_assert PASS
+check pass
 
-check (true and false) pass
+debug_assert PASS
+check pass
 
-check (false and true) pass
-
-check (false and false) pass
-
-
-check (int_value_1 < int_value_2 and int_value_2 < int_value_3) pass
-
-check (int_value_1 <= int_value_2 and int_value_2 < int_value_3) pass
-
-check (int_value_1 > int_value_2 or int_value_2 < int_value_3) pass

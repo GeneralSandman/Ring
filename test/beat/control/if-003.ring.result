@@ -1,0 +1,8 @@
+debug_assert PASS
+check (true and true) pass
+
+check (true and false) pass
+
+check (false and true) pass
+
+check (false and false) pass

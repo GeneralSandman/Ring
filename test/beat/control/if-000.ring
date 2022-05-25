@@ -1,57 +1,79 @@
 //
-// Created by Zhenhu Li on 2022/2/8.
+// File:    int-000.ring
+// Author:  zhenhuli - generalsandman@163.com
+// Date:    2022-05-19
 //
+
+function println_bool(var bool bool_value);
+function println_int(var int int_value);
+function println_double(var double double_value);
+function println_string(var string string_value);
+function debug_assert(var bool bool_value);
+function exit(var int int_value);
+
+// -----------------------------
 
 
 var bool bool_value;
 
 bool_value = true;
-print("set bool_value = true\n");
+println_bool(bool_value);
+debug_assert(bool_value == true);
 if(bool_value) {
-	print("bool_value is true\n");
+	println_string("bool_value is true");
 } else {
-	print("bool_value is false\n");
+	println_string("bool_value is false [FAILED]");
 }
+println_bool(bool_value);
+debug_assert(bool_value == true);
 
-print("\n");
+
+println_string("");
+
+bool_value = true;
+println_bool(not bool_value);
+debug_assert(not bool_value == false);
+if(not bool_value) {
+	println_string("not bool_value is true [FAILED]");
+} else {
+	println_string("not bool_value is false");
+}
+println_bool(not bool_value);
+debug_assert(not bool_value == false);
+
+
+println_string("");
+println_string("");
+
+
 
 bool_value = false;
-print("set bool_value = false\n");
+println_bool(bool_value);
+debug_assert(bool_value == false);
 if(bool_value) {
-	print("bool_value is true\n");
+	println_string("bool_value is true [FAILED]");
 } else {
-	print("bool_value is false\n");
+	println_string("bool_value is false");
 }
+println_bool(bool_value);
+debug_assert(bool_value == false);
 
 
+println_string("");
 
-var int int_value;
 
-for(int_value=0;int_value<100;int_value=int_value+1) {
-	testIf(int_value);
+bool_value = false;
+println_bool(not bool_value);
+debug_assert(not bool_value == true);
+if(not bool_value) {
+	println_string("bool_value is true");
+} else {
+	println_string("bool_value is false [FAILED]");
 }
+println_bool(not bool_value);
+debug_assert(not bool_value == true);
 
 
-function testIf(var int int_value) {
-	if(int_value < 10) {
-		print(int_value, " < 10\n");
-	} elseif(int_value < 20) {
-		print("10 <= ", int_value, " < 20\n");
-	} elseif(int_value < 30) {
-		print("20 <= ", int_value, " < 30\n");
-	} elseif(int_value < 40) {
-		print("30 <= ", int_value, " < 40\n");
-	} elseif(int_value < 50) {
-		print("40 <= ", int_value, " < 50\n");
-	} elseif(int_value < 60) {
-		print("50 <= ", int_value, " < 60\n");
-	} elseif(int_value < 70) {
-		print("60 <= ", int_value, " < 70\n");
-	} elseif(int_value < 80) {
-		print("70 <= ", int_value, " < 80\n");
-	} elseif(int_value < 90) {
-		print("80 <= ", int_value, " < 90\n");
-	} else {
-		print("90 <= ", int_value, "\n");
-	}
-}
+println_string("");
+println_string("");
+
