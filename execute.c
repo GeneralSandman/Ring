@@ -332,27 +332,21 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_INCREASE_SUFFIX:
-            // TODO:
-            /* STACK_SET_INT_OFFSET(rvm, 0, ); */
-            /* runtime_stack->top_index++; */
             STACK_GET_INT_OFFSET(rvm, -1)
             ++;
             rvm->pc++;
             break;
         case RVM_CODE_INCREASE_PREFIX:
-            // TODO:
             STACK_GET_INT_OFFSET(rvm, -1)
             ++;
             rvm->pc++;
             break;
         case RVM_CODE_DECREASE_SUFFIX:
-            // TODO:
             STACK_GET_INT_OFFSET(rvm, -1)
             --;
             rvm->pc++;
             break;
         case RVM_CODE_DECREASE_PREFIX:
-            // TODO:
             STACK_GET_INT_OFFSET(rvm, -1)
             --;
             rvm->pc++;

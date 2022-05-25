@@ -251,7 +251,7 @@ void generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* executer,
     for (Statement* statement = statement_list; statement != NULL; statement = statement->next) {
         switch (statement->type) {
         case STATEMENT_TYPE_EXPRESSION:
-            generate_vmcode_from_expression(executer, statement->u.expression, opcode_buffer);
+            generate_vmcode_from_expression(executer, statement->u.expression, opcode_buffer, 0);
             break;
 
         case STATEMENT_TYPE_IF:
@@ -280,7 +280,7 @@ void generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, I
     unsigned int if_false_jump_label = 0;
     unsigned int if_end_label        = 0;
 
-    generate_vmcode_from_expression(executer, if_statement->condition_expression, opcode_buffer);
+    generate_vmcode_from_expression(executer, if_statement->condition_expression, opcode_buffer, 1);
 
     if_false_jump_label = opcode_buffer_get_label(opcode_buffer);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, if_false_jump_label);
@@ -296,7 +296,7 @@ void generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, I
     // handle elseif list
     ElseIfStatement* pos = if_statement->elseif_list;
     for (; pos; pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->condition_expression, opcode_buffer);
+        generate_vmcode_from_expression(executer, pos->condition_expression, opcode_buffer, 0);
 
         unsigned int elseif_false_jump_label = 0;
         elseif_false_jump_label              = opcode_buffer_get_label(opcode_buffer);
@@ -330,7 +330,7 @@ void generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, 
 
     // Step-1:
     if (for_statement->init_expression) {
-        generate_vmcode_from_expression(executer, for_statement->init_expression, opcode_buffer);
+        generate_vmcode_from_expression(executer, for_statement->init_expression, opcode_buffer, 0);
     }
     loop_label = opcode_buffer_get_label(opcode_buffer);
     opcode_buffer_set_label(opcode_buffer, loop_label, opcode_buffer->code_size);
@@ -338,7 +338,7 @@ void generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, 
     // Step-2:
     end_label = opcode_buffer_get_label(opcode_buffer);
     if (for_statement->condition_expression) {
-        generate_vmcode_from_expression(executer, for_statement->condition_expression, opcode_buffer);
+        generate_vmcode_from_expression(executer, for_statement->condition_expression, opcode_buffer, 0);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label);
     }
 
@@ -347,7 +347,7 @@ void generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, 
 
     // Step-4:
     if (for_statement->post_expression) {
-        generate_vmcode_from_expression(executer, for_statement->post_expression, opcode_buffer);
+        generate_vmcode_from_expression(executer, for_statement->post_expression, opcode_buffer, 0);
     }
 
     // Step-5:
@@ -371,7 +371,7 @@ void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer
 
     // Step-1:
     if (dofor_statement->init_expression) {
-        generate_vmcode_from_expression(executer, dofor_statement->init_expression, opcode_buffer);
+        generate_vmcode_from_expression(executer, dofor_statement->init_expression, opcode_buffer, 0);
     }
     loop_label = opcode_buffer_get_label(opcode_buffer);
     opcode_buffer_set_label(opcode_buffer, loop_label, opcode_buffer->code_size);
@@ -384,14 +384,14 @@ void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer
     // Step-3:
     end_label = opcode_buffer_get_label(opcode_buffer);
     if (dofor_statement->condition_expression) {
-        generate_vmcode_from_expression(executer, dofor_statement->condition_expression, opcode_buffer);
+        generate_vmcode_from_expression(executer, dofor_statement->condition_expression, opcode_buffer, 0);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label);
     }
 
 
     // Step-4:
     if (dofor_statement->post_expression) {
-        generate_vmcode_from_expression(executer, dofor_statement->post_expression, opcode_buffer);
+        generate_vmcode_from_expression(executer, dofor_statement->post_expression, opcode_buffer, 0);
     }
 
     // Step-5;
@@ -402,7 +402,7 @@ void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer
 }
 
 
-void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
@@ -462,7 +462,7 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
     case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
     case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
     case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
-        generate_vmcode_from_increase_decrease_expression(executer, expression, opcode_buffer);
+        generate_vmcode_from_increase_decrease_expression(executer, expression, opcode_buffer, need_duplicate);
         break;
 
     case EXPRESSION_TYPE_RELATIONAL_EQ:
@@ -508,10 +508,10 @@ void generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* execut
     }
     if (expression->type != ASSIGN_EXPRESSION_TYPE_ASSIGN) {
         // += -= *= /=
-        generate_vmcode_from_expression(executer, expression->left, opcode_buffer);
+        generate_vmcode_from_expression(executer, expression->left, opcode_buffer, 1);
     }
 
-    generate_vmcode_from_expression(executer, expression->operand, opcode_buffer);
+    generate_vmcode_from_expression(executer, expression->operand, opcode_buffer, 1);
 
     switch (expression->type) {
     case ASSIGN_EXPRESSION_TYPE_ASSIGN:
@@ -521,19 +521,15 @@ void generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* execut
     case ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN:
         generate_vmcode(executer, opcode_buffer, RVM_CODE_ADD_INT, 0);
         break;
-
     case ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN:
         generate_vmcode(executer, opcode_buffer, RVM_CODE_SUB_INT, 0);
         break;
-
     case ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN:
         generate_vmcode(executer, opcode_buffer, RVM_CODE_MUL_INT, 0);
         break;
-
     case ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN:
         generate_vmcode(executer, opcode_buffer, RVM_CODE_DIV_INT, 0);
         break;
-
     case ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN:
         generate_vmcode(executer, opcode_buffer, RVM_CODE_MOD_INT, 0);
         break;
@@ -580,23 +576,23 @@ void generate_vmcode_from_logical_expression(Ring_VirtualMachine_Executer* execu
     unsigned int end_label = 0;
 
     if (opcode == RVM_CODE_LOGICAL_AND) {
-        generate_vmcode_from_expression(executer, left, opcode_buffer);
+        generate_vmcode_from_expression(executer, left, opcode_buffer, 1);
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0);
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label);
 
-        generate_vmcode_from_expression(executer, right, opcode_buffer);
+        generate_vmcode_from_expression(executer, right, opcode_buffer, 1);
 
         generate_vmcode(executer, opcode_buffer, opcode, 0);
     } else if (opcode == RVM_CODE_LOGICAL_OR) {
-        generate_vmcode_from_expression(executer, left, opcode_buffer);
+        generate_vmcode_from_expression(executer, left, opcode_buffer, 1);
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0);
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_TRUE, end_label);
 
-        generate_vmcode_from_expression(executer, right, opcode_buffer);
+        generate_vmcode_from_expression(executer, right, opcode_buffer, 1);
 
         generate_vmcode(executer, opcode_buffer, opcode, 0);
     }
@@ -641,37 +637,50 @@ void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* execut
         }
     }
 
-    generate_vmcode_from_expression(executer, left, opcode_buffer);
-    generate_vmcode_from_expression(executer, right, opcode_buffer);
+    generate_vmcode_from_expression(executer, left, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, right, opcode_buffer, 1);
 
     generate_vmcode(executer, opcode_buffer, opcode, 0);
 }
 
-void generate_vmcode_from_increase_decrease_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_increase_decrease_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
     }
 
     Expression* unitary_expression = expression->u.unitary_expression;
-    generate_vmcode_from_expression(executer, unitary_expression, opcode_buffer);
+    generate_vmcode_from_expression(executer, unitary_expression, opcode_buffer, 1);
 
     switch (expression->type) {
     case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
         /* generate_vmcode(executer, opcode_buffer, ); */
+        if (need_duplicate) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0);
+        }
         generate_vmcode(executer, opcode_buffer, RVM_CODE_INCREASE_SUFFIX, 0);
         break;
     case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
         generate_vmcode(executer, opcode_buffer, RVM_CODE_INCREASE_PREFIX, 0);
+        if (need_duplicate) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0);
+        }
         break;
     case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
+        if (need_duplicate) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0);
+        }
         generate_vmcode(executer, opcode_buffer, RVM_CODE_DECREASE_SUFFIX, 0);
         break;
     case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
         generate_vmcode(executer, opcode_buffer, RVM_CODE_DECREASE_PREFIX, 0);
+        if (need_duplicate) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0);
+        }
         break;
     default: break;
     }
+
 
     generate_pop_to_leftvalue(executer, unitary_expression->u.identifier_expression, opcode_buffer);
 }
@@ -682,7 +691,7 @@ void generate_vmcode_from_unitary_expression(Ring_VirtualMachine_Executer* execu
         return;
     }
 
-    generate_vmcode_from_expression(executer, expression, opcode_buffer);
+    generate_vmcode_from_expression(executer, expression, opcode_buffer, 1);
 
     generate_vmcode(executer, opcode_buffer, opcode, 0);
 }
@@ -774,10 +783,10 @@ void generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer*
     }
     ArgumentList* pos = function_call_expression->argument_list;
     for (; pos != NULL; pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
     }
 
-    generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer);
+    generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer, 1);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0);
 }
 
@@ -787,7 +796,7 @@ void generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer
         return;
     }
 
-    generate_vmcode_from_expression(executer, cast_expression->operand, opcode_buffer);
+    generate_vmcode_from_expression(executer, cast_expression->operand, opcode_buffer, 1);
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
     switch (cast_expression->type) {
     case CAST_TYPE_TO_STRING:
