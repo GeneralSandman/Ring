@@ -28,17 +28,17 @@ println_string("");
 int_value = 1;
 result = 1;
 
-result = int_value+1;
+result = int_value-1;
 debug_assert(int_value == 1);
-debug_assert(result == 2);
+debug_assert(result == 0);
 println_string("");
 
 
 int_value = 1;
 result = 1;
 
-result = int_value++;
-debug_assert(int_value == 2);
+result = int_value--;
+debug_assert(int_value == 0);
 debug_assert(result == 1);
 println_string("");
 
@@ -46,9 +46,9 @@ println_string("");
 int_value = 1;
 result = 1;
 
-result = ++int_value;
-debug_assert(int_value == 2);
-debug_assert(result == 2);
+result = --int_value;
+debug_assert(int_value == 0);
+debug_assert(result == 0);
 println_string("");
 
 
@@ -58,9 +58,9 @@ println_string("");
 int_value = 10;
 result = 10;
 
-result = int_value+1;
+result = int_value-1;
 debug_assert(int_value == 10);
-debug_assert(result == 11);
+debug_assert(result == 9);
 println_string("");
 
 
