@@ -1,18 +1,18 @@
-# ```Ring``` 控制语句do-while循环
+# ```Ring``` 控制语句do-for循环
 
-## do-while条件控制语句的语法：
+## do-for条件控制语句的语法：
 
 
 ```ring
 do{
   code_block;
-}while(condition_expression);
+}for(condition_expression);
 ```
 
-- ```do``` ```while``` 为关键字 📌
+- ```do``` ```for``` 为关键字 📌
 
 
-## do-while循环执行流程图：
+## do-for循环执行流程图：
 
 ```plantuml
 @startuml
@@ -21,7 +21,7 @@ start
 
 repeat
   :code_block;
-repeat while (condition_expression) is (true)
+repeat for (condition_expression) is (true)
 
 stop
 
@@ -44,7 +44,7 @@ do{
 	print("int_value1=", int_value1, ", int_value2=", int_value2, "\n");
 	int_value1 = int_value1+1;
 	int_value2 = int_value2-1;
-}while(false);
+}for(false);
 
 
 ```
