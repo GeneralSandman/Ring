@@ -291,6 +291,7 @@ struct RVM_Opcode_Info_Tag {
     RVM_Byte          code;
     char*             name;
     OpcodeOperandType type;
+    int               runtime_stack_increment; // estimate runtime stack capacity
 };
 
 typedef enum {
@@ -397,7 +398,7 @@ typedef struct {
     unsigned int  magic_number;
     RVM_Function* caller_function;
     unsigned int  caller_pc; // 调用者的返回地址
-    unsigned int  callee_stack_base;
+    unsigned int  caller_stack_base;
 } RVM_CallInfo;
 
 #define CALL_INFO_MAGIC_NUMBER (0x8421) // 33852
@@ -1114,12 +1115,12 @@ void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
-                                            unsigned int* callee_stack_base);
+                                            unsigned int* caller_stack_base);
 void                 derive_function_finish(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
-                                            unsigned int* callee_stack_base);
+                                            unsigned int* caller_stack_base);
 void                 debug_rvm(Ring_VirtualMachine* rvm);
 
 RVM_Object* create_rvm_object();

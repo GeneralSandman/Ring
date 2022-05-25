@@ -134,8 +134,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int func_index          = 0;
     unsigned int oper_num            = 0;
     unsigned int const_index         = 0;
-    unsigned int callee_stack_base   = 0;
-    unsigned int callee_stack_offset = 0;
+    unsigned int caller_stack_base   = 0;
+    unsigned int caller_stack_offset = 0;
 
     RVM_Function* function = NULL;
 
@@ -225,46 +225,44 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // stack
         case RVM_CODE_POP_STACK_INT:
-            callee_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_INT_INDEX(rvm, callee_stack_base + callee_stack_offset, STACK_GET_INT_OFFSET(rvm, -1));
+            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_INT_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_INT_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_STACK_DOUBLE:
-            callee_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_DOUBLE_INDEX(rvm, callee_stack_base + callee_stack_offset, STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_DOUBLE_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_DOUBLE_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_STACK_OBJECT:
-            callee_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_OBJECT_INDEX(rvm, callee_stack_base + callee_stack_offset, STACK_GET_OBJECT_OFFSET(rvm, -1));
+            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_OBJECT_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STACK_INT:
             oper_num            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            callee_stack_offset = oper_num; //  在操作符后边获取
-            // printf("callee_stack_offset:%d\n", callee_stack_offset);
-            // printf("value:%d\n", STACK_GET_INT_INDEX(rvm, callee_stack_base + callee_stack_offset));
+            caller_stack_offset = oper_num; //  在操作符后边获取
             STACK_SET_INT_OFFSET(rvm, 0,
-                                 STACK_GET_INT_INDEX(rvm, callee_stack_base + callee_stack_offset));
+                                 STACK_GET_INT_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STACK_DOUBLE:
             oper_num            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            callee_stack_offset = oper_num; //  在操作符后边获取
+            caller_stack_offset = oper_num; //  在操作符后边获取
             STACK_SET_DOUBLE_OFFSET(rvm, 0,
-                                    STACK_GET_DOUBLE_INDEX(rvm, callee_stack_base + callee_stack_offset));
+                                    STACK_GET_DOUBLE_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STACK_OBJECT:
             oper_num            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            callee_stack_offset = oper_num; //  在操作符后边获取
+            caller_stack_offset = oper_num; //  在操作符后边获取
             STACK_SET_OBJECT_OFFSET(rvm, 0,
-                                    STACK_GET_OBJECT_INDEX(rvm, callee_stack_base + callee_stack_offset));
+                                    STACK_GET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
@@ -502,7 +500,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                        &function, &rvm->function_list[func_index],
                                        &code_list, &code_size,
                                        &rvm->pc,
-                                       &callee_stack_base);
+                                       &caller_stack_base);
                 // printf("++++rvm->runtime_stack->top_index:%d base:%d\n", runtime_stack->top_index, callee_stack_base);
             }
             break;
@@ -512,7 +510,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             derive_function_finish(rvm,
                                    &function, NULL,
                                    &code_list, &code_size,
-                                   &rvm->pc, &callee_stack_base);
+                                   &rvm->pc, &caller_stack_base);
             break;
 
         default:
@@ -555,14 +553,21 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function) {
 // 1. store call info
 //      call info: - caller_function
 //                 - caller_pc
+// - callee_stack_base
 // 2. expan runtime stack
+// 3. change
+//          caller_function
+//          vm code_list
+//          vm code_size
+//          pc
+//          caller_stack_base
 // 3. change vm code to callee
 // 4. change pc
 void invoke_derive_function(Ring_VirtualMachine* rvm,
                             RVM_Function** caller_function, RVM_Function* callee_function,
                             RVM_Byte** code_list, unsigned int* code_size,
                             unsigned int* pc,
-                            unsigned int* callee_stack_base) {
+                            unsigned int* caller_stack_base) {
     debug_log_with_white_coloar("\t");
 
     // FIXME:
@@ -572,7 +577,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     callinfo.magic_number      = CALL_INFO_MAGIC_NUMBER;
     callinfo.caller_function   = *caller_function;
     callinfo.caller_pc         = *pc;
-    callinfo.callee_stack_base = *callee_stack_base;
+    callinfo.caller_stack_base = *caller_stack_base;
     store_callinfo(rvm->runtime_stack, &callinfo);
 
 
@@ -580,7 +585,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     *code_list         = callee_function->u.derive_func->code_list;
     *code_size         = callee_function->u.derive_func->code_size;
     *pc                = 0;
-    *callee_stack_base = rvm->runtime_stack->top_index; // FIXME:
+    *caller_stack_base = rvm->runtime_stack->top_index; // FIXME:
 
     // FIXME:
     unsigned int local_variable_size = 1; // how to get local_variable_size
@@ -596,7 +601,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
                             RVM_Function** caller_function, RVM_Function* callee_function,
                             RVM_Byte** code_list, unsigned int* code_size,
                             unsigned int* pc,
-                            unsigned int* callee_stack_base) {
+                            unsigned int* caller_stack_base) {
     debug_log_with_white_coloar("\t");
 
     RVM_CallInfo* callinfo;
@@ -608,14 +613,13 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     assert(callinfo->magic_number == CALL_INFO_MAGIC_NUMBER);
     *caller_function   = callinfo->caller_function;
     *pc                = callinfo->caller_pc + 1;
-    *callee_stack_base = callinfo->callee_stack_base;
-
+    *caller_stack_base = callinfo->caller_stack_base;
     if (*caller_function == NULL) {
-        debug_log_with_white_coloar("\tcaller is top level\n");
+        // debug_log_with_white_coloar("\tcaller is top level\n");
         *code_list = rvm->executer->code_list;
         *code_size = rvm->executer->code_size;
     } else {
-        debug_log_with_white_coloar("\tcaller function is derive function, func_name:%s\n", (*caller_function)->func_name);
+        // debug_log_with_white_coloar("\tcaller function is derive function, func_name:%s\n", (*caller_function)->func_name);
         *code_list = (*caller_function)->u.derive_func->code_list;
         *code_size = (*caller_function)->u.derive_func->code_size;
     }
