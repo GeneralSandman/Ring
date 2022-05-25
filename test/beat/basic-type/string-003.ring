@@ -31,7 +31,7 @@ println_string(string_value_1);
 println_string(string_value_2);
 
 
-// FIXME:
+// FIXME: fixme in fix_ast.c
 if(string_value_1 == string_value_2) {
     println_string("string_value_1 == string_value_2");
 } else {
