@@ -1,20 +1,35 @@
-var int int_value;
+//
+// File:    int-000.ring
+// Author:  zhenhuli - generalsandman@163.com
+// Date:    2022-05-19
+//
 
-int_value = -1;
+function println_bool(var bool bool_value);
+function println_int(var int int_value);
+function println_double(var double double_value);
+function println_string(var string string_value);
+function debug_assert(var bool bool_value);
+function exit(var int int_value);
 
-print("before for int_value=", int_value, "\n");
+// -----------------------------
 
-for(int_value = 0;int_value < 20; int_value=int_value+1) {
-	print("for int_value=", int_value, "\n");
-	if(int_value > 10) {
-		print("break here\n");
-		break;
+var int i;
+var int j;
+
+for(i=1; i<=9; i++) {
+	for(j=1; j<=i; j++) {
+		println_int(i*j);
 	}
-
-	print("--end for statementlist\n");
-
+	println_string("");
 }
 
-print("after for int_value=", int_value, "\n");
 
-
+// 1*1=1
+// 1*2=2 2*2=4
+// 1*3=3 2*3=6   3*3=9
+// 1*4=4 2*4=8   3*4=12 4*4=16
+// 1*5=5 2*5=10  3*5=15 4*5=20 5*5=25
+// 1*6=6 2*6=12  3*6=18 4*6=24 5*6=30 6*6=36
+// 1*7=7 2*7=14  3*7=21 4*7=28 5*7=35 6*7=42 7*7=49
+// 1*8=8 2*8=16  3*8=24 4*8=32 5*8=40 6*8=48 7*8=56 8*8=64
+// 1*9=9 2*9=18  3*9=27 4*9=36 5*9=45 6*9=54 7*9=63 8*9=72 9*9=81

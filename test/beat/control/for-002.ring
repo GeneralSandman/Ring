@@ -1,16 +1,15 @@
-var int int_value;
+//
+// File:    int-000.ring
+// Author:  zhenhuli - generalsandman@163.com
+// Date:    2022-05-19
+//
 
-int_value = -1;
+function println_bool(var bool bool_value);
+function println_int(var int int_value);
+function println_double(var double double_value);
+function println_string(var string string_value);
+function debug_assert(var bool bool_value);
+function exit(var int int_value);
 
-print("before for int_value=", int_value, "\n");
-
-for(;;) {
-	print("for int_value=", int_value, "\n");
-	int_value = int_value + 1;
-
-	break;
-}
-
-print("after for int_value=", int_value, "\n");
-
+// -----------------------------
 

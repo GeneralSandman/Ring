@@ -1,21 +1,12 @@
-before for int_value=-1
-for int_value=0
-for int_value=1
-for int_value=2
-for int_value=3
-for int_value=4
-for int_value=5
-for int_value=6
-for int_value=7
-for int_value=8
-for int_value=9
-after for int_value=10
-
-
-before for int_value=-1
-for int_value=0
-for int_value=2
-for int_value=4
-for int_value=6
-for int_value=8
-after for int_value=10
+[Test Case 1]
+5050
+[Test Case 2]
+5050
+[Test Case 3]
+5050
+[Test Case 4]
+5050
+[Test Case 5]
+20100
+[Test Case 6]
+3628800

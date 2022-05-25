@@ -1,23 +1,39 @@
+//
+// File:    int-000.ring
+// Author:  zhenhuli - generalsandman@163.com
+// Date:    2022-05-19
+//
 
-var int int_value1;
-var int int_value2;
+function println_bool(var bool bool_value);
+function println_int(var int int_value);
+function println_double(var double double_value);
+function println_string(var string string_value);
+function debug_assert(var bool bool_value);
+function exit(var int int_value);
 
-int_value1 = 0;
-int_value2 = 10;
-
-do{
-	print("int_value1=", int_value1, ", int_value2=", int_value2, "\n");
-	int_value1 = int_value1+1;
-	int_value2 = int_value2-1;
-}while(false);
+// -----------------------------
 
 
-print("\n\n");
-int_value1 = 0;
-int_value2 = 10;
+var int int_value;
 
-do{
-	print("int_value1=", int_value1, ", int_value2=", int_value2, "\n");
-	int_value1 = int_value1+1;
-	int_value2 = int_value2-1;
-}while(int_value1<10);
+// -----------
+println_string("[Test Case 1]");
+
+for(int_value = 0; int_value < 10; int_value++) {
+    println_int(int_value);
+}
+
+debug_assert(int_value == 10);
+println_int(int_value);
+
+println_string("");
+
+
+// -----------
+println_string("[Test Case 2]");
+do(int_value = 0) {
+    println_int(int_value);
+}for(int_value<10; int_value++);
+
+debug_assert(int_value == 10);
+println_int(int_value);

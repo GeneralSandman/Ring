@@ -1,31 +1,62 @@
-before for int_value=-1
-for int_value=0
-for int_value=1
-for int_value=2
-for int_value=3
-for int_value=4
-for int_value=5
-for int_value=6
-for int_value=7
-for int_value=8
-for int_value=9
-for int_value=10
-for int_value=11
-for int_value=11 > 10
-for int_value=12
-for int_value=12 > 10
-for int_value=13
-for int_value=13 > 10
-for int_value=14
-for int_value=14 > 10
-for int_value=15
-for int_value=15 > 10
-for int_value=16
-for int_value=16 > 10
-for int_value=17
-for int_value=17 > 10
-for int_value=18
-for int_value=18 > 10
-for int_value=19
-for int_value=19 > 10
-after for int_value=20
+debug_assert PASS
+-1
+
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+debug_assert PASS
+int_value > 10
+11
+
+12
+debug_assert PASS
+int_value > 10
+12
+
+13
+debug_assert PASS
+int_value > 10
+13
+
+14
+debug_assert PASS
+int_value > 10
+14
+
+15
+debug_assert PASS
+int_value > 10
+15
+
+16
+debug_assert PASS
+int_value > 10
+16
+
+17
+debug_assert PASS
+int_value > 10
+17
+
+18
+debug_assert PASS
+int_value > 10
+18
+
+19
+debug_assert PASS
+int_value > 10
+19
+
+
+debug_assert PASS
+20

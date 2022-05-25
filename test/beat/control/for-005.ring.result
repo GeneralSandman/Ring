@@ -1,42 +1,4 @@
-before for int_value=-1
-for int_value=0
---end for
-for int_value=1
---end for
-for int_value=2
---end for
-for int_value=3
---end for
-for int_value=4
---end for
-for int_value=5
---end for
-for int_value=6
---end for
-for int_value=7
---end for
-for int_value=8
---end for
-for int_value=9
---end for
-for int_value=10
---end for
-for int_value=11
-continue here
-for int_value=12
-continue here
-for int_value=13
-continue here
-for int_value=14
-continue here
-for int_value=15
-continue here
-for int_value=16
-continue here
-for int_value=17
-continue here
-for int_value=18
-continue here
-for int_value=19
-continue here
-after for int_value=20
+debug_assert PASS
+1048576
+debug_assert PASS
+26214400
