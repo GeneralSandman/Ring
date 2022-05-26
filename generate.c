@@ -391,6 +391,7 @@ void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer
 
 
     // Step-2:
+    end_label = opcode_buffer_get_label(opcode_buffer);
     if (dofor_statement->block) {
         dofor_statement->block->block_labels.break_label = end_label;
 
@@ -399,7 +400,6 @@ void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer
 
 
     // Step-3:
-    end_label = opcode_buffer_get_label(opcode_buffer);
     if (dofor_statement->condition_expression) {
         generate_vmcode_from_expression(executer, dofor_statement->condition_expression, opcode_buffer, 0);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label);
