@@ -333,8 +333,9 @@ void generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, 
     if (for_statement == NULL) {
         return;
     }
-    unsigned int end_label  = 0;
-    unsigned int loop_label = 0;
+    unsigned int end_label      = 0;
+    unsigned int loop_label     = 0;
+    unsigned int continue_label = 0;
 
     // Step-1:
     if (for_statement->init_expression) {
@@ -354,9 +355,13 @@ void generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, 
     // Step-3:
     if (for_statement->block) {
         for_statement->block->block_labels.break_label = end_label;
+        for_statement->block->block_labels.continue_label =
+            continue_label = opcode_buffer_get_label(opcode_buffer);
 
         generate_vmcode_from_block(executer, for_statement->block, opcode_buffer);
     }
+
+    opcode_buffer_set_label(opcode_buffer, continue_label, opcode_buffer->code_size);
 
     // Step-4:
     if (for_statement->post_expression) {
@@ -378,8 +383,9 @@ void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer
     if (dofor_statement == NULL) {
         return;
     }
-    unsigned int end_label  = 0;
-    unsigned int loop_label = 0;
+    unsigned int end_label      = 0;
+    unsigned int loop_label     = 0;
+    unsigned int continue_label = 0;
 
 
     // Step-1:
@@ -394,9 +400,14 @@ void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer
     end_label = opcode_buffer_get_label(opcode_buffer);
     if (dofor_statement->block) {
         dofor_statement->block->block_labels.break_label = end_label;
+        dofor_statement->block->block_labels.continue_label =
+            continue_label = opcode_buffer_get_label(opcode_buffer);
 
         generate_vmcode_from_block(executer, dofor_statement->block, opcode_buffer);
     }
+
+
+    opcode_buffer_set_label(opcode_buffer, continue_label, opcode_buffer->code_size);
 
 
     // Step-3:
@@ -455,6 +466,25 @@ void generate_vmcode_from_continue_statement(Ring_VirtualMachine_Executer* execu
     if (continue_statement == NULL) {
         return;
     }
+
+    Block* pos = block;
+    for (; pos; pos = pos->parent_block) {
+        if (pos->type == BLOCK_TYPE_FOR) {
+            break;
+        } else if (pos->type == BLOCK_TYPE_DOFOR) {
+            break;
+        } else {
+            continue;
+        }
+    }
+
+
+    if (pos == NULL) {
+        printf("generate_vmcode_from_continue_statement error------------\n");
+        exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+    }
+
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, pos->block_labels.continue_label);
 }
 
 void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {
