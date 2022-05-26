@@ -1,0 +1,46 @@
+[test case 1]
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+finish for====
+10
+true
+debug_assert PASS
+finish for====
+
+[test case 2]
+0
+1
+2
+3
+4
+5
+finish for====
+10
+true
+debug_assert PASS
+6
+debug_assert PASS
+finish for====
+
+[test case 3]
+0
+1
+2
+3
+4
+5
+finish for====
+6
+true
+debug_assert PASS
+6
+debug_assert PASS
+finish for====
