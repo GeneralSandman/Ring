@@ -427,7 +427,6 @@ typedef enum {
     STATEMENT_TYPE_IF,
     STATEMENT_TYPE_FOR,
     STATEMENT_TYPE_DOFOR,
-    STATEMENT_TYPE_DOWHILE,
     STATEMENT_TYPE_BREAK,
     STATEMENT_TYPE_CONTINUE,
     STATEMENT_TYPE_DECLARATION,
@@ -695,11 +694,24 @@ struct Declaration_Tag {
     Declaration*   next;
 };
 
+typedef enum {
+    BLOCK_TYPE_UNKNOW,
+    BLOCK_TYPE_IF,
+    BLOCK_TYPE_FOR,
+    BLOCK_TYPE_DOFOR,
+    BLOCK_TYPE_FUNCTION,
+    // BLOCK_TYPE_OTHER,
+} BlockType;
+
+typedef struct BlockLabels {
+    unsigned int break_label;
+    unsigned int continue_label;
+} BlockLabels;
+
 struct Block_Tag {
     unsigned int line_number;
 
-    // TODO:
-    // BlockType type;
+    BlockType type;
 
     unsigned int declaration_list_size;
     Declaration* declaration_list;
@@ -708,6 +720,8 @@ struct Block_Tag {
     Statement*   statement_list;
 
     Block* parent_block;
+
+    BlockLabels block_labels;
 };
 
 struct Function_Tag {
@@ -784,6 +798,8 @@ struct DoForStatement_Tag {
 
 struct BreakStatement_Tag {
     unsigned int line_number;
+
+    unsigned int break_loop_num; // break; break 1; break 2;
 };
 
 struct ContinueStatement_Tag {
@@ -1027,8 +1043,10 @@ Statement*              create_statement_from_for(ForStatement* for_statement);
 ForStatement*           create_for_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Block* block);
 Statement*              create_statement_from_dofor(DoForStatement* dofor_statement);
 DoForStatement*         create_dofor_statement(Expression* init_expression, Block* block, Expression* condition_expression, Expression* post_expression);
-Statement*              create_statement_from_break();
-Statement*              create_statement_from_continue();
+Statement*              create_statement_from_break(BreakStatement* break_statement);
+BreakStatement*         create_break_statement(char* literal_interface);
+Statement*              create_statement_from_continue(ContinueStatement* continue_statement);
+ContinueStatement*      create_continue_statement();
 Block*                  start_new_block();
 Block*                  finish_block(Block* block, Statement* statement_list);
 // Identifier *            create_identifier(IdentifierType type, char *name);
@@ -1070,10 +1088,12 @@ void              generate_code_from_function_definition(Ring_VirtualMachine_Exe
 void              vm_executer_dump(Ring_VirtualMachine_Executer* executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
 void              generate_vmcode_from_block(Ring_VirtualMachine_Executer* executer, Block* block, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* executer, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* executer, Block* block, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer, DoForStatement* dofor_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_break_statement(Ring_VirtualMachine_Executer* executer, Block* block, BreakStatement* break_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_continue_statement(Ring_VirtualMachine_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
 void              generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
 void              generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);

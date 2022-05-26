@@ -187,7 +187,7 @@ void add_top_level_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* e
     debug_log_with_darkgreen_coloar("\t");
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
-    generate_vmcode_from_statement_list(executer, compiler->statement_list, opcode_buffer);
+    generate_vmcode_from_statement_list(executer, NULL, compiler->statement_list, opcode_buffer);
 
     opcode_buffer_fix_label(opcode_buffer);
 
@@ -204,7 +204,7 @@ void generate_code_from_function_definition(Ring_VirtualMachine_Executer* execut
     debug_log_with_darkgreen_coloar("\t");
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
-    generate_vmcode_from_statement_list(executer, src->block->statement_list, opcode_buffer);
+    generate_vmcode_from_statement_list(executer, src->block, src->block->statement_list, opcode_buffer);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_FUNCTION_FINISH, 0);
 
     opcode_buffer_fix_label(opcode_buffer);
@@ -243,10 +243,10 @@ void generate_vmcode_from_block(Ring_VirtualMachine_Executer* executer, Block* b
         return;
     }
     debug_log_with_darkgreen_coloar("\t");
-    generate_vmcode_from_statement_list(executer, block->statement_list, opcode_buffer);
+    generate_vmcode_from_statement_list(executer, block, block->statement_list, opcode_buffer);
 }
 
-void generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* executer, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* executer, Block* block, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     for (Statement* statement = statement_list; statement != NULL; statement = statement->next) {
         switch (statement->type) {
@@ -264,6 +264,14 @@ void generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* executer,
 
         case STATEMENT_TYPE_DOFOR:
             generate_vmcode_from_dofor_statement(executer, statement->u.dofor_statement, opcode_buffer);
+            break;
+
+        case STATEMENT_TYPE_BREAK:
+            generate_vmcode_from_break_statement(executer, block, statement->u.break_statement, opcode_buffer);
+            break;
+
+        case STATEMENT_TYPE_CONTINUE:
+            generate_vmcode_from_continue_statement(executer, block, statement->u.continue_statement, opcode_buffer);
             break;
 
         default: break;
@@ -342,8 +350,13 @@ void generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label);
     }
 
+
     // Step-3:
-    generate_vmcode_from_block(executer, for_statement->block, opcode_buffer);
+    if (for_statement->block) {
+        for_statement->block->block_labels.break_label = end_label;
+
+        generate_vmcode_from_block(executer, for_statement->block, opcode_buffer);
+    }
 
     // Step-4:
     if (for_statement->post_expression) {
@@ -378,7 +391,11 @@ void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer
 
 
     // Step-2:
-    generate_vmcode_from_block(executer, dofor_statement->block, opcode_buffer);
+    if (dofor_statement->block) {
+        dofor_statement->block->block_labels.break_label = end_label;
+
+        generate_vmcode_from_block(executer, dofor_statement->block, opcode_buffer);
+    }
 
 
     // Step-3:
@@ -401,6 +418,44 @@ void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer
     opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
 }
 
+void generate_vmcode_from_break_statement(Ring_VirtualMachine_Executer* executer, Block* block, BreakStatement* break_statement, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (break_statement == NULL) {
+        return;
+    }
+
+    unsigned int break_loop_num = break_statement->break_loop_num;
+
+    Block*       pos      = block;
+    unsigned int loop_num = 1;
+    for (; pos; pos = pos->parent_block) {
+        if (pos->type == BLOCK_TYPE_FOR) {
+        } else if (pos->type == BLOCK_TYPE_DOFOR) {
+        } else {
+            continue;
+        }
+
+        if (break_loop_num == loop_num) {
+            break;
+        }
+        loop_num++;
+    }
+
+
+    if (pos == NULL) {
+        printf("generate_vmcode_from_break_statement error------------\n");
+        exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+    }
+
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, pos->block_labels.break_label);
+}
+
+void generate_vmcode_from_continue_statement(Ring_VirtualMachine_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (continue_statement == NULL) {
+        return;
+    }
+}
 
 void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {
     debug_log_with_darkgreen_coloar("\t");

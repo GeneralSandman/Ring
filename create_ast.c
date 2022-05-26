@@ -428,6 +428,7 @@ Function* new_function_definition(FunctionType type, char* identifier, Variable*
 
     // 把block中定义的局部变量加到 variable_list 中
     if (block != NULL) {
+        block->type = BLOCK_TYPE_FUNCTION;
         for (Statement* pos = block->statement_list; pos != NULL; pos = pos->next) {
             if (pos->type == STATEMENT_TYPE_VARIABLE_DEFINITION) {
                 Variable* tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL, 0);
@@ -463,6 +464,13 @@ IfStatement* create_if_statement(Expression* expression, Block* if_block, ElseIf
     if_statement->elseif_list          = elseif_statement_list;
     if_statement->else_block           = else_block;
 
+    if (if_block) {
+        if_block->type = BLOCK_TYPE_IF;
+    }
+    if (else_block) {
+        else_block->type = BLOCK_TYPE_IF;
+    }
+
     return if_statement;
 }
 
@@ -474,6 +482,10 @@ ElseIfStatement* create_elseif_statement(Expression* expression, Block* elseif_b
     elseif_statement->condition_expression = expression;
     elseif_statement->elseif_block         = elseif_block;
     elseif_statement->next                 = NULL;
+
+    if (elseif_block) {
+        elseif_block->type = BLOCK_TYPE_IF;
+    }
 
     return elseif_statement;
 }
@@ -514,6 +526,10 @@ ForStatement* create_for_statement(Expression* init_expression, Expression* cond
     for_statement->post_expression      = post_expression;
     for_statement->block                = block;
 
+    if (block) {
+        block->type = BLOCK_TYPE_FOR;
+    }
+
     return for_statement;
 }
 
@@ -539,33 +555,62 @@ DoForStatement* create_dofor_statement(Expression* init_expression, Block* block
     dofor_statement->condition_expression = condition_expression;
     dofor_statement->post_expression      = post_expression;
 
+    if (block) {
+        block->type = BLOCK_TYPE_DOFOR;
+    }
+
     return dofor_statement;
 }
 
-Statement* create_statement_from_break() {
+Statement* create_statement_from_break(BreakStatement* break_statement) {
     debug_log_with_yellow_coloar("\t");
 
     Statement* statement         = malloc(sizeof(Statement));
     statement->line_number       = get_ring_compiler_line_number();
     statement->type              = STATEMENT_TYPE_BREAK;
-    statement->u.break_statement = NULL;
+    statement->u.break_statement = break_statement;
     statement->next              = NULL;
 
     return statement;
 }
 
-Statement* create_statement_from_continue() {
+BreakStatement* create_break_statement(char* literal_interface) {
+    debug_log_with_yellow_coloar("\t");
+
+    unsigned int break_loop_num = 0;
+    if (literal_interface == NULL || strlen(literal_interface) == 0) {
+        break_loop_num = 1;
+    } else {
+        sscanf(literal_interface, "%ud", &break_loop_num);
+        // TODO: check break_loop_num valid
+    }
+
+    BreakStatement* break_statement = malloc(sizeof(BreakStatement));
+    break_statement->line_number    = get_ring_compiler_line_number();
+    break_statement->break_loop_num = break_loop_num;
+
+    return break_statement;
+}
+
+
+Statement* create_statement_from_continue(ContinueStatement* continue_statement) {
     debug_log_with_yellow_coloar("\t");
 
     Statement* statement            = malloc(sizeof(Statement));
     statement->line_number          = get_ring_compiler_line_number();
     statement->type                 = STATEMENT_TYPE_CONTINUE;
-    statement->u.continue_statement = NULL;
+    statement->u.continue_statement = continue_statement;
     statement->next                 = NULL;
 
     return statement;
 }
 
+ContinueStatement* create_continue_statement() {
+    ContinueStatement* continue_statement = malloc(sizeof(ContinueStatement));
+    continue_statement->line_number       = get_ring_compiler_line_number();
+
+    return continue_statement;
+}
 // Block* create_block(Statement* statement_list) {
 //     debug_log_with_yellow_coloar("\t");
 //
@@ -589,13 +634,16 @@ Block* start_new_block() {
     debug_log_with_yellow_coloar("\t");
 
 
-    Block* block                 = malloc(sizeof(Block));
-    block->line_number           = get_ring_compiler_line_number();
-    block->declaration_list_size = 0;
-    block->declaration_list      = NULL;
-    block->statement_list_size   = 0;
-    block->statement_list        = NULL;
-    block->parent_block          = get_ring_compiler()->current_block;
+    Block* block                       = malloc(sizeof(Block));
+    block->line_number                 = get_ring_compiler_line_number();
+    block->type                        = BLOCK_TYPE_UNKNOW;
+    block->declaration_list_size       = 0;
+    block->declaration_list            = NULL;
+    block->statement_list_size         = 0;
+    block->statement_list              = NULL;
+    block->parent_block                = get_ring_compiler()->current_block;
+    block->block_labels.break_label    = 0;
+    block->block_labels.continue_label = 0;
 
     /* printf("[start] parent:%p, current:%p\n", block->parent_block, block); */
 

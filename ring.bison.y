@@ -33,6 +33,8 @@ int yyerror(char const *str);
     FunctionReturnList*         m_return_list;
     Block*                      m_block;
     CastExpression*             m_cast;
+    BreakStatement*             m_break_statement;
+    ContinueStatement*          m_continue_statement;
 
     TypeSpecifier*              m_type_specifier;
     Ring_BasicType              m_basic_type_specifier;
@@ -149,6 +151,8 @@ int yyerror(char const *str);
 %type <m_return_list> return_list
 %type <m_block> block
 %type <m_cast> cast
+%type <m_break_statement> break_statement
+%type <m_continue_statement> continue_statement
 
 %type <m_type_specifier>        type_specifier
 %type <m_basic_type_specifier>  basic_type_specifier
@@ -244,13 +248,11 @@ statement
     }
     | break_statement TOKEN_SEMICOLON
     {
-        $$ = create_statement_from_break();
-
+        $$ = create_statement_from_break($1);
     }
     | continue_statement TOKEN_SEMICOLON
     {
-        $$ = create_statement_from_continue();
-
+        $$ = create_statement_from_continue($1);
     }
     ;
 
@@ -316,10 +318,25 @@ dofor_statement
 
 
 break_statement
-    : TOKEN_BREAK ;
+    : TOKEN_BREAK 
+    {
+        debug_log_with_green_coloar("[RULE::break_statement]\t ");
+        $$ = create_break_statement(NULL);
+    }
+    | TOKEN_BREAK INT_LITERAL
+    {
+        debug_log_with_green_coloar("[RULE::break_statement]\t ");
+        $$ = create_break_statement($2);
+    }
+    ;
 
 continue_statement
-    : TOKEN_CONTINUE ;
+    : TOKEN_CONTINUE 
+    {
+        debug_log_with_green_coloar("[RULE::continue_statement]\t ");
+        $$ = create_continue_statement();
+    }
+    ;
 
 
 variable_definition_statement
