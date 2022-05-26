@@ -1,0 +1,9 @@
+[Test Case 1]
+finish for====
+debug_assert PASS
+10000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+finish for====
