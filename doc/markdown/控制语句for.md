@@ -21,12 +21,12 @@ for(init_expression; condition_expression; post_expression) {
 do-for 类似与 C语言，do-while，但是为了扩展 do-for，所以设计成如下：
 
 
-```ring
-
+```
 do(init_expression){
 	block_list;
 }for(condition_expression; post_expression);
-```ring
+
+```
 
 
 ## for循环执行流程图：
