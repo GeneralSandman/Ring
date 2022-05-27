@@ -71,6 +71,8 @@ typedef struct DoForStatement_Tag DoForStatement;
 
 typedef struct BreakStatement_Tag BreakStatement;
 
+typedef struct ReturnStatement_Tag ReturnStatement;
+
 typedef struct ContinueStatement_Tag ContinueStatement;
 
 typedef struct Ring_DeriveType_Tag Ring_DeriveType;
@@ -423,12 +425,12 @@ typedef enum {
     STATEMENT_TYPE_UNKNOW = 0,
     STATEMENT_TYPE_EXPRESSION,
     STATEMENT_TYPE_VARIABLE_DEFINITION,
-    STATEMENT_TYPE_RETURN,
     STATEMENT_TYPE_IF,
     STATEMENT_TYPE_FOR,
     STATEMENT_TYPE_DOFOR,
     STATEMENT_TYPE_BREAK,
     STATEMENT_TYPE_CONTINUE,
+    STATEMENT_TYPE_RETURN,
     STATEMENT_TYPE_DECLARATION,
 } StatementType;
 
@@ -535,12 +537,12 @@ struct Statement_Tag {
     union {
         Expression*        expression;
         Variable*          variable; // TODO: 以后废弃 使用 declaration_statement
-        Expression*        return_expression;
         IfStatement*       if_statement;
         ForStatement*      for_statement;
         DoForStatement*    dofor_statement;
         BreakStatement*    break_statement;
         ContinueStatement* continue_statement;
+        ReturnStatement*   return_statement;
         Declaration*       declaration_statement;
     } u;
     Statement* next;
@@ -807,6 +809,13 @@ struct ContinueStatement_Tag {
     unsigned int line_number;
 };
 
+struct ReturnStatement_Tag {
+    unsigned int line_number;
+
+    unsigned int return_list_size;
+    Expression*  return_list;
+};
+
 
 typedef enum {
     RING_BASIC_TYPE_UNKNOW,
@@ -1013,7 +1022,6 @@ Statement*              statement_list_add_item2(Statement* statement);
 Statement*              statement_list_add_item3(Statement* statement_list, Statement* statement);
 Statement*              create_statemen_from_expression(Expression* expression);
 Statement*              create_statement_from_variable(Variable* variable);
-Statement*              create_return_statement(Expression* expression);
 void                    add_function_definition(Function* function_definition);
 Expression*             create_expression();
 Expression*             create_expression_identifier(char* identifier);
@@ -1048,6 +1056,8 @@ Statement*              create_statement_from_break(BreakStatement* break_statem
 BreakStatement*         create_break_statement(char* literal_interface);
 Statement*              create_statement_from_continue(ContinueStatement* continue_statement);
 ContinueStatement*      create_continue_statement();
+Statement*              create_statement_from_return(ReturnStatement* return_statement);
+ReturnStatement*        create_return_statement(Expression* expression);
 Block*                  start_new_block();
 Block*                  finish_block(Block* block, Statement* statement_list);
 // Identifier *            create_identifier(IdentifierType type, char *name);
@@ -1069,6 +1079,7 @@ void         fix_block(Block* block, Function* func);
 void         fix_if_statement(IfStatement* if_statement, Block* block, Function* func);
 void         fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
 void         fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
+void         fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
 void         fix_identifier_expression(IdentifierExpression* expression, Block* block);
 void         fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
 void         fix_binary_expression(BinaryExpression* expression, Block* block, Function* func);
@@ -1095,6 +1106,7 @@ void              generate_vmcode_from_for_statement(Ring_VirtualMachine_Execute
 void              generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer, DoForStatement* dofor_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_break_statement(Ring_VirtualMachine_Executer* executer, Block* block, BreakStatement* break_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_continue_statement(Ring_VirtualMachine_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_return_statement(Ring_VirtualMachine_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
 void              generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
 void              generate_pop_to_leftvalue_reverse(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
@@ -1138,11 +1150,18 @@ void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
                                             unsigned int* caller_stack_base);
+void                 derive_function_return(Ring_VirtualMachine* rvm,
+                                            RVM_Function** caller_function, RVM_Function* callee_function,
+                                            RVM_Byte** code_list, unsigned int* code_size,
+                                            unsigned int* pc,
+                                            unsigned int* caller_stack_base,
+                                            unsigned int  return_value_list_size);
 void                 derive_function_finish(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
-                                            unsigned int* caller_stack_base);
+                                            unsigned int* caller_stack_base,
+                                            unsigned int  return_value_list_size);
 void                 debug_rvm(Ring_VirtualMachine* rvm);
 
 RVM_Object* create_rvm_object();

@@ -130,12 +130,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int       opcode_num      = 0;
     /* unsigned int       const_pool_size = rvm->executer->constant_pool_size; */
 
-    unsigned int index               = 0;
-    unsigned int func_index          = 0;
-    unsigned int oper_num            = 0;
-    unsigned int const_index         = 0;
-    unsigned int caller_stack_base   = 0;
-    unsigned int caller_stack_offset = 0;
+    unsigned int index                  = 0;
+    unsigned int func_index             = 0;
+    unsigned int oper_num               = 0;
+    unsigned int const_index            = 0;
+    unsigned int caller_stack_base      = 0;
+    unsigned int caller_stack_offset    = 0;
+    unsigned int return_value_list_size = 0;
 
     RVM_Function* function = NULL;
 
@@ -499,12 +500,21 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             }
             break;
         case RVM_CODE_RETURN:
-            break;
+            return_value_list_size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            // derive_function_return(rvm,
+            //                        &function, NULL,
+            //                        &code_list, &code_size,
+            //                        &rvm->pc,
+            //                        &caller_stack_base,
+            //                        return_value_list_size);
+            rvm->pc += 3;
+            // break; // ATTEN: no need break
         case RVM_CODE_FUNCTION_FINISH:
             derive_function_finish(rvm,
                                    &function, NULL,
                                    &code_list, &code_size,
-                                   &rvm->pc, &caller_stack_base);
+                                   &rvm->pc, &caller_stack_base, return_value_list_size);
+            return_value_list_size = 0;
             break;
 
         default:
@@ -586,6 +596,15 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     rvm->runtime_stack->top_index += local_variable_size;
 }
 
+void derive_function_return(Ring_VirtualMachine* rvm,
+                            RVM_Function** caller_function, RVM_Function* callee_function,
+                            RVM_Byte** code_list, unsigned int* code_size,
+                            unsigned int* pc,
+                            unsigned int* caller_stack_base,
+                            unsigned int  return_list_size) {
+    debug_log_with_white_coloar("\t");
+}
+
 // derive_function_finish
 // 1. restore call info
 //      call info: caller_pc
@@ -595,15 +614,24 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
                             RVM_Function** caller_function, RVM_Function* callee_function,
                             RVM_Byte** code_list, unsigned int* code_size,
                             unsigned int* pc,
-                            unsigned int* caller_stack_base) {
+                            unsigned int* caller_stack_base,
+                            unsigned int  return_value_list_size) {
     debug_log_with_white_coloar("\t");
+
+    unsigned int old_return_value_list_index;
+
+    rvm->runtime_stack->top_index -= return_value_list_size;
+    old_return_value_list_index = rvm->runtime_stack->top_index;
+
 
     RVM_CallInfo* callinfo;
     // FIXME:
     unsigned int local_variable_size = 1; // how to get local_variable_size
     rvm->runtime_stack->top_index -= local_variable_size;
+    /* printf("top_index:%d\n", rvm->runtime_stack->top_index); */
 
     restore_callinfo(rvm->runtime_stack, &callinfo);
+    /* printf("top_index:%d\n", rvm->runtime_stack->top_index); */
     assert(callinfo->magic_number == CALL_INFO_MAGIC_NUMBER);
     *caller_function   = callinfo->caller_function;
     *pc                = callinfo->caller_pc + 1;
@@ -616,6 +644,11 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
         // debug_log_with_white_coloar("\tcaller function is derive function, func_name:%s\n", (*caller_function)->func_name);
         *code_list = (*caller_function)->u.derive_func->code_list;
         *code_size = (*caller_function)->u.derive_func->code_size;
+    }
+
+
+    for (int i = 0; i < return_value_list_size; i++) {
+        rvm->runtime_stack->data[rvm->runtime_stack->top_index++] = rvm->runtime_stack->data[old_return_value_list_index + i];
     }
 }
 

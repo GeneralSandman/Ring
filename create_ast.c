@@ -62,16 +62,6 @@ Statement* create_statement_from_variable(Variable* variable) {
     return statement;
 }
 
-Statement* create_return_statement(Expression* expression) {
-    debug_log_with_yellow_coloar("expression->type:%d", expression->type);
-
-    Statement* statement           = malloc(sizeof(Statement));
-    statement->type                = STATEMENT_TYPE_RETURN;
-    statement->line_number         = get_ring_compiler_line_number();
-    statement->u.return_expression = expression;
-    statement->next                = NULL;
-    return statement;
-}
 
 void add_function_definition(Function* function_definition) {
     assert(function_definition != NULL);
@@ -600,6 +590,32 @@ ContinueStatement* create_continue_statement() {
 
     return continue_statement;
 }
+
+Statement* create_statement_from_return(ReturnStatement* return_statement) {
+    debug_log_with_yellow_coloar("\t");
+
+    Statement* statement          = malloc(sizeof(Statement));
+    statement->line_number        = get_ring_compiler_line_number();
+    statement->type               = STATEMENT_TYPE_RETURN;
+    statement->u.return_statement = return_statement;
+    statement->next               = NULL;
+
+    return statement;
+}
+
+ReturnStatement* create_return_statement(Expression* expression) {
+    debug_log_with_yellow_coloar("expression->type:%d", expression->type);
+
+    ReturnStatement* return_statement  = malloc(sizeof(ReturnStatement));
+    return_statement->line_number      = get_ring_compiler_line_number();
+    return_statement->return_list      = expression;
+    return_statement->return_list_size = 0;
+    for (Expression* pos = expression; pos; pos = pos->next) {
+        return_statement->return_list_size++;
+    }
+    return return_statement;
+}
+
 // Block* create_block(Statement* statement_list) {
 //     debug_log_with_yellow_coloar("\t");
 //

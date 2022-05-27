@@ -274,6 +274,11 @@ void generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* executer,
             generate_vmcode_from_continue_statement(executer, block, statement->u.continue_statement, opcode_buffer);
             break;
 
+        case STATEMENT_TYPE_RETURN:
+            generate_vmcode_from_return_statement(executer, block, statement->u.return_statement, opcode_buffer);
+            break;
+
+
         default: break;
         }
     }
@@ -485,6 +490,22 @@ void generate_vmcode_from_continue_statement(Ring_VirtualMachine_Executer* execu
     }
 
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, pos->block_labels.continue_label);
+}
+
+void generate_vmcode_from_return_statement(Ring_VirtualMachine_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (return_statement == NULL) {
+        return;
+    }
+
+
+    Expression* pos;
+    for (pos = return_statement->return_list; pos; pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos, opcode_buffer, 1);
+    }
+
+
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_RETURN, return_statement->return_list_size);
 }
 
 void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {

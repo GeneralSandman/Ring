@@ -50,6 +50,9 @@ void fix_statement(Statement* statement, Block* block, Function* func) {
         fix_dofor_statement(statement->u.dofor_statement, block, func);
         break;
 
+    case STATEMENT_TYPE_RETURN:
+        fix_return_statement(statement->u.return_statement, block, func);
+
     default: break;
     }
 }
@@ -166,6 +169,17 @@ void fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function
     fix_block(dofor_statement->block, func);
     fix_expression(dofor_statement->condition_expression, block, func);
     fix_expression(dofor_statement->post_expression, block, func);
+}
+
+void fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func) {
+    if (return_statement == NULL) {
+        return;
+    }
+
+    Expression* pos;
+    for (pos = return_statement->return_list; pos; pos = pos->next) {
+        fix_expression(pos, block, func);
+    }
 }
 
 void fix_identifier_expression(IdentifierExpression* expression, Block* block) {

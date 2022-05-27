@@ -35,6 +35,7 @@ int yyerror(char const *str);
     CastExpression*             m_cast;
     BreakStatement*             m_break_statement;
     ContinueStatement*          m_continue_statement;
+    ReturnStatement*            m_return_statement;
 
     TypeSpecifier*              m_type_specifier;
     Ring_BasicType              m_basic_type_specifier;
@@ -153,6 +154,7 @@ int yyerror(char const *str);
 %type <m_cast> cast
 %type <m_break_statement> break_statement
 %type <m_continue_statement> continue_statement
+%type <m_return_statement> return_statement
 
 %type <m_type_specifier>        type_specifier
 %type <m_basic_type_specifier>  basic_type_specifier
@@ -221,16 +223,6 @@ statement
         $$ = create_statemen_from_expression($1);
     }
     | variable_definition_statement TOKEN_SEMICOLON
-    | TOKEN_RETURN expression_list TOKEN_SEMICOLON
-    {
-        debug_log_with_green_coloar("[RULE::statement:return_statement]\t ");
-        $$ = create_return_statement($2);
-    }
-    | TOKEN_RETURN TOKEN_SEMICOLON
-    {
-        debug_log_with_green_coloar("[RULE::statement:return_statement]\t ");
-        $$ = create_return_statement(NULL);
-    }
     | if_statement
     {
         debug_log_with_green_coloar("[RULE::statement:if_statement]\t ");
@@ -253,6 +245,11 @@ statement
     | continue_statement TOKEN_SEMICOLON
     {
         $$ = create_statement_from_continue($1);
+    }
+    | return_statement
+    {
+        debug_log_with_green_coloar("[RULE::statement:return_statement]\t ");
+        $$ = create_statement_from_return($1);
     }
     ;
 
@@ -335,6 +332,19 @@ continue_statement
     {
         debug_log_with_green_coloar("[RULE::continue_statement]\t ");
         $$ = create_continue_statement();
+    }
+    ;
+
+return_statement
+    : TOKEN_RETURN TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::return_statement]\t ");
+        $$ = create_return_statement(NULL);
+    }
+    | TOKEN_RETURN expression_list TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::return_statement]\t ");
+        $$ = create_return_statement($2);
     }
     ;
 
