@@ -1,20 +1,17 @@
 # The ```Ring``` Programming Language
 
 
-## ```Ring```编程语言语言的功能
+```
+Ring是一个轻量级的脚本编程语言，语法类似C、C++、Go 语言，支持过程式与面向对象两种编程范式。
 
-- 静态类型 (Static Typing) 语言
-- 支持垃圾回收GC
-- 执行方式：解释执行、虚拟机执行
-- 支持面向对象
-- 需要方便的组织各种依赖、并发编译、链接
-- import 导包
-- 支持函数闭包、匿名函数与类型推导
-- 支持 defer
+Ring编译器是使用C语言开发的。实现方法简单、轻巧、易扩展。
+```
+
+### Ring 官方网站
 
 
+https://ring.wiki
 
-## Ring Wiki
 
 https://ring-1252697766.cos-website.ap-beijing.myqcloud.com
 
