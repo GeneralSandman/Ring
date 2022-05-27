@@ -276,7 +276,6 @@ Expression* create_cast_expression(CastType cast_type, Expression* operand) {
 AssignExpression* create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand) {
     AssignExpression* assing_expression = malloc(sizeof(AssignExpression));
 
-    // 这里应该优化一下
     assing_expression->line_number = get_ring_compiler_line_number();
     assing_expression->type        = type;
     assing_expression->left        = left;
@@ -284,35 +283,25 @@ AssignExpression* create_assign_expression(AssignExpressionType type, Expression
     return assing_expression;
 }
 
-AssignExpression* create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* first_expression, Expression* expression_list) {
+AssignExpression* create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* operand) {
     // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
     debug_log_with_yellow_coloar("");
 
+    Expression* left = NULL;
+    left             = create_expression_identifier(first_identifier);
+
+    Expression* prev = left;
+    for (Identifier* pos = identifier_list; pos; pos = pos->next) {
+        prev->next = create_expression_identifier(pos->identifier_name);
+        prev       = prev->next;
+    }
+
     AssignExpression* assing_expression = malloc(sizeof(AssignExpression));
 
-    unsigned int size = 1;
-    for (Identifier* pos = identifier_list; pos != NULL; pos = pos->next) {
-        size += 1;
-    }
-
-    char**       identifiers = malloc(sizeof(char*) * size);
-    unsigned int i           = 0;
-    identifiers[i++]         = first_identifier; // 初始化第一个
-    for (Identifier* pos = identifier_list; pos != NULL; pos = pos->next, i++) {
-        identifiers[i] = pos->identifier_name;
-    }
-
-    if (first_expression != NULL)
-        first_expression->next = expression_list;
-    else
-        first_expression = expression_list;
-
     assing_expression->line_number = get_ring_compiler_line_number();
-    assing_expression->type        = ASSIGN_EXPRESSION_TYPE_ASSIGN;
-    // FIXME:
-    /* assing_expression->assign_identifier_size = size; */
-    /* assing_expression->assign_identifiers     = identifiers; */
-    /* assing_expression->expression             = first_expression; */
+    assing_expression->type        = ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN;
+    assing_expression->left        = left;
+    assing_expression->operand     = operand;
     return assing_expression;
 }
 

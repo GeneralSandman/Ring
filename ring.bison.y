@@ -788,7 +788,7 @@ assign_expression
     | identifier TOKEN_COMMA identifier_list TOKEN_ASSIGN expression_list
     {
         debug_log_with_green_coloar("[RULE::assign_expression]\t ");
-        $$ = create_multi_assign_expression($1, $3, NULL, $5);
+        $$ = create_multi_assign_expression($1, $3, $5);
     }
     | identifier TOKEN_LB expression TOKEN_RB TOKEN_ASSIGN expression
     {

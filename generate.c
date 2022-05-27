@@ -596,11 +596,20 @@ void generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* execut
         generate_vmcode_from_expression(executer, expression->left, opcode_buffer, 1);
     }
 
-    generate_vmcode_from_expression(executer, expression->operand, opcode_buffer, 1);
+    if (expression->type == ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
+        Expression* pos;
+        for (pos = expression->operand; pos; pos = pos->next) {
+            generate_vmcode_from_expression(executer, pos, opcode_buffer, 1);
+        }
+    } else {
+        generate_vmcode_from_expression(executer, expression->operand, opcode_buffer, 1);
+    }
 
     switch (expression->type) {
     case ASSIGN_EXPRESSION_TYPE_ASSIGN:
         /* code */
+        break;
+    case ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN:
         break;
 
     case ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN:
@@ -628,7 +637,22 @@ void generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* execut
         exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
     }
 
-    generate_pop_to_leftvalue(executer, expression->left->u.identifier_expression, opcode_buffer);
+    if (expression->type == ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
+        // access identifier in reverse order.
+        generate_pop_to_leftvalue_reverse(executer, expression->left, opcode_buffer);
+    } else {
+        generate_pop_to_leftvalue(executer, expression->left->u.identifier_expression, opcode_buffer);
+    }
+}
+
+void generate_pop_to_leftvalue_reverse(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (expression == NULL) {
+        return;
+    }
+
+    generate_pop_to_leftvalue_reverse(executer, expression->next, opcode_buffer);
+    generate_pop_to_leftvalue(executer, expression->u.identifier_expression, opcode_buffer);
 }
 
 void generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {

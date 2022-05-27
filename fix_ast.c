@@ -203,8 +203,12 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
         return;
     }
 
-    fix_expression(expression->left, block, func);
-    fix_expression(expression->operand, block, func);
+    for (Expression* pos = expression->left; pos; pos = pos->next) {
+        fix_expression(pos, block, func);
+    }
+    for (Expression* pos = expression->operand; pos; pos = pos->next) {
+        fix_expression(pos, block, func);
+    }
 }
 
 void fix_binary_expression(BinaryExpression* expression, Block* block, Function* func) {

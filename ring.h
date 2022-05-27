@@ -498,12 +498,13 @@ typedef enum {
 
 typedef enum {
     ASSIGN_EXPRESSION_TYPE_UNKNOW = 0,
-    ASSIGN_EXPRESSION_TYPE_ASSIGN,     // =
-    ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN, // +=
-    ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN, // -=
-    ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN, // *=
-    ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN, // /=
-    ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN, // %=
+    ASSIGN_EXPRESSION_TYPE_ASSIGN,       // =
+    ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN, // a, b = 1, 2
+    ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN,   // +=
+    ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN,   // -=
+    ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN,   // *=
+    ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN,   // /=
+    ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN,   // %=
 } AssignExpressionType;
 
 struct Ring_BasicValue_Tag {
@@ -1028,7 +1029,7 @@ Expression*             create_expression_literal(ExpressionType type, char* lit
 Expression*             create_expression_bool_literal(ExpressionType type, Ring_Bool value);
 Expression*             create_cast_expression(CastType cast_type, Expression* operand);
 AssignExpression*       create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
-AssignExpression*       create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* first_expression, Expression* expression_list);
+AssignExpression*       create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* operand);
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list);
 Expression*             expression_list_add_item(Expression* expression_list, Expression* expression);
 ArgumentList*           argument_list_add_item3(ArgumentList* argument_list, ArgumentList* argument);
@@ -1096,6 +1097,7 @@ void              generate_vmcode_from_break_statement(Ring_VirtualMachine_Execu
 void              generate_vmcode_from_continue_statement(Ring_VirtualMachine_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
 void              generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
+void              generate_pop_to_leftvalue_reverse(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_logical_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
