@@ -215,19 +215,20 @@
 
 
 ```shell
+
 git clone https://github.com/GeneralSandman/Ring
 
 cd Ring
 
-mkdir bin
 
-make
 
-make clean
+mkdir bin && make && make clean
 
 make testall
 
 make install
+
+
 
 ring --version
 
