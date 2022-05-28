@@ -1,6 +1,6 @@
 <!-- doc/_sidebar.md -->
 
-* [**Ring简介**](/)
+* [**Ring简介**](./markdown/Ring简介.md)
 * [**基本概念**](./markdown/基本概念.md)
 * [**程序结构**](./markdown/程序结构.md)
 * [**基本数据类型**](./markdown/基本数据类型.md)

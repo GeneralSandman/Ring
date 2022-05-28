@@ -1,4 +1,5 @@
 * 快速使用**Ring**💡
+  - [**Ring** Github ⚓️](https://github.com/GeneralSandman/Ring)
   - [环境设置与使用💻](./markdown/Ring使用/环境设置.md)
   - [快速运行HelloWorld🎉](./markdown/Ring使用/快速运行HelloWorld.md)
   - [交互式编程🏁](./markdown/Ring使用/交互式编程.md)

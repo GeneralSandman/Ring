@@ -24,13 +24,19 @@
 </head>
 
 <body>
-  <div id="app"></div>
+  <div id="app">加载中</div>
   <script>
     window.$docsify = {
       loadSidebar: true,
+      subMaxLevel: 2,
+
       loadNavbar: true,
-      name: 'Ring',
-      repo: 'https://github.com/GeneralSandman/Ring',
+
+      coverpage: true,
+
+      onlyCover: true,
+
+      name: 'Ring 首页',
 
       plantuml: {
         skin: 'classic',
