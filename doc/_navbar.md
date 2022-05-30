@@ -5,10 +5,10 @@
   - [交互式编程🏁](./markdown/Ring使用/交互式编程.md)
 
 * **Ring**砍题🪓
-  - [**Ring**解决八皇后问题👸](./markdown/Ring砍题)
-  - [**Ring**解数独📝](./markdown/Ring砍题)
-  - [**Ring**实现BFS广度优先遍历🚗](./markdown/Ring砍题)
-  - [**Ring**实现DFS深度优先遍历🛻](./markdown/Ring砍题)
+  - [**Ring**解决八皇后问题👸](./markdown/Ring砍题/八皇后问题.md)
+  - [**Ring**解数独📝](./markdown/Ring砍题/数独.md)
+  - [**Ring**实现BFS广度优先遍历🚗](./markdown/Ring砍题/BFS广度优先遍历.md)
+  - [**Ring**实现DFS深度优先遍历🛻](./markdown/Ring砍题/DFS深度优先遍历.md)
   
 
 - **Ring**编译器设计🔨
