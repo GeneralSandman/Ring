@@ -12,5 +12,5 @@
 - 语法规范类似```C、C++、Go```
 - 源代码编译生成字节码后由栈式虚拟机执行
 
-[Get Started Wiki](./Readme.md)
+[Get Started Wiki](./README.md)
 [GitHub](https://github.com/GeneralSandman/Ring)
