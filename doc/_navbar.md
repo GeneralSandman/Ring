@@ -3,6 +3,7 @@
   - [环境设置与使用💻](./markdown/Ring使用/环境设置.md)
   - [快速运行HelloWorld🎉](./markdown/Ring使用/快速运行HelloWorld.md)
   - [交互式编程🏁](./markdown/Ring使用/交互式编程.md)
+  - [**Ring** 基本语法编程示例⛴](./markdown/Ring使用/Ring基本语法编程示例.md)
 
 * **Ring**砍题🪓
   - [**Ring**解决八皇后问题👸](./markdown/Ring砍题/八皇后问题.md)
