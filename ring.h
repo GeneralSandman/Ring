@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#define RING_VERSION "ring-v0.1.15-beat"
+#define RING_VERSION "ring-v0.1.16-beat"
 
 typedef struct Ring_Compiler_Tag Ring_Compiler;
 
