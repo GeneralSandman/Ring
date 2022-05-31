@@ -44,8 +44,8 @@ Statement* create_statemen_from_expression(Expression* expression) {
 Statement* create_statement_from_variable(Variable* variable) {
     debug_log_with_yellow_coloar("variable->type:%d", variable->type);
 
-    Statement* statement   = malloc(sizeof(Statement));
-    statement->type        = STATEMENT_TYPE_VARIABLE_DEFINITION;
+    Statement* statement = malloc(sizeof(Statement));
+    /* statement->type        = STATEMENT_TYPE_VARIABLE_DEFINITION; */
     statement->line_number = get_ring_compiler_line_number();
     statement->u.variable  = variable;
     statement->next        = NULL;
@@ -751,6 +751,29 @@ Declaration* declaration_list_add_item(Declaration* head, Declaration* declarati
     return head;
 }
 
+Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Identifier* identifier_list, Expression* initializer_list) {
+    Declaration* head     = NULL;
+    Identifier*  pos_ider = identifier_list;
+    Expression*  pos_init = initializer_list;
+    for (pos_ider = identifier_list; pos_ider; pos_ider = pos_ider->next) {
+        Declaration* decl = create_declaration(type_specifier, pos_ider->identifier_name, pos_init);
+        if (pos_init) {
+            decl->initializer       = pos_init;
+            pos_init                = pos_init->next;
+            decl->initializer->next = NULL; // 把initializer_list 拆开
+        }
+        head = declaration_list_add_item(head, decl);
+    }
+
+
+    Statement* statement               = malloc(sizeof(Statement));
+    statement->line_number             = get_ring_compiler_line_number();
+    statement->type                    = STATEMENT_TYPE_DECLARATION;
+    statement->u.declaration_statement = head;
+    statement->next                    = NULL;
+
+    return statement;
+}
 
 Statement* create_declaration_statement(TypeSpecifier* type, char* identifier, Expression* initializer) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);

@@ -439,7 +439,6 @@ typedef enum {
 typedef enum {
     STATEMENT_TYPE_UNKNOW = 0,
     STATEMENT_TYPE_EXPRESSION,
-    STATEMENT_TYPE_VARIABLE_DEFINITION,
     STATEMENT_TYPE_IF,
     STATEMENT_TYPE_FOR,
     STATEMENT_TYPE_DOFOR,
@@ -1083,6 +1082,8 @@ Declaration*   create_declaration(TypeSpecifier* type, char* identifier, Express
 Declaration*   declaration_list_add_item(Declaration* head, Declaration* declaration);
 Statement*     create_declaration_statement(TypeSpecifier* type_specifier, char* identifier, Expression* initializer);
 
+Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Identifier* identifier_list, Expression* initializer_list);
+
 Parameter* create_parameter(TypeSpecifier* type, char* identifier);
 Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter);
 
@@ -1126,6 +1127,7 @@ void              generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Execu
 void              generate_vmcode_from_break_statement(Ring_VirtualMachine_Executer* executer, Block* block, BreakStatement* break_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_continue_statement(Ring_VirtualMachine_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_return_statement(Ring_VirtualMachine_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_initializer(Ring_VirtualMachine_Executer* executer, Block* block, Declaration* declaration, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
 void              generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
 void              generate_pop_to_leftvalue_reverse(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);

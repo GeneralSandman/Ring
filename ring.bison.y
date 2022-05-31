@@ -22,7 +22,6 @@ int yyerror(char const *str);
     AssignExpression*           m_assign_expression;
     FunctionCallExpression*     m_function_call_expression;
     ArgumentList*               m_argument_list;
-    VariableType                m_variable_type;
     Function*                   m_function_definition;
     Parameter*                  m_parameter_list;
     IfStatement*                m_if_statement;
@@ -126,7 +125,7 @@ int yyerror(char const *str);
 %type <m_identifier> identifier IDENTIFIER
 %type <m_identifier_list> identifier_list
 %type <m_statement_list> statement statement_list
-%type <m_statement_list> variable_definition_statement
+%type <m_statement_list> multi_variable_definition_statement
 %type <m_expression> expression expression_list
 %type <m_expression> literal_term
 %type <m_expression> expression_arithmetic_operation_additive 
@@ -139,7 +138,6 @@ int yyerror(char const *str);
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
 %type <m_argument_list> argument_list argument
-%type <m_variable_type> variable_type
 %type <m_function_definition> function_definition
 %type <m_parameter_list> parameter_list parameter
 %type <m_if_statement> if_statement
@@ -220,7 +218,7 @@ statement
 
         $$ = create_statemen_from_expression($1);
     }
-    | variable_definition_statement TOKEN_SEMICOLON
+    | multi_variable_definition_statement TOKEN_SEMICOLON
     | if_statement
     {
         debug_log_with_green_coloar("[RULE::statement:if_statement]\t ");
@@ -347,16 +345,29 @@ return_statement
     ;
 
 
-variable_definition_statement
-    : TOKEN_VAR type_specifier IDENTIFIER
+// variable_definition_statement
+//     : TOKEN_VAR type_specifier IDENTIFIER
+//     {
+//         debug_log_with_green_coloar("[RULE::variable_definition_statement]\t ");
+//         $$ = create_declaration_statement($2, $3, NULL);
+//     }
+//     | TOKEN_VAR type_specifier IDENTIFIER TOKEN_ASSIGN expression
+//     {
+//         debug_log_with_green_coloar("[RULE::variable_definition_statement]\t ");
+//         $$ = create_declaration_statement($2, $3, $5);
+//     }
+//     ;
+
+multi_variable_definition_statement
+    : TOKEN_VAR type_specifier identifier_list
     {
-        debug_log_with_green_coloar("[RULE::variable_definition_statement]\t ");
-        $$ = create_declaration_statement($2, $3, NULL);
+        debug_log_with_green_coloar("[RULE::multi_variable_definition_statement]\t ");
+        $$ = create_multi_declaration_statement($2, $3, NULL);
     }
-    | TOKEN_VAR type_specifier IDENTIFIER TOKEN_ASSIGN expression
+    | TOKEN_VAR type_specifier identifier_list TOKEN_ASSIGN expression_list
     {
-        debug_log_with_green_coloar("[RULE::variable_definition_statement]\t ");
-        $$ = create_declaration_statement($2, $3, $5);
+        debug_log_with_green_coloar("[RULE::multi_variable_definition_statement]\t ");
+        $$ = create_multi_declaration_statement($2, $3, $5);
     }
     ;
 
@@ -457,32 +468,32 @@ block
     ;
 
 
-variable_type
-    : TOKEN_BOOL
-    {
-        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_BOOL) ");
-
-        $$ = VARIABLE_TYPE_BOOL;
-    }
-    | TOKEN_INT
-    {
-        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_INT) ");
-
-        $$ = VARIABLE_TYPE_INT;
-    }
-    | TOKEN_DOUBLE
-    {
-        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_DOUBLE) ");
-
-        $$ = VARIABLE_TYPE_DOUBLE;
-    }
-    | TOKEN_STRING
-    {
-        debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_STRING) ");
-
-        $$ = VARIABLE_TYPE_STRING;
-    }
-    ;
+// variable_type
+//     : TOKEN_BOOL
+//     {
+//         debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_BOOL) ");
+// 
+//         $$ = VARIABLE_TYPE_BOOL;
+//     }
+//     | TOKEN_INT
+//     {
+//         debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_INT) ");
+// 
+//         $$ = VARIABLE_TYPE_INT;
+//     }
+//     | TOKEN_DOUBLE
+//     {
+//         debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_DOUBLE) ");
+// 
+//         $$ = VARIABLE_TYPE_DOUBLE;
+//     }
+//     | TOKEN_STRING
+//     {
+//         debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_STRING) ");
+// 
+//         $$ = VARIABLE_TYPE_STRING;
+//     }
+//     ;
 
 type_specifier
     : basic_type_specifier
@@ -853,7 +864,7 @@ argument
     ;
 
 cast
-    : TOKEN_LT variable_type TOKEN_GT expression
+    : TOKEN_LT type_specifier TOKEN_GT expression
     {
         debug_log_with_green_coloar("[RULE::cast %d] \t ", $2);
         /* $$ = create_cast_expression($2); */

@@ -114,19 +114,29 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
 
 // TODO: 这里得改改，目前暂时添加全局变量。
 void add_declaration(Declaration* declaration, Block* block, Function* func) {
-    if (block != NULL) {
-        block->declaration_list =
-            declaration_list_add_item(block->declaration_list, declaration);
+    if (declaration == NULL) {
+        return;
+    }
 
-        declaration->variable_index = block->declaration_list_size++;
-        declaration->is_local       = 1;
-    } else {
-        Ring_Compiler* ring_compiler = get_ring_compiler();
-        ring_compiler->declaration_list =
-            declaration_list_add_item(ring_compiler->declaration_list, declaration);
+    Declaration* pos  = declaration;
+    Declaration* next = pos->next;
+    for (; pos != NULL; pos = next) {
+        next      = pos->next;
+        pos->next = NULL;
+        if (block != NULL) {
+            block->declaration_list =
+                declaration_list_add_item(block->declaration_list, pos);
 
-        declaration->variable_index = ring_compiler->declaration_list_size++;
-        declaration->is_local       = 0;
+            pos->variable_index = block->declaration_list_size++;
+            pos->is_local       = 1;
+        } else {
+            Ring_Compiler* ring_compiler = get_ring_compiler();
+            ring_compiler->declaration_list =
+                declaration_list_add_item(ring_compiler->declaration_list, pos);
+
+            pos->variable_index = ring_compiler->declaration_list_size++;
+            pos->is_local       = 0;
+        }
     }
 }
 

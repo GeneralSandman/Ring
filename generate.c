@@ -289,6 +289,10 @@ void generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* executer,
             generate_vmcode_from_return_statement(executer, block, statement->u.return_statement, opcode_buffer);
             break;
 
+        case STATEMENT_TYPE_DECLARATION:
+            generate_vmcode_from_initializer(executer, block, statement->u.declaration_statement, opcode_buffer);
+            break;
+
 
         default: break;
         }
@@ -517,6 +521,29 @@ void generate_vmcode_from_return_statement(Ring_VirtualMachine_Executer* execute
 
 
     generate_vmcode(executer, opcode_buffer, RVM_CODE_RETURN, return_statement->return_list_size);
+}
+
+void generate_vmcode_from_initializer(Ring_VirtualMachine_Executer* executer, Block* block, Declaration* declaration, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (declaration == NULL) {
+        return;
+    }
+
+    Declaration* pos = declaration;
+    for (; pos; pos = pos->next) {
+        if (pos->initializer) {
+            generate_vmcode_from_expression(executer, pos->initializer, opcode_buffer, 1);
+            RVM_Opcode opcode = RVM_CODE_UNKNOW;
+            if (pos->is_local) {
+                // 局部变量
+                opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STACK_INT, pos->type);
+            } else {
+                // 全局变量
+                opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STATIC_INT, pos->type);
+            }
+            generate_vmcode(executer, opcode_buffer, opcode, pos->variable_index);
+        }
+    }
 }
 
 void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {
