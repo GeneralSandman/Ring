@@ -22,10 +22,9 @@ int yyerror(char const *str);
     AssignExpression*           m_assign_expression;
     FunctionCallExpression*     m_function_call_expression;
     ArgumentList*               m_argument_list;
-    Variable*                   m_variable;
     VariableType                m_variable_type;
     Function*                   m_function_definition;
-    Variable*                   m_parameter_list;
+    Parameter*                  m_parameter_list;
     IfStatement*                m_if_statement;
     ElseIfStatement*            m_elseif_statement;
     ForStatement*               m_for_statement;
@@ -140,10 +139,9 @@ int yyerror(char const *str);
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
 %type <m_argument_list> argument_list argument
-%type <m_variable> variable_definition
 %type <m_variable_type> variable_type
 %type <m_function_definition> function_definition
-%type <m_parameter_list> parameter_list
+%type <m_parameter_list> parameter_list parameter
 %type <m_if_statement> if_statement
 %type <m_for_statement> for_statement
 %type <m_dofor_statement> dofor_statement
@@ -362,23 +360,6 @@ variable_definition_statement
     }
     ;
 
-// TODO: 以后删除调
-variable_definition
-    : TOKEN_VAR variable_type identifier
-    {
-        debug_log_with_green_coloar("[RULE::variable_definition]\t ");
-
-        $$ = new_variable($2, $3, NULL, 0);
-    }
-    | TOKEN_VAR variable_type TOKEN_LB literal_term TOKEN_RB identifier
-    {
-        debug_log_with_green_coloar("[RULE::variable_definition]\t ");
-
-        $$ = new_variable_array($2, $4, $6, NULL, 0);
-
-    }
-    ;
-
 
 function_definition
     : TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP block
@@ -425,28 +406,40 @@ function_definition
     }
     ;
 
-parameter_list
-    : variable_definition
-    {
-        debug_log_with_green_coloar("[RULE::parameter_list]\t ");
 
-    }
-    | parameter_list TOKEN_COMMA variable_definition 
+parameter
+    : TOKEN_VAR type_specifier IDENTIFIER
     {
-        debug_log_with_green_coloar("[RULE::parameter_list:parameter_list]\t ");
-        $$ = variable_list_add_item($1, $3);
-
+        debug_log_with_green_coloar("[RULE::parameter]\t ");
+        $$ = create_parameter($2, $3);
     }
     ;
 
-return_list
-    : variable_type
+parameter_list
+    : parameter
     {
-        $$ = create_function_return_list($1);
+        debug_log_with_green_coloar("[RULE::parameter_list]\t ");
     }
-    | return_list TOKEN_COMMA variable_type
+    | parameter_list TOKEN_COMMA parameter
     {
-        $$ = function_return_list_add_item($1, $3);
+        debug_log_with_green_coloar("[RULE::parameter_list]\t ");
+        $$ = parameter_list_add_statement($1, $3);
+    }
+    ;
+
+
+return_list
+    : type_specifier
+    {
+        /* $$ = create_function_return_list($1); */
+        // FIXME:
+        $$ = NULL;
+    }
+    | return_list TOKEN_COMMA type_specifier
+    {
+        // FIXME:
+        $$ = NULL;
+        /* $$ = function_return_list_add_item($1, $3); */
     }
     ;
 

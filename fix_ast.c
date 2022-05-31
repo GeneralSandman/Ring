@@ -1,4 +1,6 @@
 #include "ring.h"
+#include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 
 // 修正ast
@@ -9,7 +11,7 @@ void ring_compiler_fix_ast(Ring_Compiler* compiler) {
 
     for (pos = compiler->function_list; pos; pos = pos->next) {
         if (pos->block) {
-            add_parameter_to_declaration(pos->parameter_list);
+            add_parameter_to_declaration(pos->parameter_list, pos->block);
             fix_statement_list(pos->block->statement_list, pos->block, pos);
         }
     }
@@ -247,17 +249,32 @@ void fix_function_call_expression(FunctionCallExpression* function_call_expressi
     }
 }
 
-void add_parameter_to_declaration(Variable* parameter) {
+void add_parameter_to_declaration(Parameter* parameter, Block* block) {
+    assert(block != NULL);
+
+    Parameter* pos = parameter;
+    for (; pos; pos = pos->next) {
+        Declaration* declaration    = malloc(sizeof(Declaration));
+        declaration->line_number    = pos->line_number;
+        declaration->type           = pos->type;
+        declaration->identifier     = pos->identifier;
+        declaration->initializer    = NULL;
+        declaration->is_const       = 0;
+        declaration->is_local       = 1;
+        declaration->variable_index = -1; // fix in add_declaration
+        declaration->next           = NULL;
+
+        add_declaration(declaration, block, NULL);
+    }
 }
 
 
 // -----------------
 
 Declaration* search_declaration(char* identifier, Block* block) {
-    Block*       current_block = NULL;
-    Declaration* decl          = NULL;
+    Declaration* decl = NULL;
 
-    for (current_block = block; current_block; current_block = current_block->parent_block) {
+    for (; block; block = block->parent_block) {
         for (decl = block->declaration_list; decl; decl = decl->next) {
             if (0 == strcmp(identifier, decl->identifier)) {
                 return decl;
@@ -266,11 +283,13 @@ Declaration* search_declaration(char* identifier, Block* block) {
     }
 
     for (decl = get_ring_compiler()->declaration_list; decl; decl = decl->next) {
-        if (!strcmp(identifier, decl->identifier)) {
+        if (0 == strcmp(identifier, decl->identifier)) {
             return decl;
         }
     }
 
+    printf("can't find identifier %s\n", identifier);
+    exit(ERROR_CODE_COMPILE_ERROR);
     return NULL;
 }
 

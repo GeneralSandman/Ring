@@ -110,9 +110,13 @@ void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_Virtu
         if (function.type == RVM_FUNCTION_TYPE_DERIVE) {
             rvm->function_list = realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
 
-            rvm->function_list[rvm->function_size].func_name     = function.func_name;
-            rvm->function_list[rvm->function_size].type          = RVM_FUNCTION_TYPE_DERIVE;
-            rvm->function_list[rvm->function_size].u.derive_func = function.u.derive_func;
+            rvm->function_list[rvm->function_size].func_name           = function.func_name;
+            rvm->function_list[rvm->function_size].type                = RVM_FUNCTION_TYPE_DERIVE;
+            rvm->function_list[rvm->function_size].parameter_size      = function.parameter_size;
+            rvm->function_list[rvm->function_size].parameter_list      = function.parameter_list;
+            rvm->function_list[rvm->function_size].local_variable_size = function.local_variable_size;
+            rvm->function_list[rvm->function_size].local_variable_list = function.local_variable_list;
+            rvm->function_list[rvm->function_size].u.derive_func       = function.u.derive_func;
 
             rvm->function_size++;
         }
@@ -591,8 +595,11 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     *pc                = 0;
     *caller_stack_base = rvm->runtime_stack->top_index; // FIXME:
 
-    // FIXME:
-    unsigned int local_variable_size = 1; // how to get local_variable_size
+
+    init_derive_function_local_variable(rvm, callee_function);
+
+    // FIXME:a local_variable_size
+    unsigned int local_variable_size = 164; // how to get local_variable_size
     rvm->runtime_stack->top_index += local_variable_size;
 }
 
@@ -625,23 +632,19 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
 
 
     RVM_CallInfo* callinfo;
-    // FIXME:
-    unsigned int local_variable_size = 1; // how to get local_variable_size
+    // FIXME: local_variable_size
+    unsigned int local_variable_size = 164; // how to get local_variable_size
     rvm->runtime_stack->top_index -= local_variable_size;
-    /* printf("top_index:%d\n", rvm->runtime_stack->top_index); */
 
     restore_callinfo(rvm->runtime_stack, &callinfo);
-    /* printf("top_index:%d\n", rvm->runtime_stack->top_index); */
     assert(callinfo->magic_number == CALL_INFO_MAGIC_NUMBER);
     *caller_function   = callinfo->caller_function;
     *pc                = callinfo->caller_pc + 1;
     *caller_stack_base = callinfo->caller_stack_base;
     if (*caller_function == NULL) {
-        // debug_log_with_white_coloar("\tcaller is top level\n");
         *code_list = rvm->executer->code_list;
         *code_size = rvm->executer->code_size;
     } else {
-        // debug_log_with_white_coloar("\tcaller function is derive function, func_name:%s\n", (*caller_function)->func_name);
         *code_list = (*caller_function)->u.derive_func->code_list;
         *code_size = (*caller_function)->u.derive_func->code_size;
     }
@@ -649,6 +652,18 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
 
     for (int i = 0; i < return_value_list_size; i++) {
         rvm->runtime_stack->data[rvm->runtime_stack->top_index++] = rvm->runtime_stack->data[old_return_value_list_index + i];
+    }
+}
+
+void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function* function) {
+    debug_log_with_white_coloar("\t");
+
+    // FIXME: 先忽略局部变量的类型，先用int
+    unsigned int arguement_list_size  = function->parameter_size;
+    unsigned int arguement_list_index = rvm->runtime_stack->top_index - CALL_INFO_SIZE - arguement_list_size;
+
+    for (int i = 0; i < arguement_list_size; i++) {
+        STACK_COPY_INDEX(rvm, arguement_list_index + i, rvm->runtime_stack->top_index + i);
     }
 }
 

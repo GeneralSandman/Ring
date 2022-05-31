@@ -173,13 +173,23 @@ void add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* execut
 void copy_function(Function* src, RVM_Function* dest) {
     debug_log_with_darkgreen_coloar("\t");
 
-    if (src->type == FUNCTION_TYPE_NATIVE) {
-        dest->type = RVM_FUNCTION_TYPE_NATIVE;
-    } else if (src->type == FUNCTION_TYPE_DERIVE) {
-        dest->type          = RVM_FUNCTION_TYPE_DERIVE;
-        dest->u.derive_func = malloc(sizeof(DeriveFunction));
-    }
     dest->func_name = src->function_name;
+    if (src->type == FUNCTION_TYPE_NATIVE) {
+        dest->type                = RVM_FUNCTION_TYPE_NATIVE;
+        dest->parameter_size      = src->parameter_list_size;
+        dest->parameter_list      = NULL; // TODO:
+        dest->local_variable_size = 0;
+        dest->local_variable_list = NULL; // TODO:
+    } else if (src->type == FUNCTION_TYPE_DERIVE) {
+        dest->type                = RVM_FUNCTION_TYPE_DERIVE;
+        dest->parameter_size      = src->parameter_list_size;
+        dest->parameter_list      = NULL; // TODO:
+        dest->local_variable_size = src->block->declaration_list_size;
+        dest->local_variable_list = NULL; // TODO:
+        dest->u.derive_func       = malloc(sizeof(DeriveFunction));
+    }
+
+    dest->estimate_runtime_stack_capacity = 0;
 }
 
 // 添加顶层代码
@@ -210,8 +220,9 @@ void generate_code_from_function_definition(Ring_VirtualMachine_Executer* execut
     opcode_buffer_fix_label(opcode_buffer);
 
 
-    dest->u.derive_func->code_list = opcode_buffer->code_list;
-    dest->u.derive_func->code_size = opcode_buffer->code_size;
+    dest->u.derive_func->code_list           = opcode_buffer->code_list;
+    dest->u.derive_func->code_size           = opcode_buffer->code_size;
+    dest->u.derive_func->local_variable_size = src->block->declaration_list_size;
 
 #ifdef DEBUG
     ring_vm_code_dump(opcode_buffer->code_list, opcode_buffer->code_size, 0, 60, 1);

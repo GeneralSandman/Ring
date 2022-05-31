@@ -370,7 +370,7 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
     return return_list;
 }
 
-Function* new_function_definition(FunctionType type, char* identifier, Variable* parameter_list, FunctionReturnList* return_list, Block* block) {
+Function* new_function_definition(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
     debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier);
 
     // FIXME:
@@ -390,34 +390,14 @@ Function* new_function_definition(FunctionType type, char* identifier, Variable*
     function->function_name       = identifier;
     function->parameter_list_size = 0;
     function->parameter_list      = parameter_list;
-    function->variable_list_size  = 0;
-    function->variable_list       = NULL;
     function->block               = block;
-    function->inner_func          = NULL;
     function->next                = NULL;
 
     // 把函数参数的变量添加到 variable_list 中
-    for (Variable* pos = parameter_list; pos != NULL; pos = pos->next) {
-        Variable* tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL, 0);
-        memcpy(tmp, pos, sizeof(*pos));
-
-        tmp->next               = function->variable_list;
-        function->variable_list = tmp;
+    for (Parameter* pos = parameter_list; pos != NULL; pos = pos->next) {
+        function->parameter_list_size++;
     }
 
-    // 把block中定义的局部变量加到 variable_list 中
-    if (block != NULL) {
-        block->type = BLOCK_TYPE_FUNCTION;
-        for (Statement* pos = block->statement_list; pos != NULL; pos = pos->next) {
-            if (pos->type == STATEMENT_TYPE_VARIABLE_DEFINITION) {
-                Variable* tmp = new_variable(VARIABLE_TYPE_UNKNOW, NULL, NULL, 0);
-                memcpy(tmp, pos->u.variable, sizeof(*pos->u.variable));
-
-                tmp->next               = function->variable_list;
-                function->variable_list = tmp;
-            }
-        }
-    }
     return function;
 }
 
@@ -758,7 +738,7 @@ Declaration* create_declaration(TypeSpecifier* type, char* identifier, Expressio
     declaration->initializer    = initializer;
     declaration->is_const       = 0;
     declaration->is_local       = 0;
-    declaration->variable_index = -1; // fix in fix_ast.c
+    declaration->variable_index = -1; // fix in fix_ast.c::add_declaration
     declaration->next           = NULL;
     return declaration;
 }
@@ -786,3 +766,25 @@ Statement* create_declaration_statement(TypeSpecifier* type, char* identifier, E
 
     return statement;
 }
+
+Parameter* create_parameter(TypeSpecifier* type, char* identifier) {
+    Parameter* parameter   = malloc(sizeof(Parameter));
+    parameter->line_number = get_ring_compiler_line_number();
+    parameter->type        = type;
+    parameter->identifier  = identifier;
+    parameter->next        = NULL;
+
+    return parameter;
+}
+
+Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter) {
+    if (head == NULL) {
+        return parameter;
+    }
+
+    Parameter* pos = head;
+    for (; pos->next != NULL; pos = pos->next) {}
+    pos->next = parameter;
+    return head;
+}
+

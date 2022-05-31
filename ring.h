@@ -53,6 +53,8 @@ typedef struct ArgumentList_Tag ArgumentList;
 
 typedef struct Variable_Tag Variable;
 
+typedef struct Parameter_Tag Parameter;
+
 typedef struct Identifier_Tag Identifier;
 
 typedef struct Function_Tag Function;
@@ -89,9 +91,10 @@ typedef struct RVM_Object_Tag RVM_Object;
 
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue** value);
 
-typedef struct NativeFunction NativeFunction;
-typedef struct DeriveFunction DeriveFunction;
-typedef struct RVM_Function   RVM_Function;
+typedef struct RVM_LocalVariable RVM_LocalVariable;
+typedef struct NativeFunction    NativeFunction;
+typedef struct DeriveFunction    DeriveFunction;
+typedef struct RVM_Function      RVM_Function;
 
 struct Ring_Compiler_Tag {
     char*        current_file_name;
@@ -116,6 +119,8 @@ struct Ring_Compiler_Tag {
 
     Block* current_block;
 };
+
+typedef unsigned char RVM_Byte;
 
 typedef union {
     // TODO: 补充 bool
@@ -144,21 +149,31 @@ typedef enum {
     RVM_FUNCTION_TYPE_DERIVE, // 派生函数，库函数，Ring编写的库函数
 } RVMFunctionType;
 
+struct RVM_LocalVariable {
+    char* identifier;
+    // TODO:
+};
+
 struct NativeFunction {
     RVM_NativeFuncProc* func_proc;
     unsigned int        arg_count;
 };
-
-typedef unsigned char RVM_Byte;
-
 struct DeriveFunction {
     unsigned int code_size;
     RVM_Byte*    code_list;
-};
 
+
+    unsigned int local_variable_size;
+};
 struct RVM_Function {
     char*           func_name;
     RVMFunctionType type;
+
+    unsigned int       parameter_size;
+    RVM_LocalVariable* parameter_list;
+
+    unsigned int       local_variable_size;
+    RVM_LocalVariable* local_variable_list;
 
     union {
         NativeFunction* native_func;
@@ -685,6 +700,14 @@ struct Variable_Tag {
     Variable*   next;
 };
 
+struct Parameter_Tag {
+    unsigned int line_number;
+
+    TypeSpecifier* type;
+    char*          identifier;
+    Parameter*     next;
+};
+
 struct Declaration_Tag {
     unsigned int line_number;
 
@@ -736,20 +759,12 @@ struct Function_Tag {
     FunctionType type;
 
     unsigned int parameter_list_size;
-    Variable*    parameter_list;
+    Parameter*   parameter_list;
 
     unsigned int        return_list_size;
     FunctionReturnList* return_list;
 
-    unsigned int variable_list_size;
-    Variable*    variable_list;
-
-    // unsigned int return_list_size;
-    // return_list; // TODO: d
-
     Block* block;
-
-    Ring_InnerFunc* inner_func;
 
     Function* next;
 };
@@ -1043,7 +1058,7 @@ Expression*             expression_list_add_item(Expression* expression_list, Ex
 ArgumentList*           argument_list_add_item3(ArgumentList* argument_list, ArgumentList* argument);
 ArgumentList*           create_argument_list_from_expression(Expression* expression);
 Identifier*             new_identifier(IdentifierType type, char* name);
-Function*               new_function_definition(FunctionType type, char* identifier, Variable* parameter_list, FunctionReturnList* return_list, Block* block);
+Function*               new_function_definition(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
 Statement*              create_statement_from_if(IfStatement* if_statement);
 IfStatement*            create_if_statement(Expression* expression, Block* if_block, ElseIfStatement* elseif_statement_list, Block* else_block);
 ElseIfStatement*        create_elseif_statement(Expression* expression, Block* elseif_block);
@@ -1067,6 +1082,10 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type);
 Declaration*   create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
 Declaration*   declaration_list_add_item(Declaration* head, Declaration* declaration);
 Statement*     create_declaration_statement(TypeSpecifier* type_specifier, char* identifier, Expression* initializer);
+
+Parameter* create_parameter(TypeSpecifier* type, char* identifier);
+Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter);
+
 // create_ast.c
 
 // fix.c
@@ -1084,7 +1103,7 @@ void         fix_identifier_expression(IdentifierExpression* expression, Block* 
 void         fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
 void         fix_binary_expression(BinaryExpression* expression, Block* block, Function* func);
 void         fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
-void         add_parameter_to_declaration(Variable* parameter);
+void         add_parameter_to_declaration(Parameter* parameter, Block* block);
 Declaration* search_declaration(char* identifier, Block* block);
 Function*    search_function(char* identifier);
 
@@ -1162,6 +1181,7 @@ void                 derive_function_finish(Ring_VirtualMachine* rvm,
                                             unsigned int* pc,
                                             unsigned int* caller_stack_base,
                                             unsigned int  return_value_list_size);
+void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function* function);
 void                 debug_rvm(Ring_VirtualMachine* rvm);
 
 RVM_Object* create_rvm_object();
