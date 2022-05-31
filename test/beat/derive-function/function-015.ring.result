@@ -1,0 +1,22 @@
+
+test case 1
+123
+debug_assert PASS
+
+test case 2
+123
+debug_assert PASS
+
+test case 3
+247
+debug_assert PASS
+
+test case 4
+100
+1234
+1335
+debug_assert PASS
+
+test case 5
+15
+debug_assert PASS

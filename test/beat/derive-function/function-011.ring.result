@@ -1,0 +1,9 @@
+debug_assert PASS
+debug_assert PASS
+function test_1
+123
+234
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
