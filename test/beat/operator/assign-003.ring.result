@@ -1,0 +1,24 @@
+
+test case 1
+false
+0
+0.000000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 2
+true
+1
+1.230000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 3
+true
+2147483647
+2147483647.123000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
