@@ -248,17 +248,14 @@ Expression* create_expression_bool_literal(ExpressionType type, Ring_Bool value)
     return expression;
 }
 
-Expression* create_cast_expression(CastType cast_type, Expression* operand) {
-    debug_log_with_yellow_coloar("cast_type:%d", cast_type);
-
-
+Expression* create_cast_expression(TypeSpecifier* cast_type, Expression* operand) {
     Expression* expression                     = malloc(sizeof(Expression));
     expression->line_number                    = get_ring_compiler_line_number();
     expression->type                           = EXPRESSION_TYPE_CAST;
     expression->u.cast_expression              = malloc(sizeof(CastExpression));
     expression->u.cast_expression->line_number = get_ring_compiler_line_number();
-    expression->u.cast_expression->type        = cast_type;
-    expression->u.cast_expression->operand     = operand;
+    // expression->u.cast_expression->type        = cast_type; //FIXME:
+    expression->u.cast_expression->operand = operand;
 
     return expression;
 }

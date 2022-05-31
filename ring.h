@@ -1050,7 +1050,7 @@ Expression*             create_expression_unitary(ExpressionType type, Expressio
 Expression*             create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression* expression);
 Expression*             create_expression_literal(ExpressionType type, char* literal_interface);
 Expression*             create_expression_bool_literal(ExpressionType type, Ring_Bool value);
-Expression*             create_cast_expression(CastType cast_type, Expression* operand);
+Expression*             create_cast_expression(TypeSpecifier* cast_type, Expression* operand);
 AssignExpression*       create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
 AssignExpression*       create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* operand);
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list);

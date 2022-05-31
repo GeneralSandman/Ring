@@ -532,7 +532,7 @@ expression
         debug_log_with_green_coloar("[RULE::expression ? : ]\t ");
         $$ = create_expression_ternary($1, $3, $5);
     }
-    | TOKEN_LT variable_type TOKEN_GT expression
+    | TOKEN_LT type_specifier TOKEN_GT expression
     {
         debug_log_with_green_coloar("[RULE::cast expression ? : ]\t ");
         $$ = create_cast_expression($2, $4);
