@@ -2,7 +2,7 @@
 
 <!-- ![logo](_media/icon.svg) -->
 
-# Ring <small>version: v0.1.15-beat</small>
+# Ring <small>version: v0.1.16-beat</small>
 
 > 一个基于C语言开发的轻量级脚本编程语言
 > 
