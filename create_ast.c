@@ -808,3 +808,36 @@ Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter) {
     return head;
 }
 
+PackageInfo* create_package_info(char* package_name, char* rename) {
+    debug_log_with_yellow_coloar("package name:%s, rename:%s\n", package_name, rename);
+    PackageInfo* package_info  = malloc(sizeof(PackageInfo));
+    package_info->line_number  = get_ring_compiler_line_number();
+    package_info->package_name = package_name;
+    package_info->package_path = NULL;
+    package_info->rename       = rename;
+
+    return package_info;
+}
+
+ImportPackageList* create_import_package_list(PackageInfo* package_info) {
+    ImportPackageList* import_package_list = malloc(sizeof(ImportPackageList));
+    import_package_list->package_info      = package_info;
+    import_package_list->next              = NULL;
+
+    return import_package_list;
+}
+
+ImportPackageList* import_package_list_add_item(ImportPackageList* import_package_list, PackageInfo* package_info) {
+    ImportPackageList* new = create_import_package_list(package_info);
+
+    if (import_package_list == NULL) {
+        return new;
+    }
+
+    for (; import_package_list->next; import_package_list = import_package_list->next) {
+    }
+
+    import_package_list->next = new;
+    return import_package_list;
+}
+

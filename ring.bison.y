@@ -35,6 +35,9 @@ int yyerror(char const *str);
     ContinueStatement*          m_continue_statement;
     ReturnStatement*            m_return_statement;
 
+    ImportPackageList*          m_import_package_list;
+    PackageInfo*                m_package_info;
+
     TypeSpecifier*              m_type_specifier;
     Ring_BasicType              m_basic_type_specifier;
 }
@@ -78,6 +81,9 @@ int yyerror(char const *str);
 %token TOKEN_DELETE
 %token TOKEN_DOT
 %token TOKEN_ARROW
+
+%token TOKEN_PACKAGE
+%token TOKEN_IMPORT
 
 %token TOKEN_ADD
 %token TOKEN_SUB
@@ -152,6 +158,9 @@ int yyerror(char const *str);
 %type <m_continue_statement> continue_statement
 %type <m_return_statement> return_statement
 
+%type <m_import_package_list> import_package_list package_list
+%type <m_package_info> package_info package_definition
+
 %type <m_type_specifier>        type_specifier
 %type <m_basic_type_specifier>  basic_type_specifier
 
@@ -169,6 +178,45 @@ translation_unit
     }
     ;
 
+package_definition
+    : TOKEN_PACKAGE IDENTIFIER
+    {
+        $$ = create_package_info($2, NULL);
+    }
+    ;
+
+import_package_list 
+    : TOKEN_IMPORT TOKEN_LP package_list TOKEN_RP
+    {
+        $$ = $3;
+    }
+    ;
+
+package_list
+    : 
+    {
+        $$ = NULL;
+    }
+    | package_info 
+    {
+        $$ = create_import_package_list($1);
+    }
+    | package_list TOKEN_COMMA package_info
+    {
+        $$ = import_package_list_add_item($1, $3);
+    }
+    ;
+
+package_info
+    : IDENTIFIER
+    {
+        $$ = create_package_info($1, NULL);
+    }
+    | IDENTIFIER TOKEN_ARROW IDENTIFIER
+    {
+        $$ = create_package_info($1, $3);
+    }
+    ;
 definition_or_statement
     : function_definition
     {

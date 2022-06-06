@@ -11,6 +11,10 @@ typedef struct Ring_VirtualMachine_Tag Ring_VirtualMachine;
 
 typedef struct Ring_VirtualMachine_Executer_Tag Ring_VirtualMachine_Executer;
 
+typedef struct ImportPackageList_Tag ImportPackageList;
+
+typedef struct PackageInfo_Tag PackageInfo;
+
 typedef struct RVM_Variable_Tag RVM_Variable;
 
 typedef struct RVM_RuntimeStack_Tag RVM_RuntimeStack;
@@ -139,6 +143,19 @@ struct Ring_VirtualMachine_Tag {
 
     RVM_Function* function_list;
     unsigned int  function_size;
+};
+
+struct ImportPackageList_Tag {
+    PackageInfo*       package_info;
+    ImportPackageList* next;
+};
+
+struct PackageInfo_Tag {
+    unsigned int line_number;
+
+    char* package_name;
+    char* package_path;
+    char* rename;
 };
 
 typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
@@ -1086,6 +1103,10 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Ide
 
 Parameter* create_parameter(TypeSpecifier* type, char* identifier);
 Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter);
+
+PackageInfo*       create_package_info(char* package_name, char* rename);
+ImportPackageList* create_import_package_list(PackageInfo* package_info);
+ImportPackageList* import_package_list_add_item(ImportPackageList* import_package_list, PackageInfo* package_info);
 
 // create_ast.c
 

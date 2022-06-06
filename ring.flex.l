@@ -56,6 +56,9 @@ int yywrap(){
 <INITIAL>"."            { ring_compiler_update_line_content(yytext); return TOKEN_DOT;            }
 <INITIAL>"->"           { ring_compiler_update_line_content(yytext); return TOKEN_ARROW;          }
 
+<INITIAL>"package"      { ring_compiler_update_line_content(yytext); return TOKEN_PACKAGE;        }
+<INITIAL>"import"       { ring_compiler_update_line_content(yytext); return TOKEN_IMPORT;         }
+
 <INITIAL>"+"            { ring_compiler_update_line_content(yytext); return TOKEN_ADD;            }
 <INITIAL>"-"            { ring_compiler_update_line_content(yytext); return TOKEN_SUB;            }
 <INITIAL>"*"            { ring_compiler_update_line_content(yytext); return TOKEN_MUL;            }
