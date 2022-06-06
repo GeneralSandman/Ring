@@ -133,7 +133,7 @@
 <tr>
   <td>关系运算：==、!=、>=、>、<=、<、</td>
   <td>✅</td>
-  <td></td>
+  <td>对于 double 类型，还有bug，见print_heart.</td>
 </tr>
 <tr>
   <td>逻辑运算：and or not</td>
