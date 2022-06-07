@@ -15,6 +15,7 @@ ring.bison.tab.c
 *tmp
 
 .vimspector.session
+.vimspector.json
 
 .ccls-cache/*
 .local_history/*
