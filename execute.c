@@ -395,13 +395,24 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+        case RVM_CODE_RELATIONAL_EQ_DOUBLE:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) == STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
         case RVM_CODE_RELATIONAL_EQ_STRING:
             STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) == 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+
         case RVM_CODE_RELATIONAL_NE_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) != STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_NE_DOUBLE:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) != STACK_GET_DOUBLE_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -409,9 +420,15 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) != 0);
             runtime_stack->top_index--;
             rvm->pc++;
+
             break;
         case RVM_CODE_RELATIONAL_GT_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) > STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_GT_DOUBLE:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) > STACK_GET_DOUBLE_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -420,8 +437,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+
         case RVM_CODE_RELATIONAL_GE_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) >= STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_GE_DOUBLE:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) >= STACK_GET_DOUBLE_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -430,8 +453,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+
         case RVM_CODE_RELATIONAL_LT_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) < STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_LT_DOUBLE:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) < STACK_GET_DOUBLE_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -440,8 +469,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+
         case RVM_CODE_RELATIONAL_LE_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) <= STACK_GET_INT_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc++;
+            break;
+        case RVM_CODE_RELATIONAL_LE_DOUBLE:
+            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) <= STACK_GET_DOUBLE_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc++;
             break;

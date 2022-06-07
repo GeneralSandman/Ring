@@ -65,13 +65,19 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
     }
     switch (expression->type) {
     case EXPRESSION_TYPE_IDENTIFIER:
-        fix_identifier_expression(expression->u.identifier_expression, block);
+        expression->convert_type = fix_identifier_expression(expression->u.identifier_expression, block);
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
         fix_assign_expression(expression->u.assign_expression, block, func);
         break;
 
+    case EXPRESSION_TYPE_LITERAL_BOOL:
+        break;
+    case EXPRESSION_TYPE_LITERAL_INT:
+        break;
+    case EXPRESSION_TYPE_LITERAL_DOUBLE:
+        break;
     case EXPRESSION_TYPE_LITERAL_STRING:
         break;
 
@@ -80,6 +86,8 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
     case EXPRESSION_TYPE_ARITHMETIC_DIV:
     case EXPRESSION_TYPE_ARITHMETIC_MOD:
+        fix_binary_expression(expression, block, func);
+        break;
     case EXPRESSION_TYPE_LOGICAL_AND:
     case EXPRESSION_TYPE_LOGICAL_OR:
     case EXPRESSION_TYPE_RELATIONAL_EQ:
@@ -88,7 +96,7 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
     case EXPRESSION_TYPE_RELATIONAL_GE:
     case EXPRESSION_TYPE_RELATIONAL_LT:
     case EXPRESSION_TYPE_RELATIONAL_LE:
-        fix_binary_expression(expression->u.binary_expression, block, func);
+        fix_binary_expression(expression, block, func);
         break;
 
     case EXPRESSION_TYPE_FUNCTION_CALL:
@@ -194,9 +202,9 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
     }
 }
 
-void fix_identifier_expression(IdentifierExpression* expression, Block* block) {
+TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block* block) {
     if (expression == NULL) {
-        return;
+        return NULL;
     }
     // TODO: 在这里要判断 identifier 是function 还是变量，
     // 然后从不同地方进行搜索
@@ -209,6 +217,7 @@ void fix_identifier_expression(IdentifierExpression* expression, Block* block) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
         declaration               = search_declaration(expression->identifier, block);
         expression->u.declaration = declaration;
+        return declaration->type;
         break;
 
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE_ARRAY:
@@ -222,6 +231,8 @@ void fix_identifier_expression(IdentifierExpression* expression, Block* block) {
     default:
         break;
     }
+
+    return NULL;
 }
 
 void fix_assign_expression(AssignExpression* expression, Block* block, Function* func) {
@@ -237,13 +248,31 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
     }
 }
 
-void fix_binary_expression(BinaryExpression* expression, Block* block, Function* func) {
-    if (expression == NULL) {
+void fix_binary_expression(Expression* expression, Block* block, Function* func) {
+    if (expression == NULL || expression->u.binary_expression == NULL) {
         return;
     }
 
-    fix_expression(expression->left_expression, block, func);
-    fix_expression(expression->right_expression, block, func);
+    Expression* left_expression  = expression->u.binary_expression->left_expression;
+    Expression* right_expression = expression->u.binary_expression->right_expression;
+
+    fix_expression(left_expression, block, func);
+    fix_expression(right_expression, block, func);
+    if (left_expression->type == EXPRESSION_TYPE_LITERAL_DOUBLE
+        || right_expression->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
+        if (expression->convert_type == NULL) {
+            expression->convert_type = malloc(sizeof(TypeSpecifier));
+        }
+        expression->convert_type->basic_type = RING_BASIC_TYPE_DOUBLE;
+    }
+
+    if ((left_expression->convert_type && left_expression->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE)
+        || (right_expression->convert_type && right_expression->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE)) {
+        if (expression->convert_type == NULL) {
+            expression->convert_type = malloc(sizeof(TypeSpecifier));
+        }
+        expression->convert_type->basic_type = RING_BASIC_TYPE_DOUBLE;
+    }
 }
 
 void fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func) {

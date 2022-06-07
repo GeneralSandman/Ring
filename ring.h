@@ -386,16 +386,27 @@ typedef enum {
 
     // relational
     RVM_CODE_RELATIONAL_EQ_INT,
+    RVM_CODE_RELATIONAL_EQ_DOUBLE,
     RVM_CODE_RELATIONAL_EQ_STRING,
+
     RVM_CODE_RELATIONAL_NE_INT,
+    RVM_CODE_RELATIONAL_NE_DOUBLE,
     RVM_CODE_RELATIONAL_NE_STRING,
+
     RVM_CODE_RELATIONAL_GT_INT,
+    RVM_CODE_RELATIONAL_GT_DOUBLE,
     RVM_CODE_RELATIONAL_GT_STRING,
+
     RVM_CODE_RELATIONAL_GE_INT,
+    RVM_CODE_RELATIONAL_GE_DOUBLE,
     RVM_CODE_RELATIONAL_GE_STRING,
+
     RVM_CODE_RELATIONAL_LT_INT,
+    RVM_CODE_RELATIONAL_LT_DOUBLE,
     RVM_CODE_RELATIONAL_LT_STRING,
+
     RVM_CODE_RELATIONAL_LE_INT,
+    RVM_CODE_RELATIONAL_LE_DOUBLE,
     RVM_CODE_RELATIONAL_LE_STRING,
 
     // jump
@@ -591,14 +602,13 @@ struct StatementExecResult_Tag {
 struct Expression_Tag {
     unsigned int line_number;
 
-    BasicValueType convert_type;
+    TypeSpecifier* convert_type; // 一个复杂表达式最后结果值的类型, update in fix_ast
     ExpressionType type;
     union {
         Ring_Bool               bool_literal;
         int                     int_literal;
         double                  double_literal;
         char*                   string_literal;
-        char*                   variable_identifier; // 后续废弃，使用下边的
         IdentifierExpression*   identifier_expression;
         FunctionCallExpression* function_call_expression;
         AssignExpression*       assign_expression;
@@ -1111,23 +1121,23 @@ ImportPackageList* import_package_list_add_item(ImportPackageList* import_packag
 // create_ast.c
 
 // fix.c
-void         ring_compiler_fix_ast(Ring_Compiler* ring_compiler);
-void         fix_statement_list(Statement* statement_list, Block* block, Function* func);
-void         fix_statement(Statement* statement, Block* block, Function* func);
-void         fix_expression(Expression* expression, Block* block, Function* func);
-void         add_declaration(Declaration* declaration, Block* block, Function* func);
-void         fix_block(Block* block, Function* func);
-void         fix_if_statement(IfStatement* if_statement, Block* block, Function* func);
-void         fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
-void         fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
-void         fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
-void         fix_identifier_expression(IdentifierExpression* expression, Block* block);
-void         fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
-void         fix_binary_expression(BinaryExpression* expression, Block* block, Function* func);
-void         fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
-void         add_parameter_to_declaration(Parameter* parameter, Block* block);
-Declaration* search_declaration(char* identifier, Block* block);
-Function*    search_function(char* identifier);
+void           ring_compiler_fix_ast(Ring_Compiler* ring_compiler);
+void           fix_statement_list(Statement* statement_list, Block* block, Function* func);
+void           fix_statement(Statement* statement, Block* block, Function* func);
+void           fix_expression(Expression* expression, Block* block, Function* func);
+void           add_declaration(Declaration* declaration, Block* block, Function* func);
+void           fix_block(Block* block, Function* func);
+void           fix_if_statement(IfStatement* if_statement, Block* block, Function* func);
+void           fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
+void           fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
+void           fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
+TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block* block);
+void           fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
+void           fix_binary_expression(Expression* expression, Block* block, Function* func);
+void           fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
+void           add_parameter_to_declaration(Parameter* parameter, Block* block);
+Declaration*   search_declaration(char* identifier, Block* block);
+Function*      search_function(char* identifier);
 
 // generate.c
 Ring_VirtualMachine_Executer* new_ring_vm_executer();

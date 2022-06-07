@@ -100,6 +100,7 @@ Expression* create_expression_identifier(char* identifier) {
 
     Expression* expression              = malloc(sizeof(Expression));
     expression->line_number             = get_ring_compiler_line_number();
+    expression->convert_type            = NULL; // fix in fix_ast
     expression->type                    = EXPRESSION_TYPE_IDENTIFIER;
     expression->u.identifier_expression = identifier_expression;
     expression->next                    = NULL;
@@ -118,6 +119,7 @@ Expression* create_expression_identifier2(char* identifier, IdentifierExpression
 
     Expression* expression              = malloc(sizeof(Expression));
     expression->line_number             = get_ring_compiler_line_number();
+    expression->convert_type            = NULL; // fix in fix_ast
     expression->type                    = EXPRESSION_TYPE_IDENTIFIER;
     expression->u.identifier_expression = identifier_expression;
 
@@ -134,6 +136,7 @@ Expression* create_expression_identifier_with_index(char* identifier, Expression
 
     Expression* expression               = malloc(sizeof(Expression));
     expression->line_number              = get_ring_compiler_line_number();
+    expression->convert_type             = NULL; // fix in fix_ast
     expression->type                     = EXPRESSION_TYPE_ARRAY_INDEX;
     expression->u.array_index_expression = array_index_expression;
 
@@ -145,6 +148,7 @@ Expression* create_expression_(FunctionCallExpression* function_call_expression)
 
     Expression* expression                 = malloc(sizeof(Expression));
     expression->line_number                = get_ring_compiler_line_number();
+    expression->convert_type               = NULL; // fix in fix_ast
     expression->type                       = EXPRESSION_TYPE_FUNCTION_CALL;
     expression->u.function_call_expression = function_call_expression;
     return expression;
@@ -155,6 +159,7 @@ Expression* create_expression__(AssignExpression* assign_expression) {
 
     Expression* expression          = malloc(sizeof(Expression));
     expression->line_number         = get_ring_compiler_line_number();
+    expression->convert_type        = NULL; // fix in fix_ast
     expression->type                = EXPRESSION_TYPE_ASSIGN;
     expression->u.assign_expression = assign_expression;
     return expression;
@@ -163,6 +168,7 @@ Expression* create_expression__(AssignExpression* assign_expression) {
 Expression* create_expression_ternary(Expression* condition, Expression * true, Expression * false) {
     Expression* expression                                 = malloc(sizeof(Expression));
     expression->line_number                                = get_ring_compiler_line_number();
+    expression->convert_type                               = NULL; // fix in fix_ast
     expression->type                                       = EXPRESSION_TYPE_TERNARY;
     expression->u.ternary_expression                       = malloc(sizeof(TernaryExpression));
     expression->u.ternary_expression->condition_expression = condition;
@@ -176,6 +182,7 @@ Expression* create_expression_binary(ExpressionType type, Expression* left, Expr
 
     Expression* expression                            = malloc(sizeof(Expression));
     expression->line_number                           = get_ring_compiler_line_number();
+    expression->convert_type                          = NULL; // fix in fix_ast
     expression->type                                  = type;
     expression->u.binary_expression                   = malloc(sizeof(BinaryExpression));
     expression->u.binary_expression->left_expression  = left;
@@ -189,7 +196,7 @@ Expression* create_expression_unitary(ExpressionType type, Expression* unitary_e
 
     Expression* expression           = malloc(sizeof(Expression));
     expression->line_number          = get_ring_compiler_line_number();
-    expression->convert_type         = BASICVALUE_TYPE_UNKNOW;
+    expression->convert_type         = NULL; // fix in fix_ast
     expression->type                 = type;
     expression->u.unitary_expression = unitary_expression;
     expression->next                 = NULL;
@@ -204,7 +211,6 @@ Expression* create_expression_unitary_with_convert_type(BasicValueType convert_t
     debug_log_with_yellow_coloar("convert_type:%d", convert_type);
 
     assert(expression != NULL);
-    expression->convert_type = convert_type; // enum 转换一下
 
     return expression;
 }
@@ -214,8 +220,9 @@ create_expression_literal(ExpressionType type, char* literal_interface) {
     debug_log_with_yellow_coloar("type:%d", type);
 
     assert(literal_interface != NULL);
-    Expression* expression  = malloc(sizeof(Expression));
-    expression->line_number = get_ring_compiler_line_number();
+    Expression* expression   = malloc(sizeof(Expression));
+    expression->line_number  = get_ring_compiler_line_number();
+    expression->convert_type = NULL; // fix in fix_ast
 
     expression->type = type;
     switch (type) {
@@ -242,6 +249,7 @@ Expression* create_expression_bool_literal(ExpressionType type, Ring_Bool value)
 
     Expression* expression     = malloc(sizeof(Expression));
     expression->line_number    = get_ring_compiler_line_number();
+    expression->convert_type   = NULL; // fix in fix_ast
     expression->type           = type;
     expression->u.bool_literal = value;
 
@@ -251,6 +259,7 @@ Expression* create_expression_bool_literal(ExpressionType type, Ring_Bool value)
 Expression* create_cast_expression(TypeSpecifier* cast_type, Expression* operand) {
     Expression* expression                     = malloc(sizeof(Expression));
     expression->line_number                    = get_ring_compiler_line_number();
+    expression->convert_type                   = NULL; // fix in fix_ast
     expression->type                           = EXPRESSION_TYPE_CAST;
     expression->u.cast_expression              = malloc(sizeof(CastExpression));
     expression->u.cast_expression->line_number = get_ring_compiler_line_number();
