@@ -1,0 +1,30 @@
+
+test case 1
+0
+debug_assert PASS
+0
+debug_assert PASS
+100
+debug_assert PASS
+400
+debug_assert PASS
+
+test case 2
+50
+debug_assert PASS
+52
+debug_assert PASS
+100
+debug_assert PASS
+252
+debug_assert PASS
+
+test case 3
+0
+debug_assert PASS
+0
+debug_assert PASS
+100
+debug_assert PASS
+4950
+debug_assert PASS

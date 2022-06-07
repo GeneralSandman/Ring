@@ -38,7 +38,7 @@ debug_assert(sum == 460);
 
 sum = 0;
 for(score = -9; score<=110; score+=1) {
-	sum += get_level_by_score(score);
+	sum += get_level_by_score(score); // FIXME: bug 
 }
 println_int(sum);
 debug_assert(sum == 460);
