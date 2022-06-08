@@ -50,7 +50,7 @@ void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer) {
     }
 }
 
-void ring_vm_code_dump(RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col) {
+void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col) {
     /* RVM_Byte*    code_list = executer->code_list; */
     /* unsigned int code_size = executer->code_size; */
 
@@ -58,7 +58,11 @@ void ring_vm_code_dump(RVM_Byte* code_list, unsigned int code_size, unsigned int
     // int row = 1;
 
     MOVE_CURSOR(screen_row++, screen_col);
-    printf(" ************  rvm opcode  ****\n");
+    char* func_name = "top_level";
+    if (function) {
+        func_name = function->func_name;
+    }
+    printf(" ************  rvm opcode  -- function(%s)\n", func_name);
 
     MOVE_CURSOR(screen_row++, screen_col);
     printf(" %10s | %20s | %10s | %5s\n", "index", "opcode", "oper num", "pc");

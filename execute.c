@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
@@ -85,6 +87,7 @@ Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* execu
     rvm->pc                  = 0;
     rvm->function_list       = NULL;
     rvm->function_size       = 0;
+    rvm->debug_config        = NULL;
 
     // init something
     rvm_add_static_variable(executer, rvm->runtime_static);
@@ -149,7 +152,12 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     while (rvm->pc < code_size) {
         RVM_Byte opcode = code_list[rvm->pc];
         // char*    name     = RVM_Opcode_Infos[opcode].name;
-        debug_rvm(rvm);
+
+#ifdef DEBUG
+#ifdef DEBUG_RVM
+        debug_rvm(rvm, function, code_list, code_size, rvm->pc);
+#endif
+#endif
 
         switch (opcode) {
         // int double string const
@@ -529,23 +537,15 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 invoke_native_function(rvm, &rvm->function_list[func_index]);
                 rvm->pc += 1;
             } else if (rvm->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE) {
-                // printf("----rvm->runtime_stack->top_index:%d\n", runtime_stack->top_index);
                 invoke_derive_function(rvm,
                                        &function, &rvm->function_list[func_index],
                                        &code_list, &code_size,
                                        &rvm->pc,
                                        &caller_stack_base);
-                // printf("++++rvm->runtime_stack->top_index:%d base:%d\n", runtime_stack->top_index, callee_stack_base);
             }
             break;
         case RVM_CODE_RETURN:
             return_value_list_size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            // derive_function_return(rvm,
-            //                        &function, NULL,
-            //                        &code_list, &code_size,
-            //                        &rvm->pc,
-            //                        &caller_stack_base,
-            //                        return_value_list_size);
             rvm->pc += 3;
             // break; // ATTEN: no need break
         case RVM_CODE_FUNCTION_FINISH:
@@ -569,7 +569,12 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         opcode_num++;
     }
 
-    debug_rvm(rvm);
+#ifdef DEBUG
+#ifdef DEBUG_RVM
+    // printf("execute rvm code finish, Press Any Key To Exit\n");
+    debug_rvm(rvm, function, code_list, code_size, rvm->pc);
+#endif
+#endif
 }
 
 
@@ -634,7 +639,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     init_derive_function_local_variable(rvm, callee_function);
 
     // FIXME:a local_variable_size
-    unsigned int local_variable_size = 164; // how to get local_variable_size
+    unsigned int local_variable_size = 16;
     rvm->runtime_stack->top_index += local_variable_size;
 }
 
@@ -668,7 +673,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
 
     RVM_CallInfo* callinfo;
     // FIXME: local_variable_size
-    unsigned int local_variable_size = 164; // how to get local_variable_size
+    unsigned int local_variable_size = 16;
     rvm->runtime_stack->top_index -= local_variable_size;
 
     restore_callinfo(rvm->runtime_stack, &callinfo);
@@ -757,19 +762,47 @@ void restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo) 
     *callinfo = (RVM_CallInfo*)(&runtime_stack->data[runtime_stack->top_index]);
 }
 
-void debug_rvm(Ring_VirtualMachine* rvm) {
-#ifndef DEBUG_RVM
-    return;
-#endif
+void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc) {
     debug_log_with_white_coloar("\t");
+
+    if (rvm->debug_config == NULL) {
+        rvm->debug_config             = malloc(sizeof(RVM_DebugConfig));
+        rvm->debug_config->debug_mode = RVM_DEBUG_MODE_UNKNOW;
+    }
+
+    // get terminal windows size
+    struct winsize terminal_size;
+    if (isatty(STDOUT_FILENO) == 0 || ioctl(STDOUT_FILENO, TIOCGWINSZ, &terminal_size) < 0) {
+        runtime_err_log("ioctl TIOCGWINSZ error");
+        exit(1);
+    }
+
+    if (terminal_size.ws_row < 38 || terminal_size.ws_col < 115) {
+        runtime_err_log("In Debug RVM Mode:");
+        runtime_err_log("    Please adjust current terminal window size: height > 38, width > 115\n");
+        exit(1);
+    }
 
     CLEAR_SCREEN;
     ring_vm_dump_runtime_stack(rvm->runtime_stack, 1, 0);
-    ring_vm_code_dump(rvm->executer->code_list, rvm->executer->code_size, rvm->pc, 1, 60);
+    ring_vm_code_dump(function, code_list, code_size, pc, 1, 60);
 
-    printf("press enter to step, 'q' to quit.\n");
+    MOVE_CURSOR(terminal_size.ws_row - 7, 0);
+    printf("----------Operation--------\n");
+    printf("|press   enter: step into.|\n");
+    printf("|        'i'  : step into.|\n");
+    printf("|        'v'  : step over.|\n");
+    printf("|        'o'  : step out. |\n");
+    printf("|        'q'  : quit.     |\n");
+    printf("---------------------------\n");
     char ch = getchar();
-    if (ch == 'q') {
+    if (ch == 'i') {
+        rvm->debug_config->debug_mode = RVM_DEBUG_MODE_STEPINTO;
+    } else if (ch == 'v') {
+        rvm->debug_config->debug_mode = RVM_DEBUG_MODE_STEPOVER;
+    } else if (ch == 'o') {
+        rvm->debug_config->debug_mode = RVM_DEBUG_MODE_STEPOUT;
+    } else if (ch == 'q') {
         exit(1);
     }
 }

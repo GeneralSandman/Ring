@@ -236,7 +236,7 @@ void generate_code_from_function_definition(Ring_VirtualMachine_Executer* execut
     dest->u.derive_func->local_variable_size = src->block->declaration_list_size;
 
 #ifdef DEBUG
-    ring_vm_code_dump(opcode_buffer->code_list, opcode_buffer->code_size, 0, 60, 1);
+    ring_vm_code_dump(dest, opcode_buffer->code_list, opcode_buffer->code_size, 0, 60, 1);
 #endif
 }
 
@@ -245,7 +245,7 @@ void vm_executer_dump(Ring_VirtualMachine_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
     // CLEAR_SCREEN;
     ring_vm_constantpool_dump(executer);
-    ring_vm_code_dump(executer->code_list, executer->code_size, 0, 60, 1);
+    ring_vm_code_dump(NULL, executer->code_list, executer->code_size, 0, 60, 1);
 }
 
 RVM_OpcodeBuffer* new_opcode_buffer() {

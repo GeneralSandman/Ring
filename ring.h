@@ -87,6 +87,8 @@ typedef struct Declaration_Tag Declaration;
 
 typedef struct TypeSpecifier_Tag TypeSpecifier;
 
+typedef struct RVM_DebugConfig_Tag RVM_DebugConfig;
+
 typedef struct IdentifierExpression_Tag IdentifierExpression;
 
 typedef struct RVM_String_Tag RVM_String;
@@ -127,8 +129,8 @@ struct Ring_Compiler_Tag {
 typedef unsigned char RVM_Byte;
 
 typedef union {
-    // TODO: 补充 bool
-    int         int_value;
+    // TODO: 补充 类型
+    int         int_value; // bool 可以使用 bool_value 代替
     double      double_value;
     RVM_Object* object;
 } RVM_Value; // 这个名字得改一改
@@ -143,6 +145,8 @@ struct Ring_VirtualMachine_Tag {
 
     RVM_Function* function_list;
     unsigned int  function_size;
+
+    RVM_DebugConfig* debug_config;
 };
 
 struct ImportPackageList_Tag {
@@ -883,6 +887,20 @@ struct TypeSpecifier_Tag {
     Ring_DeriveType* derive_type;
 };
 
+
+typedef enum {
+    RVM_DEBUG_MODE_UNKNOW,
+
+    RVM_DEBUG_MODE_STEPINTO,
+    RVM_DEBUG_MODE_STEPOVER,
+    RVM_DEBUG_MODE_STEPOUT,
+
+} RVM_DebugMode;
+
+struct RVM_DebugConfig_Tag {
+    RVM_DebugMode debug_mode;
+};
+
 typedef enum {
     ERROR_CODE_SUCCESS,
 
@@ -1215,7 +1233,7 @@ void                 derive_function_finish(Ring_VirtualMachine* rvm,
                                             unsigned int* caller_stack_base,
                                             unsigned int  return_value_list_size);
 void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function* function);
-void                 debug_rvm(Ring_VirtualMachine* rvm);
+void                 debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc);
 
 RVM_Object* create_rvm_object();
 RVM_Object* string_literal_to_rvm_object(char* string_literal);
@@ -1247,7 +1265,7 @@ int  write_tmp_source_file(char* tmp_source_file_name, int start_line_num, int l
 // utils.c
 void ring_compiler_functions_dump(Ring_Compiler* compiler);
 void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer);
-void ring_vm_code_dump(RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
+void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
 void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int screen_row, unsigned int screen_col);
 // utils.c
 
