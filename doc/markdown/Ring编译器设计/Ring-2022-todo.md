@@ -25,5 +25,8 @@ int 应该 类似  c语言 longlong
 
 
 优化虚拟机调试函数调用的功能。
+step into
+step over
+step out
 
 优化LineNumber 功能
