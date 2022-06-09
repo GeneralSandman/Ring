@@ -124,6 +124,8 @@ struct Ring_Compiler_Tag {
     Declaration* declaration_list;
 
     Block* current_block;
+
+    unsigned int compile_error_num;
 };
 
 typedef unsigned char RVM_Byte;
@@ -1026,7 +1028,7 @@ char*        get_ring_string(Ring_String* string);
 Ring_Compiler* new_ring_compiler(char* file_name);
 Ring_Compiler* get_ring_compiler();
 void           ring_compiler_compile(Ring_Compiler* ring_compiler, FILE* fp);
-void           ring_compiler_error(SyntaxType syntax_type);
+void           ring_compiler_error(SyntaxType syntax_type, int exit);
 char*          get_ring_compiler_current_file_name();
 Ring_String*   get_ring_compiler_current_line_content();
 unsigned int   get_ring_compiler_line_number();

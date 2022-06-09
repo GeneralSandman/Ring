@@ -268,12 +268,11 @@ int yyerror(char const *str, ...){
     // 调用 ring_compiler_error 
     // 在这里捕获详细信息
 
-    printf("%s:%d:%d: ", get_ring_compiler_current_file_name(), get_ring_compiler_line_number(), get_ring_compiler_column_number());
-    complie_err_log("error: compiler error, syntax invalid");
+    printf("\n%s:%d:%d: ", get_ring_compiler_current_file_name(), get_ring_compiler_line_number(), get_ring_compiler_column_number());
+    complie_err_log("error: compiler error, syntax error");
     complie_err_log("        %s", linebuf);
-    complie_err_log2("%*s^.....%s", get_ring_compiler_column_number() + 8, "", str);
+    complie_err_log2("%*s^.....%s\n", get_ring_compiler_column_number() + 8, "", str);
 
-    exit(ERROR_CODE_COMPILE_ERROR);
     return 0;
 }
 

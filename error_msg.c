@@ -19,7 +19,6 @@ struct ErrorMessageInfo ErrorMessageInfos[] = {
     {ERROR_CODE_RUN_VM_ERROR, "RUN_VM_ERROR"},
 };
 
-
 struct SyntaxInfo SyntaxInfos[] = {
     {SYNTAX_VARIABLE_DEFINITION,
      "[Variable Definition]: var type identifier [ = value];"},

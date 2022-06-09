@@ -33,6 +33,8 @@ Ring_Compiler* new_ring_compiler(char* file_name) {
 
     ring_compiler->current_block = NULL;
 
+    ring_compiler->compile_error_num = 0;
+
     return ring_compiler;
 }
 
@@ -48,16 +50,28 @@ void ring_compiler_compile(Ring_Compiler* ring_compiler, FILE* fp) {
 
     yyin = fp;
     if (yyparse()) {
-        // 调用 ring_compiler_error 可以在这里补货
+        // Error Attention 某些错误已经不能进行精细化识别、提示。
+        ring_compiler->compile_error_num++;
+    }
+    if (ring_compiler->compile_error_num) {
+        complie_err_log("%d syntax error detected.\n", ring_compiler->compile_error_num);
+        exit(ERROR_CODE_COMPILE_ERROR);
     }
 
     debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n");
 }
 
-void ring_compiler_error(SyntaxType syntax_type) {
+// Error Attention 某些错误提示可以精细化识别、提示
+void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
     char message[1024];
-    sprintf(message, "syntax error:\n\n Ring Grammar Standard:\n\t%s", SyntaxInfos[SYNTAX_VARIABLE_DEFINITION].bnf);
+    sprintf(message, "syntax error:\nRing Grammar Standard:\n\t%s", SyntaxInfos[SYNTAX_VARIABLE_DEFINITION].bnf);
     yyerror(message);
+    ring_compiler->compile_error_num++;
+    if (need_exit) {
+        // Donot exit when detect a error.
+        // Get next line and compile.
+        exit(ERROR_CODE_COMPILE_ERROR);
+    }
 }
 
 

@@ -892,7 +892,7 @@ cast
 error_syntax
     : literal_term TOKEN_INT identifier_list
     {
-        ring_compiler_error(SYNTAX_VARIABLE_DEFINITION);
+        ring_compiler_error(SYNTAX_VARIABLE_DEFINITION, 0);
     }
     ;
 
