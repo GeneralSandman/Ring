@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-static Ring_Compiler* ring_compiler = NULL;
+int                      yyerror(char const* str, ...);
+extern struct SyntaxInfo SyntaxInfos[];
+static Ring_Compiler*    ring_compiler = NULL;
 
 Ring_Compiler* new_ring_compiler(char* file_name) {
     if (ring_compiler == NULL) {
@@ -46,11 +48,16 @@ void ring_compiler_compile(Ring_Compiler* ring_compiler, FILE* fp) {
 
     yyin = fp;
     if (yyparse()) {
-        fprintf(stderr, "COMPLIE ERROR\n");
-        exit(ERROR_CODE_COMPILE_ERROR);
+        // 调用 ring_compiler_error 可以在这里补货
     }
 
     debug_log_with_yellow_coloar("\t COMPLIE SUCCESS\n\n");
+}
+
+void ring_compiler_error(SyntaxType syntax_type) {
+    char message[1024];
+    sprintf(message, "syntax error:\n\n Ring Grammar Standard:\n\t%s", SyntaxInfos[SYNTAX_VARIABLE_DEFINITION].bnf);
+    yyerror(message);
 }
 
 

@@ -4,18 +4,20 @@
 #define YYDEBUG 1
 
 int yylex();
-int yyerror(char const *str);
+int yyerror(char const *str, ...);
+
 
 %}
 
+%locations
 %glr-parser     // 使用 GLR 解析
-%expect 2       // TODO: legitimate 0 shift/reduce conflicts
+%expect 3       // legitimate 3 shift/reduce conflicts
 %expect-rr 0    // legitimate 0 reduce/reduce conflicts
 
 %union {
     char*                       m_comment_value;
     char*                       m_literal_interface;
-    char*                       m_identifier; // TODO: 以后不用这个，用下边的
+    char*                       m_identifier;
     Identifier*                 m_identifier_list;
     Statement*                  m_statement_list;
     Expression*                 m_expression;
@@ -165,6 +167,7 @@ int yyerror(char const *str);
 %type <m_basic_type_specifier>  basic_type_specifier
 
 
+
 %%
 
 translation_unit
@@ -297,6 +300,7 @@ statement
     }
     ;
 
+
 if_statement
     : TOKEN_IF TOKEN_LP expression TOKEN_RP block // if () {}
     {
@@ -392,19 +396,6 @@ return_statement
     }
     ;
 
-
-// variable_definition_statement
-//     : TOKEN_VAR type_specifier IDENTIFIER
-//     {
-//         debug_log_with_green_coloar("[RULE::variable_definition_statement]\t ");
-//         $$ = create_declaration_statement($2, $3, NULL);
-//     }
-//     | TOKEN_VAR type_specifier IDENTIFIER TOKEN_ASSIGN expression
-//     {
-//         debug_log_with_green_coloar("[RULE::variable_definition_statement]\t ");
-//         $$ = create_declaration_statement($2, $3, $5);
-//     }
-//     ;
 
 multi_variable_definition_statement
     : TOKEN_VAR type_specifier identifier_list
@@ -516,33 +507,6 @@ block
     ;
 
 
-// variable_type
-//     : TOKEN_BOOL
-//     {
-//         debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_BOOL) ");
-// 
-//         $$ = VARIABLE_TYPE_BOOL;
-//     }
-//     | TOKEN_INT
-//     {
-//         debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_INT) ");
-// 
-//         $$ = VARIABLE_TYPE_INT;
-//     }
-//     | TOKEN_DOUBLE
-//     {
-//         debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_DOUBLE) ");
-// 
-//         $$ = VARIABLE_TYPE_DOUBLE;
-//     }
-//     | TOKEN_STRING
-//     {
-//         debug_log_with_green_coloar("[RULE::variable_type]\t variable_type(TOKEN_STRING) ");
-// 
-//         $$ = VARIABLE_TYPE_STRING;
-//     }
-//     ;
-
 type_specifier
     : basic_type_specifier
     {
@@ -595,6 +559,10 @@ expression
     {
         debug_log_with_green_coloar("[RULE::cast expression ? : ]\t ");
         $$ = create_cast_expression($2, $4);
+    }
+    | error_syntax
+    {
+        $$ = NULL;
     }
     ;
 
@@ -920,28 +888,13 @@ cast
     ;
 
 
+
+error_syntax
+    : literal_term TOKEN_INT identifier_list
+    {
+        ring_compiler_error(SYNTAX_VARIABLE_DEFINITION);
+    }
+    ;
+
 %%
-
-extern char *yytext;
-
-// TODO: 需要优化这个错误提示
-int yyerror(char const *str){
-    complie_err_log("file(%s) \n"
-        "    line(%d) column(%d): \n"
-        "    %s", 
-        get_ring_compiler_current_file_name(),
-        get_ring_compiler_line_number(), get_ring_compiler_column_number(), 
-        ring_compiler_get_current_line_content());
-    complie_err_log2("%*s^.....%s", get_ring_compiler_column_number()+4, "", str);
-
-    // printf("%s\n", yytext);
-
-    // va_list ap;
-    // va_start(ap, str);
-    // if(yylloc.first_line) {
-
-    // }
-    
-    return 0;
-}
 

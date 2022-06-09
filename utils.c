@@ -29,9 +29,7 @@ void ring_compiler_functions_dump(Ring_Compiler* compiler) {
 
 void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer) {
     printf(" ************  rvm constant pool  ****\n");
-    /* printf("constant_pool_size:%u\n", executer->constant_pool_size); */
     for (int i = 0; i < executer->constant_pool_size; i++) {
-        /* RVM_ConstantPool tmp = executer->constant_pool_list[i]; */
         printf("%10d | ", i);
         switch (executer->constant_pool_list[i].type) {
         case CONSTANTPOOL_TYPE_INT:
@@ -51,18 +49,12 @@ void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer) {
 }
 
 void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col) {
-    /* RVM_Byte*    code_list = executer->code_list; */
-    /* unsigned int code_size = executer->code_size; */
-
-    // int col = 60;
-    // int row = 1;
-
     MOVE_CURSOR(screen_row++, screen_col);
     char* func_name = "top_level";
     if (function) {
         func_name = function->func_name;
     }
-    printf(" ************  rvm opcode  -- function(%s)\n", func_name);
+    printf(" ************  rvm opcode  --[function %s]\n", func_name);
 
     MOVE_CURSOR(screen_row++, screen_col);
     printf(" %10s | %20s | %10s | %5s\n", "index", "opcode", "oper num", "pc");
@@ -89,7 +81,6 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
             break;
 
         case OPCODE_OPERAND_TYPE_2BYTE:
-            // TODO: 位运算，从高位开始填充
             tmp = code_list[i++] << 8;
             tmp += code_list[i++];
             sprintf(oper_num, "%d", tmp);
@@ -104,19 +95,25 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
 }
 
 
-void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int screen_row, unsigned int screen_col) {
+// TODO: caller_stack_base 是不是可以放在 RVM_RuntimeStack 中，考虑
+void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col) {
     MOVE_CURSOR(screen_row++, screen_col);
     printf("****  runtime_stack  ****\n");
 
     MOVE_CURSOR(screen_row++, screen_col);
-    printf("%7s | %10s | %5s\n", "index", "oper_num", "pointer");
+    printf("%7s | %10s | %6s | %6s\n", "index", "oper_num", "space", "pointer");
     for (int i = 0; i < runtime_stack->top_index; i++) {
+        char* space   = "";
         char* pointer = "";
+        if (i >= caller_stack_base) {
+            space = "+++";
+        }
         if (i == runtime_stack->top_index - 1) {
             pointer = "<--";
         }
 
         MOVE_CURSOR(screen_row++, screen_col);
-        printf("%7d | %10d | %5s\n", i, runtime_stack->data[i].int_value, pointer);
+        printf("%7d | %10d | %6s | %6s\n", i, runtime_stack->data[i].int_value, space, pointer);
     }
 }
+

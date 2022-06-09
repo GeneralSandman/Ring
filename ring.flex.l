@@ -1,7 +1,11 @@
 %{
 #include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
 #include "ring.h"
 #include "y.tab.h"
+
+char linebuf[500];
 
 int yywrap(){
     return 1;
@@ -146,19 +150,23 @@ int yywrap(){
     init_string_literal_buffer();
     BEGIN STRING_LITERAL_STATE;
 }
-<INITIAL>\n {
+<INITIAL>\n.* {
     debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(LF) line_number(%d)\n\n", get_ring_compiler_line_number());
 
     reset_ring_compiler_column_number();
     ring_compiler_reset_current_line_content();
     increase_ring_compiler_line_number();
+    strncpy(linebuf, yytext+1, sizeof(linebuf));
+    yyless(1);
 }
-<INITIAL>\r\n {
+<INITIAL>\r\n.* {
     debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(CRLF) line_number(%d)\n\n", get_ring_compiler_line_number());
 
     reset_ring_compiler_column_number();
     ring_compiler_reset_current_line_content();
     increase_ring_compiler_line_number();
+    strncpy(linebuf, yytext+1, sizeof(linebuf));
+    yyless(1);
 }
 <INITIAL>"//" BEGIN LINE_COMMENT;
 <INITIAL>"/*" BEGIN BLOCK_COMMENT;
@@ -252,3 +260,23 @@ int yywrap(){
 }
 
 %%
+
+
+extern char *yytext;
+
+int yyerror(char const *str, ...){
+    // 调用 ring_compiler_error 
+    // 在这里捕获详细信息
+
+    printf("%s:%d:%d: ", get_ring_compiler_current_file_name(), get_ring_compiler_line_number(), get_ring_compiler_column_number());
+    complie_err_log("error: compiler error, syntax invalid");
+    complie_err_log("        %s", linebuf);
+    complie_err_log2("%*s^.....%s", get_ring_compiler_column_number() + 8, "", str);
+
+    exit(ERROR_CODE_COMPILE_ERROR);
+    return 0;
+}
+
+
+
+

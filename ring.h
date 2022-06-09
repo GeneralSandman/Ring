@@ -932,6 +932,16 @@ struct ErrorMessageInfo {
     char*     error_messaage;
 };
 
+typedef enum {
+    SYNTAX_VARIABLE_DEFINITION,
+
+} SyntaxType;
+
+struct SyntaxInfo {
+    SyntaxType syntax_type;
+    char*      bnf;
+};
+
 #define CLEAR_SCREEN printf("\e[1;1H\e[2J")
 
 #define MOVE_CURSOR(row, col) printf("%c[%d;%dH", 27, (row), (col))
@@ -1016,6 +1026,7 @@ char*        get_ring_string(Ring_String* string);
 Ring_Compiler* new_ring_compiler(char* file_name);
 Ring_Compiler* get_ring_compiler();
 void           ring_compiler_compile(Ring_Compiler* ring_compiler, FILE* fp);
+void           ring_compiler_error(SyntaxType syntax_type);
 char*          get_ring_compiler_current_file_name();
 Ring_String*   get_ring_compiler_current_line_content();
 unsigned int   get_ring_compiler_line_number();
@@ -1233,7 +1244,7 @@ void                 derive_function_finish(Ring_VirtualMachine* rvm,
                                             unsigned int* caller_stack_base,
                                             unsigned int  return_value_list_size);
 void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function* function);
-void                 debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc);
+void                 debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base);
 
 RVM_Object* create_rvm_object();
 RVM_Object* string_literal_to_rvm_object(char* string_literal);
@@ -1266,7 +1277,7 @@ int  write_tmp_source_file(char* tmp_source_file_name, int start_line_num, int l
 void ring_compiler_functions_dump(Ring_Compiler* compiler);
 void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer);
 void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
-void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int screen_row, unsigned int screen_col);
+void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
 // utils.c
 
 #endif

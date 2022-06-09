@@ -155,7 +155,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
 #ifdef DEBUG
 #ifdef DEBUG_RVM
-        debug_rvm(rvm, function, code_list, code_size, rvm->pc);
+        debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
 #endif
 #endif
 
@@ -571,8 +571,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
 #ifdef DEBUG
 #ifdef DEBUG_RVM
-    // printf("execute rvm code finish, Press Any Key To Exit\n");
-    debug_rvm(rvm, function, code_list, code_size, rvm->pc);
+    debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
 #endif
 #endif
 }
@@ -762,7 +761,7 @@ void restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo) 
     *callinfo = (RVM_CallInfo*)(&runtime_stack->data[runtime_stack->top_index]);
 }
 
-void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc) {
+void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base) {
     debug_log_with_white_coloar("\t");
 
     if (rvm->debug_config == NULL) {
@@ -784,7 +783,7 @@ void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_
     }
 
     CLEAR_SCREEN;
-    ring_vm_dump_runtime_stack(rvm->runtime_stack, 1, 0);
+    ring_vm_dump_runtime_stack(rvm->runtime_stack, caller_stack_base, 1, 0);
     ring_vm_code_dump(function, code_list, code_size, pc, 1, 60);
 
     MOVE_CURSOR(terminal_size.ws_row - 7, 0);
