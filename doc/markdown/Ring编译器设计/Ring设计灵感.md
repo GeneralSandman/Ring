@@ -22,6 +22,15 @@
 > 
 > https://www.lua.org/pil/
 
+> [!TIP|style:flat|label:Lua 4.0.1]
+> Lua 4.0.1 基于栈虚拟机实现
+> https://github.com/GeneralSandman/lua-4.0.1
+
+
+> [!TIP|style:flat|label:Lua 5.4.4]
+> Lua 5.4.4 基于寄存式虚拟机实现
+> https://github.com/GeneralSandman/lua-5.4.4
+
 > [!TIP|style:flat|label:仿制lua解释器]
 > 
 > https://github.com/Manistein/dummylua-tutorial
