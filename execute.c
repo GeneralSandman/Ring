@@ -638,7 +638,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     init_derive_function_local_variable(rvm, callee_function);
 
     // FIXME:a local_variable_size
-    unsigned int local_variable_size = 16;
+    unsigned int local_variable_size = 44;
     rvm->runtime_stack->top_index += local_variable_size;
 }
 
@@ -672,7 +672,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
 
     RVM_CallInfo* callinfo;
     // FIXME: local_variable_size
-    unsigned int local_variable_size = 16;
+    unsigned int local_variable_size = 44;
     rvm->runtime_stack->top_index -= local_variable_size;
 
     restore_callinfo(rvm->runtime_stack, &callinfo);
