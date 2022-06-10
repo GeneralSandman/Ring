@@ -12,6 +12,7 @@ OBJS = \
   compiler.o\
   inner_func.o\
   interactive.o\
+  error_msg.o\
   utils.o\
   main.o
 
@@ -19,6 +20,7 @@ OBJS = \
 # CFLAGS -DDEBUG 开启 debug 编译信息
 # CFLAGS -DDEBUG_RVM 开启 debug ring virtual machine 信息
 # -lm for fmod function
+# -lncurses for tigetnum tigetnum
 CFLAGS = -c -std=c99 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic -g -DDEBUG1 -DDEBUG_RVM1
 BIN = ./bin
 INCLUDES = \
@@ -59,5 +61,6 @@ execute.o: execute.c ring.h
 compiler.o: compiler.c ring.h inner_func.h
 inner_func.o: inner_func.c ring.h inner_func.h
 interactive.o: interactive.c ring.h
+error_msg.o: error_msg.c ring.h
 utils.o: utils.c ring.h
 main.o: main.c ring.h
