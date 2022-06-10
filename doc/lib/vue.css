@@ -846,7 +846,7 @@ body {
 }
 
 .markdown-section>:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) code {
-    font-size: .8rem
+    font-size: 1.0rem
 }
 
 .markdown-section pre {

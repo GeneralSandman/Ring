@@ -1,6 +1,6 @@
 <!-- _coverpage.md -->
 
-<!-- ![logo](_media/icon.svg) -->
+![](./media/ring-logo-1.png)
 
 # Ring <small>version: v0.1.16-beat</small>
 

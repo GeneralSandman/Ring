@@ -4,7 +4,12 @@ Prism.languages.ring = Prism.languages.extend('clike', {
         lookbehind: true,
         greedy: true
     },
-    'keyword': /\b(?:package|import|break|case|chan|const|continue|int|default|defer|else|elseif|fallthrough|for|do|while|func|ring(?:to)?|if|return|switch|var|public|private|typedef|class|function)\b/,
+    'comment': {
+        pattern: /\/\/(?:[^\r\n\\]|\\(?:\r\n?|\n|(?![\r\n])))*|\/\*[\s\S]*?(?:\*\/|$)/,
+        greedy: true
+    },
+    'keyword': /\b(?:package|import|var|public|private|typedef|class|function)\b/,
+    'function': /\b[a-z_]\w*(?=\s*\()/i,
     'boolean': /\b(?:_|false|true)\b/,
     'number': [
         // binary and octal integers
@@ -26,3 +31,5 @@ Prism.languages.insertBefore('ring', 'string', {
 });
 
 delete Prism.languages.ring['class-name'];
+
+// https://cdn.jsdelivr.net/npm/prismjs@1.28.0/components/prism-c.js
