@@ -4,7 +4,7 @@ Prism.languages.ring = Prism.languages.extend('clike', {
         lookbehind: true,
         greedy: true
     },
-    'keyword': /\b(?:break|case|chan|const|continue|int|default|defer|else|elseif|fallthrough|for|do|while|func|ring(?:to)?|if|return|switch|var|public|private|typedef|class|function)\b/,
+    'keyword': /\b(?:package|import|break|case|chan|const|continue|int|default|defer|else|elseif|fallthrough|for|do|while|func|ring(?:to)?|if|return|switch|var|public|private|typedef|class|function)\b/,
     'boolean': /\b(?:_|false|true)\b/,
     'number': [
         // binary and octal integers
@@ -15,7 +15,7 @@ Prism.languages.ring = Prism.languages.extend('clike', {
         /(?:\b\d[\d_]*(?:\.[\d_]*)?|\B\.\d[\d_]*)(?:e[+-]?[\d_]+)?i?(?!\w)/i
     ],
     'operator': /[*\/%^!=]=?|\+[=+]?|-[=-]?|\|[=|]?|&(?:=|&|\^=?)?|>(?:>=?|=)?|<(?:<=?|=|-)?|:=|\.\.\./,
-    'builtin': /\b(?:append|bool|int|double|byte|cap|close|complex|complex(?:64|128)|copy|delete|error|float(?:32|64)|u?int(?:8|16|32|64)?|imag|len|make|new|panic|print(?:ln)?|real|recover|rune|string|uintptr)\b/
+    'builtin': /\b(?:main|append|bool|int|double|byte|cap|close|complex|complex(?:64|128)|copy|delete|error|float(?:32|64)|u?int(?:8|16|32|64)?|imag|len|make|new|panic|print(?:ln)?|real|recover|rune|string|uintptr)\b/
 });
 
 Prism.languages.insertBefore('ring', 'string', {
