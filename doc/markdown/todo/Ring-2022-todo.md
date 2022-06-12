@@ -80,3 +80,21 @@ lua c函数 要编译成 so dll 放到对应的目录，这里应该抛弃这种
 
 
 lua 的 Instruction 是 unsinged long
+
+
+
+bison 第三章 显式指定优先级，消除Ring所有的shift/reduce 错误
+
+
+
+a = when(true) 1 else 0;
+
+name = true -> "has name" --> "has not name";
+
+if(true){
+        name = "has name";
+} else {
+        name = "has not name";
+}
+
+expression -> expression --> expression;
