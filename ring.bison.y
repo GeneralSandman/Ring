@@ -11,7 +11,7 @@ int yyerror(char const *str, ...);
 
 %locations
 %glr-parser     // 使用 GLR 解析
-%expect 3       // legitimate 3 shift/reduce conflicts
+%expect    0    // legitimate 0 shift/reduce conflicts
 %expect-rr 0    // legitimate 0 reduce/reduce conflicts
 
 %union {
@@ -550,7 +550,7 @@ expression
         debug_log_with_green_coloar("[RULE::expression:logical_expression]\t ");
 
     }
-    | expression TOKEN_QUESTION_MARK expression TOKEN_COLON expression
+    | logical_expression_or TOKEN_QUESTION_MARK expression_arithmetic_operation_additive TOKEN_COLON expression_arithmetic_operation_additive
     {
         debug_log_with_green_coloar("[RULE::expression ? : ]\t ");
         $$ = create_expression_ternary($1, $3, $5);
@@ -559,10 +559,6 @@ expression
     {
         debug_log_with_green_coloar("[RULE::cast expression ? : ]\t ");
         $$ = create_cast_expression($2, $4);
-    }
-    | error_syntax
-    {
-        $$ = NULL;
     }
     ;
 
@@ -889,7 +885,7 @@ cast
 
 
 
-error_syntax
+error_syntax_expression
     : literal_term TOKEN_INT identifier_list
     {
         ring_compiler_error(SYNTAX_VARIABLE_DEFINITION, 0);
