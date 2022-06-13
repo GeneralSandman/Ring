@@ -450,6 +450,7 @@ typedef struct {
     RVM_Function* caller_function;
     unsigned int  caller_pc; // 调用者的返回地址
     unsigned int  caller_stack_base;
+    unsigned int  callee_argument_size; // 函数调用的参数数量，可变参数
 } RVM_CallInfo;
 
 #define CALL_INFO_MAGIC_NUMBER (0x8421) // 33852

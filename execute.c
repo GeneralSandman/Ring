@@ -625,6 +625,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     callinfo.caller_function   = *caller_function;
     callinfo.caller_pc         = *pc;
     callinfo.caller_stack_base = *caller_stack_base;
+    callinfo.callee_argument_size = callee_function->parameter_size; // FIXME: 支持可变参数
     store_callinfo(rvm->runtime_stack, &callinfo);
 
 
@@ -688,7 +689,11 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
         *code_size = (*caller_function)->u.derive_func->code_size;
     }
 
+    // 释放arguement
+    rvm->runtime_stack->top_index -= callinfo->callee_argument_size;
 
+
+    // copy return value to top of stack.
     for (int i = 0; i < return_value_list_size; i++) {
         rvm->runtime_stack->data[rvm->runtime_stack->top_index++] = rvm->runtime_stack->data[old_return_value_list_index + i];
     }
