@@ -1,0 +1,24 @@
+
+test case 1
+bool_value is false
+bool_value is true
+
+test case 2
+-100
+100
+
+test case 3
+100.234555
+100.123000
+
+test case 1
+bool_value is false
+bool_value is true
+
+test case 2
+-100
+100
+
+test case 3
+100.234555
+100.123000
