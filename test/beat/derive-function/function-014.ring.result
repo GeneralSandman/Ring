@@ -1,4 +1,18 @@
-460
+
+test case 1
 debug_assert PASS
-460
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 2
+10
+debug_assert PASS
+15
+debug_assert PASS
+
+test case 3
+30
+debug_assert PASS
+55
 debug_assert PASS

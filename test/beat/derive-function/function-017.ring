@@ -31,3 +31,8 @@ int_value = 1 + 2;
 
 int_value = test(11, 22, 33);
 println_int(int_value);
+debug_assert(int_value == 66);
+
+int_value -= test(11, 22, 33);
+println_int(int_value);
+debug_assert(int_value == 0);

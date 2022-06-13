@@ -14,7 +14,8 @@ debug_assert PASS
 test case 4
 100
 1234
-1335
+1334
+1334
 debug_assert PASS
 
 test case 5

@@ -14,34 +14,64 @@ function exit(var int int_value);
 // -----------------------------
 
 
-
-function get_level_by_score(var int score) -> (int) {
-	if(0<=score and score<=100) {
-		return score/10;
-	} else {
-		return 0;
-	}
+function increase_one(var int int_1) -> (int) {
+    return int_1 + 1;
 }
 
-var int sum;
-var int score;
-var int level;
-
-sum = 0;
-for(score = -9; score<=110; score+=1) {
-	level = get_level_by_score(score);
-	sum += level;
+function add_two(var int int_1, var int int_2) -> (int) {
+    return int_1 + int_2;
 }
-println_int(sum);
-debug_assert(sum == 460);
 
 
-sum = 0;
-for(score = -9; score<=110; score+=1) {
-	sum += get_level_by_score(score); // FIXME: bug 
-}
-println_int(sum);
-debug_assert(sum == 460);
+
+
+
+var int int_value_1;
+
+
+println_string("\ntest case 1");
+int_value_1 = 5;
+debug_assert(int_value_1 == 5);
+
+int_value_1 = increase_one(4);
+debug_assert(int_value_1 == 5);
+
+int_value_1 = add_two(2, 3);
+debug_assert(int_value_1 == 5);
+
+
+int_value_1 = 5;
+int_value_1 += int_value_1;
+debug_assert(int_value_1 == 10);
+
+
+
+
+
+println_string("\ntest case 2");
+
+int_value_1 = 5;
+int_value_1 += increase_one(4);
+println_int(int_value_1);
+debug_assert(int_value_1 == 10);
+
+int_value_1 += increase_one(4);
+println_int(int_value_1);
+debug_assert(int_value_1 == 15);
+
+
+
+
+println_string("\ntest case 3");
+
+int_value_1 = 5;
+int_value_1 += add_two(13, 12);
+println_int(int_value_1);
+debug_assert(int_value_1 == 30);
+
+int_value_1 += add_two(13, 12);
+println_int(int_value_1);
+debug_assert(int_value_1 == 55);
 
 
 

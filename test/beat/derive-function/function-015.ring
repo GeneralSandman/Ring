@@ -38,7 +38,6 @@ var int result;
 
 
 
-/*
 println_string("\ntest case 1");
 result = max(122, 123);
 println_int(result);
@@ -68,12 +67,8 @@ println_int(max(1, 100));
 println_int(min(1234, 12345));
 println_int(add(100, 1234));
 
-*/
 
 result = add(max(1, 100), min(1234, 12345));
-
-
-/*
 println_int(result);
 debug_assert(result == 1334);
 
@@ -87,7 +82,6 @@ result = add(add(add(add(1,2), 3), 4), 5);
 println_int(result);
 debug_assert(result == 15);
 
-*/
 
 
 
