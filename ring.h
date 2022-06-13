@@ -1166,6 +1166,7 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
 void           fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
 void           fix_binary_expression(Expression* expression, Block* block, Function* func);
 void           fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
+void           fix_ternary_condition_expression(TernaryExpression* ternary_expression, Block* block, Function* func);
 void           add_parameter_to_declaration(Parameter* parameter, Block* block);
 Declaration*   search_declaration(char* identifier, Block* block);
 Function*      search_function(char* identifier);
@@ -1205,6 +1206,7 @@ void              generate_vmcode_from_double_expression(Ring_VirtualMachine_Exe
 void              generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_ternary_condition_expression(Ring_VirtualMachine_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal);
 
 int constant_pool_grow(Ring_VirtualMachine_Executer* executer, unsigned int growth_size);

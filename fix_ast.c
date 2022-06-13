@@ -115,6 +115,10 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
         fix_expression(expression->u.cast_expression->operand, block, func);
         break;
 
+    case EXPRESSION_TYPE_TERNARY:
+        fix_ternary_condition_expression(expression->u.ternary_expression, block, func);
+        break;
+
     default: break;
     }
 }
@@ -286,6 +290,16 @@ void fix_function_call_expression(FunctionCallExpression* function_call_expressi
     for (; pos != NULL; pos = pos->next) {
         fix_expression(pos->expression, block, func);
     }
+}
+
+void fix_ternary_condition_expression(TernaryExpression* ternary_expression, Block* block, Function* func) {
+    if (ternary_expression == NULL) {
+        return;
+    }
+
+    fix_expression(ternary_expression->condition_expression, block, func);
+    fix_expression(ternary_expression->true_expression, block, func);
+    fix_expression(ternary_expression->false_expression, block, func);
 }
 
 void add_parameter_to_declaration(Parameter* parameter, Block* block) {

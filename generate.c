@@ -651,6 +651,10 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
         generate_vmcode_from_cast_expression(executer, expression->u.cast_expression, opcode_buffer);
         break;
 
+    case EXPRESSION_TYPE_TERNARY:
+        generate_vmcode_from_ternary_condition_expression(executer, expression->u.ternary_expression, opcode_buffer);
+        break;
+
     default:
         break;
     }
@@ -992,6 +996,34 @@ void generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer
         break;
     }
     generate_vmcode(executer, opcode_buffer, opcode, 0);
+}
+
+void generate_vmcode_from_ternary_condition_expression(Ring_VirtualMachine_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (ternary_expression == NULL) {
+        return;
+    }
+
+    unsigned int if_false_jump_label = 0;
+    unsigned int if_end_label        = 0;
+
+    generate_vmcode_from_expression(executer, ternary_expression->condition_expression, opcode_buffer, 1);
+
+    if_false_jump_label = opcode_buffer_get_label(opcode_buffer);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, if_false_jump_label);
+
+    generate_vmcode_from_expression(executer, ternary_expression->true_expression, opcode_buffer, 1);
+
+    if_end_label = opcode_buffer_get_label(opcode_buffer);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label);
+
+
+    opcode_buffer_set_label(opcode_buffer, if_false_jump_label, opcode_buffer->code_size);
+
+    generate_vmcode_from_expression(executer, ternary_expression->false_expression, opcode_buffer, 1);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label);
+
+    opcode_buffer_set_label(opcode_buffer, if_end_label, opcode_buffer->code_size);
 }
 
 void generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int oper_num) {

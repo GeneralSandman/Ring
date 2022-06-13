@@ -45,6 +45,7 @@ int yyerror(char const *str, ...);
 }
 
 %token TOKEN_TYPEDEF
+%token TOKEN_TYPEOF
 %token TOKEN_BOOL
 %token TOKEN_INT 
 %token TOKEN_DOUBLE 
@@ -67,7 +68,6 @@ int yyerror(char const *str, ...);
 %token TOKEN_ELSE
 %token TOKEN_FOR
 %token TOKEN_DO
-%token TOKEN_WHILE
 %token TOKEN_BREAK
 %token TOKEN_CONTINUE
 %token TOKEN_NULL
@@ -539,13 +539,7 @@ basic_type_specifier
     ;
 
 expression
-    : function_call_expression 
-    {
-        debug_log_with_green_coloar("[RULE::expression:function_call_expression]\t ");
-
-        $$ = create_expression_($1);
-    }
-    | logical_expression_or
+    : logical_expression_or
     {
         debug_log_with_green_coloar("[RULE::expression:logical_expression]\t ");
 
@@ -756,6 +750,12 @@ literal_term
     {
         $$ = create_expression_identifier_with_index($1, $3);
 
+    }
+    | function_call_expression 
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:function_call_expression]\t ");
+
+        $$ = create_expression_($1);
     }
     ;
 
