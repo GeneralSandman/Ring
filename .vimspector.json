@@ -8,7 +8,8 @@
         "request": "launch",
         "program": "${fileDirname}/bin/ring",
         "args": [
-          "${fileDirname}/test/beat/derive-function/function-005.ring"
+            "run", 
+            "${fileDirname}/test/beat/basic-type/string-001.ring"
         ],
         "cwd": "${workspaceRoot}",
         "environment": [],
