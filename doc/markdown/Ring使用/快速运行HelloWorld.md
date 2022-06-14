@@ -3,11 +3,25 @@
 
 ```shell
 
+git clone https://github.com/GeneralSandman/Ring
+
 cd Ring
 
-ring --version
 
-ring test/helloworld.ring
+
+mkdir bin && make && make clean
+
+make testall
+
+make install
+
+
+
+ring version
+
+ring run test/helloworld.ring
+
+ring help
 
 ```
 

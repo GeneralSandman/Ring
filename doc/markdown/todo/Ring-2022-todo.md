@@ -229,7 +229,7 @@ https://blog.csdn.net/weixin_43652106/article/details/107684621
 补足自动化测试
 
 
-lua c函数 要编译成 so dll 放到对应的目录，这里应该抛弃这种用法，只需要下发 一个 ringc 即可。
+lua c函数 要编译成 so dll 放到对应的目录，这里应该抛弃这种用法，只需要下发 一个 ring字节码 即可。
 
 
 lua 的 Instruction 是 unsinged long
@@ -240,3 +240,46 @@ bison 第三章 显式指定优先级，消除Ring所有的shift/reduce 错误
 
 
 ## 吉祥物 owl 猫头鹰
+
+
+
+## 命令行
+
+
+ring run helloworld.ring
+ring run helloworld.ringc
+
+
+ring build helloworld.ring
+
+ring dump helloworld.ringc
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

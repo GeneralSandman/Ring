@@ -42,6 +42,13 @@
 
 
 
+> [!TIP|style:flat|label:lua 垃圾回收]
+> 
+> https://yuerer.com/Lua5.3-%E8%AE%BE%E8%AE%A1%E5%AE%9E%E7%8E%B0(%E5%85%AD)-GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/
+
+
+
+
 > [!TIP|style:flat|label:rust]
 > 
 > https://kaisery.github.io/trpl-zh-cn/title-page.html

@@ -15,11 +15,11 @@ cd Ring
 
 make
 
-./bin/ring --version
+./bin/ring version
 
 
 
-./bin/ring ./test/beat/basic-type/bool-000.ring
+./bin/ring run ./test/beat/basic-type/bool-000.ring
 
 ```
 
@@ -39,7 +39,7 @@ cd Ring
 
 make
 
-./bin/ring --version
+./bin/ring version
 
 
 
