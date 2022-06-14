@@ -28,12 +28,18 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 
 // 通过绝对索引 设置
-#define STACK_SET_INT_INDEX(rvm, index, value) \
-    ((rvm)->runtime_stack->data[(index)].int_value = (value))
-#define STACK_SET_DOUBLE_INDEX(rvm, index, value) \
-    ((rvm)->runtime_stack->data[(index)].double_value = (value))
-#define STACK_SET_OBJECT_INDEX(rvm, index, value) \
-    ((rvm)->runtime_stack->data[(index)].object = (value))
+void STACK_SET_INT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, int value) {
+    rvm->runtime_stack->data[index].type      = RVM_VALUE_TYPE_INT;
+    rvm->runtime_stack->data[index].int_value = value;
+}
+void STACK_SET_DOUBLE_INDEX(Ring_VirtualMachine* rvm, unsigned int index, double value) {
+    rvm->runtime_stack->data[index].type         = RVM_VALUE_TYPE_OBJECT;
+    rvm->runtime_stack->data[index].double_value = value;
+}
+void STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, RVM_Object* value) {
+    rvm->runtime_stack->data[index].type   = RVM_VALUE_TYPE_OBJECT;
+    rvm->runtime_stack->data[index].object = value;
+}
 
 // 通过栈顶偏移 offset 设置
 #define STACK_SET_INT_OFFSET(rvm, offset, value) \
@@ -621,10 +627,10 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     /* unsigned int arguement_count = 0; */
 
     RVM_CallInfo callinfo;
-    callinfo.magic_number      = CALL_INFO_MAGIC_NUMBER;
-    callinfo.caller_function   = *caller_function;
-    callinfo.caller_pc         = *pc;
-    callinfo.caller_stack_base = *caller_stack_base;
+    callinfo.magic_number         = CALL_INFO_MAGIC_NUMBER;
+    callinfo.caller_function      = *caller_function;
+    callinfo.caller_pc            = *pc;
+    callinfo.caller_stack_base    = *caller_stack_base;
     callinfo.callee_argument_size = callee_function->parameter_size; // FIXME: 支持可变参数
     store_callinfo(rvm->runtime_stack, &callinfo);
 

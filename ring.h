@@ -130,12 +130,20 @@ struct Ring_Compiler_Tag {
 
 typedef unsigned char RVM_Byte;
 
+typedef enum {
+    RVM_VALUE_TYPE_UNKNOW,
+
+    RVM_VALUE_TYPE_INT,
+    RVM_VALUE_TYPE_DOUBLE,
+    RVM_VALUE_TYPE_OBJECT,
+} RVM_Value_Type;
+
 typedef union {
-    // TODO: 补充 类型
-    int         int_value; // bool 可以使用 bool_value 代替
-    double      double_value;
-    RVM_Object* object;
-} RVM_Value; // 这个名字得改一改
+    RVM_Value_Type type;
+    int            int_value;
+    double         double_value;
+    RVM_Object*    object;
+} RVM_Value;
 
 struct Ring_VirtualMachine_Tag {
     Ring_VirtualMachine_Executer* executer;
@@ -143,7 +151,7 @@ struct Ring_VirtualMachine_Tag {
     RVM_RuntimeStatic* runtime_static;
     RVM_RuntimeStack*  runtime_stack;
     RVM_RuntimeHeap*   runtime_heap;
-    unsigned int       pc; // pc 用来偏移 executer->code_list[pc]
+    unsigned int       pc;
 
     RVM_Function* function_list;
     unsigned int  function_size;
@@ -907,6 +915,9 @@ struct RVM_DebugConfig_Tag {
 typedef enum {
     ERROR_CODE_SUCCESS,
 
+    // 命令行参数错误
+    ERROR_CODE_COMMAND_ERROR,
+
     // 编译错误
     ERROR_CODE_COMPILE_ERROR,
 
@@ -1224,6 +1235,11 @@ unsigned int calc_runtime_stack_capacity(RVM_Byte* code_list, unsigned int code_
 // generate.c
 
 // execute.c
+
+inline void STACK_SET_INT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, int value);
+inline void STACK_SET_DOUBLE_INDEX(Ring_VirtualMachine* rvm, unsigned int index, double value);
+inline void STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, RVM_Object* value);
+
 RVM_RuntimeStack*    new_runtime_stack();
 RVM_RuntimeStatic*   new_runtime_static();
 Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* executer);
@@ -1271,6 +1287,12 @@ RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
 void      rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, unsigned int arg_count);
 void      rvm_register_native_functions(Ring_VirtualMachine* rvm);
 // execute.c
+
+
+// bytecode.c
+void ring_bytecode_dump(Ring_VirtualMachine_Executer* executer, FILE* output);
+void ring_bytecode_load(Ring_VirtualMachine_Executer* executer, FILE* input);
+// bytecode.c
 
 
 // interactive.c

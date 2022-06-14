@@ -18,7 +18,7 @@ autoTestFunc(){
     result=""
 
 
-    ./bin/ring $source_code_file > $run_result_file_tmp
+    ./bin/ring run $source_code_file > $run_result_file_tmp
     diff $run_result_file $run_result_file_tmp
 
     if [[ "$?" -eq 0 ]];then

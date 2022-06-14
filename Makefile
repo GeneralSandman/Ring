@@ -9,6 +9,7 @@ OBJS = \
   fix_ast.o\
   generate.o\
   execute.o\
+  bytecode.o\
   compiler.o\
   inner_func.o\
   interactive.o\
@@ -58,6 +59,7 @@ semantic_check.o: semantic_check.c ring.h
 fix_ast.o: fix_ast.c ring.h
 generate.o: generate.c ring.h
 execute.o: execute.c ring.h
+bytecode.o: bytecode.c ring.h
 compiler.o: compiler.c ring.h inner_func.h
 inner_func.o: inner_func.c ring.h inner_func.h
 interactive.o: interactive.c ring.h
