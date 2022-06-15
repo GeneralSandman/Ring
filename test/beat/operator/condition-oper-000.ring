@@ -34,9 +34,9 @@ println_int(bool_value ? 100 : -100);
 
 println_string("\ntest case 3");
 bool_value = false;
-println_double(bool_value ? 100.123 : -100.2345);
+println_double(bool_value ? 100123.0 : 100.123);
 bool_value = true;
-println_double(bool_value ? 100.123 : -100.2345);
+println_double(bool_value ? 100123.0 : 100.123);
 
 
 
@@ -56,5 +56,5 @@ println_int(true ? 100 : -100);
 
 
 println_string("\ntest case 3");
-println_double(false ? 100.123 : -100.2345);
-println_double(true ? 100.123 : -100.2345);
+println_double(false ? 100.123 : 100123.0);
+println_double(true ? 100.123 : 100123.0);
