@@ -2,7 +2,7 @@
 
 ![](./media/ring-logo-1.png)
 
-# Ring <small>version: v0.1.16-beat</small>
+# Ring <small>version: ring-v0.1.18-beat</small>
 
 > 一个基于C语言开发的轻量级脚本编程语言
 > 

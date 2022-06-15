@@ -15,7 +15,7 @@
 > https://www.processon.com/diagraming/622821431e08535e1b8a5241
 > 
 
-### 当前版本：**ring-v0.1.17-beat**
+### 当前版本：**ring-v0.1.18-beat**
 
 ### 历史版本：
 
