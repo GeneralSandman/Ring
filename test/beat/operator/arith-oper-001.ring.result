@@ -4,7 +4,7 @@ test case 1
 debug_assert PASS
 
 test case 2
-0.000000
+400.000000
 debug_assert PASS
 400.000000
 debug_assert PASS

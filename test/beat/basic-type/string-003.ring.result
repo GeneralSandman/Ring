@@ -3,5 +3,12 @@ abcdefg
 123
 123
 string_value_1 == string_value_2
+debug_assert PASS
 a != b
+debug_assert PASS
 ab == ab
+debug_assert PASS
+123
+123
+123123
+123123

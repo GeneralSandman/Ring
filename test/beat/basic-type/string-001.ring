@@ -1,5 +1,5 @@
 //
-// File:    int-000.ring
+// File:    string-001.ring
 // Author:  zhenhuli - generalsandman@163.com
 // Date:    2022-05-19
 //
@@ -14,47 +14,37 @@ function exit(var int int_value);
 // -----------------------------
 
 
-println_string("123");
-println_string("123" + "345");
-println_string("123" + "345" + "567");
-println_string("123" + "345" + "567" + "789");
+println_string("123" .. "345");
+println_string("123" .. "345" .. "567");
+println_string("123" .. "345" .. "567" .. "789");
 
 println_string("");
 println_string("-----------");
 
 var string string_value;
 
-string_value = "123";
+
+println_string("\ntest case 1");
+string_value = "123-";
 println_string(string_value);
-// FIXME:
-// debug_assert();
+debug_assert(string_value == "123-");
 
 
-string_value = "123" + "345";
+
+println_string("\ntest case 2");
+string_value = "123" .. "345";
 println_string(string_value);
-// FIXME:
-// debug_assert();
+debug_assert(string_value == "123345");
 
-string_value = "123" + "345" + "567";
+
+println_string("\ntest case 3");
+string_value = "123" .. "345" .. "567";
 println_string(string_value);
-// FIXME:
-// debug_assert();
+debug_assert(string_value == "123345567");
 
-string_value = "123" + "345" + "567" + "789";
+
+println_string("\ntest case 4");
+string_value = "123" .. "345" .. "567" .. "789";
 println_string(string_value);
-// FIXME:
-// debug_assert();
+debug_assert(string_value == "123345567789");
 
-
-
-/* string_value = "1" + <string>(1+2+3); */
-/* println_string(string_value); */
-
-/* string_value = "1" + <string>int_value; */
-/* println_string(string_value); */
-
-/* string_value = "1" + <string>(int_value + int_value); */
-/* println_string(string_value); */
-
-/* string_value = "1" + "1"; */
-/* println_string(string_value); */
