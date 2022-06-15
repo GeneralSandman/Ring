@@ -44,7 +44,7 @@ step out
 
 
 
-# typedef
+## typedef
 
 typedef class Student {
 
@@ -106,6 +106,15 @@ time.GetTim();
 
 ## 符号 应用于 double的错误
 
++=
+-=
+*=
+/=
+%=
+多重赋值
+
+
+多重赋值 不能   a, b += 1, 2; // invalid
 
 ## bug 整数常量给 double 变量赋值。
 
@@ -139,31 +148,14 @@ double_value = 123; //FIXME:BUG
 ## switch case
 
 
+## 拆分ring源代码文件
+
+## 设计 class
+
+## 设计 异常与捕获
 
 
-
-
-
-学习 lua-4.0.1
-
-
-lua 函数 return的设计
-https://blog.csdn.net/weixin_43652106/article/details/107684621
-
-
-
-
-补足自动化测试
-
-
-lua c函数 要编译成 so dll 放到对应的目录，这里应该抛弃这种用法，只需要下发 一个 ring字节码 即可。
-
-
-lua 的 Instruction 是 unsinged long
-
-
-
-bison 第三章 显式指定优先级，消除Ring所有的shift/reduce 错误
+## 消除Ring所有的shift/reduce 错误 2022-06-10:done
 
 
 ## 吉祥物 owl 猫头鹰
@@ -171,7 +163,8 @@ bison 第三章 显式指定优先级，消除Ring所有的shift/reduce 错误
 
 
 
-# bug , 在ring代码中没有声明native函数，但是注册了，会报错，需要修复 
+## bug , 在ring代码中没有声明native函数，但是注册了，会报错，需要修复 
+
 只有在定义 derive的代码中才会出现。
 
 
@@ -432,6 +425,10 @@ formatLoop:
 	}
 }
 ```
+
+
+
+
 
 
 
