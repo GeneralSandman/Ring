@@ -54,10 +54,11 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
     if (function) {
         func_name = function->func_name;
     }
-    printf(" ************  rvm opcode  --[function %s]\n", func_name);
+    printf("************  rvm opcode  --[function %s]\n", func_name);
 
     MOVE_CURSOR(screen_row++, screen_col);
-    printf(" %10s | %20s | %10s | %5s\n", "index", "opcode", "oper num", "pc");
+    // width: 54
+    printf("%10s | %20s | %10s | %5s\n", "index", "opcode", "oper num", "pc");
     for (unsigned int i = 0; i < code_size;) {
         char* pointer = "";
         if (i == pc) {
@@ -98,10 +99,11 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
 // TODO: caller_stack_base 是不是可以放在 RVM_RuntimeStack 中，考虑
 void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col) {
     MOVE_CURSOR(screen_row++, screen_col);
-    printf("****  runtime_stack  ****\n");
+    printf("**************** runtime_stack *****************\n");
 
     MOVE_CURSOR(screen_row++, screen_col);
-    printf("%7s | %10s | %6s | %6s\n", "index", "oper_num", "space", "pointer");
+    // width 49
+    printf("%7s | %20s | %6s | %6s\n", "index", "oper_num", "space", "pointer");
     for (int i = 0; i < runtime_stack->top_index; i++) {
         char* space   = "";
         char* pointer = "";
@@ -113,7 +115,32 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
         }
 
         MOVE_CURSOR(screen_row++, screen_col);
-        printf("%7d | %10d | %6s | %6s\n", i, runtime_stack->data[i].int_value, space, pointer);
+
+        RVM_Value value = runtime_stack->data[i];
+        switch (value.type) {
+        case RVM_VALUE_TYPE_BOOL:
+            if (value.u.int_value) {
+                printf("%7d | %20s | %6s | %6s\n", i, "true", space, pointer);
+            } else {
+                printf("%7d | %20s | %6s | %6s\n", i, "false", space, pointer);
+            }
+            break;
+        case RVM_VALUE_TYPE_INT:
+            printf("%7d | %20d | %6s | %6s\n", i, value.u.int_value, space, pointer);
+            break;
+        case RVM_VALUE_TYPE_DOUBLE:
+            printf("%7d | %20f | %6s | %6s\n", i, value.u.double_value, space, pointer);
+            break;
+        case RVM_VALUE_TYPE_STRING:
+            if (value.u.object == NULL || value.u.object->u.string.data == NULL) {
+                printf("%7d | %20.*s | %6s | %6s\n", i, 20, "", space, pointer);
+            } else {
+                printf("%7d | %20.*s | %6s | %6s\n", i, 20, value.u.object->u.string.data, space, pointer);
+            }
+            break;
+        default:
+            break;
+        }
     }
 }
 
