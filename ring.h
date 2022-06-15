@@ -133,16 +133,26 @@ typedef unsigned char RVM_Byte;
 typedef enum {
     RVM_VALUE_TYPE_UNKNOW,
 
+    RVM_VALUE_TYPE_BOOL,
     RVM_VALUE_TYPE_INT,
     RVM_VALUE_TYPE_DOUBLE,
-    RVM_VALUE_TYPE_OBJECT,
+    RVM_VALUE_TYPE_STRING,
 } RVM_Value_Type;
 
-typedef union {
+typedef enum {
+    RVM_FALSE,
+    RVM_TRUE,
+} RVM_Bool;
+
+typedef struct {
     RVM_Value_Type type;
-    int            int_value;
-    double         double_value;
-    RVM_Object*    object;
+    union {
+        RVM_Bool    bool_value;
+        int         int_value;
+        double      double_value;
+        RVM_Object* object;
+    } u;
+
 } RVM_Value;
 
 struct Ring_VirtualMachine_Tag {
@@ -187,7 +197,7 @@ struct RVM_LocalVariable {
 
 struct NativeFunction {
     RVM_NativeFuncProc* func_proc;
-    unsigned int        arg_count;
+    int                 arg_count; // -1 表示可变参数
 };
 struct DeriveFunction {
     unsigned int code_size;
@@ -346,6 +356,7 @@ typedef enum {
     RVM_CODE_UNKNOW = 0,
 
     // int double string const
+    RVM_CODE_PUSH_BOOL,
     RVM_CODE_PUSH_INT_1BYTE, // operand 0-255
     RVM_CODE_PUSH_INT_2BYTE, // operand 256-65535
     RVM_CODE_PUSH_INT,       // bigger 65535
@@ -353,18 +364,22 @@ typedef enum {
     RVM_CODE_PUSH_STRING,
 
     // static
+    RVM_CODE_POP_STATIC_BOOL,
     RVM_CODE_POP_STATIC_INT,
     RVM_CODE_POP_STATIC_DOUBLE,
     RVM_CODE_POP_STATIC_OBJECT,
+    RVM_CODE_PUSH_STATIC_BOOL,
     RVM_CODE_PUSH_STATIC_INT,
     RVM_CODE_PUSH_STATIC_DOUBLE,
     RVM_CODE_PUSH_STATIC_OBJECT,
 
 
     // stack
+    RVM_CODE_POP_STACK_BOOL,
     RVM_CODE_POP_STACK_INT,
     RVM_CODE_POP_STACK_DOUBLE,
     RVM_CODE_POP_STACK_OBJECT,
+    RVM_CODE_PUSH_STACK_BOOL,
     RVM_CODE_PUSH_STACK_INT,
     RVM_CODE_PUSH_STACK_DOUBLE,
     RVM_CODE_PUSH_STACK_OBJECT,
@@ -433,6 +448,7 @@ typedef enum {
 
     // func
     RVM_CODE_PUSH_FUNC,
+    RVM_CODE_ARGUMENT_NUM,
     RVM_CODE_INVOKE_FUNC,
     RVM_CODE_RETURN,
     RVM_CODE_FUNCTION_FINISH,
@@ -875,6 +891,7 @@ struct ReturnStatement_Tag {
 
 typedef enum {
     RING_BASIC_TYPE_UNKNOW,
+    RING_BASIC_TYPE_ANY,
     RING_BASIC_TYPE_BOOL,
     RING_BASIC_TYPE_INT,
     RING_BASIC_TYPE_DOUBLE,
@@ -1246,7 +1263,7 @@ Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* execu
 void                 rvm_add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
-void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function);
+void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
@@ -1284,7 +1301,7 @@ RVM_Value native_proc_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
 RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value native_proc_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-void      rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, unsigned int arg_count);
+void      rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count);
 void      rvm_register_native_functions(Ring_VirtualMachine* rvm);
 // execute.c
 

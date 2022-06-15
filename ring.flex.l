@@ -53,6 +53,7 @@ int yywrap(){
 
 <INITIAL>"var"          { ring_compiler_update_line_content(yytext); return TOKEN_VAR;            }
 <INITIAL>"auto"         { ring_compiler_update_line_content(yytext); return TOKEN_AUTO;           }
+<INITIAL>"any"          { ring_compiler_update_line_content(yytext); return TOKEN_ANY;            }
 <INITIAL>"const"        { ring_compiler_update_line_content(yytext); return TOKEN_CONST;          }
 <INITIAL>"function"     { ring_compiler_update_line_content(yytext); return TOKEN_FUNCTION;       }
 <INITIAL>"new"          { ring_compiler_update_line_content(yytext); return TOKEN_NEW;            }

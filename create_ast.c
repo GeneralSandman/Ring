@@ -385,7 +385,11 @@ Function* new_function_definition(FunctionType type, char* identifier, Parameter
         || !strcmp(identifier, "println_double")
         || !strcmp(identifier, "println_string")
         || !strcmp(identifier, "debug_assert")
-        || !strcmp(identifier, "exit")) {
+        || !strcmp(identifier, "exit")
+        || !strcmp(identifier, "print")
+        || !strcmp(identifier, "println")
+        || !strcmp(identifier, "printf")
+        || !strcmp(identifier, "printfln")) {
         type = FUNCTION_TYPE_NATIVE;
     }
 

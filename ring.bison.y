@@ -77,6 +77,7 @@ int yyerror(char const *str, ...);
 
 %token TOKEN_VAR
 %token TOKEN_AUTO
+%token TOKEN_ANY
 %token TOKEN_CONST
 %token TOKEN_FUNCTION
 %token TOKEN_NEW
@@ -447,11 +448,25 @@ function_definition
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, NULL, $7, $9);
 
     }
+    | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::function_definition]\t ");
+
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, NULL, $7, NULL);
+
+    }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, $10);
+
+    }
+    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::function_definition]\t ");
+
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, NULL);
 
     }
     ;
@@ -535,6 +550,11 @@ basic_type_specifier
     {
         debug_log_with_green_coloar("[RULE::basic_type_specifier]\t variable_type(TOKEN_STRING) ");
         $$ = RING_BASIC_TYPE_STRING;
+    }
+    | TOKEN_ANY
+    {
+        debug_log_with_green_coloar("[RULE::basic_type_specifier]\t variable_type(TOKEN_ANY) ");
+        $$ = RING_BASIC_TYPE_ANY;
     }
     ;
 
