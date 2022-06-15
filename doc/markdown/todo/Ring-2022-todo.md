@@ -92,12 +92,153 @@ function main() -> (int) {
 }
 
 
+使用导入包的 类型定义、函数、变量
 
-## 系统printf
 
-关于如何实现 四个主要的 输出函数：print println printf printfln
+io.print("hello world");
 
-function typeof(var auto arg) -> (int);
+
+var time:Time time;
+
+
+time.GlobalValue = 1234;
+time.GetTim();
+
+## 符号 应用于 double的错误
+
+
+## bug 整数常量给 double 变量赋值。
+
+var double double_value;
+
+double_value = 123; //FIXME:BUG
+
+
+## 编程语言如何设计调试器、dap协议
+
+
+
+
+## 库的依赖
+
+
+首先遍历所有的文件，生成依赖，写入文件中，为后续依赖提供依据。
+
+
+
+## 如何实现数组
+
+
+## 如何实现对double数量的比较
+
+
+
+## 位移运算
+
+
+## switch case
+
+
+
+
+
+
+
+学习 lua-4.0.1
+
+
+lua 函数 return的设计
+https://blog.csdn.net/weixin_43652106/article/details/107684621
+
+
+
+
+补足自动化测试
+
+
+lua c函数 要编译成 so dll 放到对应的目录，这里应该抛弃这种用法，只需要下发 一个 ring字节码 即可。
+
+
+lua 的 Instruction 是 unsinged long
+
+
+
+bison 第三章 显式指定优先级，消除Ring所有的shift/reduce 错误
+
+
+## 吉祥物 owl 猫头鹰
+
+
+
+
+# bug , 在ring代码中没有声明native函数，但是注册了，会报错，需要修复 
+只有在定义 derive的代码中才会出现。
+
+
+## 三目运算符 2022-06-14:done
+
+
+condition_expression ? true_expression : false_expression;
+
+if(condition_expression) {
+    true_expression;
+} else {
+    false_expression;
+}
+
+
+
+不能是赋值表达式，因为赋值表达式是没有运算返回值的，且运用它们会是代码逻辑变得复杂，因此 三目运算有如下限制：
+condition_expression、true_expression、false_expression 只能是 变量标识符、逻辑运算、关系运算、算术运算、位移运算；
+
+
+如： a ? a=1 : a=2; // 非法
+
+
+if、else中代码块是statement，是没有返回值的，而三目运算是有返回值的。
+
+
+如
+
+var string result;
+
+result = int_value1==int_value2 ? "match" : "dismatch";
+
+if(int_value1==int_value2){
+    result = "match";
+} else {
+    result = "dismatch";
+}
+
+
+
+
+## 命令行 2022-06-14:done
+
+ring run helloworld.ring
+ring run helloworld.ringc
+
+ring build helloworld.ring
+
+ring dump helloworld.ringc
+
+
+## 相对方便的 print println printf printfln  2022-06-15:done
+
+目前的 println_bool println_int println_double println_string 有点复杂，为了方便使用，
+新添加四个主要的 输出函数：print println printf printfln（类似于go语言）
+
+可变参数列表转化为数组
+
+1. 要实现 类型 auto，类似于go的interface，可以将任何变量转换为auto
+2. 实现反射，在函数内部能够获取 变量的类型，实现不同的打印函数。
+3. 还要实现可变参，能够类似于go和c 如何获取可变参数。
+4. 还要实现枚举，枚举 bool int double string auto 用于判断类型。
+
+go 的反射实现 https://draveness.me/golang/docs/part2-foundation/ch04-basic/golang-reflect/
+http://c.biancheng.net/view/4407.html
+
+```ring
 
 function print(var auto... value) -> (int);
 function println(var auto... value) -> (int);
@@ -110,7 +251,11 @@ println(1, 1.2, "asdfa");
 printf("{} is {}", "zhenhuli", 123);
 printfln("{} is {}", "zhenhuli", 123);
 
+```
 
+go 是如何时间格式化控制输出
+
+```go
 
 func (p *pp) doPrintf(format string, a []any) {
 	end := len(format)
@@ -286,168 +431,9 @@ formatLoop:
 		p.buf.writeByte(')')
 	}
 }
+```
 
 
-
-
-可变参数列表转化为数组
-
-1. 要实现 类型 auto，类似于go的interface，可以将任何变量转换为auto
-2. 实现反射，在函数内部能够获取 变量的类型，实现不同的打印函数。
-3. 还要实现可变参，能够类似于go和c 如何获取可变参数。
-4. 还要实现枚举，枚举 bool int double string auto 用于判断类型。
-
-go 的反射实现 https://draveness.me/golang/docs/part2-foundation/ch04-basic/golang-reflect/
-http://c.biancheng.net/view/4407.html
-
-
-
-
-
-
-## 符号 应用于 double的错误
-
-
-## bug 整数常量给 double 变量赋值。
-
-var double double_value;
-
-double_value = 123; //FIXME:BUG
-
-## 编程语言如何设计调试器、dap协议
-
-
-
-
-## 库的依赖
-
-
-首先遍历所有的文件，生成依赖，写入文件中，为后续依赖提供依据。
-
-
-
-## 如何实现数组
-
-
-## 如何实现对double数量的比较
-
-
-## 三目运算符
-
-
-condition_expression ? true_expression : false_expression;
-
-if(condition_expression) {
-    true_expression;
-} else {
-    false_expression;
-}
-
-
-
-不能是赋值表达式，因为赋值表达式是没有运算返回值的，且运用它们会是代码逻辑变得复杂，因此 三目运算有如下限制：
-condition_expression、true_expression、false_expression 只能是 变量标识符、逻辑运算、关系运算、算术运算、位移运算；
-
-
-如： a ? a=1 : a=2; // 非法
-
-
-if、else中代码块是statement，是没有返回值的，而三目运算是有返回值的。
-
-
-如
-
-var string result;
-
-result = int_value1==int_value2 ? "match" : "dismatch";
-
-if(int_value1==int_value2){
-    result = "match";
-} else {
-    result = "dismatch";
-}
-
-
-
-## 位移运算
-
-<html>
-    <table border="0">
-        <tr>
-            <td>
-                ```
-                var string result;
-
-result = int_value1==int_value2 ? "match" : "dismatch";
-
-if(int_value1==int_value2){
-    result = "match";
-} else {
-    result = "dismatch";
-}
-                ```
-            </td>
-            <td>
-                <!--右侧内容-->
-                右侧
-            </td>
-        </tr>
-    </table>
-</html>
-
-
-## switch case
-
-
-
-
-
-
-
-学习 lua-4.0.1
-
-
-lua 函数 return的设计
-https://blog.csdn.net/weixin_43652106/article/details/107684621
-
-
-
-
-补足自动化测试
-
-
-lua c函数 要编译成 so dll 放到对应的目录，这里应该抛弃这种用法，只需要下发 一个 ring字节码 即可。
-
-
-lua 的 Instruction 是 unsinged long
-
-
-
-bison 第三章 显式指定优先级，消除Ring所有的shift/reduce 错误
-
-
-## 吉祥物 owl 猫头鹰
-
-
-
-## 命令行
-
-
-ring run helloworld.ring
-ring run helloworld.ringc
-
-
-ring build helloworld.ring
-
-ring dump helloworld.ringc
-
-
-
-
-
-
-# bug , 在ring代码中没有声明native函数，但是注册了，会报错，需要修复 
-只有在定义 derive的代码中才会出现。
 
 
 
