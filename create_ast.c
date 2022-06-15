@@ -263,8 +263,8 @@ Expression* create_cast_expression(TypeSpecifier* cast_type, Expression* operand
     expression->type                           = EXPRESSION_TYPE_CAST;
     expression->u.cast_expression              = malloc(sizeof(CastExpression));
     expression->u.cast_expression->line_number = get_ring_compiler_line_number();
-    // expression->u.cast_expression->type        = cast_type; //FIXME:
-    expression->u.cast_expression->operand = operand;
+    expression->u.cast_expression->type        = cast_type;
+    expression->u.cast_expression->operand     = operand;
 
     return expression;
 }

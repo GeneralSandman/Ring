@@ -83,6 +83,8 @@ int yyerror(char const *str, ...);
 %token TOKEN_NEW
 %token TOKEN_DELETE
 %token TOKEN_DOT
+%token TOKEN_2DOT
+%token TOKEN_3DOT
 %token TOKEN_ARROW
 
 %token TOKEN_PACKAGE
@@ -566,13 +568,13 @@ expression
     }
     | logical_expression_or TOKEN_QUESTION_MARK expression_arithmetic_operation_additive TOKEN_COLON expression_arithmetic_operation_additive
     {
-        debug_log_with_green_coloar("[RULE::expression ? : ]\t ");
+        debug_log_with_green_coloar("[RULE::expression:condition ternary expression]\t ");
         $$ = create_expression_ternary($1, $3, $5);
     }
     | TOKEN_LT type_specifier TOKEN_GT expression
     {
-        debug_log_with_green_coloar("[RULE::cast expression ? : ]\t ");
-        $$ = create_cast_expression($2, $4);
+        debug_log_with_green_coloar("[RULE::expression:case expression] \t ");
+         $$ = create_cast_expression($2, $4); 
     }
     ;
 
@@ -669,6 +671,12 @@ expression_arithmetic_operation_additive
         debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_additive]\t ");
 
         $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_SUB, $1, $3);
+    }
+    | expression_arithmetic_operation_additive TOKEN_2DOT expression_arithmetic_operation_multiplicative
+    {
+        debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_additive]\t ");
+
+        $$ = create_expression_binary(EXPRESSION_TYPE_CONCAT, $1, $3);
     }
     ;
 
@@ -899,7 +907,7 @@ cast
     : TOKEN_LT type_specifier TOKEN_GT expression
     {
         debug_log_with_green_coloar("[RULE::cast %d] \t ", $2);
-        /* $$ = create_cast_expression($2); */
+         /*$$ = create_cast_expression($2, $4); */
     }
     ;
 

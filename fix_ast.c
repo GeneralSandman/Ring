@@ -73,14 +73,23 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
         break;
 
     case EXPRESSION_TYPE_LITERAL_BOOL:
+        expression->convert_type             = malloc(sizeof(TypeSpecifier));
+        expression->convert_type->basic_type = RING_BASIC_TYPE_BOOL;
         break;
     case EXPRESSION_TYPE_LITERAL_INT:
+        expression->convert_type             = malloc(sizeof(TypeSpecifier));
+        expression->convert_type->basic_type = RING_BASIC_TYPE_INT;
         break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
+        expression->convert_type             = malloc(sizeof(TypeSpecifier));
+        expression->convert_type->basic_type = RING_BASIC_TYPE_DOUBLE;
         break;
     case EXPRESSION_TYPE_LITERAL_STRING:
+        expression->convert_type             = malloc(sizeof(TypeSpecifier));
+        expression->convert_type->basic_type = RING_BASIC_TYPE_STRING;
         break;
 
+    case EXPRESSION_TYPE_CONCAT:
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
     case EXPRESSION_TYPE_ARITHMETIC_SUB:
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
@@ -262,19 +271,23 @@ void fix_binary_expression(Expression* expression, Block* block, Function* func)
 
     fix_expression(left_expression, block, func);
     fix_expression(right_expression, block, func);
+
+    if (expression->convert_type == NULL) {
+        expression->convert_type = malloc(sizeof(TypeSpecifier));
+    }
+
+    if (expression->type == EXPRESSION_TYPE_CONCAT) {
+        expression->convert_type->basic_type = RING_BASIC_TYPE_STRING;
+        return;
+    }
+
     if (left_expression->type == EXPRESSION_TYPE_LITERAL_DOUBLE
         || right_expression->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
-        if (expression->convert_type == NULL) {
-            expression->convert_type = malloc(sizeof(TypeSpecifier));
-        }
         expression->convert_type->basic_type = RING_BASIC_TYPE_DOUBLE;
     }
 
     if ((left_expression->convert_type && left_expression->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE)
         || (right_expression->convert_type && right_expression->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE)) {
-        if (expression->convert_type == NULL) {
-            expression->convert_type = malloc(sizeof(TypeSpecifier));
-        }
         expression->convert_type->basic_type = RING_BASIC_TYPE_DOUBLE;
     }
 }

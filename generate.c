@@ -41,7 +41,6 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     // arithmetic
     {RVM_CODE_ADD_INT, "add_int", OPCODE_OPERAND_TYPE_0BYTE, -1},
     {RVM_CODE_ADD_DOUBLE, "add_double", OPCODE_OPERAND_TYPE_0BYTE, -1},
-    {RVM_CODE_ADD_STRING, "add_string", OPCODE_OPERAND_TYPE_0BYTE, -1},
 
     {RVM_CODE_SUB_INT, "sub_int", OPCODE_OPERAND_TYPE_0BYTE, -1},
     {RVM_CODE_SUB_DOUBLE, "sub_double", OPCODE_OPERAND_TYPE_0BYTE, -1},
@@ -63,11 +62,14 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_DECREASE_SUFFIX, "decrease_suffix", OPCODE_OPERAND_TYPE_0BYTE, 0},
     {RVM_CODE_DECREASE_PREFIX, "decrease_prefix", OPCODE_OPERAND_TYPE_0BYTE, 0},
 
+    {RVM_CODE_CONCAT, "concat", OPCODE_OPERAND_TYPE_0BYTE, -1},
 
     // type cast
-    {RVM_CODE_CAST_BOOL_TO_STRING, "cast_bool_to_string", OPCODE_OPERAND_TYPE_0BYTE, 0},
-    {RVM_CODE_CAST_INT_TO_STRING, "cast_int_to_string", OPCODE_OPERAND_TYPE_0BYTE, 0},
-    {RVM_CODE_CAST_DOUBLE_TO_STRING, "cast_double_to_string", OPCODE_OPERAND_TYPE_0BYTE, 0},
+    {RVM_CODE_CAST_BOOL_TO_INT, "cast_bool_to_int", OPCODE_OPERAND_TYPE_0BYTE, 0},
+    {RVM_CODE_CAST_INT_TO_DOUBLE, "cast_int_to_double", OPCODE_OPERAND_TYPE_0BYTE, 0},
+
+    {RVM_CODE_CAST_INT_TO_BOOL, "cast_int_to_bool", OPCODE_OPERAND_TYPE_0BYTE, 0},
+    {RVM_CODE_CAST_DOUBLE_TO_INT, "cast_double_to_int", OPCODE_OPERAND_TYPE_0BYTE, 0},
 
 
     // logical
@@ -585,6 +587,9 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
     case EXPRESSION_TYPE_IDENTIFIER:
         generate_vmcode_from_identifier_expression(executer, expression->u.identifier_expression, opcode_buffer);
         break;
+    case EXPRESSION_TYPE_CONCAT:
+        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_CONCAT);
+        break;
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
         generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_ADD_INT);
         break;
@@ -685,6 +690,11 @@ void generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* execut
         generate_vmcode_from_expression(executer, expression->operand, opcode_buffer, 1);
     }
 
+    unsigned int opcode_offset = 0;
+    if (expression->operand->convert_type != NULL && expression->operand->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE) {
+        opcode_offset += 1;
+    }
+
     switch (expression->type) {
     case ASSIGN_EXPRESSION_TYPE_ASSIGN:
         /* code */
@@ -693,19 +703,19 @@ void generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* execut
         break;
 
     case ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN:
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_ADD_INT, 0);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_ADD_INT + opcode_offset, 0);
         break;
     case ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN:
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_SUB_INT, 0);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_SUB_INT + opcode_offset, 0);
         break;
     case ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN:
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_MUL_INT, 0);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_MUL_INT + opcode_offset, 0);
         break;
     case ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN:
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_DIV_INT, 0);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_DIV_INT + opcode_offset, 0);
         break;
     case ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN:
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_MOD_INT, 0);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_MOD_INT + opcode_offset, 0);
         break;
 
     default:
@@ -797,41 +807,29 @@ void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* execut
     Expression* left  = expression->left_expression;
     Expression* right = expression->right_expression;
 
-    // TODO:
-    // 算术运算符 类型转换
-    // 应该 在 fix_ast 中 先优化一部分
-    // 这样在 生成vm code 的时候就方便了许多。
-    // FIXME:
-    if (left->type == EXPRESSION_TYPE_LITERAL_STRING
-        && right->type == EXPRESSION_TYPE_LITERAL_STRING) {
-        switch (opcode) {
-        case RVM_CODE_ADD_INT:
-            opcode = RVM_CODE_ADD_STRING;
-            break;
-        case RVM_CODE_RELATIONAL_EQ_INT:
-        case RVM_CODE_RELATIONAL_NE_INT:
-        case RVM_CODE_RELATIONAL_GT_INT:
-        case RVM_CODE_RELATIONAL_GE_INT:
-        case RVM_CODE_RELATIONAL_LT_INT:
-        case RVM_CODE_RELATIONAL_LE_INT:
-            opcode += 2;
-            break;
-        default:
-            break;
-        }
-    } else if (left->type == EXPRESSION_TYPE_LITERAL_STRING
-               || right->type == EXPRESSION_TYPE_LITERAL_STRING) {
-        if (opcode == RVM_CODE_ADD_INT) {
-            opcode = RVM_CODE_ADD_STRING;
-        }
-    } else if (left->type == EXPRESSION_TYPE_LITERAL_DOUBLE
-               || right->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
+
+    if (opcode == RVM_CODE_CONCAT) {
+        goto END;
+    }
+
+    if (left->convert_type != NULL && left->convert_type->basic_type == RING_BASIC_TYPE_STRING
+        && right->convert_type != NULL && right->convert_type->basic_type == RING_BASIC_TYPE_STRING) {
+        // TODO: 要在语义检查里严格检查
+        // 肯定是eq ne gt ge lt le
+        opcode += 2;
+        goto END;
+    }
+
+
+    if (left->type == EXPRESSION_TYPE_LITERAL_DOUBLE
+        || right->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
         opcode += 1;
     } else if ((left->convert_type != NULL && left->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE)
                || (right->convert_type != NULL && right->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE)) {
         opcode += 1;
     }
 
+END:
     generate_vmcode_from_expression(executer, left, opcode_buffer, 1);
     generate_vmcode_from_expression(executer, right, opcode_buffer, 1);
 
@@ -997,15 +995,43 @@ void generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer
 
     generate_vmcode_from_expression(executer, cast_expression->operand, opcode_buffer, 1);
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
-    switch (cast_expression->type) {
-    case CAST_TYPE_TO_STRING:
-        opcode = RVM_CODE_CAST_BOOL_TO_STRING;
+
+    // FIXME: derive type
+    switch (cast_expression->type->basic_type) {
+    case RING_BASIC_TYPE_BOOL:
+        if (cast_expression->operand->convert_type != NULL
+            && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_INT) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_BOOL, 0);
+        } else if (cast_expression->operand->convert_type != NULL
+                   && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_DOUBLE_TO_INT, 0);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_BOOL, 0);
+        }
+        break;
+    case RING_BASIC_TYPE_INT:
+        if (cast_expression->operand->convert_type != NULL
+            && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_BOOL) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_BOOL_TO_INT, 0);
+        } else if (cast_expression->operand->convert_type != NULL
+                   && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_DOUBLE_TO_INT, 0);
+        }
         break;
 
+    case RING_BASIC_TYPE_DOUBLE:
+        if (cast_expression->operand->convert_type != NULL
+            && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_BOOL) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_BOOL_TO_INT, 0);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_DOUBLE, 0);
+        } else if (cast_expression->operand->convert_type != NULL
+                   && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_INT) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_DOUBLE, 0);
+        }
+        break;
     default:
         break;
     }
-    generate_vmcode(executer, opcode_buffer, opcode, 0);
+    // generate_vmcode(executer, opcode_buffer, opcode, 0);
 }
 
 void generate_vmcode_from_ternary_condition_expression(Ring_VirtualMachine_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer) {

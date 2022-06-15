@@ -342,11 +342,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
-        case RVM_CODE_ADD_STRING:
-            STACK_SET_OBJECT_OFFSET(rvm, -2, concat_string(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)));
-            runtime_stack->top_index--;
-            rvm->pc++;
-            break;
         case RVM_CODE_SUB_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = STACK_GET_INT_OFFSET(rvm, -2) - STACK_GET_INT_OFFSET(rvm, -1);
             runtime_stack->top_index--;
@@ -415,21 +410,28 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             --;
             rvm->pc++;
             break;
-
-        // type cast
-        case RVM_CODE_CAST_BOOL_TO_STRING:
-            string_buf = malloc(sizeof(char) * 1024);
-            if (!STACK_GET_INT_OFFSET(rvm, -1)) {
-                sprintf(string_buf, "%s", "false");
-            } else {
-                sprintf(string_buf, "%s", "true");
-            }
-            STACK_SET_OBJECT_OFFSET(rvm, -1, string_literal_to_rvm_object((string_buf)));
+        case RVM_CODE_CONCAT:
+            STACK_SET_OBJECT_OFFSET(rvm, -2, concat_string(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)));
+            runtime_stack->top_index--;
             rvm->pc++;
             break;
-        case RVM_CODE_CAST_INT_TO_STRING:
+
+        // type cast
+        case RVM_CODE_CAST_BOOL_TO_INT:
+            STACK_SET_INT_OFFSET(rvm, -1, STACK_GET_BOOL_OFFSET(rvm, -1));
+            rvm->pc++;
             break;
-        case RVM_CODE_CAST_DOUBLE_TO_STRING:
+        case RVM_CODE_CAST_INT_TO_DOUBLE:
+            STACK_SET_DOUBLE_OFFSET(rvm, -1, STACK_GET_INT_OFFSET(rvm, -1));
+            rvm->pc++;
+            break;
+        case RVM_CODE_CAST_INT_TO_BOOL:
+            STACK_SET_BOOL_OFFSET(rvm, -1, (RVM_Bool)STACK_GET_INT_OFFSET(rvm, -1));
+            rvm->pc++;
+            break;
+        case RVM_CODE_CAST_DOUBLE_TO_INT:
+            STACK_SET_INT_OFFSET(rvm, -1, (int)STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            rvm->pc++;
             break;
 
         // logical
@@ -1105,6 +1107,8 @@ RVM_Value native_proc_printfln(Ring_VirtualMachine* rvm, unsigned int arg_count,
     RVM_Value ret;
     ret.u.int_value = 0;
 
+    native_proc_printf(rvm, arg_count, args);
+    printf("\n");
 
     return ret;
 }
