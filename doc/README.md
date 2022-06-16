@@ -222,7 +222,7 @@ cd Ring
 
 
 
-mkdir bin && make && make clean
+make && make clean
 
 make testall
 

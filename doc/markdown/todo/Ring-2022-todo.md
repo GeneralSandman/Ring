@@ -1,6 +1,53 @@
 # Ring 2022 todo/bug list
 
 
+
+## 实现函数变量
+
+
+## 实现闭包
+
+
+
+## runtime stack 空间自动扩展，不指定 1024*1024
+
+
+## 优化函数 局部变量数量 和 函数参数数量 的问题
+
+
+## auto 类型推导
+
+
+function lambda = (var any a, var any b) -> (any) {
+
+}
+
+lambda(1, "1231");
+
+
+var int int_value;
+
+
+var any result = 123;
+
+var any result like int_value;
+
+var any result like int_value + double_value;
+
+var any result = int_value;
+
+
+function(var any a, var any b) -> (any) {
+
+}
+
+
+## 不支持函数重载
+
+
+## derive function 不支持可变参数、native function 支持可变参数
+
+
 ## 括号实现运算优先级
 
 double常量/变量比较大小
