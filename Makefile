@@ -22,11 +22,11 @@ OBJS = \
 # CFLAGS -DDEBUG_RVM 开启 debug ring virtual machine 信息
 # -lm for fmod function
 # -lncurses for tigetnum tigetnum
-CFLAGS = -c -std=c99 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic -g -DDEBUG1 -DDEBUG_RVM1
+CFLAGS = -c -std=c99 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic # -g -DDEBUG1 -DDEBUG_RVM1
 BIN = ./bin
 INCLUDES = \
 
-$(TARGET):$(OBJS)
+$(TARGET):$(OBJS); $(shell if [ ! -e $(BIN) ];then mkdir -p $(BIN); fi)
 	$(CC) $(OBJS) -lm -o $(BIN)/$@
 
 install:
