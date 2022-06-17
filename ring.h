@@ -1335,4 +1335,15 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
 void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
 // utils.c
 
+// thread_pool.c
+typedef struct thpool_* threadpool;
+threadpool              thpool_init(int num_threads);
+int                     thpool_add_work(threadpool, void (*function_p)(void*), void* arg_p);
+void                    thpool_wait(threadpool);
+void                    thpool_pause(threadpool);
+void                    thpool_resume(threadpool);
+void                    thpool_destroy(threadpool);
+int                     thpool_num_threads_working(threadpool);
+// thread_pool.c
+
 #endif
