@@ -15,6 +15,7 @@ OBJS = \
   interactive.o\
   error_msg.o\
   utils.o\
+  thread_pool.o\
   main.o
 
 # CFLAGS -g 打开调试信息
@@ -27,7 +28,7 @@ BIN = ./bin
 INCLUDES = \
 
 $(TARGET):$(OBJS); $(shell if [ ! -e $(BIN) ];then mkdir -p $(BIN); fi)
-	$(CC) $(OBJS) -lm -o $(BIN)/$@
+	$(CC) $(OBJS) -lm -pthread -o $(BIN)/$@
 
 install:
 	install -p -m 0755 ./bin/ring /usr/local/bin
@@ -47,6 +48,7 @@ lex.yy.c : ring.flex.l ring.bison.y y.tab.h
 	flex ring.flex.l
 
 
+# 构建 compile_commands.json 供 vim-lsp
 compile_commands.json : Makefile
 	compiledb -n make
 
@@ -65,4 +67,5 @@ inner_func.o: inner_func.c ring.h inner_func.h
 interactive.o: interactive.c ring.h
 error_msg.o: error_msg.c ring.h
 utils.o: utils.c ring.h
+thread_pool.o: thread_pool.c ring.h
 main.o: main.c ring.h
