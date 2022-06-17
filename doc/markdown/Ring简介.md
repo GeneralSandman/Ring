@@ -99,7 +99,7 @@
 </tr>
 <tr>
   <td>类型转换</td>
-  <td>❌</td>
+  <td>✅</td>
   <td></td>
 </tr>
 <tr>

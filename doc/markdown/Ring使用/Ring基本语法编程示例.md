@@ -10,7 +10,7 @@
 > https://github.com/GeneralSandman/Ring/tree/main/test
 
 ### 运行编程示例：
-```
+```shell
 cd Ring
 
 make
@@ -34,7 +34,7 @@ make
 
 
 ### 运行自动化测试：
-```
+```shell
 cd Ring
 
 make

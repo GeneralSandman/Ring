@@ -79,7 +79,7 @@
 </tr>
 <tr>
   <td>初始化</td>
-  <td>❌</td>
+  <td>✅</td>
   <td></td>
 </tr>
 <tr>
@@ -99,7 +99,7 @@
 </tr>
 <tr>
   <td>类型转换</td>
-  <td>❌</td>
+  <td>✅</td>
   <td></td>
 </tr>
 <tr>
@@ -147,7 +147,7 @@
 </tr>
 <tr>
   <td>三目条件运算 a?b:c; </td>
-  <td>❌</td>
+  <td>✅</td>
   <td></td>
 </tr>
 <tr>

@@ -2,6 +2,39 @@
 
 
 
+## 支持类 和 对象
+
+typedef int int32;
+
+typedef class Student {
+	var int age;
+	var string name;
+
+	function print_info();
+	function set_age(var int _age);
+	function set_name(var string _name);
+};
+
+function Student::print_info() {
+	println(age, name);
+}
+
+function Student::set_age(var int _age) {
+	age = _age;
+}
+
+function Student::set_name(var string _name) {
+	name = _name;
+}
+
+
+
+var Student zhenhuli;
+zhenhuli.set_age(25);
+zhenhuli.set_name("zhenhuli");
+
+zhenhuli.print_info();
+
 ## 实现函数变量
 
 
@@ -167,7 +200,7 @@ time.GetTim();
 
 var double double_value;
 
-double_value = 123; //FIXME:BUG
+double_value = 123; //FIXME:BUG 需要语义检查
 
 
 ## 编程语言如何设计调试器、dap协议
