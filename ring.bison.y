@@ -234,6 +234,80 @@ definition_or_statement
         debug_log_with_green_coloar("[RULE::statement:statement]\t ");
         ring_compiler_add_statement($1);
     }
+    | class_definition
+    {
+        debug_log_with_green_coloar("[RULE::statement:class_definition]\t ");
+    }
+    ;
+
+class_definition
+    : TOKEN_TYPEDEF TOKEN_CLASS IDENTIFIER TOKEN_LC {} class_member_definition_list TOKEN_RC TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::class_definition]\t ");
+        /*finish_class_definition();*/
+    }
+    ;
+
+class_member_definition_list 
+    : class_member_definition
+    {
+
+    }
+    | class_member_definition_list class_member_definition
+    {
+
+    }
+    ;
+
+class_member_definition
+    : member_attribute_list field_member
+    {
+
+    }
+    | field_member
+    {
+
+    }
+    ;
+
+member_attribute_list
+    : TOKEN_ATTRIBUTE attribute
+    {
+
+    }
+    | member_attribute_list TOKEN_ATTRIBUTE attribute
+    {
+
+    }
+    ;
+
+attribute
+    : TOKEN_PUBLIC 
+    {
+        printf("attribute public\n");
+
+    }
+    | TOKEN_PRIVATE
+    {
+        printf("attribute private\n");
+
+    }
+    | TOKEN_DELETE
+    {
+        printf("attribute delete\n");
+
+    }
+    ;
+    
+
+
+field_member
+    : TOKEN_VAR type_specifier identifier_list TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::file_member]\t ");
+        printf("identifier:%s\n", $3->identifier_name);
+        /*$$ = create_field_member($2, $3, NULL);*/
+    }
     ;
 
 statement_list
