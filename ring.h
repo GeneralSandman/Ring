@@ -35,6 +35,10 @@ typedef struct Ring_BasicValue_Tag Ring_BasicValue;
 
 typedef struct Ring_Array_Tag Ring_Array;
 
+typedef struct ClassDefinition_Tag ClassDefinition;
+
+typedef struct ClassMemberDeclaration_Tag ClassMemberDeclaration;
+
 typedef struct Statement_Tag Statement;
 
 typedef struct StatementExecResult_Tag StatementExecResult;
@@ -612,6 +616,45 @@ struct Ring_BasicValue_Tag {
 struct Ring_Array_Tag {
     unsigned int     size;
     Ring_BasicValue* data;
+};
+
+struct ClassDefinition_Tag {
+    unsigned int line_number;
+
+    char* name;
+    ClassMemberDeclaration* member;
+
+    ClassDefinition* next;
+};
+
+typedef enum {
+    MEMBER_UNKNOW = 0, 
+    MEMBER_FIEDL, 
+    MEMBER_METHOD, 
+} ClassMemberType;
+
+struct ClassMemberDeclaration_Tag {
+    unsigned int line_number;
+
+    // 属性
+    // 变量 / 方法
+    ClassMemberType type;
+
+    ClassMemberDeclaration* next;
+
+};
+
+// 类成员变量
+struct FieldMember_Tag {
+    TypeSpecifier* type;
+    char* identifier;
+    int index_of_class;
+};
+
+// 类方法
+struct MethodMember_Tag {
+    char* identifier;
+    int index_of_class;
 };
 
 struct Statement_Tag {
