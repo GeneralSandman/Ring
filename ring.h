@@ -39,6 +39,10 @@ typedef struct ClassDefinition_Tag ClassDefinition;
 
 typedef struct ClassMemberDeclaration_Tag ClassMemberDeclaration;
 
+typedef struct FieldMember_Tag FieldMember;
+
+typedef struct MethodMember_Tag MethodMember;
+
 typedef struct Statement_Tag Statement;
 
 typedef struct StatementExecResult_Tag StatementExecResult;
@@ -618,19 +622,24 @@ struct Ring_Array_Tag {
     Ring_BasicValue* data;
 };
 
+// ----------------------------------
+// class define
+// ----------------------------------
+
+
 struct ClassDefinition_Tag {
     unsigned int line_number;
 
-    char* name;
+    char*                   name;
     ClassMemberDeclaration* member;
 
     ClassDefinition* next;
 };
 
 typedef enum {
-    MEMBER_UNKNOW = 0, 
-    MEMBER_FIEDL, 
-    MEMBER_METHOD, 
+    MEMBER_UNKNOW = 0,
+    MEMBER_FIELD,
+    MEMBER_METHOD,
 } ClassMemberType;
 
 struct ClassMemberDeclaration_Tag {
@@ -638,24 +647,37 @@ struct ClassMemberDeclaration_Tag {
 
     // 属性
     // 变量 / 方法
+
     ClassMemberType type;
+    union {
+        FieldMember*  field;
+        MethodMember* method;
+    } u;
 
     ClassMemberDeclaration* next;
-
 };
 
 // 类成员变量
 struct FieldMember_Tag {
+    unsigned int line_number;
+
     TypeSpecifier* type;
-    char* identifier;
-    int index_of_class;
+    char*          identifier;
+    int            index_of_class; // fix it in fix_ast
 };
 
 // 类方法
 struct MethodMember_Tag {
+    unsigned int line_number;
+
     char* identifier;
-    int index_of_class;
+    int   index_of_class; // fix it in fix_ast
 };
+
+
+// ----------------------------------
+// class define
+// ----------------------------------
 
 struct Statement_Tag {
     unsigned int line_number;
@@ -1232,6 +1254,11 @@ PackageInfo*       create_package_info(char* package_name, char* rename);
 ImportPackageList* create_import_package_list(PackageInfo* package_info);
 ImportPackageList* import_package_list_add_item(ImportPackageList* import_package_list, PackageInfo* package_info);
 
+
+ClassDefinition* start_class_definition(char* name);
+ClassDefinition* finish_class_definition(ClassDefinition* class, ClassMemberDeclaration* class_member_declar);
+
+FieldMember* create_field_member(TypeSpecifier* type_specifier, Identifier* identifier_list);
 // create_ast.c
 
 // fix.c

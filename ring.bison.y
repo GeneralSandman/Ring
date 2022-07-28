@@ -40,6 +40,11 @@ int yyerror(char const *str, ...);
     ImportPackageList*          m_import_package_list;
     PackageInfo*                m_package_info;
 
+    ClassDefinition*            m_class_definition;
+    ClassMemberDeclaration*     m_class_member_declaration;
+    FieldMember*                m_field_member;
+    MethodMember*               m_method_member;
+
     TypeSpecifier*              m_type_specifier;
     Ring_BasicType              m_basic_type_specifier;
 }
@@ -166,6 +171,11 @@ int yyerror(char const *str, ...);
 %type <m_import_package_list> import_package_list package_list
 %type <m_package_info> package_info package_definition
 
+%type <m_class_definition> class_definition
+%type <m_class_member_declaration> class_member_declaration_list class_member_declaration
+%type <m_field_member> field_member
+%type <m_method_member> method_member
+
 %type <m_type_specifier>        type_specifier
 %type <m_basic_type_specifier>  basic_type_specifier
 
@@ -241,25 +251,25 @@ definition_or_statement
     ;
 
 class_definition
-    : TOKEN_TYPEDEF TOKEN_CLASS IDENTIFIER TOKEN_LC {} class_member_definition_list TOKEN_RC TOKEN_SEMICOLON
+    : TOKEN_TYPEDEF TOKEN_CLASS IDENTIFIER TOKEN_LC { $<m_class_definition>$ = start_class_definition($3); } class_member_declaration_list TOKEN_RC TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::class_definition]\t ");
-        /*finish_class_definition();*/
+        $<m_class_definition>$ = finish_class_definition($<m_class_definition>5, $6);
     }
     ;
 
-class_member_definition_list 
-    : class_member_definition
+class_member_declaration_list 
+    : class_member_declaration
     {
 
     }
-    | class_member_definition_list class_member_definition
+    | class_member_declaration_list class_member_declaration
     {
 
     }
     ;
 
-class_member_definition
+class_member_declaration
     : member_attribute_list field_member
     {
 
@@ -284,17 +294,14 @@ member_attribute_list
 attribute
     : TOKEN_PUBLIC 
     {
-        printf("attribute public\n");
 
     }
     | TOKEN_PRIVATE
     {
-        printf("attribute private\n");
 
     }
     | TOKEN_DELETE
     {
-        printf("attribute delete\n");
 
     }
     ;
@@ -304,9 +311,15 @@ attribute
 field_member
     : TOKEN_VAR type_specifier identifier_list TOKEN_SEMICOLON
     {
-        debug_log_with_green_coloar("[RULE::file_member]\t ");
-        printf("identifier:%s\n", $3->identifier_name);
-        /*$$ = create_field_member($2, $3, NULL);*/
+        debug_log_with_green_coloar("[RULE::filed_member]\t ");
+        $$ = create_field_member($2, $3);
+    }
+    ;
+
+method_member
+    : function_definition 
+    {
+
     }
     ;
 

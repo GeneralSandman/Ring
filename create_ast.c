@@ -854,3 +854,51 @@ ImportPackageList* import_package_list_add_item(ImportPackageList* import_packag
     return import_package_list;
 }
 
+
+// create_ast function ********************************
+
+// create_ast function ********************************
+
+
+// -------------
+// class define
+// -------------
+
+ClassDefinition* start_class_definition(char* name) {
+    debug_log_with_yellow_coloar("\t");
+
+    ClassDefinition* class = malloc(sizeof(ClassDefinition));
+    class->line_number     = get_ring_compiler_line_number();
+    class->name            = name;
+    class->member          = NULL;
+    class->next            = NULL;
+
+    return class;
+}
+
+ClassDefinition* finish_class_definition(ClassDefinition* class, ClassMemberDeclaration* class_member_declar) {
+    debug_log_with_yellow_coloar("\t");
+
+    assert(class != NULL);
+
+    class->member = class_member_declar;
+
+    return class;
+}
+
+FieldMember* create_field_member(TypeSpecifier* type_specifier, Identifier* identifier_list) {
+    debug_log_with_yellow_coloar("\t");
+
+    FieldMember* field_member    = malloc(sizeof(FieldMember));
+    field_member->line_number    = get_ring_compiler_line_number();
+    field_member->type           = type_specifier;
+    field_member->identifier     = identifier_list->identifier_name;
+    field_member->index_of_class = 0;
+
+    return field_member;
+}
+
+// -------------
+// class define
+// -------------
+
