@@ -269,6 +269,20 @@ Expression* create_cast_expression(TypeSpecifier* cast_type, Expression* operand
     return expression;
 }
 
+Expression* create_member_expression(Expression* object_expression, char* member_identifier) {
+    Expression* expression                              = malloc(sizeof(Expression));
+    expression->line_number                             = get_ring_compiler_line_number();
+    expression->convert_type                            = NULL; // fix in fix_ast
+    expression->type                                    = EXPRESSION_TYPE_MEMBER;
+    expression->u.member_expression                     = malloc(sizeof(MemberExpression));
+    expression->u.member_expression->line_number        = get_ring_compiler_line_number();
+    expression->u.member_expression->object_expression  = object_expression;
+    expression->u.member_expression->member_identifier  = member_identifier;
+    expression->u.member_expression->member_declaration = NULL;
+
+    return expression;
+}
+
 AssignExpression* create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand) {
     AssignExpression* assing_expression = malloc(sizeof(AssignExpression));
 
@@ -896,6 +910,18 @@ FieldMember* create_field_member(TypeSpecifier* type_specifier, Identifier* iden
     field_member->index_of_class = 0;
 
     return field_member;
+}
+
+TypeSpecifier* create_class_type_specifier(char* identifier) {
+    debug_log_with_yellow_coloar("\t");
+
+    // TODO:
+
+    TypeSpecifier* type = malloc(sizeof(TypeSpecifier));
+    type->basic_type    = RING_BASIC_TYPE_UNKNOW;
+    type->derive_type   = NULL; // TODO:
+
+    return type;
 }
 
 // -------------

@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#define RING_VERSION "ring-v0.1.19-beat"
+#define RING_VERSION "ring-v0.1.19-beta"
 
 typedef struct Ring_Compiler_Tag Ring_Compiler;
 
@@ -53,6 +53,8 @@ typedef struct ArrayIndexExpression_Tag ArrayIndexExpression;
 
 typedef struct CastExpression_Tag CastExpression;
 
+typedef struct MemberExpression_Tag MemberExpression;
+
 typedef struct BinaryExpression_Tag BinaryExpression;
 
 typedef struct TernaryExpression_Tag TernaryExpression;
@@ -99,9 +101,10 @@ typedef struct RVM_DebugConfig_Tag RVM_DebugConfig;
 
 typedef struct IdentifierExpression_Tag IdentifierExpression;
 
-typedef struct RVM_String_Tag RVM_String;
-typedef struct RVM_Array_Tag  RVM_Array;
-typedef struct RVM_Object_Tag RVM_Object;
+typedef struct RVM_String_Tag      RVM_String;
+typedef struct RVM_Array_Tag       RVM_Array;
+typedef struct RVM_ClassObject_Tag RVM_ClassObject;
+typedef struct RVM_Object_Tag      RVM_Object;
 
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue** value);
 
@@ -296,11 +299,17 @@ struct RVM_Array_Tag {
     unsigned int i;
 };
 
+struct RVM_ClassObject_Tag {
+    unsigned int filed_count;
+    RVM_Value*   fields;
+};
+
 struct RVM_Object_Tag {
     RVM_Object_Type type;
     union {
-        RVM_String string;
-        RVM_Array  array;
+        RVM_String      string;
+        RVM_Array       array;
+        RVM_ClassObject class_object;
     } u;
 };
 
@@ -391,6 +400,15 @@ typedef enum {
     RVM_CODE_PUSH_STACK_INT,
     RVM_CODE_PUSH_STACK_DOUBLE,
     RVM_CODE_PUSH_STACK_OBJECT,
+
+
+    // class
+    RVM_CODE_PUSH_FIELD_BOOL,
+    RVM_CODE_PUSH_FIELD_INT,
+    RVM_CODE_PUSH_FIELD_DOUBLE,
+    RVM_CODE_POP_FIELD_BOOL,
+    RVM_CODE_POP_FIELD_INT,
+    RVM_CODE_POP_FIELD_DOUBLE,
 
     // arithmetic
     RVM_CODE_ADD_INT,
@@ -561,6 +579,7 @@ typedef enum {
     EXPRESSION_TYPE_ARRAY_INDEX,
 
     EXPRESSION_TYPE_CAST,
+    EXPRESSION_TYPE_MEMBER,
 } ExpressionType;
 
 typedef enum {
@@ -663,15 +682,15 @@ struct FieldMember_Tag {
 
     TypeSpecifier* type;
     char*          identifier;
-    int            index_of_class; // fix it in fix_ast
+    unsigned int   index_of_class; // fix it in fix_ast
 };
 
 // 类方法
 struct MethodMember_Tag {
     unsigned int line_number;
 
-    char* identifier;
-    int   index_of_class; // fix it in fix_ast
+    char*        identifier;
+    unsigned int index_of_class; // fix it in fix_ast
 };
 
 
@@ -724,6 +743,7 @@ struct Expression_Tag {
         Expression*             unitary_expression;
         ArrayIndexExpression*   array_index_expression;
         CastExpression*         cast_expression;
+        MemberExpression*       member_expression;
     } u;
 
     Expression* next;
@@ -770,6 +790,14 @@ struct CastExpression_Tag {
 
     TypeSpecifier* type;
     Expression*    operand;
+};
+
+struct MemberExpression_Tag {
+    unsigned int line_number;
+
+    Expression*             object_expression;
+    char*                   member_identifier;
+    ClassMemberDeclaration* member_declaration; // fix it in fix_ast.c
 };
 
 struct FunctionCallExpression_Tag {
@@ -989,6 +1017,8 @@ struct Ring_DeriveType_Tag {
 struct TypeSpecifier_Tag {
     Ring_BasicType   basic_type;
     Ring_DeriveType* derive_type;
+
+    // TODO: 这里先这样写, 以后统一一下typedef相关的类型
 };
 
 
@@ -1213,6 +1243,7 @@ Expression*             create_expression_unitary_with_convert_type(BasicValueTy
 Expression*             create_expression_literal(ExpressionType type, char* literal_interface);
 Expression*             create_expression_bool_literal(ExpressionType type, Ring_Bool value);
 Expression*             create_cast_expression(TypeSpecifier* cast_type, Expression* operand);
+Expression*             create_member_expression();
 AssignExpression*       create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
 AssignExpression*       create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* operand);
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list);
@@ -1259,6 +1290,8 @@ ClassDefinition* start_class_definition(char* name);
 ClassDefinition* finish_class_definition(ClassDefinition* class, ClassMemberDeclaration* class_member_declar);
 
 FieldMember* create_field_member(TypeSpecifier* type_specifier, Identifier* identifier_list);
+
+TypeSpecifier* create_class_type_specifier(char* identifier);
 // create_ast.c
 
 // fix.c
@@ -1316,6 +1349,7 @@ void              generate_vmcode_from_double_expression(Ring_VirtualMachine_Exe
 void              generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_member_expression(Ring_VirtualMachine_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_ternary_condition_expression(Ring_VirtualMachine_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal);
 

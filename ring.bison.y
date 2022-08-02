@@ -176,8 +176,8 @@ int yyerror(char const *str, ...);
 %type <m_field_member> field_member
 %type <m_method_member> method_member
 
-%type <m_type_specifier>        type_specifier
-%type <m_basic_type_specifier>  basic_type_specifier
+%type <m_type_specifier>        type_specifier class_type_specifier
+%type <m_basic_type_specifier>  basic_type_specifier 
 
 
 
@@ -614,8 +614,12 @@ block
 type_specifier
     : basic_type_specifier
     {
-        debug_log_with_green_coloar("[RULE::type_specifier]");
+        debug_log_with_green_coloar("[RULE::type_specifier:basic_type_specifier]");
         $$ = create_type_specifier($1);
+    }
+    | class_type_specifier
+    {
+        debug_log_with_green_coloar("[RULE::type_specifier:class_type_specifier]");
     }
     ;
 
@@ -644,6 +648,14 @@ basic_type_specifier
     {
         debug_log_with_green_coloar("[RULE::basic_type_specifier]\t variable_type(TOKEN_ANY) ");
         $$ = RING_BASIC_TYPE_ANY;
+    }
+    ;
+
+class_type_specifier
+    : IDENTIFIER
+    {
+        debug_log_with_green_coloar("[RULE::class_type_specifier]\t variable_type(TOKEN_ANY) ");
+        $$ = create_class_type_specifier($1);
     }
     ;
 
@@ -871,6 +883,11 @@ literal_term
         debug_log_with_green_coloar("[RULE::literal_term:function_call_expression]\t ");
 
         $$ = create_expression_($1);
+    }
+    | identifier TOKEN_DOT identifier
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:member_expression]\t ");
+        $$ = create_member_expression(create_expression_identifier($1), $3);
     }
     ;
 

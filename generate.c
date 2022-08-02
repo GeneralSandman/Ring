@@ -662,6 +662,10 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
         generate_vmcode_from_cast_expression(executer, expression->u.cast_expression, opcode_buffer);
         break;
 
+    case EXPRESSION_TYPE_MEMBER:
+        generate_vmcode_from_member_expression(executer, expression->u.member_expression, opcode_buffer);
+        break;
+
     case EXPRESSION_TYPE_TERNARY:
         generate_vmcode_from_ternary_condition_expression(executer, expression->u.ternary_expression, opcode_buffer);
         break;
@@ -1034,6 +1038,20 @@ void generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer
     // generate_vmcode(executer, opcode_buffer, opcode, 0);
 }
 
+void generate_vmcode_from_member_expression(Ring_VirtualMachine_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (member_expression == NULL) {
+        return;
+    }
+
+    generate_vmcode_from_expression(executer, member_expression->object_expression, opcode_buffer, 0);
+
+    ClassMemberDeclaration* member_declaration = member_expression->member_declaration;
+    RVM_Opcode              opcode             = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FIELD_BOOL, member_declaration->u.field->type);
+    unsigned                member_field_index = member_declaration->u.field->index_of_class;
+    generate_vmcode(executer, opcode_buffer, opcode, member_field_index);
+}
+
 void generate_vmcode_from_ternary_condition_expression(Ring_VirtualMachine_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (ternary_expression == NULL) {
@@ -1215,7 +1233,8 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
     if (!(opcode == RVM_CODE_POP_STATIC_BOOL
           || opcode == RVM_CODE_PUSH_STATIC_BOOL
           || opcode == RVM_CODE_POP_STACK_BOOL
-          || opcode == RVM_CODE_PUSH_STACK_BOOL)) {
+          || opcode == RVM_CODE_PUSH_STACK_BOOL
+          || opcode == RVM_CODE_PUSH_FIELD_BOOL)) {
         fprintf(stderr, "convert_opcode_by_rvm_type error(opcode is valid:%d)\n", opcode);
         exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
         return RVM_CODE_UNKNOW;
