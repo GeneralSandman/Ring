@@ -1,6 +1,24 @@
 # Ring 2022 todo/bug list
 
 
+## 不单独支持数组
+
+采用类的方式
+array 为类似于c++的vector
+所以还要支持范型
+
+不需要导入包，作为默认的关键字
+
+
+var array<int> jobs;
+jobs.resize(10);
+jobs.size();
+jobs[1] = 1;
+jobs[-1] = 2;
+// 需要判断index合法性
+
+
+
 
 ## 支持类 和 对象
 
