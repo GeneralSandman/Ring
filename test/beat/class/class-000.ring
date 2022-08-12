@@ -15,40 +15,18 @@ function println(var any value) -> (int);
 function printf(var string format, var any value)   -> (int);
 function printfln(var string format, var any value) -> (int);
 
-// -----------------------------
-
-
-typedef class Student {
-
-	var string name;
-
-    @public 
-    var string name;
-
-    @private
-    var string name;
-
-    @public
-    @private
-    @delete
-    var string name;
 
 
 
-
-
+typedef class Job {
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
 };
 
-	
-// 	// function Student(var string name, var int age, var int score);
-	
-// 	function print() {
-// 		print("Student::print\n");
-// 	}
-// 	function getInfo()->(string, int, int) {
-// 		// return self.name, self.age, self.score;
-// 	}
 
-// 	function getInfo2()->(string, int, int);
-// 	function getInfo3()->(string, int, int);
+var Job compiler_job_0;
 
+println_bool(compiler_job_0.Running);
+println_int(compiler_job_0.JobID);
+println_double(compiler_job_0.Score);
