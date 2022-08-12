@@ -5,16 +5,22 @@
 
 // 修正ast
 void ring_compiler_fix_ast(Ring_Compiler* compiler) {
-    Function* pos;
-
+    // fix statement list
     fix_statement_list(compiler->statement_list, NULL, NULL);
 
-    for (pos = compiler->function_list; pos; pos = pos->next) {
+    // fix function list
+    for (Function* pos = compiler->function_list; pos; pos = pos->next) {
         if (pos->block) {
             add_parameter_to_declaration(pos->parameter_list, pos->block);
             fix_statement_list(pos->block->statement_list, pos->block, pos);
         }
     }
+
+    // fix class list
+    for (ClassDefinition* pos = compiler->class_definition_list; pos != NULL; pos = pos->next) {
+        fix_class_definition(pos);
+    }
+
 
 #ifdef DEBUG
     ring_compiler_functions_dump(compiler);
@@ -124,6 +130,10 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
         fix_expression(expression->u.cast_expression->operand, block, func);
         break;
 
+    case EXPRESSION_TYPE_MEMBER:
+        fix_member_expression(expression, expression->u.member_expression, block, func);
+        break;
+
     case EXPRESSION_TYPE_TERNARY:
         fix_ternary_condition_expression(expression->u.ternary_expression, block, func);
         break;
@@ -133,7 +143,6 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
 }
 
 
-// TODO: 这里得改改，目前暂时添加全局变量。
 void add_declaration(Declaration* declaration, Block* block, Function* func) {
     if (declaration == NULL) {
         return;
@@ -144,6 +153,11 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
     for (; pos != NULL; pos = next) {
         next      = pos->next;
         pos->next = NULL;
+
+        // fix type specifier
+        fix_type_specfier(pos->type);
+
+
         if (block != NULL) {
             block->declaration_list =
                 declaration_list_add_item(block->declaration_list, pos);
@@ -158,6 +172,31 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
             pos->variable_index = ring_compiler->declaration_list_size++;
             pos->is_local       = 0;
         }
+    }
+}
+
+void fix_type_specfier(TypeSpecifier* type_specifier) {
+    assert(type_specifier != NULL);
+
+    // 如果这个变量是类
+    // 找到类的定义
+
+    ClassDefinition* class_definition = NULL;
+    char*            class_identifier = NULL;
+
+
+    if (type_specifier->basic_type == RING_BASIC_TYPE_CLASS && type_specifier->derive_type->u.class_type != NULL) {
+        class_identifier = type_specifier->derive_type->u.class_type->class_identifier;
+        class_definition = search_class_definition(class_identifier);
+
+        if (class_definition == NULL) {
+            // error
+            // exit
+            complie_err_log("not find class definition [%s]", class_identifier);
+            exit(ERROR_CODE_COMPILE_ERROR);
+        }
+
+        type_specifier->derive_type->u.class_type->class_definition = class_definition;
     }
 }
 
@@ -303,6 +342,93 @@ void fix_function_call_expression(FunctionCallExpression* function_call_expressi
     for (; pos != NULL; pos = pos->next) {
         fix_expression(pos->expression, block, func);
     }
+}
+
+void fix_class_definition(ClassDefinition* class_definition) {
+    assert(class_definition != NULL);
+
+    unsigned int field_index  = 0;
+    unsigned int method_index = 0;
+
+    for (ClassMemberDeclaration* pos = class_definition->member; pos != NULL; pos = pos->next) {
+        if (pos->type == MEMBER_FIELD) {
+            pos->u.field->index_of_class = field_index++;
+        } else if (pos->type == MEMBER_METHOD) {
+            pos->u.method->index_of_class = method_index++;
+        }
+    }
+}
+
+// 暂时只支持field-member
+void fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func) {
+    assert(member_expression != NULL);
+
+    char*                   member_identifier  = member_expression->member_identifier;
+    ClassDefinition*        class_definition   = NULL;
+    ClassMemberDeclaration* member_declaration = NULL;
+    Expression*             object_expression  = member_expression->object_expression;
+
+
+    // 0. fix object expression
+    fix_expression(object_expression, block, func);
+
+    // 1. find class definition by object.
+    class_definition = object_expression->convert_type->derive_type->u.class_type->class_definition;
+    if (class_definition == NULL) {
+        fprintf(stderr, "fix_member_expression error\n");
+        exit(ERROR_CODE_COMPILE_ERROR);
+    }
+
+
+    // 2. find member declaration by member identifier.
+    member_declaration = search_class_member(class_definition, member_identifier);
+    if (member_declaration == NULL) {
+        fprintf(stderr, "fix_member_expression error\n");
+        exit(ERROR_CODE_COMPILE_ERROR);
+    }
+    member_expression->member_declaration = member_declaration;
+
+
+    // expression 最终的类型取决于field-member 的类型
+    expression->convert_type = member_declaration->u.field->type;
+    fix_class_member_expression(member_expression, member_expression->object_expression, member_expression->member_identifier);
+}
+
+void fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier) {
+    // member_expression->member_declaration = ;
+}
+
+ClassDefinition* search_class_definition(char* class_identifier) {
+    assert(class_identifier != NULL);
+    ClassDefinition* pos = get_ring_compiler()->class_definition_list;
+
+    for (; pos != NULL; pos = pos->next) {
+        if (0 == strcmp(pos->class_identifier, class_identifier)) {
+            break;
+        }
+    }
+
+    return pos;
+}
+
+ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, char* member_identifier) {
+    assert(class_definition != NULL);
+
+    ClassMemberDeclaration* member_declaration = NULL;
+
+    for (member_declaration = class_definition->member; member_declaration != NULL; member_declaration = member_declaration->next) {
+        if (member_declaration->type == MEMBER_FIELD) {
+            if (0 == strcmp(member_declaration->u.field->identifier, member_identifier)) {
+                break;
+            }
+        } else if (member_declaration->type == MEMBER_METHOD) {
+            if (0 == strcmp(member_declaration->u.method->identifier, member_identifier)) {
+                break;
+            }
+        }
+    }
+
+    return member_declaration;
 }
 
 void fix_ternary_condition_expression(TernaryExpression* ternary_expression, Block* block, Function* func) {

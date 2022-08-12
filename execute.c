@@ -116,9 +116,68 @@ Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* execu
 void rvm_add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static) {
     debug_log_with_white_coloar("\t");
 
-    runtime_static->size = executer->global_variable_size;
-    runtime_static->data = malloc(runtime_static->size * sizeof(RVM_Value));
-    memset(runtime_static->data, 0, runtime_static->size * sizeof(RVM_Value));
+    // 分配空间
+    // 初始化默认值
+
+    unsigned int     size                 = executer->global_variable_size;
+    RVM_Variable*    global_variable_list = executer->global_variable_list;
+    TypeSpecifier*   type_specifier       = NULL;
+    ClassDefinition* class_definition     = NULL;
+
+    runtime_static->size = size;
+    runtime_static->data = malloc(size * sizeof(RVM_Value));
+
+    for (int i = 0; i < size; i++) {
+        type_specifier = global_variable_list[i].type;
+
+        switch (type_specifier->basic_type) {
+        case RING_BASIC_TYPE_BOOL:
+        case RING_BASIC_TYPE_INT:
+        case RING_BASIC_TYPE_DOUBLE:
+            memset(&runtime_static->data[i], 0, sizeof(RVM_Value));
+            break;
+        case RING_BASIC_TYPE_CLASS:
+            // Search class-definition from variable declaration.
+            assert(type_specifier->derive_type != NULL);
+            assert(type_specifier->derive_type->u.class_type != NULL);
+            class_definition                 = type_specifier->derive_type->u.class_type->class_definition;
+            runtime_static->data[i].u.object = new_class_object(class_definition);
+            break;
+
+        default:
+            break;
+        }
+    }
+}
+
+RVM_Object* new_class_object(ClassDefinition* class_definition) {
+    assert(class_definition != NULL);
+
+    // Search field-member's size and detail from class-definition.
+    // Alloc and Init.
+    unsigned int field_count = 0;
+    RVM_Value*   field       = malloc(field_count * sizeof(RVM_Value));
+
+    // TODO: 先用笨办法
+    for (ClassMemberDeclaration* pos = class_definition->member; pos != NULL; pos = pos->next) {
+        if (pos->type == MEMBER_FIELD) {
+            field_count++;
+        }
+    }
+    field = malloc(field_count * sizeof(RVM_Value));
+
+    RVM_Object* object                 = malloc(sizeof(RVM_Object));
+    object->type                       = RVM_OBJECT_TYPE_CLASS;
+    object->u.class_object.field_count = field_count;
+    object->u.class_object.field       = field;
+
+    memset(field, 0, field_count * sizeof(RVM_Value));
+
+
+    // TODO:
+    // if class has constructor method, invoke it.
+
+    return object;
 }
 
 void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm) {
@@ -163,6 +222,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int return_value_list_size = 0;
 
     RVM_Function* function = NULL;
+    RVM_Object*   object   = NULL;
 
     char* string_buf;
 
@@ -328,6 +388,35 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_SET_OBJECT_OFFSET(rvm, 0,
                                     STACK_GET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
+            rvm->pc += 3;
+            break;
+
+        // class
+        case RVM_CODE_POP_FIELD_BOOL:
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_POP_FIELD_INT:
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_POP_FIELD_DOUBLE:
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_PUSH_FIELD_BOOL:
+            object   = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_BOOL_OFFSET(rvm, -1, object->u.class_object.field[oper_num].u.bool_value);
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_PUSH_FIELD_INT:
+            object   = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_BOOL_OFFSET(rvm, -1, object->u.class_object.field[oper_num].u.int_value);
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_PUSH_FIELD_DOUBLE:
+            object   = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_BOOL_OFFSET(rvm, -1, object->u.class_object.field[oper_num].u.double_value);
             rvm->pc += 3;
             break;
 
@@ -1062,7 +1151,7 @@ RVM_Value native_proc_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, R
         }
         if (i > lasti) {
             // printf("[debug]------:%ld, %ld\n", lasti, i-lasti);
-            printf("%.*s", i - lasti, format + lasti);
+            printf("%.*s", (int)(i - lasti), format + lasti);
             // fflush(stdout);
         }
         if (i >= length) {

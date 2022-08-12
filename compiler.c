@@ -158,3 +158,21 @@ int ring_compiler_add_statement(Statement* statement) {
     return 0;
 }
 
+int ring_compiler_add_class_definition(ClassDefinition* class_definition) {
+    assert(ring_compiler != NULL);
+    assert(class_definition != NULL);
+
+    if (ring_compiler->class_definition_list == NULL) {
+        ring_compiler->class_definition_list      = class_definition;
+        ring_compiler->class_definition_list_size = 1;
+        return 0;
+    }
+
+    ClassDefinition* pos = ring_compiler->class_definition_list;
+    for (; pos->next != NULL; pos = pos->next) {
+    }
+    pos->next = class_definition;
+    ring_compiler->class_definition_list_size++;
+    return 0;
+}
+

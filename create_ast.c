@@ -878,14 +878,17 @@ ImportPackageList* import_package_list_add_item(ImportPackageList* import_packag
 // class define
 // -------------
 
-ClassDefinition* start_class_definition(char* name) {
+ClassDefinition* start_class_definition(char* class_identifier) {
     debug_log_with_yellow_coloar("\t");
 
-    ClassDefinition* class = malloc(sizeof(ClassDefinition));
-    class->line_number     = get_ring_compiler_line_number();
-    class->name            = name;
-    class->member          = NULL;
-    class->next            = NULL;
+    ClassDefinition* class  = malloc(sizeof(ClassDefinition));
+    class->line_number      = get_ring_compiler_line_number();
+    class->class_identifier = class_identifier;
+    class->member           = NULL;
+    class->next             = NULL;
+
+
+    ring_compiler_add_class_definition(class);
 
     return class;
 }
@@ -900,6 +903,45 @@ ClassDefinition* finish_class_definition(ClassDefinition* class, ClassMemberDecl
     return class;
 }
 
+ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclaration* list, ClassMemberDeclaration* decl) {
+    assert(decl != NULL);
+
+    if (list == NULL) {
+        return decl;
+    }
+
+    ClassMemberDeclaration* pos = list;
+    for (; pos->next != NULL; pos = pos->next) {}
+
+    pos->next = decl;
+
+    return list;
+}
+
+ClassMemberDeclaration* create_class_field_member_declaration(FieldMember* field_member) {
+    assert(field_member != NULL);
+
+    ClassMemberDeclaration* class_member_declar = malloc(sizeof(ClassMemberDeclaration));
+    class_member_declar->line_number            = get_ring_compiler_line_number();
+    class_member_declar->type                   = MEMBER_FIELD;
+    class_member_declar->u.field                = field_member;
+    class_member_declar->next                   = NULL;
+
+    return class_member_declar;
+}
+
+ClassMemberDeclaration* create_class_method_member_declaration(MethodMember* method_member) {
+    assert(method_member != NULL);
+
+    ClassMemberDeclaration* class_member_declar = malloc(sizeof(ClassMemberDeclaration));
+    class_member_declar->line_number            = get_ring_compiler_line_number();
+    class_member_declar->type                   = MEMBER_METHOD;
+    class_member_declar->u.method               = method_member;
+    class_member_declar->next                   = NULL;
+
+    return class_member_declar;
+}
+
 FieldMember* create_field_member(TypeSpecifier* type_specifier, Identifier* identifier_list) {
     debug_log_with_yellow_coloar("\t");
 
@@ -912,14 +954,24 @@ FieldMember* create_field_member(TypeSpecifier* type_specifier, Identifier* iden
     return field_member;
 }
 
+MethodMember* create_method_member(Function* function) {
+    assert(function != NULL);
+
+    MethodMember* method_member = malloc(sizeof(MethodMember));
+
+    return method_member;
+}
+
 TypeSpecifier* create_class_type_specifier(char* identifier) {
     debug_log_with_yellow_coloar("\t");
 
-    // TODO:
-
-    TypeSpecifier* type = malloc(sizeof(TypeSpecifier));
-    type->basic_type    = RING_BASIC_TYPE_UNKNOW;
-    type->derive_type   = NULL; // TODO:
+    TypeSpecifier* type                               = malloc(sizeof(TypeSpecifier));
+    type->basic_type                                  = RING_BASIC_TYPE_CLASS;
+    type->derive_type                                 = malloc(sizeof(Ring_DeriveType));
+    type->derive_type->kind                           = RING_DERIVE_TYPE_CLASS;
+    type->derive_type->u.class_type                   = malloc(sizeof(Ring_DeriveType_Class));
+    type->derive_type->u.class_type->class_identifier = identifier;
+    type->derive_type->u.class_type->class_definition = NULL; // FIX_AST_UPDATE
 
     return type;
 }

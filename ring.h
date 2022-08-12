@@ -91,6 +91,8 @@ typedef struct ReturnStatement_Tag ReturnStatement;
 
 typedef struct ContinueStatement_Tag ContinueStatement;
 
+typedef struct Ring_DeriveType_Class_Tag Ring_DeriveType_Class;
+
 typedef struct Ring_DeriveType_Tag Ring_DeriveType;
 
 typedef struct Declaration_Tag Declaration;
@@ -136,6 +138,9 @@ struct Ring_Compiler_Tag {
 
     Block* current_block;
 
+    unsigned int     class_definition_list_size;
+    ClassDefinition* class_definition_list;
+
     unsigned int compile_error_num;
 };
 
@@ -148,6 +153,7 @@ typedef enum {
     RVM_VALUE_TYPE_INT,
     RVM_VALUE_TYPE_DOUBLE,
     RVM_VALUE_TYPE_STRING,
+    RVM_VALUE_TYPE_OBJECT,
 } RVM_Value_Type;
 
 typedef enum {
@@ -286,6 +292,7 @@ typedef enum {
     RVM_OBJECT_TYPE_UNKNOW,
     RVM_OBJECT_TYPE_STRING,
     RVM_OBJECT_TYPE_ARRAY,
+    RVM_OBJECT_TYPE_CLASS,
 } RVM_Object_Type;
 
 
@@ -300,8 +307,8 @@ struct RVM_Array_Tag {
 };
 
 struct RVM_ClassObject_Tag {
-    unsigned int filed_count;
-    RVM_Value*   fields;
+    unsigned int field_count;
+    RVM_Value*   field;
 };
 
 struct RVM_Object_Tag {
@@ -403,12 +410,12 @@ typedef enum {
 
 
     // class
-    RVM_CODE_PUSH_FIELD_BOOL,
-    RVM_CODE_PUSH_FIELD_INT,
-    RVM_CODE_PUSH_FIELD_DOUBLE,
     RVM_CODE_POP_FIELD_BOOL,
     RVM_CODE_POP_FIELD_INT,
     RVM_CODE_POP_FIELD_DOUBLE,
+    RVM_CODE_PUSH_FIELD_BOOL,
+    RVM_CODE_PUSH_FIELD_INT,
+    RVM_CODE_PUSH_FIELD_DOUBLE,
 
     // arithmetic
     RVM_CODE_ADD_INT,
@@ -649,7 +656,7 @@ struct Ring_Array_Tag {
 struct ClassDefinition_Tag {
     unsigned int line_number;
 
-    char*                   name;
+    char*                   class_identifier;
     ClassMemberDeclaration* member;
 
     ClassDefinition* next;
@@ -664,9 +671,7 @@ typedef enum {
 struct ClassMemberDeclaration_Tag {
     unsigned int line_number;
 
-    // 属性
-    // 变量 / 方法
-
+    // TODO: 属性
     ClassMemberType type;
     union {
         FieldMember*  field;
@@ -728,7 +733,7 @@ struct StatementExecResult_Tag {
 struct Expression_Tag {
     unsigned int line_number;
 
-    TypeSpecifier* convert_type; // 一个复杂表达式最后结果值的类型, update in fix_ast
+    TypeSpecifier* convert_type; // 一个复杂表达式最后结果值的类型, FIX_AST_UPDATE
     ExpressionType type;
     union {
         Ring_Bool               bool_literal;
@@ -797,7 +802,13 @@ struct MemberExpression_Tag {
 
     Expression*             object_expression;
     char*                   member_identifier;
-    ClassMemberDeclaration* member_declaration; // fix it in fix_ast.c
+    ClassMemberDeclaration* member_declaration; // FIX_AST_UPDATE
+
+    // e.g.
+    // var Job job1;
+    // job1.JobID;
+    // job1 is object_expression
+    // JobID is member_identifier
 };
 
 struct FunctionCallExpression_Tag {
@@ -1000,25 +1011,31 @@ typedef enum {
     RING_BASIC_TYPE_INT,
     RING_BASIC_TYPE_DOUBLE,
     RING_BASIC_TYPE_STRING,
+    RING_BASIC_TYPE_CLASS,
     RING_BASIC_TYPE_NULL,
 } Ring_BasicType;
 
 typedef enum {
     RING_DERIVE_TYPE_UNKNOW,
-    RING_DERIVE_TYPE_FUNCTION,
-    RING_DERIVE_TYPE_ARRAY,
+    RING_DERIVE_TYPE_CLASS,
 } Ring_DeriveTypeKind;
+
+
+struct Ring_DeriveType_Class_Tag {
+    char*            class_identifier;
+    ClassDefinition* class_definition; // FIX_AST_UPDATE
+};
 
 struct Ring_DeriveType_Tag {
     Ring_DeriveTypeKind kind;
-    Ring_DeriveType*    next;
+    union {
+        Ring_DeriveType_Class* class_type;
+    } u;
 };
 
 struct TypeSpecifier_Tag {
     Ring_BasicType   basic_type;
     Ring_DeriveType* derive_type;
-
-    // TODO: 这里先这样写, 以后统一一下typedef相关的类型
 };
 
 
@@ -1176,6 +1193,7 @@ char*          ring_compiler_get_current_line_content();
 void           reset_ring_compiler_column_number();
 int            ring_compiler_init_statement_list(Statement* statement);
 int            ring_compiler_add_statement(Statement* statement);
+int            ring_compiler_add_class_definition(ClassDefinition* class_definition);
 
 void  init_string_literal_buffer();
 void  reset_string_literal_buffer();
@@ -1286,33 +1304,44 @@ ImportPackageList* create_import_package_list(PackageInfo* package_info);
 ImportPackageList* import_package_list_add_item(ImportPackageList* import_package_list, PackageInfo* package_info);
 
 
-ClassDefinition* start_class_definition(char* name);
+ClassDefinition* start_class_definition(char* class_identifier);
 ClassDefinition* finish_class_definition(ClassDefinition* class, ClassMemberDeclaration* class_member_declar);
 
-FieldMember* create_field_member(TypeSpecifier* type_specifier, Identifier* identifier_list);
+ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclaration* list, ClassMemberDeclaration* decl);
+ClassMemberDeclaration* create_class_field_member_declaration(FieldMember* field_member);
+ClassMemberDeclaration* create_class_method_member_declaration(MethodMember* method_member);
+
+FieldMember*  create_field_member(TypeSpecifier* type_specifier, Identifier* identifier_list);
+MethodMember* create_method_member(Function* function);
 
 TypeSpecifier* create_class_type_specifier(char* identifier);
 // create_ast.c
 
 // fix.c
-void           ring_compiler_fix_ast(Ring_Compiler* ring_compiler);
-void           fix_statement_list(Statement* statement_list, Block* block, Function* func);
-void           fix_statement(Statement* statement, Block* block, Function* func);
-void           fix_expression(Expression* expression, Block* block, Function* func);
-void           add_declaration(Declaration* declaration, Block* block, Function* func);
-void           fix_block(Block* block, Function* func);
-void           fix_if_statement(IfStatement* if_statement, Block* block, Function* func);
-void           fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
-void           fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
-void           fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
-TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block* block);
-void           fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
-void           fix_binary_expression(Expression* expression, Block* block, Function* func);
-void           fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
-void           fix_ternary_condition_expression(TernaryExpression* ternary_expression, Block* block, Function* func);
-void           add_parameter_to_declaration(Parameter* parameter, Block* block);
-Declaration*   search_declaration(char* identifier, Block* block);
-Function*      search_function(char* identifier);
+void                    ring_compiler_fix_ast(Ring_Compiler* ring_compiler);
+void                    fix_statement_list(Statement* statement_list, Block* block, Function* func);
+void                    fix_statement(Statement* statement, Block* block, Function* func);
+void                    fix_expression(Expression* expression, Block* block, Function* func);
+void                    add_declaration(Declaration* declaration, Block* block, Function* func);
+void                    fix_type_specfier(TypeSpecifier* type_specifier);
+void                    fix_block(Block* block, Function* func);
+void                    fix_if_statement(IfStatement* if_statement, Block* block, Function* func);
+void                    fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
+void                    fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
+void                    fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
+TypeSpecifier*          fix_identifier_expression(IdentifierExpression* expression, Block* block);
+void                    fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
+void                    fix_binary_expression(Expression* expression, Block* block, Function* func);
+void                    fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
+void                    fix_class_definition(ClassDefinition* class_definition);
+void                    fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func);
+void                    fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
+ClassDefinition*        search_class_definition(char* class_identifier);
+ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, char* member_identifier);
+void                    fix_ternary_condition_expression(TernaryExpression* ternary_expression, Block* block, Function* func);
+void                    add_parameter_to_declaration(Parameter* parameter, Block* block);
+Declaration*            search_declaration(char* identifier, Block* block);
+Function*               search_function(char* identifier);
 
 // generate.c
 Ring_VirtualMachine_Executer* new_ring_vm_executer();
@@ -1376,6 +1405,7 @@ RVM_RuntimeStack*    new_runtime_stack();
 RVM_RuntimeStatic*   new_runtime_static();
 Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* executer);
 void                 rvm_add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static);
+RVM_Object*          new_class_object();
 void                 rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);

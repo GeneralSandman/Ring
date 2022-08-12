@@ -38,6 +38,15 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_STACK_OBJECT, "push_stack_object", OPCODE_OPERAND_TYPE_2BYTE, 1},
 
 
+    // class
+    {RVM_CODE_POP_FIELD_BOOL, "pop_field_bool", OPCODE_OPERAND_TYPE_2BYTE, -1},
+    {RVM_CODE_POP_FIELD_INT, "pop_field_int", OPCODE_OPERAND_TYPE_2BYTE, -1},
+    {RVM_CODE_POP_FIELD_DOUBLE, "pop_field_double", OPCODE_OPERAND_TYPE_2BYTE, -1},
+    {RVM_CODE_PUSH_FIELD_BOOL, "push_field_bool", OPCODE_OPERAND_TYPE_2BYTE, 1},
+    {RVM_CODE_PUSH_FIELD_INT, "push_field_int", OPCODE_OPERAND_TYPE_2BYTE, 1},
+    {RVM_CODE_PUSH_FIELD_DOUBLE, "push_field_double", OPCODE_OPERAND_TYPE_2BYTE, 1},
+
+
     // arithmetic
     {RVM_CODE_ADD_INT, "add_int", OPCODE_OPERAND_TYPE_0BYTE, -1},
     {RVM_CODE_ADD_DOUBLE, "add_double", OPCODE_OPERAND_TYPE_0BYTE, -1},
@@ -1044,8 +1053,10 @@ void generate_vmcode_from_member_expression(Ring_VirtualMachine_Executer* execut
         return;
     }
 
+    // object
     generate_vmcode_from_expression(executer, member_expression->object_expression, opcode_buffer, 0);
 
+    // member
     ClassMemberDeclaration* member_declaration = member_expression->member_declaration;
     RVM_Opcode              opcode             = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FIELD_BOOL, member_declaration->u.field->type);
     unsigned                member_field_index = member_declaration->u.field->index_of_class;
@@ -1251,6 +1262,9 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         return opcode + 2;
         break;
     case RING_BASIC_TYPE_STRING:
+        return opcode + 3;
+        break;
+    case RING_BASIC_TYPE_CLASS:
         return opcode + 3;
         break;
 

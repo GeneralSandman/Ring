@@ -261,11 +261,11 @@ class_definition
 class_member_declaration_list 
     : class_member_declaration
     {
-
+        $$ = $1;
     }
     | class_member_declaration_list class_member_declaration
     {
-
+        $$ = class_member_declaration_list_add_item($1, $2);
     }
     ;
 
@@ -276,7 +276,7 @@ class_member_declaration
     }
     | field_member
     {
-
+        $$ = create_class_field_member_declaration($1);
     }
     ;
 
@@ -319,7 +319,8 @@ field_member
 method_member
     : function_definition 
     {
-
+        debug_log_with_green_coloar("[RULE::method_member]\t ");
+        $$ = create_method_member($1);
     }
     ;
 
