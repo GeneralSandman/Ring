@@ -24,9 +24,17 @@ typedef class Job {
     var double  Score;
 };
 
+println_string("\ntest case 1");
+var bool    Running;
+var int     JobID;
+var double  Score;
+println_bool(Running);
+println_int(JobID);
+println_double(Score);
 
+
+println_string("\ntest case 2");
 var Job compiler_job_0;
-
 println_bool(compiler_job_0.Running);
 println_int(compiler_job_0.JobID);
 println_double(compiler_job_0.Score);
