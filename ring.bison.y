@@ -47,6 +47,7 @@ int yyerror(char const *str, ...);
 
     TypeSpecifier*              m_type_specifier;
     Ring_BasicType              m_basic_type_specifier;
+    AttributeType               m_attribute;
 }
 
 %token TOKEN_TYPEDEF
@@ -178,6 +179,7 @@ int yyerror(char const *str, ...);
 
 %type <m_type_specifier>        type_specifier class_type_specifier
 %type <m_basic_type_specifier>  basic_type_specifier 
+%type <m_attribute> attribute attribute_list
 
 
 
@@ -270,23 +272,24 @@ class_member_declaration_list
     ;
 
 class_member_declaration
-    : member_attribute_list field_member
+    : attribute_list field_member
     {
-
+        $$ = create_class_field_member_declaration($1, $2);
     }
     | field_member
     {
-        $$ = create_class_field_member_declaration($1);
+        $$ = create_class_field_member_declaration(0, $1);
     }
     ;
 
-member_attribute_list
+attribute_list
     : TOKEN_ATTRIBUTE attribute
     {
-
+        $$ = $2;
     }
-    | member_attribute_list TOKEN_ATTRIBUTE attribute
+    | attribute_list TOKEN_ATTRIBUTE attribute
     {
+        $$ = $$ | $3;
 
     }
     ;
@@ -294,15 +297,15 @@ member_attribute_list
 attribute
     : TOKEN_PUBLIC 
     {
-
+       $$ = ACCESS_PUBLIC; 
     }
     | TOKEN_PRIVATE
     {
-
+       $$ = ACCESS_PRIVATE; 
     }
     | TOKEN_DELETE
     {
-
+       $$ = ACCESS_DELETE; 
     }
     ;
     

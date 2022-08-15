@@ -735,19 +735,22 @@ void generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* execut
         break;
     }
 
-    if (expression->left->type != EXPRESSION_TYPE_IDENTIFIER) {
-        fprintf(stderr, "generate opcode error\n");
-        exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
-    }
+    // if (expression->left->type != EXPRESSION_TYPE_IDENTIFIER) {
+    //     fprintf(stderr, "generate opcode error1\n");
+    //     exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+    // }
 
     if (expression->type == ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
         // access identifier in reverse order.
+        // TODO: FIXME:
         generate_pop_to_leftvalue_reverse(executer, expression->left, opcode_buffer);
     } else {
+        // TODO: FIXME:
         generate_pop_to_leftvalue(executer, expression->left->u.identifier_expression, opcode_buffer);
     }
 }
 
+// TODO: FIXME:
 void generate_pop_to_leftvalue_reverse(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
@@ -758,6 +761,7 @@ void generate_pop_to_leftvalue_reverse(Ring_VirtualMachine_Executer* executer, E
     generate_pop_to_leftvalue(executer, expression->u.identifier_expression, opcode_buffer);
 }
 
+// TODO: FIXME:
 void generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (identifier_expression == NULL) {
@@ -768,10 +772,8 @@ void generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, Identifie
     unsigned int variable_index = declaration->variable_index;
     RVM_Opcode   opcode         = RVM_CODE_UNKNOW;
     if (declaration->is_local) {
-        // 局部变量
         opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STACK_BOOL, declaration->type);
     } else {
-        // 全局变量
         opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STATIC_BOOL, declaration->type);
     }
     generate_vmcode(executer, opcode_buffer, opcode, variable_index);

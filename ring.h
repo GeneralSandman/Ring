@@ -663,6 +663,17 @@ struct ClassDefinition_Tag {
 };
 
 typedef enum {
+    ACCESS_PUBLIC  = 0x01,
+    ACCESS_PRIVATE = 0x01 << 1,
+    ACCESS_DELETE = 0x01 << 2,
+
+    CONSTRUCTOR = 0x01 << 4,
+    DESTRUCTOR  = 0x01 << 5,
+} AttributeType;
+
+typedef unsigned int Attribute;
+
+typedef enum {
     MEMBER_UNKNOW = 0,
     MEMBER_FIELD,
     MEMBER_METHOD,
@@ -671,7 +682,7 @@ typedef enum {
 struct ClassMemberDeclaration_Tag {
     unsigned int line_number;
 
-    // TODO: 属性
+    Attribute    attribute;
     ClassMemberType type;
     union {
         FieldMember*  field;
@@ -1308,13 +1319,19 @@ ClassDefinition* start_class_definition(char* class_identifier);
 ClassDefinition* finish_class_definition(ClassDefinition* class, ClassMemberDeclaration* class_member_declar);
 
 ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclaration* list, ClassMemberDeclaration* decl);
-ClassMemberDeclaration* create_class_field_member_declaration(FieldMember* field_member);
-ClassMemberDeclaration* create_class_method_member_declaration(MethodMember* method_member);
+ClassMemberDeclaration* create_class_field_member_declaration(Attribute attribute, FieldMember* field_member);
+ClassMemberDeclaration* create_class_method_member_declaration(Attribute attribute, MethodMember* method_member);
 
 FieldMember*  create_field_member(TypeSpecifier* type_specifier, Identifier* identifier_list);
 MethodMember* create_method_member(Function* function);
 
 TypeSpecifier* create_class_type_specifier(char* identifier);
+
+Attribute add_attribute(Attribute attribute, AttributeType type) ;
+int attribute_is_public(Attribute attribute);
+int attribute_is_private(Attribute attribute);
+int attribute_is_constructor(Attribute attribute);
+int attribute_is_destructor(Attribute attribute);
 // create_ast.c
 
 // fix.c

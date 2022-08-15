@@ -918,11 +918,12 @@ ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclar
     return list;
 }
 
-ClassMemberDeclaration* create_class_field_member_declaration(FieldMember* field_member) {
+ClassMemberDeclaration* create_class_field_member_declaration(Attribute attribute, FieldMember* field_member) {
     assert(field_member != NULL);
 
     ClassMemberDeclaration* class_member_declar = malloc(sizeof(ClassMemberDeclaration));
     class_member_declar->line_number            = get_ring_compiler_line_number();
+    class_member_declar->attribute              = attribute;
     class_member_declar->type                   = MEMBER_FIELD;
     class_member_declar->u.field                = field_member;
     class_member_declar->next                   = NULL;
@@ -930,11 +931,12 @@ ClassMemberDeclaration* create_class_field_member_declaration(FieldMember* field
     return class_member_declar;
 }
 
-ClassMemberDeclaration* create_class_method_member_declaration(MethodMember* method_member) {
+ClassMemberDeclaration* create_class_method_member_declaration(Attribute attribute, MethodMember* method_member) {
     assert(method_member != NULL);
 
     ClassMemberDeclaration* class_member_declar = malloc(sizeof(ClassMemberDeclaration));
     class_member_declar->line_number            = get_ring_compiler_line_number();
+    class_member_declar->attribute              = attribute;
     class_member_declar->type                   = MEMBER_METHOD;
     class_member_declar->u.method               = method_member;
     class_member_declar->next                   = NULL;
@@ -976,6 +978,25 @@ TypeSpecifier* create_class_type_specifier(char* identifier) {
     return type;
 }
 
+Attribute add_attribute(Attribute attribute, AttributeType type) {
+    return attribute | type;
+}
+
+int attribute_is_public(Attribute attribute) {
+    return (attribute >> 0) & (0x01);
+}
+
+int attribute_is_private(Attribute attribute) {
+    return (attribute >> 1) & (0x01);
+}
+
+int attribute_is_constructor(Attribute attribute) {
+    return (attribute >> 4) & (0x01);
+}
+
+int attribute_is_destructor(Attribute attribute) {
+    return (attribute >> 5) & (0x01);
+}
 // -------------
 // class define
 // -------------
