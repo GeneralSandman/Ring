@@ -1,6 +1,22 @@
 # Ring 2022 todo/bug list
 
 
+
+
+
+
+## how to implement a register-based virtual machine inside stack-based virtual machine.
+
+通读买的Lua数据，首先要写一个程序，能够去解析 lua 的字节码。
+
+然后去设计 instructions 
+
+能够全部cover所有的 stack-based 功能。
+
+
+再去实现闭包等高级操作
+
+
 ## 不单独支持数组
 
 采用类的方式

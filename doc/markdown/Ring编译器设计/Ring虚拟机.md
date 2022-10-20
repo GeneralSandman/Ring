@@ -3,7 +3,16 @@
 在```Ring```中的虚拟机设计和实现中，采用的是栈式虚拟机。
 
 
-## 虚拟机指令集
+
+
+> [!TIP|style:flat|label:Register-Based VM]
+> Stack Based vs Register Based Virtual Machine Architecture
+> 
+> https://www.codeproject.com/Articles/461052/Stack-Based-vs-Register-Based-Virtual-Machine-Arch
+
+
+
+## Register-based VM 指令集
 
 | 指令               | 操作数占用字节数 | 栈顶值变化                  | 栈高度 | 含义                               |
 | ------------------ | ---------------- | --------------------------- | ------ | ---------------------------------- |
