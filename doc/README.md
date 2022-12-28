@@ -203,6 +203,23 @@
   <td>some bug</td>
 </tr>
 
+<tr>
+  <td rowspan="2">面向对象</td>
+  <td>类成员变量</td>
+  <td>✅</td>
+  <td></td>
+</tr>
+<tr>
+  <td>类成员方法</td>
+  <td>❌</td>
+  <td></td>
+</tr>
+<tr>
+  <td>成员特性修饰方法</td>
+  <td>❌</td>
+  <td></td>
+</tr>
+
 
 </table>
 

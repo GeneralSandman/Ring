@@ -9,7 +9,7 @@
         "program": "${fileDirname}/bin/ring",
         "args": [
             "run", 
-            "${fileDirname}/test/beat/basic-type/string-001.ring"
+            "${fileDirname}/test/beat/class/class-002.ring"
         ],
         "cwd": "${workspaceRoot}",
         "environment": [],

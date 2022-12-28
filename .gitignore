@@ -10,6 +10,8 @@ y.tab.h
 
 ring.bison.tab.c
 
+automated-testing.sh.result
+
 .idea/*
 
 *tmp
