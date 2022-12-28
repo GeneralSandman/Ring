@@ -2,7 +2,7 @@
 
 # 需要向下兼容，测试之前的所有测试用例
 
-TEST_PATH="./test/beat"
+TEST_PATH="./test"
 
 TEST_RESULT="./automated-testing.sh.result"
 
