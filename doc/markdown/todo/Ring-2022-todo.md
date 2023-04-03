@@ -1,9 +1,16 @@
 # Ring 2022 todo/bug list
 
 
+抛弃 const
+应该跟 scala 一样
+
+var int a;
+val int b;
 
 
+吸收 scala 的字符串 format
 
+println(s"format1 $a")   a是变量
 
 ## how to implement a register-based virtual machine inside stack-based virtual machine.
 

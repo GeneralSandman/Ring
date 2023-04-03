@@ -274,7 +274,7 @@ class_member_declaration_list
 class_member_declaration
     : attribute_list field_member
     {
-        $$ = create_class_field_member_declaration($1, $2);
+        $$ = create_class_field_member_declaration(0, $2);
     }
     | field_member
     {

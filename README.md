@@ -15,3 +15,5 @@ https://ring.wiki
 
 https://ring-1252697766.cos-website.ap-beijing.myqcloud.com
 
+
+垃圾回收机制

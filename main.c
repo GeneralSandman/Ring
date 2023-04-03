@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
         exit(ERROR_CODE_COMMAND_ERROR);
     }
     command = argv[1];
-    if (!strcmp(command, "version")) {
+    if(!strcmp(command, "version")) {
         printf("Ring version: %s \n", RING_VERSION);
         return 0;
     } else if (!strcmp(command, "help")) {
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     }
 
 
-    if (argc < 3) {
+    if(argc < 3) {
         fprintf(stderr, "%s", command_help_message);
         exit(ERROR_CODE_COMMAND_ERROR);
     }
@@ -57,9 +57,9 @@ int main(int argc, char** argv) {
     }
 
     // Step-0: 读取文件
-    fp = fopen(file_name, "r");
+    fp        = fopen(file_name, "r");
     if (fp == NULL) {
-        fprintf(stderr, "file:%s not found.\n", file_name);
+        fprintf(stderr, "%s not found.\n", file_name);
         exit(1);
     }
 
