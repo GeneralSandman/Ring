@@ -25,3 +25,6 @@ automated-testing.sh.result
 .DS_Store
 
 .cache/*
+
+
+ring.wiki/publish.sh
