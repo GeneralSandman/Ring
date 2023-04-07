@@ -67,6 +67,8 @@ int yyerror(char const *str, ...);
 %token TOKEN_PUBLIC
 %token TOKEN_SELF
 %token TOKEN_ATTRIBUTE
+%token TOKEN_FIELD
+%token TOKEN_METHOD
 
 %token TOKEN_GLOBAL
 %token TOKEN_IF
@@ -272,13 +274,29 @@ class_member_declaration_list
     ;
 
 class_member_declaration
-    : attribute_list field_member
+    : field_member
     {
-        $$ = create_class_field_member_declaration(0, $2);
+        $$ = create_class_member_field_declaration(0, $1);
     }
-    | field_member
+    | method_member
     {
-        $$ = create_class_field_member_declaration(0, $1);
+        $$ = create_class_member_method_declaration(0, $1);
+    }
+    ;
+
+field_member
+    : TOKEN_FIELD type_specifier identifier_list TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::filed_member]\t ");
+        $$ = create_class_member_field($2, $3);
+    }
+    ;
+
+method_member
+    : TOKEN_METHOD identifier TOKEN_LP TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::method_member]\t ");
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, NULL, NULL, $5);
     }
     ;
 
@@ -306,24 +324,6 @@ attribute
     | TOKEN_DELETE
     {
        $$ = ACCESS_DELETE; 
-    }
-    ;
-    
-
-
-field_member
-    : TOKEN_VAR type_specifier identifier_list TOKEN_SEMICOLON
-    {
-        debug_log_with_green_coloar("[RULE::filed_member]\t ");
-        $$ = create_field_member($2, $3);
-    }
-    ;
-
-method_member
-    : function_definition 
-    {
-        debug_log_with_green_coloar("[RULE::method_member]\t ");
-        $$ = create_method_member($1);
     }
     ;
 

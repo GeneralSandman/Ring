@@ -696,17 +696,25 @@ struct ClassMemberDeclaration_Tag {
 struct FieldMember_Tag {
     unsigned int line_number;
 
+    unsigned int   index_of_class; // fix it in fix_ast
     TypeSpecifier* type;
     char*          identifier;
-    unsigned int   index_of_class; // fix it in fix_ast
 };
 
 // 类方法
 struct MethodMember_Tag {
     unsigned int line_number;
 
-    char*        identifier;
     unsigned int index_of_class; // fix it in fix_ast
+    char*        identifier;
+
+    unsigned int parameter_list_size;
+    Parameter*   parameter_list;
+
+    unsigned int        return_list_size;
+    FunctionReturnList* return_list;
+
+    Block* block;
 };
 
 
@@ -1319,11 +1327,10 @@ ClassDefinition* start_class_definition(char* class_identifier);
 ClassDefinition* finish_class_definition(ClassDefinition* class, ClassMemberDeclaration* class_member_declar);
 
 ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclaration* list, ClassMemberDeclaration* decl);
-ClassMemberDeclaration* create_class_field_member_declaration(Attribute attribute, FieldMember* field_member);
-ClassMemberDeclaration* create_class_method_member_declaration(Attribute attribute, MethodMember* method_member);
-
-FieldMember*  create_field_member(TypeSpecifier* type_specifier, Identifier* identifier_list);
-MethodMember* create_method_member(Function* function);
+ClassMemberDeclaration* create_class_member_field_declaration(Attribute attribute, FieldMember* field_member);
+ClassMemberDeclaration* create_class_member_method_declaration(Attribute attribute, MethodMember* method_member);
+FieldMember* create_class_member_field(TypeSpecifier* type_specifier, Identifier* identifier_list);
+MethodMember* create_class_member_method(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
 
 TypeSpecifier* create_class_type_specifier(char* identifier);
 

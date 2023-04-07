@@ -918,7 +918,7 @@ ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclar
     return list;
 }
 
-ClassMemberDeclaration* create_class_field_member_declaration(Attribute attribute, FieldMember* field_member) {
+ClassMemberDeclaration* create_class_member_field_declaration(Attribute attribute, FieldMember* field_member) {
     assert(field_member != NULL);
 
     ClassMemberDeclaration* class_member_declar = malloc(sizeof(ClassMemberDeclaration));
@@ -931,7 +931,7 @@ ClassMemberDeclaration* create_class_field_member_declaration(Attribute attribut
     return class_member_declar;
 }
 
-ClassMemberDeclaration* create_class_method_member_declaration(Attribute attribute, MethodMember* method_member) {
+ClassMemberDeclaration* create_class_member_method_declaration(Attribute attribute, MethodMember* method_member) {
     assert(method_member != NULL);
 
     ClassMemberDeclaration* class_member_declar = malloc(sizeof(ClassMemberDeclaration));
@@ -944,7 +944,7 @@ ClassMemberDeclaration* create_class_method_member_declaration(Attribute attribu
     return class_member_declar;
 }
 
-FieldMember* create_field_member(TypeSpecifier* type_specifier, Identifier* identifier_list) {
+FieldMember* create_class_member_field(TypeSpecifier* type_specifier, Identifier* identifier_list) {
     debug_log_with_yellow_coloar("\t");
 
     FieldMember* field_member    = malloc(sizeof(FieldMember));
@@ -956,10 +956,24 @@ FieldMember* create_field_member(TypeSpecifier* type_specifier, Identifier* iden
     return field_member;
 }
 
-MethodMember* create_method_member(Function* function) {
-    assert(function != NULL);
+MethodMember* create_class_member_method(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
+    debug_log_with_yellow_coloar("\t");
 
     MethodMember* method_member = malloc(sizeof(MethodMember));
+    method_member->line_number = get_ring_compiler_line_number();
+    method_member->index_of_class = -1;
+    method_member->identifier = identifier;
+    method_member->parameter_list_size = 0;
+    method_member->parameter_list = parameter_list;
+    method_member->return_list_size = 0;
+    method_member->return_list = return_list;
+    method_member->block = block;
+    for (Parameter* pos = parameter_list; pos != NULL; pos = pos->next) {
+        method_member->parameter_list_size++;
+    }
+    for (FunctionReturnList* pos = return_list; pos != NULL; pos = pos->next) {
+        method_member->return_list_size++;
+    }
 
     return method_member;
 }
