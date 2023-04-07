@@ -370,10 +370,13 @@ typedef enum {
 } OpcodeOperandType;
 
 struct RVM_Opcode_Info_Tag {
-    RVM_Byte          code;
-    char*             name;
-    OpcodeOperandType type;
-    int               runtime_stack_increment; // estimate runtime stack capacity
+    RVM_Byte          code;// 字节码枚举
+    char*             name;// 字节码字符串
+    OpcodeOperandType type;// 操作数的类型
+    int               runtime_stack_increment; // 对运行时栈空间的增长 可为负值
+    int               pc_increment; // 读取完本字节码，程序计数器的增长 ，便于读取下一字节码
+    // 有的指令 pc_increment 是可以确定的
+    // 有的指令 类似于 jump  只能运行时确定，所以会先配置0
 };
 
 typedef enum {
