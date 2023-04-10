@@ -104,3 +104,22 @@ https://www.cnblogs.com/zjiaxing/p/5557549.html
 
 Linux nm 工具查看 目标文件内容
 https://www.cnblogs.com/downey-blog/p/9583765.html
+
+
+llvm手册
+https://www.llvm.org/docs/LangRef.html
+
+llvm官方mini项目
+https://www.llvm.org/docs/tutorial/index.html
+
+
+## 某位大佬利用 llvm 实现的 一个编译器
+
+该项目已经可以实现前端的大部分功能了，已经生成AST了
+https://github.com/rui314/chibicc
+
+8cc 是 chibicc的原始版本, is a compiler for the C programming language.
+https://github.com/rui314/8cc
+
+llfs 利用 chibicc的AST  和 llvm 去生成字节码
+https://github.com/bigconvience/llfs
