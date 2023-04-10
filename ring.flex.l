@@ -39,6 +39,7 @@ int yywrap(){
 <INITIAL>"@"            { ring_compiler_update_line_content(yytext); return TOKEN_ATTRIBUTE;      }
 <INITIAL>"field"        { ring_compiler_update_line_content(yytext); return TOKEN_FIELD;          }
 <INITIAL>"method"       { ring_compiler_update_line_content(yytext); return TOKEN_METHOD;         }
+<INITIAL>"constructor"  { ring_compiler_update_line_content(yytext); return TOKEN_CONSTRUCTOR;    }
 
 <INITIAL>"global"       { ring_compiler_update_line_content(yytext); return TOKEN_GLOBAL;         }
 <INITIAL>"if"           { ring_compiler_update_line_content(yytext); return TOKEN_IF;             }

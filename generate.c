@@ -122,6 +122,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
     // func
     {RVM_CODE_PUSH_FUNC, "push_func", OPCODE_OPERAND_TYPE_2BYTE, 1, 3}, // TODO: update to 2 byte
+    {RVM_CODE_PUSH_METHOD, "push_method", OPCODE_OPERAND_TYPE_2BYTE, 1, 3}, // TODO:
     {RVM_CODE_ARGUMENT_NUM, "argument_num", OPCODE_OPERAND_TYPE_1BYTE, 0, 2},
     {RVM_CODE_INVOKE_FUNC, "invoke_func", OPCODE_OPERAND_TYPE_0BYTE, -1, 0},
     {RVM_CODE_RETURN, "return", OPCODE_OPERAND_TYPE_2BYTE, 0, 3}, // 操作数代表返回值的数量，ex；return int, double, string;  操作数就是3 FIXME:runtime_stack_increment

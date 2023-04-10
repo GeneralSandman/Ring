@@ -69,6 +69,7 @@ int yyerror(char const *str, ...);
 %token TOKEN_ATTRIBUTE
 %token TOKEN_FIELD
 %token TOKEN_METHOD
+%token TOKEN_CONSTRUCTOR
 
 %token TOKEN_GLOBAL
 %token TOKEN_IF
@@ -274,13 +275,15 @@ class_member_declaration_list
     ;
 
 class_member_declaration
-    : field_member
+    : attribute_list field_member
     {
-        $$ = create_class_member_field_declaration(0, $1);
+        debug_log_with_green_coloar("[RULE::class_member_declaration:field_member]\t ");
+        $$ = create_class_member_field_declaration($1, $2);
     }
-    | method_member
+    | attribute_list method_member
     {
-        $$ = create_class_member_method_declaration(0, $1);
+        debug_log_with_green_coloar("[RULE::class_member_declaration:method_member]\t ");
+        $$ = create_class_member_method_declaration($1, $2);
     }
     ;
 
@@ -296,24 +299,80 @@ method_member
     : TOKEN_METHOD identifier TOKEN_LP TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
+
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, NULL, NULL, $5);
+
+    }
+    | TOKEN_METHOD identifier TOKEN_LP TOKEN_RP TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::method_member]\t ");
+
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, NULL, NULL, NULL);
+
+    }
+    | TOKEN_METHOD identifier TOKEN_LP parameter_list TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::method_member]\t ");
+
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, NULL, $6);
+
+    }
+    | TOKEN_METHOD identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::method_member]\t ");
+
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, NULL, NULL);
+
+    }
+    | TOKEN_METHOD identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::method_member]\t ");
+
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, NULL, $7, $9);
+
+    }
+    | TOKEN_METHOD identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::method_member]\t ");
+
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, NULL, $7, NULL);
+
+    }
+    | TOKEN_METHOD identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    {
+        debug_log_with_green_coloar("[RULE::method_member]\t ");
+
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, $10);
+
+    }
+    | TOKEN_METHOD identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::method_member]\t ");
+
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, NULL);
+
     }
     ;
 
 attribute_list
-    : TOKEN_ATTRIBUTE attribute
+    : /* empty */
     {
-        $$ = $2;
+        debug_log_with_green_coloar("[RULE::attribute_list]\t ");
+        $$ = ATTRIBUTE_NONE;
     }
-    | attribute_list TOKEN_ATTRIBUTE attribute
+    | TOKEN_ATTRIBUTE attribute
     {
-        $$ = $$ | $3;
-
+        debug_log_with_green_coloar("[RULE::attribute_list]\t ");
+        $$ = $2;
     }
     ;
 
 attribute
-    : TOKEN_PUBLIC 
+    : TOKEN_CONSTRUCTOR 
+    {
+       $$ = CONSTRUCTOR; 
+    }
+    | TOKEN_PUBLIC 
     {
        $$ = ACCESS_PUBLIC; 
     }

@@ -493,6 +493,7 @@ typedef enum {
 
     // func
     RVM_CODE_PUSH_FUNC,
+    RVM_CODE_PUSH_METHOD,
     RVM_CODE_ARGUMENT_NUM,
     RVM_CODE_INVOKE_FUNC,
     RVM_CODE_RETURN,
@@ -666,6 +667,7 @@ struct ClassDefinition_Tag {
 };
 
 typedef enum {
+    ATTRIBUTE_NONE = 0,
     ACCESS_PUBLIC  = 0x01,
     ACCESS_PRIVATE = 0x01 << 1,
     ACCESS_DELETE = 0x01 << 2,
