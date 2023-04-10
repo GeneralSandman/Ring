@@ -5,108 +5,108 @@
 
 #define RING_VERSION "ring-v0.2.0-beta"
 
-typedef struct Ring_Compiler_Tag Ring_Compiler;
+typedef struct Ring_Compiler Ring_Compiler;
 
-typedef struct Ring_VirtualMachine_Tag Ring_VirtualMachine;
+typedef struct Ring_VirtualMachine Ring_VirtualMachine;
 
-typedef struct Ring_VirtualMachine_Executer_Tag Ring_VirtualMachine_Executer;
+typedef struct Ring_VirtualMachine_Executer Ring_VirtualMachine_Executer;
 
-typedef struct ImportPackageList_Tag ImportPackageList;
+typedef struct ImportPackageList ImportPackageList;
 
-typedef struct PackageInfo_Tag PackageInfo;
+typedef struct PackageInfo PackageInfo;
 
-typedef struct RVM_Variable_Tag RVM_Variable;
+typedef struct RVM_Variable RVM_Variable;
 
-typedef struct RVM_RuntimeStack_Tag RVM_RuntimeStack;
+typedef struct RVM_RuntimeStack RVM_RuntimeStack;
 
-typedef struct RVM_RuntimeStatic_Tag RVM_RuntimeStatic;
+typedef struct RVM_RuntimeStatic RVM_RuntimeStatic;
 
-typedef struct RVM_RuntimeHeap_Tag RVM_RuntimeHeap;
+typedef struct RVM_RuntimeHeap RVM_RuntimeHeap;
 
-typedef struct RVM_OpcodeBuffer_Tag RVM_OpcodeBuffer;
+typedef struct RVM_OpcodeBuffer RVM_OpcodeBuffer;
 
-typedef struct RVM_Opcode_Info_Tag RVM_Opcode_Info;
+typedef struct RVM_Opcode_Info RVM_Opcode_Info;
 
-typedef struct RVM_LabelTable_Tag RVM_LabelTable;
+typedef struct RVM_LabelTable RVM_LabelTable;
 
-typedef struct Ring_String_Tag Ring_String;
+typedef struct Ring_String Ring_String;
 
-typedef struct Ring_BasicValue_Tag Ring_BasicValue;
+typedef struct Ring_BasicValue Ring_BasicValue;
 
-typedef struct Ring_Array_Tag Ring_Array;
+typedef struct Ring_Array Ring_Array;
 
-typedef struct ClassDefinition_Tag ClassDefinition;
+typedef struct ClassDefinition ClassDefinition;
 
-typedef struct ClassMemberDeclaration_Tag ClassMemberDeclaration;
+typedef struct ClassMemberDeclaration ClassMemberDeclaration;
 
-typedef struct FieldMember_Tag FieldMember;
+typedef struct FieldMember FieldMember;
 
-typedef struct MethodMember_Tag MethodMember;
+typedef struct MethodMember MethodMember;
 
-typedef struct Statement_Tag Statement;
+typedef struct Statement Statement;
 
-typedef struct StatementExecResult_Tag StatementExecResult;
+typedef struct StatementExecResult StatementExecResult;
 
-typedef struct Expression_Tag Expression;
+typedef struct Expression Expression;
 
-typedef struct ArrayIndexExpression_Tag ArrayIndexExpression;
+typedef struct ArrayIndexExpression ArrayIndexExpression;
 
-typedef struct CastExpression_Tag CastExpression;
+typedef struct CastExpression CastExpression;
 
-typedef struct MemberExpression_Tag MemberExpression;
+typedef struct MemberExpression MemberExpression;
 
-typedef struct BinaryExpression_Tag BinaryExpression;
+typedef struct BinaryExpression BinaryExpression;
 
-typedef struct TernaryExpression_Tag TernaryExpression;
+typedef struct TernaryExpression TernaryExpression;
 
-typedef struct FunctionCallExpression_Tag FunctionCallExpression;
+typedef struct FunctionCallExpression FunctionCallExpression;
 
-typedef struct AssignExpression_Tag AssignExpression;
+typedef struct AssignExpression AssignExpression;
 
-typedef struct ArgumentList_Tag ArgumentList;
+typedef struct ArgumentList ArgumentList;
 
-typedef struct Variable_Tag Variable;
+typedef struct Variable Variable;
 
-typedef struct Parameter_Tag Parameter;
+typedef struct Parameter Parameter;
 
-typedef struct Identifier_Tag Identifier;
+typedef struct Identifier Identifier;
 
-typedef struct Function_Tag Function;
+typedef struct Function Function;
 
-typedef struct Block_Tag Block;
+typedef struct Block Block;
 
-typedef struct FunctionReturnList_Tag FunctionReturnList;
+typedef struct FunctionReturnList FunctionReturnList;
 
-typedef struct IfStatement_Tag IfStatement;
+typedef struct IfStatement IfStatement;
 
-typedef struct ElseIfStatement_Tag ElseIfStatement;
+typedef struct ElseIfStatement ElseIfStatement;
 
-typedef struct ForStatement_Tag ForStatement;
+typedef struct ForStatement ForStatement;
 
-typedef struct DoForStatement_Tag DoForStatement;
+typedef struct DoForStatement DoForStatement;
 
-typedef struct BreakStatement_Tag BreakStatement;
+typedef struct BreakStatement BreakStatement;
 
-typedef struct ReturnStatement_Tag ReturnStatement;
+typedef struct ReturnStatement ReturnStatement;
 
-typedef struct ContinueStatement_Tag ContinueStatement;
+typedef struct ContinueStatement ContinueStatement;
 
-typedef struct Ring_DeriveType_Class_Tag Ring_DeriveType_Class;
+typedef struct Ring_DeriveType_Class Ring_DeriveType_Class;
 
-typedef struct Ring_DeriveType_Tag Ring_DeriveType;
+typedef struct Ring_DeriveType Ring_DeriveType;
 
-typedef struct Declaration_Tag Declaration;
+typedef struct Declaration Declaration;
 
-typedef struct TypeSpecifier_Tag TypeSpecifier;
+typedef struct TypeSpecifier TypeSpecifier;
 
-typedef struct RVM_DebugConfig_Tag RVM_DebugConfig;
+typedef struct RVM_DebugConfig RVM_DebugConfig;
 
-typedef struct IdentifierExpression_Tag IdentifierExpression;
+typedef struct IdentifierExpression IdentifierExpression;
 
-typedef struct RVM_String_Tag      RVM_String;
-typedef struct RVM_Array_Tag       RVM_Array;
-typedef struct RVM_ClassObject_Tag RVM_ClassObject;
-typedef struct RVM_Object_Tag      RVM_Object;
+typedef struct RVM_String      RVM_String;
+typedef struct RVM_Array       RVM_Array;
+typedef struct RVM_ClassObject RVM_ClassObject;
+typedef struct RVM_Object      RVM_Object;
 
 typedef void Ring_InnerFunc(int argc, Ring_BasicValue** value);
 
@@ -115,7 +115,7 @@ typedef struct NativeFunction    NativeFunction;
 typedef struct DeriveFunction    DeriveFunction;
 typedef struct RVM_Function      RVM_Function;
 
-struct Ring_Compiler_Tag {
+struct Ring_Compiler {
     char*        current_file_name;
     unsigned int current_line_number;
     unsigned int current_column_number;
@@ -172,7 +172,7 @@ typedef struct {
 
 } RVM_Value;
 
-struct Ring_VirtualMachine_Tag {
+struct Ring_VirtualMachine {
     Ring_VirtualMachine_Executer* executer;
 
     RVM_RuntimeStatic* runtime_static;
@@ -186,12 +186,12 @@ struct Ring_VirtualMachine_Tag {
     RVM_DebugConfig* debug_config;
 };
 
-struct ImportPackageList_Tag {
+struct ImportPackageList {
     PackageInfo*       package_info;
     ImportPackageList* next;
 };
 
-struct PackageInfo_Tag {
+struct PackageInfo {
     unsigned int line_number;
 
     char* package_name;
@@ -260,7 +260,7 @@ typedef struct {
     } u;
 } RVM_ConstantPool;
 
-struct Ring_VirtualMachine_Executer_Tag {
+struct Ring_VirtualMachine_Executer {
     unsigned int      constant_pool_size;
     RVM_ConstantPool* constant_pool_list;
     // 连续数组，非链表
@@ -282,7 +282,7 @@ struct Ring_VirtualMachine_Executer_Tag {
 // generate.c
 
 
-struct RVM_Variable_Tag {
+struct RVM_Variable {
     char*          identifier;
     TypeSpecifier* type;
 };
@@ -296,22 +296,22 @@ typedef enum {
 } RVM_Object_Type;
 
 
-struct RVM_String_Tag {
+struct RVM_String {
     // TODO:
     char* data;
 };
 
-struct RVM_Array_Tag {
+struct RVM_Array {
     // TODO:
     unsigned int i;
 };
 
-struct RVM_ClassObject_Tag {
+struct RVM_ClassObject {
     unsigned int field_count;
     RVM_Value*   field;
 };
 
-struct RVM_Object_Tag {
+struct RVM_Object {
     RVM_Object_Type type;
     union {
         RVM_String      string;
@@ -321,25 +321,25 @@ struct RVM_Object_Tag {
 };
 
 // 支持线性寻址
-struct RVM_RuntimeStack_Tag {
+struct RVM_RuntimeStack {
     RVM_Value*   data;
     unsigned int top_index;
     unsigned int size;
     unsigned int capacity;
 };
 
-struct RVM_RuntimeStatic_Tag {
+struct RVM_RuntimeStatic {
     RVM_Value*   data;
     unsigned int size;
     unsigned int capacity;
 };
 
-struct RVM_RuntimeHeap_Tag {
+struct RVM_RuntimeHeap {
     // TODO: 稍后实现
     unsigned int i;
 };
 
-struct RVM_LabelTable_Tag {
+struct RVM_LabelTable {
     char*        label_name;
     unsigned int label_address;
 };
@@ -352,7 +352,7 @@ typedef struct {
     unsigned int opcode_size;        // 一行Ring源代码 对应 opcode size
 } RVM_LineMap;
 
-struct RVM_OpcodeBuffer_Tag {
+struct RVM_OpcodeBuffer {
     RVM_Byte*    code_list;
     unsigned int code_size;
     unsigned int code_capacity;
@@ -369,7 +369,7 @@ typedef enum {
     OPCODE_OPERAND_TYPE_2BYTE,
 } OpcodeOperandType;
 
-struct RVM_Opcode_Info_Tag {
+struct RVM_Opcode_Info {
     RVM_Byte          code;// 字节码枚举
     char*             name;// 字节码字符串
     OpcodeOperandType type;// 操作数的类型
@@ -526,7 +526,7 @@ typedef struct {
 #define CALL_INFO_MAGIC_NUMBER (0x8421) // 33852
 #define CALL_INFO_SIZE ((sizeof(RVM_CallInfo) - 1) / sizeof(RVM_Value) + 1)
 
-struct Ring_String_Tag {
+struct Ring_String {
     char* buffer;
     int   size;
     int   capacity;
@@ -631,7 +631,7 @@ typedef enum {
     ASSIGN_EXPRESSION_TYPE_CONCAT_ASSIGN, // .=
 } AssignExpressionType;
 
-struct Ring_BasicValue_Tag {
+struct Ring_BasicValue {
     BasicValueType type;
     BasicValueType array_member_type;
 
@@ -647,7 +647,7 @@ struct Ring_BasicValue_Tag {
     // FIXME: 以后更改这个地方
 };
 
-struct Ring_Array_Tag {
+struct Ring_Array {
     unsigned int     size;
     Ring_BasicValue* data;
 };
@@ -657,7 +657,7 @@ struct Ring_Array_Tag {
 // ----------------------------------
 
 
-struct ClassDefinition_Tag {
+struct ClassDefinition {
     unsigned int line_number;
 
     char*                   class_identifier;
@@ -684,7 +684,7 @@ typedef enum {
     MEMBER_METHOD,
 } ClassMemberType;
 
-struct ClassMemberDeclaration_Tag {
+struct ClassMemberDeclaration {
     unsigned int line_number;
 
     Attribute    attribute;
@@ -698,7 +698,7 @@ struct ClassMemberDeclaration_Tag {
 };
 
 // 类成员变量
-struct FieldMember_Tag {
+struct FieldMember {
     unsigned int line_number;
 
     unsigned int   index_of_class; // fix it in fix_ast
@@ -707,7 +707,7 @@ struct FieldMember_Tag {
 };
 
 // 类方法
-struct MethodMember_Tag {
+struct MethodMember {
     unsigned int line_number;
 
     unsigned int index_of_class; // fix it in fix_ast
@@ -727,7 +727,7 @@ struct MethodMember_Tag {
 // class define
 // ----------------------------------
 
-struct Statement_Tag {
+struct Statement {
     unsigned int line_number;
 
     StatementType type;
@@ -745,7 +745,7 @@ struct Statement_Tag {
     Statement* next;
 };
 
-struct StatementExecResult_Tag {
+struct StatementExecResult {
     StatementExecResultType type;
     union {
         Ring_BasicValue* return_value;
@@ -754,7 +754,7 @@ struct StatementExecResult_Tag {
     Ring_BasicValue** return_value_list;
 };
 
-struct Expression_Tag {
+struct Expression {
     unsigned int line_number;
 
     TypeSpecifier* convert_type; // 一个复杂表达式最后结果值的类型, FIX_AST_UPDATE
@@ -785,7 +785,7 @@ typedef enum {
     IDENTIFIER_EXPRESSION_TYPE_FUNCTION,
 } IdentifierExpressionType;
 
-struct IdentifierExpression_Tag {
+struct IdentifierExpression {
     unsigned int line_number;
 
     IdentifierExpressionType type;
@@ -796,7 +796,7 @@ struct IdentifierExpression_Tag {
     } u;
 };
 
-struct ArrayIndexExpression_Tag {
+struct ArrayIndexExpression {
     unsigned int line_number;
 
     char*       variable_identifier;
@@ -814,14 +814,14 @@ typedef enum {
     CAST_TYPE_TO_STRING,
 } CastType;
 
-struct CastExpression_Tag {
+struct CastExpression {
     unsigned int line_number;
 
     TypeSpecifier* type;
     Expression*    operand;
 };
 
-struct MemberExpression_Tag {
+struct MemberExpression {
     unsigned int line_number;
 
     Expression*             object_expression;
@@ -835,14 +835,14 @@ struct MemberExpression_Tag {
     // JobID is member_identifier
 };
 
-struct FunctionCallExpression_Tag {
+struct FunctionCallExpression {
     unsigned int line_number;
 
     Expression*   function_identifier_expression;
     ArgumentList* argument_list;
 };
 
-struct Identifier_Tag { // TODO: 以后废弃这个东西
+struct Identifier { // TODO: 以后废弃这个东西
     unsigned int line_number;
 
     IdentifierType type;
@@ -855,7 +855,7 @@ struct Identifier_Tag { // TODO: 以后废弃这个东西
 };
 
 // TODO: 这里还要兼容 数组元素赋值
-struct AssignExpression_Tag {
+struct AssignExpression {
     unsigned int line_number;
 
     AssignExpressionType type;
@@ -863,24 +863,24 @@ struct AssignExpression_Tag {
     Expression*          operand;
 };
 
-struct BinaryExpression_Tag {
+struct BinaryExpression {
     Expression* left_expression;
     Expression* right_expression;
 };
 
 // 三元运算符
-struct TernaryExpression_Tag {
+struct TernaryExpression {
     Expression* condition_expression;
     Expression* true_expression;
     Expression* false_expression;
 };
 
-struct ArgumentList_Tag {
+struct ArgumentList {
     Expression*   expression;
     ArgumentList* next;
 };
 
-struct Variable_Tag {
+struct Variable {
     unsigned int line_number;
 
     char* variable_identifer;
@@ -896,7 +896,7 @@ struct Variable_Tag {
     Variable*   next;
 };
 
-struct Parameter_Tag {
+struct Parameter {
     unsigned int line_number;
 
     TypeSpecifier* type;
@@ -904,7 +904,7 @@ struct Parameter_Tag {
     Parameter*     next;
 };
 
-struct Declaration_Tag {
+struct Declaration {
     unsigned int line_number;
 
     TypeSpecifier* type;
@@ -930,7 +930,7 @@ typedef struct BlockLabels {
     unsigned int continue_label;
 } BlockLabels;
 
-struct Block_Tag {
+struct Block {
     unsigned int line_number;
 
     BlockType type;
@@ -946,7 +946,7 @@ struct Block_Tag {
     BlockLabels block_labels;
 };
 
-struct Function_Tag {
+struct Function {
     unsigned int line_number;
 
     unsigned int func_index;
@@ -965,12 +965,12 @@ struct Function_Tag {
     Function* next;
 };
 
-struct FunctionReturnList_Tag {
+struct FunctionReturnList {
     VariableType        variable_type;
     FunctionReturnList* next;
 };
 
-struct IfStatement_Tag {
+struct IfStatement {
     unsigned int line_number;
 
     Expression* condition_expression;
@@ -980,7 +980,7 @@ struct IfStatement_Tag {
     Block*           else_block;
 };
 
-struct ElseIfStatement_Tag {
+struct ElseIfStatement {
     unsigned int line_number;
 
     Expression* condition_expression; // TODO: 这个名字得改一下 conidtion_expression;
@@ -990,7 +990,7 @@ struct ElseIfStatement_Tag {
     ElseIfStatement* next;
 };
 
-struct ForStatement_Tag {
+struct ForStatement {
     unsigned int line_number;
 
     Expression* init_expression;
@@ -1000,7 +1000,7 @@ struct ForStatement_Tag {
     Block* block;
 };
 
-struct DoForStatement_Tag {
+struct DoForStatement {
     unsigned int line_number;
 
     Expression* init_expression;
@@ -1010,17 +1010,17 @@ struct DoForStatement_Tag {
 };
 
 
-struct BreakStatement_Tag {
+struct BreakStatement {
     unsigned int line_number;
 
     unsigned int break_loop_num; // break; break 1; break 2;
 };
 
-struct ContinueStatement_Tag {
+struct ContinueStatement {
     unsigned int line_number;
 };
 
-struct ReturnStatement_Tag {
+struct ReturnStatement {
     unsigned int line_number;
 
     unsigned int return_list_size;
@@ -1045,19 +1045,19 @@ typedef enum {
 } Ring_DeriveTypeKind;
 
 
-struct Ring_DeriveType_Class_Tag {
+struct Ring_DeriveType_Class {
     char*            class_identifier;
     ClassDefinition* class_definition; // FIX_AST_UPDATE
 };
 
-struct Ring_DeriveType_Tag {
+struct Ring_DeriveType {
     Ring_DeriveTypeKind kind;
     union {
         Ring_DeriveType_Class* class_type;
     } u;
 };
 
-struct TypeSpecifier_Tag {
+struct TypeSpecifier {
     Ring_BasicType   basic_type;
     Ring_DeriveType* derive_type;
 };
@@ -1072,7 +1072,7 @@ typedef enum {
 
 } RVM_DebugMode;
 
-struct RVM_DebugConfig_Tag {
+struct RVM_DebugConfig {
     RVM_DebugMode debug_mode;
 };
 
