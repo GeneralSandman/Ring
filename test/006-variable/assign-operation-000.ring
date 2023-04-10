@@ -1,81 +1,101 @@
+//
+// File:    006-variable/assign-operation-000.ring
+// Author:  zhenhuli - generalsandman@163.com
+// Date:    2023-04-10
+//
+
+function println_bool(var bool bool_value);
+function println_int(var int int_value);
+function println_double(var double double_value);
+function println_string(var string string_value);
+function debug_assert(var bool bool_value);
+function exit(var int int_value);
+function print(var any value) -> (int);
+function println(var any value) -> (int);
+function printf(var string format, var any value)   -> (int);
+function printfln(var string format, var any value) -> (int);
+
+// -----------------------------
+
+
 var int int_value = 1;
 
 // assign
 int_value = 2;
-print(int_value, "\n");
+println_int(int_value);
 
 
 // add-assign
-print("\ntest add-assign operation\n");
+println_string("\ntest add-assign operation");
 int_value += 1;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value += 2;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value += 10;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value += 1+2+3+4+5+6+7;
-print(int_value, "\n");
+println_int(int_value);
 
 
 
 // sub-assign
-print("\ntest sub-assign operation\n");
+println_string("\ntest sub-assign operation");
 int_value -= 1;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value -= 1;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value -= 4;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value -= 4 - 1 - 1 -1 + 3;
-print(int_value, "\n");
+println_int(int_value);
 
 
 
-print("\ntest mul-assign operation\n");
+println_string("\ntest mul-assign operation");
 int_value *= 100;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value *= 2;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value *= 30;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value *= 1 + 1;
-print(int_value, "\n");
+println_int(int_value);
 
 
 
-print("\ntest div-assign operation\n");
+println_string("\ntest div-assign operation");
 int_value /= 5;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value /= 4;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value /= 3;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value /= 3 + 1 + 2;
-print(int_value, "\n");
+println_int(int_value);
 
 
 
-print("\ntest mod-assign operation\n");
+println_string("\ntest mod-assign operation");
 int_value %= 60 - 1;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value %= 10;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value %= 2 + 1;
-print(int_value, "\n");
+println_int(int_value);
 
 int_value %= 1;
-print(int_value, "\n");
+println_int(int_value);
