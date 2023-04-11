@@ -359,6 +359,7 @@ void fix_class_definition(ClassDefinition* class_definition) {
     }
 }
 
+// TODO:
 // 暂时只支持field-member
 void fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func) {
     assert(member_expression != NULL);

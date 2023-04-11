@@ -393,12 +393,27 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // class
         case RVM_CODE_POP_FIELD_BOOL:
+            object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object->u.class_object.field[oper_num].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
+            // printf("-bool_value:%d\n", object->u.class_object.field[oper_num].u.bool_value);
+            runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_INT:
+            object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object->u.class_object.field[oper_num].u.int_value = STACK_GET_INT_OFFSET(rvm, -2);
+            // printf("-int_value:%d\n", object->u.class_object.field[oper_num].u.int_value);
+            runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_DOUBLE:
+            object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object->u.class_object.field[oper_num].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -2);
+            // printf("-double_value:%f\n", object->u.class_object.field[oper_num].u.double_value);
+            runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_BOOL:
@@ -410,13 +425,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_FIELD_INT:
             object   = STACK_GET_OBJECT_OFFSET(rvm, -1);
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_BOOL_OFFSET(rvm, -1, object->u.class_object.field[oper_num].u.int_value);
+            STACK_SET_INT_OFFSET(rvm, -1, object->u.class_object.field[oper_num].u.int_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_DOUBLE:
             object   = STACK_GET_OBJECT_OFFSET(rvm, -1);
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_BOOL_OFFSET(rvm, -1, object->u.class_object.field[oper_num].u.double_value);
+            STACK_SET_DOUBLE_OFFSET(rvm, -1, object->u.class_object.field[oper_num].u.double_value);
             rvm->pc += 3;
             break;
 

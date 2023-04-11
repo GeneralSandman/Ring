@@ -147,7 +147,10 @@ int yyerror(char const *str, ...);
 %type <m_statement_list> statement statement_list
 %type <m_statement_list> multi_variable_definition_statement
 %type <m_expression> expression expression_list
-%type <m_expression> literal_term
+%type <m_expression> postfix_expression
+%type <m_expression> unitary_expression
+%type <m_expression> primary_not_new_array
+%type <m_expression> primary_expression
 %type <m_expression> expression_arithmetic_operation_additive 
 %type <m_expression> expression_arithmetic_operation_multiplicative 
 %type <m_expression> logical_expression_or
@@ -722,6 +725,15 @@ class_type_specifier
     }
     ;
 
+expression_list
+    : expression
+    | expression_list TOKEN_COMMA expression
+    {
+        debug_log_with_green_coloar("[RULE::expression_list]\t ");
+        $$ = expression_list_add_item($1, $3);
+    }
+    ;
+
 expression
     : logical_expression_or
     {
@@ -843,24 +855,24 @@ expression_arithmetic_operation_additive
     ;
 
 expression_arithmetic_operation_multiplicative
-    : literal_term
+    : unitary_expression
     {
         debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ");
 
     }
-    | expression_arithmetic_operation_multiplicative TOKEN_MUL literal_term
+    | expression_arithmetic_operation_multiplicative TOKEN_MUL unitary_expression
     {
         debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ");
 
         $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_MUL, $1, $3);
     }
-    | expression_arithmetic_operation_multiplicative TOKEN_DIV literal_term
+    | expression_arithmetic_operation_multiplicative TOKEN_DIV unitary_expression
     {
         debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ");
 
         $$ = create_expression_binary(EXPRESSION_TYPE_ARITHMETIC_DIV, $1, $3);
     }
-    | expression_arithmetic_operation_multiplicative TOKEN_MOD literal_term
+    | expression_arithmetic_operation_multiplicative TOKEN_MOD unitary_expression
     {
         debug_log_with_green_coloar("[RULE::expression_arithmetic_operation_multiplicative]\t ");
 
@@ -868,20 +880,52 @@ expression_arithmetic_operation_multiplicative
     }
     ;
 
-literal_term
-    : TOKEN_NOT literal_term
+unitary_expression
+    : TOKEN_NOT unitary_expression
     {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_NOT]\t ");
+        debug_log_with_green_coloar("[RULE::unitary_expression:TOKEN_NOT]\t ");
 
         $$ = create_expression_unitary(EXPRESSION_TYPE_LOGICAL_UNITARY_NOT, $2);
     }
-    | TOKEN_SUB literal_term
+    | TOKEN_SUB unitary_expression
     {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_SUB]\t ");
+        debug_log_with_green_coloar("[RULE::unitary_expression:TOKEN_SUB]\t ");
 
         $$ = create_expression_unitary(EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS, $2);
     }
-    | INT_LITERAL
+    | TOKEN_INCREASE unitary_expression
+    {
+        debug_log_with_green_coloar("[RULE::unitary_expression:TOKEN_INCREASE]\t ");
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX, $2);
+    }
+    | TOKEN_DECREASE unitary_expression
+    {
+        debug_log_with_green_coloar("[RULE::unitary_expression:TOKEN_INCREASE]\t ");
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX, $2);
+    }
+    | postfix_expression
+    ;
+
+postfix_expression
+    : primary_expression TOKEN_INCREASE
+    {
+        debug_log_with_green_coloar("[RULE::postfix_expression:TOKEN_INCREASE]\t ");
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX, $1);
+    }
+    | primary_expression TOKEN_DECREASE
+    {
+        debug_log_with_green_coloar("[RULE::postfix_expression:TOKEN_INCREASE]\t ");
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX, $1);
+    }
+    | primary_expression
+    ;
+
+primary_expression
+    : primary_not_new_array
+    ;
+
+primary_not_new_array
+    : INT_LITERAL
     {
         debug_log_with_green_coloar("[RULE::literal_term:INT_LITERAL]\t ");
 
@@ -915,26 +959,6 @@ literal_term
     {
         debug_log_with_green_coloar("[RULE::literal_term:identifier]\t ");
         $$ = create_expression_identifier($1);
-    }
-    | identifier TOKEN_INCREASE
-    {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX, create_expression_identifier($1));
-    }
-    | TOKEN_INCREASE identifier
-    {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX, create_expression_identifier($2));
-    }
-    | identifier TOKEN_DECREASE
-    {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX, create_expression_identifier($1));
-    }
-    | TOKEN_DECREASE identifier
-    {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX, create_expression_identifier($2));
     }
     | identifier TOKEN_LB expression TOKEN_RB
     {
@@ -970,11 +994,11 @@ function_call_expression
     ;
 
 assign_expression
-    : identifier TOKEN_ASSIGN expression
+    : primary_expression TOKEN_ASSIGN expression
     {
         debug_log_with_green_coloar("[RULE::assign_expression]\t ");
 
-        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ASSIGN, create_expression_identifier($1), $3);
+        $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ASSIGN, $1, $3);
     }
     | identifier TOKEN_ADD_ASSIGN expression
     {
@@ -1011,11 +1035,6 @@ assign_expression
         debug_log_with_green_coloar("[RULE::assign_expression]\t ");
         $$ = create_multi_assign_expression($1, $3, $5);
     }
-    | identifier TOKEN_LB expression TOKEN_RB TOKEN_ASSIGN expression
-    {
-        // $$ = create_multi_
-
-    }
     ;
 
 identifier_list
@@ -1028,15 +1047,6 @@ identifier_list
     {
         debug_log_with_green_coloar("[RULE::identifier_list]\t ");
         $$ = identifier_list_add_item($1, new_identifier(IDENTIFIER_TYPE_VARIABLE, $3));
-    }
-    ;
-
-expression_list
-    : expression
-    | expression_list TOKEN_COMMA expression
-    {
-        debug_log_with_green_coloar("[RULE::expression_list]\t ");
-        $$ = expression_list_add_item($1, $3);
     }
     ;
 
@@ -1080,12 +1090,4 @@ cast
 
 
 
-error_syntax_expression
-    : literal_term TOKEN_INT identifier_list
-    {
-        ring_compiler_error(SYNTAX_VARIABLE_DEFINITION, 0);
-    }
-    ;
-
 %%
-
