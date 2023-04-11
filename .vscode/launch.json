@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/bin/ring",
             "args": [
-                "${workspaceFolder}/test/beat/variable/int-008.ring"
+                "run",
+                "${workspaceFolder}/test/008-class/class-000.ring"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

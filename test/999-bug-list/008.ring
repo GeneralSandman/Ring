@@ -1,7 +1,7 @@
 //
-// File:    class-002.ring
+// File:    class-000.ring
 // Author:  zhenhuli - generalsandman@163.com
-// Date:    2022-08-15
+// Date:    2023-04-11
 //
 
 function println_bool(var bool bool_value);
@@ -17,16 +17,23 @@ function printfln(var string format, var any value) -> (int);
 
 // -----------------------------
 
+
+var double double_value_1 = 1.1;
+var double double_value_2 = 1.1;
+
+debug_assert(double_value_1 == 1.1);
+debug_assert(double_value_2 == 1.1);
+debug_assert(double_value_1 + double_value_2 == 2.2);
+
+
+
 typedef class Job {
-    @public
-    var bool    Running;
-
-    @private
-    var int     JobID;
-
-    @public
-    @private
-    @delete
-    var double  Score;
+    field double  Score;
 };
 
+var Job job_0;
+var Job job_1;
+
+job_0.Score = 1.1;
+job_1.Score = 2.2;
+debug_assert(job_0.Score + job_1.Score == 3.3); // 这里存在bug

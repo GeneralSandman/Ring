@@ -3,8 +3,30 @@ test case 1
 false
 0
 0.000000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
 
 test case 2
-false
-0
-0.000000
+true
+1
+1.100000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 3
+true
+2
+2.200000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 4
+3
+debug_assert PASS
+
+test case 5
+3.300000
+debug_assert PASS
