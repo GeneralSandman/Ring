@@ -45,14 +45,21 @@
 - 实现：@public @private @constructor
 
 - 2023-04-10
-  - 实现：外部访问成员变量： 
-
-Class 定义里边重新进行编写   field 一个list  method 一个list
+  - 实现：外部访问成员变量 ✅
 
 - 2023-04-11
-  - 实现：在外部访问成员变量：如job_0.Running = false; 如 println_bool(job_0.Running)
-  - 设计：self 不设计成系统关键字，也就是不再语法分析的时候，不把他当作是一个token
-  - 实现：访问method
+  - 实现：通过对象访问成员变量：如job_0.Running = false; 如 println_bool(job_0.Running) ✅
+  - 设计：self 不设计成系统关键字，也就是不再语法分析的时候，不把他当作是一个token ✅
+  - 实现：通过对象调用成员函数method，只是简单实现了，见 008-class/class-001.ring ✅
+  - 实现：在method中访问field，涉及到self关键字
+  - 实现：Class 定义里边重新进行编写   field 一个list  method 一个list
+
+- 2023-04-12
+  - 理解：Lua字节码的定义，如果生成字节码，如何解析字节码
+  - 设计：Ring生成字节码、解析字节码
+  - 实现：Ring生成字节码
+  - 实现：Ring解析字节码
+  - 设计：Ring前端和RVM存在较大的耦合，希望通过字节码能够拆分开来
 
 ## 1. 2023-04-03～2023-04-07 周规划
 
