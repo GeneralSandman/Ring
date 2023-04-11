@@ -1,2 +1,12 @@
+
+test case 1
 invoke Job::PrintInfo
+invoke Job::GetStatus
+invoke Job::GetJobID
+invoke Job::GetScore
+
+test case 2
 invoke Job::PrintInfo
+invoke Job::GetStatus
+invoke Job::GetJobID
+invoke Job::GetScore

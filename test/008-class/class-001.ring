@@ -29,10 +29,32 @@ typedef class Job {
     method PrintInfo() {
         println_string("invoke Job::PrintInfo");
     }
+
+    method GetStatus() {
+        println_string("invoke Job::GetStatus");
+    }
+
+    method GetJobID() {
+        println_string("invoke Job::GetJobID");
+    }
+
+    method GetScore() {
+        println_string("invoke Job::GetScore");
+    }
 };
+
+println_string("\ntest case 1");
 
 var Job job_0;
 job_0.PrintInfo();
+job_0.GetStatus();
+job_0.GetJobID();
+job_0.GetScore();
+
+println_string("\ntest case 2");
 
 var Job job_1;
 job_1.PrintInfo();
+job_1.GetStatus();
+job_1.GetJobID();
+job_1.GetScore();
