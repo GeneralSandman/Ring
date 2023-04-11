@@ -154,6 +154,17 @@ Expression* create_expression_(FunctionCallExpression* function_call_expression)
     return expression;
 }
 
+Expression* create_expression_from_method_call(MethodCallExpression* method_call_expression) {
+    debug_log_with_yellow_coloar("function_call_expression->name:");
+
+    Expression* expression                 = malloc(sizeof(Expression));
+    expression->line_number                = get_ring_compiler_line_number();
+    expression->convert_type               = NULL; // fix in fix_ast
+    expression->type                       = EXPRESSION_TYPE_METHOD_CALL;
+    expression->u.method_call_expression   = method_call_expression;
+    return expression;
+}
+
 Expression* create_expression__(AssignExpression* assign_expression) {
     // debug_log_with_yellow_coloar("assign_expression->assign_identifier:%s", assign_expression->assign_identifier);
 
@@ -325,6 +336,15 @@ FunctionCallExpression* create_function_call_expression(char* identifier, Argume
     function_call_expression->function_identifier_expression = function_identifier_expression;
     function_call_expression->argument_list                  = argument_list;
     return function_call_expression;
+}
+
+MethodCallExpression* create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list) {
+    MethodCallExpression* method_call_expression         = malloc(sizeof(MethodCallExpression));
+    method_call_expression->line_number                    = get_ring_compiler_line_number();
+    method_call_expression->object_expression = object_expression;
+    method_call_expression->member_identifier                  = member_identifier;
+    method_call_expression->argument_list                  = argument_list;
+    return method_call_expression;
 }
 
 Expression* expression_list_add_item(Expression* expression_list, Expression* expression) {

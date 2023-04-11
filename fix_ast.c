@@ -17,7 +17,9 @@ void ring_compiler_fix_ast(Ring_Compiler* compiler) {
     }
 
     // fix class list
-    for (ClassDefinition* pos = compiler->class_definition_list; pos != NULL; pos = pos->next) {
+    unsigned int class_index = 0;
+    for (ClassDefinition* pos = compiler->class_definition_list; pos != NULL; pos = pos->next, class_index++) {
+        pos->class_index = class_index;
         fix_class_definition(pos);
     }
 
@@ -116,6 +118,9 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
 
     case EXPRESSION_TYPE_FUNCTION_CALL:
         fix_function_call_expression(expression->u.function_call_expression, block, func);
+        break;
+    case EXPRESSION_TYPE_METHOD_CALL:
+        fix_method_call_expression(expression->u.method_call_expression, block, func);
         break;
 
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
@@ -344,6 +349,41 @@ void fix_function_call_expression(FunctionCallExpression* function_call_expressi
     }
 }
 
+void fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func) {
+    if (method_call_expression == NULL) {
+        return;
+    }
+
+    char*                   member_identifier  = method_call_expression->member_identifier;
+    ClassDefinition*        class_definition   = NULL;
+    ClassMemberDeclaration* member_declaration = NULL;
+    Expression*             object_expression  = method_call_expression->object_expression;
+
+    // 0. fix object expression
+    fix_expression(object_expression, block, func);
+
+    // 1. find class definition by object.
+    class_definition = object_expression->convert_type->derive_type->u.class_type->class_definition;
+    if (class_definition == NULL) {
+        fprintf(stderr, "fix_method_call_expression error\n");
+        exit(ERROR_CODE_COMPILE_ERROR);
+    }
+
+    // 2. find member declaration by member identifier.
+    member_declaration = search_class_member(class_definition, member_identifier);
+    if (member_declaration == NULL) {
+        fprintf(stderr, "fix_member_expression error\n");
+        exit(ERROR_CODE_COMPILE_ERROR);
+    }
+    method_call_expression->member_declaration = member_declaration;
+
+    // 4. fix argument list
+    ArgumentList* pos = method_call_expression->argument_list;
+    for (; pos != NULL; pos = pos->next) {
+        fix_expression(pos->expression, block, func);
+    }
+}
+
 void fix_class_definition(ClassDefinition* class_definition) {
     assert(class_definition != NULL);
 
@@ -355,6 +395,10 @@ void fix_class_definition(ClassDefinition* class_definition) {
             pos->u.field->index_of_class = field_index++;
         } else if (pos->type == MEMBER_METHOD) {
             pos->u.method->index_of_class = method_index++;
+
+            if(pos->u.method->block) {
+                fix_statement_list(pos->u.method->block->statement_list, pos->u.method->block, NULL);
+            }
         }
     }
 }

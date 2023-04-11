@@ -125,6 +125,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_METHOD, "push_method", OPCODE_OPERAND_TYPE_2BYTE, 1, 3}, // TODO:
     {RVM_CODE_ARGUMENT_NUM, "argument_num", OPCODE_OPERAND_TYPE_1BYTE, 0, 2},
     {RVM_CODE_INVOKE_FUNC, "invoke_func", OPCODE_OPERAND_TYPE_0BYTE, -1, 0},
+    {RVM_CODE_INVOKE_METHOD, "invoke_method", OPCODE_OPERAND_TYPE_0BYTE, -2, 0},
     {RVM_CODE_RETURN, "return", OPCODE_OPERAND_TYPE_2BYTE, 0, 3}, // 操作数代表返回值的数量，ex；return int, double, string;  操作数就是3 FIXME:runtime_stack_increment
     {RVM_CODE_FUNCTION_FINISH, "function_finish", OPCODE_OPERAND_TYPE_0BYTE, 0},
 
@@ -156,6 +157,7 @@ void ring_generate_vm_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer
 
     add_global_variable(compiler, executer);
     add_functions(compiler, executer);
+    add_classes(compiler, executer);
     add_top_level_code(compiler, executer);
 
 #ifdef DEBUG
@@ -202,6 +204,60 @@ void add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* execut
     }
 }
 
+void add_classes(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer) {
+    debug_log_with_darkgreen_coloar("\t");
+    ClassDefinition* pos = compiler->class_definition_list;
+    unsigned int class_definition_list_size = compiler->class_definition_list_size;
+    unsigned int i = 0;
+
+    executer->class_size = class_definition_list_size;
+    executer->class_list = malloc(sizeof(RVM_Class) * class_definition_list_size);
+
+    for(; pos; pos = pos->next, i++) {
+        copy_class(executer, pos, &executer->class_list[i]);
+    }
+}
+
+void copy_class(Ring_VirtualMachine_Executer* executer, ClassDefinition* src, RVM_Class* dest) {
+    debug_log_with_darkgreen_coloar("\t");
+
+    dest->identifier = src->class_identifier;
+    dest->field_size = 0;
+    dest->field_list = NULL;
+    dest->method_size = 0;
+    dest->method_list = NULL;
+
+    ClassMemberDeclaration* pos = src->member;
+    for(;pos != NULL; pos=pos->next) {
+        if(pos->type == MEMBER_FIELD) {
+            dest->field_size++;
+        } else if(pos->type == MEMBER_METHOD) {
+            dest->method_size++;
+        }
+    }
+
+    dest->method_list = malloc(sizeof(RVM_Method) * dest->method_size);
+
+    unsigned int i = 0;
+    pos = src->member;
+    for(;pos != NULL; pos=pos->next) {
+        if(pos->type == MEMBER_FIELD) {
+        } else if(pos->type == MEMBER_METHOD) {
+            copy_method(pos->u.method, &dest->method_list[i]);
+            if(pos->u.method->block != NULL)
+                generate_code_from_method_definition(executer, pos->u.method, &dest->method_list[i]);
+            i++;
+        }
+    }
+
+    // unsigned int index = 0;
+    // for(;index <  dest->method_size; index++) {
+    //     RVM_Method* tmp =  &dest->method_list[index];
+    //     printf("debug method_size:%s\n",  tmp->identifier);
+    // }
+
+}
+
 void copy_function(Function* src, RVM_Function* dest) {
     debug_log_with_darkgreen_coloar("\t");
 
@@ -222,6 +278,12 @@ void copy_function(Function* src, RVM_Function* dest) {
     }
 
     dest->estimate_runtime_stack_capacity = 0;
+}
+
+void copy_method(MethodMember* src, RVM_Method* dest) {
+    dest->identifier = src->identifier;
+    dest->rvm_function = malloc(sizeof(RVM_Function));
+    dest->rvm_function->u.derive_func = malloc(sizeof(DeriveFunction));
 }
 
 // 添加顶层代码
@@ -261,6 +323,21 @@ void generate_code_from_function_definition(Ring_VirtualMachine_Executer* execut
 #endif
 }
 
+void generate_code_from_method_definition(Ring_VirtualMachine_Executer* executer, MethodMember* src, RVM_Method* dest) {
+    debug_log_with_darkgreen_coloar("\t");
+
+    RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
+    generate_vmcode_from_statement_list(executer, src->block, src->block->statement_list, opcode_buffer);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_FUNCTION_FINISH, 0);
+
+    opcode_buffer_fix_label(opcode_buffer);
+
+    dest->rvm_function->u.derive_func->code_list           = opcode_buffer->code_list;
+    dest->rvm_function->u.derive_func->code_size           = opcode_buffer->code_size;
+    dest->rvm_function->u.derive_func->local_variable_size = src->block->declaration_list_size;
+
+
+}
 
 void vm_executer_dump(Ring_VirtualMachine_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
@@ -670,6 +747,9 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
     case EXPRESSION_TYPE_FUNCTION_CALL:
         generate_vmcode_from_function_call_expression(executer, expression->u.function_call_expression, opcode_buffer);
         break;
+    case EXPRESSION_TYPE_METHOD_CALL:
+        generate_vmcode_from_method_call_expression(executer, expression->u.method_call_expression, opcode_buffer);
+        break;
 
     case EXPRESSION_TYPE_CAST:
         generate_vmcode_from_cast_expression(executer, expression->u.cast_expression, opcode_buffer);
@@ -1026,6 +1106,31 @@ void generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer*
 
     generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer, 1);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0);
+}
+
+void generate_vmcode_from_method_call_expression(Ring_VirtualMachine_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (method_call_expression == NULL) {
+        return;
+    }
+    ArgumentList* pos                = method_call_expression->argument_list;
+    unsigned int  argument_list_size = 0;
+    for (; pos != NULL; pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
+        argument_list_size++;
+    }
+
+    // argument
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size);
+
+    // object
+    generate_vmcode_from_expression(executer, method_call_expression->object_expression, opcode_buffer, 1);
+
+    // generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer, 1);
+    ClassMemberDeclaration* member_declaration = method_call_expression->member_declaration;
+    unsigned member_method_index = member_declaration->u.method->index_of_class;
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_METHOD, member_method_index);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_METHOD, 0);
 }
 
 void generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer) {

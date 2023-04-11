@@ -138,6 +138,9 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
                 printf("%7d | %20.*s | %6s | %6s\n", i, 20, value.u.object->u.string.data, space, pointer);
             }
             break;
+        case RVM_VALUE_TYPE_OBJECT:
+            printf("%7d | %20s | %6s | %6s\n", i, "object", space, pointer);
+            break;
         default:
             break;
         }

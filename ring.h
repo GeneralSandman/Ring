@@ -61,6 +61,8 @@ typedef struct TernaryExpression TernaryExpression;
 
 typedef struct FunctionCallExpression FunctionCallExpression;
 
+typedef struct MethodCallExpression MethodCallExpression;
+
 typedef struct AssignExpression AssignExpression;
 
 typedef struct ArgumentList ArgumentList;
@@ -114,6 +116,9 @@ typedef struct RVM_LocalVariable RVM_LocalVariable;
 typedef struct NativeFunction    NativeFunction;
 typedef struct DeriveFunction    DeriveFunction;
 typedef struct RVM_Function      RVM_Function;
+typedef struct RVM_Field         RVM_Field;
+typedef struct RVM_Method        RVM_Method;
+typedef struct RVM_Class         RVM_Class;
 
 struct Ring_Compiler {
     char*        current_file_name;
@@ -183,6 +188,9 @@ struct Ring_VirtualMachine {
     RVM_Function* function_list;
     unsigned int  function_size;
 
+    RVM_Class*    class_list;
+    unsigned int  class_size;
+
     RVM_DebugConfig* debug_config;
 };
 
@@ -241,6 +249,26 @@ struct RVM_Function {
     unsigned int estimate_runtime_stack_capacity;
 };
 
+struct RVM_Field {
+    char*   identifier;
+};
+
+// 他的本质就是一个 函数
+// 只不过他可以引用 field
+struct RVM_Method {
+    char*   identifier;
+    RVM_Function* rvm_function;
+};
+
+struct RVM_Class {
+    char*        identifier;
+
+    unsigned int field_size;
+    RVM_Field*  field_list;
+
+    unsigned int method_size;
+    RVM_Method*  method_list;
+};
 
 // generate.c
 
@@ -270,6 +298,9 @@ struct Ring_VirtualMachine_Executer {
     // 连续数组，非链表
     unsigned int  function_size;
     RVM_Function* function_list;
+
+    unsigned int class_size;
+    RVM_Class*   class_list;
 
     // 连续数组，非链表
     unsigned int code_size;
@@ -307,6 +338,7 @@ struct RVM_Array {
 };
 
 struct RVM_ClassObject {
+    ClassDefinition*   class_def;
     unsigned int field_count;
     RVM_Value*   field;
 };
@@ -496,6 +528,7 @@ typedef enum {
     RVM_CODE_PUSH_METHOD,
     RVM_CODE_ARGUMENT_NUM,
     RVM_CODE_INVOKE_FUNC,
+    RVM_CODE_INVOKE_METHOD,
     RVM_CODE_RETURN,
     RVM_CODE_FUNCTION_FINISH,
 
@@ -562,6 +595,7 @@ typedef enum {
     EXPRESSION_TYPE_VARIABLE,
     EXPRESSION_TYPE_IDENTIFIER,
     EXPRESSION_TYPE_FUNCTION_CALL,
+    EXPRESSION_TYPE_METHOD_CALL,
     EXPRESSION_TYPE_ASSIGN,
 
     EXPRESSION_TYPE_TERNARY, // 三目运算
@@ -660,6 +694,7 @@ struct Ring_Array {
 struct ClassDefinition {
     unsigned int line_number;
 
+    unsigned int            class_index;
     char*                   class_identifier;
     ClassMemberDeclaration* member;
 
@@ -766,6 +801,7 @@ struct Expression {
         char*                   string_literal;
         IdentifierExpression*   identifier_expression;
         FunctionCallExpression* function_call_expression;
+        MethodCallExpression*   method_call_expression;
         AssignExpression*       assign_expression;
         TernaryExpression*      ternary_expression;
         BinaryExpression*       binary_expression;
@@ -840,6 +876,15 @@ struct FunctionCallExpression {
     unsigned int line_number;
 
     Expression*   function_identifier_expression;
+    ArgumentList* argument_list;
+};
+
+struct MethodCallExpression {
+    unsigned int line_number;
+
+    Expression*             object_expression;
+    char*                   member_identifier;
+    ClassMemberDeclaration* member_declaration; // FIX_AST_UPDATE
     ArgumentList* argument_list;
 };
 
@@ -1278,6 +1323,7 @@ Expression*             create_expression_identifier(char* identifier);
 Expression*             create_expression_identifier2(char* identifier, IdentifierExpressionType type);
 Expression*             create_expression_identifier_with_index(char* identifier, Expression* index);
 Expression*             create_expression_(FunctionCallExpression* function_call_expression);
+Expression*             create_expression_from_method_call(MethodCallExpression* method_call_expression);
 Expression*             create_expression__(AssignExpression* assign_expression);
 Expression*             create_expression_ternary(Expression* condition, Expression* true_expression, Expression* false_expression);
 Expression*             create_expression_binary(ExpressionType type, Expression* left, Expression* right);
@@ -1290,6 +1336,7 @@ Expression*             create_member_expression();
 AssignExpression*       create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
 AssignExpression*       create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* operand);
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list);
+MethodCallExpression*   create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list);
 Expression*             expression_list_add_item(Expression* expression_list, Expression* expression);
 ArgumentList*           argument_list_add_item3(ArgumentList* argument_list, ArgumentList* argument);
 ArgumentList*           create_argument_list_from_expression(Expression* expression);
@@ -1363,6 +1410,7 @@ TypeSpecifier*          fix_identifier_expression(IdentifierExpression* expressi
 void                    fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
 void                    fix_binary_expression(Expression* expression, Block* block, Function* func);
 void                    fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
+void                    fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func);
 void                    fix_class_definition(ClassDefinition* class_definition);
 void                    fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func);
 void                    fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
@@ -1379,9 +1427,13 @@ Ring_VirtualMachine_Executer* new_ring_vm_executer();
 void              ring_generate_vm_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
 void              add_global_variable(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
 void              add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
+void add_classes(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
+void copy_class(Ring_VirtualMachine_Executer* executer, ClassDefinition* src, RVM_Class* dest);
 void              copy_function(Function* src, RVM_Function* dest);
+void copy_method(MethodMember* src, RVM_Method* dest);
 void              add_top_level_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
 void              generate_code_from_function_definition(Ring_VirtualMachine_Executer* executer, Function* src, RVM_Function* dest);
+void generate_code_from_method_definition(Ring_VirtualMachine_Executer* executer, MethodMember* src, RVM_Method* dest);
 void              vm_executer_dump(Ring_VirtualMachine_Executer* executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
 void              generate_vmcode_from_block(Ring_VirtualMachine_Executer* executer, Block* block, RVM_OpcodeBuffer* opcode_buffer);
@@ -1409,6 +1461,7 @@ void              generate_vmcode_from_int_expression(Ring_VirtualMachine_Execut
 void              generate_vmcode_from_double_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_method_call_expression(Ring_VirtualMachine_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_member_expression(Ring_VirtualMachine_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_ternary_condition_expression(Ring_VirtualMachine_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer);
@@ -1438,6 +1491,7 @@ RVM_RuntimeStatic*   new_runtime_static();
 Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* executer);
 void                 rvm_add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static);
 RVM_Object*          new_class_object();
+void                 rvm_add_classs(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm);
 void                 rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);

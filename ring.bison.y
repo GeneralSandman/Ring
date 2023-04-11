@@ -23,6 +23,7 @@ int yyerror(char const *str, ...);
     Expression*                 m_expression;
     AssignExpression*           m_assign_expression;
     FunctionCallExpression*     m_function_call_expression;
+    MethodCallExpression*       m_method_call_expression;
     ArgumentList*               m_argument_list;
     Function*                   m_function_definition;
     Parameter*                  m_parameter_list;
@@ -65,7 +66,6 @@ int yyerror(char const *str, ...);
 %token TOKEN_CLASS
 %token TOKEN_PRIVATE
 %token TOKEN_PUBLIC
-%token TOKEN_SELF
 %token TOKEN_ATTRIBUTE
 %token TOKEN_FIELD
 %token TOKEN_METHOD
@@ -160,6 +160,7 @@ int yyerror(char const *str, ...);
 %type <m_expression> maybe_empty_expression
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
+%type <m_method_call_expression> method_call_expression
 %type <m_argument_list> argument_list argument
 %type <m_function_definition> function_definition
 %type <m_parameter_list> parameter_list parameter
@@ -389,20 +390,7 @@ attribute
     }
     ;
 
-statement_list
-    : statement
-    {
-        debug_log_with_green_coloar("[RULE::statement:statement]\t ");
-        // $$ = statement_list_add_item2($1);
-    }
-    | statement_list statement
-    {
-        // 这个地方不应该加在全局的 statment_list 中
-        // 应该只放到函数的 statement_list 中
-        debug_log_with_green_coloar("[RULE::statement:statement_list]\t ");
-        $$ = statement_list_add_item3($1, $2);
-    }
-    ;
+
 
 maybe_empty_expression
     :
@@ -418,6 +406,20 @@ maybe_empty_expression
     }
     ;
 
+statement_list
+    : statement
+    {
+        debug_log_with_green_coloar("[RULE::statement:statement]\t ");
+        // $$ = statement_list_add_item2($1);
+    }
+    | statement_list statement
+    {
+        // 这个地方不应该加在全局的 statment_list 中
+        // 应该只放到函数的 statement_list 中
+        debug_log_with_green_coloar("[RULE::statement:statement_list]\t ");
+        $$ = statement_list_add_item3($1, $2);
+    }
+    ;
 statement
     : maybe_empty_expression TOKEN_SEMICOLON
     {
@@ -971,6 +973,12 @@ primary_not_new_array
 
         $$ = create_expression_($1);
     }
+    | method_call_expression 
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:method_call_expression]\t ");
+
+        $$ = create_expression_from_method_call($1); 
+    }
     | identifier TOKEN_DOT identifier
     {
         debug_log_with_green_coloar("[RULE::literal_term:member_expression]\t ");
@@ -990,6 +998,21 @@ function_call_expression
         debug_log_with_green_coloar("[RULE::function_call_expression]\t ");
 
         $$ = create_function_call_expression($1, NULL);
+    }
+    ;
+
+method_call_expression
+    : identifier TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
+    {
+        debug_log_with_green_coloar("[RULE::function_call_expression]\t ");
+
+        $$ = create_method_call_expression(create_expression_identifier($1), $3, $5);
+    }
+    | identifier TOKEN_DOT identifier TOKEN_LP TOKEN_RP
+    {
+        debug_log_with_green_coloar("[RULE::function_call_expression]\t ");
+
+        $$ = create_method_call_expression(create_expression_identifier($1), $3, NULL);
     }
     ;
 

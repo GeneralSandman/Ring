@@ -35,7 +35,6 @@ int yywrap(){
 <INITIAL>"class"        { ring_compiler_update_line_content(yytext); return TOKEN_CLASS;          }
 <INITIAL>"private"      { ring_compiler_update_line_content(yytext); return TOKEN_PRIVATE;        }
 <INITIAL>"public"       { ring_compiler_update_line_content(yytext); return TOKEN_PUBLIC;         }
-<INITIAL>"self"         { ring_compiler_update_line_content(yytext); return TOKEN_SELF;           }
 <INITIAL>"@"            { ring_compiler_update_line_content(yytext); return TOKEN_ATTRIBUTE;      }
 <INITIAL>"field"        { ring_compiler_update_line_content(yytext); return TOKEN_FIELD;          }
 <INITIAL>"method"       { ring_compiler_update_line_content(yytext); return TOKEN_METHOD;         }

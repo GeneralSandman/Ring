@@ -103,12 +103,15 @@ Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* execu
     rvm->pc                  = 0;
     rvm->function_list       = NULL;
     rvm->function_size       = 0;
+    rvm->class_list          = executer->class_list; // FIXME:
+    rvm->class_size          = executer->class_size; // FIXME:
     rvm->debug_config        = NULL;
 
     // init something
     rvm_add_static_variable(executer, rvm->runtime_static);
     rvm_register_native_functions(rvm);
     rvm_add_derive_functions(executer, rvm);
+    rvm_add_classs(executer, rvm);
 
     return rvm;
 }
@@ -168,6 +171,7 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
 
     RVM_Object* object                 = malloc(sizeof(RVM_Object));
     object->type                       = RVM_OBJECT_TYPE_CLASS;
+    object->u.class_object.class_def   = class_definition;
     object->u.class_object.field_count = field_count;
     object->u.class_object.field       = field;
 
@@ -201,6 +205,9 @@ void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_Virtu
     }
 }
 
+void rvm_add_classs(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm) {
+    debug_log_with_white_coloar("\t");
+}
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
 
@@ -214,6 +221,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
     unsigned int index                  = 0;
     unsigned int func_index             = 0;
+    unsigned int method_index           = 0;
     unsigned int oper_num               = 0;
     unsigned int const_index            = 0;
     unsigned int caller_stack_base      = 0;
@@ -687,6 +695,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
+        case RVM_CODE_PUSH_METHOD:
+            oper_num   = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            method_index = oper_num;
+            STACK_SET_INT_OFFSET(rvm, 0, method_index);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+            break;
         case RVM_CODE_ARGUMENT_NUM:
             oper_num           = code_list[rvm->pc + 1];
             argument_list_size = oper_num;
@@ -705,6 +720,17 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                        &rvm->pc,
                                        &caller_stack_base);
             }
+            break;
+        case RVM_CODE_INVOKE_METHOD:
+            method_index = STACK_GET_INT_OFFSET(rvm, -1);
+            object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            runtime_stack->top_index -= 2;
+            invoke_derive_function(rvm,
+                                       &function, rvm->class_list[object->u.class_object.class_def->class_index].method_list[method_index].rvm_function,
+                                       &code_list, &code_size,
+                                       &rvm->pc,
+                                       &caller_stack_base);
+
             break;
         case RVM_CODE_RETURN:
             return_value_list_size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
