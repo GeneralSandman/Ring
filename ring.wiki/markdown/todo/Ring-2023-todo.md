@@ -51,6 +51,7 @@ Class 定义里边重新进行编写   field 一个list  method 一个list
 
 - 2023-04-11
   - 实现：在外部访问成员变量：如job_0.Running = false; 如 println_bool(job_0.Running)
+  - 设计：self 不设计成系统关键字，也就是不再语法分析的时候，不把他当作是一个token
   - 实现：访问method
 
 ## 1. 2023-04-03～2023-04-07 周规划
