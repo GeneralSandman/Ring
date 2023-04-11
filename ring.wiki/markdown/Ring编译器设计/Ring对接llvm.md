@@ -115,6 +115,10 @@ https://www.llvm.org/docs/tutorial/index.html
 
 ## 某位大佬利用 llvm 实现的 一个编译器
 
+
+tinyc 编译器
+https://pandolia.net/tinyc/ch15_tinyc_backend.html
+
 该项目已经可以实现前端的大部分功能了，已经生成AST了
 https://github.com/rui314/chibicc
 
@@ -123,3 +127,13 @@ https://github.com/rui314/8cc
 
 llfs 利用 chibicc的AST  和 llvm 去生成字节码
 https://github.com/bigconvience/llfs
+
+
+
+如何对 lua字节码 进行优化
+死代码消除。。
+https://zhuanlan.zhihu.com/p/615142061
+
+lua垃圾回收
+https://blog.codingnow.com/2018/10/lua_gc.html
+https://www.zhihu.com/tardis/zm/art/133939450?source_id=1003
