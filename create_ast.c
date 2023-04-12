@@ -9,18 +9,7 @@ void create_statement_list(Statement* statement) {
     ring_compiler_init_statement_list(statement);
 }
 
-void statement_list_add_item(Statement* statement) {
-    debug_log_with_yellow_coloar("statement->type:%d", statement->type);
-
-    ring_compiler_add_statement(statement);
-}
-
-Statement* statement_list_add_item2(Statement* statement) {
-    debug_log_with_yellow_coloar("statement->type:%d", statement->type);
-    return NULL;
-}
-
-Statement* statement_list_add_item3(Statement* statement_list, Statement* statement) {
+Statement* statement_list_add_item(Statement* statement_list, Statement* statement) {
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
 
     Statement* pos = statement_list;
@@ -81,14 +70,6 @@ void add_function_definition(Function* function_definition) {
     pos->next = function_definition;
 }
 
-Expression* create_expression() {
-    // debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
-
-    Expression* expression = malloc(sizeof(Expression));
-
-    return expression;
-}
-
 Expression* create_expression_identifier(char* identifier) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
@@ -143,7 +124,7 @@ Expression* create_expression_identifier_with_index(char* identifier, Expression
     return expression;
 }
 
-Expression* create_expression_(FunctionCallExpression* function_call_expression) {
+Expression* create_expression_from_function_call(FunctionCallExpression* function_call_expression) {
     debug_log_with_yellow_coloar("function_call_expression->name:");
 
     Expression* expression                 = malloc(sizeof(Expression));
@@ -165,7 +146,7 @@ Expression* create_expression_from_method_call(MethodCallExpression* method_call
     return expression;
 }
 
-Expression* create_expression__(AssignExpression* assign_expression) {
+Expression* create_expression_assign(AssignExpression* assign_expression) {
     // debug_log_with_yellow_coloar("assign_expression->assign_identifier:%s", assign_expression->assign_identifier);
 
     Expression* expression          = malloc(sizeof(Expression));

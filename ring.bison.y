@@ -402,7 +402,7 @@ maybe_empty_expression
     {
         debug_log_with_green_coloar("[RULE:expression-assign_expression]\t ");
         
-        $$ = create_expression__($1);
+        $$ = create_expression_assign($1);
     }
     ;
 
@@ -410,14 +410,14 @@ statement_list
     : statement
     {
         debug_log_with_green_coloar("[RULE::statement:statement]\t ");
-        // $$ = statement_list_add_item2($1);
+        $$ = $1;
     }
     | statement_list statement
     {
         // 这个地方不应该加在全局的 statment_list 中
         // 应该只放到函数的 statement_list 中
         debug_log_with_green_coloar("[RULE::statement:statement_list]\t ");
-        $$ = statement_list_add_item3($1, $2);
+        $$ = statement_list_add_item($1, $2);
     }
     ;
 statement
@@ -971,7 +971,7 @@ primary_not_new_array
     {
         debug_log_with_green_coloar("[RULE::literal_term:function_call_expression]\t ");
 
-        $$ = create_expression_($1);
+        $$ = create_expression_from_function_call($1);
     }
     | method_call_expression 
     {
