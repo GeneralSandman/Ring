@@ -232,7 +232,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Function* function = NULL;
     RVM_Object*   object   = NULL;
 
-    char* string_buf;
+    // char* string_buf;
 
     while (rvm->pc < code_size) {
         RVM_Byte opcode = code_list[rvm->pc];
@@ -771,7 +771,7 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, un
     RVM_Value ret;
 
     RVM_NativeFuncProc* native_func_proc = function->u.native_func->func_proc;
-    unsigned int        arg_count        = function->u.native_func->arg_count;
+    // unsigned int        arg_count        = function->u.native_func->arg_count;
     RVM_Value*          args; // TODO:
 
     // TODO: how to handle arg_count > 1

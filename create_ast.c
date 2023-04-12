@@ -182,6 +182,7 @@ Expression* create_expression_ternary(Expression* condition, Expression * true, 
     expression->convert_type                               = NULL; // fix in fix_ast
     expression->type                                       = EXPRESSION_TYPE_TERNARY;
     expression->u.ternary_expression                       = malloc(sizeof(TernaryExpression));
+    expression->u.ternary_expression->line_number          = get_ring_compiler_line_number();
     expression->u.ternary_expression->condition_expression = condition;
     expression->u.ternary_expression->true_expression      = true;
     expression->u.ternary_expression->false_expression     = false;
@@ -196,6 +197,7 @@ Expression* create_expression_binary(ExpressionType type, Expression* left, Expr
     expression->convert_type                          = NULL; // fix in fix_ast
     expression->type                                  = type;
     expression->u.binary_expression                   = malloc(sizeof(BinaryExpression));
+    expression->u.binary_expression->line_number      = get_ring_compiler_line_number();
     expression->u.binary_expression->left_expression  = left;
     expression->u.binary_expression->right_expression = right;
 
@@ -341,7 +343,7 @@ FunctionCallExpression* create_function_call_expression(char* identifier, Argume
 MethodCallExpression* create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list) {
     MethodCallExpression* method_call_expression         = malloc(sizeof(MethodCallExpression));
     method_call_expression->line_number                    = get_ring_compiler_line_number();
-    method_call_expression->object_expression = object_expression;
+    method_call_expression->object_expression            = object_expression;
     method_call_expression->member_identifier                  = member_identifier;
     method_call_expression->argument_list                  = argument_list;
     return method_call_expression;
@@ -369,6 +371,7 @@ ArgumentList* create_argument_list_from_expression(Expression* expression) {
     debug_log_with_yellow_coloar("expression->type:%d", expression->type);
 
     ArgumentList* argument_list = malloc(sizeof(ArgumentList));
+    argument_list->line_number  = get_ring_compiler_line_number();
     argument_list->expression   = expression;
     argument_list->next         = NULL;
     return argument_list;
