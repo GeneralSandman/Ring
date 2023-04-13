@@ -19,6 +19,9 @@ Ring_Compiler* new_ring_compiler(char* file_name) {
     ring_compiler->current_column_number = 1;
     ring_compiler->current_line_content  = new_ring_string();
 
+    ring_compiler->import_package_size = 0;
+    ring_compiler->import_package_list = NULL;
+
     ring_compiler->statement_list_size = 0;
     ring_compiler->statement_list      = NULL;
 

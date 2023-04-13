@@ -11,8 +11,6 @@ typedef struct Ring_VirtualMachine Ring_VirtualMachine;
 
 typedef struct Ring_VirtualMachine_Executer Ring_VirtualMachine_Executer;
 
-typedef struct ImportPackageList ImportPackageList;
-
 typedef struct PackageInfo PackageInfo;
 
 typedef struct RVM_Variable RVM_Variable;
@@ -126,6 +124,9 @@ struct Ring_Compiler {
     unsigned int current_column_number;
     Ring_String* current_line_content;
 
+    unsigned int    import_package_size;
+    PackageInfo*    import_package_list;
+
     unsigned int statement_list_size;
     Statement*   statement_list;
 
@@ -192,11 +193,6 @@ struct Ring_VirtualMachine {
     unsigned int  class_size;
 
     RVM_DebugConfig* debug_config;
-};
-
-struct ImportPackageList {
-    PackageInfo*       package_info;
-    ImportPackageList* next;
 };
 
 struct PackageInfo {
@@ -1382,9 +1378,7 @@ Parameter* create_parameter(TypeSpecifier* type, char* identifier);
 Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter);
 
 PackageInfo*       create_package_info(char* package_name, char* rename);
-ImportPackageList* create_import_package_list(PackageInfo* package_info);
-ImportPackageList* import_package_list_add_item(ImportPackageList* import_package_list, PackageInfo* package_info);
-
+void import_package_list_add_item(char* package_name, char* rename);
 
 ClassDefinition* start_class_definition(char* class_identifier);
 ClassDefinition* finish_class_definition(ClassDefinition* class, ClassMemberDeclaration* class_member_declar);

@@ -38,7 +38,6 @@ int yyerror(char const *str, ...);
     ContinueStatement*          m_continue_statement;
     ReturnStatement*            m_return_statement;
 
-    ImportPackageList*          m_import_package_list;
     PackageInfo*                m_package_info;
 
     ClassDefinition*            m_class_definition;
@@ -171,13 +170,11 @@ int yyerror(char const *str, ...);
 %type <m_elseif_statement> elseif_statement
 %type <m_return_list> return_list
 %type <m_block> block
-%type <m_cast> cast
 %type <m_break_statement> break_statement
 %type <m_continue_statement> continue_statement
 %type <m_return_statement> return_statement
 
-%type <m_import_package_list> import_package_list package_list
-%type <m_package_info> package_info package_definition
+%type <m_package_info> package_definition
 
 %type <m_class_definition> class_definition
 %type <m_class_member_declaration> class_member_declaration_list class_member_declaration
@@ -192,14 +189,19 @@ int yyerror(char const *str, ...);
 
 %%
 
+// TODO: 重新规划一下
 translation_unit
-    : definition_or_statement
+    : package_definition import_block definition_or_statement
     {
-        debug_log_with_green_coloar("[RULE::translation_unit:definition_or_statement]\t ");
+        debug_log_with_green_coloar("[RULE::translation_unit:1]\t ");
+    }
+    | definition_or_statement
+    {
+        debug_log_with_green_coloar("[RULE::translation_unit:2]\t ");
     }
     | translation_unit definition_or_statement
     {
-        debug_log_with_green_coloar("[RULE::translation_unit:translation_unit]\t ");
+        debug_log_with_green_coloar("[RULE::translation_unit:3]\t ");
     }
     ;
 
@@ -210,38 +212,27 @@ package_definition
     }
     ;
 
-import_package_list 
-    : TOKEN_IMPORT TOKEN_LP package_list TOKEN_RP
-    {
-        $$ = $3;
-    }
+import_block 
+    : TOKEN_IMPORT TOKEN_LC package_list TOKEN_RC
     ;
 
 package_list
-    : 
-    {
-        $$ = NULL;
-    }
-    | package_info 
-    {
-        $$ = create_import_package_list($1);
-    }
-    | package_list TOKEN_COMMA package_info
-    {
-        $$ = import_package_list_add_item($1, $3);
-    }
+    : package_info 
+    | package_list package_info
     ;
 
 package_info
-    : IDENTIFIER
+    : IDENTIFIER TOKEN_SEMICOLON
     {
-        $$ = create_package_info($1, NULL);
+        import_package_list_add_item($1, NULL);
     }
-    | IDENTIFIER TOKEN_ARROW IDENTIFIER
-    {
-        $$ = create_package_info($1, $3);
-    }
+    // TODO: 别名
+    // | IDENTIFIER TOKEN_ARROW IDENTIFIER TOKEN_SEMICOLON
+    // {
+    //     $$ = create_package_info($1, $3);
+    // }
     ;
+
 definition_or_statement
     : function_definition
     {
@@ -1103,13 +1094,13 @@ argument
     }
     ;
 
-cast
-    : TOKEN_LT type_specifier TOKEN_GT expression
-    {
-        debug_log_with_green_coloar("[RULE::cast %d] \t ", $2);
-         /*$$ = create_cast_expression($2, $4); */
-    }
-    ;
+// cast
+//     : TOKEN_LT type_specifier TOKEN_GT expression
+//     {
+//         debug_log_with_green_coloar("[RULE::cast %d] \t ", $2);
+//          /*$$ = create_cast_expression($2, $4); */
+//     }
+//     ;
 
 
 
