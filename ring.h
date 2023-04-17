@@ -15,6 +15,8 @@ typedef struct ImportPackageInfo ImportPackageInfo;
 
 typedef struct Package Package;
 
+typedef struct PackageUnit PackageUnit;
+
 typedef struct RVM_Variable RVM_Variable;
 
 typedef struct RVM_RuntimeStack RVM_RuntimeStack;
@@ -135,9 +137,6 @@ struct Ring_Compiler {
     unsigned int function_list_size;
     Function*    function_list;
 
-    unsigned int variable_list_size;
-    Variable*    variable_list; // FIXME: 这里指的是全局变量，需要区分函数中的局部变量。
-
     unsigned int identifier_list_size; // TODO:后续删除调
     Identifier*  identifier_list;      // TODO:后续删除调
 
@@ -208,6 +207,36 @@ struct ImportPackageInfo {
 struct Package {
     char* package_name;
 };
+
+// 一个Package 有多个 编译单元
+// 也就是一个包内有多个Ring源码文件
+// 一个编译单元 对应一个Ring源码文件
+struct PackageUnit {
+    Package* parent_package;
+
+    char*        current_file_name;
+    FILE*        current_file_fp;
+    unsigned int current_line_number;
+    unsigned int current_column_number;
+    Ring_String* current_line_content;
+
+    unsigned int    import_package_size;
+    ImportPackageInfo*        import_package_list;
+
+    unsigned int declaration_list_size;
+    Declaration* declaration_list;
+
+    unsigned int     class_list_size;
+    ClassDefinition* class_list;
+
+    unsigned int function_list_size;
+    Function*    function_list;
+
+    Block* current_block;
+
+    unsigned int compile_error_num;
+};
+
 
 typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
 
@@ -1287,49 +1316,17 @@ char* get_string_literal();
 
 void insert_identifier(IdentifierType type, char* name);
 
-int       identifier_check_valid(char* identifier);
-Variable* variable_list_add_item(Variable* variable_list, Variable* variable);
-Variable* new_variable(VariableType type, char* identifier, Expression* init_expression, int is_const);
-Variable* new_variable_array(VariableType type, Expression* size, char* identifier, Expression* init_expression, int is_const);
-
 Identifier*         new_identifier(IdentifierType type, char* name);
 Identifier*         identifier_list_add_item(Identifier* identifier_list, Identifier* identifier);
 FunctionReturnList* create_function_return_list(VariableType variable_type);
 FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type);
 void                check_identifier_valid(char* identifier_name);
 
-void                 ring_interpret(Ring_Compiler* ring_compiler);
-StatementExecResult* interpret_statement(Statement* statement, Function* function);
-StatementExecResult* interpret_statement_list(Statement* statement, Function* function);
-StatementExecResult* interpret_statement_break(BreakStatement* statement, Function* function);
-StatementExecResult* interpret_statement_continue(ContinueStatement* statement, Function* function);
-StatementExecResult* interpret_statement_return(Statement* statement, Function* function);
-StatementExecResult* interpret_statement_if(IfStatement* if_statement, Function* function);
-StatementExecResult* interpret_statement_for(ForStatement* for_statement, Function* function);
-Ring_BasicValue*     interpret_expression(Expression* expression, Function* function);
-Ring_BasicValue*     search_variable_value(char* identifier, Function* origin_function);
-StatementExecResult* invoke_function(FunctionCallExpression* function_call_expression, Function* function);
-StatementExecResult* invoke_external_function(Function* function);
-Ring_BasicValue*     interpret_variable_expression(char* variable_identifier, Function* function);
-Ring_BasicValue*     interpret_array_index_expression(ArrayIndexExpression* expression, Function* function);
-Ring_BasicValue*     interpret_binary_expression_arithmetic(Expression* expression, Function* origin_function);
-Ring_BasicValue*     interpret_binary_expression_realational(Expression* expression, Function* function);
-Ring_BasicValue*     interpret_binary_expression_logical(Expression* expression, Function* function);
-Ring_BasicValue*     interpret_ternary_condition_expression(Expression* expression, Function* origin_function);
-Ring_BasicValue*     interpret_binary_expression(Expression* expression, Function* origin_function);
-Ring_BasicValue*     interpret_unitary_expression(Expression* expression, Function* origin_function);
-Ring_BasicValue*     interpret_unitary_expression_(Expression* expression, Function* origin_function);
-void                 interpret_assign_expression(Expression* expression, Function* function);
-void                 assign_identifier(Variable* variable, Ring_BasicValue* new_value, AssignExpressionType type);
-Variable*            search_variable(char* variable_identifier, Function* function);
-
 // 上下文相关语义检查
 int ring_semantic_check(Ring_Compiler* ring_compiler);
 
-void                    create_statement_list(Statement* statement);
 Statement*              statement_list_add_item(Statement* statement_list, Statement* statement);
 Statement*              create_statemen_from_expression(Expression* expression);
-Statement*              create_statement_from_variable(Variable* variable);
 void                    add_function_definition(Function* function_definition);
 Expression*             create_expression_identifier(char* identifier);
 Expression*             create_expression_identifier2(char* identifier, IdentifierExpressionType type);

@@ -4,11 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-void create_statement_list(Statement* statement) {
-    debug_log_with_yellow_coloar("statement->type:%d", statement->type);
-    ring_compiler_init_statement_list(statement);
-}
-
 Statement* statement_list_add_item(Statement* statement_list, Statement* statement) {
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
 
@@ -29,28 +24,6 @@ Statement* create_statemen_from_expression(Expression* expression) {
     statement->next         = NULL;
     return statement;
 }
-
-Statement* create_statement_from_variable(Variable* variable) {
-    debug_log_with_yellow_coloar("variable->type:%d", variable->type);
-
-    Statement* statement = malloc(sizeof(Statement));
-    /* statement->type        = STATEMENT_TYPE_VARIABLE_DEFINITION; */
-    statement->line_number = get_ring_compiler_line_number();
-    statement->u.variable  = variable;
-    statement->next        = NULL;
-
-    variable->next                     = get_ring_compiler()->variable_list;
-    get_ring_compiler()->variable_list = variable;
-    // TODO: 在这里重写，修改变量的可见范围
-
-    get_ring_compiler()->variable_list_size = 0;
-    for (Variable* pos = variable; pos; pos = pos->next) {
-        get_ring_compiler()->variable_list_size++;
-    }
-
-    return statement;
-}
-
 
 void add_function_definition(Function* function_definition) {
     assert(function_definition != NULL);
@@ -677,57 +650,6 @@ Block* finish_block(Block* block, Statement* statement_list) {
 
     /* printf("[end] current:%p, parent:%p\n", block, block->parent_block); */
     return block;
-}
-
-// 标识符合法性检查
-// 其实这个用不到，flex是有优先级的，会有语法错误
-// 检查变量是否重复定义
-int identifier_check_valid(char* identifier) {
-    return 0;
-}
-
-Variable* variable_list_add_item(Variable* variable_list, Variable* variable) {
-    Variable* pos = variable_list;
-    for (; pos->next != NULL; pos = pos->next)
-        ;
-    pos->next = variable;
-
-    return variable_list;
-}
-
-Variable* new_variable(VariableType type, char* identifier, Expression* init_expression, int is_const) {
-    debug_log_with_yellow_coloar("\t type(%d),identifier(%s)", type, identifier);
-
-    Variable* variable           = malloc(sizeof(Variable));
-    variable->line_number        = get_ring_compiler_line_number();
-    variable->is_const           = is_const;
-    variable->type               = type;
-    variable->variable_identifer = identifier;
-    variable->u.ring_basic_value = NULL;
-    variable->init_expression    = init_expression;
-    variable->next               = NULL;
-
-    insert_identifier(IDENTIFIER_TYPE_VARIABLE, identifier);
-    return variable;
-}
-
-Variable* new_variable_array(VariableType type, Expression* size, char* identifier, Expression* init_expression, int is_const) {
-    debug_log_with_yellow_coloar("\t type(%d),identifier(%s)", type, identifier);
-
-    // 这个应该放到解释的时候
-
-    Variable* variable           = malloc(sizeof(Variable));
-    variable->line_number        = get_ring_compiler_line_number();
-    variable->is_const           = is_const;
-    variable->type               = VARIABLE_TYPE_ARRAY;
-    variable->array_member_type  = type;
-    variable->variable_identifer = identifier;
-    variable->u.ring_basic_value = NULL;
-    variable->init_expression    = init_expression;
-    variable->next               = NULL;
-
-    insert_identifier(IDENTIFIER_TYPE_VARIABLE, identifier);
-    return variable;
 }
 
 // 定义一个变量、函数时 都要执行改操作

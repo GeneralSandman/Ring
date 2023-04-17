@@ -8,6 +8,7 @@
 int                      yyerror(char const* str, ...);
 extern struct SyntaxInfo SyntaxInfos[];
 static Ring_Compiler*    ring_compiler = NULL;
+static PackageUnit*    package_unit = NULL;
 
 Ring_Compiler* new_ring_compiler(char* file_name) {
     if (ring_compiler == NULL) {
@@ -27,9 +28,6 @@ Ring_Compiler* new_ring_compiler(char* file_name) {
 
     ring_compiler->function_list_size = 0;
     ring_compiler->function_list      = NULL;
-
-    ring_compiler->variable_list_size = 0;
-    ring_compiler->variable_list      = NULL;
 
     ring_compiler->identifier_list_size = 0;
     ring_compiler->identifier_list      = NULL;
@@ -76,7 +74,6 @@ void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
         exit(ERROR_CODE_COMPILE_ERROR);
     }
 }
-
 
 char* get_ring_compiler_current_file_name() {
     assert(ring_compiler != NULL);
@@ -132,16 +129,6 @@ void reset_ring_compiler_column_number() {
     ring_compiler->current_column_number = 1;
 }
 
-int ring_compiler_init_statement_list(Statement* statement) {
-    assert(ring_compiler != NULL);
-    debug_log_with_yellow_coloar("statement->type:%d", statement->type);
-
-    ring_compiler->statement_list      = statement;
-    ring_compiler->statement_list_size = 1;
-
-    return 0;
-}
-
 int ring_compiler_add_statement(Statement* statement) {
     assert(ring_compiler != NULL);
 
@@ -179,3 +166,61 @@ int ring_compiler_add_class_definition(ClassDefinition* class_definition) {
     return 0;
 }
 
+
+PackageUnit* package_unit_create(char* file_name) {
+    if (package_unit == NULL) {
+        package_unit = malloc(sizeof(PackageUnit));
+    }
+
+    package_unit->parent_package     = NULL;
+    
+    package_unit->current_file_name     = file_name;
+    package_unit->current_file_fp       = NULL;
+    package_unit->current_line_number   = 1;
+    package_unit->current_column_number = 1;
+    package_unit->current_line_content  = new_ring_string();
+
+    package_unit->import_package_size = 0;
+    package_unit->import_package_list = NULL;
+
+    package_unit->declaration_list_size = 0;
+    package_unit->declaration_list      = NULL;
+
+    package_unit->class_list_size = 0;
+    package_unit->class_list      = NULL;
+
+    package_unit->function_list_size = 0;
+    package_unit->function_list      = NULL;
+
+    package_unit->current_block = NULL;
+
+    package_unit->compile_error_num = 0;
+
+    package_unit->current_file_fp   = fopen(file_name, "r");
+    if (package_unit->current_file_fp == NULL) {
+        fprintf(stderr, "%s not found.\n", file_name);
+        exit(1);
+    }
+
+    return package_unit;
+}
+
+PackageUnit* get_package_unit() {
+    return package_unit;
+}
+
+void package_unit_compile(PackageUnit* package_unit) {
+    extern int   yyparse(void);
+    extern FILE* yyin;
+
+    yyin = package_unit->current_file_fp;
+    if (yyparse()) {
+        package_unit->compile_error_num++;
+    }
+    if (package_unit->compile_error_num) {
+        complie_err_log("%d syntax error detected.\n", package_unit->compile_error_num);
+        exit(ERROR_CODE_COMPILE_ERROR);
+    }
+
+    debug_log_with_yellow_coloar("\t compile_unit COMPLIE SUCCESS\n\n");
+}

@@ -51,8 +51,6 @@ void ring_interactive_program() {
                 printf_witch_red("YYPARSE error\n");
             }
 
-            // 解释执行
-            // ring_interpret(ring_compiler);
             printf_witch_green("\n");
 
             // 只清除相关语句不清楚相关变量
