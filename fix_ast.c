@@ -24,9 +24,9 @@ void ring_compiler_fix_ast(PackageUnit* package_unit) {
     }
 
 
-// #ifdef DEBUG
-//     ring_compiler_functions_dump(compiler);
-// #endif
+#ifdef DEBUG
+    ring_compiler_functions_dump(package_unit);
+#endif
 }
 
 void fix_statement_list(Statement* statement_list, Block* block, Function* func) {

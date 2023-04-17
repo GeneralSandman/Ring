@@ -22,10 +22,51 @@ void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
     }
 }
 
-PackageUnit* package_unit_create(char* file_name) {
-    if (package_unit == NULL) {
-        package_unit = malloc(sizeof(PackageUnit));
+Package* package_create(char* package_name, char* package_path) {
+    Package* package = malloc(sizeof(Package));
+
+    package->package_name = package_name;
+    package->package_path = package_path;
+
+    package->declaration_list_size = 0;
+    package->declaration_list = NULL;
+
+    package->class_definition_list_size = 0;
+    package->class_definition_list = NULL;
+
+    package->function_list_size = 0;
+    package->function_list = NULL;
+
+    package->package_unit_size = 0;
+    package->package_unit_list = NULL;
+
+    return package;
+}
+
+// 获取包下的所有 ring 源代码文件
+// 依次生成 PackageUnit 进行编译
+void package_compile(Package* package) {
+    /*
+    for(int i=0; i<package->package_unit_size; i++) {
+        PackageUnit* package_unit = package_unit_create();
+        package_unit_compile(package_unit);
+
+        for(int j=0; j<package_unit->import_package_size; j++) {
+            Package* new_package = package_create();
+
+            if(-1 == compiler_entry_add_package(compiler_entry, new_package)) {
+                continue;
+            }
+            package_compile(new_package);
+        }
     }
+    */
+}
+
+
+
+PackageUnit* package_unit_create(char* file_name) {
+    package_unit = malloc(sizeof(PackageUnit));
 
     package_unit->parent_package     = NULL;
     

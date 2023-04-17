@@ -1,5 +1,8 @@
 #include "ring.h"
+#include <dirent.h>
 #include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
@@ -147,3 +150,49 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
     }
 }
 
+int list_file(char* path) {
+    DIR*           dp = NULL;
+    struct dirent* st;
+    struct stat    sta;
+    int            ret            = 0;
+    char           tmp_name[1024] = {0};
+    dp                            = opendir(path);
+    if (dp == NULL) {
+        // TODO:
+        printf("open dir error!!\n");
+        return -1;
+    }
+    while (1) {
+        st = readdir(dp);
+        if (NULL == st) {
+            //读取完毕
+            break;
+        }
+        strcpy(tmp_name, path);
+        if (path[strlen(path) - 1] != '/') //判断路径名是否带/
+            strcat(tmp_name, "/");
+        strcat(tmp_name, st->d_name); //新文件路径名
+        ret = stat(tmp_name, &sta);   //查看目录下文件属性
+        if (ret < 0) {
+            // TODO:
+            printf("read stat fail\n");
+            return -1;
+        }
+
+        if (S_ISDIR(sta.st_mode)) {
+            //如果为目录文件
+            if (0 == strcmp("..", st->d_name) || 0 == strcmp(".", st->d_name)) {
+                //忽略当前目录和上一层目录
+                continue;
+            } else {
+                //递归读取
+                // list_file(tmp_name);
+            }
+        } else {
+            //不为目录则打印文件路径名
+            printf("%s\n", tmp_name);
+        }
+    }
+    closedir(dp);
+    return 0;
+}
