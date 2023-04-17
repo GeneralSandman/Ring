@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <vector>
+#include <string>
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
@@ -150,7 +152,8 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
     }
 }
 
-int list_file(char* path) {
+std::vector<std::string> list_file(char* path) {
+    std::vector<std::string> file_list;
     DIR*           dp = NULL;
     struct dirent* st;
     struct stat    sta;
@@ -160,7 +163,7 @@ int list_file(char* path) {
     if (dp == NULL) {
         // TODO:
         printf("open dir error!!\n");
-        return -1;
+        return file_list;
     }
     while (1) {
         st = readdir(dp);
@@ -176,7 +179,7 @@ int list_file(char* path) {
         if (ret < 0) {
             // TODO:
             printf("read stat fail\n");
-            return -1;
+            return file_list;
         }
 
         if (S_ISDIR(sta.st_mode)) {
@@ -190,9 +193,10 @@ int list_file(char* path) {
             }
         } else {
             //不为目录则打印文件路径名
+            file_list.push_back(std::string(tmp_name));
             printf("%s\n", tmp_name);
         }
     }
     closedir(dp);
-    return 0;
+    return file_list;
 }

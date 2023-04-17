@@ -2,6 +2,8 @@
 #define RING_INCLUDE_H
 
 #include <stdio.h>
+#include <vector>
+#include <string>
 
 #define RING_VERSION "ring-v0.2.0-beta"
 
@@ -1573,7 +1575,7 @@ void ring_compiler_functions_dump(PackageUnit* package_unit);
 void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer);
 void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
 void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
-int  list_file(char* path);
+std::vector<std::string> list_file(char* path);
 // utils.c
 
 // thread_pool.c
