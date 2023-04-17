@@ -123,6 +123,7 @@ typedef struct RVM_Method        RVM_Method;
 typedef struct RVM_Class         RVM_Class;
 
 struct Ring_Compiler {
+    /*
     char*        current_file_name;
     unsigned int current_line_number;
     unsigned int current_column_number;
@@ -149,6 +150,7 @@ struct Ring_Compiler {
     ClassDefinition* class_definition_list;
 
     unsigned int compile_error_num;
+    */
 };
 
 typedef unsigned char RVM_Byte;
@@ -1294,23 +1296,7 @@ void         reset_ring_string(Ring_String* string);
 void         ring_string_add_char(Ring_String* string, char ch);
 char*        get_ring_string(Ring_String* string);
 
-Ring_Compiler* new_ring_compiler(char* file_name);
-Ring_Compiler* get_ring_compiler();
-void           ring_compiler_compile(Ring_Compiler* ring_compiler, FILE* fp);
 void           ring_compiler_error(SyntaxType syntax_type, int exit);
-char*          get_ring_compiler_current_file_name();
-Ring_String*   get_ring_compiler_current_line_content();
-unsigned int   get_ring_compiler_line_number();
-unsigned int   increase_ring_compiler_line_number();
-unsigned int   get_ring_compiler_column_number();
-unsigned int   increase_ring_compiler_column_number(unsigned int len);
-void           ring_compiler_update_line_content(char* str);
-void           ring_compiler_reset_current_line_content();
-char*          ring_compiler_get_current_line_content();
-void           reset_ring_compiler_column_number();
-int            ring_compiler_init_statement_list(Statement* statement);
-int            ring_compiler_add_statement(Statement* statement);
-int            ring_compiler_add_class_definition(ClassDefinition* class_definition);
 
 PackageUnit* package_unit_create(char* file_name);
 PackageUnit* get_package_unit();
@@ -1567,12 +1553,10 @@ void ring_bytecode_load(Ring_VirtualMachine_Executer* executer, FILE* input);
 
 
 // interactive.c
-void ring_interactive_program();
-int  write_tmp_source_file(char* tmp_source_file_name, int start_line_num, int line_size, char** input_line_content);
 // interactive.c
 
 // utils.c
-void ring_compiler_functions_dump(Ring_Compiler* compiler);
+void ring_compiler_functions_dump(PackageUnit* package_unit);
 void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer);
 void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
 void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
