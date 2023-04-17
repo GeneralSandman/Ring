@@ -1354,7 +1354,7 @@ Expression*             create_expression_unitary_with_convert_type(BasicValueTy
 Expression*             create_expression_literal(ExpressionType type, char* literal_interface);
 Expression*             create_expression_bool_literal(ExpressionType type, Ring_Bool value);
 Expression*             create_cast_expression(TypeSpecifier* cast_type, Expression* operand);
-Expression*             create_member_expression();
+Expression*             create_member_expression(Expression* object_expression, char* member_identifier);
 AssignExpression*       create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
 AssignExpression*       create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* operand);
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list);
@@ -1397,7 +1397,7 @@ Package* create_package_info(char* package_name);
 void     import_package_list_add_item(char* package_name, char* rename);
 
 ClassDefinition* start_class_definition(char* class_identifier);
-ClassDefinition* finish_class_definition(ClassDefinition* class, ClassMemberDeclaration* class_member_declar);
+ClassDefinition* finish_class_definition(ClassDefinition* class_def, ClassMemberDeclaration* class_member_declar);
 
 ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclaration* list, ClassMemberDeclaration* decl);
 ClassMemberDeclaration* create_class_member_field_declaration(Attribute attribute, FieldMember* field_member);
@@ -1512,7 +1512,7 @@ RVM_RuntimeStack*    new_runtime_stack();
 RVM_RuntimeStatic*   new_runtime_static();
 Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* executer);
 void                 rvm_add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static);
-RVM_Object*          new_class_object();
+RVM_Object*          new_class_object(ClassDefinition* class_definition);
 void                 rvm_add_classs(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm);
 void                 rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);

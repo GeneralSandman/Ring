@@ -1,5 +1,5 @@
 TARGET=ring
-CC=gcc
+CC=g++
 OBJS = \
   lex.yy.o\
   y.tab.o\
@@ -15,7 +15,6 @@ OBJS = \
   interactive.o\
   error_msg.o\
   utils.o\
-  thread_pool.o\
   main.o
 
 # CFLAGS -g 打开调试信息
@@ -23,7 +22,7 @@ OBJS = \
 # CFLAGS -DDEBUG_RVM 开启 debug ring virtual machine 信息
 # -lm for fmod function
 # -lncurses for tigetnum tigetnum
-CFLAGS = -c -std=c99 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic # -g -DDEBUG1 -DDEBUG_RVM1
+CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic # -g -DDEBUG1 -DDEBUG_RVM1
 BIN = ./bin
 INCLUDES = \
 
@@ -55,17 +54,17 @@ compile_commands.json : Makefile
 
 lex.yy.o: lex.yy.c ring.h
 y.tab.o: y.tab.c
-string.o: string.c
-create_ast.o: create_ast.c ring.h
-semantic_check.o: semantic_check.c ring.h
-fix_ast.o: fix_ast.c ring.h
-generate.o: generate.c ring.h
-execute.o: execute.c ring.h
-bytecode.o: bytecode.c ring.h
-compiler.o: compiler.c ring.h inner_func.h
-inner_func.o: inner_func.c ring.h inner_func.h
-interactive.o: interactive.c ring.h
-error_msg.o: error_msg.c ring.h
-utils.o: utils.c ring.h
+string.o: string.cpp
+create_ast.o: create_ast.cpp ring.h
+semantic_check.o: semantic_check.cpp ring.h
+fix_ast.o: fix_ast.cpp ring.h
+generate.o: generate.cpp ring.h
+execute.o: execute.cpp ring.h
+bytecode.o: bytecode.cpp ring.h
+compiler.o: compiler.cpp ring.h inner_func.h
+inner_func.o: inner_func.cpp ring.h inner_func.h
+interactive.o: interactive.cpp ring.h
+error_msg.o: error_msg.cpp ring.h
+utils.o: utils.cpp ring.h
 thread_pool.o: thread_pool.c ring.h
-main.o: main.c ring.h
+main.o: main.cpp ring.h

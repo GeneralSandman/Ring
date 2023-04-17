@@ -76,10 +76,10 @@ void STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, RVM_Ob
 RVM_RuntimeStack* new_runtime_stack() {
     debug_log_with_white_coloar("\t");
 
-    RVM_RuntimeStack* stack = malloc(sizeof(RVM_RuntimeStack));
+    RVM_RuntimeStack* stack = (RVM_RuntimeStack*)malloc(sizeof(RVM_RuntimeStack));
     stack->top_index        = 0;
     stack->capacity         = 1024 * 1024; // FIXME: 先开辟一个大的空间
-    stack->data             = malloc(stack->capacity * sizeof(RVM_Value));
+    stack->data             = (RVM_Value*)malloc(stack->capacity * sizeof(RVM_Value));
     stack->size             = 0;
     return stack;
 }
@@ -87,7 +87,7 @@ RVM_RuntimeStack* new_runtime_stack() {
 RVM_RuntimeStatic* new_runtime_static() {
     debug_log_with_white_coloar("\t");
 
-    RVM_RuntimeStatic* runtime_static = malloc(sizeof(RVM_RuntimeStatic));
+    RVM_RuntimeStatic* runtime_static = (RVM_RuntimeStatic*)malloc(sizeof(RVM_RuntimeStatic));
     runtime_static->data              = NULL;
     runtime_static->size              = 0;
     return runtime_static;
@@ -96,7 +96,7 @@ RVM_RuntimeStatic* new_runtime_static() {
 Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* executer) {
     debug_log_with_white_coloar("\t");
 
-    Ring_VirtualMachine* rvm = malloc(sizeof(Ring_VirtualMachine));
+    Ring_VirtualMachine* rvm = (Ring_VirtualMachine*)malloc(sizeof(Ring_VirtualMachine));
     rvm->executer            = executer;
     rvm->runtime_static      = new_runtime_static();
     rvm->runtime_stack       = new_runtime_stack();
@@ -128,7 +128,7 @@ void rvm_add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_Runtime
     ClassDefinition* class_definition     = NULL;
 
     runtime_static->size = size;
-    runtime_static->data = malloc(size * sizeof(RVM_Value));
+    runtime_static->data = (RVM_Value*)malloc(size * sizeof(RVM_Value));
 
     for (int i = 0; i < size; i++) {
         type_specifier = global_variable_list[i].type;
@@ -159,7 +159,7 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
     // Search field-member's size and detail from class-definition.
     // Alloc and Init.
     unsigned int field_count = 0;
-    RVM_Value*   field       = malloc(field_count * sizeof(RVM_Value));
+    RVM_Value*   field       = (RVM_Value*)malloc(field_count * sizeof(RVM_Value));
 
     // TODO: 先用笨办法
     for (ClassMemberDeclaration* pos = class_definition->member; pos != NULL; pos = pos->next) {
@@ -167,9 +167,9 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
             field_count++;
         }
     }
-    field = malloc(field_count * sizeof(RVM_Value));
+    field = (RVM_Value*)malloc(field_count * sizeof(RVM_Value));
 
-    RVM_Object* object                 = malloc(sizeof(RVM_Object));
+    RVM_Object* object                 = (RVM_Object*)malloc(sizeof(RVM_Object));
     object->type                       = RVM_OBJECT_TYPE_CLASS;
     object->u.class_object.class_def   = class_definition;
     object->u.class_object.field_count = field_count;
@@ -190,7 +190,7 @@ void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_Virtu
     for (int i = 0; i < executer->function_size; i++) {
         RVM_Function function = executer->function_list[i];
         if (function.type == RVM_FUNCTION_TYPE_DERIVE) {
-            rvm->function_list = realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
+            rvm->function_list = (RVM_Function*)realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
 
             rvm->function_list[rvm->function_size].func_name           = function.func_name;
             rvm->function_list[rvm->function_size].type                = RVM_FUNCTION_TYPE_DERIVE;
@@ -900,7 +900,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
 }
 
 RVM_Object* create_rvm_object() {
-    RVM_Object* object = malloc(sizeof(RVM_Object));
+    RVM_Object* object = (RVM_Object*)malloc(sizeof(RVM_Object));
     return object;
 }
 
@@ -925,7 +925,7 @@ RVM_Object* concat_string(RVM_Object* a, RVM_Object* b) {
     }
 
     result_len = strlen(left) + strlen(right);
-    result     = malloc(sizeof(char) * (result_len + 1));
+    result     = (char*)malloc(sizeof(char) * (result_len + 1));
 
     strcpy(result, left);
     strcpy(result + strlen(left), right);
@@ -958,7 +958,7 @@ void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_
     debug_log_with_white_coloar("\t");
 
     if (rvm->debug_config == NULL) {
-        rvm->debug_config             = malloc(sizeof(RVM_DebugConfig));
+        rvm->debug_config             = (RVM_DebugConfig*)malloc(sizeof(RVM_DebugConfig));
         rvm->debug_config->debug_mode = RVM_DEBUG_MODE_UNKNOW;
     }
 
@@ -1247,13 +1247,13 @@ void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM
     debug_log_with_white_coloar("\t");
 
     if (rvm->function_list == NULL) {
-        rvm->function_list = malloc(sizeof(RVM_Function));
+        rvm->function_list = (RVM_Function*)malloc(sizeof(RVM_Function));
     } else {
-        rvm->function_list = realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
+        rvm->function_list = (RVM_Function*)realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
     }
     rvm->function_list[rvm->function_size].func_name                = func_name;
     rvm->function_list[rvm->function_size].type                     = RVM_FUNCTION_TYPE_NATIVE;
-    rvm->function_list[rvm->function_size].u.native_func            = malloc(sizeof(NativeFunction));
+    rvm->function_list[rvm->function_size].u.native_func            = (NativeFunction*)malloc(sizeof(NativeFunction));
     rvm->function_list[rvm->function_size].u.native_func->func_proc = func_proc;
     rvm->function_list[rvm->function_size].u.native_func->arg_count = arg_count;
 

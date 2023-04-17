@@ -81,19 +81,19 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
         break;
 
     case EXPRESSION_TYPE_LITERAL_BOOL:
-        expression->convert_type             = malloc(sizeof(TypeSpecifier));
+        expression->convert_type             = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
         expression->convert_type->basic_type = RING_BASIC_TYPE_BOOL;
         break;
     case EXPRESSION_TYPE_LITERAL_INT:
-        expression->convert_type             = malloc(sizeof(TypeSpecifier));
+        expression->convert_type             = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
         expression->convert_type->basic_type = RING_BASIC_TYPE_INT;
         break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
-        expression->convert_type             = malloc(sizeof(TypeSpecifier));
+        expression->convert_type             = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
         expression->convert_type->basic_type = RING_BASIC_TYPE_DOUBLE;
         break;
     case EXPRESSION_TYPE_LITERAL_STRING:
-        expression->convert_type             = malloc(sizeof(TypeSpecifier));
+        expression->convert_type             = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
         expression->convert_type->basic_type = RING_BASIC_TYPE_STRING;
         break;
 
@@ -317,7 +317,7 @@ void fix_binary_expression(Expression* expression, Block* block, Function* func)
     fix_expression(right_expression, block, func);
 
     if (expression->convert_type == NULL) {
-        expression->convert_type = malloc(sizeof(TypeSpecifier));
+        expression->convert_type = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
     }
 
     if (expression->type == EXPRESSION_TYPE_CONCAT) {
@@ -491,7 +491,7 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
 
     Parameter* pos = parameter;
     for (; pos; pos = pos->next) {
-        Declaration* declaration    = malloc(sizeof(Declaration));
+        Declaration* declaration    = (Declaration*)malloc(sizeof(Declaration));
         declaration->line_number    = pos->line_number;
         declaration->type           = pos->type;
         declaration->identifier     = pos->identifier;

@@ -7,7 +7,7 @@
 
 char linebuf[500];
 
-int yywrap(){
+extern "C" int yywrap(){
     return 1;
 }
 

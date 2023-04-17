@@ -23,7 +23,7 @@ void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
 }
 
 Package* package_create(char* package_name, char* package_path) {
-    Package* package = malloc(sizeof(Package));
+    Package* package = (Package*)malloc(sizeof(Package));
 
     package->package_name = package_name;
     package->package_path = package_path;
@@ -66,7 +66,7 @@ void package_compile(Package* package) {
 
 
 PackageUnit* package_unit_create(char* file_name) {
-    package_unit = malloc(sizeof(PackageUnit));
+    package_unit = (PackageUnit*)malloc(sizeof(PackageUnit));
 
     package_unit->parent_package     = NULL;
     
