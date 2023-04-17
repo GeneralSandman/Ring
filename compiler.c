@@ -186,8 +186,8 @@ PackageUnit* package_unit_create(char* file_name) {
     package_unit->declaration_list_size = 0;
     package_unit->declaration_list      = NULL;
 
-    package_unit->class_list_size = 0;
-    package_unit->class_list      = NULL;
+    package_unit->class_definition_list_size = 0;
+    package_unit->class_definition_list      = NULL;
 
     package_unit->function_list_size = 0;
     package_unit->function_list      = NULL;
@@ -223,4 +223,96 @@ void package_unit_compile(PackageUnit* package_unit) {
     }
 
     debug_log_with_yellow_coloar("\t compile_unit COMPLIE SUCCESS\n\n");
+}
+
+
+char* get_package_unit_current_file_name() {
+    assert(package_unit != NULL);
+    return package_unit->current_file_name;
+}
+
+Ring_String* get_package_unit_current_line_content() {
+    assert(package_unit != NULL);
+    return package_unit->current_line_content;
+}
+
+unsigned int get_package_unit_line_number() {
+    assert(package_unit != NULL);
+    return package_unit->current_line_number;
+}
+
+unsigned int increase_package_unit_line_number() {
+    assert(package_unit != NULL);
+    package_unit->current_line_number++;
+    return package_unit->current_line_number;
+}
+
+unsigned int get_package_unit_column_number() {
+    assert(package_unit != NULL);
+    return package_unit->current_column_number;
+}
+
+unsigned int increase_package_unit_column_number(unsigned int len) {
+    assert(package_unit != NULL);
+    package_unit->current_column_number += len;
+    return package_unit->current_column_number;
+}
+
+void package_unit_update_line_content(char* str) {
+    assert(package_unit != NULL);
+
+    for (int i = 0; i < strlen(str); i++) {
+        ring_string_add_char(package_unit->current_line_content, str[i]);
+    }
+
+    package_unit->current_column_number += strlen(str);
+}
+
+void package_unit_reset_current_line_content() {
+    reset_ring_string(package_unit->current_line_content);
+}
+
+char* package_unit_get_current_line_content() {
+    return get_ring_string(package_unit->current_line_content);
+}
+
+void reset_package_unit_column_number() {
+    package_unit->current_column_number = 1;
+}
+
+int package_unit_add_statement(Statement* statement) {
+    assert(package_unit != NULL);
+
+    if (package_unit->statement_list == NULL) {
+        package_unit->statement_list      = statement;
+        package_unit->statement_list_size = 1;
+        return 0;
+    }
+
+
+    Statement* pos;
+    pos = package_unit->statement_list;
+    for (; pos->next != NULL; pos = pos->next) {
+    }
+    pos->next = statement;
+    package_unit->statement_list_size++;
+    return 0;
+}
+
+int package_unit_add_class_definition(ClassDefinition* class_definition) {
+    assert(package_unit != NULL);
+    assert(class_definition != NULL);
+
+    if (package_unit->class_definition_list == NULL) {
+        package_unit->class_definition_list      = class_definition;
+        package_unit->class_definition_list_size = 1;
+        return 0;
+    }
+
+    ClassDefinition* pos = package_unit->class_definition_list;
+    for (; pos->next != NULL; pos = pos->next) {
+    }
+    pos->next = class_definition;
+    package_unit->class_definition_list_size++;
+    return 0;
 }

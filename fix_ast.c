@@ -4,12 +4,12 @@
 #include <string.h>
 
 // 修正ast
-void ring_compiler_fix_ast(Ring_Compiler* compiler) {
+void ring_compiler_fix_ast(PackageUnit* package_unit) {
     // fix statement list
-    fix_statement_list(compiler->statement_list, NULL, NULL);
+    fix_statement_list(package_unit->statement_list, NULL, NULL);
 
     // fix function list
-    for (Function* pos = compiler->function_list; pos; pos = pos->next) {
+    for (Function* pos = package_unit->function_list; pos; pos = pos->next) {
         if (pos->block) {
             add_parameter_to_declaration(pos->parameter_list, pos->block);
             fix_statement_list(pos->block->statement_list, pos->block, pos);
@@ -18,15 +18,15 @@ void ring_compiler_fix_ast(Ring_Compiler* compiler) {
 
     // fix class list
     unsigned int class_index = 0;
-    for (ClassDefinition* pos = compiler->class_definition_list; pos != NULL; pos = pos->next, class_index++) {
+    for (ClassDefinition* pos = package_unit->class_definition_list; pos != NULL; pos = pos->next, class_index++) {
         pos->class_index = class_index;
         fix_class_definition(pos);
     }
 
 
-#ifdef DEBUG
-    ring_compiler_functions_dump(compiler);
-#endif
+// #ifdef DEBUG
+//     ring_compiler_functions_dump(compiler);
+// #endif
 }
 
 void fix_statement_list(Statement* statement_list, Block* block, Function* func) {
@@ -170,11 +170,11 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
             pos->variable_index = block->declaration_list_size++;
             pos->is_local       = 1;
         } else {
-            Ring_Compiler* ring_compiler = get_ring_compiler();
-            ring_compiler->declaration_list =
-                declaration_list_add_item(ring_compiler->declaration_list, pos);
+            PackageUnit* package_unit = get_package_unit();
+            package_unit->declaration_list =
+                declaration_list_add_item(package_unit->declaration_list, pos);
 
-            pos->variable_index = ring_compiler->declaration_list_size++;
+            pos->variable_index = package_unit->declaration_list_size++;
             pos->is_local       = 0;
         }
     }
@@ -445,7 +445,7 @@ void fix_class_member_expression(MemberExpression* member_expression, Expression
 
 ClassDefinition* search_class_definition(char* class_identifier) {
     assert(class_identifier != NULL);
-    ClassDefinition* pos = get_ring_compiler()->class_definition_list;
+    ClassDefinition* pos = get_package_unit()->class_definition_list;
 
     for (; pos != NULL; pos = pos->next) {
         if (0 == strcmp(pos->class_identifier, class_identifier)) {
@@ -519,7 +519,7 @@ Declaration* search_declaration(char* identifier, Block* block) {
         }
     }
 
-    for (decl = get_ring_compiler()->declaration_list; decl; decl = decl->next) {
+    for (decl = get_package_unit()->declaration_list; decl; decl = decl->next) {
         if (0 == strcmp(identifier, decl->identifier)) {
             return decl;
         }
@@ -531,7 +531,7 @@ Declaration* search_declaration(char* identifier, Block* block) {
 }
 
 Function* search_function(char* identifier) {
-    Function* pos = get_ring_compiler()->function_list;
+    Function* pos = get_package_unit()->function_list;
     for (; pos; pos = pos->next) {
         if (!strcmp(identifier, pos->function_name)) {
             return pos;

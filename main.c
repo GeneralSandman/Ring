@@ -20,7 +20,7 @@ char* command_help_message =
 
 
 int main(int argc, char** argv) {
-    Ring_Compiler*                ring_compiler;
+    PackageUnit*                package_unit;
     Ring_VirtualMachine_Executer* ring_vm_executer;
     Ring_VirtualMachine*          ring_vm;
     char*                         file_name;
@@ -63,21 +63,18 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    ring_compiler    = new_ring_compiler(file_name);
+    package_unit    = package_unit_create(file_name);
     ring_vm_executer = new_ring_vm_executer();
 
     // Step-1: flex 词法分析，
     // Step-2: bison 语法分析，构建语法树
-    ring_compiler_compile(ring_compiler, fp);
-
-    // Step-3: 语义分析
-    ring_semantic_check(ring_compiler);
+    package_unit_compile(package_unit);
 
     // Step-4: 修正语法树
-    ring_compiler_fix_ast(ring_compiler);
+    ring_compiler_fix_ast(package_unit);
 
     // Step-5: 生成虚拟机中间代码
-    ring_generate_vm_code(ring_compiler, ring_vm_executer);
+    ring_generate_vm_code(package_unit, ring_vm_executer);
 
     // Step-6: 运行虚拟机
     ring_vm = new_ring_virtualmachine(ring_vm_executer);

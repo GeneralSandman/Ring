@@ -226,11 +226,14 @@ struct PackageUnit {
     unsigned int declaration_list_size;
     Declaration* declaration_list;
 
-    unsigned int     class_list_size;
-    ClassDefinition* class_list;
+    unsigned int     class_definition_list_size;
+    ClassDefinition* class_definition_list;
 
     unsigned int function_list_size;
     Function*    function_list;
+
+    unsigned int statement_list_size;
+    Statement*   statement_list;
 
     Block* current_block;
 
@@ -1309,21 +1312,32 @@ int            ring_compiler_init_statement_list(Statement* statement);
 int            ring_compiler_add_statement(Statement* statement);
 int            ring_compiler_add_class_definition(ClassDefinition* class_definition);
 
+PackageUnit* package_unit_create(char* file_name);
+PackageUnit* get_package_unit();
+void package_unit_compile(PackageUnit* package_unit);
+char* get_package_unit_current_file_name();
+Ring_String* get_package_unit_current_line_content();
+unsigned int get_package_unit_line_number();
+unsigned int increase_package_unit_line_number();
+unsigned int get_package_unit_column_number();
+unsigned int increase_package_unit_column_number(unsigned int len);
+void package_unit_update_line_content(char* str);
+void package_unit_reset_current_line_content();
+char* package_unit_get_current_line_content();
+void reset_package_unit_column_number();
+int package_unit_add_statement(Statement* statement);
+int package_unit_add_class_definition(ClassDefinition* class_definition);
+
+
 void  init_string_literal_buffer();
 void  reset_string_literal_buffer();
 void  string_literal_add_char(char ch);
 char* get_string_literal();
 
-void insert_identifier(IdentifierType type, char* name);
-
 Identifier*         new_identifier(IdentifierType type, char* name);
 Identifier*         identifier_list_add_item(Identifier* identifier_list, Identifier* identifier);
 FunctionReturnList* create_function_return_list(VariableType variable_type);
 FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type);
-void                check_identifier_valid(char* identifier_name);
-
-// 上下文相关语义检查
-int ring_semantic_check(Ring_Compiler* ring_compiler);
 
 Statement*              statement_list_add_item(Statement* statement_list, Statement* statement);
 Statement*              create_statemen_from_expression(Expression* expression);
@@ -1402,7 +1416,7 @@ int attribute_is_destructor(Attribute attribute);
 // create_ast.c
 
 // fix.c
-void                    ring_compiler_fix_ast(Ring_Compiler* ring_compiler);
+void                    ring_compiler_fix_ast(PackageUnit* package_unit);
 void                    fix_statement_list(Statement* statement_list, Block* block, Function* func);
 void                    fix_statement(Statement* statement, Block* block, Function* func);
 void                    fix_expression(Expression* expression, Block* block, Function* func);
@@ -1431,14 +1445,14 @@ Function*               search_function(char* identifier);
 // generate.c
 Ring_VirtualMachine_Executer* new_ring_vm_executer();
 
-void              ring_generate_vm_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
-void              add_global_variable(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
-void              add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
-void              add_classes(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
+void              ring_generate_vm_code(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer);
+void              add_global_variable(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer);
+void              add_functions(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer);
+void              add_classes(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer);
 void              copy_class(Ring_VirtualMachine_Executer* executer, ClassDefinition* src, RVM_Class* dest);
 void              copy_function(Function* src, RVM_Function* dest);
 void              copy_method(MethodMember* src, RVM_Method* dest);
-void              add_top_level_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer);
+void              add_top_level_code(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer);
 void              generate_code_from_function_definition(Ring_VirtualMachine_Executer* executer, Function* src, RVM_Function* dest);
 void              generate_code_from_method_definition(Ring_VirtualMachine_Executer* executer, MethodMember* src, RVM_Method* dest);
 void              vm_executer_dump(Ring_VirtualMachine_Executer* executer);

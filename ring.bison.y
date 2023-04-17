@@ -241,7 +241,7 @@ definition_or_statement
     | statement
     {
         debug_log_with_green_coloar("[RULE::statement:statement]\t ");
-        ring_compiler_add_statement($1);
+        package_unit_add_statement($1);
     }
     | class_definition
     {

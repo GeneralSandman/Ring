@@ -20,98 +20,98 @@ int yywrap(){
 
 
 
-<INITIAL>"typedef"      { ring_compiler_update_line_content(yytext); return TOKEN_TYPEDEF;        }
-<INITIAL>"typeof"       { ring_compiler_update_line_content(yytext); return TOKEN_TYPEOF;         }
-<INITIAL>"bool"         { ring_compiler_update_line_content(yytext); return TOKEN_BOOL;           }
-<INITIAL>"int"          { ring_compiler_update_line_content(yytext); return TOKEN_INT;            }
-<INITIAL>"double"       { ring_compiler_update_line_content(yytext); return TOKEN_DOUBLE;         }
-<INITIAL>"string"       { ring_compiler_update_line_content(yytext); return TOKEN_STRING;         }
-<INITIAL>"struct"       { ring_compiler_update_line_content(yytext); return TOKEN_STRUCT;         }
-<INITIAL>"bind"         { ring_compiler_update_line_content(yytext); return TOKEN_BIND;           }
-<INITIAL>"lambda"       { ring_compiler_update_line_content(yytext); return TOKEN_LAMBDA;         }
-<INITIAL>"return"       { ring_compiler_update_line_content(yytext); return TOKEN_RETURN;         }
-<INITIAL>"defer"        { ring_compiler_update_line_content(yytext); return TOKEN_DEFER;          }
+<INITIAL>"typedef"      { package_unit_update_line_content(yytext); return TOKEN_TYPEDEF;        }
+<INITIAL>"typeof"       { package_unit_update_line_content(yytext); return TOKEN_TYPEOF;         }
+<INITIAL>"bool"         { package_unit_update_line_content(yytext); return TOKEN_BOOL;           }
+<INITIAL>"int"          { package_unit_update_line_content(yytext); return TOKEN_INT;            }
+<INITIAL>"double"       { package_unit_update_line_content(yytext); return TOKEN_DOUBLE;         }
+<INITIAL>"string"       { package_unit_update_line_content(yytext); return TOKEN_STRING;         }
+<INITIAL>"struct"       { package_unit_update_line_content(yytext); return TOKEN_STRUCT;         }
+<INITIAL>"bind"         { package_unit_update_line_content(yytext); return TOKEN_BIND;           }
+<INITIAL>"lambda"       { package_unit_update_line_content(yytext); return TOKEN_LAMBDA;         }
+<INITIAL>"return"       { package_unit_update_line_content(yytext); return TOKEN_RETURN;         }
+<INITIAL>"defer"        { package_unit_update_line_content(yytext); return TOKEN_DEFER;          }
 
-<INITIAL>"class"        { ring_compiler_update_line_content(yytext); return TOKEN_CLASS;          }
-<INITIAL>"private"      { ring_compiler_update_line_content(yytext); return TOKEN_PRIVATE;        }
-<INITIAL>"public"       { ring_compiler_update_line_content(yytext); return TOKEN_PUBLIC;         }
-<INITIAL>"@"            { ring_compiler_update_line_content(yytext); return TOKEN_ATTRIBUTE;      }
-<INITIAL>"field"        { ring_compiler_update_line_content(yytext); return TOKEN_FIELD;          }
-<INITIAL>"method"       { ring_compiler_update_line_content(yytext); return TOKEN_METHOD;         }
-<INITIAL>"constructor"  { ring_compiler_update_line_content(yytext); return TOKEN_CONSTRUCTOR;    }
+<INITIAL>"class"        { package_unit_update_line_content(yytext); return TOKEN_CLASS;          }
+<INITIAL>"private"      { package_unit_update_line_content(yytext); return TOKEN_PRIVATE;        }
+<INITIAL>"public"       { package_unit_update_line_content(yytext); return TOKEN_PUBLIC;         }
+<INITIAL>"@"            { package_unit_update_line_content(yytext); return TOKEN_ATTRIBUTE;      }
+<INITIAL>"field"        { package_unit_update_line_content(yytext); return TOKEN_FIELD;          }
+<INITIAL>"method"       { package_unit_update_line_content(yytext); return TOKEN_METHOD;         }
+<INITIAL>"constructor"  { package_unit_update_line_content(yytext); return TOKEN_CONSTRUCTOR;    }
 
-<INITIAL>"global"       { ring_compiler_update_line_content(yytext); return TOKEN_GLOBAL;         }
-<INITIAL>"if"           { ring_compiler_update_line_content(yytext); return TOKEN_IF;             }
-<INITIAL>"elseif"       { ring_compiler_update_line_content(yytext); return TOKEN_ELSEIF;         }
-<INITIAL>"else"         { ring_compiler_update_line_content(yytext); return TOKEN_ELSE;           }
-<INITIAL>"for"          { ring_compiler_update_line_content(yytext); return TOKEN_FOR;            }
-<INITIAL>"do"           { ring_compiler_update_line_content(yytext); return TOKEN_DO;             }
-<INITIAL>"break"        { ring_compiler_update_line_content(yytext); return TOKEN_BREAK;          }
-<INITIAL>"continue"     { ring_compiler_update_line_content(yytext); return TOKEN_CONTINUE;       }
-<INITIAL>"null"         { ring_compiler_update_line_content(yytext); return TOKEN_NULL;           }
+<INITIAL>"global"       { package_unit_update_line_content(yytext); return TOKEN_GLOBAL;         }
+<INITIAL>"if"           { package_unit_update_line_content(yytext); return TOKEN_IF;             }
+<INITIAL>"elseif"       { package_unit_update_line_content(yytext); return TOKEN_ELSEIF;         }
+<INITIAL>"else"         { package_unit_update_line_content(yytext); return TOKEN_ELSE;           }
+<INITIAL>"for"          { package_unit_update_line_content(yytext); return TOKEN_FOR;            }
+<INITIAL>"do"           { package_unit_update_line_content(yytext); return TOKEN_DO;             }
+<INITIAL>"break"        { package_unit_update_line_content(yytext); return TOKEN_BREAK;          }
+<INITIAL>"continue"     { package_unit_update_line_content(yytext); return TOKEN_CONTINUE;       }
+<INITIAL>"null"         { package_unit_update_line_content(yytext); return TOKEN_NULL;           }
 
-<INITIAL>"true"         { ring_compiler_update_line_content(yytext); return TOKEN_TRUE;           }
-<INITIAL>"false"        { ring_compiler_update_line_content(yytext); return TOKEN_FALSE;          }
+<INITIAL>"true"         { package_unit_update_line_content(yytext); return TOKEN_TRUE;           }
+<INITIAL>"false"        { package_unit_update_line_content(yytext); return TOKEN_FALSE;          }
 
-<INITIAL>"var"          { ring_compiler_update_line_content(yytext); return TOKEN_VAR;            }
-<INITIAL>"auto"         { ring_compiler_update_line_content(yytext); return TOKEN_AUTO;           }
-<INITIAL>"any"          { ring_compiler_update_line_content(yytext); return TOKEN_ANY;            }
-<INITIAL>"const"        { ring_compiler_update_line_content(yytext); return TOKEN_CONST;          }
-<INITIAL>"function"     { ring_compiler_update_line_content(yytext); return TOKEN_FUNCTION;       }
-<INITIAL>"new"          { ring_compiler_update_line_content(yytext); return TOKEN_NEW;            }
-<INITIAL>"delete"       { ring_compiler_update_line_content(yytext); return TOKEN_DELETE;         }
-<INITIAL>"."            { ring_compiler_update_line_content(yytext); return TOKEN_DOT;            }
-<INITIAL>".."           { ring_compiler_update_line_content(yytext); return TOKEN_2DOT;           }
-<INITIAL>"..."          { ring_compiler_update_line_content(yytext); return TOKEN_3DOT;           }
-<INITIAL>"->"           { ring_compiler_update_line_content(yytext); return TOKEN_ARROW;          }
+<INITIAL>"var"          { package_unit_update_line_content(yytext); return TOKEN_VAR;            }
+<INITIAL>"auto"         { package_unit_update_line_content(yytext); return TOKEN_AUTO;           }
+<INITIAL>"any"          { package_unit_update_line_content(yytext); return TOKEN_ANY;            }
+<INITIAL>"const"        { package_unit_update_line_content(yytext); return TOKEN_CONST;          }
+<INITIAL>"function"     { package_unit_update_line_content(yytext); return TOKEN_FUNCTION;       }
+<INITIAL>"new"          { package_unit_update_line_content(yytext); return TOKEN_NEW;            }
+<INITIAL>"delete"       { package_unit_update_line_content(yytext); return TOKEN_DELETE;         }
+<INITIAL>"."            { package_unit_update_line_content(yytext); return TOKEN_DOT;            }
+<INITIAL>".."           { package_unit_update_line_content(yytext); return TOKEN_2DOT;           }
+<INITIAL>"..."          { package_unit_update_line_content(yytext); return TOKEN_3DOT;           }
+<INITIAL>"->"           { package_unit_update_line_content(yytext); return TOKEN_ARROW;          }
 
-<INITIAL>"package"      { ring_compiler_update_line_content(yytext); return TOKEN_PACKAGE;        }
-<INITIAL>"import"       { ring_compiler_update_line_content(yytext); return TOKEN_IMPORT;         }
+<INITIAL>"package"      { package_unit_update_line_content(yytext); return TOKEN_PACKAGE;        }
+<INITIAL>"import"       { package_unit_update_line_content(yytext); return TOKEN_IMPORT;         }
 
-<INITIAL>"+"            { ring_compiler_update_line_content(yytext); return TOKEN_ADD;            }
-<INITIAL>"-"            { ring_compiler_update_line_content(yytext); return TOKEN_SUB;            }
-<INITIAL>"*"            { ring_compiler_update_line_content(yytext); return TOKEN_MUL;            }
-<INITIAL>"/"            { ring_compiler_update_line_content(yytext); return TOKEN_DIV;            }
-<INITIAL>"%"            { ring_compiler_update_line_content(yytext); return TOKEN_MOD;            }
-<INITIAL>"++"           { ring_compiler_update_line_content(yytext); return TOKEN_INCREASE;       }
-<INITIAL>"--"           { ring_compiler_update_line_content(yytext); return TOKEN_DECREASE;       }
-<INITIAL>"+="           { ring_compiler_update_line_content(yytext); return TOKEN_ADD_ASSIGN;     }
-<INITIAL>"-="           { ring_compiler_update_line_content(yytext); return TOKEN_SUB_ASSIGN;     }
-<INITIAL>"*="           { ring_compiler_update_line_content(yytext); return TOKEN_MUL_ASSIGN;     }
-<INITIAL>"/="           { ring_compiler_update_line_content(yytext); return TOKEN_DIV_ASSIGN;     }
-<INITIAL>"%="           { ring_compiler_update_line_content(yytext); return TOKEN_MOD_ASSIGN;     }
+<INITIAL>"+"            { package_unit_update_line_content(yytext); return TOKEN_ADD;            }
+<INITIAL>"-"            { package_unit_update_line_content(yytext); return TOKEN_SUB;            }
+<INITIAL>"*"            { package_unit_update_line_content(yytext); return TOKEN_MUL;            }
+<INITIAL>"/"            { package_unit_update_line_content(yytext); return TOKEN_DIV;            }
+<INITIAL>"%"            { package_unit_update_line_content(yytext); return TOKEN_MOD;            }
+<INITIAL>"++"           { package_unit_update_line_content(yytext); return TOKEN_INCREASE;       }
+<INITIAL>"--"           { package_unit_update_line_content(yytext); return TOKEN_DECREASE;       }
+<INITIAL>"+="           { package_unit_update_line_content(yytext); return TOKEN_ADD_ASSIGN;     }
+<INITIAL>"-="           { package_unit_update_line_content(yytext); return TOKEN_SUB_ASSIGN;     }
+<INITIAL>"*="           { package_unit_update_line_content(yytext); return TOKEN_MUL_ASSIGN;     }
+<INITIAL>"/="           { package_unit_update_line_content(yytext); return TOKEN_DIV_ASSIGN;     }
+<INITIAL>"%="           { package_unit_update_line_content(yytext); return TOKEN_MOD_ASSIGN;     }
 
-<INITIAL>"and"          { ring_compiler_update_line_content(yytext); return TOKEN_AND;            }
-<INITIAL>"or"           { ring_compiler_update_line_content(yytext); return TOKEN_OR;             }
-<INITIAL>"not"          { ring_compiler_update_line_content(yytext); return TOKEN_NOT;            }
+<INITIAL>"and"          { package_unit_update_line_content(yytext); return TOKEN_AND;            }
+<INITIAL>"or"           { package_unit_update_line_content(yytext); return TOKEN_OR;             }
+<INITIAL>"not"          { package_unit_update_line_content(yytext); return TOKEN_NOT;            }
 
-<INITIAL>"=="           { ring_compiler_update_line_content(yytext); return TOKEN_EQ;             }
-<INITIAL>"!="           { ring_compiler_update_line_content(yytext); return TOKEN_NE;             }
+<INITIAL>"=="           { package_unit_update_line_content(yytext); return TOKEN_EQ;             }
+<INITIAL>"!="           { package_unit_update_line_content(yytext); return TOKEN_NE;             }
 
-<INITIAL>">"            { ring_compiler_update_line_content(yytext); return TOKEN_GT;             }
-<INITIAL>">="           { ring_compiler_update_line_content(yytext); return TOKEN_GE;             }
-<INITIAL>"<"            { ring_compiler_update_line_content(yytext); return TOKEN_LT;             }
-<INITIAL>"<="           { ring_compiler_update_line_content(yytext); return TOKEN_LE;             }
+<INITIAL>">"            { package_unit_update_line_content(yytext); return TOKEN_GT;             }
+<INITIAL>">="           { package_unit_update_line_content(yytext); return TOKEN_GE;             }
+<INITIAL>"<"            { package_unit_update_line_content(yytext); return TOKEN_LT;             }
+<INITIAL>"<="           { package_unit_update_line_content(yytext); return TOKEN_LE;             }
 
-<INITIAL>"("            { ring_compiler_update_line_content(yytext); return TOKEN_LP;             }
-<INITIAL>")"            { ring_compiler_update_line_content(yytext); return TOKEN_RP;             }
-<INITIAL>"{"            { ring_compiler_update_line_content(yytext); return TOKEN_LC;             }
-<INITIAL>"}"            { ring_compiler_update_line_content(yytext); return TOKEN_RC;             }
-<INITIAL>"["            { ring_compiler_update_line_content(yytext); return TOKEN_LB;             }
-<INITIAL>"]"            { ring_compiler_update_line_content(yytext); return TOKEN_RB;             }
-<INITIAL>","            { ring_compiler_update_line_content(yytext); return TOKEN_COMMA;          }
-<INITIAL>":"            { ring_compiler_update_line_content(yytext); return TOKEN_COLON;          }
-<INITIAL>";"            { ring_compiler_update_line_content(yytext); return TOKEN_SEMICOLON;      }
-<INITIAL>"?"            { ring_compiler_update_line_content(yytext); return TOKEN_QUESTION_MARK;  }
-<INITIAL>"="            { ring_compiler_update_line_content(yytext); return TOKEN_ASSIGN;         }
+<INITIAL>"("            { package_unit_update_line_content(yytext); return TOKEN_LP;             }
+<INITIAL>")"            { package_unit_update_line_content(yytext); return TOKEN_RP;             }
+<INITIAL>"{"            { package_unit_update_line_content(yytext); return TOKEN_LC;             }
+<INITIAL>"}"            { package_unit_update_line_content(yytext); return TOKEN_RC;             }
+<INITIAL>"["            { package_unit_update_line_content(yytext); return TOKEN_LB;             }
+<INITIAL>"]"            { package_unit_update_line_content(yytext); return TOKEN_RB;             }
+<INITIAL>","            { package_unit_update_line_content(yytext); return TOKEN_COMMA;          }
+<INITIAL>":"            { package_unit_update_line_content(yytext); return TOKEN_COLON;          }
+<INITIAL>";"            { package_unit_update_line_content(yytext); return TOKEN_SEMICOLON;      }
+<INITIAL>"?"            { package_unit_update_line_content(yytext); return TOKEN_QUESTION_MARK;  }
+<INITIAL>"="            { package_unit_update_line_content(yytext); return TOKEN_ASSIGN;         }
 
 <INITIAL>[A-Za-z_][A-Za-z_0-9]* {
     debug_log_with_red_coloar("[STATUS:INITIAL]\t line_num(%d),column_num(%d),identifier(%s)",
-        get_ring_compiler_line_number(), 
-        get_ring_compiler_column_number(), 
+        get_package_unit_line_number(), 
+        get_package_unit_column_number(), 
         yytext);
 
-    ring_compiler_update_line_content(yytext);
+    package_unit_update_line_content(yytext);
 
     init_string_literal_buffer();
 
@@ -128,48 +128,48 @@ int yywrap(){
 }
 <INITIAL>([1-9][0-9]*)|"0" {
     debug_log_with_red_coloar("[STATUS:INITIAL]\t line_num(%d),column_num(%d),int_literal(%s)",
-        get_ring_compiler_line_number(), 
-        get_ring_compiler_column_number(), 
+        get_package_unit_line_number(), 
+        get_package_unit_column_number(), 
         yytext);
 
-    ring_compiler_update_line_content(yytext);
+    package_unit_update_line_content(yytext);
     yylval.m_literal_interface = yytext;
 
     return INT_LITERAL;
 }
 <INITIAL>[0-9]+\.[0-9]+ {
     debug_log_with_red_coloar("[STATUS:INITIAL]\t line_num(%d),column_num(%d),double_literal(%s)",
-        get_ring_compiler_line_number(), 
-        get_ring_compiler_column_number(), 
+        get_package_unit_line_number(), 
+        get_package_unit_column_number(), 
         yytext);
 
-    ring_compiler_update_line_content(yytext);
+    package_unit_update_line_content(yytext);
     yylval.m_literal_interface = yytext;
 
     return DOUBLE_LITERAL;
 }
 
 <INITIAL>\" {
-    ring_compiler_update_line_content(yytext);
+    package_unit_update_line_content(yytext);
 
     init_string_literal_buffer();
     BEGIN STRING_LITERAL_STATE;
 }
 <INITIAL>\n.* {
-    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(LF) line_number(%d)\n\n", get_ring_compiler_line_number());
+    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(LF) line_number(%d)\n\n", get_package_unit_line_number());
 
-    reset_ring_compiler_column_number();
-    ring_compiler_reset_current_line_content();
-    increase_ring_compiler_line_number();
+    reset_package_unit_column_number();
+    package_unit_reset_current_line_content();
+    increase_package_unit_line_number();
     strncpy(linebuf, yytext+1, sizeof(linebuf));
     yyless(1);
 }
 <INITIAL>\r\n.* {
-    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(CRLF) line_number(%d)\n\n", get_ring_compiler_line_number());
+    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(CRLF) line_number(%d)\n\n", get_package_unit_line_number());
 
-    reset_ring_compiler_column_number();
-    ring_compiler_reset_current_line_content();
-    increase_ring_compiler_line_number();
+    reset_package_unit_column_number();
+    package_unit_reset_current_line_content();
+    increase_package_unit_line_number();
     strncpy(linebuf, yytext+1, sizeof(linebuf));
     yyless(1);
 }
@@ -177,24 +177,24 @@ int yywrap(){
 <INITIAL>"/*" BEGIN BLOCK_COMMENT;
 
 <INITIAL>. {
-    ring_compiler_update_line_content(yytext);
+    package_unit_update_line_content(yytext);
 }
 
 
 <LINE_COMMENT>\n {
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
-    reset_ring_compiler_column_number();
-    ring_compiler_reset_current_line_content();
-    increase_ring_compiler_line_number();
+    reset_package_unit_column_number();
+    package_unit_reset_current_line_content();
+    increase_package_unit_line_number();
     BEGIN INITIAL;
 }
 <LINE_COMMENT>\r\n {
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
-    reset_ring_compiler_column_number();
-    ring_compiler_reset_current_line_content();
-    increase_ring_compiler_line_number();
+    reset_package_unit_column_number();
+    package_unit_reset_current_line_content();
+    increase_package_unit_line_number();
     BEGIN INITIAL;
 }
 <LINE_COMMENT>. {
@@ -205,16 +205,16 @@ int yywrap(){
 <BLOCK_COMMENT>\n {
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
-    reset_ring_compiler_column_number();
-    ring_compiler_reset_current_line_content();
-    increase_ring_compiler_line_number();
+    reset_package_unit_column_number();
+    package_unit_reset_current_line_content();
+    increase_package_unit_line_number();
 }
 <BLOCK_COMMENT>\r\n {
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
-    reset_ring_compiler_column_number();
-    ring_compiler_reset_current_line_content();
-    increase_ring_compiler_line_number();
+    reset_package_unit_column_number();
+    package_unit_reset_current_line_content();
+    increase_package_unit_line_number();
 }
 <BLOCK_COMMENT>. {
     string_literal_add_char(yytext[0]);
@@ -227,7 +227,7 @@ int yywrap(){
 
 
 <STRING_LITERAL_STATE>\" {
-    ring_compiler_update_line_content(yytext);
+    package_unit_update_line_content(yytext);
 
     yylval.m_literal_interface = get_string_literal();
 
@@ -236,28 +236,28 @@ int yywrap(){
     return STRING_LITERAL;
 }
 <STRING_LITERAL_STATE>\\n {
-    ring_compiler_update_line_content(yytext);
+    package_unit_update_line_content(yytext);
 
     string_literal_add_char('\n');
 
     BEGIN STRING_LITERAL_STATE;
 }
 <STRING_LITERAL_STATE>\\r {
-    ring_compiler_update_line_content(yytext);
+    package_unit_update_line_content(yytext);
 
     string_literal_add_char('\r');
 
     BEGIN STRING_LITERAL_STATE;
 }
 <STRING_LITERAL_STATE>\\t {
-    ring_compiler_update_line_content(yytext);
+    package_unit_update_line_content(yytext);
 
     string_literal_add_char('\t');
 
     BEGIN STRING_LITERAL_STATE;
 }
 <STRING_LITERAL_STATE>. {
-    ring_compiler_update_line_content(yytext);
+    package_unit_update_line_content(yytext);
 
     string_literal_add_char(yytext[0]);
 
@@ -273,10 +273,10 @@ int yyerror(char const *str, ...){
     // 调用 ring_compiler_error 
     // 在这里捕获详细信息
 
-    printf("\n%s:%d:%d: ", get_ring_compiler_current_file_name(), get_ring_compiler_line_number(), get_ring_compiler_column_number());
+    printf("\n%s:%d:%d: ", get_package_unit_current_file_name(), get_package_unit_line_number(), get_package_unit_column_number());
     complie_err_log("error: compiler error, syntax error");
     complie_err_log("        %s", linebuf);
-    complie_err_log2("%*s^.....%s\n", get_ring_compiler_column_number() + 8, "", str);
+    complie_err_log2("%*s^.....%s\n", get_package_unit_column_number() + 8, "", str);
 
     return 0;
 }

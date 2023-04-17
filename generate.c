@@ -152,13 +152,13 @@ Ring_VirtualMachine_Executer* new_ring_vm_executer() {
 }
 
 // 生成 RVM 虚拟机代码
-void ring_generate_vm_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer) {
+void ring_generate_vm_code(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
-    add_global_variable(compiler, executer);
-    add_functions(compiler, executer);
-    add_classes(compiler, executer);
-    add_top_level_code(compiler, executer);
+    add_global_variable(package_unit, executer);
+    add_functions(package_unit, executer);
+    add_classes(package_unit, executer);
+    add_top_level_code(package_unit, executer);
 
 #ifdef DEBUG
     vm_executer_dump(executer);
@@ -166,18 +166,18 @@ void ring_generate_vm_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer
 }
 
 // 添加全局变量
-void add_global_variable(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer) {
+void add_global_variable(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
     // FIXME: 在 Compiler 中大部分是链表：因为在编译的时候不确定存储空间
     // 在 Executer 中 大部分是数组，因为编译完成，存储空间的数量都已经确认了。
-    if (compiler->declaration_list_size == 0) {
+    if (package_unit->declaration_list_size == 0) {
         return;
     }
 
-    executer->global_variable_size = compiler->declaration_list_size;
+    executer->global_variable_size = package_unit->declaration_list_size;
     executer->global_variable_list = malloc(executer->global_variable_size * sizeof(RVM_Variable));
 
-    Declaration* pos = compiler->declaration_list;
+    Declaration* pos = package_unit->declaration_list;
     int          i   = 0;
     for (; pos; pos = pos->next, i++) {
         executer->global_variable_list[i].identifier = pos->identifier;
@@ -186,10 +186,10 @@ void add_global_variable(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* 
 }
 
 // 添加函数定义
-void add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer) {
+void add_functions(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
-    Function*    pos                = compiler->function_list;
-    unsigned int function_list_size = compiler->function_list_size;
+    Function*    pos                = package_unit->function_list;
+    unsigned int function_list_size = package_unit->function_list_size;
     unsigned int i                  = 0;
 
     executer->function_size = function_list_size;
@@ -204,10 +204,10 @@ void add_functions(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* execut
     }
 }
 
-void add_classes(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer) {
+void add_classes(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
-    ClassDefinition* pos = compiler->class_definition_list;
-    unsigned int class_definition_list_size = compiler->class_definition_list_size;
+    ClassDefinition* pos = package_unit->class_definition_list;
+    unsigned int class_definition_list_size = package_unit->class_definition_list_size;
     unsigned int i = 0;
 
     executer->class_size = class_definition_list_size;
@@ -287,11 +287,11 @@ void copy_method(MethodMember* src, RVM_Method* dest) {
 }
 
 // 添加顶层代码
-void add_top_level_code(Ring_Compiler* compiler, Ring_VirtualMachine_Executer* executer) {
+void add_top_level_code(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
-    generate_vmcode_from_statement_list(executer, NULL, compiler->statement_list, opcode_buffer);
+    generate_vmcode_from_statement_list(executer, NULL, package_unit->statement_list, opcode_buffer);
 
     opcode_buffer_fix_label(opcode_buffer);
 
