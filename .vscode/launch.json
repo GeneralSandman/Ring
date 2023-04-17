@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/bin/ring",
             "args": [
                 "run",
-                "${workspaceFolder}/test/008-class/class-000.ring"
+                "${workspaceFolder}/test/001-basic-type/string-001.ring"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

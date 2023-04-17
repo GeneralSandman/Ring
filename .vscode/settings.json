@@ -37,6 +37,10 @@
         "fstream": "c",
         "limits": "c",
         "new": "c",
-        "assert.h": "c"
-    }
+        "assert.h": "c",
+        "chrono": "c",
+        "variant": "c",
+        "cstdlib": "c"
+    },
+    "editor.formatOnSave": true
 }
