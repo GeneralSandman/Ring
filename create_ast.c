@@ -839,29 +839,20 @@ Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter) {
     return head;
 }
 
-PackageInfo* create_package_info(char* package_name, char* rename) {
+Package* create_package_info(char* package_name) {
     debug_log_with_yellow_coloar("current package name:%s, rename:%s\n", package_name, rename);
-    PackageInfo* package_info  = malloc(sizeof(PackageInfo));
-    package_info->line_number  = get_ring_compiler_line_number();
-    package_info->package_name = package_name;
-    package_info->package_path = NULL;
-    package_info->rename       = rename;
+    Package* package  = malloc(sizeof(Package));
+    package->package_name = package_name;
 
-    return package_info;
+    return package;
 }
 
 void import_package_list_add_item(char* package_name, char* rename) {
     debug_log_with_yellow_coloar("import package name:%s, rename:%s\n", package_name, rename);
-    PackageInfo* package_info  = malloc(sizeof(PackageInfo));
-    package_info->line_number  = get_ring_compiler_line_number();
-    package_info->package_name = package_name;
-    package_info->package_path = NULL;
-    package_info->rename       = rename;
-
 
     get_ring_compiler()->import_package_size ++;
     get_ring_compiler()->import_package_list = realloc(get_ring_compiler()->import_package_list, 
-        sizeof(PackageInfo) * get_ring_compiler()->import_package_size);
+        sizeof(ImportPackageInfo) * get_ring_compiler()->import_package_size);
     
     
     get_ring_compiler()->import_package_list[get_ring_compiler()->import_package_size-1].line_number = get_ring_compiler_line_number();

@@ -11,7 +11,9 @@ typedef struct Ring_VirtualMachine Ring_VirtualMachine;
 
 typedef struct Ring_VirtualMachine_Executer Ring_VirtualMachine_Executer;
 
-typedef struct PackageInfo PackageInfo;
+typedef struct ImportPackageInfo ImportPackageInfo;
+
+typedef struct Package Package;
 
 typedef struct RVM_Variable RVM_Variable;
 
@@ -125,7 +127,7 @@ struct Ring_Compiler {
     Ring_String* current_line_content;
 
     unsigned int    import_package_size;
-    PackageInfo*    import_package_list;
+    ImportPackageInfo*    import_package_list;
 
     unsigned int statement_list_size;
     Statement*   statement_list;
@@ -195,12 +197,16 @@ struct Ring_VirtualMachine {
     RVM_DebugConfig* debug_config;
 };
 
-struct PackageInfo {
+struct ImportPackageInfo {
     unsigned int line_number;
 
     char* package_name;
     char* package_path;
     char* rename;
+};
+
+struct Package {
+    char* package_name;
 };
 
 typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
@@ -1377,7 +1383,7 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Ide
 Parameter* create_parameter(TypeSpecifier* type, char* identifier);
 Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter);
 
-PackageInfo*       create_package_info(char* package_name, char* rename);
+Package*       create_package_info(char* package_name);
 void import_package_list_add_item(char* package_name, char* rename);
 
 ClassDefinition* start_class_definition(char* class_identifier);

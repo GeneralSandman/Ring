@@ -38,7 +38,7 @@ int yyerror(char const *str, ...);
     ContinueStatement*          m_continue_statement;
     ReturnStatement*            m_return_statement;
 
-    PackageInfo*                m_package_info;
+    Package*                    m_package;
 
     ClassDefinition*            m_class_definition;
     ClassMemberDeclaration*     m_class_member_declaration;
@@ -174,7 +174,7 @@ int yyerror(char const *str, ...);
 %type <m_continue_statement> continue_statement
 %type <m_return_statement> return_statement
 
-%type <m_package_info> package_definition
+%type <m_package> package_definition
 
 %type <m_class_definition> class_definition
 %type <m_class_member_declaration> class_member_declaration_list class_member_declaration
@@ -208,29 +208,28 @@ translation_unit
 package_definition
     : TOKEN_PACKAGE IDENTIFIER
     {
-        $$ = create_package_info($2, NULL);
+        $$ = create_package_info($2);
     }
     ;
 
 import_block 
-    : TOKEN_IMPORT TOKEN_LC package_list TOKEN_RC
+    : TOKEN_IMPORT TOKEN_LC import_package_list TOKEN_RC
     ;
 
-package_list
-    : package_info 
-    | package_list package_info
+import_package_list
+    : import_package_info 
+    | import_package_list import_package_info
     ;
 
-package_info
+import_package_info
     : IDENTIFIER TOKEN_SEMICOLON
     {
         import_package_list_add_item($1, NULL);
     }
-    // TODO: 别名
-    // | IDENTIFIER TOKEN_ARROW IDENTIFIER TOKEN_SEMICOLON
-    // {
-    //     $$ = create_package_info($1, $3);
-    // }
+    | IDENTIFIER TOKEN_ARROW IDENTIFIER TOKEN_SEMICOLON
+    {
+        import_package_list_add_item($1, $3);
+    }
     ;
 
 definition_or_statement
