@@ -45,6 +45,7 @@ void package_compile(Package* package) {
     for (std::string source_file : source_file_list) {
         PackageUnit* package_unit = package_unit_create(source_file.c_str());
         package_unit_compile(package_unit);
+        package_unit_dump(package_unit);
 
         // for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
         //     // TODO:
@@ -71,27 +72,29 @@ void package_compile(Package* package) {
 
 void package_dump(Package* package) {
     printf("******************* Package-Dump-begin *******************\n");
-    printf("package_name:%s,package_path:%s\n", package->package_name, package->package_path);
 
-    printf("PackageUnit:\n");
+    printf("## package_name:%s,package_path:%s\n", package->package_name, package->package_path);
+
+    printf("## PackageUnit:\n");
     for (auto package_unit : package->package_unit_list) {
         printf("\tfile_name:%s\n", package_unit->current_file_name.c_str());
     }
 
-    printf("Declaration:\n");
+    printf("## Declaration:\n");
     for (auto declaration : package->declaration_list) {
         printf("\tdeclaration identifier:%s\n", declaration->identifier);
     }
 
-    printf("ClassDefinition:\n");
+    printf("## ClassDefinition:\n");
     for (auto class_definition : package->class_definition_list) {
         printf("\tclass_definition identifier:%s\n", class_definition->class_identifier);
     }
 
-    printf("Function:\n");
+    printf("## Function:\n");
     for (auto function : package->function_list) {
         printf("\tfunction function_name:%s\n", function->function_name);
     }
+
     printf("******************* Package-Dump-end  *******************\n");
 }
 
@@ -151,27 +154,24 @@ void package_unit_compile(PackageUnit* package_unit) {
 
 void package_unit_dump(PackageUnit* package_unit) {
     printf("******************* PackageUnit-Dump-begin *******************\n");
-    printf("tfile_name:%s\n", package_unit->current_file_name.c_str());
 
-    // printf("PackageUnit:\n");
-    // for (auto package_unit : package->package_unit_list) {
-    //     printf("\tfile_name:%s\n", package_unit->current_file_name.c_str());
-    // }
+    printf("## file_name:%s\n", package_unit->current_file_name.c_str());
 
-    // printf("Declaration:\n");
-    // for (auto declaration : package->declaration_list) {
-    //     printf("\tdeclaration identifier:%s\n", declaration->identifier);
-    // }
+    printf("## Declaration:\n");
+    for (int d_i = 0; d_i < package_unit->declaration_list_size; d_i++) {
+        printf("\tdeclaration identifier:%s\n", package_unit->declaration_list[d_i].identifier);
+    }
 
-    // printf("ClassDefinition:\n");
-    // for (auto class_definition : package->class_definition_list) {
-    //     printf("\tclass_definition identifier:%s\n", class_definition->class_identifier);
-    // }
+    printf("## ClassDefinition:\n");
+    for (auto class_definition : package_unit->class_definition_list) {
+        printf("\tclass_definition identifier:%s\n", class_definition->class_identifier);
+    }
 
-    // printf("Function:\n");
-    // for (auto function : package->function_list) {
-    //     printf("\tfunction function_name:%s\n", function->function_name);
-    // }
+    printf("## Function:\n");
+    for (auto function : package_unit->function_list) {
+        printf("\tfunction function_name:%s\n", function->function_name);
+    }
+
     printf("******************* PackageUnit-Dump-end  *******************\n");
 }
 
