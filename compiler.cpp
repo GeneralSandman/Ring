@@ -176,7 +176,7 @@ void package_unit_dump(PackageUnit* package_unit) {
 }
 
 
-const char* get_package_unit_current_file_name() {
+const char* package_unit_get_file_name() {
     assert(package_unit != NULL);
     return package_unit->current_file_name.c_str();
 }
@@ -186,23 +186,23 @@ Ring_String* get_package_unit_current_line_content() {
     return package_unit->current_line_content;
 }
 
-unsigned int get_package_unit_line_number() {
+unsigned int package_unit_get_line_number() {
     assert(package_unit != NULL);
     return package_unit->current_line_number;
 }
 
-unsigned int increase_package_unit_line_number() {
+unsigned int package_unit_increa_line_number() {
     assert(package_unit != NULL);
     package_unit->current_line_number++;
     return package_unit->current_line_number;
 }
 
-unsigned int get_package_unit_column_number() {
+unsigned int package_unit_get_column_number() {
     assert(package_unit != NULL);
     return package_unit->current_column_number;
 }
 
-unsigned int increase_package_unit_column_number(unsigned int len) {
+unsigned int package_unit_increa_column_number(unsigned int len) {
     assert(package_unit != NULL);
     package_unit->current_column_number += len;
     return package_unit->current_column_number;
@@ -218,7 +218,7 @@ void package_unit_update_line_content(char* str) {
     package_unit->current_column_number += strlen(str);
 }
 
-void package_unit_reset_current_line_content() {
+void package_unit_reset_line_content() {
     reset_ring_string(package_unit->current_line_content);
 }
 
@@ -226,7 +226,7 @@ char* package_unit_get_current_line_content() {
     return get_ring_string(package_unit->current_line_content);
 }
 
-void reset_package_unit_column_number() {
+void package_unit_reset_column_number() {
     package_unit->current_column_number = 1;
 }
 

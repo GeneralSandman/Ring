@@ -107,8 +107,8 @@ extern "C" int yywrap(){
 
 <INITIAL>[A-Za-z_][A-Za-z_0-9]* {
     debug_log_with_red_coloar("[STATUS:INITIAL]\t line_num(%d),column_num(%d),identifier(%s)",
-        get_package_unit_line_number(), 
-        get_package_unit_column_number(), 
+        package_unit_get_line_number(), 
+        package_unit_get_column_number(), 
         yytext);
 
     package_unit_update_line_content(yytext);
@@ -128,8 +128,8 @@ extern "C" int yywrap(){
 }
 <INITIAL>([1-9][0-9]*)|"0" {
     debug_log_with_red_coloar("[STATUS:INITIAL]\t line_num(%d),column_num(%d),int_literal(%s)",
-        get_package_unit_line_number(), 
-        get_package_unit_column_number(), 
+        package_unit_get_line_number(), 
+        package_unit_get_column_number(), 
         yytext);
 
     package_unit_update_line_content(yytext);
@@ -139,8 +139,8 @@ extern "C" int yywrap(){
 }
 <INITIAL>[0-9]+\.[0-9]+ {
     debug_log_with_red_coloar("[STATUS:INITIAL]\t line_num(%d),column_num(%d),double_literal(%s)",
-        get_package_unit_line_number(), 
-        get_package_unit_column_number(), 
+        package_unit_get_line_number(), 
+        package_unit_get_column_number(), 
         yytext);
 
     package_unit_update_line_content(yytext);
@@ -156,20 +156,20 @@ extern "C" int yywrap(){
     BEGIN STRING_LITERAL_STATE;
 }
 <INITIAL>\n.* {
-    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(LF) line_number(%d)\n\n", get_package_unit_line_number());
+    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(LF) line_number(%d)\n\n", package_unit_get_line_number());
 
-    reset_package_unit_column_number();
-    package_unit_reset_current_line_content();
-    increase_package_unit_line_number();
+    package_unit_reset_column_number();
+    package_unit_reset_line_content();
+    package_unit_increa_line_number();
     strncpy(linebuf, yytext+1, sizeof(linebuf));
     yyless(1);
 }
 <INITIAL>\r\n.* {
-    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(CRLF) line_number(%d)\n\n", get_package_unit_line_number());
+    debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(CRLF) line_number(%d)\n\n", package_unit_get_line_number());
 
-    reset_package_unit_column_number();
-    package_unit_reset_current_line_content();
-    increase_package_unit_line_number();
+    package_unit_reset_column_number();
+    package_unit_reset_line_content();
+    package_unit_increa_line_number();
     strncpy(linebuf, yytext+1, sizeof(linebuf));
     yyless(1);
 }
@@ -184,17 +184,17 @@ extern "C" int yywrap(){
 <LINE_COMMENT>\n {
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
-    reset_package_unit_column_number();
-    package_unit_reset_current_line_content();
-    increase_package_unit_line_number();
+    package_unit_reset_column_number();
+    package_unit_reset_line_content();
+    package_unit_increa_line_number();
     BEGIN INITIAL;
 }
 <LINE_COMMENT>\r\n {
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
-    reset_package_unit_column_number();
-    package_unit_reset_current_line_content();
-    increase_package_unit_line_number();
+    package_unit_reset_column_number();
+    package_unit_reset_line_content();
+    package_unit_increa_line_number();
     BEGIN INITIAL;
 }
 <LINE_COMMENT>. {
@@ -205,16 +205,16 @@ extern "C" int yywrap(){
 <BLOCK_COMMENT>\n {
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
-    reset_package_unit_column_number();
-    package_unit_reset_current_line_content();
-    increase_package_unit_line_number();
+    package_unit_reset_column_number();
+    package_unit_reset_line_content();
+    package_unit_increa_line_number();
 }
 <BLOCK_COMMENT>\r\n {
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
-    reset_package_unit_column_number();
-    package_unit_reset_current_line_content();
-    increase_package_unit_line_number();
+    package_unit_reset_column_number();
+    package_unit_reset_line_content();
+    package_unit_increa_line_number();
 }
 <BLOCK_COMMENT>. {
     string_literal_add_char(yytext[0]);
@@ -273,10 +273,10 @@ int yyerror(char const *str, ...){
     // 调用 ring_compiler_error 
     // 在这里捕获详细信息
 
-    printf("\n%s:%d:%d: ", get_package_unit_current_file_name(), get_package_unit_line_number(), get_package_unit_column_number());
+    printf("\n%s:%d:%d: ", package_unit_get_file_name(), package_unit_get_line_number(), package_unit_get_column_number());
     complie_err_log("error: compiler error, syntax error");
     complie_err_log("        %s", linebuf);
-    complie_err_log2("%*s^.....%s\n", get_package_unit_column_number() + 8, "", str);
+    complie_err_log2("%*s^.....%s\n", package_unit_get_column_number() + 8, "", str);
 
     return 0;
 }
