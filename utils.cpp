@@ -2,9 +2,9 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include <sys/stat.h>
 #include <vector>
-#include <string>
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
@@ -20,7 +20,7 @@ void ring_compiler_functions_dump(PackageUnit* package_unit) {
     }
     printf("\n");
 
-    for (func = package_unit->function_list; func; func = func->next, i++) {
+    for (Function* func : package_unit->function_list) {
         printf("function[%d]: name:%s\n", i, func->function_name);
         if (func->block) {
             decl = func->block->declaration_list;
@@ -28,6 +28,7 @@ void ring_compiler_functions_dump(PackageUnit* package_unit) {
                 printf("\tlocal-variable[%d]: name:%s\n", j, decl->identifier);
             }
         }
+        i++;
     }
 }
 
@@ -154,12 +155,12 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
 
 std::vector<std::string> list_file(char* path) {
     std::vector<std::string> file_list;
-    DIR*           dp = NULL;
-    struct dirent* st;
-    struct stat    sta;
-    int            ret            = 0;
-    char           tmp_name[1024] = {0};
-    dp                            = opendir(path);
+    DIR*                     dp = NULL;
+    struct dirent*           st;
+    struct stat              sta;
+    int                      ret            = 0;
+    char                     tmp_name[1024] = {0};
+    dp                                      = opendir(path);
     if (dp == NULL) {
         // TODO:
         printf("open dir error!!\n");
@@ -168,14 +169,14 @@ std::vector<std::string> list_file(char* path) {
     while (1) {
         st = readdir(dp);
         if (NULL == st) {
-            //读取完毕
+            // 读取完毕
             break;
         }
         strcpy(tmp_name, path);
-        if (path[strlen(path) - 1] != '/') //判断路径名是否带/
+        if (path[strlen(path) - 1] != '/') // 判断路径名是否带/
             strcat(tmp_name, "/");
-        strcat(tmp_name, st->d_name); //新文件路径名
-        ret = stat(tmp_name, &sta);   //查看目录下文件属性
+        strcat(tmp_name, st->d_name); // 新文件路径名
+        ret = stat(tmp_name, &sta);   // 查看目录下文件属性
         if (ret < 0) {
             // TODO:
             printf("read stat fail\n");
@@ -183,16 +184,16 @@ std::vector<std::string> list_file(char* path) {
         }
 
         if (S_ISDIR(sta.st_mode)) {
-            //如果为目录文件
+            // 如果为目录文件
             if (0 == strcmp("..", st->d_name) || 0 == strcmp(".", st->d_name)) {
-                //忽略当前目录和上一层目录
+                // 忽略当前目录和上一层目录
                 continue;
             } else {
-                //递归读取
-                // list_file(tmp_name);
+                // 递归读取
+                //  list_file(tmp_name);
             }
         } else {
-            //不为目录则打印文件路径名
+            // 不为目录则打印文件路径名
             file_list.push_back(std::string(tmp_name));
             printf("%s\n", tmp_name);
         }

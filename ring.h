@@ -2,8 +2,8 @@
 #define RING_INCLUDE_H
 
 #include <stdio.h>
-#include <vector>
 #include <string>
+#include <vector>
 
 #define RING_VERSION "ring-v0.2.0-beta"
 
@@ -208,21 +208,17 @@ struct ImportPackageInfo {
     char* rename;
 };
 
+// Pacage 对应一个源代码的逻辑包  也就是一个路径
+// 其实它就是 就是将 PackageUnit 打包在一块
 struct Package {
     char* package_name;
     char* package_path;
 
-    unsigned int declaration_list_size;
-    Declaration* declaration_list;
+    std::vector<Declaration*>     declaration_list;
+    std::vector<ClassDefinition*> class_definition_list;
+    std::vector<Function*>        function_list;
 
-    unsigned int     class_definition_list_size;
-    ClassDefinition* class_definition_list;
-
-    unsigned int function_list_size;
-    Function*    function_list;
-
-    unsigned int package_unit_size;
-    PackageUnit* package_unit_list;
+    std::vector<PackageUnit*> package_unit_list;
 };
 
 // 一个Package 有多个 编译单元
@@ -231,23 +227,20 @@ struct Package {
 struct PackageUnit {
     Package* parent_package;
 
-    char*        current_file_name;
+    std::string  current_file_name;
     FILE*        current_file_fp;
     unsigned int current_line_number;
     unsigned int current_column_number;
     Ring_String* current_line_content;
 
-    unsigned int       import_package_size;
-    ImportPackageInfo* import_package_list;
+    std::vector<ImportPackageInfo*> import_package_list;
 
     unsigned int declaration_list_size;
     Declaration* declaration_list;
 
-    unsigned int     class_definition_list_size;
-    ClassDefinition* class_definition_list;
+    std::vector<ClassDefinition*> class_definition_list;
 
-    unsigned int function_list_size;
-    Function*    function_list;
+    std::vector<Function*> function_list;
 
     unsigned int statement_list_size;
     Statement*   statement_list;
@@ -949,7 +942,7 @@ struct Identifier { // TODO: 以后废弃这个东西
     char*          identifier_name;
     unsigned int   array_index; // 供数组使用，还要考虑一下负值索引的问题
 
-    Function* parent_scope; //作用域
+    Function* parent_scope; // 作用域
 
     Identifier* next;
 };
@@ -1313,10 +1306,12 @@ char*        get_ring_string(Ring_String* string);
 void         ring_compiler_error(SyntaxType syntax_type, int exit);
 Package*     package_create(char* package_name, char* package_path);
 void         package_compile(Package* package);
-PackageUnit* package_unit_create(char* file_name);
+void         package_dump(Package* package);
+PackageUnit* package_unit_create(std::string file_name);
 PackageUnit* get_package_unit();
 void         package_unit_compile(PackageUnit* package_unit);
-char*        get_package_unit_current_file_name();
+void         package_unit_dump(PackageUnit* package_unit);
+const char*  get_package_unit_current_file_name();
 Ring_String* get_package_unit_current_line_content();
 unsigned int get_package_unit_line_number();
 unsigned int increase_package_unit_line_number();
@@ -1571,10 +1566,10 @@ void ring_bytecode_load(Ring_VirtualMachine_Executer* executer, FILE* input);
 // interactive.c
 
 // utils.c
-void ring_compiler_functions_dump(PackageUnit* package_unit);
-void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer);
-void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
-void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
+void                     ring_compiler_functions_dump(PackageUnit* package_unit);
+void                     ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer);
+void                     ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
+void                     ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
 std::vector<std::string> list_file(char* path);
 // utils.c
 

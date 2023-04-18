@@ -9,7 +9,7 @@ void ring_compiler_fix_ast(PackageUnit* package_unit) {
     fix_statement_list(package_unit->statement_list, NULL, NULL);
 
     // fix function list
-    for (Function* pos = package_unit->function_list; pos; pos = pos->next) {
+    for (Function* pos : package_unit->function_list) {
         if (pos->block) {
             add_parameter_to_declaration(pos->parameter_list, pos->block);
             fix_statement_list(pos->block->statement_list, pos->block, pos);
@@ -18,8 +18,8 @@ void ring_compiler_fix_ast(PackageUnit* package_unit) {
 
     // fix class list
     unsigned int class_index = 0;
-    for (ClassDefinition* pos = package_unit->class_definition_list; pos != NULL; pos = pos->next, class_index++) {
-        pos->class_index = class_index;
+    for (ClassDefinition* pos : package_unit->class_definition_list) {
+        pos->class_index = class_index++;
         fix_class_definition(pos);
     }
 
@@ -396,7 +396,7 @@ void fix_class_definition(ClassDefinition* class_definition) {
         } else if (pos->type == MEMBER_METHOD) {
             pos->u.method->index_of_class = method_index++;
 
-            if(pos->u.method->block) {
+            if (pos->u.method->block) {
                 fix_statement_list(pos->u.method->block->statement_list, pos->u.method->block, NULL);
             }
         }
@@ -445,15 +445,13 @@ void fix_class_member_expression(MemberExpression* member_expression, Expression
 
 ClassDefinition* search_class_definition(char* class_identifier) {
     assert(class_identifier != NULL);
-    ClassDefinition* pos = get_package_unit()->class_definition_list;
-
-    for (; pos != NULL; pos = pos->next) {
+    for (ClassDefinition* pos : get_package_unit()->class_definition_list) {
         if (0 == strcmp(pos->class_identifier, class_identifier)) {
-            break;
+            return pos;
         }
     }
 
-    return pos;
+    return NULL;
 }
 
 ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, char* member_identifier) {
@@ -531,8 +529,7 @@ Declaration* search_declaration(char* identifier, Block* block) {
 }
 
 Function* search_function(char* identifier) {
-    Function* pos = get_package_unit()->function_list;
-    for (; pos; pos = pos->next) {
+    for (Function* pos : get_package_unit()->function_list) {
         if (!strcmp(identifier, pos->function_name)) {
             return pos;
         }

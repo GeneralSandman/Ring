@@ -214,6 +214,7 @@ package_definition
 
 import_block 
     : TOKEN_IMPORT TOKEN_LC import_package_list TOKEN_RC
+    | TOKEN_IMPORT TOKEN_LC TOKEN_RC
     ;
 
 import_package_list

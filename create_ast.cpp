@@ -29,18 +29,7 @@ void add_function_definition(Function* function_definition) {
     assert(function_definition != NULL);
     debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
 
-    Function* pos = get_package_unit()->function_list;
-
-    get_package_unit()->function_list_size++;
-    if (pos == NULL) {
-        get_package_unit()->function_list = function_definition;
-        return;
-    }
-
-    for (; pos->next; pos = pos->next) {
-    }
-
-    pos->next = function_definition;
+    get_package_unit()->function_list.push_back(function_definition);
 }
 
 Expression* create_expression_identifier(char* identifier) {
@@ -111,11 +100,11 @@ Expression* create_expression_from_function_call(FunctionCallExpression* functio
 Expression* create_expression_from_method_call(MethodCallExpression* method_call_expression) {
     debug_log_with_yellow_coloar("function_call_expression->name:");
 
-    Expression* expression                 = (Expression*)malloc(sizeof(Expression));
-    expression->line_number                = get_package_unit_line_number();
-    expression->convert_type               = NULL; // fix in fix_ast
-    expression->type                       = EXPRESSION_TYPE_METHOD_CALL;
-    expression->u.method_call_expression   = method_call_expression;
+    Expression* expression               = (Expression*)malloc(sizeof(Expression));
+    expression->line_number              = get_package_unit_line_number();
+    expression->convert_type             = NULL; // fix in fix_ast
+    expression->type                     = EXPRESSION_TYPE_METHOD_CALL;
+    expression->u.method_call_expression = method_call_expression;
     return expression;
 }
 
@@ -295,11 +284,11 @@ FunctionCallExpression* create_function_call_expression(char* identifier, Argume
 }
 
 MethodCallExpression* create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list) {
-    MethodCallExpression* method_call_expression         = (MethodCallExpression*)malloc(sizeof(MethodCallExpression));
-    method_call_expression->line_number                    = get_package_unit_line_number();
-    method_call_expression->object_expression            = object_expression;
-    method_call_expression->member_identifier                  = member_identifier;
-    method_call_expression->argument_list                  = argument_list;
+    MethodCallExpression* method_call_expression = (MethodCallExpression*)malloc(sizeof(MethodCallExpression));
+    method_call_expression->line_number          = get_package_unit_line_number();
+    method_call_expression->object_expression    = object_expression;
+    method_call_expression->member_identifier    = member_identifier;
+    method_call_expression->argument_list        = argument_list;
     return method_call_expression;
 }
 
@@ -386,7 +375,7 @@ Function* new_function_definition(FunctionType type, char* identifier, Parameter
 
     Function* function            = (Function*)malloc(sizeof(Function));
     function->line_number         = get_package_unit_line_number();
-    function->func_index          = get_package_unit()->function_list_size;
+    function->func_index          = get_package_unit()->function_list.size();
     function->type                = type;
     function->function_name       = identifier;
     function->parameter_list_size = 0;
@@ -747,7 +736,7 @@ Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter) {
 
 Package* create_package_info(char* package_name) {
     debug_log_with_yellow_coloar("current package name:%s, rename:%s\n", package_name, rename);
-    Package* package  = (Package*)malloc(sizeof(Package));
+    Package* package      = (Package*)malloc(sizeof(Package));
     package->package_name = package_name;
 
     return package;
@@ -756,15 +745,13 @@ Package* create_package_info(char* package_name) {
 void import_package_list_add_item(char* package_name, char* rename) {
     debug_log_with_yellow_coloar("import package name:%s, rename:%s\n", package_name, rename);
 
-    get_package_unit()->import_package_size ++;
-    get_package_unit()->import_package_list = (ImportPackageInfo*)realloc(get_package_unit()->import_package_list, 
-        sizeof(ImportPackageInfo) * get_package_unit()->import_package_size);
-    
-    
-    get_package_unit()->import_package_list[get_package_unit()->import_package_size-1].line_number = get_package_unit_line_number();
-    get_package_unit()->import_package_list[get_package_unit()->import_package_size-1].package_name = package_name;
-    get_package_unit()->import_package_list[get_package_unit()->import_package_size-1].package_path = NULL;
-    get_package_unit()->import_package_list[get_package_unit()->import_package_size-1].rename = rename;
+    ImportPackageInfo* import_package_info = (ImportPackageInfo*)malloc(sizeof(ImportPackageInfo));
+    import_package_info->line_number       = get_package_unit_line_number();
+    import_package_info->package_name      = package_name;
+    import_package_info->package_path      = NULL;
+    import_package_info->rename            = rename;
+
+    get_package_unit()->import_package_list.push_back(import_package_info);
 }
 
 
@@ -858,15 +845,15 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier, Identifier
 MethodMember* create_class_member_method(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
     debug_log_with_yellow_coloar("\t");
 
-    MethodMember* method_member = (MethodMember*)malloc(sizeof(MethodMember));
-    method_member->line_number = get_package_unit_line_number();
-    method_member->index_of_class = -1;
-    method_member->identifier = identifier;
+    MethodMember* method_member        = (MethodMember*)malloc(sizeof(MethodMember));
+    method_member->line_number         = get_package_unit_line_number();
+    method_member->index_of_class      = -1;
+    method_member->identifier          = identifier;
     method_member->parameter_list_size = 0;
-    method_member->parameter_list = parameter_list;
-    method_member->return_list_size = 0;
-    method_member->return_list = return_list;
-    method_member->block = block;
+    method_member->parameter_list      = parameter_list;
+    method_member->return_list_size    = 0;
+    method_member->return_list         = return_list;
+    method_member->block               = block;
     for (Parameter* pos = parameter_list; pos != NULL; pos = pos->next) {
         method_member->parameter_list_size++;
     }
@@ -913,4 +900,3 @@ int attribute_is_destructor(Attribute attribute) {
 // -------------
 // class define
 // -------------
-
