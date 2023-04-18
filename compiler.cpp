@@ -12,9 +12,8 @@ static PackageUnit*      package_unit = NULL;
 
 // Error Attention 某些错误提示可以精细化识别、提示
 void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
-    char message[1024];
-    sprintf(message, "syntax error:\nRing Grammar Standard:\n\t%s", SyntaxInfos[SYNTAX_VARIABLE_DEFINITION].bnf);
-    yyerror(message);
+    std::string message = "syntax error:\nRing Grammar Standard:\n\t" + std::string(SyntaxInfos[SYNTAX_VARIABLE_DEFINITION].bnf);
+    yyerror(message.c_str());
     package_unit->compile_error_num++;
     if (need_exit) {
         // Donot exit when detect a error.
@@ -47,10 +46,10 @@ void package_compile(Package* package) {
         PackageUnit* package_unit = package_unit_create(source_file.c_str());
         package_unit_compile(package_unit);
 
-        for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
-            // TODO:
-            // add
-        }
+        // for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
+        //     // TODO:
+        //     // add
+        // }
 
         package->package_unit_list.push_back(package_unit);
     }

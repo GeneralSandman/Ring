@@ -23,8 +23,7 @@ struct ErrorMessageInfo ErrorMessageInfos[] = {
 
 struct SyntaxInfo SyntaxInfos[] = {
     {SYNTAX_VARIABLE_DEFINITION,
-     "[Variable Definition]: var type identifier [ = value];"},
+     (char*)"[Variable Definition]: var type identifier [ = value];"},
     {SYNTAX_VARIABLE_DEFINITION,
-     "[Variable Definition]: var type identifier [ = value];"},
+     (char*)"[Variable Definition]: var type identifier [ = value];"},
 };
-

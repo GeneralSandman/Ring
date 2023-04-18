@@ -1423,7 +1423,7 @@ void add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number
         opcode_buffer->code_line_size++;
         opcode_buffer->code_line_map = (RVM_SourceCodeLineMap*)malloc(sizeof(RVM_SourceCodeLineMap) * opcode_buffer->code_line_size);
 
-        opcode_buffer->code_line_map[0].source_file_name   = "";
+        opcode_buffer->code_line_map[0].source_file_name   = NULL;
         opcode_buffer->code_line_map[0].line_number        = line_number;
         opcode_buffer->code_line_map[0].opcode_begin_index = start_pc;
         opcode_buffer->code_line_map[0].opcode_size += opcode_size;
@@ -1433,7 +1433,7 @@ void add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number
         opcode_buffer->code_line_map = (RVM_SourceCodeLineMap*)realloc(opcode_buffer->code_line_map,
                                                                        sizeof(RVM_SourceCodeLineMap) * opcode_buffer->code_line_size);
 
-        opcode_buffer->code_line_map[opcode_buffer->code_line_size - 1].source_file_name   = "";
+        opcode_buffer->code_line_map[opcode_buffer->code_line_size - 1].source_file_name   = NULL;
         opcode_buffer->code_line_map[opcode_buffer->code_line_size - 1].line_number        = line_number;
         opcode_buffer->code_line_map[opcode_buffer->code_line_size - 1].opcode_begin_index = start_pc;
         opcode_buffer->code_line_map[opcode_buffer->code_line_size - 1].opcode_size += opcode_size;

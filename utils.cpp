@@ -10,7 +10,7 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 void ring_compiler_functions_dump(PackageUnit* package_unit) {
     printf(" ************  compiler functions dump ****\n");
-    Function*    func;
+    // Function*    func;
     Declaration* decl;
     int          i = 0;
     int          j = 0;
@@ -56,17 +56,17 @@ void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer) {
 
 void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col) {
     MOVE_CURSOR(screen_row++, screen_col);
-    char* func_name = "top_level";
+    std::string func_name = "top_level";
     if (function) {
-        func_name = function->func_name;
+        func_name = std::string(function->func_name);
     }
-    printf("************  rvm opcode  --[function %s]\n", func_name);
+    printf("************  rvm opcode  --[function %s]\n", func_name.c_str());
 
     MOVE_CURSOR(screen_row++, screen_col);
     // width: 54
     printf("%10s | %20s | %10s | %5s\n", "index", "opcode", "oper num", "pc");
     for (unsigned int i = 0; i < code_size;) {
-        char* pointer = "";
+        std::string pointer = "";
         if (i == pc) {
             pointer = "<--";
         }
@@ -74,8 +74,8 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
         unsigned int    index       = i;
         RVM_Byte        opcode      = code_list[i++];
         RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
-        char*           opcode_name = opcode_info.name;
-        char            oper_num[]  = "         -";
+        std::string     opcode_name = opcode_info.name;
+        std::string     oper_num    = "";
 
         int tmp = 0;
 
@@ -84,20 +84,18 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
             break;
 
         case OPCODE_OPERAND_TYPE_1BYTE:
-            sprintf(oper_num, "%d", code_list[i++]);
+            oper_num = std::to_string(code_list[i++]);
             break;
 
         case OPCODE_OPERAND_TYPE_2BYTE:
-            tmp = code_list[i++] << 8;
-            tmp += code_list[i++];
-            sprintf(oper_num, "%d", tmp);
+            oper_num = std::to_string(tmp);
             break;
 
         default: break;
         }
 
         MOVE_CURSOR(screen_row++, screen_col);
-        printf(" %10d | %20s | %10s | %5s\n", index, opcode_name, oper_num, pointer);
+        printf(" %10d | %20s | %10s | %5s\n", index, opcode_name.c_str(), oper_num.c_str(), pointer.c_str());
     }
 }
 
@@ -111,8 +109,8 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
     // width 49
     printf("%7s | %20s | %6s | %6s\n", "index", "oper_num", "space", "pointer");
     for (int i = 0; i < runtime_stack->top_index; i++) {
-        char* space   = "";
-        char* pointer = "";
+        std::string space   = "";
+        std::string pointer = "";
         if (i >= caller_stack_base) {
             space = "+++";
         }
@@ -126,26 +124,26 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
         switch (value.type) {
         case RVM_VALUE_TYPE_BOOL:
             if (value.u.int_value) {
-                printf("%7d | %20s | %6s | %6s\n", i, "true", space, pointer);
+                printf("%7d | %20s | %6s | %6s\n", i, "true", space.c_str(), pointer.c_str());
             } else {
-                printf("%7d | %20s | %6s | %6s\n", i, "false", space, pointer);
+                printf("%7d | %20s | %6s | %6s\n", i, "false", space.c_str(), pointer.c_str());
             }
             break;
         case RVM_VALUE_TYPE_INT:
-            printf("%7d | %20d | %6s | %6s\n", i, value.u.int_value, space, pointer);
+            printf("%7d | %20d | %6s | %6s\n", i, value.u.int_value, space.c_str(), pointer.c_str());
             break;
         case RVM_VALUE_TYPE_DOUBLE:
-            printf("%7d | %20f | %6s | %6s\n", i, value.u.double_value, space, pointer);
+            printf("%7d | %20f | %6s | %6s\n", i, value.u.double_value, space.c_str(), pointer.c_str());
             break;
         case RVM_VALUE_TYPE_STRING:
             if (value.u.object == NULL || value.u.object->u.string.data == NULL) {
-                printf("%7d | %20.*s | %6s | %6s\n", i, 20, "", space, pointer);
+                printf("%7d | %20.*s | %6s | %6s\n", i, 20, "", space.c_str(), pointer.c_str());
             } else {
-                printf("%7d | %20.*s | %6s | %6s\n", i, 20, value.u.object->u.string.data, space, pointer);
+                printf("%7d | %20.*s | %6s | %6s\n", i, 20, value.u.object->u.string.data, space.c_str(), pointer.c_str());
             }
             break;
         case RVM_VALUE_TYPE_OBJECT:
-            printf("%7d | %20s | %6s | %6s\n", i, "object", space, pointer);
+            printf("%7d | %20s | %6s | %6s\n", i, "object", space.c_str(), pointer.c_str());
             break;
         default:
             break;

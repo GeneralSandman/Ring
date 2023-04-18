@@ -450,7 +450,7 @@ typedef enum {
 
 struct RVM_Opcode_Info {
     RVM_Byte          code;                    // 字节码枚举
-    char*             name;                    // 字节码字符串
+    std::string       name;                    // 字节码字符串
     OpcodeOperandType type;                    // 操作数的类型
     int               runtime_stack_increment; // 对运行时栈空间的增长 可为负值
     int               pc_increment;            // 读取完本字节码，程序计数器的增长 ，便于读取下一字节码
@@ -1205,8 +1205,8 @@ typedef enum {
 } ErrorCode;
 
 struct ErrorMessageInfo {
-    ErrorCode error_code;
-    char*     error_messaage;
+    ErrorCode   error_code;
+    std::string error_messaage;
 };
 
 typedef enum {

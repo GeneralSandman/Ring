@@ -1,10 +1,11 @@
 #include "ring.h"
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 
-char* command_help_message =
+std::string command_help_message =
     "Ring Command Usage: \n"
     "\n"
     "        ring <command> [arguments]\n"
@@ -18,9 +19,19 @@ char* command_help_message =
     "        help                                           :get Ring version\n"
     "\n";
 
+/*
+void test() {
+    std::string package_name("job");
+    std::string package_path("/Users/zhenhuli/Desktop/Ring/std/job");
+    Package*    package = package_create(package_name.c_str(), package_path.c_str());
 
+    package_compile(package);
+
+    package_dump(package);
+}
+*/
 int main(int argc, char** argv) {
-    PackageUnit*                package_unit;
+    PackageUnit*                  package_unit;
     Ring_VirtualMachine_Executer* ring_vm_executer;
     Ring_VirtualMachine*          ring_vm;
     char*                         file_name;
@@ -29,21 +40,21 @@ int main(int argc, char** argv) {
 
 
     if (argc < 2) {
-        fprintf(stderr, "%s", command_help_message);
+        fprintf(stderr, "%s", command_help_message.c_str());
         exit(ERROR_CODE_COMMAND_ERROR);
     }
     command = argv[1];
-    if(!strcmp(command, "version")) {
+    if (!strcmp(command, "version")) {
         printf("Ring version: %s \n", RING_VERSION);
         return 0;
     } else if (!strcmp(command, "help")) {
-        printf("%s", command_help_message);
+        printf("%s", command_help_message.c_str());
         return 0;
     }
 
 
-    if(argc < 3) {
-        fprintf(stderr, "%s", command_help_message);
+    if (argc < 3) {
+        fprintf(stderr, "%s", command_help_message.c_str());
         exit(ERROR_CODE_COMMAND_ERROR);
     }
     file_name = argv[2];
@@ -57,13 +68,13 @@ int main(int argc, char** argv) {
     }
 
     // Step-0: 读取文件
-    fp        = fopen(file_name, "r");
+    fp = fopen(file_name, "r");
     if (fp == NULL) {
         fprintf(stderr, "%s not found.\n", file_name);
         exit(1);
     }
 
-    package_unit    = package_unit_create(file_name);
+    package_unit     = package_unit_create(file_name);
     ring_vm_executer = new_ring_vm_executer();
 
     // Step-1: flex 词法分析，
@@ -82,4 +93,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-

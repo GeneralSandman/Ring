@@ -401,24 +401,24 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // class
         case RVM_CODE_POP_FIELD_BOOL:
-            object = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object                                              = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num                                            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object->u.class_object.field[oper_num].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
             // printf("-bool_value:%d\n", object->u.class_object.field[oper_num].u.bool_value);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_INT:
-            object = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object                                             = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num                                           = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object->u.class_object.field[oper_num].u.int_value = STACK_GET_INT_OFFSET(rvm, -2);
             // printf("-int_value:%d\n", object->u.class_object.field[oper_num].u.int_value);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_DOUBLE:
-            object = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object                                                = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num                                              = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object->u.class_object.field[oper_num].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -2);
             // printf("-double_value:%f\n", object->u.class_object.field[oper_num].u.double_value);
             runtime_stack->top_index -= 2;
@@ -696,7 +696,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_METHOD:
-            oper_num   = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             method_index = oper_num;
             STACK_SET_INT_OFFSET(rvm, 0, method_index);
             runtime_stack->top_index++;
@@ -723,13 +723,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_INVOKE_METHOD:
             method_index = STACK_GET_INT_OFFSET(rvm, -1);
-            object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            object       = STACK_GET_OBJECT_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             invoke_derive_function(rvm,
-                                       &function, rvm->class_list[object->u.class_object.class_def->class_index].method_list[method_index].rvm_function,
-                                       &code_list, &code_size,
-                                       &rvm->pc,
-                                       &caller_stack_base);
+                                   &function, rvm->class_list[object->u.class_object.class_def->class_index].method_list[method_index].rvm_function,
+                                   &code_list, &code_size,
+                                   &rvm->pc,
+                                   &caller_stack_base);
 
             break;
         case RVM_CODE_RETURN:
@@ -772,7 +772,7 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, un
 
     RVM_NativeFuncProc* native_func_proc = function->u.native_func->func_proc;
     // unsigned int        arg_count        = function->u.native_func->arg_count;
-    RVM_Value*          args; // TODO:
+    RVM_Value* args; // TODO:
 
     // TODO: how to handle arg_count > 1
     args = &rvm->runtime_stack->data[rvm->runtime_stack->top_index - argument_list_size];
@@ -1266,15 +1266,15 @@ void rvm_register_native_functions(Ring_VirtualMachine* rvm) {
 
     // rvm_register_native_function(rvm, "print", native_proc_print, 1);
     // rvm_register_native_function(rvm, "println", native_proc_println, 1);
-    rvm_register_native_function(rvm, "println_bool", native_proc_println_bool, 1);
-    rvm_register_native_function(rvm, "println_int", native_proc_println_int, 1);
-    rvm_register_native_function(rvm, "println_double", native_proc_println_double, 1);
-    rvm_register_native_function(rvm, "println_string", native_proc_println_string, 1);
-    rvm_register_native_function(rvm, "debug_assert", native_proc_debug_assert, 1);
-    rvm_register_native_function(rvm, "exit", native_proc_exit, 1);
+    rvm_register_native_function(rvm, (char*)"println_bool", native_proc_println_bool, 1);
+    rvm_register_native_function(rvm, (char*)"println_int", native_proc_println_int, 1);
+    rvm_register_native_function(rvm, (char*)"println_double", native_proc_println_double, 1);
+    rvm_register_native_function(rvm, (char*)"println_string", native_proc_println_string, 1);
+    rvm_register_native_function(rvm, (char*)"debug_assert", native_proc_debug_assert, 1);
+    rvm_register_native_function(rvm, (char*)"exit", native_proc_exit, 1);
 
-    rvm_register_native_function(rvm, "print", native_proc_print, -1);
-    rvm_register_native_function(rvm, "println", native_proc_println, -1);
-    rvm_register_native_function(rvm, "printf", native_proc_printf, -1);
-    rvm_register_native_function(rvm, "printfln", native_proc_printfln, -1);
+    rvm_register_native_function(rvm, (char*)"print", native_proc_print, -1);
+    rvm_register_native_function(rvm, (char*)"println", native_proc_println, -1);
+    rvm_register_native_function(rvm, (char*)"printf", native_proc_printf, -1);
+    rvm_register_native_function(rvm, (char*)"printfln", native_proc_printfln, -1);
 }
