@@ -26,6 +26,10 @@ CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-
 BIN = ./bin
 INCLUDES = \
 
+.SUFFIXES: .cpp .c
+.cpp.o:
+	$(CC) $(CFLAGS) $<
+
 $(TARGET):$(OBJS); $(shell if [ ! -e $(BIN) ];then mkdir -p $(BIN); fi)
 	$(CC) $(OBJS) -lm -pthread -o $(BIN)/$@
 
