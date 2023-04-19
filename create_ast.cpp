@@ -25,9 +25,11 @@ Statement* create_statemen_from_expression(Expression* expression) {
     return statement;
 }
 
-void add_function_definition(Function* function_definition) {
+void add_function_definition(AttributeInfo* attribute_info, Function* function_definition) {
     assert(function_definition != NULL);
     debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
+
+    function_definition->attribute_info = attribute_info;
 
     get_package_unit()->function_list.push_back(function_definition);
 }
@@ -876,6 +878,24 @@ TypeSpecifier* create_class_type_specifier(char* identifier) {
     type->derive_type->u.class_type->class_definition = NULL; // FIX_AST_UPDATE
 
     return type;
+}
+
+AttributeInfo* create_attribute_info(char* name) {
+    AttributeInfo* info = (AttributeInfo*)malloc(sizeof(AttributeInfo));
+    info->name          = name;
+    info->next          = NULL;
+    return info;
+}
+
+AttributeInfo* attribute_info_add_item(AttributeInfo* list, AttributeInfo* item) {
+    if (list == NULL) {
+        return item;
+    } else {
+        AttributeInfo* pos = list;
+        for (; pos->next != NULL; pos = pos->next) {}
+        pos->next = item;
+        return list;
+    }
 }
 
 Attribute add_attribute(Attribute attribute, AttributeType type) {

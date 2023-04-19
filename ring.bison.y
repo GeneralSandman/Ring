@@ -45,6 +45,8 @@ int yyerror(char const *str, ...);
     FieldMember*                m_field_member;
     MethodMember*               m_method_member;
 
+    AttributeInfo*              m_attribute_info;
+
     TypeSpecifier*              m_type_specifier;
     Ring_BasicType              m_basic_type_specifier;
     AttributeType               m_attribute;
@@ -183,6 +185,8 @@ int yyerror(char const *str, ...);
 %type <m_field_member> field_member
 %type <m_method_member> method_member
 
+%type <m_attribute_info> attribute_list_v2 attribute_v2
+
 %type <m_type_specifier>        type_specifier class_type_specifier
 %type <m_basic_type_specifier>  basic_type_specifier 
 %type <m_attribute> attribute attribute_list
@@ -239,7 +243,12 @@ definition_or_statement
     : function_definition
     {
         debug_log_with_green_coloar("[RULE::statement:function_definition]\t ");
-        add_function_definition($1);
+        add_function_definition(NULL, $1);
+    }
+    | attribute_list_v2 function_definition
+    {
+        debug_log_with_green_coloar("[RULE::statement:function_definition]\t ");
+        add_function_definition($1, $2);
     }
     | statement
     {
@@ -351,7 +360,7 @@ method_member
     }
     ;
 
-attribute_list
+attribute_list // TODO: delete
     : /* empty */
     {
         debug_log_with_green_coloar("[RULE::attribute_list]\t ");
@@ -364,7 +373,7 @@ attribute_list
     }
     ;
 
-attribute
+attribute // TODO: delete
     : TOKEN_CONSTRUCTOR 
     {
        $$ = CONSTRUCTOR; 
@@ -383,7 +392,22 @@ attribute
     }
     ;
 
+attribute_list_v2
+    : attribute_v2
+    {
+    }
+    | attribute_list_v2 attribute_v2
+    {
+        $$ = attribute_info_add_item($1, $2);
+    }
+    ;
 
+attribute_v2
+    : TOKEN_ATTRIBUTE IDENTIFIER
+    {
+        $$ = create_attribute_info($2);
+    }
+    ;
 
 maybe_empty_expression
     :

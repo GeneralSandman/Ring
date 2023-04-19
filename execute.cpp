@@ -208,6 +208,7 @@ void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_Virtu
 void rvm_add_classs(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
 }
+
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
 

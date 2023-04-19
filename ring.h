@@ -111,6 +111,8 @@ typedef struct RVM_DebugConfig RVM_DebugConfig;
 
 typedef struct IdentifierExpression IdentifierExpression;
 
+typedef struct AttributeInfo AttributeInfo;
+
 typedef struct RVM_String      RVM_String;
 typedef struct RVM_Array       RVM_Array;
 typedef struct RVM_ClassObject RVM_ClassObject;
@@ -768,6 +770,11 @@ typedef enum {
 
 typedef unsigned int Attribute;
 
+struct AttributeInfo {
+    char*          name;
+    AttributeInfo* next;
+};
+
 typedef enum {
     MEMBER_UNKNOW = 0,
     MEMBER_FIELD,
@@ -1055,6 +1062,8 @@ struct Block {
 
 struct Function {
     unsigned int line_number;
+
+    AttributeInfo* attribute_info;
 
     unsigned int func_index;
 
@@ -1345,7 +1354,7 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
 
 Statement*              statement_list_add_item(Statement* statement_list, Statement* statement);
 Statement*              create_statemen_from_expression(Expression* expression);
-void                    add_function_definition(Function* function_definition);
+void                    add_function_definition(AttributeInfo* attribute_info, Function* function_definition);
 Expression*             create_expression_identifier(char* identifier);
 Expression*             create_expression_identifier2(char* identifier, IdentifierExpressionType type);
 Expression*             create_expression_identifier_with_index(char* identifier, Expression* index);
@@ -1411,6 +1420,10 @@ FieldMember*            create_class_member_field(TypeSpecifier* type_specifier,
 MethodMember*           create_class_member_method(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
 
 TypeSpecifier* create_class_type_specifier(char* identifier);
+
+AttributeInfo* create_attribute_info(char* name);
+AttributeInfo* attribute_info_add_item(AttributeInfo* list, AttributeInfo* item);
+
 
 Attribute add_attribute(Attribute attribute, AttributeType type);
 int       attribute_is_public(Attribute attribute);
