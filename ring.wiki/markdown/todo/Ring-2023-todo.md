@@ -52,16 +52,19 @@
 
 ### 2023-04-17
 - 实现：源代码的切分编译 ✅
-- 实现：编译器从C语言全部转为C++
+- 实现：编译器从C语言全部转为C++ ✅
 
 ### 2023-04-18
+- 重构：源代码没有变量编译错误 bug  ✅
+- 重构：源代码import为空时编译错误 bug  ✅
+- 重构：创建AST时，将 class_definition_list 和 function_list 转为 CPP-vector，更好的管理内存 ✅
 - 实现：源代码的切分编译、打包
 - 实现：PacageUnit等 static变量的优化 
 - 实现：导入使用 package
 - 实现：定义package
-- 重构：源代码没有变量编译错误 bug  ✅
-- 重构：源代码import为空时编译错误 bug  ✅
-- 重构：创建AST时，将 class_definition_list 和 function_list 转为 CPP-vector，更好的管理内存 ✅
+- 实现：根据import-package名称去访问 package内的function
+- 优化：单文件内 对象的访问
+- 优化：native 的那些 printf函数
 
 ### 2023-04-19 
 - 实现：class method使用self关键字
@@ -69,6 +72,8 @@
 - 实现：class 构造method
 - 测试：完善 class 的相关测试
 
+- 实现：好好实现 std-fmt 库，同时优化 native函数
+- 实现：main 函数  ✅
 
 ### 2023-04-20
 - 实现：去除编译warn告警，提高编译速度
