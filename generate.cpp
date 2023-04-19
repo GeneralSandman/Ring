@@ -129,6 +129,8 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_RETURN, "return", OPCODE_OPERAND_TYPE_2BYTE, 0, 3}, // 操作数代表返回值的数量，ex；return int, double, string;  操作数就是3 FIXME:runtime_stack_increment
     {RVM_CODE_FUNCTION_FINISH, "function_finish", OPCODE_OPERAND_TYPE_0BYTE, 0},
 
+    {RVM_CODE_EXIT, "exit", OPCODE_OPERAND_TYPE_1BYTE, 0},
+
     // new heap memory
     // {RVM_CODE_DUPLICATE, "new", OPCODE_OPERAND_TYPE_0BYTE, 1, 0},
 
@@ -136,9 +138,27 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODES_NUM, "", OPCODE_OPERAND_TYPE_0BYTE, 0, 0},
 };
 
-Ring_VirtualMachine_Executer* new_ring_vm_executer() {
+// PackageExecuter* package_executer_create() {
+//     // debug_log_with_darkgreen_coloar("\t");
+//     // PackageExecuter* package_executer                 = (PackageExecuter*)malloc(sizeof(PackageExecuter));
+//     // package_executer->package_name                    = NULL;
+//     // package_executer->constant_pool_list              = std::vector<RVM_ConstantPool*>{};
+//     // package_executer->global_variable_list            = std::vector<RVM_Variable*>{};
+//     // package_executer->function_list                   = std::vector<RVM_Function*>{};
+//     // package_executer->class_list                      = std::vector<RVM_Class*>{};
+//     // package_executer->code_size                       = 0;
+//     // package_executer->code_list                       = NULL;
+//     // package_executer->estimate_runtime_stack_capacity = 0;
+//     // return package_executer;
+// }
+
+// void package_generate_vm_code(Package* package, PackageExecuter* executer) {
+//     // debug_log_with_darkgreen_coloar("\t");
+// }
+
+Package_Executer* package_executer_create() {
     debug_log_with_darkgreen_coloar("\t");
-    Ring_VirtualMachine_Executer* executer    = (Ring_VirtualMachine_Executer*)malloc(sizeof(Ring_VirtualMachine_Executer));
+    Package_Executer* executer                = (Package_Executer*)malloc(sizeof(Package_Executer));
     executer->constant_pool_size              = 0;
     executer->constant_pool_list              = NULL;
     executer->global_variable_size            = 0;
@@ -147,12 +167,13 @@ Ring_VirtualMachine_Executer* new_ring_vm_executer() {
     executer->function_list                   = NULL;
     executer->code_size                       = 0;
     executer->code_list                       = NULL;
+    executer->main_func_index                 = -1;
     executer->estimate_runtime_stack_capacity = 0;
     return executer;
 }
 
 // 生成 RVM 虚拟机代码
-void ring_generate_vm_code(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer) {
+void ring_generate_vm_code(PackageUnit* package_unit, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
     add_global_variable(package_unit, executer);
@@ -165,8 +186,22 @@ void ring_generate_vm_code(PackageUnit* package_unit, Ring_VirtualMachine_Execut
 #endif
 }
 
+// 生成 RVM 虚拟机代码
+void ring_generate_vm_code(Package* package, Package_Executer* executer) {
+    debug_log_with_darkgreen_coloar("\t");
+
+    add_global_variable(package, executer);
+    add_functions(package, executer);
+    add_classes(package, executer);
+    add_top_level_code(package, executer);
+
+#ifdef DEBUG
+    vm_executer_dump(executer);
+#endif
+}
+
 // 添加全局变量
-void add_global_variable(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer) {
+void add_global_variable(PackageUnit* package_unit, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
     // FIXME: 在 Compiler 中大部分是链表：因为在编译的时候不确定存储空间
     // 在 Executer 中 大部分是数组，因为编译完成，存储空间的数量都已经确认了。
@@ -185,8 +220,28 @@ void add_global_variable(PackageUnit* package_unit, Ring_VirtualMachine_Executer
     }
 }
 
+// 添加全局变量
+void add_global_variable(Package* package, Package_Executer* executer) {
+    debug_log_with_darkgreen_coloar("\t");
+    // FIXME: 在 Compiler 中大部分是链表：因为在编译的时候不确定存储空间
+    // 在 Executer 中 大部分是数组，因为编译完成，存储空间的数量都已经确认了。
+    if (package->declaration_list.empty()) {
+        return;
+    }
+
+    executer->global_variable_size = package->declaration_list.size();
+    executer->global_variable_list = (RVM_Variable*)malloc(executer->global_variable_size * sizeof(RVM_Variable));
+
+    int i = 0;
+    for (Declaration* pos : package->declaration_list) {
+        executer->global_variable_list[i].identifier = pos->identifier;
+        executer->global_variable_list[i].type       = pos->type; // TODO: 这里考虑要深度复制
+        i++;
+    }
+}
+
 // 添加函数定义
-void add_functions(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer) {
+void add_functions(PackageUnit* package_unit, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
     executer->function_size = package_unit->function_list.size();
@@ -203,7 +258,31 @@ void add_functions(PackageUnit* package_unit, Ring_VirtualMachine_Executer* exec
     }
 }
 
-void add_classes(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer) {
+// 添加函数定义
+void add_functions(Package* package, Package_Executer* executer) {
+    debug_log_with_darkgreen_coloar("\t");
+
+    executer->function_size = package->function_list.size();
+    executer->function_list = (RVM_Function*)malloc(sizeof(RVM_Function) * package->function_list.size());
+
+    unsigned int i = 0;
+    // 暂时只处理 native function
+    for (Function* pos : package->function_list) {
+        copy_function(pos, &executer->function_list[i]);
+        if (pos->block != NULL) {
+            generate_code_from_function_definition(executer, pos, &executer->function_list[i]);
+        }
+        // TODO: FIXME:
+        // 注册main函数
+        if (0 == strcmp(pos->function_name, "main")) {
+            // printf("find main:%d\n", i);
+            executer->main_func_index = i;
+        }
+        i++;
+    }
+}
+
+void add_classes(PackageUnit* package_unit, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
     executer->class_size = package_unit->class_definition_list.size();
@@ -216,7 +295,20 @@ void add_classes(PackageUnit* package_unit, Ring_VirtualMachine_Executer* execut
     }
 }
 
-void copy_class(Ring_VirtualMachine_Executer* executer, ClassDefinition* src, RVM_Class* dest) {
+void add_classes(Package* package, Package_Executer* executer) {
+    debug_log_with_darkgreen_coloar("\t");
+
+    executer->class_size = package->class_definition_list.size();
+    executer->class_list = (RVM_Class*)malloc(sizeof(RVM_Class) * package->class_definition_list.size());
+
+    unsigned int i = 0;
+    for (ClassDefinition* pos : package->class_definition_list) {
+        copy_class(executer, pos, &executer->class_list[i]);
+        i++;
+    }
+}
+
+void copy_class(Package_Executer* executer, ClassDefinition* src, RVM_Class* dest) {
     debug_log_with_darkgreen_coloar("\t");
 
     dest->identifier  = src->class_identifier;
@@ -284,7 +376,7 @@ void copy_method(MethodMember* src, RVM_Method* dest) {
 }
 
 // 添加顶层代码
-void add_top_level_code(PackageUnit* package_unit, Ring_VirtualMachine_Executer* executer) {
+void add_top_level_code(PackageUnit* package_unit, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
@@ -301,7 +393,33 @@ void add_top_level_code(PackageUnit* package_unit, Ring_VirtualMachine_Executer*
     executer->code_size = code_size;
 }
 
-void generate_code_from_function_definition(Ring_VirtualMachine_Executer* executer, Function* src, RVM_Function* dest) {
+void add_top_level_code(Package* package, Package_Executer* executer) {
+    debug_log_with_darkgreen_coloar("\t");
+
+    if (executer->main_func_index != -1) {
+        // printf("executer->main_func_index\n");
+        // 生成一下字节码
+        // 找到main函数
+        // 调用 main 函数
+        // exit code
+        RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, executer->main_func_index, 0);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, 0);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
+
+        executer->code_list = opcode_buffer->code_list;
+        executer->code_size = opcode_buffer->code_size;
+    } else {
+        RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
+        generate_vmcode_from_statement_list(executer, NULL, package->statement_list, opcode_buffer);
+        opcode_buffer_fix_label(opcode_buffer);
+
+        executer->code_list = opcode_buffer->code_list;
+        executer->code_size = opcode_buffer->code_size;
+    }
+}
+
+void generate_code_from_function_definition(Package_Executer* executer, Function* src, RVM_Function* dest) {
     debug_log_with_darkgreen_coloar("\t");
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
@@ -320,7 +438,7 @@ void generate_code_from_function_definition(Ring_VirtualMachine_Executer* execut
 #endif
 }
 
-void generate_code_from_method_definition(Ring_VirtualMachine_Executer* executer, MethodMember* src, RVM_Method* dest) {
+void generate_code_from_method_definition(Package_Executer* executer, MethodMember* src, RVM_Method* dest) {
     debug_log_with_darkgreen_coloar("\t");
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
@@ -334,7 +452,7 @@ void generate_code_from_method_definition(Ring_VirtualMachine_Executer* executer
     dest->rvm_function->u.derive_func->local_variable_size = src->block->declaration_list_size;
 }
 
-void vm_executer_dump(Ring_VirtualMachine_Executer* executer) {
+void vm_executer_dump(Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
     // CLEAR_SCREEN;
     ring_vm_constantpool_dump(executer);
@@ -355,7 +473,7 @@ RVM_OpcodeBuffer* new_opcode_buffer() {
     return buffer;
 }
 
-void generate_vmcode_from_block(Ring_VirtualMachine_Executer* executer, Block* block, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_block(Package_Executer* executer, Block* block, RVM_OpcodeBuffer* opcode_buffer) {
     if (block == NULL) {
         return;
     }
@@ -363,7 +481,7 @@ void generate_vmcode_from_block(Ring_VirtualMachine_Executer* executer, Block* b
     generate_vmcode_from_statement_list(executer, block, block->statement_list, opcode_buffer);
 }
 
-void generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* executer, Block* block, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_statement_list(Package_Executer* executer, Block* block, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     for (Statement* statement = statement_list; statement != NULL; statement = statement->next) {
         switch (statement->type) {
@@ -405,7 +523,7 @@ void generate_vmcode_from_statement_list(Ring_VirtualMachine_Executer* executer,
     }
 }
 
-void generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_if_statement(Package_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (if_statement == NULL) {
         return;
@@ -454,7 +572,7 @@ void generate_vmcode_from_if_statement(Ring_VirtualMachine_Executer* executer, I
 }
 
 // TODO: 暂时不支持 break continue
-void generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_for_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (for_statement == NULL) {
         return;
@@ -504,7 +622,7 @@ void generate_vmcode_from_for_statement(Ring_VirtualMachine_Executer* executer, 
 }
 
 // TODO: 暂时不支持 break continue
-void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer, DoForStatement* dofor_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_dofor_statement(Package_Executer* executer, DoForStatement* dofor_statement, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (dofor_statement == NULL) {
         return;
@@ -555,7 +673,7 @@ void generate_vmcode_from_dofor_statement(Ring_VirtualMachine_Executer* executer
     opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
 }
 
-void generate_vmcode_from_break_statement(Ring_VirtualMachine_Executer* executer, Block* block, BreakStatement* break_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_break_statement(Package_Executer* executer, Block* block, BreakStatement* break_statement, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (break_statement == NULL) {
         return;
@@ -587,7 +705,7 @@ void generate_vmcode_from_break_statement(Ring_VirtualMachine_Executer* executer
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, pos->block_labels.break_label, break_statement->line_number);
 }
 
-void generate_vmcode_from_continue_statement(Ring_VirtualMachine_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_continue_statement(Package_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (continue_statement == NULL) {
         return;
@@ -613,7 +731,7 @@ void generate_vmcode_from_continue_statement(Ring_VirtualMachine_Executer* execu
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, pos->block_labels.continue_label, continue_statement->line_number);
 }
 
-void generate_vmcode_from_return_statement(Ring_VirtualMachine_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_return_statement(Package_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (return_statement == NULL) {
         return;
@@ -629,7 +747,7 @@ void generate_vmcode_from_return_statement(Ring_VirtualMachine_Executer* execute
     generate_vmcode(executer, opcode_buffer, RVM_CODE_RETURN, return_statement->return_list_size, return_statement->line_number);
 }
 
-void generate_vmcode_from_initializer(Ring_VirtualMachine_Executer* executer, Block* block, Declaration* declaration, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_initializer(Package_Executer* executer, Block* block, Declaration* declaration, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (declaration == NULL) {
         return;
@@ -652,7 +770,7 @@ void generate_vmcode_from_initializer(Ring_VirtualMachine_Executer* executer, Bl
     }
 }
 
-void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {
+void generate_vmcode_from_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
@@ -765,12 +883,14 @@ void generate_vmcode_from_expression(Ring_VirtualMachine_Executer* executer, Exp
     }
 }
 
-void generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_assign_expression(Package_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
     }
-    if (expression->type != ASSIGN_EXPRESSION_TYPE_ASSIGN) {
+    // TODO:
+    if (expression->type != ASSIGN_EXPRESSION_TYPE_ASSIGN && expression->type != ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
+        // if (expression->type != ASSIGN_EXPRESSION_TYPE_ASSIGN) {
         // += -= *= /=
         generate_vmcode_from_expression(executer, expression->left, opcode_buffer, 1);
     }
@@ -832,7 +952,7 @@ void generate_vmcode_from_assign_expression(Ring_VirtualMachine_Executer* execut
 }
 
 // TODO: FIXME:
-void generate_pop_to_leftvalue_reverse(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_pop_to_leftvalue_reverse(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
@@ -843,7 +963,7 @@ void generate_pop_to_leftvalue_reverse(Ring_VirtualMachine_Executer* executer, E
 }
 
 // TODO:  处理 赋值给 标识符、array[index]、成员变量 a.b
-void generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_pop_to_leftvalue(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     if (expression->type == EXPRESSION_TYPE_IDENTIFIER) {
         generate_pop_to_leftvalue_identifier(executer, expression->u.identifier_expression, opcode_buffer);
     } else if (expression->type == EXPRESSION_TYPE_MEMBER) {
@@ -851,7 +971,7 @@ void generate_pop_to_leftvalue(Ring_VirtualMachine_Executer* executer, Expressio
     }
 }
 
-void generate_pop_to_leftvalue_identifier(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_pop_to_leftvalue_identifier(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (identifier_expression == NULL) {
         return;
@@ -868,7 +988,7 @@ void generate_pop_to_leftvalue_identifier(Ring_VirtualMachine_Executer* executer
     generate_vmcode(executer, opcode_buffer, opcode, variable_index, identifier_expression->line_number);
 }
 
-void generate_pop_to_leftvalue_member(Ring_VirtualMachine_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_pop_to_leftvalue_member(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (member_expression == NULL) {
         return;
@@ -882,7 +1002,7 @@ void generate_pop_to_leftvalue_member(Ring_VirtualMachine_Executer* executer, Me
     generate_vmcode(executer, opcode_buffer, opcode, field_index, member_expression->line_number);
 }
 
-void generate_vmcode_from_logical_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+void generate_vmcode_from_logical_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
@@ -917,7 +1037,7 @@ void generate_vmcode_from_logical_expression(Ring_VirtualMachine_Executer* execu
     opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
 }
 
-void generate_vmcode_from_binary_expression(Ring_VirtualMachine_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+void generate_vmcode_from_binary_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
@@ -954,7 +1074,7 @@ END:
     generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
 }
 
-void generate_vmcode_from_increase_decrease_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {
+void generate_vmcode_from_increase_decrease_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
@@ -996,7 +1116,7 @@ void generate_vmcode_from_increase_decrease_expression(Ring_VirtualMachine_Execu
     generate_pop_to_leftvalue(executer, unitary_expression, opcode_buffer);
 }
 
-void generate_vmcode_from_unitary_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+void generate_vmcode_from_unitary_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
@@ -1007,7 +1127,7 @@ void generate_vmcode_from_unitary_expression(Ring_VirtualMachine_Executer* execu
     generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
 }
 
-void generate_vmcode_from_identifier_expression(Ring_VirtualMachine_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_identifier_expression(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (identifier_expression == NULL) {
         return;
@@ -1039,7 +1159,7 @@ void generate_vmcode_from_identifier_expression(Ring_VirtualMachine_Executer* ex
     }
 }
 
-void generate_vmcode_from_bool_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_bool_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
@@ -1051,7 +1171,7 @@ void generate_vmcode_from_bool_expression(Ring_VirtualMachine_Executer* executer
     }
 }
 
-void generate_vmcode_from_int_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_int_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
@@ -1068,7 +1188,7 @@ void generate_vmcode_from_int_expression(Ring_VirtualMachine_Executer* executer,
     }
 }
 
-void generate_vmcode_from_double_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_double_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == NULL) {
         return;
@@ -1079,7 +1199,7 @@ void generate_vmcode_from_double_expression(Ring_VirtualMachine_Executer* execut
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_DOUBLE, constant_index, expression->line_number);
 }
 
-void generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_string_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     // 都放在常量区
     assert(expression->type == EXPRESSION_TYPE_LITERAL_STRING);
@@ -1087,7 +1207,7 @@ void generate_vmcode_from_string_expression(Ring_VirtualMachine_Executer* execut
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING, constant_index, expression->line_number);
 }
 
-void generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (function_call_expression == NULL) {
         return;
@@ -1105,7 +1225,7 @@ void generate_vmcode_from_function_call_expression(Ring_VirtualMachine_Executer*
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, function_call_expression->line_number);
 }
 
-void generate_vmcode_from_method_call_expression(Ring_VirtualMachine_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_method_call_expression(Package_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (method_call_expression == NULL) {
         return;
@@ -1130,7 +1250,7 @@ void generate_vmcode_from_method_call_expression(Ring_VirtualMachine_Executer* e
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_METHOD, 0, method_call_expression->line_number);
 }
 
-void generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (cast_expression == NULL) {
         return;
@@ -1177,7 +1297,7 @@ void generate_vmcode_from_cast_expression(Ring_VirtualMachine_Executer* executer
     // generate_vmcode(executer, opcode_buffer, opcode, 0);
 }
 
-void generate_vmcode_from_member_expression(Ring_VirtualMachine_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_member_expression(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (member_expression == NULL) {
         return;
@@ -1193,7 +1313,7 @@ void generate_vmcode_from_member_expression(Ring_VirtualMachine_Executer* execut
     generate_vmcode(executer, opcode_buffer, opcode, member_field_index, member_expression->line_number);
 }
 
-void generate_vmcode_from_ternary_condition_expression(Ring_VirtualMachine_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_ternary_condition_expression(Package_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (ternary_expression == NULL) {
         return;
@@ -1221,7 +1341,7 @@ void generate_vmcode_from_ternary_condition_expression(Ring_VirtualMachine_Execu
     opcode_buffer_set_label(opcode_buffer, if_end_label, opcode_buffer->code_size);
 }
 
-void generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int oper_num, unsigned int line_number) {
+void generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int oper_num, unsigned int line_number) {
     debug_log_with_darkgreen_coloar("\t");
     if (opcode_buffer->code_capacity == opcode_buffer->code_size) {
         // FIXME:
@@ -1249,10 +1369,11 @@ void generate_vmcode(Ring_VirtualMachine_Executer* executer, RVM_OpcodeBuffer* o
     default: break;
     }
 
-    add_code_line_map(opcode_buffer, line_number, start_pc, opcode_buffer->code_size - start_pc);
+    if (line_number)
+        add_code_line_map(opcode_buffer, line_number, start_pc, opcode_buffer->code_size - start_pc);
 }
 
-int constant_pool_grow(Ring_VirtualMachine_Executer* executer, unsigned int growth_size) {
+int constant_pool_grow(Package_Executer* executer, unsigned int growth_size) {
     debug_log_with_darkgreen_coloar("\t");
     int old_size = executer->constant_pool_size;
     executer->constant_pool_size += growth_size;
@@ -1263,7 +1384,7 @@ int constant_pool_grow(Ring_VirtualMachine_Executer* executer, unsigned int grow
     return old_size;
 }
 
-int constant_pool_add_int(Ring_VirtualMachine_Executer* executer, int int_literal) {
+int constant_pool_add_int(Package_Executer* executer, int int_literal) {
     debug_log_with_darkgreen_coloar("\t");
     int index = constant_pool_grow(executer, 1);
 
@@ -1272,7 +1393,7 @@ int constant_pool_add_int(Ring_VirtualMachine_Executer* executer, int int_litera
     return index;
 }
 
-int constant_pool_add_double(Ring_VirtualMachine_Executer* executer, double double_literal) {
+int constant_pool_add_double(Package_Executer* executer, double double_literal) {
     debug_log_with_darkgreen_coloar("\t");
     int index = constant_pool_grow(executer, 1);
 
@@ -1281,7 +1402,7 @@ int constant_pool_add_double(Ring_VirtualMachine_Executer* executer, double doub
     return index;
 }
 
-int constant_pool_add_string(Ring_VirtualMachine_Executer* executer, char* string_literal) {
+int constant_pool_add_string(Package_Executer* executer, char* string_literal) {
     debug_log_with_darkgreen_coloar("\t");
     int index = constant_pool_grow(executer, 1);
 

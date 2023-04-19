@@ -33,7 +33,7 @@ void ring_compiler_functions_dump(PackageUnit* package_unit) {
 }
 
 
-void ring_vm_constantpool_dump(Ring_VirtualMachine_Executer* executer) {
+void ring_vm_constantpool_dump(Package_Executer* executer) {
     printf(" ************  rvm constant pool  ****\n");
     for (int i = 0; i < executer->constant_pool_size; i++) {
         printf("%10d | ", i);
@@ -88,6 +88,8 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
             break;
 
         case OPCODE_OPERAND_TYPE_2BYTE:
+            tmp = code_list[i++] << 8;
+            tmp += code_list[i++];
             oper_num = std::to_string(tmp);
             break;
 

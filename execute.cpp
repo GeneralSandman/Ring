@@ -93,7 +93,7 @@ RVM_RuntimeStatic* new_runtime_static() {
     return runtime_static;
 }
 
-Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* executer) {
+Ring_VirtualMachine* new_ring_virtualmachine(Package_Executer* executer) {
     debug_log_with_white_coloar("\t");
 
     Ring_VirtualMachine* rvm = (Ring_VirtualMachine*)malloc(sizeof(Ring_VirtualMachine));
@@ -116,7 +116,7 @@ Ring_VirtualMachine* new_ring_virtualmachine(Ring_VirtualMachine_Executer* execu
     return rvm;
 }
 
-void rvm_add_static_variable(Ring_VirtualMachine_Executer* executer, RVM_RuntimeStatic* runtime_static) {
+void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
     debug_log_with_white_coloar("\t");
 
     // 分配空间
@@ -184,7 +184,7 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
     return object;
 }
 
-void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm) {
+void rvm_add_derive_functions(Package_Executer* executer, Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
 
     for (int i = 0; i < executer->function_size; i++) {
@@ -205,7 +205,7 @@ void rvm_add_derive_functions(Ring_VirtualMachine_Executer* executer, Ring_Virtu
     }
 }
 
-void rvm_add_classs(Ring_VirtualMachine_Executer* executer, Ring_VirtualMachine* rvm) {
+void rvm_add_classs(Package_Executer* executer, Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
 }
 
@@ -743,6 +743,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                    &code_list, &code_size,
                                    &rvm->pc, &caller_stack_base, return_value_list_size);
             return_value_list_size = 0;
+            break;
+        case RVM_CODE_EXIT:
+            oper_num = code_list[rvm->pc + 1];
+            exit(oper_num);
             break;
 
         default:

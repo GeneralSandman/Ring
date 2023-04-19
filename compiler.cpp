@@ -25,12 +25,33 @@ void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
 Package* package_create(char* package_name, char* package_path) {
     Package* package = (Package*)malloc(sizeof(Package));
 
-    package->package_name = package_name;
-    package->package_path = package_path;
+    package->package_name     = package_name;
+    package->package_path     = package_path;
+    package->source_file_list = list_file(package->package_path);
 
     package->declaration_list      = std::vector<Declaration*>{};
     package->class_definition_list = std::vector<ClassDefinition*>{};
     package->function_list         = std::vector<Function*>{};
+    package->statement_list_size   = 0;
+    package->statement_list        = NULL;
+
+    package->package_unit_list = std::vector<PackageUnit*>{};
+
+    return package;
+}
+
+Package* package_create_input_file(char* package_name, char* input_main_file) {
+    Package* package = (Package*)malloc(sizeof(Package));
+
+    package->package_name     = package_name;
+    package->package_path     = "";
+    package->source_file_list = std::vector<std::string>{std::string(input_main_file)};
+
+    package->declaration_list      = std::vector<Declaration*>{};
+    package->class_definition_list = std::vector<ClassDefinition*>{};
+    package->function_list         = std::vector<Function*>{};
+    package->statement_list_size   = 0;
+    package->statement_list        = NULL;
 
     package->package_unit_list = std::vector<PackageUnit*>{};
 
@@ -40,12 +61,10 @@ Package* package_create(char* package_name, char* package_path) {
 // 获取包下的所有 ring 源代码文件
 // 依次生成 PackageUnit 进行编译
 void package_compile(Package* package) {
-    std::vector<std::string> source_file_list = list_file(package->package_path);
-
-    for (std::string source_file : source_file_list) {
+    for (std::string source_file : package->source_file_list) {
         PackageUnit* package_unit = package_unit_create(source_file.c_str());
         package_unit_compile(package_unit);
-        package_unit_dump(package_unit);
+        // package_unit_dump(package_unit);
 
         // for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
         //     // TODO:
@@ -67,6 +86,19 @@ void package_compile(Package* package) {
         for (Function* pos : package_unit->function_list) {
             package->function_list.push_back(pos);
         }
+
+        // TODO: delete 只能在函数内写语句
+        if (package->statement_list == NULL) {
+            package->statement_list = package_unit->statement_list;
+        } else {
+            Statement* pos = package->statement_list;
+            for (; pos->next != NULL; pos = pos->next) {}
+            pos->next = package_unit->statement_list;
+        }
+    }
+
+    for (PackageUnit* package_unit : package->package_unit_list) {
+        ring_compiler_fix_ast(package_unit);
     }
 }
 
@@ -118,6 +150,9 @@ PackageUnit* package_unit_create(std::string file_name) {
     package_unit->class_definition_list = std::vector<ClassDefinition*>{};
 
     package_unit->function_list = std::vector<Function*>{};
+
+    package_unit->statement_list_size = 0;
+    package_unit->statement_list      = NULL;
 
     package_unit->current_block = NULL;
 

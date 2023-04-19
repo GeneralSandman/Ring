@@ -2,10 +2,10 @@
 #include <stdio.h>
 
 
-void ring_bytecode_dump(Ring_VirtualMachine_Executer* executer, FILE* output) {
+void ring_bytecode_dump(Package_Executer* executer, FILE* output) {
     debug_log_with_darkgreen_coloar("\t");
 }
 
-void ring_bytecode_load(Ring_VirtualMachine_Executer* executer, FILE* input) {
+void ring_bytecode_load(Package_Executer* executer, FILE* input) {
     debug_log_with_darkgreen_coloar("\t");
 }

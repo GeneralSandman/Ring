@@ -19,24 +19,31 @@ std::string command_help_message =
     "        help                                           :get Ring version\n"
     "\n";
 
-/*
 void test() {
-    std::string package_name("job");
-    std::string package_path("/Users/zhenhuli/Desktop/Ring/std/job");
-    Package*    package = package_create(package_name.c_str(), package_path.c_str());
+    Package* package = package_create_input_file("main", "/Users/zhenhuli/Desktop/Ring/test/005-control-flow/dofor-000.ring");
 
+    // Step-1: flex 词法分析，
+    // Step-2: bison 语法分析，构建语法树
+    // Step-4: 修正语法树
     package_compile(package);
 
-    package_dump(package);
+    // package_dump(package);
+
+    Package_Executer* package_executer = package_executer_create();
+
+    // Step-5: 生成虚拟机中间代码
+    ring_generate_vm_code(package, package_executer);
+
+    // Step-6: 运行虚拟机
+    Ring_VirtualMachine* ring_vm;
+    ring_vm = new_ring_virtualmachine(package_executer);
+    ring_execute_vm_code(ring_vm);
 }
-*/
+
 int main(int argc, char** argv) {
-    PackageUnit*                  package_unit;
-    Ring_VirtualMachine_Executer* ring_vm_executer;
-    Ring_VirtualMachine*          ring_vm;
-    char*                         file_name;
-    FILE*                         fp;
-    char*                         command;
+    char* file_name;
+    FILE* fp;
+    char* command;
 
 
     if (argc < 2) {
@@ -74,22 +81,21 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    package_unit     = package_unit_create(file_name);
-    ring_vm_executer = new_ring_vm_executer();
+    Package*          package          = package_create_input_file("main", file_name);
+    Package_Executer* package_executer = package_executer_create();
 
     // Step-1: flex 词法分析，
     // Step-2: bison 语法分析，构建语法树
-    package_unit_compile(package_unit);
-
     // Step-4: 修正语法树
-    ring_compiler_fix_ast(package_unit);
+    package_compile(package);
+
 
     // Step-5: 生成虚拟机中间代码
-    ring_generate_vm_code(package_unit, ring_vm_executer);
+    ring_generate_vm_code(package, package_executer);
 
     // Step-6: 运行虚拟机
-    ring_vm = new_ring_virtualmachine(ring_vm_executer);
+    Ring_VirtualMachine* ring_vm;
+    ring_vm = new_ring_virtualmachine(package_executer);
     ring_execute_vm_code(ring_vm);
-
     return 0;
 }
