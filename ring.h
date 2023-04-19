@@ -19,6 +19,8 @@ typedef struct Package Package;
 
 typedef struct PackageUnit PackageUnit;
 
+typedef struct PackageExecuter PackageExecuter;
+
 typedef struct RVM_Variable RVM_Variable;
 
 typedef struct RVM_RuntimeStack RVM_RuntimeStack;
@@ -250,6 +252,12 @@ struct PackageUnit {
     unsigned int compile_error_num;
 };
 
+struct PackageExecuter {
+    char* package_name;
+
+    // 连续数组，非链表
+    std::vector<RVM_Function*> function_list;
+};
 
 typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
 
@@ -1561,6 +1569,18 @@ void ring_bytecode_dump(Ring_VirtualMachine_Executer* executer, FILE* output);
 void ring_bytecode_load(Ring_VirtualMachine_Executer* executer, FILE* input);
 // bytecode.c
 
+// std_lib.cpp
+void      register_std_lib();
+void      register_std_fmt_lib(PackageExecuter* std_fmt_package_executer);
+void      register_std_debug_lib(PackageExecuter* std_debug_package_executer);
+void      register_lib(PackageExecuter* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count);
+RVM_Value std_fmt_lib_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_fmt_lib_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_fmt_lib_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_fmt_lib_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+
+// std_lib.cpp
 
 // interactive.c
 // interactive.c
