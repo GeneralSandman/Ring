@@ -149,6 +149,8 @@ int yyerror(char const *str, ...);
 %type <m_expression> postfix_expression
 %type <m_expression> unitary_expression
 %type <m_expression> primary_not_new_array
+%type <m_expression> member_expression
+%type <m_expression> literal_expression
 %type <m_expression> primary_expression
 %type <m_expression> expression_arithmetic_operation_additive 
 %type <m_expression> expression_arithmetic_operation_multiplicative 
@@ -918,36 +920,7 @@ primary_expression
     ;
 
 primary_not_new_array
-    : INT_LITERAL
-    {
-        debug_log_with_green_coloar("[RULE::literal_term:INT_LITERAL]\t ");
-
-        $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_INT, $1);
-    }
-    | DOUBLE_LITERAL
-    {
-        debug_log_with_green_coloar("[RULE::literal_term:DOUBLE_LITERAL]\t ");
-
-        $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_DOUBLE, $1);
-    }
-    | STRING_LITERAL
-    {
-        debug_log_with_green_coloar("[RULE::literal_term:STRING_LITERAL]\t ");
-
-        $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_STRING, $1);
-    }
-    | TOKEN_TRUE
-    {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_TRUE]\t ");
-
-        $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, BOOL_TRUE);
-    }
-    | TOKEN_FALSE
-    {
-        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_FALSE]\t ");
-
-        $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, BOOL_FALSE);
-    }
+    : literal_expression
     | identifier
     {
         debug_log_with_green_coloar("[RULE::literal_term:identifier]\t ");
@@ -970,10 +943,47 @@ primary_not_new_array
 
         $$ = create_expression_from_method_call($1); 
     }
-    | identifier TOKEN_DOT identifier
+    | member_expression
+    ;
+
+member_expression
+    : identifier TOKEN_DOT identifier
     {
         debug_log_with_green_coloar("[RULE::literal_term:member_expression]\t ");
         $$ = create_member_expression(create_expression_identifier($1), $3);
+    }
+    | member_expression TOKEN_DOT identifier
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:member_expression]\t ");
+        $$ = create_member_expression($1, $3);
+    }
+    ;
+
+literal_expression
+    : INT_LITERAL
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:INT_LITERAL]\t ");
+        $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_INT, $1);
+    }
+    | DOUBLE_LITERAL
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:DOUBLE_LITERAL]\t ");
+        $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_DOUBLE, $1);
+    }
+    | STRING_LITERAL
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:STRING_LITERAL]\t ");
+        $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_STRING, $1);
+    }
+    | TOKEN_TRUE
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_TRUE]\t ");
+        $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, BOOL_TRUE);
+    }
+    | TOKEN_FALSE
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:TOKEN_FALSE]\t ");
+        $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, BOOL_FALSE);
     }
     ;
 
