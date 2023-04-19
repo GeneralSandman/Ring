@@ -37,6 +37,29 @@
 
 [TOC]
 
+
+## Bug List
+
+1. 对象目前只能支持 创建 static，在function中创建对象 会有点问题，class-000.ring class-001.ring class-002.ring
+2. 在支持main函数之后，全局变量 初始化默认值 存在bug  ./test/004-derive-function/function-011.ring
+3. 测试用例应该覆盖全局变量 和 局部变量   &  基础变量 对象
+
+
+2023-04-19 测试未通过的bug
+````
+[pass/all=75/82]
+
+[NotPassCase]
+source_code_file                                             err_nums
+./test/002-operator/cast-oper-000.ring                       1
+./test/006-variable/type-convert-000.ring                    1
+./test/006-variable/type-convert-001.ring                    1
+./test/004-derive-function/function-011.ring                 1
+./test/008-class/class-000.ring                              1
+./test/008-class/class-001.ring                              1
+./test/008-class/class-002.ring                              1
+```
+
 -----------------------------
 
 
