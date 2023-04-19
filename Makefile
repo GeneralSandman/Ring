@@ -15,6 +15,7 @@ OBJS = \
   interactive.o\
   error_msg.o\
   utils.o\
+  std_lib.o\
   main.o
 
 # CFLAGS -g 打开调试信息
@@ -70,5 +71,6 @@ inner_func.o: inner_func.cpp ring.h inner_func.h
 interactive.o: interactive.cpp ring.h
 error_msg.o: error_msg.cpp ring.h
 utils.o: utils.cpp ring.h
+std_lib.o: std_lib.cpp ring.h
 thread_pool.o: thread_pool.c ring.h
 main.o: main.cpp ring.h
