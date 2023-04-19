@@ -33,7 +33,8 @@ function test_return_3() {
     return 4, 5, 6;
 }
 
-
+@main
+function main() {
 var int int_value_1;
 var int int_value_2;
 var int int_value_3;
@@ -129,6 +130,7 @@ println_int(int_value_6);
 
 
 
+}
 
 
 

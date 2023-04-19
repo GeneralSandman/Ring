@@ -38,7 +38,8 @@ function test_return_3() {
 	int_value_local_1 = 4;
     return int_value_local_1++, int_value_local_1++, int_value_local_1;
 }
-
+@main
+function main() {
 
 var int int_value_1;
 var int int_value_2;
@@ -134,7 +135,7 @@ println_int(int_value_6);
 
 
 
-
+}
 
 
 

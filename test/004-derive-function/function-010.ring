@@ -37,6 +37,8 @@ function test(var int int_value_1, var int int_value_2) {
     return int_value_1, int_value_2, int_value_3, int_value_4;
 }
 
+@main
+function main() {
 var int int_value_1;
 var int int_value_2;
 var int int_value_3;
@@ -47,6 +49,11 @@ debug_assert(int_value_2 == 0);
 debug_assert(int_value_3 == 0);
 debug_assert(int_value_4 == 0);
 
+println_int(int_value_1);
+println_int(int_value_2);
+println_int(int_value_3);
+println_int(int_value_4);
+
 
 
 println_string("\ntest case 1");
@@ -56,4 +63,5 @@ debug_assert(int_value_1 == 1);
 debug_assert(int_value_2 == 2);
 debug_assert(int_value_3 == 3);
 debug_assert(int_value_4 == 4);
-
+return 0;
+}

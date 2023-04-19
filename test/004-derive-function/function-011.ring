@@ -38,7 +38,8 @@ function test_1(var int int_value_1, var int int_value_2) {
 
 }
 
-
+@main
+function main() {
 debug_assert(int_value_global_1 == 0);
 debug_assert(int_value_global_2 == 0);
 
@@ -50,3 +51,4 @@ debug_assert(int_value_global_2 == 234);
 
 
 
+}

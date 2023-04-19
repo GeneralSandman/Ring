@@ -1,8 +1,9 @@
-//
-// File:    assign-003.ring
-// Author:  zhenhuli - generalsandman@163.com
-// Date:    2022-05-31
-//
+
+package job
+
+import {
+
+}
 
 function println_bool(var bool bool_value);
 function println_int(var int int_value);
@@ -10,9 +11,14 @@ function println_double(var double double_value);
 function println_string(var string string_value);
 function debug_assert(var bool bool_value);
 function exit(var int int_value);
+function print(var any value) -> (int);
+function println(var any value) -> (int);
+function printf(var string format, var any value)   -> (int);
+function printfln(var string format, var any value) -> (int);
 
 // -----------------------------
-
+@main
+function main() {
 
 println_string("\ntest case 1");
 var bool bool_value_0;
@@ -62,3 +68,4 @@ println_double(double_value_2);
 debug_assert(bool_value_2 == true);
 debug_assert(int_value_2 == 2147483647);
 debug_assert(double_value_2 == 2147483647.123);
+}
