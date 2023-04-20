@@ -807,7 +807,6 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer, AssignEx
     }
     // TODO:
     if (expression->type != ASSIGN_EXPRESSION_TYPE_ASSIGN && expression->type != ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
-        // if (expression->type != ASSIGN_EXPRESSION_TYPE_ASSIGN) {
         // += -= *= /=
         generate_vmcode_from_expression(executer, expression->left, opcode_buffer, 1);
     }

@@ -66,6 +66,9 @@ void STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, RVM_Ob
 #define STACK_COPY_OFFSET(rvm, src_offset, dest_offset) \
     STACK_COPY_INDEX((rvm), (rvm)->runtime_stack->top_index + (src_offset), (rvm)->runtime_stack->top_index + (dest_offset))
 
+// 从后边获取 1BYTE的操作数
+#define OPCODE_GET_1BYTE(p) \
+    (((p)[0]))
 // 从后边获取 2BYTE的操作数
 #define OPCODE_GET_2BYTE(p) \
     (((p)[0] << 8) + (p)[1])
@@ -255,12 +258,12 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         switch (opcode) {
         // int double string const
         case RVM_CODE_PUSH_BOOL:
-            STACK_SET_BOOL_OFFSET(rvm, 0, (RVM_Bool)code_list[rvm->pc + 1]);
+            STACK_SET_BOOL_OFFSET(rvm, 0, (RVM_Bool)OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]));
             runtime_stack->top_index++;
             rvm->pc += 2;
             break;
         case RVM_CODE_PUSH_INT_1BYTE:
-            STACK_SET_INT_OFFSET(rvm, 0, code_list[rvm->pc + 1]);
+            STACK_SET_INT_OFFSET(rvm, 0, OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]));
             runtime_stack->top_index++;
             rvm->pc += 2;
             break;
@@ -711,7 +714,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 3;
             break;
         case RVM_CODE_ARGUMENT_NUM:
-            oper_num           = code_list[rvm->pc + 1];
+            oper_num           = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             argument_list_size = oper_num;
             rvm->pc += 2;
             break;
@@ -752,7 +755,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             return_value_list_size = 0;
             break;
         case RVM_CODE_EXIT:
-            oper_num = code_list[rvm->pc + 1];
+            oper_num = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             exit(oper_num);
             break;
 

@@ -109,7 +109,7 @@ Expression* create_expression_from_function_call(FunctionCallExpression* functio
 }
 
 Expression* create_expression_from_method_call(MethodCallExpression* method_call_expression) {
-    debug_log_with_yellow_coloar("function_call_expression->name:");
+    debug_log_with_yellow_coloar("method_call_expression->name:");
 
     Expression* expression               = (Expression*)malloc(sizeof(Expression));
     expression->line_number              = package_unit_get_line_number();

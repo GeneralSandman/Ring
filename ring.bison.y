@@ -152,6 +152,7 @@ int yyerror(char const *str, ...);
 %type <m_expression> postfix_expression
 %type <m_expression> unitary_expression
 %type <m_expression> primary_not_new_array
+%type <m_expression> primary_not_new_array_2
 %type <m_expression> member_expression
 %type <m_expression> literal_expression
 %type <m_expression> primary_expression
@@ -162,6 +163,7 @@ int yyerror(char const *str, ...);
 %type <m_expression> relational_expression
 %type <m_expression> equality_expression
 %type <m_expression> maybe_empty_expression
+%type <m_expression> dot_expression
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
 %type <m_method_call_expression> method_call_expression
@@ -988,21 +990,27 @@ primary_not_new_array
     | identifier TOKEN_LB expression TOKEN_RB
     {
         $$ = create_expression_identifier_with_index($1, $3);
-
     }
     | function_call_expression 
     {
         debug_log_with_green_coloar("[RULE::literal_term:function_call_expression]\t ");
-
         $$ = create_expression_from_function_call($1);
     }
+    | member_expression
     | method_call_expression 
     {
         debug_log_with_green_coloar("[RULE::literal_term:method_call_expression]\t ");
-
         $$ = create_expression_from_method_call($1); 
     }
-    | member_expression
+    ;
+
+
+primary_not_new_array_2
+    : literal_expression
+    | dot_expression 
+    {
+
+    }
     ;
 
 member_expression
@@ -1015,6 +1023,26 @@ member_expression
     {
         debug_log_with_green_coloar("[RULE::literal_term:member_expression]\t ");
         $$ = create_member_expression($1, $3);
+    }
+    ;
+
+dot_expression
+    : identifier
+    {
+        debug_log_with_green_coloar("[RULE::dot_expression:1]\t ");
+        $$ = create_expression_identifier($1);
+    }
+    | function_call_expression
+    {
+
+    }
+    | dot_expression TOKEN_DOT identifier
+    {
+        debug_log_with_green_coloar("[RULE::dot_expression:4]\t ");
+    }
+    | dot_expression TOKEN_DOT function_call_expression
+    {
+        debug_log_with_green_coloar("[RULE::dot_expression:4]\t ");
     }
     ;
 
