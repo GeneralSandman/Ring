@@ -41,12 +41,13 @@
 ## Bug List
 
 1. 对象目前只能支持 创建 static，在function中创建对象 会有点问题，class-000.ring class-001.ring class-002.ring
-2. 在支持main函数之后，全局变量 初始化默认值 存在bug  ./test/004-derive-function/function-011.ring
-3. 测试用例应该覆盖全局变量 和 局部变量   &  基础变量 对象
+2. 在支持main函数之后，全局变量 默认值 存在bug  ./test/004-derive-function/function-011.ring ✅
+3. 全局变量的初始化 ✅
+4. 测试用例应该覆盖全局变量 和 局部变量   &  基础变量 对象
 
 
 2023-04-19 测试未通过的bug
-````
+```
 [pass/all=75/82]
 
 [NotPassCase]
