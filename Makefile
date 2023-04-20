@@ -11,8 +11,6 @@ OBJS = \
   execute.o\
   bytecode.o\
   compiler.o\
-  inner_func.o\
-  interactive.o\
   error_msg.o\
   utils.o\
   std_lib.o\
@@ -67,8 +65,6 @@ generate.o: generate.cpp ring.h
 execute.o: execute.cpp ring.h
 bytecode.o: bytecode.cpp ring.h
 compiler.o: compiler.cpp ring.h inner_func.h
-inner_func.o: inner_func.cpp ring.h inner_func.h
-interactive.o: interactive.cpp ring.h
 error_msg.o: error_msg.cpp ring.h
 utils.o: utils.cpp ring.h
 std_lib.o: std_lib.cpp ring.h
