@@ -5,11 +5,9 @@ OBJS = \
   y.tab.o\
   string.o\
   create_ast.o\
-  semantic_check.o\
   fix_ast.o\
   generate.o\
   execute.o\
-  bytecode.o\
   compiler.o\
   error_msg.o\
   utils.o\
