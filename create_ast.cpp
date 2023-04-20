@@ -4,6 +4,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+void finish_global_block(Statement* global_statement_list) {
+    debug_log_with_yellow_coloar("");
+
+    get_package_unit()->global_block_statement_list = global_statement_list;
+    for (; global_statement_list != NULL; global_statement_list = global_statement_list->next) {
+        get_package_unit()->global_block_statement_list_size++;
+    }
+}
+
 Statement* statement_list_add_item(Statement* statement_list, Statement* statement) {
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
 

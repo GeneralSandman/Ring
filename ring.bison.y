@@ -147,6 +147,7 @@ int yyerror(char const *str, ...);
 %type <m_identifier_list> identifier_list
 %type <m_statement_list> statement statement_list
 %type <m_statement_list> multi_variable_definition_statement
+%type <m_statement_list> global_variable_definition global_variable_definition_list
 %type <m_expression> expression expression_list
 %type <m_expression> postfix_expression
 %type <m_expression> unitary_expression
@@ -201,13 +202,17 @@ translation_unit
     {
         debug_log_with_green_coloar("[RULE::translation_unit:1]\t ");
     }
-    | definition_or_statement
+    | translation_unit global_variable_definition_block
     {
         debug_log_with_green_coloar("[RULE::translation_unit:2]\t ");
     }
-    | translation_unit definition_or_statement
+    | definition_or_statement
     {
         debug_log_with_green_coloar("[RULE::translation_unit:3]\t ");
+    }
+    | translation_unit definition_or_statement
+    {
+        debug_log_with_green_coloar("[RULE::translation_unit:4]\t ");
     }
     ;
 
@@ -222,12 +227,10 @@ import_block
     : TOKEN_IMPORT TOKEN_LC import_package_list TOKEN_RC
     | TOKEN_IMPORT TOKEN_LC TOKEN_RC
     ;
-
 import_package_list
     : import_package_info 
     | import_package_list import_package_info
     ;
-
 import_package_info
     : IDENTIFIER TOKEN_SEMICOLON
     {
@@ -238,6 +241,38 @@ import_package_info
         import_package_list_add_item($1, $3);
     }
     ;
+
+global_variable_definition_block
+    : TOKEN_GLOBAL TOKEN_LC global_variable_definition_list TOKEN_RC
+    {
+        debug_log_with_green_coloar("[RULE::global_variable_definition_block:2]\t ");
+        finish_global_block($3);
+    }
+    | TOKEN_GLOBAL TOKEN_LC TOKEN_RC
+    {
+        debug_log_with_green_coloar("[RULE::global_variable_definition_block:1]\t ");
+    }
+    ;
+global_variable_definition_list
+    : global_variable_definition
+    {
+        debug_log_with_green_coloar("[RULE::global_variable_definition_list:1]\t ");
+        $$ = $1;
+    }
+    | global_variable_definition_list global_variable_definition
+    {
+        debug_log_with_green_coloar("[RULE::global_variable_definition_list:2]\t ");
+        $$ = statement_list_add_item($1, $2);
+    }
+    ;
+global_variable_definition
+    : multi_variable_definition_statement TOKEN_SEMICOLON
+    {
+        debug_log_with_green_coloar("[RULE::global_variable_definition]\t ");
+        $$ = $1;
+    }
+    ;
+
 
 definition_or_statement
     : function_definition

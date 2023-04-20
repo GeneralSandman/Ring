@@ -5,6 +5,9 @@
 
 // 修正ast
 void ring_compiler_fix_ast(PackageUnit* package_unit) {
+    // fix global block
+    fix_statement_list(package_unit->global_block_statement_list, NULL, NULL);
+
     // fix statement list
     fix_statement_list(package_unit->statement_list, NULL, NULL);
 

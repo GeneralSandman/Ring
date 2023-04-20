@@ -29,11 +29,12 @@ Package* package_create(char* package_name, char* package_path) {
     package->package_path     = package_path;
     package->source_file_list = list_file(package->package_path);
 
-    package->declaration_list      = std::vector<Declaration*>{};
-    package->class_definition_list = std::vector<ClassDefinition*>{};
-    package->function_list         = std::vector<Function*>{};
-    package->statement_list_size   = 0;
-    package->statement_list        = NULL;
+    package->global_declaration_list = std::vector<Declaration*>{};
+    package->declaration_list        = std::vector<Declaration*>{};
+    package->class_definition_list   = std::vector<ClassDefinition*>{};
+    package->function_list           = std::vector<Function*>{};
+    package->statement_list_size     = 0;
+    package->statement_list          = NULL;
 
     package->package_unit_list = std::vector<PackageUnit*>{};
 
@@ -47,11 +48,12 @@ Package* package_create_input_file(char* package_name, char* input_main_file) {
     package->package_path     = NULL;
     package->source_file_list = std::vector<std::string>{std::string(input_main_file)};
 
-    package->declaration_list      = std::vector<Declaration*>{};
-    package->class_definition_list = std::vector<ClassDefinition*>{};
-    package->function_list         = std::vector<Function*>{};
-    package->statement_list_size   = 0;
-    package->statement_list        = NULL;
+    package->global_declaration_list = std::vector<Declaration*>{};
+    package->declaration_list        = std::vector<Declaration*>{};
+    package->class_definition_list   = std::vector<ClassDefinition*>{};
+    package->function_list           = std::vector<Function*>{};
+    package->statement_list_size     = 0;
+    package->statement_list          = NULL;
 
     package->package_unit_list = std::vector<PackageUnit*>{};
 
@@ -150,8 +152,11 @@ PackageUnit* package_unit_create(std::string file_name) {
 
     package_unit->import_package_list = std::vector<ImportPackageInfo*>{};
 
-    package_unit->declaration_list_size = 0;
-    package_unit->declaration_list      = NULL;
+    package_unit->global_block_statement_list_size = 0;
+    package_unit->global_block_statement_list      = NULL;
+    package_unit->global_declaration_list          = std::vector<Declaration*>{};
+    package_unit->declaration_list_size            = 0;
+    package_unit->declaration_list                 = NULL;
 
     package_unit->class_definition_list = std::vector<ClassDefinition*>{};
 

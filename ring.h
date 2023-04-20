@@ -222,6 +222,8 @@ struct Package {
 
     std::vector<std::string> source_file_list;
 
+    std::vector<Declaration*> global_declaration_list; // global变量 TODO:以后不使用 declaration_list
+    // TODO: 保留 global_declaration_list 删除 declaration_list
     std::vector<Declaration*>     declaration_list;
     std::vector<ClassDefinition*> class_definition_list;
     std::vector<Function*>        function_list;
@@ -245,14 +247,18 @@ struct PackageUnit {
 
     std::vector<ImportPackageInfo*> import_package_list;
 
+    unsigned int              global_block_statement_list_size;
+    Statement*                global_block_statement_list;
+    std::vector<Declaration*> global_declaration_list; // global变量 TODO:以后不使用 declaration_list
+    // TODO: 保留 global_declaration_list 删除 declaration_list
     unsigned int declaration_list_size;
     Declaration* declaration_list;
 
     std::vector<ClassDefinition*> class_definition_list;
     std::vector<Function*>        function_list;
 
-    unsigned int statement_list_size;
-    Statement*   statement_list;
+    unsigned int statement_list_size; // TODO: 删除
+    Statement*   statement_list;      // TODO: 删除
 
     Block* current_block;
 
@@ -1367,6 +1373,7 @@ Identifier*         identifier_list_add_item(Identifier* identifier_list, Identi
 FunctionReturnList* create_function_return_list(VariableType variable_type);
 FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type);
 
+void                    finish_global_block(Statement* global_statement_list);
 Statement*              statement_list_add_item(Statement* statement_list, Statement* statement);
 Statement*              create_statemen_from_expression(Expression* expression);
 void                    add_function_definition(AttributeInfo* attribute_info, Function* function_definition);
