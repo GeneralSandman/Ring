@@ -46,19 +46,15 @@
 4. 测试用例应该覆盖全局变量 和 局部变量   &  基础变量 对象
 
 
-2023-04-19 测试未通过的bug
+2023-04-20 测试未通过的bug
 ```
-[pass/all=75/82]
+[pass/all=81/84]
 
 [NotPassCase]
 source_code_file                                             err_nums
 ./test/002-operator/cast-oper-000.ring                       1
 ./test/006-variable/type-convert-000.ring                    1
 ./test/006-variable/type-convert-001.ring                    1
-./test/004-derive-function/function-011.ring                 1
-./test/008-class/class-000.ring                              1
-./test/008-class/class-001.ring                              1
-./test/008-class/class-002.ring                              1
 ```
 
 -----------------------------
@@ -73,6 +69,17 @@ source_code_file                                             err_nums
 
 包的名称 不能 和类变量的名称一样，不然会有逻辑问题
 
+- 实现：PacageUnit等 static变量的优化 
+- 实现：根据import-package名称去访问 package内的function
+- 优化：单文件内 对象的访问
+- 实现：class method使用self关键字
+- 实现：class method参数和返回值
+- 实现：class 构造method
+- 测试：完善 class 的相关测试
+- 实现：好好实现 std-fmt 库，同时优化 native函数
+- 实现：实现比较好用printf函数
+- 设计：设计可变参数
+- 实现：function method 返回值的严格检验 与 返回值处理
 
 ### 2023-04-17
 - 实现：源代码的切分编译 ✅
@@ -82,30 +89,21 @@ source_code_file                                             err_nums
 - 重构：源代码没有变量编译错误 bug  ✅
 - 重构：源代码import为空时编译错误 bug  ✅
 - 重构：创建AST时，将 class_definition_list 和 function_list 转为 CPP-vector，更好的管理内存 ✅
-- 实现：源代码的切分编译、打包
-- 实现：PacageUnit等 static变量的优化 
-- 实现：导入使用 package
-- 实现：定义package
-- 实现：根据import-package名称去访问 package内的function
-- 优化：单文件内 对象的访问
-- 优化：native 的那些 printf函数
+- 实现：源代码的切分编译、打包 ✅
+- 实现：导入使用 package ✅
+- 实现：定义package ✅
 
 ### 2023-04-19 
-- 实现：class method使用self关键字
-- 实现：class method参数和返回值
-- 实现：class 构造method
-- 测试：完善 class 的相关测试
-
-- 实现：好好实现 std-fmt 库，同时优化 native函数
 - 实现：main 函数  ✅
+- 优化：一些编译告警  ✅
+- 修复：一些全局变量的默认初始值的bug  ✅
 
 ### 2023-04-20
-- 实现：去除编译warn告警，提高编译速度
-- 实现：实现比较好用printf函数
+- 实现：去除编译warn告警，提高编译速度 ✅
+- 实现：全局变量的定义采用一个比较好的 方式 global{}  ✅
 
 ### 2023-04-21
-- 设计：设计可变参数
-- 实现：function method 返回值的严格检验 与 返回值处理
+
 
 -----------------------------
 
