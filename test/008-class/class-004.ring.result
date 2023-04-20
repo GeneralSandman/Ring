@@ -1,0 +1,86 @@
+function[test] begin
+
+test case 1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 2
+1
+2
+3
+4
+5
+6
+7
+8
+9
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+function[test] end
+------
+
+entry[main] begin
+
+test case 1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 2
+1
+2
+3
+4
+5
+6
+7
+8
+9
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+entry[main] end
