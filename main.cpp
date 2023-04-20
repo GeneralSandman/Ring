@@ -19,27 +19,6 @@ std::string command_help_message =
     "        help                                           :get Ring version\n"
     "\n";
 
-void test() {
-    Package* package = package_create_input_file((char*)"main", (char*)"/Users/zhenhuli/Desktop/Ring/test/005-control-flow/dofor-000.ring");
-
-    // Step-1: flex 词法分析，
-    // Step-2: bison 语法分析，构建语法树
-    // Step-4: 修正语法树
-    package_compile(package);
-
-    // package_dump(package);
-
-    Package_Executer* package_executer = package_executer_create();
-
-    // Step-5: 生成虚拟机中间代码
-    ring_generate_vm_code(package, package_executer);
-
-    // Step-6: 运行虚拟机
-    Ring_VirtualMachine* ring_vm;
-    ring_vm = new_ring_virtualmachine(package_executer);
-    ring_execute_vm_code(ring_vm);
-}
-
 int main(int argc, char** argv) {
     char* file_name;
     FILE* fp;
@@ -81,8 +60,9 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    Package*          package          = package_create_input_file((char*)"main", file_name);
-    Package_Executer* package_executer = package_executer_create();
+    Package*             package          = package_create_input_file((char*)"main", file_name);
+    Package_Executer*    package_executer = package_executer_create();
+    Ring_VirtualMachine* ring_vm          = ring_virtualmachine_create();
 
     // Step-1: flex 词法分析，
     // Step-2: bison 语法分析，构建语法树
@@ -94,8 +74,7 @@ int main(int argc, char** argv) {
     ring_generate_vm_code(package, package_executer);
 
     // Step-6: 运行虚拟机
-    Ring_VirtualMachine* ring_vm;
-    ring_vm = new_ring_virtualmachine(package_executer);
+    ring_virtualmachine_load_executer(ring_vm, package_executer);
     ring_execute_vm_code(ring_vm);
     return 0;
 }

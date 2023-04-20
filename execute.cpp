@@ -93,27 +93,34 @@ RVM_RuntimeStatic* new_runtime_static() {
     return runtime_static;
 }
 
-Ring_VirtualMachine* new_ring_virtualmachine(Package_Executer* executer) {
+Ring_VirtualMachine* ring_virtualmachine_create() {
     debug_log_with_white_coloar("\t");
 
     Ring_VirtualMachine* rvm = (Ring_VirtualMachine*)malloc(sizeof(Ring_VirtualMachine));
-    rvm->executer            = executer;
+    rvm->executer            = NULL;
     rvm->runtime_static      = new_runtime_static();
     rvm->runtime_stack       = new_runtime_stack();
     rvm->pc                  = 0;
     rvm->function_list       = NULL;
     rvm->function_size       = 0;
-    rvm->class_list          = executer->class_list; // FIXME:
-    rvm->class_size          = executer->class_size; // FIXME:
+    rvm->class_list          = NULL;
+    rvm->class_size          = 0;
     rvm->debug_config        = NULL;
+
+
+    return rvm;
+}
+
+void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, Package_Executer* executer) {
+    rvm->executer   = executer;
+    rvm->class_list = executer->class_list; // FIXME:
+    rvm->class_size = executer->class_size; // FIXME:
 
     // init something
     rvm_add_static_variable(executer, rvm->runtime_static);
     rvm_register_native_functions(rvm);
     rvm_add_derive_functions(executer, rvm);
     rvm_add_classs(executer, rvm);
-
-    return rvm;
 }
 
 void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {

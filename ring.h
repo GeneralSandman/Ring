@@ -1554,7 +1554,8 @@ inline void STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index,
 
 RVM_RuntimeStack*    new_runtime_stack();
 RVM_RuntimeStatic*   new_runtime_static();
-Ring_VirtualMachine* new_ring_virtualmachine(Package_Executer* executer);
+Ring_VirtualMachine* ring_virtualmachine_create();
+void                 ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, Package_Executer* executer);
 void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 RVM_Object*          new_class_object(ClassDefinition* class_definition);
 void                 rvm_add_classs(Package_Executer* executer, Ring_VirtualMachine* rvm);
