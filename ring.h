@@ -1480,13 +1480,9 @@ Function*               search_function(char* identifier);
 
 Package_Executer* package_executer_create();
 
-void              ring_generate_vm_code(PackageUnit* package_unit, Package_Executer* executer);
 void              ring_generate_vm_code(Package* package, Package_Executer* executer);
-void              add_global_variable(PackageUnit* package_unit, Package_Executer* executer);
 void              add_global_variable(Package* package, Package_Executer* executer);
-void              add_functions(PackageUnit* package_unit, Package_Executer* executer);
 void              add_functions(Package* package, Package_Executer* executer);
-void              add_classes(PackageUnit* package_unit, Package_Executer* executer);
 void              add_classes(Package* package, Package_Executer* executer);
 void              copy_class(Package_Executer* executer, ClassDefinition* src, RVM_Class* dest);
 void              copy_function(Function* src, RVM_Function* dest);

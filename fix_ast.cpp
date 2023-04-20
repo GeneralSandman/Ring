@@ -22,11 +22,6 @@ void ring_compiler_fix_ast(PackageUnit* package_unit) {
         pos->class_index = class_index++;
         fix_class_definition(pos);
     }
-
-
-#ifdef DEBUG
-    ring_compiler_functions_dump(package_unit);
-#endif
 }
 
 void fix_statement_list(Statement* statement_list, Block* block, Function* func) {

@@ -138,24 +138,6 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODES_NUM, "", OPCODE_OPERAND_TYPE_0BYTE, 0, 0},
 };
 
-// PackageExecuter* package_executer_create() {
-//     // debug_log_with_darkgreen_coloar("\t");
-//     // PackageExecuter* package_executer                 = (PackageExecuter*)malloc(sizeof(PackageExecuter));
-//     // package_executer->package_name                    = NULL;
-//     // package_executer->constant_pool_list              = std::vector<RVM_ConstantPool*>{};
-//     // package_executer->global_variable_list            = std::vector<RVM_Variable*>{};
-//     // package_executer->function_list                   = std::vector<RVM_Function*>{};
-//     // package_executer->class_list                      = std::vector<RVM_Class*>{};
-//     // package_executer->code_size                       = 0;
-//     // package_executer->code_list                       = NULL;
-//     // package_executer->estimate_runtime_stack_capacity = 0;
-//     // return package_executer;
-// }
-
-// void package_generate_vm_code(Package* package, PackageExecuter* executer) {
-//     // debug_log_with_darkgreen_coloar("\t");
-// }
-
 Package_Executer* package_executer_create() {
     debug_log_with_darkgreen_coloar("\t");
     Package_Executer* executer                = (Package_Executer*)malloc(sizeof(Package_Executer));
@@ -173,20 +155,6 @@ Package_Executer* package_executer_create() {
 }
 
 // 生成 RVM 虚拟机代码
-void ring_generate_vm_code(PackageUnit* package_unit, Package_Executer* executer) {
-    debug_log_with_darkgreen_coloar("\t");
-
-    add_global_variable(package_unit, executer);
-    add_functions(package_unit, executer);
-    add_classes(package_unit, executer);
-    add_top_level_code(package_unit, executer);
-
-#ifdef DEBUG
-    vm_executer_dump(executer);
-#endif
-}
-
-// 生成 RVM 虚拟机代码
 void ring_generate_vm_code(Package* package, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
@@ -198,26 +166,6 @@ void ring_generate_vm_code(Package* package, Package_Executer* executer) {
 #ifdef DEBUG
     vm_executer_dump(executer);
 #endif
-}
-
-// 添加全局变量
-void add_global_variable(PackageUnit* package_unit, Package_Executer* executer) {
-    debug_log_with_darkgreen_coloar("\t");
-    // FIXME: 在 Compiler 中大部分是链表：因为在编译的时候不确定存储空间
-    // 在 Executer 中 大部分是数组，因为编译完成，存储空间的数量都已经确认了。
-    if (package_unit->declaration_list_size == 0) {
-        return;
-    }
-
-    executer->global_variable_size = package_unit->declaration_list_size;
-    executer->global_variable_list = (RVM_Variable*)malloc(executer->global_variable_size * sizeof(RVM_Variable));
-
-    Declaration* pos = package_unit->declaration_list;
-    int          i   = 0;
-    for (; pos; pos = pos->next, i++) {
-        executer->global_variable_list[i].identifier = pos->identifier;
-        executer->global_variable_list[i].type       = pos->type; // TODO: 这里考虑要深度复制
-    }
 }
 
 // 添加全局变量
@@ -236,24 +184,6 @@ void add_global_variable(Package* package, Package_Executer* executer) {
     for (Declaration* pos : package->declaration_list) {
         executer->global_variable_list[i].identifier = pos->identifier;
         executer->global_variable_list[i].type       = pos->type; // TODO: 这里考虑要深度复制
-        i++;
-    }
-}
-
-// 添加函数定义
-void add_functions(PackageUnit* package_unit, Package_Executer* executer) {
-    debug_log_with_darkgreen_coloar("\t");
-
-    executer->function_size = package_unit->function_list.size();
-    executer->function_list = (RVM_Function*)malloc(sizeof(RVM_Function) * package_unit->function_list.size());
-
-    unsigned int i = 0;
-    // 暂时只处理 native function
-    for (Function* pos : package_unit->function_list) {
-        copy_function(pos, &executer->function_list[i]);
-        if (pos->block != NULL) {
-            generate_code_from_function_definition(executer, pos, &executer->function_list[i]);
-        }
         i++;
     }
 }
@@ -278,19 +208,6 @@ void add_functions(Package* package, Package_Executer* executer) {
             // printf("find main:%d\n", i);
             executer->main_func_index = i;
         }
-        i++;
-    }
-}
-
-void add_classes(PackageUnit* package_unit, Package_Executer* executer) {
-    debug_log_with_darkgreen_coloar("\t");
-
-    executer->class_size = package_unit->class_definition_list.size();
-    executer->class_list = (RVM_Class*)malloc(sizeof(RVM_Class) * package_unit->class_definition_list.size());
-
-    unsigned int i = 0;
-    for (ClassDefinition* pos : package_unit->class_definition_list) {
-        copy_class(executer, pos, &executer->class_list[i]);
         i++;
     }
 }

@@ -737,7 +737,7 @@ Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter) {
 }
 
 Package* create_package_info(char* package_name) {
-    debug_log_with_yellow_coloar("current package name:%s, rename:%s\n", package_name, rename);
+    debug_log_with_yellow_coloar("current package name:%s\n", package_name);
     Package* package      = (Package*)malloc(sizeof(Package));
     package->package_name = package_name;
 

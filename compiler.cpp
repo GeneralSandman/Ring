@@ -44,7 +44,7 @@ Package* package_create_input_file(char* package_name, char* input_main_file) {
     Package* package = (Package*)malloc(sizeof(Package));
 
     package->package_name     = package_name;
-    package->package_path     = "";
+    package->package_path     = NULL;
     package->source_file_list = std::vector<std::string>{std::string(input_main_file)};
 
     package->declaration_list      = std::vector<Declaration*>{};
@@ -64,7 +64,6 @@ void package_compile(Package* package) {
     for (std::string source_file : package->source_file_list) {
         PackageUnit* package_unit = package_unit_create(source_file.c_str());
         package_unit_compile(package_unit);
-        // package_unit_dump(package_unit);
 
         // for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
         //     // TODO:
@@ -75,8 +74,11 @@ void package_compile(Package* package) {
     }
 
     for (PackageUnit* package_unit : package->package_unit_list) {
-        for (int d_i = 0; d_i < package_unit->declaration_list_size; d_i++) {
-            package->declaration_list.push_back(&package_unit->declaration_list[d_i]);
+        ring_compiler_fix_ast(package_unit);
+
+        int d_i = 0;
+        for (Declaration* decl = package_unit->declaration_list; decl; decl = decl->next, d_i++) {
+            package->declaration_list.push_back(decl);
         }
 
         for (ClassDefinition* pos : package_unit->class_definition_list) {
@@ -95,11 +97,15 @@ void package_compile(Package* package) {
             for (; pos->next != NULL; pos = pos->next) {}
             pos->next = package_unit->statement_list;
         }
+
+#ifdef DEBUG
+        package_unit_dump(package_unit);
+#endif
     }
 
-    for (PackageUnit* package_unit : package->package_unit_list) {
-        ring_compiler_fix_ast(package_unit);
-    }
+#ifdef DEBUG
+    package_dump(package);
+#endif
 }
 
 void package_dump(Package* package) {
@@ -193,8 +199,9 @@ void package_unit_dump(PackageUnit* package_unit) {
     printf("## file_name:%s\n", package_unit->current_file_name.c_str());
 
     printf("## Declaration:\n");
-    for (int d_i = 0; d_i < package_unit->declaration_list_size; d_i++) {
-        printf("\tdeclaration identifier:%s\n", package_unit->declaration_list[d_i].identifier);
+    int d_i = 0;
+    for (Declaration* decl = package_unit->declaration_list; decl; decl = decl->next, d_i++) {
+        printf("\tdeclaration global-variable[%d] identifier:%s\n", d_i, decl->identifier);
     }
 
     printf("## ClassDefinition:\n");
