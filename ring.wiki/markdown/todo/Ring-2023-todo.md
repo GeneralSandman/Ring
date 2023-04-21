@@ -103,6 +103,12 @@ source_code_file                                             err_nums
 - 实现：全局变量的定义采用一个比较好的 方式 global{}  ✅
 
 ### 2023-04-21
+- 实现：import 的相关功能 通过import 使用package内的函数     操作符使用 ::  方法的定义也使用 ::
+  - package::变量
+  - package::函数
+  - package::类
+- 实现：导入std-fmt包，使用fmt相关库函数，同时要设计好native函数要怎样register才能更方便    --有bug  优先fix
+- 实现：解决 std package 路径的问题
 
 
 -----------------------------
