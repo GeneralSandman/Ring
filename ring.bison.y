@@ -133,6 +133,7 @@ int yyerror(char const *str, ...);
 %token TOKEN_RB 
 %token TOKEN_COMMA 
 %token TOKEN_COLON
+%token TOKEN_2COLON
 %token TOKEN_SEMICOLON 
 %token TOKEN_QUESTION_MARK
 %token TOKEN_ASSIGN
@@ -977,12 +978,16 @@ postfix_expression
     ;
 
 primary_expression
-    : primary_not_new_array
+    : literal_expression
+    | primary_not_new_array
+    | identifier TOKEN_2COLON primary_not_new_array
+    {
+        $$ = expression_add_package_posit($3, $1);
+    }
     ;
 
 primary_not_new_array
-    : literal_expression
-    | identifier
+    : identifier
     {
         debug_log_with_green_coloar("[RULE::literal_term:identifier]\t ");
         $$ = create_expression_identifier($1);

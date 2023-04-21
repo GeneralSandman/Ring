@@ -22,8 +22,35 @@ void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
     }
 }
 
-Package* package_create(char* package_name, char* package_path) {
+CompilerEntry* compiler_entry_create() {
+    CompilerEntry* compiler_entry = (CompilerEntry*)malloc(sizeof(CompilerEntry));
+    compiler_entry->package_map   = std::unordered_map<std::string, Package*>{};
+    compiler_entry->main_package  = NULL;
+    return compiler_entry;
+}
+
+void compiler_entry_dump(CompilerEntry* compiler_entry) {
+    assert(compiler_entry != NULL);
+    printf("|------------------ CompilerEntry-Dump-begin ------------------\n");
+
+    printf("|PackageList:\n");
+    for (auto iter = compiler_entry->package_map.begin(); iter != compiler_entry->package_map.end(); iter++) {
+        printf("|\t package:%s\n", iter->first.c_str());
+    }
+
+    printf("|MainPackage:\n");
+    printf("|## package_name:%s,package_path:%s\n", compiler_entry->main_package->package_name, compiler_entry->main_package->package_path);
+
+
+    printf("|------------------ CompilerEntry-Dump-begin ------------------\n\n");
+}
+
+Package* package_create(CompilerEntry* compiler_entry, char* package_name, char* package_path) {
+    assert(compiler_entry != NULL);
+
     Package* package = (Package*)malloc(sizeof(Package));
+
+    package->compiler_entry = compiler_entry;
 
     package->package_name     = package_name;
     package->package_path     = package_path;
@@ -41,8 +68,12 @@ Package* package_create(char* package_name, char* package_path) {
     return package;
 }
 
-Package* package_create_input_file(char* package_name, char* input_main_file) {
+Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_name, char* input_main_file) {
+    assert(compiler_entry != NULL);
+
     Package* package = (Package*)malloc(sizeof(Package));
+
+    package->compiler_entry = compiler_entry;
 
     package->package_name     = package_name;
     package->package_path     = NULL;
@@ -63,14 +94,25 @@ Package* package_create_input_file(char* package_name, char* input_main_file) {
 // 获取包下的所有 ring 源代码文件
 // 依次生成 PackageUnit 进行编译
 void package_compile(Package* package) {
+    CompilerEntry* compiler_entry = package->compiler_entry;
+
     for (std::string source_file : package->source_file_list) {
         PackageUnit* package_unit = package_unit_create(source_file.c_str());
         package_unit_compile(package_unit);
 
-        // for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
-        //     // TODO:
-        //     // add
-        // }
+        for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
+            // TODO:
+            char* package_name = import_package_info->package_name;
+            char* package_path = "/Users/zhenhuli/Desktop/Ring/std/fmt/";
+
+            std::string tmp = std::string(package_name);
+            if (compiler_entry->package_map.end() != compiler_entry->package_map.find(tmp)) {
+                continue;
+            }
+            Package* import_package          = package_create(compiler_entry, package_name, package_path);
+            compiler_entry->package_map[tmp] = import_package;
+            package_compile(import_package);
+        }
 
         package->package_unit_list.push_back(package_unit);
     }
@@ -107,35 +149,36 @@ void package_compile(Package* package) {
 
 #ifdef DEBUG
     package_dump(package);
+    compiler_entry_dump(compiler_entry);
 #endif
 }
 
 void package_dump(Package* package) {
-    printf("******************* Package-Dump-begin *******************\n");
+    printf("|------------------ Package-Dump-begin ------------------\n");
 
-    printf("## package_name:%s,package_path:%s\n", package->package_name, package->package_path);
+    printf("|## package_name:%s,package_path:%s\n", package->package_name, package->package_path);
 
-    printf("## PackageUnit:\n");
+    printf("|## PackageUnit:\n");
     for (auto package_unit : package->package_unit_list) {
-        printf("\tfile_name:%s\n", package_unit->current_file_name.c_str());
+        printf("|\tfile_name:%s\n", package_unit->current_file_name.c_str());
     }
 
-    printf("## Declaration:\n");
+    printf("|## Declaration:\n");
     for (auto declaration : package->declaration_list) {
-        printf("\tdeclaration identifier:%s\n", declaration->identifier);
+        printf("|\tdeclaration identifier:%s\n", declaration->identifier);
     }
 
-    printf("## ClassDefinition:\n");
+    printf("|## ClassDefinition:\n");
     for (auto class_definition : package->class_definition_list) {
-        printf("\tclass_definition identifier:%s\n", class_definition->class_identifier);
+        printf("|\tclass_definition identifier:%s\n", class_definition->class_identifier);
     }
 
-    printf("## Function:\n");
+    printf("|## Function:\n");
     for (auto function : package->function_list) {
-        printf("\tfunction function_name:%s\n", function->function_name);
+        printf("|\tfunction function_name:%s\n", function->function_name);
     }
 
-    printf("******************* Package-Dump-end  *******************\n");
+    printf("|------------------ Package-Dump-end  ------------------\n\n");
 }
 
 
@@ -199,27 +242,27 @@ void package_unit_compile(PackageUnit* package_unit) {
 }
 
 void package_unit_dump(PackageUnit* package_unit) {
-    printf("******************* PackageUnit-Dump-begin *******************\n");
+    printf("|------------------ PackageUnit-Dump-begin ------------------\n");
 
-    printf("## file_name:%s\n", package_unit->current_file_name.c_str());
+    printf("|## file_name:%s\n", package_unit->current_file_name.c_str());
 
-    printf("## Declaration:\n");
+    printf("|## Declaration:\n");
     int d_i = 0;
     for (Declaration* decl = package_unit->declaration_list; decl; decl = decl->next, d_i++) {
-        printf("\tdeclaration global-variable[%d] identifier:%s\n", d_i, decl->identifier);
+        printf("|\tdeclaration global-variable[%d] identifier:%s\n", d_i, decl->identifier);
     }
 
-    printf("## ClassDefinition:\n");
+    printf("|## ClassDefinition:\n");
     for (auto class_definition : package_unit->class_definition_list) {
-        printf("\tclass_definition identifier:%s\n", class_definition->class_identifier);
+        printf("|\tclass_definition identifier:%s\n", class_definition->class_identifier);
     }
 
-    printf("## Function:\n");
+    printf("|## Function:\n");
     for (auto function : package_unit->function_list) {
-        printf("\tfunction function_name:%s\n", function->function_name);
+        printf("|\tfunction function_name:%s\n", function->function_name);
     }
 
-    printf("******************* PackageUnit-Dump-end  *******************\n");
+    printf("|------------------ PackageUnit-Dump-end  ------------------\n\n");
 }
 
 

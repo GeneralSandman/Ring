@@ -43,6 +43,12 @@ void add_function_definition(AttributeInfo* attribute_info, Function* function_d
     get_package_unit()->function_list.push_back(function_definition);
 }
 
+Expression* expression_add_package_posit(Expression* expression, char* package_posit) {
+    assert(expression != NULL);
+    expression->package_posit = package_posit;
+    return expression;
+}
+
 Expression* create_expression_identifier(char* identifier) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
@@ -246,6 +252,19 @@ Expression* create_member_expression(Expression* object_expression, char* member
     expression->u.member_expression->object_expression  = object_expression;
     expression->u.member_expression->member_identifier  = member_identifier;
     expression->u.member_expression->member_declaration = NULL;
+
+    return expression;
+}
+
+Expression* create_dot_expression(Expression* prefix_expression, Expression* suffix_expression) {
+    Expression* expression                          = (Expression*)malloc(sizeof(Expression));
+    expression->line_number                         = package_unit_get_line_number();
+    expression->convert_type                        = NULL; // fix in fix_ast
+    expression->type                                = EXPRESSION_TYPE_DOT;
+    expression->u.dot_expression                    = (DotExpression*)malloc(sizeof(DotExpression));
+    expression->u.dot_expression->line_number       = package_unit_get_line_number();
+    expression->u.dot_expression->prefix_expression = prefix_expression;
+    expression->u.dot_expression->suffix_expression = suffix_expression;
 
     return expression;
 }

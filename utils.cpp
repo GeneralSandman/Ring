@@ -195,7 +195,6 @@ std::vector<std::string> list_file(char* path) {
         } else {
             // 不为目录则打印文件路径名
             file_list.push_back(std::string(tmp_name));
-            printf("%s\n", tmp_name);
         }
     }
     closedir(dp);

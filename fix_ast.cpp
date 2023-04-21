@@ -136,6 +136,9 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
     case EXPRESSION_TYPE_MEMBER:
         fix_member_expression(expression, expression->u.member_expression, block, func);
         break;
+    case EXPRESSION_TYPE_DOT:
+        fix_dot_expression(expression, expression->u.dot_expression, block, func);
+        break;
 
     case EXPRESSION_TYPE_TERNARY:
         fix_ternary_condition_expression(expression->u.ternary_expression, block, func);
@@ -435,6 +438,13 @@ void fix_member_expression(Expression* expression, MemberExpression* member_expr
     // expression 最终的类型取决于field-member 的类型
     expression->convert_type = member_declaration->u.field->type;
     fix_class_member_expression(member_expression, member_expression->object_expression, member_expression->member_identifier);
+}
+
+void fix_dot_expression(Expression* expression, DotExpression* dot_expression, Block* block, Function* func) {
+    assert(dot_expression != NULL);
+
+    // 1. prefix is a package name
+    // 2. suffix is a object name
 }
 
 void fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier) {

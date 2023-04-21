@@ -60,9 +60,12 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    Package*             package          = package_create_input_file((char*)"main", file_name);
+    CompilerEntry*       compiler_entry   = compiler_entry_create();
+    Package*             package          = package_create_input_file(compiler_entry, (char*)"main", file_name);
     Package_Executer*    package_executer = package_executer_create();
     Ring_VirtualMachine* ring_vm          = ring_virtualmachine_create();
+
+    compiler_entry->main_package = package; // TODO: optimize the method of set main_package;
 
     // Step-1: flex 词法分析，
     // Step-2: bison 语法分析，构建语法树

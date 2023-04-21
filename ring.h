@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #define RING_VERSION "ring-v0.2.0-beta"
@@ -14,6 +15,8 @@ typedef struct Ring_VirtualMachine Ring_VirtualMachine;
 typedef struct Package_Executer Package_Executer;
 
 typedef struct ImportPackageInfo ImportPackageInfo;
+
+typedef struct CompilerEntry CompilerEntry;
 
 typedef struct Package Package;
 
@@ -60,6 +63,8 @@ typedef struct ArrayIndexExpression ArrayIndexExpression;
 typedef struct CastExpression CastExpression;
 
 typedef struct MemberExpression MemberExpression;
+
+typedef struct DotExpression DotExpression;
 
 typedef struct BinaryExpression BinaryExpression;
 
@@ -214,9 +219,16 @@ struct ImportPackageInfo {
     char* rename;
 };
 
+struct CompilerEntry {
+    std::unordered_map<std::string, Package*> package_map;
+    Package*                                  main_package;
+};
+
 // Pacage 对应一个源代码的逻辑包  也就是一个路径
 // 其实它就是 就是将 PackageUnit 打包在一块
 struct Package {
+    CompilerEntry* compiler_entry;
+
     char* package_name;
     char* package_path;
 
@@ -702,6 +714,7 @@ typedef enum {
 
     EXPRESSION_TYPE_CAST,
     EXPRESSION_TYPE_MEMBER,
+    EXPRESSION_TYPE_DOT,
 } ExpressionType;
 
 typedef enum {
@@ -874,6 +887,7 @@ struct StatementExecResult {
 struct Expression {
     unsigned int line_number;
 
+    char*          package_posit;
     TypeSpecifier* convert_type; // 一个复杂表达式最后结果值的类型, FIX_AST_UPDATE
     ExpressionType type;
     union {
@@ -891,6 +905,7 @@ struct Expression {
         ArrayIndexExpression*   array_index_expression;
         CastExpression*         cast_expression;
         MemberExpression*       member_expression;
+        DotExpression*          dot_expression;
     } u;
 
     Expression* next;
@@ -952,6 +967,19 @@ struct MemberExpression {
     // job1 is object_expression
     // JobID is member_identifier
     // JobID is member_declaration
+};
+
+struct DotExpression {
+    unsigned int line_number;
+
+    Expression* prefix_expression;
+    Expression* suffix_expression;
+
+    // e.g.
+    // object.member
+    // object.member()
+    // object -> prefix_expression
+    // member -> suffix_expression
 };
 
 struct FunctionCallExpression {
@@ -1340,27 +1368,29 @@ void         reset_ring_string(Ring_String* string);
 void         ring_string_add_char(Ring_String* string, char ch);
 char*        get_ring_string(Ring_String* string);
 
-void         ring_compiler_error(SyntaxType syntax_type, int exit);
-Package*     package_create(char* package_name, char* package_path);
-Package*     package_create_input_file(char* package_name, char* input_main_file);
-void         package_compile(Package* package);
-void         package_dump(Package* package);
-PackageUnit* package_unit_create(std::string file_name);
-PackageUnit* get_package_unit();
-void         package_unit_compile(PackageUnit* package_unit);
-void         package_unit_dump(PackageUnit* package_unit);
-const char*  package_unit_get_file_name();
-Ring_String* get_package_unit_current_line_content();
-unsigned int package_unit_get_line_number();
-unsigned int package_unit_increa_line_number();
-unsigned int package_unit_get_column_number();
-unsigned int package_unit_increa_column_number(unsigned int len);
-void         package_unit_update_line_content(char* str);
-void         package_unit_reset_line_content();
-char*        package_unit_get_current_line_content();
-void         package_unit_reset_column_number();
-int          package_unit_add_statement(Statement* statement);
-int          package_unit_add_class_definition(ClassDefinition* class_definition);
+void           ring_compiler_error(SyntaxType syntax_type, int exit);
+CompilerEntry* compiler_entry_create();
+void           compiler_entry_dump(CompilerEntry* compiler_entry);
+Package*       package_create(CompilerEntry* compiler_entry, char* package_name, char* package_path);
+Package*       package_create_input_file(CompilerEntry* compiler_entry, char* package_name, char* input_main_file);
+void           package_compile(Package* package);
+void           package_dump(Package* package);
+PackageUnit*   package_unit_create(std::string file_name);
+PackageUnit*   get_package_unit();
+void           package_unit_compile(PackageUnit* package_unit);
+void           package_unit_dump(PackageUnit* package_unit);
+const char*    package_unit_get_file_name();
+Ring_String*   get_package_unit_current_line_content();
+unsigned int   package_unit_get_line_number();
+unsigned int   package_unit_increa_line_number();
+unsigned int   package_unit_get_column_number();
+unsigned int   package_unit_increa_column_number(unsigned int len);
+void           package_unit_update_line_content(char* str);
+void           package_unit_reset_line_content();
+char*          package_unit_get_current_line_content();
+void           package_unit_reset_column_number();
+int            package_unit_add_statement(Statement* statement);
+int            package_unit_add_class_definition(ClassDefinition* class_definition);
 
 
 void  init_string_literal_buffer();
@@ -1377,6 +1407,7 @@ void                    finish_global_block(Statement* global_statement_list);
 Statement*              statement_list_add_item(Statement* statement_list, Statement* statement);
 Statement*              create_statemen_from_expression(Expression* expression);
 void                    add_function_definition(AttributeInfo* attribute_info, Function* function_definition);
+Expression*             expression_add_package_posit(Expression* expression, char* package_posit);
 Expression*             create_expression_identifier(char* identifier);
 Expression*             create_expression_identifier2(char* identifier, IdentifierExpressionType type);
 Expression*             create_expression_identifier_with_index(char* identifier, Expression* index);
@@ -1391,6 +1422,7 @@ Expression*             create_expression_literal(ExpressionType type, char* lit
 Expression*             create_expression_bool_literal(ExpressionType type, Ring_Bool value);
 Expression*             create_cast_expression(TypeSpecifier* cast_type, Expression* operand);
 Expression*             create_member_expression(Expression* object_expression, char* member_identifier);
+Expression*             create_dot_expression(Expression* prefix_expression, Expression* suffix_expression);
 AssignExpression*       create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
 AssignExpression*       create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* operand);
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list);
@@ -1473,6 +1505,7 @@ void                    fix_function_call_expression(FunctionCallExpression* fun
 void                    fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func);
 void                    fix_class_definition(ClassDefinition* class_definition);
 void                    fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func);
+void                    fix_dot_expression(Expression* expression, DotExpression* dot_expression, Block* block, Function* func);
 void                    fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
 ClassDefinition*        search_class_definition(char* class_identifier);
 ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, char* member_identifier);
