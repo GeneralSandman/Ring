@@ -61,20 +61,22 @@ int main(int argc, char** argv) {
     }
 
     CompilerEntry*       compiler_entry   = compiler_entry_create();
-    Package*             package          = package_create_input_file(compiler_entry, (char*)"main", file_name);
+    Package*             main_package     = package_create_input_file(compiler_entry, (char*)"main", file_name);
     Package_Executer*    package_executer = package_executer_create();
     Ring_VirtualMachine* ring_vm          = ring_virtualmachine_create();
 
-    compiler_entry->main_package = package; // TODO: optimize the method of set main_package;
+    compiler_entry->main_package = main_package; // TODO: optimize the method of set main_package;
+
+    compile_std_lib(compiler_entry);
 
     // Step-1: flex 词法分析，
     // Step-2: bison 语法分析，构建语法树
     // Step-4: 修正语法树
-    package_compile(package);
+    package_compile(main_package);
 
 
     // Step-5: 生成虚拟机中间代码
-    ring_generate_vm_code(package, package_executer);
+    ring_generate_vm_code(main_package, package_executer);
 
     // Step-6: 运行虚拟机
     ring_virtualmachine_load_executer(ring_vm, package_executer);

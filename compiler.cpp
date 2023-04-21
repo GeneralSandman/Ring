@@ -8,7 +8,8 @@
 
 int                      yyerror(char const* str, ...);
 extern struct SyntaxInfo SyntaxInfos[];
-static PackageUnit*      package_unit = NULL;
+static PackageUnit*      package_unit   = NULL;
+static CompilerEntry*    compiler_entry = NULL;
 
 // Error Attention 某些错误提示可以精细化识别、提示
 void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
@@ -23,9 +24,13 @@ void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
 }
 
 CompilerEntry* compiler_entry_create() {
-    CompilerEntry* compiler_entry = (CompilerEntry*)malloc(sizeof(CompilerEntry));
-    compiler_entry->package_map   = std::unordered_map<std::string, Package*>{};
-    compiler_entry->main_package  = NULL;
+    compiler_entry               = (CompilerEntry*)malloc(sizeof(CompilerEntry));
+    compiler_entry->package_list = std::vector<Package*>{};
+    compiler_entry->main_package = NULL;
+    return compiler_entry;
+}
+
+CompilerEntry* get_compiler_entry() {
     return compiler_entry;
 }
 
@@ -34,8 +39,8 @@ void compiler_entry_dump(CompilerEntry* compiler_entry) {
     printf("|------------------ CompilerEntry-Dump-begin ------------------\n");
 
     printf("|PackageList:\n");
-    for (auto iter = compiler_entry->package_map.begin(); iter != compiler_entry->package_map.end(); iter++) {
-        printf("|\t package:%s\n", iter->first.c_str());
+    for (Package* package : compiler_entry->package_list) {
+        printf("|\t package:%s\n", package->package_name);
     }
 
     printf("|MainPackage:\n");
@@ -45,15 +50,25 @@ void compiler_entry_dump(CompilerEntry* compiler_entry) {
     printf("|------------------ CompilerEntry-Dump-begin ------------------\n\n");
 }
 
+Package* search_package(CompilerEntry* compiler_entry, char* package_name) {
+    for (Package* package : compiler_entry->package_list) {
+        if (0 == strcmp(package->package_name, package_name)) {
+            return package;
+        }
+    }
+    return NULL;
+}
+
 Package* package_create(CompilerEntry* compiler_entry, char* package_name, char* package_path) {
     assert(compiler_entry != NULL);
 
     Package* package = (Package*)malloc(sizeof(Package));
 
     package->compiler_entry = compiler_entry;
+    package->package_index  = -1; // TODO: 这个应该在 fix的时候 设置
+    package->package_name   = package_name;
+    package->package_path   = package_path;
 
-    package->package_name     = package_name;
-    package->package_path     = package_path;
     package->source_file_list = list_file(package->package_path);
 
     package->global_declaration_list = std::vector<Declaration*>{};
@@ -74,9 +89,10 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
     Package* package = (Package*)malloc(sizeof(Package));
 
     package->compiler_entry = compiler_entry;
+    package->package_index  = -1; // TODO: 这个应该在 fix的时候 设置
+    package->package_name   = package_name;
+    package->package_path   = NULL;
 
-    package->package_name     = package_name;
-    package->package_path     = NULL;
     package->source_file_list = std::vector<std::string>{std::string(input_main_file)};
 
     package->global_declaration_list = std::vector<Declaration*>{};
@@ -96,21 +112,29 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
 void package_compile(Package* package) {
     CompilerEntry* compiler_entry = package->compiler_entry;
 
+    if (NULL != search_package(compiler_entry, package->package_name)) {
+        debug_log_with_yellow_coloar("\t package[%s] already compiled", package->package_name);
+        return;
+    }
+    package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
+    compiler_entry->package_list.push_back(package);
+
     for (std::string source_file : package->source_file_list) {
-        PackageUnit* package_unit = package_unit_create(source_file.c_str());
+        PackageUnit* package_unit = package_unit_create(package, source_file.c_str());
         package_unit_compile(package_unit);
 
         for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
             // TODO:
             char* package_name = import_package_info->package_name;
-            char* package_path = "/Users/zhenhuli/Desktop/Ring/std/fmt/";
+            char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring//"; // TODO:
 
-            std::string tmp = std::string(package_name);
-            if (compiler_entry->package_map.end() != compiler_entry->package_map.find(tmp)) {
+            if (NULL != search_package(compiler_entry, package_name)) {
+                debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
                 continue;
             }
-            Package* import_package          = package_create(compiler_entry, package_name, package_path);
-            compiler_entry->package_map[tmp] = import_package;
+            Package* import_package       = package_create(compiler_entry, package_name, package_path);
+            import_package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
+            compiler_entry->package_list.push_back(import_package);
             package_compile(import_package);
         }
 
@@ -181,11 +205,85 @@ void package_dump(Package* package) {
     printf("|------------------ Package-Dump-end  ------------------\n\n");
 }
 
+void compile_std_lib(CompilerEntry* compiler_entry) {
+    compile_std_lib_fmt(compiler_entry);
+    compile_std_lib_debug(compiler_entry);
+    compile_std_lib_math(compiler_entry);
+}
 
-PackageUnit* package_unit_create(std::string file_name) {
+void compile_std_lib_fmt(CompilerEntry* compiler_entry) {
+    char* package_name = (char*)"fmt";
+    char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring/std/fmt/";
+
+    if (NULL != search_package(compiler_entry, package_name)) {
+        debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
+        return;
+    }
+
+    Package*          std_package      = package_create(compiler_entry, package_name, package_path);
+    Package_Executer* package_executer = package_executer_create();
+
+    std_package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
+    compiler_entry->package_list.push_back(std_package);
+
+    package_compile(std_package);
+
+    ring_generate_vm_code(std_package, package_executer);
+
+    register_lib(package_executer, (char*)"println_bool", std_fmt_lib_println_bool, 1);
+    register_lib(package_executer, (char*)"println_int", std_fmt_lib_println_int, 1);
+    register_lib(package_executer, (char*)"println_double", std_fmt_lib_println_double, 1);
+    register_lib(package_executer, (char*)"println_string", std_fmt_lib_println_string, 1);
+}
+
+void compile_std_lib_debug(CompilerEntry* compiler_entry) {
+    char* package_name = (char*)"debug";
+    char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring/std/debug/";
+
+    if (NULL != search_package(compiler_entry, package_name)) {
+        debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
+        return;
+    }
+
+    Package*          std_package      = package_create(compiler_entry, package_name, package_path);
+    Package_Executer* package_executer = package_executer_create();
+
+    std_package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
+    compiler_entry->package_list.push_back(std_package);
+
+    package_compile(std_package);
+
+    ring_generate_vm_code(std_package, package_executer);
+
+    register_lib(package_executer, (char*)"debug_assert", std_debug_lib_debug_assert, 1);
+}
+
+void compile_std_lib_math(CompilerEntry* compiler_entry) {
+    char* package_name = (char*)"math";
+    char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring/std/math/";
+
+    if (NULL != search_package(compiler_entry, package_name)) {
+        debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
+        return;
+    }
+
+    Package*          std_package      = package_create(compiler_entry, package_name, package_path);
+    Package_Executer* package_executer = package_executer_create();
+
+    std_package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
+    compiler_entry->package_list.push_back(std_package);
+
+    package_compile(std_package);
+
+    ring_generate_vm_code(std_package, package_executer);
+
+    register_lib(package_executer, (char*)"sqrt", std_math_lib_sqrt, 1);
+}
+
+PackageUnit* package_unit_create(Package* parent_package, std::string file_name) {
     package_unit = (PackageUnit*)malloc(sizeof(PackageUnit));
 
-    package_unit->parent_package = NULL;
+    package_unit->parent_package = parent_package;
 
     package_unit->current_file_name     = file_name;
     package_unit->current_file_fp       = NULL;

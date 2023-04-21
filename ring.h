@@ -22,8 +22,6 @@ typedef struct Package Package;
 
 typedef struct PackageUnit PackageUnit;
 
-typedef struct PackageEEEEEEE PackageEEEEEEE;
-
 typedef struct RVM_Variable RVM_Variable;
 
 typedef struct RVM_RuntimeStack RVM_RuntimeStack;
@@ -220,17 +218,18 @@ struct ImportPackageInfo {
 };
 
 struct CompilerEntry {
-    std::unordered_map<std::string, Package*> package_map;
-    Package*                                  main_package;
+    // std::unordered_map<std::string, Package*> package_map;
+    std::vector<Package*> package_list;
+    Package*              main_package;
 };
 
 // Pacage 对应一个源代码的逻辑包  也就是一个路径
 // 其实它就是 就是将 PackageUnit 打包在一块
 struct Package {
     CompilerEntry* compiler_entry;
-
-    char* package_name;
-    char* package_path;
+    unsigned int   package_index; // 在 CompilerEntry 中的 index
+    char*          package_name;
+    char*          package_path;
 
     std::vector<std::string> source_file_list;
 
@@ -277,19 +276,6 @@ struct PackageUnit {
     unsigned int compile_error_num;
 };
 
-struct PackageEEEEEEE {
-    char* package_name;
-
-    std::vector<RVM_ConstantPool*> constant_pool_list;
-    std::vector<RVM_Variable*>     global_variable_list;
-    std::vector<RVM_Function*>     function_list;
-    std::vector<RVM_Class*>        class_list;
-
-    unsigned int code_size;
-    RVM_Byte*    code_list;
-
-    unsigned int estimate_runtime_stack_capacity;
-};
 
 typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
 
@@ -393,6 +379,16 @@ struct Package_Executer {
     unsigned int estimate_runtime_stack_capacity;
 };
 
+// struct PackageEEEEEEE {
+//     char* package_name;
+//     std::vector<RVM_ConstantPool*> constant_pool_list;
+//     std::vector<RVM_Variable*>     global_variable_list;
+//     std::vector<RVM_Function*>     function_list;
+//     std::vector<RVM_Class*>        class_list;
+//     unsigned int code_size;
+//     RVM_Byte*    code_list;
+//     unsigned int estimate_runtime_stack_capacity;
+// };
 
 // generate.c
 
@@ -921,6 +917,8 @@ typedef enum {
 struct IdentifierExpression {
     unsigned int line_number;
 
+    char* package_posit;
+
     IdentifierExpressionType type;
     char*                    identifier;
     union {
@@ -984,6 +982,8 @@ struct DotExpression {
 
 struct FunctionCallExpression {
     unsigned int line_number;
+
+    char* package_posit;
 
     Expression*   function_identifier_expression;
     ArgumentList* argument_list;
@@ -1110,6 +1110,8 @@ struct Block {
 
 struct Function {
     unsigned int line_number;
+
+    Package* package; // 所属的package
 
     AttributeInfo* attribute_info;
 
@@ -1370,12 +1372,18 @@ char*        get_ring_string(Ring_String* string);
 
 void           ring_compiler_error(SyntaxType syntax_type, int exit);
 CompilerEntry* compiler_entry_create();
+CompilerEntry* get_compiler_entry();
 void           compiler_entry_dump(CompilerEntry* compiler_entry);
+Package*       search_package(CompilerEntry* compiler_entry, char* package_name);
 Package*       package_create(CompilerEntry* compiler_entry, char* package_name, char* package_path);
 Package*       package_create_input_file(CompilerEntry* compiler_entry, char* package_name, char* input_main_file);
 void           package_compile(Package* package);
 void           package_dump(Package* package);
-PackageUnit*   package_unit_create(std::string file_name);
+void           compile_std_lib(CompilerEntry* compiler_entry);
+void           compile_std_lib_fmt(CompilerEntry* compiler_entry);
+void           compile_std_lib_debug(CompilerEntry* compiler_entry);
+void           compile_std_lib_math(CompilerEntry* compiler_entry);
+PackageUnit*   package_unit_create(Package* parent_package, std::string file_name);
 PackageUnit*   get_package_unit();
 void           package_unit_compile(PackageUnit* package_unit);
 void           package_unit_dump(PackageUnit* package_unit);
@@ -1511,8 +1519,8 @@ ClassDefinition*        search_class_definition(char* class_identifier);
 ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, char* member_identifier);
 void                    fix_ternary_condition_expression(TernaryExpression* ternary_expression, Block* block, Function* func);
 void                    add_parameter_to_declaration(Parameter* parameter, Block* block);
-Declaration*            search_declaration(char* identifier, Block* block);
-Function*               search_function(char* identifier);
+Declaration*            search_declaration(char* package_posit, char* identifier, Block* block);
+Function*               search_function(char* package_posit, char* identifier);
 
 // generate.c
 // PackageExecuter* package_executer_create();
@@ -1643,16 +1651,15 @@ void ring_bytecode_load(Package_Executer* executer, FILE* input);
 // bytecode.c
 
 // std_lib.cpp
-void      register_std_lib();
-void      register_std_fmt_lib(PackageEEEEEEE* std_fmt_package_executer);
-void      register_std_debug_lib(PackageEEEEEEE* std_debug_package_executer);
-void      register_lib(PackageEEEEEEE* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count);
+void      register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count);
 RVM_Value std_fmt_lib_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_fmt_lib_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_fmt_lib_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_fmt_lib_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+
 RVM_Value std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
+RVM_Value std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 // std_lib.cpp
 
 // interactive.c

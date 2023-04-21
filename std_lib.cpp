@@ -1,35 +1,16 @@
 #include "ring.h"
 
-void register_std_lib() {
-    PackageEEEEEEE* std_fmt_package_executer   = NULL;
-    PackageEEEEEEE* std_debug_package_executer = NULL;
-
-    register_std_fmt_lib(std_fmt_package_executer);
-    register_std_debug_lib(std_debug_package_executer);
-}
-
-void register_std_fmt_lib(PackageEEEEEEE* std_fmt_package_executer) {
-    register_lib(std_fmt_package_executer, (char*)"println_bool", std_fmt_lib_println_bool, 1);
-    register_lib(std_fmt_package_executer, (char*)"println_int", std_fmt_lib_println_int, 1);
-    register_lib(std_fmt_package_executer, (char*)"println_double", std_fmt_lib_println_double, 1);
-    register_lib(std_fmt_package_executer, (char*)"println_string", std_fmt_lib_println_string, 1);
-}
-
-void register_std_debug_lib(PackageEEEEEEE* std_debug_package_executer) {
-    register_lib(std_debug_package_executer, (char*)"debug_assert", std_debug_lib_debug_assert, 1);
-}
-
-void register_lib(PackageEEEEEEE* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count) {
+void register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count) {
     debug_log_with_white_coloar("\t");
 
-    RVM_Function* function             = (RVM_Function*)malloc(sizeof(RVM_Function));
-    function->func_name                = func_name;
-    function->type                     = RVM_FUNCTION_TYPE_NATIVE;
-    function->u.native_func            = (NativeFunction*)malloc(sizeof(NativeFunction));
-    function->u.native_func->func_proc = func_proc;
-    function->u.native_func->arg_count = arg_count;
-
-    package_executer->function_list.push_back(function);
+    for (int i = 0; i < package_executer->function_size; i++) {
+        RVM_Function* function = &package_executer->function_list[i];
+        if (function->type == RVM_FUNCTION_TYPE_NATIVE && 0 == strcmp(function->func_name, func_name)) {
+            function->u.native_func            = (NativeFunction*)malloc(sizeof(NativeFunction));
+            function->u.native_func->func_proc = func_proc;
+            function->u.native_func->arg_count = arg_count;
+        }
+    }
 }
 
 // ------------------ std fmt ------------------
@@ -135,6 +116,30 @@ RVM_Value std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
         printf("debug_assert FAILED\n");
     }
     fflush(stdout);
+
+    return ret;
+}
+
+// ------------------ std math ------------------
+// std_math_lib_sqrt
+
+RVM_Value std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    debug_log_with_white_coloar("\t");
+
+    // if (arg_count != 1) {
+    //     printf("native_proc_print only one arguement\n");
+    //     exit(ERROR_CODE_RUN_VM_ERROR);
+    // }
+
+    RVM_Value ret;
+    ret.u.int_value = 0;
+
+    // if (args->u.int_value) {
+    //     printf("debug_assert PASS\n");
+    // } else {
+    //     printf("debug_assert FAILED\n");
+    // }
+    // fflush(stdout);
 
     return ret;
 }

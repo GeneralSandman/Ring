@@ -40,6 +40,12 @@ void add_function_definition(AttributeInfo* attribute_info, Function* function_d
 
     function_definition->attribute_info = attribute_info;
 
+    for (AttributeInfo* pos = attribute_info; pos; pos = pos->next) {
+        if (0 == strcmp(pos->name, "native")) {
+            function_definition->type = FUNCTION_TYPE_NATIVE;
+        }
+    }
+
     get_package_unit()->function_list.push_back(function_definition);
 }
 
@@ -389,22 +395,23 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
 Function* new_function_definition(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
     debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier);
 
-    // FIXME:
-    if (!strcmp(identifier, "println_bool")
-        || !strcmp(identifier, "println_int")
-        || !strcmp(identifier, "println_double")
-        || !strcmp(identifier, "println_string")
-        || !strcmp(identifier, "debug_assert")
-        || !strcmp(identifier, "exit")
-        || !strcmp(identifier, "print")
-        || !strcmp(identifier, "println")
-        || !strcmp(identifier, "printf")
-        || !strcmp(identifier, "printfln")) {
-        type = FUNCTION_TYPE_NATIVE;
-    }
+    // if (!strcmp(identifier, "println_bool")
+    //     || !strcmp(identifier, "println_int")
+    //     || !strcmp(identifier, "println_double")
+    //     || !strcmp(identifier, "println_string")
+    //     || !strcmp(identifier, "debug_assert")
+    //     || !strcmp(identifier, "exit")
+    //     || !strcmp(identifier, "print")
+    //     || !strcmp(identifier, "println")
+    //     || !strcmp(identifier, "printf")
+    //     || !strcmp(identifier, "printfln")) {
+    //     type = FUNCTION_TYPE_NATIVE;
+    // }
 
     Function* function            = (Function*)malloc(sizeof(Function));
     function->line_number         = package_unit_get_line_number();
+    function->package             = get_package_unit()->parent_package;
+    function->attribute_info      = NULL;
     function->func_index          = get_package_unit()->function_list.size();
     function->type                = type;
     function->function_name       = identifier;

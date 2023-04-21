@@ -71,7 +71,10 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
     }
     switch (expression->type) {
     case EXPRESSION_TYPE_IDENTIFIER:
-        expression->convert_type = fix_identifier_expression(expression->u.identifier_expression, block);
+        // TODO: 这里需要优化一下
+        // 没有必要赋值 package_posit
+        expression->u.identifier_expression->package_posit = expression->package_posit;
+        expression->convert_type                           = fix_identifier_expression(expression->u.identifier_expression, block);
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
@@ -115,6 +118,9 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
         break;
 
     case EXPRESSION_TYPE_FUNCTION_CALL:
+        // TODO: 这里需要优化一下
+        // 没有必要赋值 package_posit
+        expression->u.function_call_expression->package_posit = expression->package_posit;
         fix_function_call_expression(expression->u.function_call_expression, block, func);
         break;
     case EXPRESSION_TYPE_METHOD_CALL:
@@ -273,7 +279,7 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
     Function*    function    = NULL;
     switch (expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
-        declaration               = search_declaration(expression->identifier, block);
+        declaration               = search_declaration(expression->package_posit, expression->identifier, block);
         expression->u.declaration = declaration;
         return declaration->type;
         break;
@@ -282,7 +288,7 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
         break;
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
-        function               = search_function(expression->identifier);
+        function               = search_function(expression->package_posit, expression->identifier);
         expression->u.function = function;
         break;
 
@@ -342,6 +348,9 @@ void fix_function_call_expression(FunctionCallExpression* function_call_expressi
         return;
     }
 
+    // TODO: 这里需要优化一下
+    // 没有必要赋值 package_posit
+    function_call_expression->function_identifier_expression->package_posit = function_call_expression->package_posit;
     fix_expression(function_call_expression->function_identifier_expression, block, func);
 
     ArgumentList* pos = function_call_expression->argument_list;
@@ -514,7 +523,7 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
 
 // -----------------
 
-Declaration* search_declaration(char* identifier, Block* block) {
+Declaration* search_declaration(char* package_posit, char* identifier, Block* block) {
     Declaration* decl = NULL;
 
     for (; block; block = block->parent_block) {
@@ -536,7 +545,20 @@ Declaration* search_declaration(char* identifier, Block* block) {
     return NULL;
 }
 
-Function* search_function(char* identifier) {
+Function* search_function(char* package_posit, char* identifier) {
+    if (package_posit != NULL) {
+        CompilerEntry* compiler_entry = get_compiler_entry();
+        Package*       package        = search_package(compiler_entry, package_posit);
+
+        // TODO: 封装成函数
+        for (auto function : package->function_list) {
+            if (0 == strcmp(function->function_name, identifier)) {
+                return function;
+            }
+        }
+
+        return NULL;
+    }
     for (Function* pos : get_package_unit()->function_list) {
         if (!strcmp(identifier, pos->function_name)) {
             return pos;
