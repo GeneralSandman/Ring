@@ -11,7 +11,14 @@ import {
 
 }
 
+@native
 function println_bool(var bool bool_value);
+
+@native
 function println_int(var int int_value);
+
+@native
 function println_double(var double double_value);
+
+@native
 function println_string(var string string_value);

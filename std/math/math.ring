@@ -4,11 +4,11 @@
 // Date:    2023-04-14
 //
 
-package debug
+package math
 
 import {
 
 }
 
 @native
-function debug_assert(var bool bool_value);
+function sqrt(var double double_value) -> (double);
