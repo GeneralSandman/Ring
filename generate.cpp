@@ -138,9 +138,11 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODES_NUM, "", OPCODE_OPERAND_TYPE_0BYTE, 0, 0},
 };
 
-Package_Executer* package_executer_create() {
-    debug_log_with_darkgreen_coloar("\t");
+Package_Executer* package_executer_create(ExecuterEntry* executer_entry, char* package_name) {
     Package_Executer* executer                = (Package_Executer*)malloc(sizeof(Package_Executer));
+    executer->executer_entry                  = executer_entry;
+    executer->package_index                   = -1;
+    executer->package_name                    = package_name;
     executer->constant_pool_size              = 0;
     executer->constant_pool_list              = NULL;
     executer->global_variable_size            = 0;
@@ -154,18 +156,57 @@ Package_Executer* package_executer_create() {
     return executer;
 }
 
+void package_executer_dump(Package_Executer* package_executer) {
+    assert(package_executer != NULL);
+    printf("|------------------ Package_Executer-Dump-begin ------------------\n");
+
+    printf("|PackageIndex:%d\n", package_executer->package_index);
+    printf("|PackageName:%s\n", package_executer->package_name);
+
+    printf("|FunctionList:\n");
+
+    for (int i = 0; i < package_executer->function_size; i++) {
+        printf("|\t func_name:%s\n", package_executer->function_list[i].func_name);
+    }
+
+    printf("|------------------ Package_Executer-Dump-begin ------------------\n\n");
+}
+
 // 生成 RVM 虚拟机代码
-void ring_generate_vm_code(Package* package, Package_Executer* executer) {
+void ring_generate_vm_code(Package* package, Package_Executer* package_executer) {
     debug_log_with_darkgreen_coloar("\t");
 
-    add_global_variable(package, executer);
-    add_functions(package, executer);
-    add_classes(package, executer);
-    add_top_level_code(package, executer);
+    add_global_variable(package, package_executer);
+    add_functions(package, package_executer);
+    add_classes(package, package_executer);
+    add_top_level_code(package, package_executer);
 
 #ifdef DEBUG
-    vm_executer_dump(executer);
+    package_executer_dump(package_executer);
 #endif
+}
+
+void ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry) {
+    debug_log_with_darkgreen_coloar("\t");
+
+    Package*          main_package     = compiler_entry->main_package;
+    Package_Executer* package_executer = executer_entry->main_package_executer;
+
+    ring_generate_vm_code(main_package, package_executer);
+
+    for (Package* package : compiler_entry->package_list) {
+        // FIXME: find duplicate
+        for (Package_Executer* package_executer : executer_entry->package_executer_list) {
+            if (0 == strcmp(package_executer->package_name, package->package_name)) {
+                debug_log_with_darkgreen_coloar("\tpackage executer[%s] already register", package->package_name);
+
+                continue;
+            }
+        }
+        Package_Executer* package_executer = package_executer_create(executer_entry, package->package_name);
+        ring_generate_vm_code(package, package_executer);
+        executer_entry->package_executer_list.push_back(package_executer);
+    }
 }
 
 // 添加全局变量
@@ -320,7 +361,7 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
         // 调用 main 函数
         // exit code
         RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, executer->main_func_index, 0);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, (1 << 8) | executer->main_func_index, 0);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, 0);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
 
@@ -1048,8 +1089,10 @@ void generate_vmcode_from_identifier_expression(Package_Executer* executer, Iden
     if (identifier_expression == NULL) {
         return;
     }
-    RVM_Opcode   opcode = RVM_CODE_UNKNOW;
-    unsigned int offset = 0;
+    RVM_Opcode   opcode         = RVM_CODE_UNKNOW;
+    unsigned int package_offset = 0;
+    unsigned int offset         = 0;
+    unsigned int operand        = 0;
     switch (identifier_expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
         if (identifier_expression->u.declaration->is_local) {
@@ -1065,9 +1108,11 @@ void generate_vmcode_from_identifier_expression(Package_Executer* executer, Iden
         break;
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
-        // find func index
-        offset = identifier_expression->u.function->func_index;
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, offset, identifier_expression->line_number);
+        // find package & function index
+        package_offset = 0;
+        offset         = identifier_expression->u.function->func_index;
+        operand        = (package_offset << 8) | offset;
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, identifier_expression->line_number);
         break;
 
     default:

@@ -59,7 +59,32 @@ Package* search_package(CompilerEntry* compiler_entry, char* package_name) {
     return NULL;
 }
 
+ExecuterEntry* executer_entry_create() {
+    ExecuterEntry* executer_entry         = (ExecuterEntry*)malloc(sizeof(ExecuterEntry));
+    executer_entry->package_executer_list = std::vector<Package_Executer*>{};
+    executer_entry->main_package_executer = NULL;
+    return executer_entry;
+}
+
+void executer_entry_dump(ExecuterEntry* executer_entry) {
+    assert(executer_entry != NULL);
+    printf("|------------------ ExecuterEntry-Dump-begin ------------------\n");
+
+    printf("|Package_Executer:\n");
+    for (Package_Executer* package_executer : executer_entry->package_executer_list) {
+        printf("|\t package:%s\n", package_executer->package_name);
+    }
+
+    printf("|MainPackage_Executer:\n");
+    printf("|## package_name:%s\n", executer_entry->main_package_executer->package_name);
+
+    printf("|------------------ ExecuterEntry-Dump-end  ------------------\n\n");
+}
+
+
 Package* package_create(CompilerEntry* compiler_entry, char* package_name, char* package_path) {
+    debug_log_with_yellow_coloar("\t package[%s] create", package_name);
+
     assert(compiler_entry != NULL);
 
     Package* package = (Package*)malloc(sizeof(Package));
@@ -116,6 +141,7 @@ void package_compile(Package* package) {
         debug_log_with_yellow_coloar("\t package[%s] already compiled", package->package_name);
         return;
     }
+    debug_log_with_yellow_coloar("\t package[%s] start compile...", package->package_name);
     package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
     compiler_entry->package_list.push_back(package);
 
@@ -124,18 +150,18 @@ void package_compile(Package* package) {
         package_unit_compile(package_unit);
 
         for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
-            // TODO:
-            char* package_name = import_package_info->package_name;
-            char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring//"; // TODO:
+            // // TODO:
+            // char* package_name = import_package_info->package_name;
+            // char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring//"; // TODO:
 
-            if (NULL != search_package(compiler_entry, package_name)) {
-                debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
-                continue;
-            }
-            Package* import_package       = package_create(compiler_entry, package_name, package_path);
-            import_package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
-            compiler_entry->package_list.push_back(import_package);
-            package_compile(import_package);
+            // if (NULL != search_package(compiler_entry, package_name)) {
+            //     debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
+            //     continue;
+            // }
+            // Package* import_package       = package_create(compiler_entry, package_name, package_path);
+            // import_package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
+            // compiler_entry->package_list.push_back(import_package);
+            // package_compile(import_package);
         }
 
         package->package_unit_list.push_back(package_unit);
@@ -205,30 +231,35 @@ void package_dump(Package* package) {
     printf("|------------------ Package-Dump-end  ------------------\n\n");
 }
 
-void compile_std_lib(CompilerEntry* compiler_entry) {
+void compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry) {
+    // register_std_lib_fmt(executer_entry, compile_std_lib_fmt(compiler_entry));
     compile_std_lib_fmt(compiler_entry);
-    compile_std_lib_debug(compiler_entry);
-    compile_std_lib_math(compiler_entry);
+    // register_std_lib_fmt(executer_entry, compile_std_lib_debug(compiler_entry));
+    // register_std_lib_fmt(executer_entry, compile_std_lib_math(compiler_entry));
 }
 
-void compile_std_lib_fmt(CompilerEntry* compiler_entry) {
+Package* compile_std_lib_fmt(CompilerEntry* compiler_entry) {
     char* package_name = (char*)"fmt";
     char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring/std/fmt/";
 
     if (NULL != search_package(compiler_entry, package_name)) {
         debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
-        return;
+        return NULL;
     }
 
-    Package*          std_package      = package_create(compiler_entry, package_name, package_path);
-    Package_Executer* package_executer = package_executer_create();
-
+    Package* std_package       = package_create(compiler_entry, package_name, package_path);
     std_package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
-    compiler_entry->package_list.push_back(std_package);
 
     package_compile(std_package);
 
+    return std_package;
+}
+
+void register_std_lib_fmt(ExecuterEntry* executer_entry, Package* std_package) {
+    Package_Executer* package_executer = package_executer_create(executer_entry, std_package->package_name);
+
     ring_generate_vm_code(std_package, package_executer);
+    executer_entry->package_executer_list.push_back(package_executer);
 
     register_lib(package_executer, (char*)"println_bool", std_fmt_lib_println_bool, 1);
     register_lib(package_executer, (char*)"println_int", std_fmt_lib_println_int, 1);
@@ -236,7 +267,8 @@ void compile_std_lib_fmt(CompilerEntry* compiler_entry) {
     register_lib(package_executer, (char*)"println_string", std_fmt_lib_println_string, 1);
 }
 
-void compile_std_lib_debug(CompilerEntry* compiler_entry) {
+Package* compile_std_lib_debug(CompilerEntry* compiler_entry) {
+    /*
     char* package_name = (char*)"debug";
     char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring/std/debug/";
 
@@ -256,9 +288,12 @@ void compile_std_lib_debug(CompilerEntry* compiler_entry) {
     ring_generate_vm_code(std_package, package_executer);
 
     register_lib(package_executer, (char*)"debug_assert", std_debug_lib_debug_assert, 1);
+    */
+    return NULL;
 }
 
-void compile_std_lib_math(CompilerEntry* compiler_entry) {
+Package* compile_std_lib_math(CompilerEntry* compiler_entry) {
+    /*
     char* package_name = (char*)"math";
     char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring/std/math/";
 
@@ -278,6 +313,8 @@ void compile_std_lib_math(CompilerEntry* compiler_entry) {
     ring_generate_vm_code(std_package, package_executer);
 
     register_lib(package_executer, (char*)"sqrt", std_math_lib_sqrt, 1);
+    */
+    return NULL;
 }
 
 PackageUnit* package_unit_create(Package* parent_package, std::string file_name) {

@@ -60,14 +60,19 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    CompilerEntry*       compiler_entry   = compiler_entry_create();
-    Package*             main_package     = package_create_input_file(compiler_entry, (char*)"main", file_name);
-    Package_Executer*    package_executer = package_executer_create();
-    Ring_VirtualMachine* ring_vm          = ring_virtualmachine_create();
+    CompilerEntry* compiler_entry = compiler_entry_create();
+    Package*       main_package   = package_create_input_file(compiler_entry, (char*)"main", file_name);
+    compiler_entry->main_package  = main_package; // TODO: optimize the method of set main_package;
 
-    compiler_entry->main_package = main_package; // TODO: optimize the method of set main_package;
+    ExecuterEntry*    executer_entry      = executer_entry_create();
+    Package_Executer* package_executer    = package_executer_create(executer_entry, main_package->package_name);
+    executer_entry->main_package_executer = package_executer; // TODO: optimize the method of set main_package_executer;
 
-    compile_std_lib(compiler_entry);
+    Ring_VirtualMachine* ring_vm = ring_virtualmachine_create();
+
+
+    // Step-0: 编译官方std包
+    compile_std_lib(compiler_entry, executer_entry);
 
     // Step-1: flex 词法分析，
     // Step-2: bison 语法分析，构建语法树
@@ -76,10 +81,20 @@ int main(int argc, char** argv) {
 
 
     // Step-5: 生成虚拟机中间代码
-    ring_generate_vm_code(main_package, package_executer);
+    // ring_generate_vm_code(main_package, package_executer);
+    ring_generate_vm_code(compiler_entry, executer_entry);
 
-    // Step-6: 运行虚拟机
-    ring_virtualmachine_load_executer(ring_vm, package_executer);
+#ifdef DEBUG
+    executer_entry_dump(executer_entry);
+#endif
+
+    // Step-6: 链接符号表
+
+    // Step-7: 加载虚拟机
+    // ring_virtualmachine_load_executer(ring_vm, package_executer);
+    ring_virtualmachine_load_executer(ring_vm, executer_entry);
+
+    // Step-8: 运行虚拟机
     ring_execute_vm_code(ring_vm);
     return 0;
 }

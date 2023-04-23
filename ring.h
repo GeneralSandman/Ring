@@ -12,11 +12,13 @@ typedef struct Ring_Compiler Ring_Compiler;
 
 typedef struct Ring_VirtualMachine Ring_VirtualMachine;
 
-typedef struct Package_Executer Package_Executer;
-
 typedef struct ImportPackageInfo ImportPackageInfo;
 
 typedef struct CompilerEntry CompilerEntry;
+
+typedef struct ExecuterEntry ExecuterEntry;
+
+typedef struct Package_Executer Package_Executer;
 
 typedef struct Package Package;
 
@@ -194,17 +196,18 @@ typedef struct {
 
 struct Ring_VirtualMachine {
     Package_Executer* executer;
+    ExecuterEntry*    executer_entry;
 
-    RVM_RuntimeStatic* runtime_static;
+    RVM_RuntimeStatic* runtime_static; // TODO: 暂时只支持main包的 全局变量
     RVM_RuntimeStack*  runtime_stack;
     RVM_RuntimeHeap*   runtime_heap;
     unsigned int       pc;
 
-    RVM_Function* function_list;
-    unsigned int  function_size;
+    // RVM_Function* function_list; // TODO: 删除掉
+    // unsigned int  function_size; // TODO: 删除掉
 
-    RVM_Class*   class_list;
-    unsigned int class_size;
+    RVM_Class*   class_list; // TODO: 删除掉
+    unsigned int class_size; // TODO: 删除掉
 
     RVM_DebugConfig* debug_config;
 };
@@ -221,6 +224,37 @@ struct CompilerEntry {
     // std::unordered_map<std::string, Package*> package_map;
     std::vector<Package*> package_list;
     Package*              main_package;
+};
+
+struct ExecuterEntry {
+    std::vector<Package_Executer*> package_executer_list;
+    Package_Executer*              main_package_executer;
+};
+
+struct Package_Executer {
+    ExecuterEntry* executer_entry;
+    unsigned int   package_index; // 在 ExecuterEntry 中的 index
+    char*          package_name;
+    // char*          package_path;
+
+    unsigned int      constant_pool_size;
+    RVM_ConstantPool* constant_pool_list;
+
+    unsigned int  global_variable_size;
+    RVM_Variable* global_variable_list;
+
+    unsigned int  function_size;
+    RVM_Function* function_list;
+
+    unsigned int class_size;
+    RVM_Class*   class_list;
+
+    unsigned int code_size;
+    RVM_Byte*    code_list;
+
+    unsigned int main_func_index;
+
+    unsigned int estimate_runtime_stack_capacity;
 };
 
 // Pacage 对应一个源代码的逻辑包  也就是一个路径
@@ -357,41 +391,6 @@ struct RVM_ConstantPool {
         char*  string_value;
     } u;
 };
-
-struct Package_Executer {
-    unsigned int      constant_pool_size;
-    RVM_ConstantPool* constant_pool_list;
-
-    unsigned int  global_variable_size;
-    RVM_Variable* global_variable_list;
-
-    unsigned int  function_size;
-    RVM_Function* function_list;
-
-    unsigned int class_size;
-    RVM_Class*   class_list;
-
-    unsigned int code_size;
-    RVM_Byte*    code_list;
-
-    unsigned int main_func_index;
-
-    unsigned int estimate_runtime_stack_capacity;
-};
-
-// struct PackageEEEEEEE {
-//     char* package_name;
-//     std::vector<RVM_ConstantPool*> constant_pool_list;
-//     std::vector<RVM_Variable*>     global_variable_list;
-//     std::vector<RVM_Function*>     function_list;
-//     std::vector<RVM_Class*>        class_list;
-//     unsigned int code_size;
-//     RVM_Byte*    code_list;
-//     unsigned int estimate_runtime_stack_capacity;
-// };
-
-// generate.c
-
 
 struct RVM_Variable {
     char*          identifier;
@@ -1375,14 +1374,17 @@ CompilerEntry* compiler_entry_create();
 CompilerEntry* get_compiler_entry();
 void           compiler_entry_dump(CompilerEntry* compiler_entry);
 Package*       search_package(CompilerEntry* compiler_entry, char* package_name);
+ExecuterEntry* executer_entry_create();
+void           executer_entry_dump(ExecuterEntry* executer_entry);
 Package*       package_create(CompilerEntry* compiler_entry, char* package_name, char* package_path);
 Package*       package_create_input_file(CompilerEntry* compiler_entry, char* package_name, char* input_main_file);
 void           package_compile(Package* package);
 void           package_dump(Package* package);
-void           compile_std_lib(CompilerEntry* compiler_entry);
-void           compile_std_lib_fmt(CompilerEntry* compiler_entry);
-void           compile_std_lib_debug(CompilerEntry* compiler_entry);
-void           compile_std_lib_math(CompilerEntry* compiler_entry);
+void           compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry);
+Package*       compile_std_lib_fmt(CompilerEntry* compiler_entry);
+void           register_std_lib_fmt(ExecuterEntry* executer_entry, Package* std_package);
+Package*       compile_std_lib_debug(CompilerEntry* compiler_entry);
+Package*       compile_std_lib_math(CompilerEntry* compiler_entry);
 PackageUnit*   package_unit_create(Package* parent_package, std::string file_name);
 PackageUnit*   get_package_unit();
 void           package_unit_compile(PackageUnit* package_unit);
@@ -1526,9 +1528,11 @@ Function*               search_function(char* package_posit, char* identifier);
 // PackageExecuter* package_executer_create();
 // void             package_generate_vm_code(Package* package, PackageExecuter* executer);
 
-Package_Executer* package_executer_create();
+Package_Executer* package_executer_create(ExecuterEntry* executer_entry, char* package_name);
+void              package_executer_dump(Package_Executer* package_executer);
 
 void              ring_generate_vm_code(Package* package, Package_Executer* executer);
+void              ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry);
 void              add_global_variable(Package* package, Package_Executer* executer);
 void              add_functions(Package* package, Package_Executer* executer);
 void              add_classes(Package* package, Package_Executer* executer);
@@ -1597,6 +1601,7 @@ RVM_RuntimeStack*    new_runtime_stack();
 RVM_RuntimeStatic*   new_runtime_static();
 Ring_VirtualMachine* ring_virtualmachine_create();
 void                 ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, Package_Executer* executer);
+void                 ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry);
 void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 RVM_Object*          new_class_object(ClassDefinition* class_definition);
 void                 rvm_add_classs(Package_Executer* executer, Ring_VirtualMachine* rvm);

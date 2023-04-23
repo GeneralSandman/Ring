@@ -77,8 +77,6 @@ void STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, RVM_Ob
     (((p)[0] = (value) >> 8), ((p)[1] = value & 0xff))
 
 RVM_RuntimeStack* new_runtime_stack() {
-    debug_log_with_white_coloar("\t");
-
     RVM_RuntimeStack* stack = (RVM_RuntimeStack*)malloc(sizeof(RVM_RuntimeStack));
     stack->top_index        = 0;
     stack->capacity         = 1024 * 1024; // FIXME: 先开辟一个大的空间
@@ -88,8 +86,6 @@ RVM_RuntimeStack* new_runtime_stack() {
 }
 
 RVM_RuntimeStatic* new_runtime_static() {
-    debug_log_with_white_coloar("\t");
-
     RVM_RuntimeStatic* runtime_static = (RVM_RuntimeStatic*)malloc(sizeof(RVM_RuntimeStatic));
     runtime_static->data              = NULL;
     runtime_static->size              = 0;
@@ -97,33 +93,37 @@ RVM_RuntimeStatic* new_runtime_static() {
 }
 
 Ring_VirtualMachine* ring_virtualmachine_create() {
-    debug_log_with_white_coloar("\t");
-
     Ring_VirtualMachine* rvm = (Ring_VirtualMachine*)malloc(sizeof(Ring_VirtualMachine));
     rvm->executer            = NULL;
+    rvm->executer_entry      = NULL;
     rvm->runtime_static      = new_runtime_static();
     rvm->runtime_stack       = new_runtime_stack();
+    rvm->runtime_heap        = NULL;
     rvm->pc                  = 0;
-    rvm->function_list       = NULL;
-    rvm->function_size       = 0;
     rvm->class_list          = NULL;
     rvm->class_size          = 0;
     rvm->debug_config        = NULL;
-
-
     return rvm;
 }
 
 void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, Package_Executer* executer) {
-    rvm->executer   = executer;
-    rvm->class_list = executer->class_list; // FIXME:
-    rvm->class_size = executer->class_size; // FIXME:
+    rvm->executer = executer;
 
     // init something
     rvm_add_static_variable(executer, rvm->runtime_static);
     rvm_register_native_functions(rvm);
     rvm_add_derive_functions(executer, rvm);
     rvm_add_classs(executer, rvm);
+}
+
+void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry) {
+    rvm->executer = executer_entry->main_package_executer;
+
+    rvm->executer_entry = executer_entry;
+
+    // // init something
+    rvm_add_static_variable(executer_entry->main_package_executer, rvm->runtime_static); // TODO: 只初始化main包的全局变量
+    rvm_add_classs(executer_entry->main_package_executer, rvm);                          // TODO: 只初始化main包的 class 定义
 }
 
 void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
@@ -196,6 +196,7 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
 
 void rvm_add_derive_functions(Package_Executer* executer, Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
+    /*
 
     for (int i = 0; i < executer->function_size; i++) {
         RVM_Function function = executer->function_list[i];
@@ -213,9 +214,13 @@ void rvm_add_derive_functions(Package_Executer* executer, Ring_VirtualMachine* r
             rvm->function_size++;
         }
     }
+
+    */
 }
 
 void rvm_add_classs(Package_Executer* executer, Ring_VirtualMachine* rvm) {
+    rvm->class_list = executer->class_list; // FIXME:
+    rvm->class_size = executer->class_size; // FIXME:
     debug_log_with_white_coloar("\t");
 }
 
@@ -231,6 +236,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     /* unsigned int       const_pool_size = rvm->executer->constant_pool_size; */
 
     unsigned int index                  = 0;
+    unsigned int package_index          = 0;
     unsigned int func_index             = 0;
     unsigned int method_index           = 0;
     unsigned int oper_num               = 0;
@@ -719,14 +725,17 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 2;
             break;
         case RVM_CODE_INVOKE_FUNC:
-            func_index = STACK_GET_INT_OFFSET(rvm, -1);
+            oper_num      = STACK_GET_INT_OFFSET(rvm, -1);
+            package_index = oper_num >> 8;
+            func_index    = oper_num & 0XFF;
+
             runtime_stack->top_index--;
-            if (rvm->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE) {
-                invoke_native_function(rvm, &rvm->function_list[func_index], argument_list_size);
+            if (rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE) {
+                invoke_native_function(rvm, &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index], argument_list_size);
                 rvm->pc += 1;
-            } else if (rvm->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE) {
+            } else if (rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE) {
                 invoke_derive_function(rvm,
-                                       &function, &rvm->function_list[func_index],
+                                       &function, &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
                                        &code_list, &code_size,
                                        &rvm->pc,
                                        &caller_stack_base);
@@ -1260,6 +1269,7 @@ RVM_Value native_proc_printfln(Ring_VirtualMachine* rvm, unsigned int arg_count,
 
 void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count) {
     debug_log_with_white_coloar("\t");
+    /*
 
     if (rvm->function_list == NULL) {
         rvm->function_list = (RVM_Function*)malloc(sizeof(RVM_Function));
@@ -1273,6 +1283,8 @@ void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM
     rvm->function_list[rvm->function_size].u.native_func->arg_count = arg_count;
 
     rvm->function_size++;
+
+    */
 }
 
 void rvm_register_native_functions(Ring_VirtualMachine* rvm) {

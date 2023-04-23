@@ -1,11 +1,13 @@
 #include "ring.h"
 
 void register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count) {
-    debug_log_with_white_coloar("\t");
+    debug_log_with_white_coloar("\t func_name:%s", func_name);
 
     for (int i = 0; i < package_executer->function_size; i++) {
         RVM_Function* function = &package_executer->function_list[i];
         if (function->type == RVM_FUNCTION_TYPE_NATIVE && 0 == strcmp(function->func_name, func_name)) {
+            debug_log_with_white_coloar("\t func_name:%s register succ", func_name);
+
             function->u.native_func            = (NativeFunction*)malloc(sizeof(NativeFunction));
             function->u.native_func->func_proc = func_proc;
             function->u.native_func->arg_count = arg_count;
