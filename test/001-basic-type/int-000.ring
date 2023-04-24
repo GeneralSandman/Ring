@@ -4,179 +4,181 @@
 // Date:    2022-05-19
 //
 
-function println_bool(var bool bool_value);
-function println_int(var int int_value);
-function println_double(var double double_value);
-function println_string(var string string_value);
-function debug_assert(var bool bool_value);
-function exit(var int int_value);
 
-// -----------------------------
+package main
 
-println_int(0);
-println_int(-0);
+import {
+	fmt;
+	debug;
+}
 
-println_int(1);
-println_int(-1);
+@main
+function main() {
 
-println_int(255);
-println_int(-255);
+fmt::println_int(0);
+fmt::println_int(-0);
 
-println_int(256);
-println_int(-256);
+fmt::println_int(1);
+fmt::println_int(-1);
 
-println_int(65535);
-println_int(-65535);
+fmt::println_int(255);
+fmt::println_int(-255);
 
-println_int(65536);
-println_int(-65536);
+fmt::println_int(256);
+fmt::println_int(-256);
 
-println_int(65537);
-println_int(-65537);
+fmt::println_int(65535);
+fmt::println_int(-65535);
 
-println_int(2147483647);
-println_int(-2147483647);
+fmt::println_int(65536);
+fmt::println_int(-65536);
 
-println_int(2147483648);
-println_int(-2147483648);
+fmt::println_int(65537);
+fmt::println_int(-65537);
 
-println_string("--------");
-println_string("");
+fmt::println_int(2147483647);
+fmt::println_int(-2147483647);
+
+fmt::println_int(2147483648);
+fmt::println_int(-2147483648);
+
+fmt::println_string("--------");
+fmt::println_string("");
 
 var int int_value_1 = 0;
-println_int(int_value_1);
-debug_assert(int_value_1 == 0);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == 0);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = 1;
-println_int(int_value_1);
-debug_assert(int_value_1 == 1);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == 1);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = 2;
-println_int(int_value_1);
-debug_assert(int_value_1 == 2);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == 2);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = 255;
-println_int(int_value_1);
-debug_assert(int_value_1 == 255);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == 255);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = 256;
-println_int(int_value_1);
-debug_assert(int_value_1 == 256);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == 256);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = 65535;
-println_int(int_value_1);
-debug_assert(int_value_1 == 65535);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == 65535);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = 65536;
-println_int(int_value_1);
-debug_assert(int_value_1 == 65536);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == 65536);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = 2147483647;
-println_int(int_value_1);
-debug_assert(int_value_1 == 2147483647);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == 2147483647);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = 2147483648;
-println_int(int_value_1);
-debug_assert(int_value_1 == -2147483648);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == -2147483648);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = -0;
-println_int(int_value_1);
-debug_assert(int_value_1 == 0);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == 0);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = -1;
-println_int(int_value_1);
-debug_assert(int_value_1 == -1);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == -1);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = -255;
-println_int(int_value_1);
-debug_assert(int_value_1 == -255);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == -255);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = -256;
-println_int(int_value_1);
-debug_assert(int_value_1 == -256);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == -256);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = -65535;
-println_int(int_value_1);
-debug_assert(int_value_1 == -65535);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == -65535);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = -65536;
-println_int(int_value_1);
-debug_assert(int_value_1 == -65536);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == -65536);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = -2147483647;
-println_int(int_value_1);
-debug_assert(int_value_1 == -2147483647);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == -2147483647);
 
 
-println_string("");
+fmt::println_string("");
 
 
 int_value_1 = -2147483648;
-println_int(int_value_1);
-debug_assert(int_value_1 == -2147483648);
+fmt::println_int(int_value_1);
+debug::debug_assert(int_value_1 == -2147483648);
 
 
-println_string("");
+fmt::println_string("");
 
 
 
@@ -214,3 +216,5 @@ int_value_5 = -int_value_5;
 print("int_value_5(-2147483648)=", int_value_5, "\n");
 
 */
+
+}
