@@ -1,18 +1,13 @@
-//
-// File:    int-000.ring
-// Author:  zhenhuli - generalsandman@163.com
-// Date:    2022-05-19
-//
 
-function println_bool(var bool bool_value);
-function println_int(var int int_value);
-function println_double(var double double_value);
-function println_string(var string string_value);
-function debug_assert(var bool bool_value);
-function exit(var int int_value);
+package main
 
-// -----------------------------
+import {
+	fmt;
+	debug;
+}
 
+@main
+function main() {
 
 var int int_value_1;
 var int int_value_2;
@@ -21,7 +16,7 @@ var int int_value_4;
 var int count;
 
 // -----------
-println_string("[Test Case 1]");
+fmt::println_string("[Test Case 1]");
 
 count = 0;
 
@@ -40,14 +35,15 @@ for(int_value_1 = 0; int_value_1<10; int_value_1++){
     }for(int_value_2<9; int_value_2++);
 }
 
-println_string("finish for====");
-debug_assert(count == 10 * 10 * 10 * 10);
-println_int(count);
-debug_assert(int_value_1 == 10);
-debug_assert(int_value_2 == 9);
-debug_assert(int_value_3 == 10);
-debug_assert(int_value_4 == 9);
-println_string("finish for====");
+fmt::println_string("finish for====");
+debug::debug_assert(count == 10 * 10 * 10 * 10);
+fmt::println_int(count);
+debug::debug_assert(int_value_1 == 10);
+debug::debug_assert(int_value_2 == 9);
+debug::debug_assert(int_value_3 == 10);
+debug::debug_assert(int_value_4 == 9);
+fmt::println_string("finish for====");
 
 
+}
 

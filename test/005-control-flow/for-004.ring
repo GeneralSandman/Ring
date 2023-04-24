@@ -1,27 +1,25 @@
-//
-// File:    int-000.ring
-// Author:  zhenhuli - generalsandman@163.com
-// Date:    2022-05-19
-//
 
-function println_bool(var bool bool_value);
-function println_int(var int int_value);
-function println_double(var double double_value);
-function println_string(var string string_value);
-function debug_assert(var bool bool_value);
-function exit(var int int_value);
+package main
 
-// -----------------------------
+import {
+	fmt;
+	debug;
+}
+
+@main
+function main() {
 
 var int i;
 var int j;
 
 for(i=1; i<=9; i++) {
 	for(j=1; j<=i; j++) {
-		println_int(i*j);
+		fmt::println_int(i*j);
 	}
-	println_string("");
+	fmt::println_string("");
 }
+}
+
 
 
 // 1*1=1
