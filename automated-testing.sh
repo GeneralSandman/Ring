@@ -49,7 +49,7 @@ printf "%-4s %-16s %-60s %-60s %s\n" num model source_code_file run_result_file 
 
 for i in {1..1}; do {
 
-    for model in "001-basic-type" "002-operator" "003-native-function" "004-derive-function" "005-control-flow" "006-variable" "008-class" ; do
+    for model in "001-basic-type" "002-operator" "003-native-function" "004-derive-function" "005-control-flow" "006-variable" "008-class" "009-package" ; do
         source_file_path=$TEST_PATH"/"$model
         for file in `ls $source_file_path`; do
             extension=${file##*.}
