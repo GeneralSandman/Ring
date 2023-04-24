@@ -111,7 +111,7 @@ void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, Package_Execute
 
     // init something
     rvm_add_static_variable(executer, rvm->runtime_static);
-    rvm_register_native_functions(rvm);
+    // rvm_register_native_functions(rvm);
     rvm_add_derive_functions(executer, rvm);
     rvm_add_classs(executer, rvm);
 }
@@ -1267,41 +1267,41 @@ RVM_Value native_proc_printfln(Ring_VirtualMachine* rvm, unsigned int arg_count,
     return ret;
 }
 
-void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count) {
-    debug_log_with_white_coloar("\t");
-    /*
+// void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count) {
+//     debug_log_with_white_coloar("\t");
+//     /*
 
-    if (rvm->function_list == NULL) {
-        rvm->function_list = (RVM_Function*)malloc(sizeof(RVM_Function));
-    } else {
-        rvm->function_list = (RVM_Function*)realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
-    }
-    rvm->function_list[rvm->function_size].func_name                = func_name;
-    rvm->function_list[rvm->function_size].type                     = RVM_FUNCTION_TYPE_NATIVE;
-    rvm->function_list[rvm->function_size].u.native_func            = (NativeFunction*)malloc(sizeof(NativeFunction));
-    rvm->function_list[rvm->function_size].u.native_func->func_proc = func_proc;
-    rvm->function_list[rvm->function_size].u.native_func->arg_count = arg_count;
+//     if (rvm->function_list == NULL) {
+//         rvm->function_list = (RVM_Function*)malloc(sizeof(RVM_Function));
+//     } else {
+//         rvm->function_list = (RVM_Function*)realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
+//     }
+//     rvm->function_list[rvm->function_size].func_name                = func_name;
+//     rvm->function_list[rvm->function_size].type                     = RVM_FUNCTION_TYPE_NATIVE;
+//     rvm->function_list[rvm->function_size].u.native_func            = (NativeFunction*)malloc(sizeof(NativeFunction));
+//     rvm->function_list[rvm->function_size].u.native_func->func_proc = func_proc;
+//     rvm->function_list[rvm->function_size].u.native_func->arg_count = arg_count;
 
-    rvm->function_size++;
+//     rvm->function_size++;
 
-    */
-}
+//     */
+// }
 
-void rvm_register_native_functions(Ring_VirtualMachine* rvm) {
-    debug_log_with_white_coloar("\t");
-    // FIXME: 如果 println_bool 和 println_string 生命的顺序不一致怎么办
+// void rvm_register_native_functions(Ring_VirtualMachine* rvm) {
+//     debug_log_with_white_coloar("\t");
+//     // FIXME: 如果 println_bool 和 println_string 生命的顺序不一致怎么办
 
-    // rvm_register_native_function(rvm, "print", native_proc_print, 1);
-    // rvm_register_native_function(rvm, "println", native_proc_println, 1);
-    rvm_register_native_function(rvm, (char*)"println_bool", native_proc_println_bool, 1);
-    rvm_register_native_function(rvm, (char*)"println_int", native_proc_println_int, 1);
-    rvm_register_native_function(rvm, (char*)"println_double", native_proc_println_double, 1);
-    rvm_register_native_function(rvm, (char*)"println_string", native_proc_println_string, 1);
-    rvm_register_native_function(rvm, (char*)"debug_assert", native_proc_debug_assert, 1);
-    rvm_register_native_function(rvm, (char*)"exit", native_proc_exit, 1);
+//     // rvm_register_native_function(rvm, "print", native_proc_print, 1);
+//     // rvm_register_native_function(rvm, "println", native_proc_println, 1);
+//     rvm_register_native_function(rvm, (char*)"println_bool", native_proc_println_bool, 1);
+//     rvm_register_native_function(rvm, (char*)"println_int", native_proc_println_int, 1);
+//     rvm_register_native_function(rvm, (char*)"println_double", native_proc_println_double, 1);
+//     rvm_register_native_function(rvm, (char*)"println_string", native_proc_println_string, 1);
+//     rvm_register_native_function(rvm, (char*)"debug_assert", native_proc_debug_assert, 1);
+//     rvm_register_native_function(rvm, (char*)"exit", native_proc_exit, 1);
 
-    rvm_register_native_function(rvm, (char*)"print", native_proc_print, -1);
-    rvm_register_native_function(rvm, (char*)"println", native_proc_println, -1);
-    rvm_register_native_function(rvm, (char*)"printf", native_proc_printf, -1);
-    rvm_register_native_function(rvm, (char*)"printfln", native_proc_printfln, -1);
-}
+//     rvm_register_native_function(rvm, (char*)"print", native_proc_print, -1);
+//     rvm_register_native_function(rvm, (char*)"println", native_proc_println, -1);
+//     rvm_register_native_function(rvm, (char*)"printf", native_proc_printf, -1);
+//     rvm_register_native_function(rvm, (char*)"printfln", native_proc_printfln, -1);
+// }

@@ -112,6 +112,10 @@ typedef struct Declaration Declaration;
 
 typedef struct TypeSpecifier TypeSpecifier;
 
+typedef struct StdPackageNativeFunction StdPackageNativeFunction;
+
+typedef struct StdPackageInfo StdPackageInfo;
+
 typedef struct RVM_DebugConfig RVM_DebugConfig;
 
 typedef struct IdentifierExpression IdentifierExpression;
@@ -1227,6 +1231,19 @@ struct TypeSpecifier {
     Ring_DeriveType* derive_type;
 };
 
+struct StdPackageNativeFunction {
+    char*               func_name;
+    RVM_NativeFuncProc* func_proc;
+    int                 arg_count;
+};
+
+struct StdPackageInfo {
+    char* package_name;
+    char* path;
+
+    std::vector<StdPackageNativeFunction> native_function_list;
+};
+
 
 typedef enum {
     RVM_DEBUG_MODE_UNKNOW,
@@ -1381,10 +1398,6 @@ Package*       package_create_input_file(CompilerEntry* compiler_entry, char* pa
 void           package_compile(Package* package);
 void           package_dump(Package* package);
 void           compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry);
-Package*       compile_std_lib_fmt(CompilerEntry* compiler_entry);
-void           register_std_lib_fmt(ExecuterEntry* executer_entry, Package* std_package);
-Package*       compile_std_lib_debug(CompilerEntry* compiler_entry);
-Package*       compile_std_lib_math(CompilerEntry* compiler_entry);
 PackageUnit*   package_unit_create(Package* parent_package, std::string file_name);
 PackageUnit*   get_package_unit();
 void           package_unit_compile(PackageUnit* package_unit);
@@ -1645,8 +1658,8 @@ RVM_Value native_proc_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
 RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value native_proc_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-void      rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count);
-void      rvm_register_native_functions(Ring_VirtualMachine* rvm);
+// void      rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count);
+// void      rvm_register_native_functions(Ring_VirtualMachine* rvm);
 // execute.c
 
 

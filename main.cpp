@@ -84,10 +84,6 @@ int main(int argc, char** argv) {
     // ring_generate_vm_code(main_package, package_executer);
     ring_generate_vm_code(compiler_entry, executer_entry);
 
-#ifdef DEBUG
-    executer_entry_dump(executer_entry);
-#endif
-
     // Step-6: 链接符号表
 
     // Step-7: 加载虚拟机

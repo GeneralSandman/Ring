@@ -193,20 +193,25 @@ void ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterEntry* execute
     Package_Executer* package_executer = executer_entry->main_package_executer;
 
     ring_generate_vm_code(main_package, package_executer);
+    executer_entry->package_executer_list.push_back(package_executer);
 
-    for (Package* package : compiler_entry->package_list) {
-        // FIXME: find duplicate
-        for (Package_Executer* package_executer : executer_entry->package_executer_list) {
-            if (0 == strcmp(package_executer->package_name, package->package_name)) {
-                debug_log_with_darkgreen_coloar("\tpackage executer[%s] already register", package->package_name);
+    // for (Package* package : compiler_entry->package_list) {
+    //     // FIXME: find duplicate
+    //     for (Package_Executer* package_executer : executer_entry->package_executer_list) {
+    //         if (0 == strcmp(package_executer->package_name, package->package_name)) {
+    //             debug_log_with_darkgreen_coloar("\tpackage executer[%s] already register", package->package_name);
 
-                continue;
-            }
-        }
-        Package_Executer* package_executer = package_executer_create(executer_entry, package->package_name);
-        ring_generate_vm_code(package, package_executer);
-        executer_entry->package_executer_list.push_back(package_executer);
-    }
+    //             continue;
+    //         }
+    //     }
+    //     Package_Executer* package_executer = package_executer_create(executer_entry, package->package_name);
+    //     ring_generate_vm_code(package, package_executer);
+    //     executer_entry->package_executer_list.push_back(package_executer);
+    // }
+
+#ifdef DEBUG
+    executer_entry_dump(executer_entry);
+#endif
 }
 
 // 添加全局变量
@@ -361,7 +366,8 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
         // 调用 main 函数
         // exit code
         RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, (1 << 8) | executer->main_func_index, 0);
+        // FIXME: (package->compiler_entry->package_list.size() - 1) << 8) 这里要修正一下
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, ((package->compiler_entry->package_list.size() - 1) << 8) | executer->main_func_index, 0);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, 0);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
 
@@ -1109,7 +1115,7 @@ void generate_vmcode_from_identifier_expression(Package_Executer* executer, Iden
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
         // find package & function index
-        package_offset = 0;
+        package_offset = identifier_expression->u.function->package->package_index; // FIXME:
         offset         = identifier_expression->u.function->func_index;
         operand        = (package_offset << 8) | offset;
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, identifier_expression->line_number);

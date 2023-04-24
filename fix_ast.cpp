@@ -549,6 +549,9 @@ Function* search_function(char* package_posit, char* identifier) {
     if (package_posit != NULL) {
         CompilerEntry* compiler_entry = get_compiler_entry();
         Package*       package        = search_package(compiler_entry, package_posit);
+        if (package == NULL) {
+            printf("can't find package:%s\n", package_posit);
+        }
 
         // TODO: 封装成函数
         for (auto function : package->function_list) {
