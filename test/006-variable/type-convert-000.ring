@@ -1,23 +1,12 @@
-//
-// File:    006-variable/assign-operation-000.ring
-// Author:  zhenhuli - generalsandman@163.com
-// Date:    2023-04-10
-//
+package main
 
-function println_bool(var bool bool_value);
-function println_int(var int int_value);
-function println_double(var double double_value);
-function println_string(var string string_value);
-function debug_assert(var bool bool_value);
-function exit(var int int_value);
-function print(var any value) -> (int);
-function println(var any value) -> (int);
-function printf(var string format, var any value)   -> (int);
-function printfln(var string format, var any value) -> (int);
+import {
+	fmt;
+	debug;
+}
 
-// -----------------------------
-
-
+@main
+function main() {
 
 var bool bool_value;
 var int int_value;
@@ -65,3 +54,5 @@ print("bool_value=", bool_value, ", int_value=", int_value, ", double_value=", d
 // int_value = int(-1.1);
 // double_value = double(-1.1);
 // print("bool_value=", bool_value, ", int_value=", int_value, ", double_value=", double_value, "\n");
+
+}
