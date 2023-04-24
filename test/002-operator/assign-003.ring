@@ -1,71 +1,60 @@
 
-package job
+package main
 
 import {
-
+	fmt;
+	debug;
 }
 
-function println_bool(var bool bool_value);
-function println_int(var int int_value);
-function println_double(var double double_value);
-function println_string(var string string_value);
-function debug_assert(var bool bool_value);
-function exit(var int int_value);
-function print(var any value) -> (int);
-function println(var any value) -> (int);
-function printf(var string format, var any value)   -> (int);
-function printfln(var string format, var any value) -> (int);
-
-// -----------------------------
 @main
 function main() {
 
-println_string("\ntest case 1");
+fmt::println_string("\ntest case 1");
 var bool bool_value_0;
 var int  int_value_0;
 var double double_value_0;
 
 
-println_bool(bool_value_0);
-println_int(int_value_0);
-println_double(double_value_0);
+fmt::println_bool(bool_value_0);
+fmt::println_int(int_value_0);
+fmt::println_double(double_value_0);
 
-debug_assert(bool_value_0 == false);
-debug_assert(int_value_0 == 0);
-debug_assert(double_value_0 == 0.0);
-
-
+debug::debug_assert(bool_value_0 == false);
+debug::debug_assert(int_value_0 == 0);
+debug::debug_assert(double_value_0 == 0.0);
 
 
 
-println_string("\ntest case 2");
+
+
+fmt::println_string("\ntest case 2");
 var bool bool_value_1     = true;
 var int  int_value_1      = 1;
 var double double_value_1 = 1.23;
 
 
-println_bool(bool_value_1);
-println_int(int_value_1);
-println_double(double_value_1);
+fmt::println_bool(bool_value_1);
+fmt::println_int(int_value_1);
+fmt::println_double(double_value_1);
 
-debug_assert(bool_value_1 == true);
-debug_assert(int_value_1 == 1);
-debug_assert(double_value_1 == 1.23);
-
-
+debug::debug_assert(bool_value_1 == true);
+debug::debug_assert(int_value_1 == 1);
+debug::debug_assert(double_value_1 == 1.23);
 
 
-println_string("\ntest case 3");
+
+
+fmt::println_string("\ntest case 3");
 var bool bool_value_2     = true and true;
 var int  int_value_2      = 2147483647;
 var double double_value_2 = 2147483647.123;
 
 
-println_bool(bool_value_2);
-println_int(int_value_2);
-println_double(double_value_2);
+fmt::println_bool(bool_value_2);
+fmt::println_int(int_value_2);
+fmt::println_double(double_value_2);
 
-debug_assert(bool_value_2 == true);
-debug_assert(int_value_2 == 2147483647);
-debug_assert(double_value_2 == 2147483647.123);
+debug::debug_assert(bool_value_2 == true);
+debug::debug_assert(int_value_2 == 2147483647);
+debug::debug_assert(double_value_2 == 2147483647.123);
 }

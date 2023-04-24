@@ -1,45 +1,41 @@
-//
-// File:    arith-oper-002.ring
-// Author:  zhenhuli - generalsandman@163.com
-// Date:    2022-06-15
-//
 
-function println_bool(var bool bool_value);
-function println_int(var int int_value);
-function println_double(var double double_value);
-function println_string(var string string_value);
-function debug_assert(var bool bool_value);
-function exit(var int int_value);
+package main
 
-// -----------------------------
+import {
+	fmt;
+	debug;
+}
 
+@main
+function main() {
 
 var double double_value;
 
 
 // double_value = 1.1;
-// println_double(double_value);
-// debug_assert(double_value == 1.1);
+// fmt::println_double(double_value);
+// debug::debug_assert(double_value == 1.1);
 
-println_string("\ntest case");
+fmt::println_string("\ntest case");
 double_value = 1.1 + 2.2 + 3.3;
-println_double(double_value);
-debug_assert(double_value == 6.6);
+fmt::println_double(double_value);
+debug::debug_assert(double_value == 6.6);
 
 
-println_string("\ntest case");
+fmt::println_string("\ntest case");
 double_value = double_value + 1.1;
-println_double(double_value);
-debug_assert(7.700000 == double_value); // FIXME: bug
+fmt::println_double(double_value);
+debug::debug_assert(7.700000 == double_value); // FIXME: bug
 
-println_string("\ntest case");
+fmt::println_string("\ntest case");
 double_value += 1.1;
-println_double(double_value);
-debug_assert(double_value == 8.8); // FIXME: bug
+fmt::println_double(double_value);
+debug::debug_assert(double_value == 8.8); // FIXME: bug
 
 
-println_string("\ntest case");
+fmt::println_string("\ntest case");
 double_value += 1.1 + 2.2;
-println_double(double_value);
-debug_assert(double_value == 12.1); 
+fmt::println_double(double_value);
+debug::debug_assert(double_value == 12.1); 
 
+}
