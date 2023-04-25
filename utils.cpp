@@ -97,7 +97,7 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
         }
 
         MOVE_CURSOR(screen_row++, screen_col);
-        printf(" %10d | %20s | %10s | %5s\n", index, opcode_name.c_str(), oper_num.c_str(), pointer.c_str());
+        printf("%10d | %20s | %10s | %5s\n", index, opcode_name.c_str(), oper_num.c_str(), pointer.c_str());
     }
 }
 
