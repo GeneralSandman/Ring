@@ -96,11 +96,8 @@ Package* package_create(CompilerEntry* compiler_entry, char* package_name, char*
     package->source_file_list = list_file(package->package_path);
 
     package->global_declaration_list = std::vector<Declaration*>{};
-    package->declaration_list        = std::vector<Declaration*>{};
     package->class_definition_list   = std::vector<ClassDefinition*>{};
     package->function_list           = std::vector<Function*>{};
-    package->statement_list_size     = 0;
-    package->statement_list          = NULL;
 
     package->package_unit_list = std::vector<PackageUnit*>{};
 
@@ -120,11 +117,8 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
     package->source_file_list = std::vector<std::string>{std::string(input_main_file)};
 
     package->global_declaration_list = std::vector<Declaration*>{};
-    package->declaration_list        = std::vector<Declaration*>{};
     package->class_definition_list   = std::vector<ClassDefinition*>{};
     package->function_list           = std::vector<Function*>{};
-    package->statement_list_size     = 0;
-    package->statement_list          = NULL;
 
     package->package_unit_list = std::vector<PackageUnit*>{};
 
@@ -169,9 +163,8 @@ void package_compile(Package* package) {
     for (PackageUnit* package_unit : package->package_unit_list) {
         ring_compiler_fix_ast(package_unit);
 
-        int d_i = 0;
-        for (Declaration* decl = package_unit->declaration_list; decl; decl = decl->next, d_i++) {
-            package->declaration_list.push_back(decl);
+        for (Declaration* decl : package_unit->global_declaration_list) {
+            package->global_declaration_list.push_back(decl);
         }
 
         for (ClassDefinition* pos : package_unit->class_definition_list) {
@@ -180,15 +173,6 @@ void package_compile(Package* package) {
 
         for (Function* pos : package_unit->function_list) {
             package->function_list.push_back(pos);
-        }
-
-        // TODO: delete 只能在函数内写语句
-        if (package->statement_list == NULL) {
-            package->statement_list = package_unit->statement_list;
-        } else {
-            Statement* pos = package->statement_list;
-            for (; pos->next != NULL; pos = pos->next) {}
-            pos->next = package_unit->statement_list;
         }
 
 #ifdef DEBUG
@@ -213,7 +197,7 @@ void package_dump(Package* package) {
     }
 
     printf("|## Declaration:\n");
-    for (auto declaration : package->declaration_list) {
+    for (auto declaration : package->global_declaration_list) {
         printf("|\tdeclaration identifier:%s\n", declaration->identifier);
     }
 
@@ -246,15 +230,10 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
     package_unit->global_block_statement_list_size = 0;
     package_unit->global_block_statement_list      = NULL;
     package_unit->global_declaration_list          = std::vector<Declaration*>{};
-    package_unit->declaration_list_size            = 0;
-    package_unit->declaration_list                 = NULL;
 
     package_unit->class_definition_list = std::vector<ClassDefinition*>{};
 
     package_unit->function_list = std::vector<Function*>{};
-
-    package_unit->statement_list_size = 0;
-    package_unit->statement_list      = NULL;
 
     package_unit->current_block = NULL;
 
@@ -295,9 +274,8 @@ void package_unit_dump(PackageUnit* package_unit) {
     printf("|## file_name:%s\n", package_unit->current_file_name.c_str());
 
     printf("|## Declaration:\n");
-    int d_i = 0;
-    for (Declaration* decl = package_unit->declaration_list; decl; decl = decl->next, d_i++) {
-        printf("|\tdeclaration global-variable[%d] identifier:%s\n", d_i, decl->identifier);
+    for (Declaration* decl : package_unit->global_declaration_list) {
+        printf("|\tdeclaration global-variable: identifier:%s\n", decl->identifier);
     }
 
     printf("|## ClassDefinition:\n");
@@ -366,25 +344,6 @@ char* package_unit_get_current_line_content() {
 
 void package_unit_reset_column_number() {
     package_unit->current_column_number = 1;
-}
-
-int package_unit_add_statement(Statement* statement) {
-    assert(package_unit != NULL);
-
-    if (package_unit->statement_list == NULL) {
-        package_unit->statement_list      = statement;
-        package_unit->statement_list_size = 1;
-        return 0;
-    }
-
-
-    Statement* pos;
-    pos = package_unit->statement_list;
-    for (; pos->next != NULL; pos = pos->next) {
-    }
-    pos->next = statement;
-    package_unit->statement_list_size++;
-    return 0;
 }
 
 int package_unit_add_class_definition(ClassDefinition* class_definition) {

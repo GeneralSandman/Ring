@@ -207,9 +207,6 @@ struct Ring_VirtualMachine {
     RVM_RuntimeHeap*   runtime_heap;
     unsigned int       pc;
 
-    // RVM_Function* function_list; // TODO: 删除掉
-    // unsigned int  function_size; // TODO: 删除掉
-
     RVM_Class*   class_list; // TODO: 删除掉
     unsigned int class_size; // TODO: 删除掉
 
@@ -271,13 +268,9 @@ struct Package {
 
     std::vector<std::string> source_file_list;
 
-    std::vector<Declaration*> global_declaration_list; // global变量 TODO:以后不使用 declaration_list
-    // TODO: 保留 global_declaration_list 删除 declaration_list
-    std::vector<Declaration*>     declaration_list;
+    std::vector<Declaration*>     global_declaration_list;
     std::vector<ClassDefinition*> class_definition_list;
     std::vector<Function*>        function_list;
-    unsigned int                  statement_list_size; // TODO: delete 只能在函数内写语句
-    Statement*                    statement_list;      // TODO: delete 只能在函数内写语句
 
     std::vector<PackageUnit*> package_unit_list;
 };
@@ -298,16 +291,10 @@ struct PackageUnit {
 
     unsigned int              global_block_statement_list_size;
     Statement*                global_block_statement_list;
-    std::vector<Declaration*> global_declaration_list; // global变量 TODO:以后不使用 declaration_list
-    // TODO: 保留 global_declaration_list 删除 declaration_list
-    unsigned int declaration_list_size;
-    Declaration* declaration_list;
+    std::vector<Declaration*> global_declaration_list;
 
     std::vector<ClassDefinition*> class_definition_list;
     std::vector<Function*>        function_list;
-
-    unsigned int statement_list_size; // TODO: 删除
-    Statement*   statement_list;      // TODO: 删除
 
     Block* current_block;
 
@@ -1151,7 +1138,7 @@ struct IfStatement {
 struct ElseIfStatement {
     unsigned int line_number;
 
-    Expression* condition_expression; // TODO: 这个名字得改一下 conidtion_expression;
+    Expression* condition_expression;
 
     Block* elseif_block;
 
@@ -1411,7 +1398,6 @@ void           package_unit_update_line_content(char* str);
 void           package_unit_reset_line_content();
 char*          package_unit_get_current_line_content();
 void           package_unit_reset_column_number();
-int            package_unit_add_statement(Statement* statement);
 int            package_unit_add_class_definition(ClassDefinition* class_definition);
 
 
@@ -1551,7 +1537,6 @@ void              add_classes(Package* package, Package_Executer* executer);
 void              copy_class(Package_Executer* executer, ClassDefinition* src, RVM_Class* dest);
 void              copy_function(Function* src, RVM_Function* dest);
 void              copy_method(MethodMember* src, RVM_Method* dest);
-void              add_top_level_code(PackageUnit* package_unit, Package_Executer* executer);
 void              add_top_level_code(Package* package, Package_Executer* executer);
 void              generate_code_from_function_definition(Package_Executer* executer, Function* src, RVM_Function* dest);
 void              generate_code_from_method_definition(Package_Executer* executer, MethodMember* src, RVM_Method* dest);

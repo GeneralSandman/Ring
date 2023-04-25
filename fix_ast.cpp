@@ -8,9 +8,6 @@ void ring_compiler_fix_ast(PackageUnit* package_unit) {
     // fix global block
     fix_statement_list(package_unit->global_block_statement_list, NULL, NULL);
 
-    // fix statement list
-    fix_statement_list(package_unit->statement_list, NULL, NULL);
-
     // fix function list
     for (Function* pos : package_unit->function_list) {
         if (pos->block) {
@@ -177,12 +174,17 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
             pos->variable_index = block->declaration_list_size++;
             pos->is_local       = 1;
         } else {
-            PackageUnit* package_unit = get_package_unit();
-            package_unit->declaration_list =
-                declaration_list_add_item(package_unit->declaration_list, pos);
+            // PackageUnit* package_unit = get_package_unit();
+            // package_unit->declaration_list =
+            //     declaration_list_add_item(package_unit->declaration_list, pos);
 
-            pos->variable_index = package_unit->declaration_list_size++;
-            pos->is_local       = 0;
+            // pos->variable_index = package_unit->declaration_list_size++;
+            // pos->is_local       = 0;
+
+            PackageUnit* package_unit = get_package_unit();
+            pos->variable_index       = package_unit->global_declaration_list.size();
+            pos->is_local             = 0;
+            package_unit->global_declaration_list.push_back(pos);
         }
     }
 }
@@ -533,8 +535,7 @@ Declaration* search_declaration(char* package_posit, char* identifier, Block* bl
             }
         }
     }
-
-    for (decl = get_package_unit()->declaration_list; decl; decl = decl->next) {
+    for (Declaration* decl : get_package_unit()->global_declaration_list) {
         if (0 == strcmp(identifier, decl->identifier)) {
             return decl;
         }

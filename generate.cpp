@@ -219,15 +219,15 @@ void add_global_variable(Package* package, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
     // FIXME: 在 Compiler 中大部分是链表：因为在编译的时候不确定存储空间
     // 在 Executer 中 大部分是数组，因为编译完成，存储空间的数量都已经确认了。
-    if (package->declaration_list.empty()) {
+    if (package->global_declaration_list.empty()) {
         return;
     }
 
-    executer->global_variable_size = package->declaration_list.size();
+    executer->global_variable_size = package->global_declaration_list.size();
     executer->global_variable_list = (RVM_Variable*)malloc(executer->global_variable_size * sizeof(RVM_Variable));
 
     int i = 0;
-    for (Declaration* pos : package->declaration_list) {
+    for (Declaration* pos : package->global_declaration_list) {
         executer->global_variable_list[i].identifier = pos->identifier;
         executer->global_variable_list[i].type       = pos->type; // TODO: 这里考虑要深度复制
         i++;
@@ -336,24 +336,6 @@ void copy_method(MethodMember* src, RVM_Method* dest) {
     dest->identifier                  = src->identifier;
     dest->rvm_function                = (RVM_Function*)malloc(sizeof(RVM_Function));
     dest->rvm_function->u.derive_func = (DeriveFunction*)malloc(sizeof(DeriveFunction));
-}
-
-// 添加顶层代码
-void add_top_level_code(PackageUnit* package_unit, Package_Executer* executer) {
-    debug_log_with_darkgreen_coloar("\t");
-
-    RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
-    generate_vmcode_from_statement_list(executer, NULL, package_unit->statement_list, opcode_buffer);
-
-    opcode_buffer_fix_label(opcode_buffer);
-
-
-    RVM_Byte*    code_list = opcode_buffer->code_list;
-    unsigned int code_size = opcode_buffer->code_size;
-    // unsigned int code_capacity = opcode_buffer->code_capacity;
-
-    executer->code_list = code_list;
-    executer->code_size = code_size;
 }
 
 void add_top_level_code(Package* package, Package_Executer* executer) {
