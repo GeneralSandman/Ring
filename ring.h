@@ -8,8 +8,6 @@
 
 #define RING_VERSION "ring-v0.2.1-beta"
 
-typedef struct Ring_Compiler Ring_Compiler;
-
 typedef struct Ring_VirtualMachine Ring_VirtualMachine;
 
 typedef struct ImportPackageInfo ImportPackageInfo;
@@ -138,37 +136,6 @@ typedef struct RVM_Function      RVM_Function;
 typedef struct RVM_Field         RVM_Field;
 typedef struct RVM_Method        RVM_Method;
 typedef struct RVM_Class         RVM_Class;
-
-struct Ring_Compiler {
-    /*
-    char*        current_file_name;
-    unsigned int current_line_number;
-    unsigned int current_column_number;
-    Ring_String* current_line_content;
-
-    unsigned int    import_package_size;
-    ImportPackageInfo*    import_package_list;
-
-    unsigned int statement_list_size;
-    Statement*   statement_list;
-
-    unsigned int function_list_size;
-    Function*    function_list;
-
-    unsigned int identifier_list_size; // TODO:后续删除调
-    Identifier*  identifier_list;      // TODO:后续删除调
-
-    unsigned int declaration_list_size;
-    Declaration* declaration_list;
-
-    Block* current_block;
-
-    unsigned int     class_definition_list_size;
-    ClassDefinition* class_definition_list;
-
-    unsigned int compile_error_num;
-    */
-};
 
 typedef unsigned char RVM_Byte;
 
