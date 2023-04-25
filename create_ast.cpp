@@ -395,19 +395,6 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
 Function* new_function_definition(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
     debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier);
 
-    // if (!strcmp(identifier, "println_bool")
-    //     || !strcmp(identifier, "println_int")
-    //     || !strcmp(identifier, "println_double")
-    //     || !strcmp(identifier, "println_string")
-    //     || !strcmp(identifier, "debug_assert")
-    //     || !strcmp(identifier, "exit")
-    //     || !strcmp(identifier, "print")
-    //     || !strcmp(identifier, "println")
-    //     || !strcmp(identifier, "printf")
-    //     || !strcmp(identifier, "printfln")) {
-    //     type = FUNCTION_TYPE_NATIVE;
-    // }
-
     Function* function            = (Function*)malloc(sizeof(Function));
     function->line_number         = package_unit_get_line_number();
     function->package             = get_package_unit()->parent_package;

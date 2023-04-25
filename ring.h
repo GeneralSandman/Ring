@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-#define RING_VERSION "ring-v0.2.0-beta"
+#define RING_VERSION "ring-v0.2.1-beta"
 
 typedef struct Ring_Compiler Ring_Compiler;
 

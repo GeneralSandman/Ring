@@ -185,9 +185,10 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
 }
 
 void rvm_add_classs(Package_Executer* executer, Ring_VirtualMachine* rvm) {
+    debug_log_with_white_coloar("\t");
+
     rvm->class_list = executer->class_list; // FIXME:
     rvm->class_size = executer->class_size; // FIXME:
-    debug_log_with_white_coloar("\t");
 }
 
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
