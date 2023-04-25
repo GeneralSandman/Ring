@@ -476,8 +476,7 @@ struct RVM_OpcodeBuffer {
     unsigned int    lable_size;
     unsigned int    lable_capacity;
 
-    RVM_SourceCodeLineMap* code_line_map;
-    unsigned int           code_line_size;
+    std::vector<RVM_SourceCodeLineMap> code_line_map;
 };
 
 typedef enum {
@@ -1601,7 +1600,7 @@ void         opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer);
 RVM_Opcode   convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type);
 unsigned int calc_runtime_stack_capacity(RVM_Byte* code_list, unsigned int code_size);
 void         add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number, unsigned int start_pc, unsigned int opcode_size);
-void         dump_code_line_map(RVM_SourceCodeLineMap* code_line_map, unsigned int code_line_size);
+void         dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map);
 // generate.c
 
 // execute.c

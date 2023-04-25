@@ -374,12 +374,13 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
         executer->code_list = opcode_buffer->code_list;
         executer->code_size = opcode_buffer->code_size;
     } else {
-        RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
-        generate_vmcode_from_statement_list(executer, NULL, package->statement_list, opcode_buffer);
-        opcode_buffer_fix_label(opcode_buffer);
+        // 必须有main函数
+        // RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
+        // generate_vmcode_from_statement_list(executer, NULL, package->statement_list, opcode_buffer);
+        // opcode_buffer_fix_label(opcode_buffer);
 
-        executer->code_list = opcode_buffer->code_list;
-        executer->code_size = opcode_buffer->code_size;
+        // executer->code_list = opcode_buffer->code_list;
+        // executer->code_size = opcode_buffer->code_size;
     }
 }
 
@@ -399,6 +400,7 @@ void generate_code_from_function_definition(Package_Executer* executer, Function
 
 #ifdef DEBUG
     ring_vm_code_dump(dest, opcode_buffer->code_list, opcode_buffer->code_size, 0, 60, 1);
+    dump_code_line_map(opcode_buffer->code_line_map);
 #endif
 }
 
@@ -432,8 +434,7 @@ RVM_OpcodeBuffer* new_opcode_buffer() {
     buffer->lable_list       = NULL;
     buffer->lable_size       = 0;
     buffer->lable_capacity   = 0;
-    buffer->code_line_map    = NULL;
-    buffer->code_line_size   = 0;
+    buffer->code_line_map    = std::vector<RVM_SourceCodeLineMap>{};
     return buffer;
 }
 
@@ -1507,38 +1508,33 @@ unsigned int calc_runtime_stack_capacity(RVM_Byte* code_list, unsigned int code_
 // 这里实现完成了：但是有点bug，还未测试  因为 executer 和 rvm 有点耦合，所以这里设计的有点问题，需要重新设计
 // FIXME:
 void add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number, unsigned int start_pc, unsigned int opcode_size) {
-    if (opcode_buffer->code_line_map == NULL) {
-        opcode_buffer->code_line_size++;
-        opcode_buffer->code_line_map = (RVM_SourceCodeLineMap*)malloc(sizeof(RVM_SourceCodeLineMap) * opcode_buffer->code_line_size);
+    if (opcode_buffer->code_line_map.empty()
+        || opcode_buffer->code_line_map.rbegin()->line_number != line_number) {
+        RVM_SourceCodeLineMap tmp = RVM_SourceCodeLineMap{
+            NULL,
+            line_number,
+            start_pc,
+            opcode_size,
+        };
 
-        opcode_buffer->code_line_map[0].source_file_name   = NULL;
-        opcode_buffer->code_line_map[0].line_number        = line_number;
-        opcode_buffer->code_line_map[0].opcode_begin_index = start_pc;
-        opcode_buffer->code_line_map[0].opcode_size += opcode_size;
-
-    } else if (opcode_buffer->code_line_map[opcode_buffer->code_line_size - 1].line_number != line_number) {
-        opcode_buffer->code_line_size++;
-        opcode_buffer->code_line_map = (RVM_SourceCodeLineMap*)realloc(opcode_buffer->code_line_map,
-                                                                       sizeof(RVM_SourceCodeLineMap) * opcode_buffer->code_line_size);
-
-        opcode_buffer->code_line_map[opcode_buffer->code_line_size - 1].source_file_name   = NULL;
-        opcode_buffer->code_line_map[opcode_buffer->code_line_size - 1].line_number        = line_number;
-        opcode_buffer->code_line_map[opcode_buffer->code_line_size - 1].opcode_begin_index = start_pc;
-        opcode_buffer->code_line_map[opcode_buffer->code_line_size - 1].opcode_size += opcode_size;
+        opcode_buffer->code_line_map.push_back(tmp);
 
     } else {
-        opcode_buffer->code_line_map[opcode_buffer->code_line_size - 1].opcode_size += opcode_size;
+        opcode_buffer->code_line_map.rbegin()->opcode_size += opcode_size;
     }
 }
 // 这里实现完成了：但是有点bug，还未测试  因为 executer 和 rvm 有点耦合，所以这里设计的有点问题，需要重新设计
 // FIXME:
-void dump_code_line_map(RVM_SourceCodeLineMap* code_line_map, unsigned int code_line_size) {
-    unsigned int index = 0;
-    printf("dump_code_line_map \n");
-    for (index = 0; index < code_line_size; index++) {
-        printf("line_number:%10d start_pc:%10d size:%10d\n",
-               code_line_map[index].line_number,
-               code_line_map[index].opcode_begin_index,
-               code_line_map[index].opcode_size);
+void dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map) {
+    printf("|------------------ CodeLineMap-Dump-begin ------------------\n");
+
+    for (RVM_SourceCodeLineMap& code_line : code_line_map) {
+        printf("source_file_name:%10s line_number:%10d start_pc:%10d size:%10d\n",
+               code_line.source_file_name,
+               code_line.line_number,
+               code_line.opcode_begin_index,
+               code_line.opcode_size);
     }
+
+    printf("|------------------ CodeLineMap-Dump-begin ------------------\n");
 }
