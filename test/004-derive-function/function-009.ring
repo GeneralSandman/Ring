@@ -1,22 +1,11 @@
-//
-// File:    function-009.ring
-// Author:  zhenhuli - generalsandman@163.com
-// Date:    2022-05-30
-//
 
-function println_bool(var bool bool_value);
-function println_int(var int int_value);
-function println_double(var double double_value);
-function println_string(var string string_value);
-function debug_assert(var bool bool_value);
-function exit(var int int_value);
-function print(var any value) -> (int);
-function println(var any value) -> (int);
-function printf(var string format, var any value)   -> (int);
-function printfln(var string format, var any value) -> (int);
+package main
 
+import {
+	fmt;
+	debug;
+}
 
-// -----------------------------
 
 
 
@@ -45,29 +34,32 @@ function test() {
 	int_value_local_10 = 10;
 
 
-    println_int(int_value_local_1);
-    println_int(int_value_local_2);
-    println_int(int_value_local_3);
-    println_int(int_value_local_4);
-    println_int(int_value_local_5);
-    println_int(int_value_local_6);
-    println_int(int_value_local_7);
-    println_int(int_value_local_8);
-    println_int(int_value_local_9);
-    println_int(int_value_local_10);
+    fmt::println_int(int_value_local_1);
+    fmt::println_int(int_value_local_2);
+    fmt::println_int(int_value_local_3);
+    fmt::println_int(int_value_local_4);
+    fmt::println_int(int_value_local_5);
+    fmt::println_int(int_value_local_6);
+    fmt::println_int(int_value_local_7);
+    fmt::println_int(int_value_local_8);
+    fmt::println_int(int_value_local_9);
+    fmt::println_int(int_value_local_10);
 
-    debug_assert(int_value_local_1 == 1);
-    debug_assert(int_value_local_2 == 2);
-    debug_assert(int_value_local_3 == 3);
-    debug_assert(int_value_local_4 == 4);
-    debug_assert(int_value_local_5 == 5);
-    debug_assert(int_value_local_6 == 6);
-    debug_assert(int_value_local_7 == 7);
-    debug_assert(int_value_local_8 == 8);
-    debug_assert(int_value_local_9 == 9);
-    debug_assert(int_value_local_10 == 10);
+    debug::debug_assert(int_value_local_1 == 1);
+    debug::debug_assert(int_value_local_2 == 2);
+    debug::debug_assert(int_value_local_3 == 3);
+    debug::debug_assert(int_value_local_4 == 4);
+    debug::debug_assert(int_value_local_5 == 5);
+    debug::debug_assert(int_value_local_6 == 6);
+    debug::debug_assert(int_value_local_7 == 7);
+    debug::debug_assert(int_value_local_8 == 8);
+    debug::debug_assert(int_value_local_9 == 9);
+    debug::debug_assert(int_value_local_10 == 10);
 }
 
-test();
+@main
+function main() {
 
+test();
+}
 

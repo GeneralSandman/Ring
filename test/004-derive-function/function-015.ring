@@ -1,22 +1,11 @@
-//
-// File:    function-014.ring
-// Author:  zhenhuli - generalsandman@163.com
-// Date:    2022-05-31
-//
 
-function println_bool(var bool bool_value);
-function println_int(var int int_value);
-function println_double(var double double_value);
-function println_string(var string string_value);
-function debug_assert(var bool bool_value);
-function exit(var int int_value);
-function print(var any value) -> (int);
-function println(var any value) -> (int);
-function printf(var string format, var any value)   -> (int);
-function printfln(var string format, var any value) -> (int);
+package main
 
+import {
+	fmt;
+	debug;
+}
 
-// -----------------------------
 
 
 function max(var int parameter_1, var int parameter_2) -> (int) {
@@ -39,56 +28,59 @@ function add(var int parameter_1, var int parameter_2) -> (int) {
 }
 
 
+@main
+function main() {
+
 var int result;
 
 
 
-println_string("\ntest case 1");
+fmt::println_string("\ntest case 1");
 result = max(122, 123);
-println_int(result);
-debug_assert(result == 123);
+fmt::println_int(result);
+debug::debug_assert(result == 123);
 
 
 
 
-println_string("\ntest case 2");
+fmt::println_string("\ntest case 2");
 result = min(124, 123);
-println_int(result);
-debug_assert(result == 123);
+fmt::println_int(result);
+debug::debug_assert(result == 123);
 
 
 
 
-println_string("\ntest case 3");
+fmt::println_string("\ntest case 3");
 result = add(124, 123);
-println_int(result);
-debug_assert(result == 247);
+fmt::println_int(result);
+debug::debug_assert(result == 247);
 
 
 
 
-println_string("\ntest case 4");
-println_int(max(1, 100));
-println_int(min(1234, 12345));
-println_int(add(100, 1234));
+fmt::println_string("\ntest case 4");
+fmt::println_int(max(1, 100));
+fmt::println_int(min(1234, 12345));
+fmt::println_int(add(100, 1234));
 
 
 result = add(max(1, 100), min(1234, 12345));
-println_int(result);
-debug_assert(result == 1334);
+fmt::println_int(result);
+debug::debug_assert(result == 1334);
 
 
 
 
 
-println_string("\ntest case 5");
+fmt::println_string("\ntest case 5");
 
 result = add(add(add(add(1,2), 3), 4), 5);
-println_int(result);
-debug_assert(result == 15);
+fmt::println_int(result);
+debug::debug_assert(result == 15);
 
 
-
+}
 
 
 

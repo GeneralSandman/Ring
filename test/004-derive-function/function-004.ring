@@ -1,22 +1,11 @@
-//
-// File:    function-003.ring
-// Author:  zhenhuli - generalsandman@163.com
-// Date:    2022-05-23
-//
 
-function println_bool(var bool bool_value);
-function println_int(var int int_value);
-function println_double(var double double_value);
-function println_string(var string string_value);
-function debug_assert(var bool bool_value);
-function exit(var int int_value);
-function print(var any value) -> (int);
-function println(var any value) -> (int);
-function printf(var string format, var any value)   -> (int);
-function printfln(var string format, var any value) -> (int);
+package main
 
+import {
+	fmt;
+	debug;
+}
 
-// -----------------------------
 
 var int int_value_global;
 
@@ -24,33 +13,38 @@ var int int_value_global;
 function func_use_local_variable_hidden_global() {
     var int int_value_global;
     int_value_global = 234;
-    println_int(int_value_global);
-    println_int(int_value_global);
-    println_int(int_value_global);
-    println_int(int_value_global);
-    debug_assert(int_value_global == 234);
-    debug_assert(int_value_global == 234);
-    debug_assert(int_value_global == 234);
-    debug_assert(int_value_global == 234);
+    fmt::println_int(int_value_global);
+    fmt::println_int(int_value_global);
+    fmt::println_int(int_value_global);
+    fmt::println_int(int_value_global);
+    debug::debug_assert(int_value_global == 234);
+    debug::debug_assert(int_value_global == 234);
+    debug::debug_assert(int_value_global == 234);
+    debug::debug_assert(int_value_global == 234);
 }
 
 
 // --------------
+
+@main
+function main() {
+
 int_value_global = 1;
-println_int(int_value_global);
-debug_assert(int_value_global == 1);
-debug_assert(int_value_global == 1);
-debug_assert(int_value_global == 1);
-debug_assert(int_value_global == 1);
-println_string("");
+fmt::println_int(int_value_global);
+debug::debug_assert(int_value_global == 1);
+debug::debug_assert(int_value_global == 1);
+debug::debug_assert(int_value_global == 1);
+debug::debug_assert(int_value_global == 1);
+fmt::println_string("");
 
 func_use_local_variable_hidden_global();
-println_string("");
+fmt::println_string("");
 
-println_int(int_value_global);
-debug_assert(int_value_global == 1);
-debug_assert(int_value_global == 1);
-debug_assert(int_value_global == 1);
-debug_assert(int_value_global == 1);
-println_string("");
+fmt::println_int(int_value_global);
+debug::debug_assert(int_value_global == 1);
+debug::debug_assert(int_value_global == 1);
+debug::debug_assert(int_value_global == 1);
+debug::debug_assert(int_value_global == 1);
+fmt::println_string("");
 
+}
