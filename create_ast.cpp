@@ -74,6 +74,7 @@ Expression* create_expression_identifier(char* identifier) {
     return expression;
 }
 
+// TODO: 后续合并为一个，目的是在 fix_ast 中 去确定 identifier 的 类型
 Expression* create_expression_identifier2(char* identifier, IdentifierExpressionType type) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
@@ -338,7 +339,7 @@ Expression* expression_list_add_item(Expression* expression_list, Expression* ex
     return expression_list;
 }
 
-ArgumentList* argument_list_add_item3(ArgumentList* argument_list, ArgumentList* argument) {
+ArgumentList* argument_list_add_item(ArgumentList* argument_list, ArgumentList* argument) {
     ArgumentList* pos = argument_list;
     for (; pos->next != NULL; pos = pos->next)
         ;

@@ -1450,7 +1450,7 @@ AssignExpression*       create_multi_assign_expression(char* first_identifier, I
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list);
 MethodCallExpression*   create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list);
 Expression*             expression_list_add_item(Expression* expression_list, Expression* expression);
-ArgumentList*           argument_list_add_item3(ArgumentList* argument_list, ArgumentList* argument);
+ArgumentList*           argument_list_add_item(ArgumentList* argument_list, ArgumentList* argument);
 ArgumentList*           create_argument_list_from_expression(Expression* expression);
 Identifier*             new_identifier(IdentifierType type, char* name);
 Function*               new_function_definition(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);

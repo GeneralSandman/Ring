@@ -200,22 +200,28 @@ int yyerror(char const *str, ...);
 %%
 
 // TODO: 重新规划一下
+
+translation_unit_list
+    : translation_unit
+    | translation_unit_list translation_unit
+    ;
+
 translation_unit
-    : package_definition import_block definition_or_statement
+    : package_definition
     {
         debug_log_with_green_coloar("[RULE::translation_unit:1]\t ");
     }
-    | translation_unit global_variable_definition_block
+    | import_block
     {
         debug_log_with_green_coloar("[RULE::translation_unit:2]\t ");
+    }
+    | global_variable_definition_block
+    {
+        debug_log_with_green_coloar("[RULE::translation_unit:4]\t ");
     }
     | definition_or_statement
     {
         debug_log_with_green_coloar("[RULE::translation_unit:3]\t ");
-    }
-    | translation_unit definition_or_statement
-    {
-        debug_log_with_green_coloar("[RULE::translation_unit:4]\t ");
     }
     ;
 
@@ -287,11 +293,6 @@ definition_or_statement
     {
         debug_log_with_green_coloar("[RULE::statement:function_definition]\t ");
         add_function_definition($1, $2);
-    }
-    | statement
-    {
-        debug_log_with_green_coloar("[RULE::statement:statement]\t ");
-        package_unit_add_statement($1);
     }
     | class_definition
     {
@@ -1181,7 +1182,7 @@ argument_list
     }
     | argument_list TOKEN_COMMA argument
     {
-        $$ = argument_list_add_item3($1, $3);
+        $$ = argument_list_add_item($1, $3);
 
     }
     ;
