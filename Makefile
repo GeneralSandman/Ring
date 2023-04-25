@@ -62,7 +62,7 @@ fix_ast.o: fix_ast.cpp ring.h
 generate.o: generate.cpp ring.h
 execute.o: execute.cpp ring.h
 bytecode.o: bytecode.cpp ring.h
-compiler.o: compiler.cpp ring.h inner_func.h
+compiler.o: compiler.cpp ring.h
 error_msg.o: error_msg.cpp ring.h
 utils.o: utils.cpp ring.h
 std_lib.o: std_lib.cpp ring.h
