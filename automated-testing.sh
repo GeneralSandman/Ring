@@ -65,7 +65,9 @@ for i in {1..1}; do {
 done
 
 
-printf "\n\n[pass/all=%s/%s]\n\n" $pass_num $all_num 
+printf "\n\n"
+printf "[Result]:\n"
+printf "[pass/all=%s/%s]\n\n" $pass_num $all_num 
 
 
 printNotPassCase
