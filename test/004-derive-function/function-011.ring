@@ -8,8 +8,10 @@ import {
 
 
 
-var int int_value_global_1;
-var int int_value_global_2;
+global {
+    var int int_value_global_1;
+    var int int_value_global_2;
+}
 
 
 

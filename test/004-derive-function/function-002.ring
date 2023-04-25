@@ -6,9 +6,9 @@ import {
 	debug;
 }
 
-
-var int int_value_global;
-
+global {
+    var int int_value_global;
+}
 
 function func_use_local_variable() {
     var int int_value_local;

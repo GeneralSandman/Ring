@@ -7,7 +7,10 @@ import {
 }
 
 
-var int int_value_global;
+global {
+    var int int_value_global;
+}
+
 
 
 

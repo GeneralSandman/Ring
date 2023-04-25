@@ -33,4 +33,7 @@ typedef class Job {
     method PrintInfo();
 };
 
-var Job job_0;
+global {
+    var Job job_0;
+
+}

@@ -6,8 +6,10 @@ import {
 	debug;
 }
 
+global {
+    var int int_value_global;
+}
 
-var int int_value_global;
 
 
 function func_use_local_variable_hidden_global() {
