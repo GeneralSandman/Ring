@@ -1613,12 +1613,10 @@ inline void STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index,
 RVM_RuntimeStack*    new_runtime_stack();
 RVM_RuntimeStatic*   new_runtime_static();
 Ring_VirtualMachine* ring_virtualmachine_create();
-void                 ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, Package_Executer* executer);
 void                 ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry);
 void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 RVM_Object*          new_class_object(ClassDefinition* class_definition);
 void                 rvm_add_classs(Package_Executer* executer, Ring_VirtualMachine* rvm);
-void                 rvm_add_derive_functions(Package_Executer* executer, Ring_VirtualMachine* rvm);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
@@ -1649,17 +1647,7 @@ void store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo);
 void restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo);
 
 
-// RVM_Value native_proc_to_string(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
-// RVM_Value native_proc_print(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
-// RVM_Value native_proc_println(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
-RVM_Value native_proc_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value native_proc_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value native_proc_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value native_proc_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-// void      rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count);
-// void      rvm_register_native_functions(Ring_VirtualMachine* rvm);
 // execute.c
 
 
@@ -1679,9 +1667,6 @@ RVM_Value std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
 
 RVM_Value std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 // std_lib.cpp
-
-// interactive.c
-// interactive.c
 
 // utils.c
 void                     ring_compiler_functions_dump(PackageUnit* package_unit);

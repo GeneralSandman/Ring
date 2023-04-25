@@ -73,7 +73,7 @@ RVM_Value std_fmt_lib_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_co
     debug_log_with_white_coloar("\t");
 
     if (arg_count != 1) {
-        printf("native_proc_print only one arguement\n");
+        printf("std_fmt_lib_println_bool only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
 
@@ -94,7 +94,7 @@ RVM_Value std_fmt_lib_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
     debug_log_with_white_coloar("\t");
 
     if (arg_count != 1) {
-        printf("native_proc_print only one arguement\n");
+        printf("std_fmt_lib_println_int only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
 
@@ -112,7 +112,7 @@ RVM_Value std_fmt_lib_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
     debug_log_with_white_coloar("\t");
 
     if (arg_count != 1) {
-        printf("native_proc_print only one arguement\n");
+        printf("std_fmt_lib_println_double only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
 
@@ -129,7 +129,7 @@ RVM_Value std_fmt_lib_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     debug_log_with_white_coloar("\t");
 
     if (arg_count != 1) {
-        printf("native_proc_print only one arguement\n");
+        printf("std_fmt_lib_println_string only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
 
@@ -153,7 +153,7 @@ RVM_Value std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
     debug_log_with_white_coloar("\t");
 
     if (arg_count != 1) {
-        printf("native_proc_print only one arguement\n");
+        printf("std_debug_lib_debug_assert only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
 

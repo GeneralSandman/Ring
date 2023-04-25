@@ -106,16 +106,6 @@ Ring_VirtualMachine* ring_virtualmachine_create() {
     return rvm;
 }
 
-void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, Package_Executer* executer) {
-    rvm->executer = executer;
-
-    // init something
-    rvm_add_static_variable(executer, rvm->runtime_static);
-    // rvm_register_native_functions(rvm);
-    rvm_add_derive_functions(executer, rvm);
-    rvm_add_classs(executer, rvm);
-}
-
 void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry) {
     rvm->executer = executer_entry->main_package_executer;
 
@@ -192,30 +182,6 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
     // if class has constructor method, invoke it.
 
     return object;
-}
-
-void rvm_add_derive_functions(Package_Executer* executer, Ring_VirtualMachine* rvm) {
-    debug_log_with_white_coloar("\t");
-    /*
-
-    for (int i = 0; i < executer->function_size; i++) {
-        RVM_Function function = executer->function_list[i];
-        if (function.type == RVM_FUNCTION_TYPE_DERIVE) {
-            rvm->function_list = (RVM_Function*)realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
-
-            rvm->function_list[rvm->function_size].func_name           = function.func_name;
-            rvm->function_list[rvm->function_size].type                = RVM_FUNCTION_TYPE_DERIVE;
-            rvm->function_list[rvm->function_size].parameter_size      = function.parameter_size;
-            rvm->function_list[rvm->function_size].parameter_list      = function.parameter_list;
-            rvm->function_list[rvm->function_size].local_variable_size = function.local_variable_size;
-            rvm->function_list[rvm->function_size].local_variable_list = function.local_variable_list;
-            rvm->function_list[rvm->function_size].u.derive_func       = function.u.derive_func;
-
-            rvm->function_size++;
-        }
-    }
-
-    */
 }
 
 void rvm_add_classs(Package_Executer* executer, Ring_VirtualMachine* rvm) {
@@ -1023,105 +989,6 @@ void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_
     }
 }
 
-
-RVM_Value native_proc_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
-    if (arg_count != 1) {
-        printf("native_proc_print only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
-    }
-
-    RVM_Value ret;
-    ret.u.int_value = 0;
-
-    if (args->u.int_value) {
-        printf("true\n");
-    } else {
-        printf("false\n");
-    }
-    fflush(stdout);
-
-    return ret;
-}
-
-RVM_Value native_proc_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
-    if (arg_count != 1) {
-        printf("native_proc_print only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
-    }
-
-    RVM_Value ret;
-    ret.u.int_value = 0;
-
-    // TODO: 暂时只打印int, 以后都强制转换成int_value
-    printf("%d\n", args->u.int_value);
-    fflush(stdout);
-
-    return ret;
-}
-
-RVM_Value native_proc_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
-    if (arg_count != 1) {
-        printf("native_proc_print only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
-    }
-
-    RVM_Value ret;
-    ret.u.int_value = 0;
-
-    printf("%f\n", args->u.double_value);
-    fflush(stdout);
-
-    return ret;
-}
-
-RVM_Value native_proc_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
-    if (arg_count != 1) {
-        printf("native_proc_print only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
-    }
-
-    RVM_Value ret;
-    ret.u.int_value = 0;
-
-    if (args->u.object == NULL || args->u.object->u.string.data == NULL) {
-        printf("\n");
-    } else {
-        printf("%s\n", args->u.object->u.string.data);
-    }
-    fflush(stdout);
-
-    return ret;
-}
-
-RVM_Value native_proc_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
-    if (arg_count != 1) {
-        printf("native_proc_print only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
-    }
-
-    RVM_Value ret;
-    ret.u.int_value = 0;
-
-    if (args->u.int_value) {
-        printf("debug_assert PASS\n");
-    } else {
-        printf("debug_assert FAILED\n");
-    }
-    fflush(stdout);
-
-    return ret;
-}
-
 RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     debug_log_with_white_coloar("\t");
 
@@ -1131,7 +998,7 @@ RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
 
 
     if (arg_count != 1) {
-        printf("native_proc_print only one arguement\n");
+        printf("native_proc_exit only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
 
@@ -1141,167 +1008,128 @@ RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
     return ret;
 }
 
-RVM_Value native_proc_print(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
-    RVM_Value ret;
-    ret.u.int_value = 0;
-
-    for (unsigned int i = 0; i < arg_count; i++) {
-        switch (args[i].type) {
-        case RVM_VALUE_TYPE_BOOL:
-            if (args[i].u.int_value) {
-                printf("true");
-            } else {
-                printf("false");
-            }
-            break;
-        case RVM_VALUE_TYPE_INT:
-            printf("%d", args[i].u.int_value);
-            break;
-        case RVM_VALUE_TYPE_DOUBLE:
-            printf("%f", args[i].u.double_value);
-            break;
-        case RVM_VALUE_TYPE_STRING:
-            if (args[i].u.object == NULL || args[i].u.object->u.string.data == NULL) {
-                printf("");
-            } else {
-                printf("%s", args[i].u.object->u.string.data);
-            }
-            break;
-        default:
-            break;
-        }
-        if (i < arg_count - 1)
-            printf(" ");
-    }
-
-
-    return ret;
-}
-
-RVM_Value native_proc_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
-    RVM_Value ret;
-    ret.u.int_value = 0;
-
-    native_proc_print(rvm, arg_count, args);
-    printf("\n");
-
-    return ret;
-}
-
-RVM_Value native_proc_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
-    RVM_Value ret;
-    ret.u.int_value = 0;
-
-    assert(args[0].type == RVM_VALUE_TYPE_STRING);
-
-    char*        format     = args[0].u.object->u.string.data;
-    size_t       length     = strlen(format);
-    unsigned int args_index = 1;
-
-    // printf("format:%s\n", format);
-    // printf("length:%ld\n", length);
-
-
-    for (size_t i = 0; i < length;) {
-        size_t lasti = i;
-
-        while (i < length && format[i] != '_') {
-            i++;
-        }
-        if (i > lasti) {
-            // printf("[debug]------:%ld, %ld\n", lasti, i-lasti);
-            printf("%.*s", (int)(i - lasti), format + lasti);
-            // fflush(stdout);
-        }
-        if (i >= length) {
-            break;
-        }
-
-
-        switch (args[args_index].type) {
-        case RVM_VALUE_TYPE_BOOL:
-            if (args[args_index].u.int_value) {
-                printf("true");
-            } else {
-                printf("false");
-            }
-            break;
-        case RVM_VALUE_TYPE_INT:
-            printf("%d", args[args_index].u.int_value);
-            break;
-        case RVM_VALUE_TYPE_DOUBLE:
-            printf("%f", args[args_index].u.double_value);
-            break;
-        case RVM_VALUE_TYPE_STRING:
-            if (args[args_index].u.object == NULL || args[args_index].u.object->u.string.data == NULL) {
-                printf("");
-            } else {
-                printf("%s", args[args_index].u.object->u.string.data);
-            }
-            break;
-        default:
-            break;
-        }
-        args_index++;
-        i++;
-    }
-
-    return ret;
-}
-
-RVM_Value native_proc_printfln(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
-    RVM_Value ret;
-    ret.u.int_value = 0;
-
-    native_proc_printf(rvm, arg_count, args);
-    printf("\n");
-
-    return ret;
-}
-
-// void rvm_register_native_function(Ring_VirtualMachine* rvm, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count) {
+// RVM_Value native_proc_print(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
 //     debug_log_with_white_coloar("\t");
-//     /*
 
-//     if (rvm->function_list == NULL) {
-//         rvm->function_list = (RVM_Function*)malloc(sizeof(RVM_Function));
-//     } else {
-//         rvm->function_list = (RVM_Function*)realloc(rvm->function_list, sizeof(RVM_Function) * (rvm->function_size + 1));
+//     RVM_Value ret;
+//     ret.u.int_value = 0;
+
+//     for (unsigned int i = 0; i < arg_count; i++) {
+//         switch (args[i].type) {
+//         case RVM_VALUE_TYPE_BOOL:
+//             if (args[i].u.int_value) {
+//                 printf("true");
+//             } else {
+//                 printf("false");
+//             }
+//             break;
+//         case RVM_VALUE_TYPE_INT:
+//             printf("%d", args[i].u.int_value);
+//             break;
+//         case RVM_VALUE_TYPE_DOUBLE:
+//             printf("%f", args[i].u.double_value);
+//             break;
+//         case RVM_VALUE_TYPE_STRING:
+//             if (args[i].u.object == NULL || args[i].u.object->u.string.data == NULL) {
+//                 printf("");
+//             } else {
+//                 printf("%s", args[i].u.object->u.string.data);
+//             }
+//             break;
+//         default:
+//             break;
+//         }
+//         if (i < arg_count - 1)
+//             printf(" ");
 //     }
-//     rvm->function_list[rvm->function_size].func_name                = func_name;
-//     rvm->function_list[rvm->function_size].type                     = RVM_FUNCTION_TYPE_NATIVE;
-//     rvm->function_list[rvm->function_size].u.native_func            = (NativeFunction*)malloc(sizeof(NativeFunction));
-//     rvm->function_list[rvm->function_size].u.native_func->func_proc = func_proc;
-//     rvm->function_list[rvm->function_size].u.native_func->arg_count = arg_count;
 
-//     rvm->function_size++;
 
-//     */
+//     return ret;
 // }
 
-// void rvm_register_native_functions(Ring_VirtualMachine* rvm) {
+// RVM_Value native_proc_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
 //     debug_log_with_white_coloar("\t");
-//     // FIXME: 如果 println_bool 和 println_string 生命的顺序不一致怎么办
 
-//     // rvm_register_native_function(rvm, "print", native_proc_print, 1);
-//     // rvm_register_native_function(rvm, "println", native_proc_println, 1);
-//     rvm_register_native_function(rvm, (char*)"println_bool", native_proc_println_bool, 1);
-//     rvm_register_native_function(rvm, (char*)"println_int", native_proc_println_int, 1);
-//     rvm_register_native_function(rvm, (char*)"println_double", native_proc_println_double, 1);
-//     rvm_register_native_function(rvm, (char*)"println_string", native_proc_println_string, 1);
-//     rvm_register_native_function(rvm, (char*)"debug_assert", native_proc_debug_assert, 1);
-//     rvm_register_native_function(rvm, (char*)"exit", native_proc_exit, 1);
+//     RVM_Value ret;
+//     ret.u.int_value = 0;
 
-//     rvm_register_native_function(rvm, (char*)"print", native_proc_print, -1);
-//     rvm_register_native_function(rvm, (char*)"println", native_proc_println, -1);
-//     rvm_register_native_function(rvm, (char*)"printf", native_proc_printf, -1);
-//     rvm_register_native_function(rvm, (char*)"printfln", native_proc_printfln, -1);
+//     native_proc_print(rvm, arg_count, args);
+//     printf("\n");
+
+//     return ret;
+// }
+
+// RVM_Value native_proc_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+//     debug_log_with_white_coloar("\t");
+
+//     RVM_Value ret;
+//     ret.u.int_value = 0;
+
+//     assert(args[0].type == RVM_VALUE_TYPE_STRING);
+
+//     char*        format     = args[0].u.object->u.string.data;
+//     size_t       length     = strlen(format);
+//     unsigned int args_index = 1;
+
+//     // printf("format:%s\n", format);
+//     // printf("length:%ld\n", length);
+
+
+//     for (size_t i = 0; i < length;) {
+//         size_t lasti = i;
+
+//         while (i < length && format[i] != '_') {
+//             i++;
+//         }
+//         if (i > lasti) {
+//             // printf("[debug]------:%ld, %ld\n", lasti, i-lasti);
+//             printf("%.*s", (int)(i - lasti), format + lasti);
+//             // fflush(stdout);
+//         }
+//         if (i >= length) {
+//             break;
+//         }
+
+
+//         switch (args[args_index].type) {
+//         case RVM_VALUE_TYPE_BOOL:
+//             if (args[args_index].u.int_value) {
+//                 printf("true");
+//             } else {
+//                 printf("false");
+//             }
+//             break;
+//         case RVM_VALUE_TYPE_INT:
+//             printf("%d", args[args_index].u.int_value);
+//             break;
+//         case RVM_VALUE_TYPE_DOUBLE:
+//             printf("%f", args[args_index].u.double_value);
+//             break;
+//         case RVM_VALUE_TYPE_STRING:
+//             if (args[args_index].u.object == NULL || args[args_index].u.object->u.string.data == NULL) {
+//                 printf("");
+//             } else {
+//                 printf("%s", args[args_index].u.object->u.string.data);
+//             }
+//             break;
+//         default:
+//             break;
+//         }
+//         args_index++;
+//         i++;
+//     }
+
+//     return ret;
+// }
+
+// RVM_Value native_proc_printfln(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+//     debug_log_with_white_coloar("\t");
+
+//     RVM_Value ret;
+//     ret.u.int_value = 0;
+
+//     native_proc_printf(rvm, arg_count, args);
+//     printf("\n");
+
+//     return ret;
 // }

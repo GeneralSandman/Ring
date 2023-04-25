@@ -1,4 +1,3 @@
-#include "inner_func.h"
 #include "ring.h"
 #include <assert.h>
 #include <stdio.h>

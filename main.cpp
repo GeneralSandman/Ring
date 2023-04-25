@@ -81,13 +81,11 @@ int main(int argc, char** argv) {
 
 
     // Step-5: 生成虚拟机中间代码
-    // ring_generate_vm_code(main_package, package_executer);
     ring_generate_vm_code(compiler_entry, executer_entry);
 
     // Step-6: 链接符号表
 
     // Step-7: 加载虚拟机
-    // ring_virtualmachine_load_executer(ring_vm, package_executer);
     ring_virtualmachine_load_executer(ring_vm, executer_entry);
 
     // Step-8: 运行虚拟机

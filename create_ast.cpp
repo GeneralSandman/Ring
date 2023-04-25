@@ -623,25 +623,6 @@ ReturnStatement* create_return_statement(Expression* expression) {
     return return_statement;
 }
 
-// Block* create_block(Statement* statement_list) {
-//     debug_log_with_yellow_coloar("\t");
-//
-//     Block* block                 = malloc(sizeof(Block));
-//     block->line_number           = package_unit_get_line_number();
-//     block->declaration_list_size = 0;
-//     block->declaration_list      = NULL;
-//     block->statement_list_size   = 0;
-//     block->statement_list        = statement_list;
-//     block->parent_block          = NULL;
-//
-//     for (Statement* pos = statement_list; pos; pos = pos->next) {
-//         block->statement_list_size++;
-//     }
-//
-//     // TODO: 这里不要直接赋值，要扫描statment_list 把变量加到当前变量列表中
-//     return block;
-// }
-
 Block* start_new_block() {
     debug_log_with_yellow_coloar("\t");
 
