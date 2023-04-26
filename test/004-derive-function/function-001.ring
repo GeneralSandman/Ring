@@ -56,6 +56,6 @@ function doit6() {
 @main
 function main() {
 
-doit6();
+    doit6();
 
 }

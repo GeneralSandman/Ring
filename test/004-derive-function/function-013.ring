@@ -44,19 +44,19 @@ function get_level_by_score(var int score) -> (int) {
 @main
 function main() {
 
-var int score;
-var int level;
-
-for(score = -9; score<=110; score+=10) {
-	level = get_level_by_score(score);
-
-	fmt::println_string("=====");
-	fmt::println_int(score);
-	fmt::println_int(level);
-	fmt::println_string("=====");
-
-	fmt::println_string("");
-}
+	var int score;
+	var int level;
+	
+	for(score = -9; score<=110; score+=10) {
+		level = get_level_by_score(score);
+	
+		fmt::println_string("=====");
+		fmt::println_int(score);
+		fmt::println_int(level);
+		fmt::println_string("=====");
+	
+		fmt::println_string("");
+	}
 
 }
 

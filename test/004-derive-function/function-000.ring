@@ -34,28 +34,27 @@ function doit4() {
 @main
 function main() {
 
-fmt::println_string("invoke doit1");
-doit1();
+    fmt::println_string("invoke doit1");
+    doit1();
 
 
-fmt::println_string("");
+    fmt::println_string("");
 
 
-fmt::println_string("invoke doit2");
-doit2();
+    fmt::println_string("invoke doit2");
+    doit2();
 
 
-fmt::println_string("");
+    fmt::println_string("");
 
 
-fmt::println_string("invoke doit3");
-doit3();
+    fmt::println_string("invoke doit3");
+    doit3();
 
-fmt::println_string("");
+    fmt::println_string("");
 
 
-fmt::println_string("invoke doit4");
-doit4();
+    fmt::println_string("invoke doit4");
+    doit4();
 
 }
-

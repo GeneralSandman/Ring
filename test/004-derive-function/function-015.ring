@@ -31,59 +31,53 @@ function add(var int parameter_1, var int parameter_2) -> (int) {
 @main
 function main() {
 
-var int result;
+	var int result;
 
 
 
-fmt::println_string("\ntest case 1");
-result = max(122, 123);
-fmt::println_int(result);
-debug::debug_assert(result == 123);
-
-
-
-
-fmt::println_string("\ntest case 2");
-result = min(124, 123);
-fmt::println_int(result);
-debug::debug_assert(result == 123);
+	fmt::println_string("\ntest case 1");
+	result = max(122, 123);
+	fmt::println_int(result);
+	debug::debug_assert(result == 123);
 
 
 
 
-fmt::println_string("\ntest case 3");
-result = add(124, 123);
-fmt::println_int(result);
-debug::debug_assert(result == 247);
+	fmt::println_string("\ntest case 2");
+	result = min(124, 123);
+	fmt::println_int(result);
+	debug::debug_assert(result == 123);
 
 
 
 
-fmt::println_string("\ntest case 4");
-fmt::println_int(max(1, 100));
-fmt::println_int(min(1234, 12345));
-fmt::println_int(add(100, 1234));
-
-
-result = add(max(1, 100), min(1234, 12345));
-fmt::println_int(result);
-debug::debug_assert(result == 1334);
+	fmt::println_string("\ntest case 3");
+	result = add(124, 123);
+	fmt::println_int(result);
+	debug::debug_assert(result == 247);
 
 
 
 
+	fmt::println_string("\ntest case 4");
+	fmt::println_int(max(1, 100));
+	fmt::println_int(min(1234, 12345));
+	fmt::println_int(add(100, 1234));
 
-fmt::println_string("\ntest case 5");
 
-result = add(add(add(add(1,2), 3), 4), 5);
-fmt::println_int(result);
-debug::debug_assert(result == 15);
+	result = add(max(1, 100), min(1234, 12345));
+	fmt::println_int(result);
+	debug::debug_assert(result == 1334);
+
+
+
+
+
+	fmt::println_string("\ntest case 5");
+
+	result = add(add(add(add(1,2), 3), 4), 5);
+	fmt::println_int(result);
+	debug::debug_assert(result == 15);
 
 
 }
-
-
-
-
-
-

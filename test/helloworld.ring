@@ -4,46 +4,48 @@
 // Date:    2022-05-27
 //
 
-function println_bool(var bool bool_value);
-function println_int(var int int_value);
-function println_double(var double double_value);
-function println_string(var string string_value);
-function debug_assert(var bool bool_value);
-function exit(var int int_value);
+package main
 
-// -----------------------------
+import {
+	fmt;
+	debug;
+}
 
-println_string("          _____                    _____                    _____                    _____          ");
-println_string("         /\    \                  /\    \                  /\    \                  /\    \         ");
-println_string("        /::\    \                /::\    \                /::\____\                /::\    \        ");
-println_string("       /::::\    \               \:::\    \              /::::|   |               /::::\    \       ");
-println_string("      /::::::\    \               \:::\    \            /:::::|   |              /::::::\    \      ");
-println_string("     /:::/\:::\    \               \:::\    \          /::::::|   |             /:::/\:::\    \     ");
-println_string("    /:::/__\:::\    \               \:::\    \        /:::/|::|   |            /:::/  \:::\    \    ");
-println_string("   /::::\   \:::\    \              /::::\    \      /:::/ |::|   |           /:::/    \:::\    \   ");
-println_string("  /::::::\   \:::\    \    ____    /::::::\    \    /:::/  |::|   | _____    /:::/    / \:::\    \  ");
-println_string(" /:::/\:::\   \:::\____\  /\   \  /:::/\:::\    \  /:::/   |::|   |/\    \  /:::/    /   \:::\ ___\ ");
-println_string("/:::/  \:::\   \:::|    |/::\   \/:::/  \:::\____\/:: /    |::|   /::\____\/:::/____/  ___\:::|    |");
-println_string("\::/   |::::\  /:::|____|\:::\  /:::/    \::/    /\::/    /|::|  /:::/    /\:::\    \ /\  /:::|____|");
-println_string(" \/____|:::::\/:::/    /  \:::\/:::/    / \/____/  \/____/ |::| /:::/    /  \:::\    /::\ \::/    / ");
-println_string("       |:::::::::/    /    \::::::/    /                   |::|/:::/    /    \:::\   \:::\ \/____/  ");
-println_string("       |::|\::::/    /      \::::/____/                    |::::::/    /      \:::\   \:::\____\    ");
-println_string("       |::| \::/____/        \:::\    \                    |:::::/    /        \:::\  /:::/    /    ");
-println_string("       |::|  ~|               \:::\    \                   |::::/    /          \:::\/:::/    /     ");
-println_string("       |::|   |                \:::\    \                  /:::/    /            \::::::/    /      ");
-println_string("       \::|   |                 \:::\____\                /:::/    /              \::::/    /       ");
-println_string("        \:|   |                  \::/    /                \::/    /                \::/____/        ");
-println_string("         \|___|                   \/____/                  \/____/                                  ");
-                                                                                                    
+@main
+function main() {
+	fmt::println_string("          _____                    _____                    _____                    _____          ");
+	fmt::println_string("         /\    \                  /\    \                  /\    \                  /\    \         ");
+	fmt::println_string("        /::\    \                /::\    \                /::\____\                /::\    \        ");
+	fmt::println_string("       /::::\    \               \:::\    \              /::::|   |               /::::\    \       ");
+	fmt::println_string("      /::::::\    \               \:::\    \            /:::::|   |              /::::::\    \      ");
+	fmt::println_string("     /:::/\:::\    \               \:::\    \          /::::::|   |             /:::/\:::\    \     ");
+	fmt::println_string("    /:::/__\:::\    \               \:::\    \        /:::/|::|   |            /:::/  \:::\    \    ");
+	fmt::println_string("   /::::\   \:::\    \              /::::\    \      /:::/ |::|   |           /:::/    \:::\    \   ");
+	fmt::println_string("  /::::::\   \:::\    \    ____    /::::::\    \    /:::/  |::|   | _____    /:::/    / \:::\    \  ");
+	fmt::println_string(" /:::/\:::\   \:::\____\  /\   \  /:::/\:::\    \  /:::/   |::|   |/\    \  /:::/    /   \:::\ ___\ ");
+	fmt::println_string("/:::/  \:::\   \:::|    |/::\   \/:::/  \:::\____\/:: /    |::|   /::\____\/:::/____/  ___\:::|    |");
+	fmt::println_string("\::/   |::::\  /:::|____|\:::\  /:::/    \::/    /\::/    /|::|  /:::/    /\:::\    \ /\  /:::|____|");
+	fmt::println_string(" \/____|:::::\/:::/    /  \:::\/:::/    / \/____/  \/____/ |::| /:::/    /  \:::\    /::\ \::/    / ");
+	fmt::println_string("       |:::::::::/    /    \::::::/    /                   |::|/:::/    /    \:::\   \:::\ \/____/  ");
+	fmt::println_string("       |::|\::::/    /      \::::/____/                    |::::::/    /      \:::\   \:::\____\    ");
+	fmt::println_string("       |::| \::/____/        \:::\    \                    |:::::/    /        \:::\  /:::/    /    ");
+	fmt::println_string("       |::|  ~|               \:::\    \                   |::::/    /          \:::\/:::/    /     ");
+	fmt::println_string("       |::|   |                \:::\    \                  /:::/    /            \::::::/    /      ");
+	fmt::println_string("       \::|   |                 \:::\____\                /:::/    /              \::::/    /       ");
+	fmt::println_string("        \:|   |                  \::/    /                \::/    /                \::/____/        ");
+	fmt::println_string("         \|___|                   \/____/                  \/____/                                  ");
+	
 
-println_string("");
-println_string("");
-println_string("");
+	fmt::println_string("");
+	fmt::println_string("");
+	fmt::println_string("");
 
 
-println_string("  _              _   _                                       _       _     _ ");
-println_string(" | |__     ___  | | | |   ___     __      __   ___    _ __  | |   __| |   | |");
-println_string(" | '_ \   / _ \ | | | |  / _ \    \ \ /\ / /  / _ \  | '__| | |  / _` |   | |");
-println_string(" | | | | |  __/ | | | | | (_) |    \ V  V /  | (_) | | |    | | | (_| |   |_|");
-println_string(" |_| |_|  \___| |_| |_|  \___/      \_/\_/    \___/  |_|    |_|  \__,_|   (_)");
-                                                                           
+	fmt::println_string("  _              _   _                                       _       _     _ ");
+	fmt::println_string(" | |__     ___  | | | |   ___     __      __   ___    _ __  | |   __| |   | |");
+	fmt::println_string(" | '_ \   / _ \ | | | |  / _ \    \ \ /\ / /  / _ \  | '__| | |  / _` |   | |");
+	fmt::println_string(" | | | | |  __/ | | | | | (_) |    \ V  V /  | (_) | | |    | | | (_| |   |_|");
+	fmt::println_string(" |_| |_|  \___| |_| |_|  \___/      \_/\_/    \___/  |_|    |_|  \__,_|   (_)");
+	
+}
+

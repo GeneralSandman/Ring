@@ -17,8 +17,8 @@ function b() {
 @main
 function main() {
 
-true ? a() : b();
-
-false ? a() : b();
+	true ? a() : b();
+	
+	false ? a() : b();
 
 }

@@ -39,17 +39,17 @@ function test(var int int_value_1, var int int_value_2) {
 @main
 function main() {
     var int int_value_1;
-var int int_value_2;
-var int int_value_3;
-var int int_value_4;
+    var int int_value_2;
+    var int int_value_3;
+    var int int_value_4;
+        
+    int_value_1, int_value_2, int_value_3, int_value_4 = test(0, 0);
     
-int_value_1, int_value_2, int_value_3, int_value_4 = test(0, 0);
-
-debug_assert(int_value_1 == 1);
-debug_assert(int_value_2 == 2);
-debug_assert(int_value_3 == 3);
-debug_assert(int_value_4 == 4);
-
-int_value_1+=1;
-debug_assert(int_value_1 == 2);
+    debug_assert(int_value_1 == 1);
+    debug_assert(int_value_2 == 2);
+    debug_assert(int_value_3 == 3);
+    debug_assert(int_value_4 == 4);
+    
+    int_value_1+=1;
+    debug_assert(int_value_1 == 2);
 }

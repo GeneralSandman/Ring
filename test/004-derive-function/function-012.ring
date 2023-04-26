@@ -81,12 +81,11 @@ function test(var int parameter_1, var int parameter_2, var int parameter_3, var
 @main
 function main() {
 
-var int result;
-result = test(11,12,13,14,15,16,17,18,19,20);
+	var int result;
+	result = test(11,12,13,14,15,16,17,18,19,20);
 
-fmt::println_string("\ntest case 1 ======");
-fmt::println_int(result);
-debug::debug_assert(result == 210);
-
+	fmt::println_string("\ntest case 1 ======");
+	fmt::println_int(result);
+	debug::debug_assert(result == 210);
 
 }

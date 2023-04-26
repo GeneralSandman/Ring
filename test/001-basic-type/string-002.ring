@@ -16,82 +16,82 @@ import {
 function main() {
 
 
-if("a" == "a") {
-    fmt::println_string("test pass");
-} else {
-    fmt::println_string("test failed");
+    if("a" == "a") {
+        fmt::println_string("test pass");
+    } else {
+        fmt::println_string("test failed");
 
-}
+    }
 
-if("a" != "a") {
-    fmt::println_string("test failed");
-} else {
-    fmt::println_string("test pass");
-}
+    if("a" != "a") {
+        fmt::println_string("test failed");
+    } else {
+        fmt::println_string("test pass");
+    }
 
-if("a" > "a") {
-    fmt::println_string("test failed");
-} else {
-    fmt::println_string("test pass");
-}
+    if("a" > "a") {
+        fmt::println_string("test failed");
+    } else {
+        fmt::println_string("test pass");
+    }
 
-if("a" >= "a") {
-    fmt::println_string("test pass");
-} else {
-    fmt::println_string("test failed");
-}
+    if("a" >= "a") {
+        fmt::println_string("test pass");
+    } else {
+        fmt::println_string("test failed");
+    }
 
-if("a" < "a") {
-    fmt::println_string("test failed");
-} else {
-    fmt::println_string("test pass");
-}
+    if("a" < "a") {
+        fmt::println_string("test failed");
+    } else {
+        fmt::println_string("test pass");
+    }
 
-if("a" <= "a") {
-    fmt::println_string("test pass");
-} else {
-    fmt::println_string("test failed");
-}
+    if("a" <= "a") {
+        fmt::println_string("test pass");
+    } else {
+        fmt::println_string("test failed");
+    }
 
 
 
-fmt::println_string("----------------");
+    fmt::println_string("----------------");
 
-if("a" == "b") {
-    fmt::println_string("test failed");
-} else {
-    fmt::println_string("test pass");
-}
+    if("a" == "b") {
+        fmt::println_string("test failed");
+    } else {
+        fmt::println_string("test pass");
+    }
 
-if("a" != "b") {
-    fmt::println_string("test pass");
-} else {
-    fmt::println_string("test failed");
-}
+    if("a" != "b") {
+        fmt::println_string("test pass");
+    } else {
+        fmt::println_string("test failed");
+    }
 
-if("a" > "b") {
-    fmt::println_string("test failed");
-} else {
-    fmt::println_string("test pass");
-}
+    if("a" > "b") {
+        fmt::println_string("test failed");
+    } else {
+        fmt::println_string("test pass");
+    }
 
-if("a" >= "b") {
-    fmt::println_string("test failed");
-} else {
-    fmt::println_string("test pass");
-}
+    if("a" >= "b") {
+        fmt::println_string("test failed");
+    } else {
+        fmt::println_string("test pass");
+    }
 
-if("a" < "b") {
-    fmt::println_string("test pass");
-} else {
-    fmt::println_string("test failed");
-}
+    if("a" < "b") {
+        fmt::println_string("test pass");
+    } else {
+        fmt::println_string("test failed");
+    }
 
-if("a" <= "b") {
-    fmt::println_string("test pass");
-} else {
-    fmt::println_string("test failed");
-}
+    if("a" <= "b") {
+        fmt::println_string("test pass");
+    } else {
+        fmt::println_string("test failed");
+    }
 
 
 

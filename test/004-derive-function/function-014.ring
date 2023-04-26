@@ -22,52 +22,52 @@ function add_two(var int int_1, var int int_2) -> (int) {
 @main
 function main() {
 
-var int int_value_1;
+	var int int_value_1;
 
 
-fmt::println_string("\ntest case 1");
-int_value_1 = 5;
-debug::debug_assert(int_value_1 == 5);
+	fmt::println_string("\ntest case 1");
+	int_value_1 = 5;
+	debug::debug_assert(int_value_1 == 5);
 
-int_value_1 = increase_one(4);
-debug::debug_assert(int_value_1 == 5);
+	int_value_1 = increase_one(4);
+	debug::debug_assert(int_value_1 == 5);
 
-int_value_1 = add_two(2, 3);
-debug::debug_assert(int_value_1 == 5);
-
-
-int_value_1 = 5;
-int_value_1 += int_value_1;
-debug::debug_assert(int_value_1 == 10);
+	int_value_1 = add_two(2, 3);
+	debug::debug_assert(int_value_1 == 5);
 
 
-
-
-
-fmt::println_string("\ntest case 2");
-
-int_value_1 = 5;
-int_value_1 += increase_one(4);
-fmt::println_int(int_value_1);
-debug::debug_assert(int_value_1 == 10);
-
-int_value_1 += increase_one(4);
-fmt::println_int(int_value_1);
-debug::debug_assert(int_value_1 == 15);
+	int_value_1 = 5;
+	int_value_1 += int_value_1;
+	debug::debug_assert(int_value_1 == 10);
 
 
 
 
-fmt::println_string("\ntest case 3");
 
-int_value_1 = 5;
-int_value_1 += add_two(13, 12);
-fmt::println_int(int_value_1);
-debug::debug_assert(int_value_1 == 30);
+	fmt::println_string("\ntest case 2");
 
-int_value_1 += add_two(13, 12);
-fmt::println_int(int_value_1);
-debug::debug_assert(int_value_1 == 55);
+	int_value_1 = 5;
+	int_value_1 += increase_one(4);
+	fmt::println_int(int_value_1);
+	debug::debug_assert(int_value_1 == 10);
+
+	int_value_1 += increase_one(4);
+	fmt::println_int(int_value_1);
+	debug::debug_assert(int_value_1 == 15);
+
+
+
+
+	fmt::println_string("\ntest case 3");
+
+	int_value_1 = 5;
+	int_value_1 += add_two(13, 12);
+	fmt::println_int(int_value_1);
+	debug::debug_assert(int_value_1 == 30);
+
+	int_value_1 += add_two(13, 12);
+	fmt::println_int(int_value_1);
+	debug::debug_assert(int_value_1 == 55);
 
 
 

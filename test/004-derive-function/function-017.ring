@@ -21,16 +21,16 @@ function test(var int int_value_1, var int int_value_2, var int int_value_3) -> 
 @main
 function main() {
 
-var int int_value;
-
-int_value = 1 + 2;
-
-int_value = test(11, 22, 33);
-fmt::println_int(int_value);
-debug::debug_assert(int_value == 66);
-
-int_value -= test(11, 22, 33);
-fmt::println_int(int_value);
-debug::debug_assert(int_value == 0);
+    var int int_value;
+    
+    int_value = 1 + 2;
+    
+    int_value = test(11, 22, 33);
+    fmt::println_int(int_value);
+    debug::debug_assert(int_value == 66);
+    
+    int_value -= test(11, 22, 33);
+    fmt::println_int(int_value);
+    debug::debug_assert(int_value == 0);
 
 }

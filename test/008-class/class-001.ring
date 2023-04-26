@@ -42,18 +42,18 @@ global {
 @main
 function main() {
 
-fmt::println_string("\ntest case 1");
-
-job_0.PrintInfo();
-job_0.GetStatus();
-job_0.GetJobID();
-job_0.GetScore();
-
-fmt::println_string("\ntest case 2");
-
-job_1.PrintInfo();
-job_1.GetStatus();
-job_1.GetJobID();
-job_1.GetScore();
+    fmt::println_string("\ntest case 1");
+    
+    job_0.PrintInfo();
+    job_0.GetStatus();
+    job_0.GetJobID();
+    job_0.GetScore();
+    
+    fmt::println_string("\ntest case 2");
+    
+    job_1.PrintInfo();
+    job_1.GetStatus();
+    job_1.GetJobID();
+    job_1.GetScore();
 
 }

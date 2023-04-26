@@ -60,6 +60,6 @@ function test() {
 @main
 function main() {
 
-test();
+	test();
 }
 

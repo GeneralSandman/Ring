@@ -14,7 +14,6 @@ import {
 @main
 function main() {
 
-
 	var bool bool_value;
 
 
