@@ -1,18 +1,18 @@
-# The ```Ring``` Programming Language
+# The **Ring** Programming Language
 
 
 
 > [!TIP|style:flat|label:What is Ring]
 > 
 > 
-> ```Ring```是基于C++语言开发的一个轻量级的脚本编程语言，支持**面向过程式**、**面向对象**两种编程范式，语法设计参考自**C、C++、Java、Go、Lua、PHP、Python、Rust**等语言规范。
+> **Ring**是基于C++语言开发的一个轻量级的脚本编程语言，支持**面向过程式**、**面向对象**两种编程范式，语法设计参考自**C、C++、Java、Go、Lua、PHP、Python、Rust**等语言规范。
 > 
-> ```Ring```源代码编译生成字节码后由**栈式虚拟机**执行。
+> *Ring*源代码编译生成字节码后由**栈式虚拟机**执行。
 > 
-> ```Ring```编译器采用模块式设计：实现方法简单、轻巧，易扩展。
+> *Ring*编译器采用模块式设计：实现方法简单、轻巧，易扩展。
 
 
-## 快速了解```Ring```特性
+## 快速了解*Ring*特性
 
 - 语法类似```C、C++、Go``` 语言
 - 支持**面向过程式**、**面向对象**两种编程范式
@@ -27,7 +27,7 @@
 - ~~标准库：打印输出、字符串、文件操作、数学计算~~
 
 
-#### [```Ring```一些宏远的规划](./markdown/Ring编译器设计/Ring未来展望)
+#### [*Ring*一些宏远的规划](./markdown/Ring编译器设计/Ring未来展望)
 
 
 > [!TIP|style:callout|label:Ring官方网站]
