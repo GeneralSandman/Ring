@@ -174,13 +174,6 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
             pos->variable_index = block->declaration_list_size++;
             pos->is_local       = 1;
         } else {
-            // PackageUnit* package_unit = get_package_unit();
-            // package_unit->declaration_list =
-            //     declaration_list_add_item(package_unit->declaration_list, pos);
-
-            // pos->variable_index = package_unit->declaration_list_size++;
-            // pos->is_local       = 0;
-
             PackageUnit* package_unit = get_package_unit();
             pos->variable_index       = package_unit->global_declaration_list.size();
             pos->is_local             = 0;

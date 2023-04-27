@@ -301,7 +301,7 @@ definition_or_statement
     ;
 
 class_definition
-    : TOKEN_TYPEDEF TOKEN_CLASS IDENTIFIER TOKEN_LC { $<m_class_definition>$ = start_class_definition($3); } class_member_declaration_list TOKEN_RC TOKEN_SEMICOLON
+    : TOKEN_TYPEDEF TOKEN_CLASS IDENTIFIER TOKEN_LC { $<m_class_definition>$ = start_class_definition($3); } class_member_declaration_list TOKEN_RC
     {
         debug_log_with_green_coloar("[RULE::class_definition]\t ");
         $<m_class_definition>$ = finish_class_definition($<m_class_definition>5, $6);

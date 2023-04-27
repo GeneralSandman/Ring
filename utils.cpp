@@ -10,14 +10,10 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 void ring_compiler_functions_dump(PackageUnit* package_unit) {
     printf(" ************  compiler functions dump ****\n");
-    // Function*    func;
     Declaration* decl;
     int          i = 0;
     int          j = 0;
 
-    // for (j = 0, decl = package_unit->declaration_list; decl; decl = decl->next, j++) {
-    //     printf("global-variable[%d]: name:%s\n", j, decl->identifier);
-    // }
     for (Declaration* decl : package_unit->global_declaration_list) {
         printf("global-variable: name:%s\n", decl->identifier);
     }

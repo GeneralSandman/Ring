@@ -632,6 +632,7 @@ Block* start_new_block() {
 
     return block;
 }
+
 Block* finish_block(Block* block, Statement* statement_list) {
     debug_log_with_yellow_coloar("\t");
     assert(block == get_package_unit()->current_block);
