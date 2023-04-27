@@ -17,7 +17,7 @@ typedef class Job {
     method Job(var bool _Running, var int _JobID, var double _Score);
 
     method PrintInfo();
-};
+}
 
 /*
 method Job::Init(var bool _Running, var int _JobID, var double _Score) {

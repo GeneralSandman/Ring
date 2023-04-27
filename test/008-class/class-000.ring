@@ -17,12 +17,11 @@ typedef class Job {
     method Job(var bool _Running, var int _JobID, var double _Score);
 
     method PrintInfo();
-};
+}
 
 global {
-var Job job_0;
-var Job job_1;
-
+    var Job job_0;
+    var Job job_1;
 }
 
 @main

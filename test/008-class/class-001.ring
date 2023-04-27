@@ -31,7 +31,7 @@ typedef class Job {
     method GetScore() {
         fmt::println_string("invoke Job::GetScore");
     }
-};
+}
 
 global {
     var Job job_0;

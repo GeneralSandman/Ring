@@ -17,7 +17,7 @@ typedef class Job {
     method Job(var bool _Running, var int _JobID, var double _Score);
 
     method PrintInfo();
-};
+}
 
 global {
     var int global_int_value_1;

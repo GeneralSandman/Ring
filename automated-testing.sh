@@ -4,6 +4,20 @@
 
 TEST_PATH="./test"
 
+TEST_MODELS=(
+    "001-basic-type" 
+    "002-operator" 
+    "003-native-function" 
+    "004-derive-function" 
+    "005-control-flow" 
+    "006-variable" 
+    "008-class" 
+    "009-package" 
+    "010-main-entry" 
+    "011-global-variable" 
+    "012-local-variable"
+    )
+
 TEST_RESULT="./automated-testing.sh.result"
 
 pass_num=0
@@ -16,7 +30,6 @@ autoTestFunc(){
     run_result_file=$2"/"$3".result"
     run_result_file_tmp=$2"/"$3".result.tmp"
     result=""
-
 
     ./bin/ring run $source_code_file > $run_result_file_tmp
     diff $run_result_file $run_result_file_tmp
@@ -33,7 +46,6 @@ autoTestFunc(){
     rm $run_result_file_tmp
 }
 
-
 printNotPassCase(){
     if [ ! -f "$TEST_RESULT" ]; then
     return 0
@@ -49,7 +61,7 @@ printf "%-4s %-16s %-60s %-60s %s\n" num model source_code_file run_result_file 
 
 for i in {1..1}; do {
 
-    for model in "001-basic-type" "002-operator" "003-native-function" "004-derive-function" "005-control-flow" "006-variable" "008-class" "009-package" ; do
+    for model in ${TEST_MODELS[@]} ; do
         source_file_path=$TEST_PATH"/"$model
         for file in `ls $source_file_path`; do
             extension=${file##*.}
@@ -69,6 +81,4 @@ printf "\n\n"
 printf "[Result]:\n"
 printf "[pass/all=%s/%s]\n\n" $pass_num $all_num 
 
-
 printNotPassCase
-
