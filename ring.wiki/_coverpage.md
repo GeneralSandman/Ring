@@ -2,15 +2,17 @@
 
 ![](./media/ring-logo-1.png)
 
-# Ring <small>version: ring-v0.2.0-beta</small>
+# Ring <small>version: ring-v0.2.1-beta</small>
 
-> 一个基于C++语言开发的轻量级脚本编程语言
+> 轻量级脚本编程语言
 > 
 
+- 基于C++11设计实现
 - 静态类型
 - 面向过程式、面向对象
-- 语法规范类似```C、C++、Go```
-- 源代码编译生成字节码后由栈式虚拟机执行
+- 语法规范简洁无冗余
+- 代码编译生成字节码交由栈式虚拟机执行
+- 较为丰富的标准库
+- 可原生调用C语言
 
-[Get Started Wiki](./README.md)
-[GitHub](https://github.com/GeneralSandman/Ring)
+[Get Started Wiki](./markdown/index-v2/001-Ring简介.md)
