@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ch">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ring</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="Description">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+
+    <!-- 主题 -->
+    <!-- 原始主题 -->
+    <link rel="stylesheet" href="./lib/vue.css">
+    <link rel="stylesheet" href="./lib/prism.css">
+
+    <link rel="stylesheet" href="./lib/docsify-darklight-theme-style.min.css" title="docsify-darklight-theme" type="text/css" />
+
+    <!-- 额外主题 -->
+    <!-- https://jhildenbiddle.github.io/docsify-themeable/#/quick-start?id=installation -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-defaults.css"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css"> -->
+    <!-- 主题 -->
+
+    <link rel="stylesheet" href="./lib/normalize.css">
+    <!-- <link rel="stylesheet" href="./lib/prism-coy.min.css"> -->
+    <!-- <link rel="stylesheet" href="./lib/prism-toolbar.min.css"> -->
+    <!-- <link rel="stylesheet" href="./lib/prism-line-numbers.min.css"> -->
+</head>
+
+<body>
+    <div id="app">加载中</div>
+    <script>
+        window.$docsify = {
+            loadSidebar: true,
+            subMaxLevel: 2,
+            loadNavbar: true,
+            coverpage: true,
+            onlyCover: true,
+            name: 'Ring 首页',
+            logo: './media/ring-logo-2.png',
+            auto2top: true,
+            plantuml: {
+                skin: 'classic',
+            },
+
+            themeColor: '#3F51B5',
+
+            mergeNavbar: true,
+
+            topMargin: 10,
+            markdown: {
+                renderer: {
+                    // 图片居中
+                    image: function(href, title, text) {
+                        var image_html = this.origin.image.apply(this, arguments)
+                        return '<figure>' + image_html + '<figcaption>' + text +
+                            '</figcaption></figure>'
+                    }
+                }
+            },
+            'flexible-alerts': {
+                style: 'flat',
+                skin: 'classic',
+            },
+        }
+    </script>
+
+    <script src="./lib/js/docsify@4"></script>
+    <script src="./lib/js/click_heart.js"></script>
+    <script src="./lib/js/docsify-plugin-flexible-alerts.min.js"></script>
+    <script src="./lib/js/prism-ring.js"></script>
+    <script src="./lib/js/prism-shell.js"></script>
+
+    <!--prism核心js (用于渲染代码块)-->
+    <!-- <script src="./lib/js/prism.min.js"></script> -->
+    <!--显示代码块行号-->
+    <script src="./lib/js/prism-line-numbers.min.js"></script>
+    <!--工具栏(一些插件的前置依赖)-->
+    <script src="./lib/js/prism-toolbar.min.js"></script>
+    <!--自动去cdn加载对应语言的代码高亮js-->
+    <script src="./lib/js/prism-autoloader.min.js"></script>
+    <script src="./lib/js/docsify-plantuml.min.js"></script>
+
+    <script src="./lib/js/prism.js"></script>
+
+    <script src="./lib/docsify-darklight-theme-index.min.js" type="text/javascript">
+    </script>
+
+
+    <!-- docsify-themeable (latest v0.x.x) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script> -->
+
+    <style>
+        figure {
+            text-align: center
+        }
+    </style>
+
+</body>
+
+</html>

@@ -220,33 +220,28 @@
 ## Get Started
 
 
-```shell
+```terminal
 
-git clone https://github.com/GeneralSandman/Ring
+>|info| git clone https://github.com/GeneralSandman/Ring
 
-cd Ring
-
-
-
-make && make clean
-
-make testall
-
-make install
+>|info| cd Ring
 
 
 
-ring version
+$|success| make && make clean
 
-ring run test/helloworld.ring
+$|success| make testall
 
-ring help
+$|success| make install
+
+
+
+$|info| ring version
+
+$|info| ring run test/helloworld.ring
+
+$|info| ring help
 
 ```
-
-
-
-
-
 
 
