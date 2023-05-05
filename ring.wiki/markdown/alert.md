@@ -37,3 +37,20 @@
 
 > [!ATTENTION|style:callout]
 > An alert of type 'attention' using global style 'callout'.
+
+
+<!-- tabs:start -->
+
+#### **English**
+
+Hello!
+
+#### **French**
+
+Bonjour!
+
+#### **Italian**
+
+Ciao!
+
+<!-- tabs:end -->

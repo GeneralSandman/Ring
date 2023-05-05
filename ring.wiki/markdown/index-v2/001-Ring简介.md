@@ -1,15 +1,18 @@
-# The **Ring** Programming Language
+# The Ring Programming Language
 
 
-> [!TIP|style:callout|label:Ring官方网站]
+> [!TIP|label:Ring Official Website]
 > 
 > https://ring.wiki
 > 
 > https://ring-1252697766.cos-website.ap-beijing.myqcloud.com
+>
+> Power by Docsify
+> 
 
 
 
-## What is Ring Language
+## 1. What is Ring Language
 
 **Ring** 是由zhenhuli与2021年开始设计实现的高级编程语言，目标：轻量级脚本编程语言、解决目前现有编程语言的痛点。
 
@@ -19,21 +22,21 @@
 
 - 语法设计参考自**C、C++、Java、Go、Lua、PHP、Python、Rust**等语言规范。
 
-- **Ring** 支持的是静态类型系统。
+- 静态类型系统。
 
 - **Ring** 源代码编译生成字节码后由**栈式虚拟机**执行。
 
 
 
-## Get Ring Features
+## 2. Get Ring Features
 
-- 语法类似```C、C++、Go``` 语言
+- 语法类似 *C、C++、Go* 语言
 - 支持**面向过程式**
 - 支持**面向对象**
 - 静态类型
 - 源代码编译生成字节码后由**栈式虚拟机**执行
 
-## Ring ToDo Features
+## 3. Ring ToDo Features
 
 - ~~跨平台运行~~
 - ~~具有原生的项目构建和包依赖管理工具 ```hobbit```~~
@@ -44,7 +47,7 @@
 - ~~实现一系列标准库：IO、字符串、文件操作、数学计算、Socket、网络~~
 
 
-## Get Ring Basic Ability
+## 4. Get Ring Basic Ability
 
 <table>
 <tr>
@@ -211,37 +214,4 @@
 
 
 </table>
-
-
-
-
-
-
-## Get Started
-
-
-```terminal
-
->|info| git clone https://github.com/GeneralSandman/Ring
-
->|info| cd Ring
-
-
-
-$|success| make && make clean
-
-$|success| make testall
-
-$|success| make install
-
-
-
-$|info| ring version
-
-$|info| ring run test/helloworld.ring
-
-$|info| ring help
-
-```
-
 
