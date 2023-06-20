@@ -4,7 +4,7 @@
 std::vector<StdPackageInfo> Std_Lib_List = {
     {
         (char*)"fmt",
-        (char*)"/Users/zhenhuli/Desktop/Ring/std/fmt/",
+        RING_PACKAGE_STD_PAHT_FMT,
         std::vector<StdPackageNativeFunction>{
             {(char*)"println_bool", std_fmt_lib_println_bool, 1},
             {(char*)"println_int", std_fmt_lib_println_int, 1},
@@ -15,7 +15,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
 
     {
         (char*)"debug",
-        (char*)"/Users/zhenhuli/Desktop/Ring/std/debug/",
+        RING_PACKAGE_STD_PATH_DEBUG,
         std::vector<StdPackageNativeFunction>{
             {(char*)"debug_assert", std_debug_lib_debug_assert, 1},
         },

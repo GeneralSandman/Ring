@@ -6,7 +6,10 @@
 #include <unordered_map>
 #include <vector>
 
-#define RING_VERSION "ring-v0.2.1-beta"
+#define RING_VERSION "ring-v0.2.2-beta"
+
+#define RING_PACKAGE_STD_PAHT_FMT "/usr/local/ring/std/fmt/"
+#define RING_PACKAGE_STD_PATH_DEBUG "/usr/local/ring/std/debug/"
 
 typedef struct Ring_VirtualMachine Ring_VirtualMachine;
 
