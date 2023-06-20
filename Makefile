@@ -23,6 +23,26 @@ CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-
 BIN = ./bin
 INCLUDES = \
 
+
+INSTALL_TOP= /usr/local
+INSTALL_BIN= $(INSTALL_TOP)/bin
+INSTALL_PACK= $(INSTALL_TOP)/ring
+INSTALL_PACK_STD = $(INSTALL_TOP)/ring/std
+
+CMD_INSTALL= install -p
+CMD_INSTALL_EXEC= $(CMD_INSTALL) -m 0755
+CMD_INSTALL_DATA= $(CMD_INSTALL) -m 0644
+
+CMD_MKDIR= mkdir -p
+CMD_RM= rm -r
+
+PLATS= linux macosx
+
+T_BIN= ring
+T_STD_PACKS= debug fmt math strings
+
+
+
 .SUFFIXES: .cpp .c
 .cpp.o:
 	$(CC) $(CFLAGS) $<
@@ -31,15 +51,46 @@ $(TARGET):$(OBJS); $(shell if [ ! -e $(BIN) ];then mkdir -p $(BIN); fi)
 	$(CC) $(OBJS) -lm -pthread -o $(BIN)/$@
 
 install:
-	install -p -m 0755 ./bin/ring /usr/local/bin
+	$(CMD_INSTALL_EXEC) ./bin/ring $(INSTALL_BIN)
+	$(call install_package_std)
+
 uninstall:
-	cd /usr/local/bin && rm ring
+	$(CMD_RM) $(INSTALL_BIN)/ring
+	$(call uninstall_package_std)
+
 clean:
 	rm -f *.o lex.yy.c y.tab.c y.tab.h y.output *~
 
 testall:
 	sh ./automated-testing.sh
   
+
+define func_install_package_std
+	@echo "install package std:$(1)"
+	$(CMD_MKDIR) $(INSTALL_PACK_STD)/$(1)
+	$(CMD_INSTALL_DATA) std/$(1)/* $(INSTALL_PACK_STD)/$(1)
+endef
+
+define func_uninstall_package_std
+	@echo "uninstall package std:$(1)"
+	$(CMD_RM) $(INSTALL_PACK_STD)/$(1)
+endef
+
+define install_package_std
+	$(call func_install_package_std,debug)
+	$(call func_install_package_std,fmt)
+	$(call func_install_package_std,math)
+	$(call func_install_package_std,strings)
+endef
+	
+define uninstall_package_std
+	$(call func_uninstall_package_std,debug)
+	$(call func_uninstall_package_std,fmt)
+	$(call func_uninstall_package_std,math)
+	$(call func_uninstall_package_std,strings)
+endef
+
+
 y.tab.h : ring.bison.y
 	bison --yacc -dv ring.bison.y
 y.tab.c : ring.bison.y

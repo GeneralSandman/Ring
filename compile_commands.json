@@ -1,14 +1,17 @@
 [
  {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "directory": "/Users/bytedance/Desktop/Ring",
   "arguments": [
-   "gcc",
+   "g++",
    "-c",
-   "-std=c99",
+   "-std=c++11",
    "-Wall",
    "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
    "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
    "-c",
    "-o",
    "lex.yy.o",
@@ -17,15 +20,18 @@
   "file": "lex.yy.c"
  },
  {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "directory": "/Users/bytedance/Desktop/Ring",
   "arguments": [
-   "gcc",
+   "g++",
    "-c",
-   "-std=c99",
+   "-std=c++11",
    "-Wall",
    "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
    "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
    "-c",
    "-o",
    "y.tab.o",
@@ -34,228 +40,7 @@
   "file": "y.tab.c"
  },
  {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "string.o",
-   "string.c"
-  ],
-  "file": "string.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "create_ast.o",
-   "create_ast.c"
-  ],
-  "file": "create_ast.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "semantic_check.o",
-   "semantic_check.c"
-  ],
-  "file": "semantic_check.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "fix_ast.o",
-   "fix_ast.c"
-  ],
-  "file": "fix_ast.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "generate.o",
-   "generate.c"
-  ],
-  "file": "generate.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "execute.o",
-   "execute.c"
-  ],
-  "file": "execute.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "compiler.o",
-   "compiler.c"
-  ],
-  "file": "compiler.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "inner_func.o",
-   "inner_func.c"
-  ],
-  "file": "inner_func.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "interactive.o",
-   "interactive.c"
-  ],
-  "file": "interactive.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "utils.o",
-   "utils.c"
-  ],
-  "file": "utils.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "main.o",
-   "main.c"
-  ],
-  "file": "main.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "bytecode.o",
-   "bytecode.c"
-  ],
-  "file": "bytecode.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
-  "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "error_msg.o",
-   "error_msg.c"
-  ],
-  "file": "error_msg.c"
- },
- {
-  "directory": "/Users/zhenhuli/Desktop/Ring",
+  "directory": "/Users/bytedance/Desktop/Ring",
   "arguments": [
    "gcc",
    "-c",
@@ -270,5 +55,175 @@
    "thread_pool.c"
   ],
   "file": "thread_pool.c"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "string.cpp"
+  ],
+  "file": "string.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "create_ast.cpp"
+  ],
+  "file": "create_ast.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "fix_ast.cpp"
+  ],
+  "file": "fix_ast.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "generate.cpp"
+  ],
+  "file": "generate.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "execute.cpp"
+  ],
+  "file": "execute.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "compiler.cpp"
+  ],
+  "file": "compiler.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "error_msg.cpp"
+  ],
+  "file": "error_msg.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "utils.cpp"
+  ],
+  "file": "utils.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "std_lib.cpp"
+  ],
+  "file": "std_lib.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-gnu-zero-variadic-macro-arguments",
+   "-Wno-unused-function",
+   "-Wno-pedantic",
+   "-g",
+   "-DDEBUG1",
+   "-DDEBUG_RVM1",
+   "main.cpp"
+  ],
+  "file": "main.cpp"
  }
 ]

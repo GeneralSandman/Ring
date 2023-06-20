@@ -9,7 +9,7 @@
         "program": "${fileDirname}/bin/ring",
         "args": [
             "run", 
-            "${fileDirname}/test/beat/class/class-005.ring"
+            "${fileDirname}/test/009-package/std-debug-000.ring"
         ],
         "cwd": "${workspaceRoot}",
         "environment": [],
