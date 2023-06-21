@@ -34,7 +34,7 @@ CMD_INSTALL_EXEC= $(CMD_INSTALL) -m 0755
 CMD_INSTALL_DATA= $(CMD_INSTALL) -m 0644
 
 CMD_MKDIR= mkdir -p
-CMD_RM= rm -r
+CMD_RM= rm -rf
 
 PLATS= linux macosx
 
