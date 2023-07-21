@@ -19,7 +19,20 @@ OBJS = \
 # CFLAGS -DDEBUG_RVM 开启 debug ring virtual machine 信息
 # -lm for fmod function
 # -lncurses for tigetnum tigetnum
-CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic # -g -DDEBUG1 -DDEBUG_RVM1
+
+# DEBUG_XX 来控制不同阶段的debug日志
+# DEBUG_COMPILER 控制编译阶段的信息：词法分析、语法分析、语意分析
+# DEBUG_GENERATE_DETAIL 代码生成阶段 详情
+# DEBUG_GENERATE_SUMMARY 代码生成阶段 概要
+# DEBUG_STD_LIB 控制 std lib 的 debug 路径
+# DEBUG_RVM 控制调试RVM
+CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic \
+				 -g \
+				 -DDEBUG1 \
+				 -DDEBUG_STD_LIB \
+				 -DDEBUG_COMPILER_SUMMARY \
+				 -DDEBUG_GENERATE_SUMMARY1 \
+				 -DDEBUG_RVM1
 BIN = ./bin
 INCLUDES = \
 

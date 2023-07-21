@@ -181,11 +181,12 @@ void ring_generate_vm_code(Package* package, Package_Executer* package_executer)
     add_classes(package, package_executer);
     add_top_level_code(package, package_executer);
 
-#ifdef DEBUG
+#ifdef DEBUG_GENERATE_SUMMARY
     package_executer_dump(package_executer);
 #endif
 }
 
+// 只生成主包的vm code
 void ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry) {
     debug_log_with_darkgreen_coloar("\t");
 
@@ -209,7 +210,7 @@ void ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterEntry* execute
     //     executer_entry->package_executer_list.push_back(package_executer);
     // }
 
-#ifdef DEBUG
+#ifdef DEBUG_GENERATE_SUMMARY
     executer_entry_dump(executer_entry);
 #endif
 }

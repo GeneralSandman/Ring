@@ -43,7 +43,9 @@ void compiler_entry_dump(CompilerEntry* compiler_entry) {
     }
 
     printf("|MainPackage:\n");
-    printf("|## package_name:%s,package_path:%s\n", compiler_entry->main_package->package_name, compiler_entry->main_package->package_path);
+    printf("|## package_name:%s,package_path:%s\n",
+           compiler_entry->main_package->package_name,
+           compiler_entry->main_package->package_path);
 
 
     printf("|------------------ CompilerEntry-Dump-begin ------------------\n\n");
@@ -80,11 +82,10 @@ void executer_entry_dump(ExecuterEntry* executer_entry) {
     printf("|------------------ ExecuterEntry-Dump-end  ------------------\n\n");
 }
 
-
+// create package from a package's dir which contains multi files
 Package* package_create(CompilerEntry* compiler_entry, char* package_name, char* package_path) {
-    debug_log_with_yellow_coloar("\t package[%s] create", package_name);
-
     assert(compiler_entry != NULL);
+    debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 
     Package* package = (Package*)malloc(sizeof(Package));
 
@@ -104,8 +105,10 @@ Package* package_create(CompilerEntry* compiler_entry, char* package_name, char*
     return package;
 }
 
+// create package from only source file
 Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_name, char* input_main_file) {
     assert(compiler_entry != NULL);
+    debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 
     Package* package = (Package*)malloc(sizeof(Package));
 
@@ -142,20 +145,20 @@ void package_compile(Package* package) {
         PackageUnit* package_unit = package_unit_create(package, source_file.c_str());
         package_unit_compile(package_unit);
 
-        for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
-            // // TODO:
-            // char* package_name = import_package_info->package_name;
-            // char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring//"; // TODO:
+        // for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
+        // // TODO:
+        // char* package_name = import_package_info->package_name;
+        // char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring//"; // TODO:
 
-            // if (NULL != search_package(compiler_entry, package_name)) {
-            //     debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
-            //     continue;
-            // }
-            // Package* import_package       = package_create(compiler_entry, package_name, package_path);
-            // import_package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
-            // compiler_entry->package_list.push_back(import_package);
-            // package_compile(import_package);
-        }
+        // if (NULL != search_package(compiler_entry, package_name)) {
+        //     debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
+        //     continue;
+        // }
+        // Package* import_package       = package_create(compiler_entry, package_name, package_path);
+        // import_package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
+        // compiler_entry->package_list.push_back(import_package);
+        // package_compile(import_package);
+        //}
 
         package->package_unit_list.push_back(package_unit);
     }
@@ -174,15 +177,13 @@ void package_compile(Package* package) {
         for (Function* pos : package_unit->function_list) {
             package->function_list.push_back(pos);
         }
-
-#ifdef DEBUG
-        package_unit_dump(package_unit);
-#endif
     }
 
-#ifdef DEBUG
+#ifdef DEBUG_COMPILER_SUMMARY
     package_dump(package);
-    compiler_entry_dump(compiler_entry);
+    for (PackageUnit* package_unit : package->package_unit_list) {
+        package_unit_dump(package_unit);
+    }
 #endif
 }
 
@@ -211,9 +212,10 @@ void package_dump(Package* package) {
         printf("|\tfunction function_name:%s\n", function->function_name);
     }
 
-    printf("|------------------ Package-Dump-end  ------------------\n\n");
+    printf("|------------------ Package-Dump-end  ------------------\n");
 }
 
+// create packge by a input source file
 PackageUnit* package_unit_create(Package* parent_package, std::string file_name) {
     package_unit = (PackageUnit*)malloc(sizeof(PackageUnit));
 
@@ -265,7 +267,7 @@ void package_unit_compile(PackageUnit* package_unit) {
         exit(ERROR_CODE_COMPILE_ERROR);
     }
 
-    debug_log_with_yellow_coloar("\t compile_unit COMPLIE SUCCESS\n\n");
+    debug_log_with_yellow_coloar("\t package_unit COMPLIE SUCCESS\n\n");
 }
 
 void package_unit_dump(PackageUnit* package_unit) {
@@ -288,7 +290,7 @@ void package_unit_dump(PackageUnit* package_unit) {
         printf("|\tfunction function_name:%s\n", function->function_name);
     }
 
-    printf("|------------------ PackageUnit-Dump-end  ------------------\n\n");
+    printf("|------------------ PackageUnit-Dump-end  ------------------\n");
 }
 
 
