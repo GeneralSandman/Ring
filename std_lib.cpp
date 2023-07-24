@@ -1,6 +1,14 @@
 #include "ring.h"
 #include <vector>
 
+#ifdef DEBUG_STD_LIB
+char RING_PACKAGE_STD_PAHT_FMT[]   = "/Users/bytedance/Desktop/Ring/std/fmt/";
+char RING_PACKAGE_STD_PATH_DEBUG[] = "/Users/bytedance/Desktop/Ring/std/debug/";
+#else
+char RING_PACKAGE_STD_PAHT_FMT[]   = "/usr/local/ring/std/fmt/";
+char RING_PACKAGE_STD_PATH_DEBUG[] = "/usr/local/ring/std/debug/";
+#endif
+
 std::vector<StdPackageInfo> Std_Lib_List = {
     {
         (char*)"fmt",

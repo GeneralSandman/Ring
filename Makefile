@@ -27,11 +27,13 @@ OBJS = \
 # DEBUG_STD_LIB 控制 std lib 的 debug 路径
 # DEBUG_RVM 控制调试RVM
 CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic \
-				 -g \
+				 # -g \
 				 -DDEBUG1 \
 				 -DDEBUG_STD_LIB \
-				 -DDEBUG_COMPILER_SUMMARY \
-				 -DDEBUG_GENERATE_SUMMARY1 \
+				 -DDEBUG_COMPILER_SUMMARY1 \
+				 -DDEBUG_COMPILER_DETAIL1 \
+				 -DDEBUG_GENERATE_SUMMARY \
+				 -DDEBUG_GENERATE_DETAIL1 \
 				 -DDEBUG_RVM1
 BIN = ./bin
 INCLUDES = \

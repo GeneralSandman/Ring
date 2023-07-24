@@ -184,6 +184,7 @@ void package_compile(Package* package) {
     for (PackageUnit* package_unit : package->package_unit_list) {
         package_unit_dump(package_unit);
     }
+    printf("\n\n");
 #endif
 }
 

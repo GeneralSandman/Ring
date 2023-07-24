@@ -8,13 +8,6 @@
 
 #define RING_VERSION "ring-v0.2.2-beta"
 
-#ifdef DEBUG_STD_LIB
-#define RING_PACKAGE_STD_PAHT_FMT "/Users/bytedance/Desktop/Ring/std/fmt/"
-#define RING_PACKAGE_STD_PATH_DEBUG "/Users/bytedance/Desktop/Ring/std/debug/"
-#else
-#define RING_PACKAGE_STD_PAHT_FMT "/usr/local/ring/std/fmt/"
-#define RING_PACKAGE_STD_PATH_DEBUG "/usr/local/ring/std/debug/"
-#endif
 
 typedef struct Ring_VirtualMachine Ring_VirtualMachine;
 
