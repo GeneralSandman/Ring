@@ -9,10 +9,10 @@ AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 
 # 连续赋值时，对齐所有等号
-AlignConsecutiveAssignments: true
+AlignConsecutiveAssignments: AcrossEmptyLinesAndComments
 
 # 连续声明时，对齐所有声明的变量名
-AlignConsecutiveDeclarations: true
+AlignConsecutiveDeclarations: AcrossEmptyLinesAndComments
 
 # 右对齐逃脱换行(使用反斜杠换行)的反斜杠
 AlignEscapedNewlines: Right
@@ -157,7 +157,7 @@ PointerAlignment: Left
 ReflowComments: true
 
 # 允许排序#include
-SortIncludes: true
+SortIncludes: CaseSensitive
 
 # 允许排序 using 声明
 SortUsingDeclarations: false
@@ -204,7 +204,7 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 
 # 标准: Cpp03, Cpp11, Auto
-Standard: Cpp11
+Standard: c++11
 
 # tab宽度
 TabWidth: 4

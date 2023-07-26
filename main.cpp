@@ -60,19 +60,19 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    CompilerEntry* compiler_entry = compiler_entry_create();
-    // TOOD: 目前main package 只能有一个源文件
-    Package* main_package        = package_create_input_file(compiler_entry, (char*)"main", file_name);
-    compiler_entry->main_package = main_package; // TODO: optimize the method of set main_package;
+    CompilerEntry* compiler_entry         = compiler_entry_create();
+    // TODO: 目前main package 只能有一个源文件
+    Package*       main_package           = package_create_input_file(compiler_entry, (char*)"main", file_name);
+    compiler_entry->main_package          = main_package; // TODO: optimize the method of set main_package;
 
     ExecuterEntry*    executer_entry      = executer_entry_create();
     Package_Executer* package_executer    = package_executer_create(executer_entry, main_package->package_name);
     executer_entry->main_package_executer = package_executer; // TODO: optimize the method of set main_package_executer;
 
-    Ring_VirtualMachine* ring_vm = ring_virtualmachine_create();
+    Ring_VirtualMachine* ring_vm          = ring_virtualmachine_create();
 
 
-    // Step-0: 预编译官方std包
+    // Step-0: 预编译官方std包, 并生成vmcode
     compile_std_lib(compiler_entry, executer_entry);
 
     // Step-1: flex 词法分析，

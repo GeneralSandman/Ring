@@ -11,7 +11,7 @@ static PackageUnit*      package_unit   = NULL;
 static CompilerEntry*    compiler_entry = NULL;
 
 // Error Attention 某些错误提示可以精细化识别、提示
-void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
+void                     ring_compiler_error(SyntaxType syntax_type, int need_exit) {
     std::string message = "syntax error:\nRing Grammar Standard:\n\t" + std::string(SyntaxInfos[SYNTAX_VARIABLE_DEFINITION].bnf);
     yyerror(message.c_str());
     package_unit->compile_error_num++;
@@ -87,20 +87,20 @@ Package* package_create(CompilerEntry* compiler_entry, char* package_name, char*
     assert(compiler_entry != NULL);
     debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 
-    Package* package = (Package*)malloc(sizeof(Package));
+    Package* package                 = (Package*)malloc(sizeof(Package));
 
-    package->compiler_entry = compiler_entry;
-    package->package_index  = -1; // TODO: 这个应该在 fix的时候 设置
-    package->package_name   = package_name;
-    package->package_path   = package_path;
+    package->compiler_entry          = compiler_entry;
+    package->package_index           = -1; // TODO: 这个应该在 fix的时候 设置
+    package->package_name            = package_name;
+    package->package_path            = package_path;
 
-    package->source_file_list = list_file(package->package_path);
+    package->source_file_list        = list_file(package->package_path);
 
     package->global_declaration_list = std::vector<Declaration*>{};
     package->class_definition_list   = std::vector<ClassDefinition*>{};
     package->function_list           = std::vector<Function*>{};
 
-    package->package_unit_list = std::vector<PackageUnit*>{};
+    package->package_unit_list       = std::vector<PackageUnit*>{};
 
     return package;
 }
@@ -110,20 +110,20 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
     assert(compiler_entry != NULL);
     debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 
-    Package* package = (Package*)malloc(sizeof(Package));
+    Package* package                 = (Package*)malloc(sizeof(Package));
 
-    package->compiler_entry = compiler_entry;
-    package->package_index  = -1; // TODO: 这个应该在 fix的时候 设置
-    package->package_name   = package_name;
-    package->package_path   = NULL;
+    package->compiler_entry          = compiler_entry;
+    package->package_index           = -1; // TODO: 这个应该在 fix的时候 设置
+    package->package_name            = package_name;
+    package->package_path            = NULL;
 
-    package->source_file_list = std::vector<std::string>{std::string(input_main_file)};
+    package->source_file_list        = std::vector<std::string>{std::string(input_main_file)};
 
     package->global_declaration_list = std::vector<Declaration*>{};
     package->class_definition_list   = std::vector<ClassDefinition*>{};
     package->function_list           = std::vector<Function*>{};
 
-    package->package_unit_list = std::vector<PackageUnit*>{};
+    package->package_unit_list       = std::vector<PackageUnit*>{};
 
     return package;
 }
@@ -218,31 +218,31 @@ void package_dump(Package* package) {
 
 // create packge by a input source file
 PackageUnit* package_unit_create(Package* parent_package, std::string file_name) {
-    package_unit = (PackageUnit*)malloc(sizeof(PackageUnit));
+    package_unit                                   = (PackageUnit*)malloc(sizeof(PackageUnit));
 
-    package_unit->parent_package = parent_package;
+    package_unit->parent_package                   = parent_package;
 
-    package_unit->current_file_name     = file_name;
-    package_unit->current_file_fp       = NULL;
-    package_unit->current_line_number   = 1;
-    package_unit->current_column_number = 1;
-    package_unit->current_line_content  = new_ring_string();
+    package_unit->current_file_name                = file_name;
+    package_unit->current_file_fp                  = NULL;
+    package_unit->current_line_number              = 1;
+    package_unit->current_column_number            = 1;
+    package_unit->current_line_content             = new_ring_string();
 
-    package_unit->import_package_list = std::vector<ImportPackageInfo*>{};
+    package_unit->import_package_list              = std::vector<ImportPackageInfo*>{};
 
     package_unit->global_block_statement_list_size = 0;
     package_unit->global_block_statement_list      = NULL;
     package_unit->global_declaration_list          = std::vector<Declaration*>{};
 
-    package_unit->class_definition_list = std::vector<ClassDefinition*>{};
+    package_unit->class_definition_list            = std::vector<ClassDefinition*>{};
 
-    package_unit->function_list = std::vector<Function*>{};
+    package_unit->function_list                    = std::vector<Function*>{};
 
-    package_unit->current_block = NULL;
+    package_unit->current_block                    = NULL;
 
-    package_unit->compile_error_num = 0;
+    package_unit->compile_error_num                = 0;
 
-    package_unit->current_file_fp = fopen(file_name.c_str(), "r");
+    package_unit->current_file_fp                  = fopen(file_name.c_str(), "r");
     if (package_unit->current_file_fp == NULL) {
         fprintf(stderr, "%s not found.\n", file_name.c_str());
         exit(1);
