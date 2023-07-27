@@ -11,6 +11,7 @@ TEST_MODELS=(
     "004-derive-function" 
     "005-control-flow" 
     "006-variable" 
+    "007-array"
     "008-class" 
     "009-package" 
     "010-main-entry" 

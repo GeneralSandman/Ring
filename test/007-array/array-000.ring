@@ -1,33 +1,32 @@
 
+package main
 
-var int[10] array;
-
-// array[0] = 1;
-// print("array[", 0 ,"]=", array[0], "\n");
-// print("array[", 1 ,"]=", array[1], "\n");
-// print("array[", 2 ,"]=", array[2], "\n");
-// print("array[", 3 ,"]=", array[3], "\n");
-// print("array[", 4 ,"]=", array[4], "\n");
-// print("array[", 5 ,"]=", array[5], "\n");
-// print("array[", 6 ,"]=", array[6], "\n");
-// print("array[", 7 ,"]=", array[7], "\n");
-// print("array[", 8 ,"]=", array[8], "\n");
-// print("array[", 9 ,"]=", array[9], "\n");
-
-
-var int i;
-
-for(i=0; i<10; i=i+1) {
-    print("array[", i ,"]=", array[i], "\n");
+import {
+    fmt;
+    debug;
 }
 
-print("\n");
+global {
+  var int int_value;
+  var int[] int_array;
+}
+
+@main
+function main() {
+
+  int_array = new int[10];
 
 
+  fmt::println_int(int_array[0]);
+  fmt::println_int(int_array[1]);
+  fmt::println_int(int_array[2]);
+  fmt::println_int(int_array[3]);
+  fmt::println_int(int_array[4]);
+  fmt::println_int(int_array[5]);
+  fmt::println_int(int_array[6]);
+  fmt::println_int(int_array[7]);
+  fmt::println_int(int_array[8]);
+  fmt::println_int(int_array[9]);
 
-// var int[] array2;
 
-// array2 = array[0:1];
-
-// // 支持使用负索引
-// print(array2[-1]);
+}
