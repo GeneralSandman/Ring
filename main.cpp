@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
 
     // Step-0: 读取文件
     fp = fopen(file_name, "r");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         fprintf(stderr, "%s not found.\n", file_name);
         exit(1);
     }

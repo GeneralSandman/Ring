@@ -6,7 +6,7 @@
 // 修正ast
 void ring_compiler_fix_ast(PackageUnit* package_unit) {
     // fix global block
-    fix_statement_list(package_unit->global_block_statement_list, NULL, NULL);
+    fix_statement_list(package_unit->global_block_statement_list, nullptr, nullptr);
 
     // fix function list
     for (Function* pos : package_unit->function_list) {
@@ -25,7 +25,7 @@ void ring_compiler_fix_ast(PackageUnit* package_unit) {
 }
 
 void fix_statement_list(Statement* statement_list, Block* block, Function* func) {
-    if (statement_list == NULL) {
+    if (statement_list == nullptr) {
         return;
     }
 
@@ -63,7 +63,7 @@ void fix_statement(Statement* statement, Block* block, Function* func) {
 }
 
 void fix_expression(Expression* expression, Block* block, Function* func) {
-    if (expression == NULL) {
+    if (expression == nullptr) {
         return;
     }
     switch (expression->type) {
@@ -161,15 +161,15 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
 
     Declaration* pos  = declaration;
     Declaration* next = pos->next;
-    for (; pos != NULL; pos = next) {
+    for (; pos != nullptr; pos = next) {
         next      = pos->next;
-        pos->next = NULL;
+        pos->next = nullptr;
 
         // fix type specifier
         fix_type_specfier(pos->type);
 
 
-        if (block != NULL) {
+        if (block != nullptr) {
             block->declaration_list =
                 declaration_list_add_item(block->declaration_list, pos);
 
@@ -185,20 +185,20 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
 }
 
 void fix_type_specfier(TypeSpecifier* type_specifier) {
-    assert(type_specifier != NULL);
+    assert(type_specifier != nullptr);
 
     // 如果这个变量是类
     // 找到类的定义
 
-    ClassDefinition* class_definition = NULL;
-    char*            class_identifier = NULL;
+    ClassDefinition* class_definition = nullptr;
+    char*            class_identifier = nullptr;
 
 
-    if (type_specifier->basic_type == RING_BASIC_TYPE_CLASS && type_specifier->derive_type->u.class_type != NULL) {
+    if (type_specifier->basic_type == RING_BASIC_TYPE_CLASS && type_specifier->derive_type->u.class_type != nullptr) {
         class_identifier = type_specifier->derive_type->u.class_type->class_identifier;
         class_definition = search_class_definition(class_identifier);
 
-        if (class_definition == NULL) {
+        if (class_definition == nullptr) {
             // error
             // exit
             complie_err_log("not find class definition [%s]", class_identifier);
@@ -210,7 +210,7 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
 }
 
 void fix_block(Block* block, Function* func) {
-    if (block == NULL) {
+    if (block == nullptr) {
         return;
     }
     fix_statement_list(block->statement_list, block, func);
@@ -231,7 +231,7 @@ void fix_if_statement(IfStatement* if_statement, Block* block, Function* func) {
 
 
 void fix_for_statement(ForStatement* for_statement, Block* block, Function* func) {
-    if (for_statement == NULL) {
+    if (for_statement == nullptr) {
         return;
     }
 
@@ -242,7 +242,7 @@ void fix_for_statement(ForStatement* for_statement, Block* block, Function* func
 }
 
 void fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func) {
-    if (dofor_statement == NULL) {
+    if (dofor_statement == nullptr) {
         return;
     }
 
@@ -253,7 +253,7 @@ void fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function
 }
 
 void fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func) {
-    if (return_statement == NULL) {
+    if (return_statement == nullptr) {
         return;
     }
 
@@ -270,8 +270,8 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
     // 并判断当前代码片段是否已经声明过相关的变量和函数
     // 报错提示
     //
-    Declaration* declaration = NULL;
-    Function*    function    = NULL;
+    Declaration* declaration = nullptr;
+    Function*    function    = nullptr;
     switch (expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
         declaration               = search_declaration(expression->package_posit, expression->identifier, block);
@@ -291,11 +291,11 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
         break;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void fix_assign_expression(AssignExpression* expression, Block* block, Function* func) {
-    if (expression == NULL) {
+    if (expression == nullptr) {
         return;
     }
 
@@ -308,7 +308,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
 }
 
 void fix_binary_expression(Expression* expression, Block* block, Function* func) {
-    if (expression == NULL || expression->u.binary_expression == NULL) {
+    if (expression == nullptr || expression->u.binary_expression == nullptr) {
         return;
     }
 
@@ -318,7 +318,7 @@ void fix_binary_expression(Expression* expression, Block* block, Function* func)
     fix_expression(left_expression, block, func);
     fix_expression(right_expression, block, func);
 
-    if (expression->convert_type == NULL) {
+    if (expression->convert_type == nullptr) {
         expression->convert_type = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
     }
 
@@ -339,7 +339,7 @@ void fix_binary_expression(Expression* expression, Block* block, Function* func)
 }
 
 void fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func) {
-    if (function_call_expression == NULL) {
+    if (function_call_expression == nullptr) {
         return;
     }
 
@@ -349,19 +349,19 @@ void fix_function_call_expression(FunctionCallExpression* function_call_expressi
     fix_expression(function_call_expression->function_identifier_expression, block, func);
 
     ArgumentList* pos = function_call_expression->argument_list;
-    for (; pos != NULL; pos = pos->next) {
+    for (; pos != nullptr; pos = pos->next) {
         fix_expression(pos->expression, block, func);
     }
 }
 
 void fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func) {
-    if (method_call_expression == NULL) {
+    if (method_call_expression == nullptr) {
         return;
     }
 
     char*                   member_identifier  = method_call_expression->member_identifier;
-    ClassDefinition*        class_definition   = NULL;
-    ClassMemberDeclaration* member_declaration = NULL;
+    ClassDefinition*        class_definition   = nullptr;
+    ClassMemberDeclaration* member_declaration = nullptr;
     Expression*             object_expression  = method_call_expression->object_expression;
 
     // 0. fix object expression
@@ -369,14 +369,14 @@ void fix_method_call_expression(MethodCallExpression* method_call_expression, Bl
 
     // 1. find class definition by object.
     class_definition = object_expression->convert_type->derive_type->u.class_type->class_definition;
-    if (class_definition == NULL) {
+    if (class_definition == nullptr) {
         fprintf(stderr, "fix_method_call_expression error\n");
         exit(ERROR_CODE_COMPILE_ERROR);
     }
 
     // 2. find member declaration by member identifier.
     member_declaration = search_class_member(class_definition, member_identifier);
-    if (member_declaration == NULL) {
+    if (member_declaration == nullptr) {
         fprintf(stderr, "fix_member_expression error\n");
         exit(ERROR_CODE_COMPILE_ERROR);
     }
@@ -384,25 +384,25 @@ void fix_method_call_expression(MethodCallExpression* method_call_expression, Bl
 
     // 4. fix argument list
     ArgumentList* pos                          = method_call_expression->argument_list;
-    for (; pos != NULL; pos = pos->next) {
+    for (; pos != nullptr; pos = pos->next) {
         fix_expression(pos->expression, block, func);
     }
 }
 
 void fix_class_definition(ClassDefinition* class_definition) {
-    assert(class_definition != NULL);
+    assert(class_definition != nullptr);
 
     unsigned int field_index  = 0;
     unsigned int method_index = 0;
 
-    for (ClassMemberDeclaration* pos = class_definition->member; pos != NULL; pos = pos->next) {
+    for (ClassMemberDeclaration* pos = class_definition->member; pos != nullptr; pos = pos->next) {
         if (pos->type == MEMBER_FIELD) {
             pos->u.field->index_of_class = field_index++;
         } else if (pos->type == MEMBER_METHOD) {
             pos->u.method->index_of_class = method_index++;
 
             if (pos->u.method->block) {
-                fix_statement_list(pos->u.method->block->statement_list, pos->u.method->block, NULL);
+                fix_statement_list(pos->u.method->block->statement_list, pos->u.method->block, nullptr);
             }
         }
     }
@@ -426,11 +426,11 @@ void fix_array_index_expression(Expression* expression, ArrayIndexExpression* ar
 // TODO:
 // 暂时只支持field-member
 void fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func) {
-    assert(member_expression != NULL);
+    assert(member_expression != nullptr);
 
     char*                   member_identifier  = member_expression->member_identifier;
-    ClassDefinition*        class_definition   = NULL;
-    ClassMemberDeclaration* member_declaration = NULL;
+    ClassDefinition*        class_definition   = nullptr;
+    ClassMemberDeclaration* member_declaration = nullptr;
     Expression*             object_expression  = member_expression->object_expression;
 
 
@@ -439,7 +439,7 @@ void fix_member_expression(Expression* expression, MemberExpression* member_expr
 
     // 1. find class definition by object.
     class_definition = object_expression->convert_type->derive_type->u.class_type->class_definition;
-    if (class_definition == NULL) {
+    if (class_definition == nullptr) {
         fprintf(stderr, "fix_member_expression error\n");
         exit(ERROR_CODE_COMPILE_ERROR);
     }
@@ -447,7 +447,7 @@ void fix_member_expression(Expression* expression, MemberExpression* member_expr
 
     // 2. find member declaration by member identifier.
     member_declaration = search_class_member(class_definition, member_identifier);
-    if (member_declaration == NULL) {
+    if (member_declaration == nullptr) {
         fprintf(stderr, "fix_member_expression error\n");
         exit(ERROR_CODE_COMPILE_ERROR);
     }
@@ -460,7 +460,7 @@ void fix_member_expression(Expression* expression, MemberExpression* member_expr
 }
 
 void fix_dot_expression(Expression* expression, DotExpression* dot_expression, Block* block, Function* func) {
-    assert(dot_expression != NULL);
+    assert(dot_expression != nullptr);
 
     // 1. prefix is a package name
     // 2. suffix is a object name
@@ -471,22 +471,22 @@ void fix_class_member_expression(MemberExpression* member_expression, Expression
 }
 
 ClassDefinition* search_class_definition(char* class_identifier) {
-    assert(class_identifier != NULL);
+    assert(class_identifier != nullptr);
     for (ClassDefinition* pos : get_package_unit()->class_definition_list) {
         if (0 == strcmp(pos->class_identifier, class_identifier)) {
             return pos;
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, char* member_identifier) {
-    assert(class_definition != NULL);
+    assert(class_definition != nullptr);
 
-    ClassMemberDeclaration* member_declaration = NULL;
+    ClassMemberDeclaration* member_declaration = nullptr;
 
-    for (member_declaration = class_definition->member; member_declaration != NULL; member_declaration = member_declaration->next) {
+    for (member_declaration = class_definition->member; member_declaration != nullptr; member_declaration = member_declaration->next) {
         if (member_declaration->type == MEMBER_FIELD) {
             if (0 == strcmp(member_declaration->u.field->identifier, member_identifier)) {
                 break;
@@ -502,7 +502,7 @@ ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, c
 }
 
 void fix_ternary_condition_expression(TernaryExpression* ternary_expression, Block* block, Function* func) {
-    if (ternary_expression == NULL) {
+    if (ternary_expression == nullptr) {
         return;
     }
 
@@ -512,7 +512,7 @@ void fix_ternary_condition_expression(TernaryExpression* ternary_expression, Blo
 }
 
 void add_parameter_to_declaration(Parameter* parameter, Block* block) {
-    assert(block != NULL);
+    assert(block != nullptr);
 
     Parameter* pos = parameter;
     for (; pos; pos = pos->next) {
@@ -520,13 +520,13 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
         declaration->line_number    = pos->line_number;
         declaration->type           = pos->type;
         declaration->identifier     = pos->identifier;
-        declaration->initializer    = NULL;
+        declaration->initializer    = nullptr;
         declaration->is_const       = 0;
         declaration->is_local       = 1;
         declaration->variable_index = -1; // fix in add_declaration
-        declaration->next           = NULL;
+        declaration->next           = nullptr;
 
-        add_declaration(declaration, block, NULL);
+        add_declaration(declaration, block, nullptr);
     }
 }
 
@@ -555,10 +555,10 @@ Declaration* search_declaration(char* package_posit, char* identifier, Block* bl
 }
 
 Function* search_function(char* package_posit, char* identifier) {
-    if (package_posit != NULL) {
+    if (package_posit != nullptr) {
         CompilerEntry* compiler_entry = get_compiler_entry();
         Package*       package        = search_package(compiler_entry, package_posit);
-        if (package == NULL) {
+        if (package == nullptr) {
             printf("can't find package:%s\n", package_posit);
         }
 
@@ -569,12 +569,12 @@ Function* search_function(char* package_posit, char* identifier) {
             }
         }
 
-        return NULL;
+        return nullptr;
     }
     for (Function* pos : get_package_unit()->function_list) {
         if (!strcmp(identifier, pos->function_name)) {
             return pos;
         }
     }
-    return NULL;
+    return nullptr;
 }

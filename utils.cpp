@@ -8,7 +8,7 @@
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
-void ring_compiler_functions_dump(PackageUnit* package_unit) {
+void                   ring_compiler_functions_dump(PackageUnit* package_unit) {
     printf(" ************  compiler functions dump ****\n");
     Declaration* decl;
     int          i = 0;
@@ -76,7 +76,7 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
         std::string     opcode_name = opcode_info.name;
         std::string     oper_num    = "";
 
-        int tmp = 0;
+        int             tmp         = 0;
 
         switch (opcode_info.type) {
         case OPCODE_OPERAND_TYPE_0BYTE:
@@ -137,7 +137,7 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
             printf("%7d | %20f | %6s | %6s\n", i, value.u.double_value, space.c_str(), pointer.c_str());
             break;
         case RVM_VALUE_TYPE_STRING:
-            if (value.u.object == NULL || value.u.object->u.string.data == NULL) {
+            if (value.u.object == nullptr || value.u.object->u.string.data == nullptr) {
                 printf("%7d | %20.*s | %6s | %6s\n", i, 20, "", space.c_str(), pointer.c_str());
             } else {
                 printf("%7d | %20.*s | %6s | %6s\n", i, 20, value.u.object->u.string.data, space.c_str(), pointer.c_str());
@@ -154,28 +154,28 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
 
 std::vector<std::string> list_file(char* path) {
     std::vector<std::string> file_list;
-    DIR*                     dp = NULL;
+    DIR*                     dp = nullptr;
     struct dirent*           st;
     struct stat              sta;
     int                      ret            = 0;
     char                     tmp_name[1024] = {0};
     dp                                      = opendir(path);
-    if (dp == NULL) {
+    if (dp == nullptr) {
         // TODO:
         printf("open dir error!!\n");
         return file_list;
     }
     while (1) {
         st = readdir(dp);
-        if (NULL == st) {
+        if (nullptr == st) {
             // 读取完毕
             break;
         }
         strcpy(tmp_name, path);
         if (path[strlen(path) - 1] != '/') // 判断路径名是否带/
             strcat(tmp_name, "/");
-        strcat(tmp_name, st->d_name); // 新文件路径名
-        ret = stat(tmp_name, &sta);   // 查看目录下文件属性
+        strcat(tmp_name, st->d_name);      // 新文件路径名
+        ret = stat(tmp_name, &sta);        // 查看目录下文件属性
         if (ret < 0) {
             // TODO:
             printf("read stat fail\n");

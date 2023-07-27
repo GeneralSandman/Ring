@@ -87,22 +87,22 @@ RVM_RuntimeStack* new_runtime_stack() {
 
 RVM_RuntimeStatic* new_runtime_static() {
     RVM_RuntimeStatic* runtime_static = (RVM_RuntimeStatic*)malloc(sizeof(RVM_RuntimeStatic));
-    runtime_static->data              = NULL;
+    runtime_static->data              = nullptr;
     runtime_static->size              = 0;
     return runtime_static;
 }
 
 Ring_VirtualMachine* ring_virtualmachine_create() {
     Ring_VirtualMachine* rvm = (Ring_VirtualMachine*)malloc(sizeof(Ring_VirtualMachine));
-    rvm->executer            = NULL;
-    rvm->executer_entry      = NULL;
+    rvm->executer            = nullptr;
+    rvm->executer_entry      = nullptr;
     rvm->runtime_static      = new_runtime_static();
     rvm->runtime_stack       = new_runtime_stack();
-    rvm->runtime_heap        = NULL;
+    rvm->runtime_heap        = nullptr;
     rvm->pc                  = 0;
-    rvm->class_list          = NULL;
+    rvm->class_list          = nullptr;
     rvm->class_size          = 0;
-    rvm->debug_config        = NULL;
+    rvm->debug_config        = nullptr;
     return rvm;
 }
 
@@ -124,8 +124,8 @@ void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runt
 
     unsigned int     size                 = executer->global_variable_size;
     RVM_Variable*    global_variable_list = executer->global_variable_list;
-    TypeSpecifier*   type_specifier       = NULL;
-    ClassDefinition* class_definition     = NULL;
+    TypeSpecifier*   type_specifier       = nullptr;
+    ClassDefinition* class_definition     = nullptr;
 
     runtime_static->size                  = size;
     runtime_static->data                  = (RVM_Value*)malloc(size * sizeof(RVM_Value));
@@ -145,8 +145,8 @@ void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runt
             break;
         case RING_BASIC_TYPE_CLASS:
             // Search class-definition from variable declaration.
-            assert(type_specifier->derive_type != NULL);
-            assert(type_specifier->derive_type->u.class_type != NULL);
+            assert(type_specifier->derive_type != nullptr);
+            assert(type_specifier->derive_type->u.class_type != nullptr);
             class_definition                 = type_specifier->derive_type->u.class_type->class_definition;
             runtime_static->data[i].u.object = new_class_object(class_definition);
             break;
@@ -158,7 +158,7 @@ void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runt
 }
 
 RVM_Object* new_class_object(ClassDefinition* class_definition) {
-    assert(class_definition != NULL);
+    assert(class_definition != nullptr);
 
     // Search field-member's size and detail from class-definition.
     // Alloc and Init.
@@ -166,7 +166,7 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
     RVM_Value*   field       = (RVM_Value*)malloc(field_count * sizeof(RVM_Value));
 
     // TODO: 先用笨办法
-    for (ClassMemberDeclaration* pos = class_definition->member; pos != NULL; pos = pos->next) {
+    for (ClassMemberDeclaration* pos = class_definition->member; pos != nullptr; pos = pos->next) {
         if (pos->type == MEMBER_FIELD) {
             field_count++;
         }
@@ -217,8 +217,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int       caller_stack_offset    = 0;
     unsigned int       return_value_list_size = 0;
 
-    RVM_Function*      function               = NULL;
-    RVM_Object*        object                 = NULL;
+    RVM_Function*      function               = nullptr;
+    RVM_Object*        object                 = nullptr;
 
     // char* string_buf;
 
@@ -740,7 +740,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // break; // ATTEN: no need break
         case RVM_CODE_FUNCTION_FINISH:
             derive_function_finish(rvm,
-                                   &function, NULL,
+                                   &function, nullptr,
                                    &code_list, &code_size,
                                    &rvm->pc, &caller_stack_base, return_value_list_size);
             return_value_list_size = 0;
@@ -890,7 +890,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     *caller_function   = callinfo->caller_function;
     *pc                = callinfo->caller_pc + 1;
     *caller_stack_base = callinfo->caller_stack_base;
-    if (*caller_function == NULL) {
+    if (*caller_function == nullptr) {
         *code_list = rvm->executer->code_list;
         *code_size = rvm->executer->code_size;
     } else {
@@ -935,15 +935,15 @@ RVM_Object* string_literal_to_rvm_object(char* string_literal) {
 }
 
 RVM_Object* concat_string(RVM_Object* a, RVM_Object* b) {
-    char*        left       = NULL;
-    char*        right      = NULL;
-    char*        result     = NULL;
+    char*        left       = nullptr;
+    char*        right      = nullptr;
+    char*        result     = nullptr;
     unsigned int result_len = 0;
 
-    if (a != NULL) {
+    if (a != nullptr) {
         left = a->u.string.data;
     }
-    if (b != NULL) {
+    if (b != nullptr) {
         right = b->u.string.data;
     }
 
@@ -980,7 +980,7 @@ void restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo) 
 void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base) {
     debug_log_with_white_coloar("\t");
 
-    if (rvm->debug_config == NULL) {
+    if (rvm->debug_config == nullptr) {
         rvm->debug_config             = (RVM_DebugConfig*)malloc(sizeof(RVM_DebugConfig));
         rvm->debug_config->debug_mode = RVM_DEBUG_MODE_UNKNOW;
     }

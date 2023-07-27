@@ -36,7 +36,7 @@ void compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entr
         char* package_path = std_package_info.path;
 
         // 编译
-        if (NULL != search_package(compiler_entry, package_name)) {
+        if (nullptr != search_package(compiler_entry, package_name)) {
             debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
             continue;
         }
@@ -144,7 +144,7 @@ RVM_Value std_fmt_lib_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     RVM_Value ret;
     ret.u.int_value = 0;
 
-    if (args->u.object == NULL || args->u.object->u.string.data == NULL) {
+    if (args->u.object == nullptr || args->u.object->u.string.data == nullptr) {
         printf("\n");
     } else {
         printf("%s\n", args->u.object->u.string.data);
@@ -225,7 +225,7 @@ RVM_Value std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
 //             printf("%f", args[i].u.double_value);
 //             break;
 //         case RVM_VALUE_TYPE_STRING:
-//             if (args[i].u.object == NULL || args[i].u.object->u.string.data == NULL) {
+//             if (args[i].u.object == nullptr || args[i].u.object->u.string.data == nullptr) {
 //                 printf("");
 //             } else {
 //                 printf("%s", args[i].u.object->u.string.data);
@@ -301,7 +301,7 @@ RVM_Value std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
 //             printf("%f", args[args_index].u.double_value);
 //             break;
 //         case RVM_VALUE_TYPE_STRING:
-//             if (args[args_index].u.object == NULL || args[args_index].u.object->u.string.data == NULL) {
+//             if (args[args_index].u.object == nullptr || args[args_index].u.object->u.string.data == nullptr) {
 //                 printf("");
 //             } else {
 //                 printf("%s", args[args_index].u.object->u.string.data);

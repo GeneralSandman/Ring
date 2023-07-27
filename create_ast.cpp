@@ -8,7 +8,7 @@ void finish_global_block(Statement* global_statement_list) {
     debug_log_with_yellow_coloar("");
 
     get_package_unit()->global_block_statement_list = global_statement_list;
-    for (; global_statement_list != NULL; global_statement_list = global_statement_list->next) {
+    for (; global_statement_list != nullptr; global_statement_list = global_statement_list->next) {
         get_package_unit()->global_block_statement_list_size++;
     }
 }
@@ -17,7 +17,7 @@ Statement* statement_list_add_item(Statement* statement_list, Statement* stateme
     debug_log_with_yellow_coloar("statement->type:%d", statement->type);
 
     Statement* pos = statement_list;
-    for (; pos->next != NULL; pos = pos->next)
+    for (; pos->next != nullptr; pos = pos->next)
         ;
     pos->next = statement;
     return statement_list;
@@ -30,12 +30,12 @@ Statement* create_statemen_from_expression(Expression* expression) {
     statement->type         = STATEMENT_TYPE_EXPRESSION;
     statement->line_number  = package_unit_get_line_number();
     statement->u.expression = expression;
-    statement->next         = NULL;
+    statement->next         = nullptr;
     return statement;
 }
 
 void add_function_definition(AttributeInfo* attribute_info, Function* function_definition) {
-    assert(function_definition != NULL);
+    assert(function_definition != nullptr);
     debug_log_with_yellow_coloar("function_definition->type:%d", function_definition->type);
 
     function_definition->attribute_info = attribute_info;
@@ -50,7 +50,7 @@ void add_function_definition(AttributeInfo* attribute_info, Function* function_d
 }
 
 Expression* expression_add_package_posit(Expression* expression, char* package_posit) {
-    assert(expression != NULL);
+    assert(expression != nullptr);
     expression->package_posit = package_posit;
     return expression;
 }
@@ -62,14 +62,14 @@ Expression* create_expression_identifier(char* identifier) {
     identifier_expression->line_number          = package_unit_get_line_number();
     identifier_expression->type                 = IDENTIFIER_EXPRESSION_TYPE_VARIABLE;
     identifier_expression->identifier           = identifier;
-    identifier_expression->u.declaration        = NULL;
+    identifier_expression->u.declaration        = nullptr;
 
     Expression* expression                      = (Expression*)malloc(sizeof(Expression));
     expression->line_number                     = package_unit_get_line_number();
-    expression->convert_type                    = NULL; // fix in fix_ast
+    expression->convert_type                    = nullptr; // fix in fix_ast
     expression->type                            = EXPRESSION_TYPE_IDENTIFIER;
     expression->u.identifier_expression         = identifier_expression;
-    expression->next                            = NULL;
+    expression->next                            = nullptr;
 
     return expression;
 }
@@ -82,11 +82,11 @@ Expression* create_expression_identifier2(char* identifier, IdentifierExpression
     identifier_expression->line_number          = package_unit_get_line_number();
     identifier_expression->type                 = type;
     identifier_expression->identifier           = identifier;
-    identifier_expression->u.declaration        = NULL;
+    identifier_expression->u.declaration        = nullptr;
 
     Expression* expression                      = (Expression*)malloc(sizeof(Expression));
     expression->line_number                     = package_unit_get_line_number();
-    expression->convert_type                    = NULL; // fix in fix_ast
+    expression->convert_type                    = nullptr; // fix in fix_ast
     expression->type                            = EXPRESSION_TYPE_IDENTIFIER;
     expression->u.identifier_expression         = identifier_expression;
 
@@ -103,7 +103,7 @@ Expression* create_expression_identifier_with_index(Expression* array_expression
 
     Expression* expression                       = (Expression*)malloc(sizeof(Expression));
     expression->line_number                      = package_unit_get_line_number();
-    expression->convert_type                     = NULL; // fix in fix_ast
+    expression->convert_type                     = nullptr; // fix in fix_ast
     expression->type                             = EXPRESSION_TYPE_ARRAY_INDEX;
     expression->u.array_index_expression         = array_index_expression;
 
@@ -115,7 +115,7 @@ Expression* create_expression_from_function_call(FunctionCallExpression* functio
 
     Expression* expression                 = (Expression*)malloc(sizeof(Expression));
     expression->line_number                = package_unit_get_line_number();
-    expression->convert_type               = NULL; // fix in fix_ast
+    expression->convert_type               = nullptr; // fix in fix_ast
     expression->type                       = EXPRESSION_TYPE_FUNCTION_CALL;
     expression->u.function_call_expression = function_call_expression;
     return expression;
@@ -126,7 +126,7 @@ Expression* create_expression_from_method_call(MethodCallExpression* method_call
 
     Expression* expression               = (Expression*)malloc(sizeof(Expression));
     expression->line_number              = package_unit_get_line_number();
-    expression->convert_type             = NULL; // fix in fix_ast
+    expression->convert_type             = nullptr; // fix in fix_ast
     expression->type                     = EXPRESSION_TYPE_METHOD_CALL;
     expression->u.method_call_expression = method_call_expression;
     return expression;
@@ -137,7 +137,7 @@ Expression* create_expression_assign(AssignExpression* assign_expression) {
 
     Expression* expression          = (Expression*)malloc(sizeof(Expression));
     expression->line_number         = package_unit_get_line_number();
-    expression->convert_type        = NULL; // fix in fix_ast
+    expression->convert_type        = nullptr; // fix in fix_ast
     expression->type                = EXPRESSION_TYPE_ASSIGN;
     expression->u.assign_expression = assign_expression;
     return expression;
@@ -146,7 +146,7 @@ Expression* create_expression_assign(AssignExpression* assign_expression) {
 Expression* create_expression_ternary(Expression* condition, Expression* true_expression, Expression* false_expression) {
     Expression* expression                                 = (Expression*)malloc(sizeof(Expression));
     expression->line_number                                = package_unit_get_line_number();
-    expression->convert_type                               = NULL; // fix in fix_ast
+    expression->convert_type                               = nullptr; // fix in fix_ast
     expression->type                                       = EXPRESSION_TYPE_TERNARY;
     expression->u.ternary_expression                       = (TernaryExpression*)malloc(sizeof(TernaryExpression));
     expression->u.ternary_expression->line_number          = package_unit_get_line_number();
@@ -161,7 +161,7 @@ Expression* create_expression_binary(ExpressionType type, Expression* left, Expr
 
     Expression* expression                            = (Expression*)malloc(sizeof(Expression));
     expression->line_number                           = package_unit_get_line_number();
-    expression->convert_type                          = NULL; // fix in fix_ast
+    expression->convert_type                          = nullptr; // fix in fix_ast
     expression->type                                  = type;
     expression->u.binary_expression                   = (BinaryExpression*)malloc(sizeof(BinaryExpression));
     expression->u.binary_expression->line_number      = package_unit_get_line_number();
@@ -176,10 +176,10 @@ Expression* create_expression_unitary(ExpressionType type, Expression* unitary_e
 
     Expression* expression           = (Expression*)malloc(sizeof(Expression));
     expression->line_number          = package_unit_get_line_number();
-    expression->convert_type         = NULL; // fix in fix_ast
+    expression->convert_type         = nullptr; // fix in fix_ast
     expression->type                 = type;
     expression->u.unitary_expression = unitary_expression;
-    expression->next                 = NULL;
+    expression->next                 = nullptr;
 
     return expression;
 }
@@ -190,7 +190,7 @@ Expression* create_expression_unitary(ExpressionType type, Expression* unitary_e
 Expression* create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression* expression) {
     debug_log_with_yellow_coloar("convert_type:%d", convert_type);
 
-    assert(expression != NULL);
+    assert(expression != nullptr);
 
     return expression;
 }
@@ -199,10 +199,10 @@ Expression*
 create_expression_literal(ExpressionType type, char* literal_interface) {
     debug_log_with_yellow_coloar("type:%d", type);
 
-    assert(literal_interface != NULL);
+    assert(literal_interface != nullptr);
     Expression* expression   = (Expression*)malloc(sizeof(Expression));
     expression->line_number  = package_unit_get_line_number();
-    expression->convert_type = NULL; // fix in fix_ast
+    expression->convert_type = nullptr; // fix in fix_ast
 
     expression->type         = type;
     switch (type) {
@@ -229,7 +229,7 @@ Expression* create_expression_bool_literal(ExpressionType type, Ring_Bool value)
 
     Expression* expression     = (Expression*)malloc(sizeof(Expression));
     expression->line_number    = package_unit_get_line_number();
-    expression->convert_type   = NULL; // fix in fix_ast
+    expression->convert_type   = nullptr; // fix in fix_ast
     expression->type           = type;
     expression->u.bool_literal = value;
 
@@ -239,7 +239,7 @@ Expression* create_expression_bool_literal(ExpressionType type, Ring_Bool value)
 Expression* create_cast_expression(TypeSpecifier* cast_type, Expression* operand) {
     Expression* expression                     = (Expression*)malloc(sizeof(Expression));
     expression->line_number                    = package_unit_get_line_number();
-    expression->convert_type                   = NULL; // fix in fix_ast
+    expression->convert_type                   = nullptr; // fix in fix_ast
     expression->type                           = EXPRESSION_TYPE_CAST;
     expression->u.cast_expression              = (CastExpression*)malloc(sizeof(CastExpression));
     expression->u.cast_expression->line_number = package_unit_get_line_number();
@@ -252,13 +252,13 @@ Expression* create_cast_expression(TypeSpecifier* cast_type, Expression* operand
 Expression* create_member_expression(Expression* object_expression, char* member_identifier) {
     Expression* expression                              = (Expression*)malloc(sizeof(Expression));
     expression->line_number                             = package_unit_get_line_number();
-    expression->convert_type                            = NULL; // fix in fix_ast
+    expression->convert_type                            = nullptr; // fix in fix_ast
     expression->type                                    = EXPRESSION_TYPE_MEMBER;
     expression->u.member_expression                     = (MemberExpression*)malloc(sizeof(MemberExpression));
     expression->u.member_expression->line_number        = package_unit_get_line_number();
     expression->u.member_expression->object_expression  = object_expression;
     expression->u.member_expression->member_identifier  = member_identifier;
-    expression->u.member_expression->member_declaration = NULL;
+    expression->u.member_expression->member_declaration = nullptr;
 
     return expression;
 }
@@ -266,7 +266,7 @@ Expression* create_member_expression(Expression* object_expression, char* member
 Expression* create_dot_expression(Expression* prefix_expression, Expression* suffix_expression) {
     Expression* expression                          = (Expression*)malloc(sizeof(Expression));
     expression->line_number                         = package_unit_get_line_number();
-    expression->convert_type                        = NULL; // fix in fix_ast
+    expression->convert_type                        = nullptr; // fix in fix_ast
     expression->type                                = EXPRESSION_TYPE_DOT;
     expression->u.dot_expression                    = (DotExpression*)malloc(sizeof(DotExpression));
     expression->u.dot_expression->line_number       = package_unit_get_line_number();
@@ -279,7 +279,7 @@ Expression* create_dot_expression(Expression* prefix_expression, Expression* suf
 Expression* create_new_array_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression) {
     Expression* expression                                   = (Expression*)malloc(sizeof(Expression));
     expression->line_number                                  = package_unit_get_line_number();
-    expression->convert_type                                 = NULL; // fix in fix_ast
+    expression->convert_type                                 = nullptr; // fix in fix_ast
     expression->type                                         = EXPRESSION_TYPE_NEW_ARRAY;
     expression->u.new_array_expression                       = (NewArrayExpression*)malloc(sizeof(NewArrayExpression));
     expression->u.new_array_expression->line_number          = package_unit_get_line_number();
@@ -303,7 +303,7 @@ AssignExpression* create_multi_assign_expression(char* first_identifier, Identif
     // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
     debug_log_with_yellow_coloar("");
 
-    Expression* left = NULL;
+    Expression* left = nullptr;
     left             = create_expression_identifier(first_identifier);
 
     Expression* prev = left;
@@ -346,7 +346,7 @@ Expression* expression_list_add_item(Expression* expression_list, Expression* ex
     debug_log_with_yellow_coloar("");
 
     Expression* pos = expression_list;
-    for (; pos->next != NULL; pos = pos->next)
+    for (; pos->next != nullptr; pos = pos->next)
         ;
     pos->next = expression;
     return expression_list;
@@ -354,7 +354,7 @@ Expression* expression_list_add_item(Expression* expression_list, Expression* ex
 
 ArgumentList* argument_list_add_item(ArgumentList* argument_list, ArgumentList* argument) {
     ArgumentList* pos = argument_list;
-    for (; pos->next != NULL; pos = pos->next)
+    for (; pos->next != nullptr; pos = pos->next)
         ;
     pos->next = argument;
     return argument_list;
@@ -366,7 +366,7 @@ ArgumentList* create_argument_list_from_expression(Expression* expression) {
     ArgumentList* argument_list = (ArgumentList*)malloc(sizeof(ArgumentList));
     argument_list->line_number  = package_unit_get_line_number();
     argument_list->expression   = expression;
-    argument_list->next         = NULL;
+    argument_list->next         = nullptr;
     return argument_list;
 }
 
@@ -376,14 +376,14 @@ Identifier* new_identifier(IdentifierType type, char* name) {
     Identifier* identifier      = (Identifier*)malloc(sizeof(Identifier));
     identifier->type            = type;
     identifier->identifier_name = name;
-    identifier->next            = NULL;
+    identifier->next            = nullptr;
 
     return identifier;
 }
 
 Identifier* identifier_list_add_item(Identifier* identifier_list, Identifier* identifier) {
     Identifier* pos = identifier_list;
-    for (; pos->next != NULL; pos = pos->next)
+    for (; pos->next != nullptr; pos = pos->next)
         ;
     pos->next = identifier;
     return identifier_list;
@@ -393,14 +393,14 @@ FunctionReturnList* create_function_return_list(VariableType variable_type) {
     FunctionReturnList* return_list = (FunctionReturnList*)malloc(sizeof(FunctionReturnList));
 
     return_list->variable_type      = variable_type;
-    return_list->next               = NULL;
+    return_list->next               = nullptr;
 
     return return_list;
 }
 
 FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type) {
     FunctionReturnList* pos = return_list;
-    for (; pos->next != NULL; pos = pos->next)
+    for (; pos->next != nullptr; pos = pos->next)
         ;
     pos->next = create_function_return_list(variable_type);
     return return_list;
@@ -412,17 +412,17 @@ Function* new_function_definition(FunctionType type, char* identifier, Parameter
     Function* function            = (Function*)malloc(sizeof(Function));
     function->line_number         = package_unit_get_line_number();
     function->package             = get_package_unit()->parent_package;
-    function->attribute_info      = NULL;
+    function->attribute_info      = nullptr;
     function->func_index          = get_package_unit()->function_list.size();
     function->type                = type;
     function->function_name       = identifier;
     function->parameter_list_size = 0;
     function->parameter_list      = parameter_list;
     function->block               = block;
-    function->next                = NULL;
+    function->next                = nullptr;
 
     // 把函数参数的变量添加到 variable_list 中
-    for (Parameter* pos = parameter_list; pos != NULL; pos = pos->next) {
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
         function->parameter_list_size++;
     }
 
@@ -436,7 +436,7 @@ Statement* create_statement_from_if(IfStatement* if_statement) {
     statement->line_number    = package_unit_get_line_number();
     statement->type           = STATEMENT_TYPE_IF;
     statement->u.if_statement = if_statement;
-    statement->next           = NULL;
+    statement->next           = nullptr;
 
     return statement;
 }
@@ -468,7 +468,7 @@ ElseIfStatement* create_elseif_statement(Expression* expression, Block* elseif_b
     elseif_statement->line_number          = package_unit_get_line_number();
     elseif_statement->condition_expression = expression;
     elseif_statement->elseif_block         = elseif_block;
-    elseif_statement->next                 = NULL;
+    elseif_statement->next                 = nullptr;
 
     if (elseif_block) {
         elseif_block->type = BLOCK_TYPE_IF;
@@ -480,10 +480,10 @@ ElseIfStatement* create_elseif_statement(Expression* expression, Block* elseif_b
 ElseIfStatement* elseif_statement_add_item(ElseIfStatement* list, ElseIfStatement* elseif_statement) {
     debug_log_with_yellow_coloar("\t");
 
-    assert(list != NULL);
+    assert(list != nullptr);
 
     ElseIfStatement* pos;
-    for (pos = list; pos->next != NULL; pos = pos->next) {
+    for (pos = list; pos->next != nullptr; pos = pos->next) {
     }
 
     pos->next = elseif_statement;
@@ -498,7 +498,7 @@ Statement* create_statement_from_for(ForStatement* for_statement) {
     statement->line_number     = package_unit_get_line_number();
     statement->type            = STATEMENT_TYPE_FOR;
     statement->u.for_statement = for_statement;
-    statement->next            = NULL;
+    statement->next            = nullptr;
 
     return statement;
 }
@@ -527,7 +527,7 @@ Statement* create_statement_from_dofor(DoForStatement* dofor_statement) {
     statement->line_number       = package_unit_get_line_number();
     statement->type              = STATEMENT_TYPE_DOFOR;
     statement->u.dofor_statement = dofor_statement;
-    statement->next              = NULL;
+    statement->next              = nullptr;
 
     return statement;
 }
@@ -556,7 +556,7 @@ Statement* create_statement_from_break(BreakStatement* break_statement) {
     statement->line_number       = package_unit_get_line_number();
     statement->type              = STATEMENT_TYPE_BREAK;
     statement->u.break_statement = break_statement;
-    statement->next              = NULL;
+    statement->next              = nullptr;
 
     return statement;
 }
@@ -565,7 +565,7 @@ BreakStatement* create_break_statement(char* literal_interface) {
     debug_log_with_yellow_coloar("\t");
 
     unsigned int break_loop_num = 0;
-    if (literal_interface == NULL || strlen(literal_interface) == 0) {
+    if (literal_interface == nullptr || strlen(literal_interface) == 0) {
         break_loop_num = 1;
     } else {
         sscanf(literal_interface, "%ud", &break_loop_num);
@@ -587,7 +587,7 @@ Statement* create_statement_from_continue(ContinueStatement* continue_statement)
     statement->line_number          = package_unit_get_line_number();
     statement->type                 = STATEMENT_TYPE_CONTINUE;
     statement->u.continue_statement = continue_statement;
-    statement->next                 = NULL;
+    statement->next                 = nullptr;
 
     return statement;
 }
@@ -606,7 +606,7 @@ Statement* create_statement_from_return(ReturnStatement* return_statement) {
     statement->line_number        = package_unit_get_line_number();
     statement->type               = STATEMENT_TYPE_RETURN;
     statement->u.return_statement = return_statement;
-    statement->next               = NULL;
+    statement->next               = nullptr;
 
     return statement;
 }
@@ -632,9 +632,9 @@ Block* start_new_block() {
     block->line_number                 = package_unit_get_line_number();
     block->type                        = BLOCK_TYPE_UNKNOW;
     block->declaration_list_size       = 0;
-    block->declaration_list            = NULL;
+    block->declaration_list            = nullptr;
     block->statement_list_size         = 0;
-    block->statement_list              = NULL;
+    block->statement_list              = nullptr;
     block->parent_block                = get_package_unit()->current_block;
     block->block_labels.break_label    = 0;
     block->block_labels.continue_label = 0;
@@ -688,7 +688,7 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
 
     TypeSpecifier* type_specifier = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
     type_specifier->basic_type    = basic_type;
-    type_specifier->derive_type   = NULL;
+    type_specifier->derive_type   = nullptr;
     return type_specifier;
 }
 
@@ -713,23 +713,23 @@ Declaration* create_declaration(TypeSpecifier* type, char* identifier, Expressio
     declaration->is_const       = 0;
     declaration->is_local       = 0;
     declaration->variable_index = -1; // fix in fix_ast.c::add_declaration
-    declaration->next           = NULL;
+    declaration->next           = nullptr;
     return declaration;
 }
 
 Declaration* declaration_list_add_item(Declaration* head, Declaration* declaration) {
-    if (head == NULL) {
+    if (head == nullptr) {
         return declaration;
     }
 
     Declaration* pos = head;
-    for (; pos->next != NULL; pos = pos->next) {}
+    for (; pos->next != nullptr; pos = pos->next) {}
     pos->next = declaration;
     return head;
 }
 
 Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Identifier* identifier_list, Expression* initializer_list) {
-    Declaration* head     = NULL;
+    Declaration* head     = nullptr;
     Identifier*  pos_ider = identifier_list;
     Expression*  pos_init = initializer_list;
     for (pos_ider = identifier_list; pos_ider; pos_ider = pos_ider->next) {
@@ -737,7 +737,7 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Ide
         if (pos_init) {
             decl->initializer       = pos_init;
             pos_init                = pos_init->next;
-            decl->initializer->next = NULL; // 把initializer_list 拆开
+            decl->initializer->next = nullptr; // 把initializer_list 拆开
         }
         head = declaration_list_add_item(head, decl);
     }
@@ -747,7 +747,7 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Ide
     statement->line_number             = package_unit_get_line_number();
     statement->type                    = STATEMENT_TYPE_DECLARATION;
     statement->u.declaration_statement = head;
-    statement->next                    = NULL;
+    statement->next                    = nullptr;
 
     return statement;
 }
@@ -759,7 +759,7 @@ Statement* create_declaration_statement(TypeSpecifier* type, char* identifier, E
     statement->line_number             = package_unit_get_line_number();
     statement->type                    = STATEMENT_TYPE_DECLARATION;
     statement->u.declaration_statement = create_declaration(type, identifier, initializer);
-    statement->next                    = NULL;
+    statement->next                    = nullptr;
 
     return statement;
 }
@@ -769,18 +769,18 @@ Parameter* create_parameter(TypeSpecifier* type, char* identifier) {
     parameter->line_number = package_unit_get_line_number();
     parameter->type        = type;
     parameter->identifier  = identifier;
-    parameter->next        = NULL;
+    parameter->next        = nullptr;
 
     return parameter;
 }
 
 Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter) {
-    if (head == NULL) {
+    if (head == nullptr) {
         return parameter;
     }
 
     Parameter* pos = head;
-    for (; pos->next != NULL; pos = pos->next) {}
+    for (; pos->next != nullptr; pos = pos->next) {}
     pos->next = parameter;
     return head;
 }
@@ -799,7 +799,7 @@ void import_package_list_add_item(char* package_name, char* rename) {
     ImportPackageInfo* import_package_info = (ImportPackageInfo*)malloc(sizeof(ImportPackageInfo));
     import_package_info->line_number       = package_unit_get_line_number();
     import_package_info->package_name      = package_name;
-    import_package_info->package_path      = NULL;
+    import_package_info->package_path      = nullptr;
     import_package_info->rename            = rename;
 
     get_package_unit()->import_package_list.push_back(import_package_info);
@@ -821,8 +821,8 @@ ClassDefinition* start_class_definition(char* class_identifier) {
     ClassDefinition* class_def  = (ClassDefinition*)malloc(sizeof(ClassDefinition));
     class_def->line_number      = package_unit_get_line_number();
     class_def->class_identifier = class_identifier;
-    class_def->member           = NULL;
-    class_def->next             = NULL;
+    class_def->member           = nullptr;
+    class_def->next             = nullptr;
 
 
     package_unit_add_class_definition(class_def);
@@ -833,7 +833,7 @@ ClassDefinition* start_class_definition(char* class_identifier) {
 ClassDefinition* finish_class_definition(ClassDefinition* class_def, ClassMemberDeclaration* class_member_declar) {
     debug_log_with_yellow_coloar("\t");
 
-    assert(class_def != NULL);
+    assert(class_def != nullptr);
 
     class_def->member = class_member_declar;
 
@@ -841,14 +841,14 @@ ClassDefinition* finish_class_definition(ClassDefinition* class_def, ClassMember
 }
 
 ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclaration* list, ClassMemberDeclaration* decl) {
-    assert(decl != NULL);
+    assert(decl != nullptr);
 
-    if (list == NULL) {
+    if (list == nullptr) {
         return decl;
     }
 
     ClassMemberDeclaration* pos = list;
-    for (; pos->next != NULL; pos = pos->next) {}
+    for (; pos->next != nullptr; pos = pos->next) {}
 
     pos->next = decl;
 
@@ -856,27 +856,27 @@ ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclar
 }
 
 ClassMemberDeclaration* create_class_member_field_declaration(Attribute attribute, FieldMember* field_member) {
-    assert(field_member != NULL);
+    assert(field_member != nullptr);
 
     ClassMemberDeclaration* class_member_declar = (ClassMemberDeclaration*)malloc(sizeof(ClassMemberDeclaration));
     class_member_declar->line_number            = package_unit_get_line_number();
     class_member_declar->attribute              = attribute;
     class_member_declar->type                   = MEMBER_FIELD;
     class_member_declar->u.field                = field_member;
-    class_member_declar->next                   = NULL;
+    class_member_declar->next                   = nullptr;
 
     return class_member_declar;
 }
 
 ClassMemberDeclaration* create_class_member_method_declaration(Attribute attribute, MethodMember* method_member) {
-    assert(method_member != NULL);
+    assert(method_member != nullptr);
 
     ClassMemberDeclaration* class_member_declar = (ClassMemberDeclaration*)malloc(sizeof(ClassMemberDeclaration));
     class_member_declar->line_number            = package_unit_get_line_number();
     class_member_declar->attribute              = attribute;
     class_member_declar->type                   = MEMBER_METHOD;
     class_member_declar->u.method               = method_member;
-    class_member_declar->next                   = NULL;
+    class_member_declar->next                   = nullptr;
 
     return class_member_declar;
 }
@@ -905,10 +905,10 @@ MethodMember* create_class_member_method(FunctionType type, char* identifier, Pa
     method_member->return_list_size    = 0;
     method_member->return_list         = return_list;
     method_member->block               = block;
-    for (Parameter* pos = parameter_list; pos != NULL; pos = pos->next) {
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
         method_member->parameter_list_size++;
     }
-    for (FunctionReturnList* pos = return_list; pos != NULL; pos = pos->next) {
+    for (FunctionReturnList* pos = return_list; pos != nullptr; pos = pos->next) {
         method_member->return_list_size++;
     }
 
@@ -924,7 +924,7 @@ TypeSpecifier* create_class_type_specifier(char* identifier) {
     type->derive_type->kind                           = RING_DERIVE_TYPE_CLASS;
     type->derive_type->u.class_type                   = (Ring_DeriveType_Class*)malloc(sizeof(Ring_DeriveType_Class));
     type->derive_type->u.class_type->class_identifier = identifier;
-    type->derive_type->u.class_type->class_definition = NULL; // FIX_AST_UPDATE
+    type->derive_type->u.class_type->class_definition = nullptr; // FIX_AST_UPDATE
 
     return type;
 }
@@ -932,16 +932,16 @@ TypeSpecifier* create_class_type_specifier(char* identifier) {
 AttributeInfo* create_attribute_info(char* name) {
     AttributeInfo* info = (AttributeInfo*)malloc(sizeof(AttributeInfo));
     info->name          = name;
-    info->next          = NULL;
+    info->next          = nullptr;
     return info;
 }
 
 AttributeInfo* attribute_info_add_item(AttributeInfo* list, AttributeInfo* item) {
-    if (list == NULL) {
+    if (list == nullptr) {
         return item;
     } else {
         AttributeInfo* pos = list;
-        for (; pos->next != NULL; pos = pos->next) {}
+        for (; pos->next != nullptr; pos = pos->next) {}
         pos->next = item;
         return list;
     }

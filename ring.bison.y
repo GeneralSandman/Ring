@@ -246,7 +246,7 @@ import_package_list
 import_package_info
     : IDENTIFIER TOKEN_SEMICOLON
     {
-        import_package_list_add_item($1, NULL);
+        import_package_list_add_item($1, nullptr);
     }
     | IDENTIFIER TOKEN_ARROW IDENTIFIER TOKEN_SEMICOLON
     {
@@ -290,7 +290,7 @@ definition_or_statement
     : function_definition
     {
         debug_log_with_green_coloar("[RULE::statement:function_definition]\t ");
-        add_function_definition(NULL, $1);
+        add_function_definition(nullptr, $1);
     }
     | attribute_list_v2 function_definition
     {
@@ -348,42 +348,42 @@ method_member
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
 
-        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, NULL, NULL, $5);
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, nullptr, nullptr, $5);
 
     }
     | TOKEN_METHOD identifier TOKEN_LP TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
 
-        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, NULL, NULL, NULL);
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, nullptr, nullptr, nullptr);
 
     }
     | TOKEN_METHOD identifier TOKEN_LP parameter_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
 
-        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, NULL, $6);
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, nullptr, $6);
 
     }
     | TOKEN_METHOD identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
 
-        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, NULL, NULL);
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, nullptr, nullptr);
 
     }
     | TOKEN_METHOD identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
 
-        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, NULL, $7, $9);
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, nullptr, $7, $9);
 
     }
     | TOKEN_METHOD identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
 
-        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, NULL, $7, NULL);
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, nullptr, $7, nullptr);
 
     }
     | TOKEN_METHOD identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
@@ -397,7 +397,7 @@ method_member
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
 
-        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, NULL);
+        $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, nullptr);
 
     }
     ;
@@ -454,7 +454,7 @@ attribute_v2
 maybe_empty_expression
     :
     {
-        $$ = NULL;
+        $$ = nullptr;
     }
     | expression
     | assign_expression
@@ -522,17 +522,17 @@ if_statement
     : TOKEN_IF TOKEN_LP expression TOKEN_RP block // if () {}
     {
         debug_log_with_green_coloar("[RULE::if_statement]\t ");
-        $$ = create_if_statement($3, $5, NULL, NULL);
+        $$ = create_if_statement($3, $5, nullptr, nullptr);
     }
     | TOKEN_IF TOKEN_LP expression TOKEN_RP block TOKEN_ELSE block // if () {} else {}
     {
         debug_log_with_green_coloar("[RULE::if_statement]\t ");
-        $$ = create_if_statement($3, $5, NULL, $7);
+        $$ = create_if_statement($3, $5, nullptr, $7);
     }
     | TOKEN_IF TOKEN_LP expression TOKEN_RP block elseif_statement_list // if () {} elseif() {} elseif {}
     {
         debug_log_with_green_coloar("[RULE::if_statement]\t ");
-        $$ = create_if_statement($3, $5, $6, NULL);
+        $$ = create_if_statement($3, $5, $6, nullptr);
     }
     | TOKEN_IF TOKEN_LP expression TOKEN_RP block elseif_statement_list TOKEN_ELSE block // if () {} elseif() {} elseif {} else {}
     {
@@ -583,7 +583,7 @@ break_statement
     : TOKEN_BREAK 
     {
         debug_log_with_green_coloar("[RULE::break_statement]\t ");
-        $$ = create_break_statement(NULL);
+        $$ = create_break_statement(nullptr);
     }
     | TOKEN_BREAK INT_LITERAL
     {
@@ -604,7 +604,7 @@ return_statement
     : TOKEN_RETURN TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::return_statement]\t ");
-        $$ = create_return_statement(NULL);
+        $$ = create_return_statement(nullptr);
     }
     | TOKEN_RETURN expression_list TOKEN_SEMICOLON
     {
@@ -618,7 +618,7 @@ multi_variable_definition_statement
     : TOKEN_VAR type_specifier identifier_list
     {
         debug_log_with_green_coloar("[RULE::multi_variable_definition_statement]\t ");
-        $$ = create_multi_declaration_statement($2, $3, NULL);
+        $$ = create_multi_declaration_statement($2, $3, nullptr);
     }
     | TOKEN_VAR type_specifier identifier_list TOKEN_ASSIGN expression_list
     {
@@ -633,42 +633,42 @@ function_definition
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, NULL, NULL, $5);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, nullptr, $5);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, NULL, NULL, NULL);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, nullptr, nullptr);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, NULL, $6);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, $6);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, NULL, NULL);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, nullptr);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, NULL, $7, $9);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, $7, $9);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, NULL, $7, NULL);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, $7, nullptr);
 
     }
     | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
@@ -682,7 +682,7 @@ function_definition
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, NULL);
+        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, nullptr);
 
     }
     ;
@@ -714,12 +714,12 @@ return_list
     {
         /* $$ = create_function_return_list($1); */
         // FIXME:
-        $$ = NULL;
+        $$ = nullptr;
     }
     | return_list TOKEN_COMMA type_specifier
     {
         // FIXME:
-        $$ = NULL;
+        $$ = nullptr;
         /* $$ = function_return_list_add_item($1, $3); */
     }
     ;
@@ -733,7 +733,7 @@ block
     | TOKEN_LC TOKEN_RC
     {
         debug_log_with_green_coloar("[RULE::block: empty statement_list]\t ");
-        $$ = finish_block(start_new_block(), NULL);
+        $$ = finish_block(start_new_block(), nullptr);
     }
     ;
 
@@ -1125,7 +1125,7 @@ function_call_expression
     {
         debug_log_with_green_coloar("[RULE::function_call_expression]\t ");
 
-        $$ = create_function_call_expression($1, NULL);
+        $$ = create_function_call_expression($1, nullptr);
     }
     ;
 
@@ -1140,7 +1140,7 @@ method_call_expression
     {
         debug_log_with_green_coloar("[RULE::function_call_expression]\t ");
 
-        $$ = create_method_call_expression(create_expression_identifier($1), $3, NULL);
+        $$ = create_method_call_expression(create_expression_identifier($1), $3, nullptr);
     }
     ;
 

@@ -7,8 +7,8 @@
 
 int                      yyerror(char const* str, ...);
 extern struct SyntaxInfo SyntaxInfos[];
-static PackageUnit*      package_unit   = NULL;
-static CompilerEntry*    compiler_entry = NULL;
+static PackageUnit*      package_unit   = nullptr;
+static CompilerEntry*    compiler_entry = nullptr;
 
 // Error Attention 某些错误提示可以精细化识别、提示
 void                     ring_compiler_error(SyntaxType syntax_type, int need_exit) {
@@ -25,7 +25,7 @@ void                     ring_compiler_error(SyntaxType syntax_type, int need_ex
 CompilerEntry* compiler_entry_create() {
     compiler_entry               = (CompilerEntry*)malloc(sizeof(CompilerEntry));
     compiler_entry->package_list = std::vector<Package*>{};
-    compiler_entry->main_package = NULL;
+    compiler_entry->main_package = nullptr;
     return compiler_entry;
 }
 
@@ -34,7 +34,7 @@ CompilerEntry* get_compiler_entry() {
 }
 
 void compiler_entry_dump(CompilerEntry* compiler_entry) {
-    assert(compiler_entry != NULL);
+    assert(compiler_entry != nullptr);
     printf("|------------------ CompilerEntry-Dump-begin ------------------\n");
 
     printf("|PackageList:\n");
@@ -57,18 +57,18 @@ Package* search_package(CompilerEntry* compiler_entry, char* package_name) {
             return package;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 ExecuterEntry* executer_entry_create() {
     ExecuterEntry* executer_entry         = (ExecuterEntry*)malloc(sizeof(ExecuterEntry));
     executer_entry->package_executer_list = std::vector<Package_Executer*>{};
-    executer_entry->main_package_executer = NULL;
+    executer_entry->main_package_executer = nullptr;
     return executer_entry;
 }
 
 void executer_entry_dump(ExecuterEntry* executer_entry) {
-    assert(executer_entry != NULL);
+    assert(executer_entry != nullptr);
     printf("|------------------ ExecuterEntry-Dump-begin ------------------\n");
 
     printf("|Package_Executer:\n");
@@ -84,7 +84,7 @@ void executer_entry_dump(ExecuterEntry* executer_entry) {
 
 // create package from a package's dir which contains multi files
 Package* package_create(CompilerEntry* compiler_entry, char* package_name, char* package_path) {
-    assert(compiler_entry != NULL);
+    assert(compiler_entry != nullptr);
     debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 
     Package* package                 = (Package*)malloc(sizeof(Package));
@@ -107,7 +107,7 @@ Package* package_create(CompilerEntry* compiler_entry, char* package_name, char*
 
 // create package from only source file
 Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_name, char* input_main_file) {
-    assert(compiler_entry != NULL);
+    assert(compiler_entry != nullptr);
     debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 
     Package* package                 = (Package*)malloc(sizeof(Package));
@@ -115,7 +115,7 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
     package->compiler_entry          = compiler_entry;
     package->package_index           = -1; // TODO: 这个应该在 fix的时候 设置
     package->package_name            = package_name;
-    package->package_path            = NULL;
+    package->package_path            = nullptr;
 
     package->source_file_list        = std::vector<std::string>{std::string(input_main_file)};
 
@@ -133,7 +133,7 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
 void package_compile(Package* package) {
     CompilerEntry* compiler_entry = package->compiler_entry;
 
-    if (NULL != search_package(compiler_entry, package->package_name)) {
+    if (nullptr != search_package(compiler_entry, package->package_name)) {
         debug_log_with_yellow_coloar("\t package[%s] already compiled", package->package_name);
         return;
     }
@@ -150,7 +150,7 @@ void package_compile(Package* package) {
         // char* package_name = import_package_info->package_name;
         // char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring//"; // TODO:
 
-        // if (NULL != search_package(compiler_entry, package_name)) {
+        // if (nullptr != search_package(compiler_entry, package_name)) {
         //     debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
         //     continue;
         // }
@@ -223,7 +223,7 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
     package_unit->parent_package                   = parent_package;
 
     package_unit->current_file_name                = file_name;
-    package_unit->current_file_fp                  = NULL;
+    package_unit->current_file_fp                  = nullptr;
     package_unit->current_line_number              = 1;
     package_unit->current_column_number            = 1;
     package_unit->current_line_content             = new_ring_string();
@@ -231,19 +231,19 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
     package_unit->import_package_list              = std::vector<ImportPackageInfo*>{};
 
     package_unit->global_block_statement_list_size = 0;
-    package_unit->global_block_statement_list      = NULL;
+    package_unit->global_block_statement_list      = nullptr;
     package_unit->global_declaration_list          = std::vector<Declaration*>{};
 
     package_unit->class_definition_list            = std::vector<ClassDefinition*>{};
 
     package_unit->function_list                    = std::vector<Function*>{};
 
-    package_unit->current_block                    = NULL;
+    package_unit->current_block                    = nullptr;
 
     package_unit->compile_error_num                = 0;
 
     package_unit->current_file_fp                  = fopen(file_name.c_str(), "r");
-    if (package_unit->current_file_fp == NULL) {
+    if (package_unit->current_file_fp == nullptr) {
         fprintf(stderr, "%s not found.\n", file_name.c_str());
         exit(1);
     }
@@ -296,39 +296,39 @@ void package_unit_dump(PackageUnit* package_unit) {
 
 
 const char* package_unit_get_file_name() {
-    assert(package_unit != NULL);
+    assert(package_unit != nullptr);
     return package_unit->current_file_name.c_str();
 }
 
 Ring_String* get_package_unit_current_line_content() {
-    assert(package_unit != NULL);
+    assert(package_unit != nullptr);
     return package_unit->current_line_content;
 }
 
 unsigned int package_unit_get_line_number() {
-    assert(package_unit != NULL);
+    assert(package_unit != nullptr);
     return package_unit->current_line_number;
 }
 
 unsigned int package_unit_increa_line_number() {
-    assert(package_unit != NULL);
+    assert(package_unit != nullptr);
     package_unit->current_line_number++;
     return package_unit->current_line_number;
 }
 
 unsigned int package_unit_get_column_number() {
-    assert(package_unit != NULL);
+    assert(package_unit != nullptr);
     return package_unit->current_column_number;
 }
 
 unsigned int package_unit_increa_column_number(unsigned int len) {
-    assert(package_unit != NULL);
+    assert(package_unit != nullptr);
     package_unit->current_column_number += len;
     return package_unit->current_column_number;
 }
 
 void package_unit_update_line_content(char* str) {
-    assert(package_unit != NULL);
+    assert(package_unit != nullptr);
 
     for (int i = 0; i < strlen(str); i++) {
         ring_string_add_char(package_unit->current_line_content, str[i]);
@@ -350,8 +350,8 @@ void package_unit_reset_column_number() {
 }
 
 int package_unit_add_class_definition(ClassDefinition* class_definition) {
-    assert(package_unit != NULL);
-    assert(class_definition != NULL);
+    assert(package_unit != nullptr);
+    assert(class_definition != nullptr);
 
     package_unit->class_definition_list.push_back(class_definition);
     return 0;

@@ -92,9 +92,9 @@ struct thpool_* thpool_init(int num_threads) {
     /* Make new thread pool */
     thpool_* thpool_p;
     thpool_p = (struct thpool_*)malloc(sizeof(struct thpool_));
-    if (thpool_p == NULL) {
+    if (thpool_p == nullptr) {
         fprintf(stderr, "thpool_init(): Could not allocate memory for thread pool\n");
-        return NULL;
+        return nullptr;
     }
     thpool_p->num_threads_alive   = 0;
     thpool_p->num_threads_working = 0;
@@ -103,21 +103,21 @@ struct thpool_* thpool_init(int num_threads) {
     if (jobqueue_init(&thpool_p->jobqueue) == -1) {
         fprintf(stderr, "thpool_init(): Could not allocate memory for job queue\n");
         free(thpool_p);
-        return NULL;
+        return nullptr;
     }
 
     /* Make threads in pool */
     thpool_p->threads =
         (struct thread**)malloc(num_threads * sizeof(struct thread*));
-    if (thpool_p->threads == NULL) {
+    if (thpool_p->threads == nullptr) {
         fprintf(stderr, "thpool_init(): Could not allocate memory for threads\n");
         jobqueue_destroy(&thpool_p->jobqueue);
         free(thpool_p);
-        return NULL;
+        return nullptr;
     }
 
-    pthread_mutex_init(&(thpool_p->thcount_lock), NULL);
-    pthread_cond_init(&thpool_p->threads_all_idle, NULL);
+    pthread_mutex_init(&(thpool_p->thcount_lock), nullptr);
+    pthread_cond_init(&thpool_p->threads_all_idle, nullptr);
 
     /* Thread init */
     int n;
@@ -140,7 +140,7 @@ int thpool_add_work(thpool_* thpool_p, void (*function_p)(void*), void* arg_p) {
     job* newjob;
 
     newjob = (struct job*)malloc(sizeof(struct job));
-    if (newjob == NULL) {
+    if (newjob == nullptr) {
         fprintf(stderr, "thpool_add_work(): Could not allocate memory for new job\n");
         return -1;
     }
@@ -166,8 +166,8 @@ void thpool_wait(thpool_* thpool_p) {
 
 /* Destroy the threadpool */
 void thpool_destroy(thpool_* thpool_p) {
-    /* No need to destory if it's NULL */
-    if (thpool_p == NULL) return;
+    /* No need to destory if it's nullptr */
+    if (thpool_p == nullptr) return;
 
     volatile int threads_total = thpool_p->num_threads_alive;
 
@@ -234,7 +234,7 @@ int thpool_num_threads_working(thpool_* thpool_p) {
  */
 static int thread_init(thpool_* thpool_p, struct thread** thread_p, int id) {
     *thread_p = (struct thread*)malloc(sizeof(struct thread));
-    if (*thread_p == NULL) {
+    if (*thread_p == nullptr) {
         fprintf(stderr, "thread_init(): Could not allocate memory for thread\n");
         return -1;
     }
@@ -242,7 +242,7 @@ static int thread_init(thpool_* thpool_p, struct thread** thread_p, int id) {
     (*thread_p)->thpool_p = thpool_p;
     (*thread_p)->id       = id;
 
-    pthread_create(&(*thread_p)->pthread, NULL, (void* (*)(void*))thread_do,
+    pthread_create(&(*thread_p)->pthread, nullptr, (void* (*)(void*))thread_do,
                    (*thread_p));
     pthread_detach((*thread_p)->pthread);
     return 0;
@@ -288,7 +288,7 @@ static void* thread_do(struct thread* thread_p) {
     sigemptyset(&act.sa_mask);
     act.sa_flags   = 0;
     act.sa_handler = thread_hold;
-    if (sigaction(SIGUSR1, &act, NULL) == -1) {
+    if (sigaction(SIGUSR1, &act, nullptr) == -1) {
         fprintf(stderr, "thread_do(): cannot handle SIGUSR1");
     }
 
@@ -328,7 +328,7 @@ static void* thread_do(struct thread* thread_p) {
     thpool_p->num_threads_alive--;
     pthread_mutex_unlock(&thpool_p->thcount_lock);
 
-    return NULL;
+    return nullptr;
 }
 
 /* Frees a thread  */
@@ -341,15 +341,15 @@ static void thread_destroy(thread* thread_p) {
 /* Initialize queue */
 static int jobqueue_init(jobqueue* jobqueue_p) {
     jobqueue_p->len   = 0;
-    jobqueue_p->front = NULL;
-    jobqueue_p->rear  = NULL;
+    jobqueue_p->front = nullptr;
+    jobqueue_p->rear  = nullptr;
 
     jobqueue_p->has_jobs = (struct bsem*)malloc(sizeof(struct bsem));
-    if (jobqueue_p->has_jobs == NULL) {
+    if (jobqueue_p->has_jobs == nullptr) {
         return -1;
     }
 
-    pthread_mutex_init(&(jobqueue_p->rwmutex), NULL);
+    pthread_mutex_init(&(jobqueue_p->rwmutex), nullptr);
     bsem_init(jobqueue_p->has_jobs, 0);
 
     return 0;
@@ -361,8 +361,8 @@ static void jobqueue_clear(jobqueue* jobqueue_p) {
         free(jobqueue_pull(jobqueue_p));
     }
 
-    jobqueue_p->front = NULL;
-    jobqueue_p->rear  = NULL;
+    jobqueue_p->front = nullptr;
+    jobqueue_p->rear  = nullptr;
     bsem_reset(jobqueue_p->has_jobs);
     jobqueue_p->len = 0;
 }
@@ -371,7 +371,7 @@ static void jobqueue_clear(jobqueue* jobqueue_p) {
  */
 static void jobqueue_push(jobqueue* jobqueue_p, struct job* newjob) {
     pthread_mutex_lock(&jobqueue_p->rwmutex);
-    newjob->prev = NULL;
+    newjob->prev = nullptr;
 
     switch (jobqueue_p->len) {
     case 0: /* if no jobs in queue */
@@ -401,8 +401,8 @@ static struct job* jobqueue_pull(jobqueue* jobqueue_p) {
         break;
 
     case 1: /* if one job in queue */
-        jobqueue_p->front = NULL;
-        jobqueue_p->rear  = NULL;
+        jobqueue_p->front = nullptr;
+        jobqueue_p->rear  = nullptr;
         jobqueue_p->len   = 0;
         break;
 
@@ -431,8 +431,8 @@ static void bsem_init(bsem* bsem_p, int value) {
         fprintf(stderr, "bsem_init(): Binary semaphore can take only values 1 or 0");
         exit(1);
     }
-    pthread_mutex_init(&(bsem_p->mutex), NULL);
-    pthread_cond_init(&(bsem_p->cond), NULL);
+    pthread_mutex_init(&(bsem_p->mutex), nullptr);
+    pthread_cond_init(&(bsem_p->cond), nullptr);
     bsem_p->v = value;
 }
 
