@@ -32,7 +32,7 @@ CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-
 				 -DDEBUG_STD_LIB \
 				 -DDEBUG_COMPILER_SUMMARY1 \
 				 -DDEBUG_COMPILER_DETAIL1 \
-				 -DDEBUG_GENERATE_SUMMARY \
+				 -DDEBUG_GENERATE_SUMMARY1 \
 				 -DDEBUG_GENERATE_DETAIL1 \
 				 -DDEBUG_RVM1
 BIN = ./bin
