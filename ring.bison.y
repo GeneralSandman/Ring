@@ -37,6 +37,7 @@ int yyerror(char const *str, ...);
     BreakStatement*             m_break_statement;
     ContinueStatement*          m_continue_statement;
     ReturnStatement*            m_return_statement;
+    DimensionExpression*        m_dimension_expression;
 
     Package*                    m_package;
 
@@ -154,6 +155,7 @@ int yyerror(char const *str, ...);
 %type <m_expression> unitary_expression
 %type <m_expression> primary_not_new_array
 %type <m_expression> primary_not_new_array_2
+%type <m_expression> primary_new_creation
 %type <m_expression> member_expression
 %type <m_expression> literal_expression
 %type <m_expression> primary_expression
@@ -181,6 +183,7 @@ int yyerror(char const *str, ...);
 %type <m_break_statement> break_statement
 %type <m_continue_statement> continue_statement
 %type <m_return_statement> return_statement
+%type <m_dimension_expression> dimension_expression dimension_expression_list
 
 %type <m_package> package_definition
 
@@ -745,6 +748,11 @@ type_specifier
     {
         debug_log_with_green_coloar("[RULE::type_specifier:class_type_specifier]");
     }
+    | basic_type_specifier TOKEN_LB TOKEN_RB
+    {
+        debug_log_with_green_coloar("[RULE::type_specifier:array_type_specifier]");
+        $$ = create_type_specifier_array($1);
+    }
     ;
 
 basic_type_specifier
@@ -985,6 +993,32 @@ primary_expression
     {
         $$ = expression_add_package_posit($3, $1);
     }
+    | primary_new_creation
+    ;
+
+primary_new_creation
+    : TOKEN_NEW basic_type_specifier dimension_expression_list
+    {
+      $$ = create_new_array_expression(create_type_specifier($2), $3);
+    }
+    ;
+
+dimension_expression_list
+    : dimension_expression
+    {
+    }
+    | dimension_expression_list dimension_expression
+    {
+      $$ = dimension_expression_list_add_item($1, $2);
+    }
+    ;
+
+
+dimension_expression
+    : TOKEN_LB INT_LITERAL TOKEN_RB
+    {
+      $$ = create_dimension_expression($2);
+    }
     ;
 
 primary_not_new_array
@@ -995,7 +1029,7 @@ primary_not_new_array
     }
     | identifier TOKEN_LB expression TOKEN_RB
     {
-        $$ = create_expression_identifier_with_index($1, $3);
+        $$ = create_expression_identifier_with_index(create_expression_identifier($1), $3);
     }
     | function_call_expression 
     {

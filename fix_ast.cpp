@@ -147,15 +147,17 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
         fix_ternary_condition_expression(expression->u.ternary_expression, block, func);
         break;
 
+    case EXPRESSION_TYPE_ARRAY_INDEX:
+        fix_array_index_expression(expression, expression->u.array_index_expression, block, func);
+        break;
+
     default: break;
     }
 }
 
 
 void add_declaration(Declaration* declaration, Block* block, Function* func) {
-    if (declaration == NULL) {
-        return;
-    }
+    assert(declaration != nullptr);
 
     Declaration* pos  = declaration;
     Declaration* next = pos->next;
@@ -262,9 +264,7 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
 }
 
 TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block* block) {
-    if (expression == NULL) {
-        return NULL;
-    }
+    assert(expression != nullptr);
     // TODO: 在这里要判断 identifier 是function 还是变量，
     // 然后从不同地方进行搜索
     // 并判断当前代码片段是否已经声明过相关的变量和函数
@@ -383,7 +383,7 @@ void fix_method_call_expression(MethodCallExpression* method_call_expression, Bl
     method_call_expression->member_declaration = member_declaration;
 
     // 4. fix argument list
-    ArgumentList* pos = method_call_expression->argument_list;
+    ArgumentList* pos                          = method_call_expression->argument_list;
     for (; pos != NULL; pos = pos->next) {
         fix_expression(pos->expression, block, func);
     }
@@ -405,6 +405,21 @@ void fix_class_definition(ClassDefinition* class_definition) {
                 fix_statement_list(pos->u.method->block->statement_list, pos->u.method->block, NULL);
             }
         }
+    }
+}
+
+void fix_array_index_expression(Expression* expression, ArrayIndexExpression* array_index_expression, Block* block, Function* func) {
+    assert(array_index_expression != nullptr);
+
+    Declaration* declaration = nullptr;
+
+    declaration              = search_declaration(expression->package_posit,
+                                                  array_index_expression->array_expression->u.identifier_expression->identifier,
+                                                  block);
+
+    if (declaration == nullptr) {
+        printf("not found identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
+        exit(1);
     }
 }
 
@@ -440,7 +455,7 @@ void fix_member_expression(Expression* expression, MemberExpression* member_expr
 
 
     // expression 最终的类型取决于field-member 的类型
-    expression->convert_type = member_declaration->u.field->type;
+    expression->convert_type              = member_declaration->u.field->type;
     fix_class_member_expression(member_expression, member_expression->object_expression, member_expression->member_identifier);
 }
 
@@ -519,7 +534,7 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
 // -----------------
 
 Declaration* search_declaration(char* package_posit, char* identifier, Block* block) {
-    Declaration* decl = NULL;
+    Declaration* decl = nullptr;
 
     for (; block; block = block->parent_block) {
         for (decl = block->declaration_list; decl; decl = decl->next) {
@@ -536,7 +551,7 @@ Declaration* search_declaration(char* package_posit, char* identifier, Block* bl
 
     printf("can't find identifier %s\n", identifier);
     exit(ERROR_CODE_COMPILE_ERROR);
-    return NULL;
+    return nullptr;
 }
 
 Function* search_function(char* package_posit, char* identifier) {

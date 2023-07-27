@@ -38,6 +38,9 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_STACK_OBJECT, "push_stack_object", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
 
 
+    // array
+    {RVM_CODE_PUSH_ARRAY_INT, "push_array_int", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
+
     // class
     {RVM_CODE_POP_FIELD_BOOL, "pop_field_bool", OPCODE_OPERAND_TYPE_2BYTE, -1, 3},
     {RVM_CODE_POP_FIELD_INT, "pop_field_int", OPCODE_OPERAND_TYPE_2BYTE, -1, 3},
@@ -132,7 +135,8 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_EXIT, "exit", OPCODE_OPERAND_TYPE_1BYTE, 0},
 
     // new heap memory
-    // {RVM_CODE_DUPLICATE, "new", OPCODE_OPERAND_TYPE_0BYTE, 1, 0},
+    {RVM_CODE_NEW_ARRAY_INT, "new_array_int", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
+    {RVM_CODE_NEW_ARRAY_DOUBLE, "new_array_double", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
 
 
     {RVM_CODES_NUM, "", OPCODE_OPERAND_TYPE_0BYTE, 0, 0},
@@ -227,7 +231,7 @@ void add_global_variable(Package* package, Package_Executer* executer) {
     executer->global_variable_size = package->global_declaration_list.size();
     executer->global_variable_list = (RVM_Variable*)malloc(executer->global_variable_size * sizeof(RVM_Variable));
 
-    int i = 0;
+    int i                          = 0;
     for (Declaration* pos : package->global_declaration_list) {
         executer->global_variable_list[i].identifier = pos->identifier;
         executer->global_variable_list[i].type       = pos->type; // TODO: 这里考虑要深度复制
@@ -242,7 +246,7 @@ void add_functions(Package* package, Package_Executer* executer) {
     executer->function_size = package->function_list.size();
     executer->function_list = (RVM_Function*)malloc(sizeof(RVM_Function) * package->function_list.size());
 
-    unsigned int i = 0;
+    unsigned int i          = 0;
     // 暂时只处理 native function
     for (Function* pos : package->function_list) {
         copy_function(pos, &executer->function_list[i]);
@@ -265,7 +269,7 @@ void add_classes(Package* package, Package_Executer* executer) {
     executer->class_size = package->class_definition_list.size();
     executer->class_list = (RVM_Class*)malloc(sizeof(RVM_Class) * package->class_definition_list.size());
 
-    unsigned int i = 0;
+    unsigned int i       = 0;
     for (ClassDefinition* pos : package->class_definition_list) {
         copy_class(executer, pos, &executer->class_list[i]);
         i++;
@@ -275,11 +279,11 @@ void add_classes(Package* package, Package_Executer* executer) {
 void copy_class(Package_Executer* executer, ClassDefinition* src, RVM_Class* dest) {
     debug_log_with_darkgreen_coloar("\t");
 
-    dest->identifier  = src->class_identifier;
-    dest->field_size  = 0;
-    dest->field_list  = NULL;
-    dest->method_size = 0;
-    dest->method_list = NULL;
+    dest->identifier            = src->class_identifier;
+    dest->field_size            = 0;
+    dest->field_list            = NULL;
+    dest->method_size           = 0;
+    dest->method_list           = NULL;
 
     ClassMemberDeclaration* pos = src->member;
     for (; pos != NULL; pos = pos->next) {
@@ -292,8 +296,8 @@ void copy_class(Package_Executer* executer, ClassDefinition* src, RVM_Class* des
 
     dest->method_list = (RVM_Method*)malloc(sizeof(RVM_Method) * dest->method_size);
 
-    unsigned int i = 0;
-    pos            = src->member;
+    unsigned int i    = 0;
+    pos               = src->member;
     for (; pos != NULL; pos = pos->next) {
         if (pos->type == MEMBER_FIELD) {
         } else if (pos->type == MEMBER_METHOD) {
@@ -629,8 +633,8 @@ void generate_vmcode_from_break_statement(Package_Executer* executer, Block* blo
 
     unsigned int break_loop_num = break_statement->break_loop_num;
 
-    Block*       pos      = block;
-    unsigned int loop_num = 1;
+    Block*       pos            = block;
+    unsigned int loop_num       = 1;
     for (; pos; pos = pos->parent_block) {
         if (pos->type == BLOCK_TYPE_FOR) {
         } else if (pos->type == BLOCK_TYPE_DOFOR) {
@@ -826,6 +830,14 @@ void generate_vmcode_from_expression(Package_Executer* executer, Expression* exp
         generate_vmcode_from_ternary_condition_expression(executer, expression->u.ternary_expression, opcode_buffer);
         break;
 
+    case EXPRESSION_TYPE_NEW_ARRAY:
+        generate_vmcode_from_new_array_expression(executer, expression->u.new_array_expression, opcode_buffer);
+        break;
+
+    case EXPRESSION_TYPE_ARRAY_INDEX:
+        generate_vmcode_from_array_index_expression(executer, expression->u.array_index_expression, opcode_buffer);
+        break;
+
     default:
         break;
     }
@@ -833,9 +845,8 @@ void generate_vmcode_from_expression(Package_Executer* executer, Expression* exp
 
 void generate_vmcode_from_assign_expression(Package_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
-    if (expression == NULL) {
-        return;
-    }
+    assert(expression != nullptr);
+
     // TODO:
     if (expression->type != ASSIGN_EXPRESSION_TYPE_ASSIGN && expression->type != ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
         // += -= *= /=
@@ -920,10 +931,9 @@ void generate_pop_to_leftvalue(Package_Executer* executer, Expression* expressio
 
 void generate_pop_to_leftvalue_identifier(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
-    if (identifier_expression == NULL) {
-        return;
-    }
-    Declaration* declaration = identifier_expression->u.declaration;
+    assert(identifier_expression != nullptr);
+
+    Declaration* declaration    = identifier_expression->u.declaration;
 
     unsigned int variable_index = declaration->variable_index;
     RVM_Opcode   opcode         = RVM_CODE_UNKNOW;
@@ -1266,9 +1276,7 @@ void generate_vmcode_from_member_expression(Package_Executer* executer, MemberEx
 
 void generate_vmcode_from_ternary_condition_expression(Package_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
-    if (ternary_expression == NULL) {
-        return;
-    }
+    assert(ternary_expression != nullptr);
 
     unsigned int if_false_jump_label = 0;
     unsigned int if_end_label        = 0;
@@ -1290,6 +1298,40 @@ void generate_vmcode_from_ternary_condition_expression(Package_Executer* execute
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label, ternary_expression->line_number);
 
     opcode_buffer_set_label(opcode_buffer, if_end_label, opcode_buffer->code_size);
+}
+
+void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    assert(new_array_expression != nullptr);
+    assert(new_array_expression->dimension_expression != nullptr);
+
+    unsigned int dimension = new_array_expression->dimension_expression->dimension;
+
+    if (new_array_expression->type_specifier->basic_type == RING_BASIC_TYPE_INT) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_INT, dimension, new_array_expression->line_number);
+    } else if (new_array_expression->type_specifier->basic_type == RING_BASIC_TYPE_DOUBLE) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_DOUBLE, dimension, new_array_expression->line_number);
+    } else {
+        printf("error: only support int[] double[]\n");
+        exit(1);
+    }
+}
+
+void generate_vmcode_from_array_index_expression(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    assert(array_index_expression != nullptr);
+    assert(array_index_expression->array_expression != nullptr);
+    assert(array_index_expression->index_expression != nullptr);
+
+    // Expression* array = array_index_expression->array_expression;
+    Expression* index = array_index_expression->index_expression;
+    // FIXME: 这里处理 array_expression 不对，需要修正，目前暂时写死
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STATIC_OBJECT, 1, array_index_expression->line_number);
+    generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
+
+    // TODO：需要处理一下字符串 通过索引寻址
+    // 这里暂时只处理数组
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_INT, 0, array_index_expression->line_number);
 }
 
 void generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int oper_num, unsigned int line_number) {
@@ -1337,7 +1379,7 @@ int constant_pool_grow(Package_Executer* executer, unsigned int growth_size) {
 
 int constant_pool_add_int(Package_Executer* executer, int int_literal) {
     debug_log_with_darkgreen_coloar("\t");
-    int index = constant_pool_grow(executer, 1);
+    int index                                       = constant_pool_grow(executer, 1);
 
     executer->constant_pool_list[index].type        = CONSTANTPOOL_TYPE_INT;
     executer->constant_pool_list[index].u.int_value = int_literal;
@@ -1346,7 +1388,7 @@ int constant_pool_add_int(Package_Executer* executer, int int_literal) {
 
 int constant_pool_add_double(Package_Executer* executer, double double_literal) {
     debug_log_with_darkgreen_coloar("\t");
-    int index = constant_pool_grow(executer, 1);
+    int index                                          = constant_pool_grow(executer, 1);
 
     executer->constant_pool_list[index].type           = CONSTANTPOOL_TYPE_DOUBLE;
     executer->constant_pool_list[index].u.double_value = double_literal;
@@ -1355,12 +1397,12 @@ int constant_pool_add_double(Package_Executer* executer, double double_literal) 
 
 int constant_pool_add_string(Package_Executer* executer, char* string_literal) {
     debug_log_with_darkgreen_coloar("\t");
-    int index = constant_pool_grow(executer, 1);
+    int              index = constant_pool_grow(executer, 1);
 
     RVM_ConstantPool new_value;
-    new_value.type                      = CONSTANTPOOL_TYPE_STRING;
-    new_value.u.string_value            = string_literal;
-    executer->constant_pool_list[index] = new_value;
+    new_value.type                                     = CONSTANTPOOL_TYPE_STRING;
+    new_value.u.string_value                           = string_literal;
+    executer->constant_pool_list[index]                = new_value;
 
     executer->constant_pool_list[index].type           = CONSTANTPOOL_TYPE_STRING;
     executer->constant_pool_list[index].u.string_value = string_literal;
@@ -1409,8 +1451,8 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         case RVM_CODE_JUMP:
         case RVM_CODE_JUMP_IF_FALSE:
         case RVM_CODE_JUMP_IF_TRUE:
-            label         = (opcode_buffer->code_list[i + 1] << 8) + (opcode_buffer->code_list[i + 2]);
-            label_address = opcode_buffer->lable_list[label].label_address;
+            label                           = (opcode_buffer->code_list[i + 1] << 8) + (opcode_buffer->code_list[i + 2]);
+            label_address                   = opcode_buffer->lable_list[label].label_address;
 
             opcode_buffer->code_list[i + 1] = (RVM_Byte)(label_address >> 8);
             opcode_buffer->code_list[i + 2] = (RVM_Byte)(label_address & 0Xff);
@@ -1462,9 +1504,15 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         return opcode;
         break;
     case RING_BASIC_TYPE_INT:
+        if (type->derive_type != nullptr && type->derive_type->kind == RING_DERIVE_TYPE_ARRAY) {
+            return RVM_Opcode(opcode + 3);
+        }
         return RVM_Opcode(opcode + 1);
         break;
     case RING_BASIC_TYPE_DOUBLE:
+        if (type->derive_type != nullptr && type->derive_type->kind == RING_DERIVE_TYPE_ARRAY) {
+            return RVM_Opcode(opcode + 3);
+        }
         return RVM_Opcode(opcode + 2);
         break;
     case RING_BASIC_TYPE_STRING:

@@ -64,12 +64,12 @@ Expression* create_expression_identifier(char* identifier) {
     identifier_expression->identifier           = identifier;
     identifier_expression->u.declaration        = NULL;
 
-    Expression* expression              = (Expression*)malloc(sizeof(Expression));
-    expression->line_number             = package_unit_get_line_number();
-    expression->convert_type            = NULL; // fix in fix_ast
-    expression->type                    = EXPRESSION_TYPE_IDENTIFIER;
-    expression->u.identifier_expression = identifier_expression;
-    expression->next                    = NULL;
+    Expression* expression                      = (Expression*)malloc(sizeof(Expression));
+    expression->line_number                     = package_unit_get_line_number();
+    expression->convert_type                    = NULL; // fix in fix_ast
+    expression->type                            = EXPRESSION_TYPE_IDENTIFIER;
+    expression->u.identifier_expression         = identifier_expression;
+    expression->next                            = NULL;
 
     return expression;
 }
@@ -84,28 +84,28 @@ Expression* create_expression_identifier2(char* identifier, IdentifierExpression
     identifier_expression->identifier           = identifier;
     identifier_expression->u.declaration        = NULL;
 
-    Expression* expression              = (Expression*)malloc(sizeof(Expression));
-    expression->line_number             = package_unit_get_line_number();
-    expression->convert_type            = NULL; // fix in fix_ast
-    expression->type                    = EXPRESSION_TYPE_IDENTIFIER;
-    expression->u.identifier_expression = identifier_expression;
+    Expression* expression                      = (Expression*)malloc(sizeof(Expression));
+    expression->line_number                     = package_unit_get_line_number();
+    expression->convert_type                    = NULL; // fix in fix_ast
+    expression->type                            = EXPRESSION_TYPE_IDENTIFIER;
+    expression->u.identifier_expression         = identifier_expression;
 
     return expression;
 }
 
-Expression* create_expression_identifier_with_index(char* identifier, Expression* index) {
-    debug_log_with_yellow_coloar("identifier:%s", identifier);
+Expression* create_expression_identifier_with_index(Expression* array_expression, Expression* index) {
+    debug_log_with_yellow_coloar("\t");
 
     ArrayIndexExpression* array_index_expression = (ArrayIndexExpression*)malloc(sizeof(ArrayIndexExpression));
     array_index_expression->line_number          = package_unit_get_line_number();
-    array_index_expression->variable_identifier  = identifier;
+    array_index_expression->array_expression     = array_expression;
     array_index_expression->index_expression     = index;
 
-    Expression* expression               = (Expression*)malloc(sizeof(Expression));
-    expression->line_number              = package_unit_get_line_number();
-    expression->convert_type             = NULL; // fix in fix_ast
-    expression->type                     = EXPRESSION_TYPE_ARRAY_INDEX;
-    expression->u.array_index_expression = array_index_expression;
+    Expression* expression                       = (Expression*)malloc(sizeof(Expression));
+    expression->line_number                      = package_unit_get_line_number();
+    expression->convert_type                     = NULL; // fix in fix_ast
+    expression->type                             = EXPRESSION_TYPE_ARRAY_INDEX;
+    expression->u.array_index_expression         = array_index_expression;
 
     return expression;
 }
@@ -204,7 +204,7 @@ create_expression_literal(ExpressionType type, char* literal_interface) {
     expression->line_number  = package_unit_get_line_number();
     expression->convert_type = NULL; // fix in fix_ast
 
-    expression->type = type;
+    expression->type         = type;
     switch (type) {
     case EXPRESSION_TYPE_LITERAL_INT:
         sscanf(literal_interface, "%d", &(expression->u.int_literal));
@@ -276,13 +276,26 @@ Expression* create_dot_expression(Expression* prefix_expression, Expression* suf
     return expression;
 }
 
+Expression* create_new_array_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression) {
+    Expression* expression                                   = (Expression*)malloc(sizeof(Expression));
+    expression->line_number                                  = package_unit_get_line_number();
+    expression->convert_type                                 = NULL; // fix in fix_ast
+    expression->type                                         = EXPRESSION_TYPE_NEW_ARRAY;
+    expression->u.new_array_expression                       = (NewArrayExpression*)malloc(sizeof(NewArrayExpression));
+    expression->u.new_array_expression->line_number          = package_unit_get_line_number();
+    expression->u.new_array_expression->type_specifier       = type_specifier;
+    expression->u.new_array_expression->dimension_expression = dimension_expression;
+
+    return expression;
+}
+
 AssignExpression* create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand) {
     AssignExpression* assing_expression = (AssignExpression*)malloc(sizeof(AssignExpression));
 
-    assing_expression->line_number = package_unit_get_line_number();
-    assing_expression->type        = type;
-    assing_expression->left        = left;
-    assing_expression->operand     = operand;
+    assing_expression->line_number      = package_unit_get_line_number();
+    assing_expression->type             = type;
+    assing_expression->left             = left;
+    assing_expression->operand          = operand;
     return assing_expression;
 }
 
@@ -301,17 +314,17 @@ AssignExpression* create_multi_assign_expression(char* first_identifier, Identif
 
     AssignExpression* assing_expression = (AssignExpression*)malloc(sizeof(AssignExpression));
 
-    assing_expression->line_number = package_unit_get_line_number();
-    assing_expression->type        = ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN;
-    assing_expression->left        = left;
-    assing_expression->operand     = operand;
+    assing_expression->line_number      = package_unit_get_line_number();
+    assing_expression->type             = ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN;
+    assing_expression->left             = left;
+    assing_expression->operand          = operand;
     return assing_expression;
 }
 
 FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list) {
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
-    Expression* function_identifier_expression = create_expression_identifier2(identifier, IDENTIFIER_EXPRESSION_TYPE_FUNCTION);
+    Expression*             function_identifier_expression   = create_expression_identifier2(identifier, IDENTIFIER_EXPRESSION_TYPE_FUNCTION);
 
     FunctionCallExpression* function_call_expression         = (FunctionCallExpression*)malloc(sizeof(FunctionCallExpression));
     function_call_expression->line_number                    = package_unit_get_line_number();
@@ -379,8 +392,8 @@ Identifier* identifier_list_add_item(Identifier* identifier_list, Identifier* id
 FunctionReturnList* create_function_return_list(VariableType variable_type) {
     FunctionReturnList* return_list = (FunctionReturnList*)malloc(sizeof(FunctionReturnList));
 
-    return_list->variable_type = variable_type;
-    return_list->next          = NULL;
+    return_list->variable_type      = variable_type;
+    return_list->next               = NULL;
 
     return return_list;
 }
@@ -628,7 +641,7 @@ Block* start_new_block() {
 
     /* printf("[start] parent:%p, current:%p\n", block->parent_block, block); */
 
-    get_package_unit()->current_block = block;
+    get_package_unit()->current_block  = block;
 
     return block;
 }
@@ -648,6 +661,27 @@ Block* finish_block(Block* block, Statement* statement_list) {
     return block;
 }
 
+
+DimensionExpression* create_dimension_expression(char* literal_interface) {
+    debug_log_with_yellow_coloar("\tdimension:%s", literal_interface);
+    DimensionExpression* dim = (DimensionExpression*)malloc(sizeof(DimensionExpression));
+    dim->dimension           = 0;
+    dim->next                = nullptr;
+    sscanf(literal_interface, "%ud", &(dim->dimension));
+    return dim;
+}
+
+DimensionExpression* dimension_expression_list_add_item(DimensionExpression* list, DimensionExpression* item) {
+    if (list == nullptr) {
+        return item;
+    }
+    DimensionExpression* pos = list;
+    for (; pos->next != nullptr; pos = pos->next)
+        ;
+    pos->next = item;
+    return list;
+}
+
 // -
 TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
     debug_log_with_yellow_coloar("basic_type:%d", basic_type);
@@ -655,6 +689,16 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
     TypeSpecifier* type_specifier = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
     type_specifier->basic_type    = basic_type;
     type_specifier->derive_type   = NULL;
+    return type_specifier;
+}
+
+TypeSpecifier* create_type_specifier_array(Ring_BasicType basic_type) {
+    debug_log_with_yellow_coloar("basic_type:%d", basic_type);
+    TypeSpecifier* type_specifier             = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+    type_specifier->basic_type                = basic_type;
+    type_specifier->derive_type               = (Ring_DeriveType*)malloc(sizeof(Ring_DeriveType));
+    type_specifier->derive_type->kind         = RING_DERIVE_TYPE_ARRAY;
+    type_specifier->derive_type->u.array_type = nullptr;
     return type_specifier;
 }
 
