@@ -1513,7 +1513,6 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         return RVM_Opcode(opcode + 3);
         break;
     case RING_BASIC_TYPE_ARRAY:
-        // FIXME: 暂时只处理 int[]
         return RVM_Opcode(opcode + 3);
         break;
 

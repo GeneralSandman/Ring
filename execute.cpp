@@ -750,7 +750,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_NEW_ARRAY_INT:
-            // TODO:
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object   = rvm_new_array_int(rvm, oper_num);
             STACK_SET_OBJECT_OFFSET(rvm, 0, object);
@@ -758,10 +757,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 3;
             break;
         case RVM_CODE_NEW_ARRAY_DOUBLE:
-            // TODO:
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object   = rvm_new_array_double(rvm, oper_num);
             STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            runtime_stack->top_index++;
             rvm->pc += 3;
             break;
 
@@ -1057,12 +1056,12 @@ RVM_Object* rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension) 
 // support create one-dimensional array only.
 // TODO: support multi-dimensional array
 RVM_Object* rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimension) {
-    RVM_Object* object          = (RVM_Object*)malloc(sizeof(RVM_Object));
-    object->type                = RVM_OBJECT_TYPE_ARRAY;
-    object->u.array.type        = RVM_ARRAY_DOUBLE;
-    object->u.array.size        = dimension;
-    object->u.array.capacity    = dimension;
-    object->u.array.u.int_array = (int*)malloc(sizeof(int) * dimension);
+    RVM_Object* object             = (RVM_Object*)malloc(sizeof(RVM_Object));
+    object->type                   = RVM_OBJECT_TYPE_ARRAY;
+    object->u.array.type           = RVM_ARRAY_DOUBLE;
+    object->u.array.size           = dimension;
+    object->u.array.capacity       = dimension;
+    object->u.array.u.double_array = (double*)malloc(sizeof(double) * dimension);
     return object;
 }
 
@@ -1071,5 +1070,5 @@ void rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, 
 }
 
 void rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value) {
-    *value = object->u.array.u.int_array[index];
+    *value = object->u.array.u.double_array[index];
 }
