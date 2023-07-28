@@ -899,7 +899,6 @@ struct Expression {
 typedef enum {
     IDENTIFIER_EXPRESSION_TYPE_UNKNOW,
     IDENTIFIER_EXPRESSION_TYPE_VARIABLE,
-    IDENTIFIER_EXPRESSION_TYPE_VARIABLE_ARRAY,
     IDENTIFIER_EXPRESSION_TYPE_FUNCTION,
 } IdentifierExpressionType;
 
@@ -1195,13 +1194,32 @@ struct ReturnStatement {
 };
 
 
+// TODO: 这里重新规划一下 还要考虑类型的嵌套
+// typedef
+// 考虑 函数类型
+/* TypeSpecifier
+ * 基础类型：
+ *  bool
+ *  int
+ *  double
+ * 对象类型：
+ *  string
+ *  array
+ *  class
+ * 范型推导
+ *  any
+ * */
 typedef enum {
     RING_BASIC_TYPE_UNKNOW,
+
     RING_BASIC_TYPE_ANY,
+
     RING_BASIC_TYPE_BOOL,
     RING_BASIC_TYPE_INT,
     RING_BASIC_TYPE_DOUBLE,
+
     RING_BASIC_TYPE_STRING,
+    RING_BASIC_TYPE_ARRAY,
     RING_BASIC_TYPE_CLASS,
     RING_BASIC_TYPE_NULL,
 } Ring_BasicType;
@@ -1230,11 +1248,14 @@ struct Ring_DeriveType {
 };
 
 
-// TODO: 这里重新规划一下
-// 不太好理解
 struct TypeSpecifier {
-    Ring_BasicType   basic_type;
-    Ring_DeriveType* derive_type;
+    Ring_BasicType kind;
+    union {
+        Ring_DeriveType_Array* array_type;
+        Ring_DeriveType_Class* class_type;
+    } u;
+    unsigned int   dimension; // 维度，用来指明next
+    TypeSpecifier* next;      // 用于嵌套类型
 };
 
 struct StdPackageNativeFunction {
@@ -1484,6 +1505,7 @@ DimensionExpression*     dimension_expression_list_add_item(DimensionExpression*
 
 TypeSpecifier*           create_type_specifier(Ring_BasicType basic_type);
 TypeSpecifier*           create_type_specifier_array(Ring_BasicType basic_type);
+TypeSpecifier*           create_class_type_specifier(char* identifier);
 Declaration*             create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
 Declaration*             declaration_list_add_item(Declaration* head, Declaration* declaration);
 Statement*               create_declaration_statement(TypeSpecifier* type_specifier, char* identifier, Expression* initializer);
@@ -1504,8 +1526,6 @@ ClassMemberDeclaration*  create_class_member_field_declaration(Attribute attribu
 ClassMemberDeclaration*  create_class_member_method_declaration(Attribute attribute, MethodMember* method_member);
 FieldMember*             create_class_member_field(TypeSpecifier* type_specifier, Identifier* identifier_list);
 MethodMember*            create_class_member_method(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
-
-TypeSpecifier*           create_class_type_specifier(char* identifier);
 
 AttributeInfo*           create_attribute_info(char* name);
 AttributeInfo*           attribute_info_add_item(AttributeInfo* list, AttributeInfo* item);

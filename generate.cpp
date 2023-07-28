@@ -863,7 +863,7 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer, AssignEx
     }
 
     unsigned int opcode_offset = 0;
-    if (expression->operand->convert_type != nullptr && expression->operand->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE) {
+    if (expression->operand->convert_type != nullptr && expression->operand->convert_type->kind == RING_BASIC_TYPE_DOUBLE) {
         opcode_offset += 1;
     }
 
@@ -1007,8 +1007,8 @@ void generate_vmcode_from_binary_expression(Package_Executer* executer, BinaryEx
         goto END;
     }
 
-    if (left->convert_type != nullptr && left->convert_type->basic_type == RING_BASIC_TYPE_STRING
-        && right->convert_type != nullptr && right->convert_type->basic_type == RING_BASIC_TYPE_STRING) {
+    if (left->convert_type != nullptr && left->convert_type->kind == RING_BASIC_TYPE_STRING
+        && right->convert_type != nullptr && right->convert_type->kind == RING_BASIC_TYPE_STRING) {
         // TODO: 要在语义检查里严格检查
         // 肯定是eq ne gt ge lt le
         opcode = RVM_Opcode(opcode + 2);
@@ -1019,8 +1019,8 @@ void generate_vmcode_from_binary_expression(Package_Executer* executer, BinaryEx
     if (left->type == EXPRESSION_TYPE_LITERAL_DOUBLE
         || right->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
         opcode = RVM_Opcode(opcode + 1);
-    } else if ((left->convert_type != nullptr && left->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE)
-               || (right->convert_type != nullptr && right->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE)) {
+    } else if ((left->convert_type != nullptr && left->convert_type->kind == RING_BASIC_TYPE_DOUBLE)
+               || (right->convert_type != nullptr && right->convert_type->kind == RING_BASIC_TYPE_DOUBLE)) {
         opcode = RVM_Opcode(opcode + 1);
     }
 
@@ -1102,9 +1102,6 @@ void generate_vmcode_from_identifier_expression(Package_Executer* executer, Iden
         }
         offset = identifier_expression->u.declaration->variable_index;
         generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
-        break;
-
-    case IDENTIFIER_EXPRESSION_TYPE_VARIABLE_ARRAY:
         break;
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
@@ -1221,34 +1218,34 @@ void generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpres
     // RVM_Opcode opcode = RVM_CODE_UNKNOW;
 
     // FIXME: derive type
-    switch (cast_expression->type->basic_type) {
+    switch (cast_expression->type->kind) {
     case RING_BASIC_TYPE_BOOL:
         if (cast_expression->operand->convert_type != nullptr
-            && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_INT) {
+            && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_INT) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_BOOL, 0, cast_expression->line_number);
         } else if (cast_expression->operand->convert_type != nullptr
-                   && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE) {
+                   && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_DOUBLE_TO_INT, 0, cast_expression->line_number);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_BOOL, 0, cast_expression->line_number);
         }
         break;
     case RING_BASIC_TYPE_INT:
         if (cast_expression->operand->convert_type != nullptr
-            && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_BOOL) {
+            && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_BOOL_TO_INT, 0, cast_expression->line_number);
         } else if (cast_expression->operand->convert_type != nullptr
-                   && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE) {
+                   && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_DOUBLE_TO_INT, 0, cast_expression->line_number);
         }
         break;
 
     case RING_BASIC_TYPE_DOUBLE:
         if (cast_expression->operand->convert_type != nullptr
-            && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_BOOL) {
+            && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_BOOL_TO_INT, 0, cast_expression->line_number);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_DOUBLE, 0, cast_expression->line_number);
         } else if (cast_expression->operand->convert_type != nullptr
-                   && cast_expression->operand->convert_type->basic_type == RING_BASIC_TYPE_INT) {
+                   && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_INT) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_DOUBLE, 0, cast_expression->line_number);
         }
         break;
@@ -1307,9 +1304,9 @@ void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewAr
 
     unsigned int dimension = new_array_expression->dimension_expression->dimension;
 
-    if (new_array_expression->type_specifier->basic_type == RING_BASIC_TYPE_INT) {
+    if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_INT) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_INT, dimension, new_array_expression->line_number);
-    } else if (new_array_expression->type_specifier->basic_type == RING_BASIC_TYPE_DOUBLE) {
+    } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_DOUBLE) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_DOUBLE, dimension, new_array_expression->line_number);
     } else {
         printf("error: only support int[] double[]\n");
@@ -1499,26 +1496,24 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         return RVM_CODE_UNKNOW;
     }
 
-    switch (type->basic_type) {
+    switch (type->kind) {
     case RING_BASIC_TYPE_BOOL:
         return opcode;
         break;
     case RING_BASIC_TYPE_INT:
-        if (type->derive_type != nullptr && type->derive_type->kind == RING_DERIVE_TYPE_ARRAY) {
-            return RVM_Opcode(opcode + 3);
-        }
         return RVM_Opcode(opcode + 1);
         break;
     case RING_BASIC_TYPE_DOUBLE:
-        if (type->derive_type != nullptr && type->derive_type->kind == RING_DERIVE_TYPE_ARRAY) {
-            return RVM_Opcode(opcode + 3);
-        }
         return RVM_Opcode(opcode + 2);
         break;
     case RING_BASIC_TYPE_STRING:
         return RVM_Opcode(opcode + 3);
         break;
     case RING_BASIC_TYPE_CLASS:
+        return RVM_Opcode(opcode + 3);
+        break;
+    case RING_BASIC_TYPE_ARRAY:
+        // FIXME: 暂时只处理 int[]
         return RVM_Opcode(opcode + 3);
         break;
 

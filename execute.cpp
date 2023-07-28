@@ -133,21 +133,20 @@ void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runt
     for (int i = 0; i < size; i++) {
         type_specifier = global_variable_list[i].type;
 
-        switch (type_specifier->basic_type) {
+        switch (type_specifier->kind) {
         case RING_BASIC_TYPE_BOOL:
         case RING_BASIC_TYPE_INT:
         case RING_BASIC_TYPE_DOUBLE:
             memset(&runtime_static->data[i], 0, sizeof(RVM_Value));
             // TODO: 临时处理一下 int[]
-            if (type_specifier->derive_type != nullptr && type_specifier->derive_type->kind == RING_DERIVE_TYPE_ARRAY) {
+            if (type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
                 runtime_static->data[i].u.object = rvm_new_array_int(nullptr, 10);
             }
             break;
         case RING_BASIC_TYPE_CLASS:
             // Search class-definition from variable declaration.
-            assert(type_specifier->derive_type != nullptr);
-            assert(type_specifier->derive_type->u.class_type != nullptr);
-            class_definition                 = type_specifier->derive_type->u.class_type->class_definition;
+            assert(type_specifier->u.class_type != nullptr);
+            class_definition                 = type_specifier->u.class_type->class_definition;
             runtime_static->data[i].u.object = new_class_object(class_definition);
             break;
 

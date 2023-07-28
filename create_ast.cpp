@@ -687,18 +687,36 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
     debug_log_with_yellow_coloar("basic_type:%d", basic_type);
 
     TypeSpecifier* type_specifier = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
-    type_specifier->basic_type    = basic_type;
-    type_specifier->derive_type   = nullptr;
+    type_specifier->kind          = basic_type;
+    type_specifier->dimension     = 0;
+    type_specifier->next          = nullptr;
+
     return type_specifier;
 }
 
 TypeSpecifier* create_type_specifier_array(Ring_BasicType basic_type) {
     debug_log_with_yellow_coloar("basic_type:%d", basic_type);
-    TypeSpecifier* type_specifier             = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
-    type_specifier->basic_type                = basic_type;
-    type_specifier->derive_type               = (Ring_DeriveType*)malloc(sizeof(Ring_DeriveType));
-    type_specifier->derive_type->kind         = RING_DERIVE_TYPE_ARRAY;
-    type_specifier->derive_type->u.array_type = nullptr;
+
+    TypeSpecifier* type_specifier = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+    type_specifier->kind          = RING_BASIC_TYPE_ARRAY;
+    type_specifier->u.array_type  = nullptr;
+    type_specifier->dimension     = 1; // 暂时只支持一维数组
+    type_specifier->next          = create_type_specifier(basic_type);
+
+    return type_specifier;
+}
+
+TypeSpecifier* create_class_type_specifier(char* identifier) {
+    debug_log_with_yellow_coloar("\t");
+
+    TypeSpecifier* type_specifier                  = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+    type_specifier->kind                           = RING_BASIC_TYPE_CLASS;
+    type_specifier->u.class_type                   = (Ring_DeriveType_Class*)malloc(sizeof(Ring_DeriveType_Class));
+    type_specifier->u.class_type->class_identifier = identifier;
+    type_specifier->u.class_type->class_definition = nullptr;
+    type_specifier->dimension                      = 0;
+    type_specifier->next                           = nullptr;
+
     return type_specifier;
 }
 
@@ -915,19 +933,6 @@ MethodMember* create_class_member_method(FunctionType type, char* identifier, Pa
     return method_member;
 }
 
-TypeSpecifier* create_class_type_specifier(char* identifier) {
-    debug_log_with_yellow_coloar("\t");
-
-    TypeSpecifier* type                               = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
-    type->basic_type                                  = RING_BASIC_TYPE_CLASS;
-    type->derive_type                                 = (Ring_DeriveType*)malloc(sizeof(Ring_DeriveType));
-    type->derive_type->kind                           = RING_DERIVE_TYPE_CLASS;
-    type->derive_type->u.class_type                   = (Ring_DeriveType_Class*)malloc(sizeof(Ring_DeriveType_Class));
-    type->derive_type->u.class_type->class_identifier = identifier;
-    type->derive_type->u.class_type->class_definition = nullptr; // FIX_AST_UPDATE
-
-    return type;
-}
 
 AttributeInfo* create_attribute_info(char* name) {
     AttributeInfo* info = (AttributeInfo*)malloc(sizeof(AttributeInfo));

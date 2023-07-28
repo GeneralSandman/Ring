@@ -79,20 +79,20 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
         break;
 
     case EXPRESSION_TYPE_LITERAL_BOOL:
-        expression->convert_type             = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
-        expression->convert_type->basic_type = RING_BASIC_TYPE_BOOL;
+        expression->convert_type       = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+        expression->convert_type->kind = RING_BASIC_TYPE_BOOL;
         break;
     case EXPRESSION_TYPE_LITERAL_INT:
-        expression->convert_type             = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
-        expression->convert_type->basic_type = RING_BASIC_TYPE_INT;
+        expression->convert_type       = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+        expression->convert_type->kind = RING_BASIC_TYPE_INT;
         break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
-        expression->convert_type             = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
-        expression->convert_type->basic_type = RING_BASIC_TYPE_DOUBLE;
+        expression->convert_type       = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+        expression->convert_type->kind = RING_BASIC_TYPE_DOUBLE;
         break;
     case EXPRESSION_TYPE_LITERAL_STRING:
-        expression->convert_type             = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
-        expression->convert_type->basic_type = RING_BASIC_TYPE_STRING;
+        expression->convert_type       = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+        expression->convert_type->kind = RING_BASIC_TYPE_STRING;
         break;
 
     case EXPRESSION_TYPE_CONCAT:
@@ -194,8 +194,8 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
     char*            class_identifier = nullptr;
 
 
-    if (type_specifier->basic_type == RING_BASIC_TYPE_CLASS && type_specifier->derive_type->u.class_type != nullptr) {
-        class_identifier = type_specifier->derive_type->u.class_type->class_identifier;
+    if (type_specifier->kind == RING_BASIC_TYPE_CLASS && type_specifier->u.class_type != nullptr) {
+        class_identifier = type_specifier->u.class_type->class_identifier;
         class_definition = search_class_definition(class_identifier);
 
         if (class_definition == nullptr) {
@@ -205,7 +205,7 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
             exit(ERROR_CODE_COMPILE_ERROR);
         }
 
-        type_specifier->derive_type->u.class_type->class_definition = class_definition;
+        type_specifier->u.class_type->class_definition = class_definition;
     }
 }
 
@@ -279,9 +279,6 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
         return declaration->type;
         break;
 
-    case IDENTIFIER_EXPRESSION_TYPE_VARIABLE_ARRAY:
-        break;
-
     case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
         function               = search_function(expression->package_posit, expression->identifier);
         expression->u.function = function;
@@ -323,18 +320,18 @@ void fix_binary_expression(Expression* expression, Block* block, Function* func)
     }
 
     if (expression->type == EXPRESSION_TYPE_CONCAT) {
-        expression->convert_type->basic_type = RING_BASIC_TYPE_STRING;
+        expression->convert_type->kind = RING_BASIC_TYPE_STRING;
         return;
     }
 
     if (left_expression->type == EXPRESSION_TYPE_LITERAL_DOUBLE
         || right_expression->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
-        expression->convert_type->basic_type = RING_BASIC_TYPE_DOUBLE;
+        expression->convert_type->kind = RING_BASIC_TYPE_DOUBLE;
     }
 
-    if ((left_expression->convert_type && left_expression->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE)
-        || (right_expression->convert_type && right_expression->convert_type->basic_type == RING_BASIC_TYPE_DOUBLE)) {
-        expression->convert_type->basic_type = RING_BASIC_TYPE_DOUBLE;
+    if ((left_expression->convert_type && left_expression->convert_type->kind == RING_BASIC_TYPE_DOUBLE)
+        || (right_expression->convert_type && right_expression->convert_type->kind == RING_BASIC_TYPE_DOUBLE)) {
+        expression->convert_type->kind = RING_BASIC_TYPE_DOUBLE;
     }
 }
 
@@ -368,7 +365,7 @@ void fix_method_call_expression(MethodCallExpression* method_call_expression, Bl
     fix_expression(object_expression, block, func);
 
     // 1. find class definition by object.
-    class_definition = object_expression->convert_type->derive_type->u.class_type->class_definition;
+    class_definition = object_expression->convert_type->u.class_type->class_definition;
     if (class_definition == nullptr) {
         fprintf(stderr, "fix_method_call_expression error\n");
         exit(ERROR_CODE_COMPILE_ERROR);
@@ -438,7 +435,7 @@ void fix_member_expression(Expression* expression, MemberExpression* member_expr
     fix_expression(object_expression, block, func);
 
     // 1. find class definition by object.
-    class_definition = object_expression->convert_type->derive_type->u.class_type->class_definition;
+    class_definition = object_expression->convert_type->u.class_type->class_definition;
     if (class_definition == nullptr) {
         fprintf(stderr, "fix_member_expression error\n");
         exit(ERROR_CODE_COMPILE_ERROR);
