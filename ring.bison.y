@@ -24,6 +24,7 @@ int yyerror(char const *str, ...);
     AssignExpression*           m_assign_expression;
     FunctionCallExpression*     m_function_call_expression;
     MethodCallExpression*       m_method_call_expression;
+    ArrayLiteralExpression*     m_array_literal_expression;
     ArgumentList*               m_argument_list;
     Function*                   m_function_definition;
     Parameter*                  m_parameter_list;
@@ -170,6 +171,7 @@ int yyerror(char const *str, ...);
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
 %type <m_method_call_expression> method_call_expression
+%type <m_array_literal_expression> array_literal_expression
 %type <m_argument_list> argument_list argument
 %type <m_function_definition> function_definition
 %type <m_parameter_list> parameter_list parameter
@@ -1019,6 +1021,10 @@ dimension_expression
     {
       $$ = create_dimension_expression($2);
     }
+    | TOKEN_LB TOKEN_RB
+    {
+      $$ = create_dimension_expression(nullptr);
+    }
     ;
 
 primary_not_new_array
@@ -1041,6 +1047,11 @@ primary_not_new_array
     {
         debug_log_with_green_coloar("[RULE::literal_term:method_call_expression]\t ");
         $$ = create_expression_from_method_call($1); 
+    }
+    | array_literal_expression
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:array_literal_expression]\t ");
+        $$ = create_expression_from_array_literal($1);
     }
     ;
 
@@ -1141,6 +1152,14 @@ method_call_expression
         debug_log_with_green_coloar("[RULE::function_call_expression]\t ");
 
         $$ = create_method_call_expression(create_expression_identifier($1), $3, nullptr);
+    }
+    ;
+
+array_literal_expression
+    : basic_type_specifier dimension_expression_list TOKEN_LC expression_list TOKEN_RC
+    {
+        debug_log_with_green_coloar("[RULE::array_literal_expression]\t ");
+        $$ = create_array_literal_expression(create_type_specifier($1), $2, $4);
     }
     ;
 

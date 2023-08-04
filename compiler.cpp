@@ -18,7 +18,7 @@ void                     ring_compiler_error(SyntaxType syntax_type, int need_ex
     if (need_exit) {
         // Donot exit when detect a error.
         // Get next line and compile.
-        exit(ERROR_CODE_COMPILE_ERROR);
+        exit(1);
     }
 }
 
@@ -138,6 +138,7 @@ void package_compile(Package* package) {
         return;
     }
     debug_log_with_yellow_coloar("\t package[%s] start compile...", package->package_name);
+
     package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
     compiler_entry->package_list.push_back(package);
 

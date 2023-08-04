@@ -40,6 +40,9 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
     // array
     {RVM_CODE_PUSH_ARRAY_INT, "push_array_int", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
+    {RVM_CODE_PUSH_ARRAY_DOUBLE, "push_array_double", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
+    {RVM_CODE_PUSH_ARRAY_OBJECT, "push_array_object", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
+
 
     // class
     {RVM_CODE_POP_FIELD_BOOL, "pop_field_bool", OPCODE_OPERAND_TYPE_2BYTE, -1, 3},
@@ -137,6 +140,10 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     // new heap memory
     {RVM_CODE_NEW_ARRAY_INT, "new_array_int", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
     {RVM_CODE_NEW_ARRAY_DOUBLE, "new_array_double", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
+    {RVM_CODE_NEW_ARRAY_OBJECT, "new_array_object", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
+    {RVM_CODE_NEW_ARRAY_LITERAL_INT, "new_array_literal_int", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
+    {RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE, "new_array_literal_double", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
+    {RVM_CODE_NEW_ARRAY_LITERAL_OBJECT, "new_array_literal_object", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
 
 
     {RVM_CODES_NUM, "", OPCODE_OPERAND_TYPE_0BYTE, 0, 0},
@@ -830,12 +837,16 @@ void generate_vmcode_from_expression(Package_Executer* executer, Expression* exp
         generate_vmcode_from_ternary_condition_expression(executer, expression->u.ternary_expression, opcode_buffer);
         break;
 
+    case EXPRESSION_TYPE_ARRAY_INDEX:
+        generate_vmcode_from_array_index_expression(executer, expression->u.array_index_expression, opcode_buffer);
+        break;
+
     case EXPRESSION_TYPE_NEW_ARRAY:
         generate_vmcode_from_new_array_expression(executer, expression->u.new_array_expression, opcode_buffer);
         break;
 
-    case EXPRESSION_TYPE_ARRAY_INDEX:
-        generate_vmcode_from_array_index_expression(executer, expression->u.array_index_expression, opcode_buffer);
+    case EXPRESSION_TYPE_ARRAY_LITERAL:
+        generate_vmcode_from_array_literal_expreesion(executer, expression->u.array_literal_expression, opcode_buffer);
         break;
 
     default:
@@ -1314,6 +1325,28 @@ void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewAr
     }
 }
 
+void generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, ArrayLiteralExpression* array_literal_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    assert(array_literal_expression != nullptr);
+    assert(array_literal_expression->expression_list != nullptr);
+
+    int         size = 0;
+    Expression* pos  = array_literal_expression->expression_list;
+    for (; pos != nullptr; pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos, opcode_buffer, 0);
+        size++;
+    }
+
+    if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_INT) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_INT, size, array_literal_expression->line_number);
+    } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_DOUBLE) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE, size, array_literal_expression->line_number);
+    } else {
+        printf("error: only support int[] double[]\n");
+        exit(1);
+    }
+}
+
 void generate_vmcode_from_array_index_expression(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     assert(array_index_expression != nullptr);
@@ -1328,7 +1361,20 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
 
     // TODO：需要处理一下字符串 通过索引寻址
     // 这里暂时只处理数组
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_INT, 0, array_index_expression->line_number);
+    // 暂时只处理一维数组
+    // 要通过变量的类型来决定 push_array_int push_array_double push_array_object
+    Declaration* declaration = array_index_expression->array_expression->u.identifier_expression->u.declaration;
+    if (declaration == nullptr) {
+        printf("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
+        exit(1);
+    }
+
+
+    if (declaration->type->next->kind == RING_BASIC_TYPE_INT) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_INT, 0, array_index_expression->line_number);
+    } else if (declaration->type->next->kind == RING_BASIC_TYPE_DOUBLE) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_DOUBLE, 0, array_index_expression->line_number);
+    }
 }
 
 void generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int oper_num, unsigned int line_number) {

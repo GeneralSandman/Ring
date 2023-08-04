@@ -132,6 +132,17 @@ Expression* create_expression_from_method_call(MethodCallExpression* method_call
     return expression;
 }
 
+Expression* create_expression_from_array_literal(ArrayLiteralExpression* array_literal) {
+    debug_log_with_yellow_coloar("\t");
+
+    Expression* expression                 = (Expression*)malloc(sizeof(Expression));
+    expression->line_number                = package_unit_get_line_number();
+    expression->convert_type               = nullptr; // fix in fix_ast
+    expression->type                       = EXPRESSION_TYPE_ARRAY_LITERAL;
+    expression->u.array_literal_expression = array_literal;
+    return expression;
+}
+
 Expression* create_expression_assign(AssignExpression* assign_expression) {
     // debug_log_with_yellow_coloar("assign_expression->assign_identifier:%s", assign_expression->assign_identifier);
 
@@ -340,6 +351,15 @@ MethodCallExpression* create_method_call_expression(Expression* object_expressio
     method_call_expression->member_identifier    = member_identifier;
     method_call_expression->argument_list        = argument_list;
     return method_call_expression;
+}
+
+ArrayLiteralExpression* create_array_literal_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression, Expression* expression_list) {
+    ArrayLiteralExpression* array_literal = (ArrayLiteralExpression*)malloc(sizeof(ArrayLiteralExpression));
+    array_literal->line_number            = package_unit_get_line_number();
+    array_literal->type_specifier         = type_specifier;
+    array_literal->dimension_expression   = dimension_expression;
+    array_literal->expression_list        = expression_list;
+    return array_literal;
 }
 
 Expression* expression_list_add_item(Expression* expression_list, Expression* expression) {
@@ -667,7 +687,9 @@ DimensionExpression* create_dimension_expression(char* literal_interface) {
     DimensionExpression* dim = (DimensionExpression*)malloc(sizeof(DimensionExpression));
     dim->dimension           = 0;
     dim->next                = nullptr;
-    sscanf(literal_interface, "%ud", &(dim->dimension));
+    if (literal_interface != nullptr) {
+        sscanf(literal_interface, "%ud", &(dim->dimension));
+    }
     return dim;
 }
 

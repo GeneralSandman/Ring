@@ -394,8 +394,19 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_SET_INT_OFFSET(rvm, 0, value);
             runtime_stack->top_index++;
             rvm->pc += 1;
+        } break;
+        case RVM_CODE_PUSH_ARRAY_DOUBLE: {
+            object       = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            double value = 0;
+            rvm_array_get_double(rvm, object, index, &value);
+            runtime_stack->top_index -= 2;
+            STACK_SET_DOUBLE_OFFSET(rvm, 0, value);
+            runtime_stack->top_index++;
+            rvm->pc += 1;
+        } break;
+        case RVM_CODE_PUSH_ARRAY_OBJECT:
             break;
-        }
 
         // class
         case RVM_CODE_POP_FIELD_BOOL:
@@ -749,6 +760,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             exit(oper_num);
             break;
 
+        // array
         case RVM_CODE_NEW_ARRAY_INT:
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object   = rvm_new_array_int(rvm, oper_num);
@@ -761,6 +773,27 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             object   = rvm_new_array_double(rvm, oper_num);
             STACK_SET_OBJECT_OFFSET(rvm, 0, object);
             runtime_stack->top_index++;
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_NEW_ARRAY_OBJECT:
+            break;
+        case RVM_CODE_NEW_ARRAY_LITERAL_INT: {
+            int size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object   = rvm_new_array_literal_int(rvm, size);
+            runtime_stack->top_index -= size;
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+        } break;
+        case RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE: {
+            int size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object   = rvm_new_array_literal_double(rvm, size);
+            runtime_stack->top_index -= size;
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+        } break;
+        case RVM_CODE_NEW_ARRAY_LITERAL_OBJECT:
             rvm->pc += 3;
             break;
 
@@ -1065,10 +1098,26 @@ RVM_Object* rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimensio
     return object;
 }
 
+RVM_Object* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size) {
+    RVM_Object* object = rvm_new_array_int(rvm, size);
+    for (int i = 0; i < size; i++) {
+        object->u.array.u.int_array[i] = STACK_GET_INT_OFFSET(rvm, -size + i);
+    }
+    return object;
+}
+
+RVM_Object* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size) {
+    RVM_Object* object = rvm_new_array_double(rvm, size);
+    for (int i = 0; i < size; i++) {
+        object->u.array.u.double_array[i] = STACK_GET_DOUBLE_OFFSET(rvm, -size + i);
+    }
+    return object;
+}
+
 void rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value) {
     *value = object->u.array.u.int_array[index];
 }
 
-void rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value) {
+void rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value) {
     *value = object->u.array.u.double_array[index];
 }

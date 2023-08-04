@@ -61,6 +61,8 @@ typedef struct ArrayIndexExpression     ArrayIndexExpression;
 
 typedef struct NewArrayExpression       NewArrayExpression;
 
+typedef struct ArrayLiteralExpression   ArrayLiteralExpression;
+
 typedef struct CastExpression           CastExpression;
 
 typedef struct MemberExpression         MemberExpression;
@@ -135,8 +137,6 @@ typedef struct RVM_ClassObject          RVM_ClassObject;
 typedef struct RVM_Object               RVM_Object;
 typedef struct RVM_BasicTypeSpecifier   RVM_BasicTypeSpecifier;
 typedef struct RVM_TypeSpecifier        RVM_TypeSpecifier;
-
-typedef void                            Ring_InnerFunc(int argc, Ring_BasicValue** value);
 
 typedef struct RVM_LocalVariable        RVM_LocalVariable;
 typedef struct NativeFunction           NativeFunction;
@@ -510,6 +510,8 @@ typedef enum {
 
     // array
     RVM_CODE_PUSH_ARRAY_INT,
+    RVM_CODE_PUSH_ARRAY_DOUBLE,
+    RVM_CODE_PUSH_ARRAY_OBJECT,
 
     // class
     RVM_CODE_POP_FIELD_BOOL,
@@ -601,8 +603,13 @@ typedef enum {
 
     RVM_CODE_EXIT,
 
+    // array
     RVM_CODE_NEW_ARRAY_INT,
     RVM_CODE_NEW_ARRAY_DOUBLE,
+    RVM_CODE_NEW_ARRAY_OBJECT,
+    RVM_CODE_NEW_ARRAY_LITERAL_INT,
+    RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE,
+    RVM_CODE_NEW_ARRAY_LITERAL_OBJECT,
 
     // 不能在生成代码的时候使用
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
@@ -695,6 +702,7 @@ typedef enum {
 
     EXPRESSION_TYPE_ARRAY_INDEX,
     EXPRESSION_TYPE_NEW_ARRAY,
+    EXPRESSION_TYPE_ARRAY_LITERAL,
 
     EXPRESSION_TYPE_CAST,
     EXPRESSION_TYPE_MEMBER,
@@ -888,6 +896,7 @@ struct Expression {
         Expression*             unitary_expression;
         ArrayIndexExpression*   array_index_expression;
         NewArrayExpression*     new_array_expression;
+        ArrayLiteralExpression* array_literal_expression;
         CastExpression*         cast_expression;
         MemberExpression*       member_expression;
         DotExpression*          dot_expression;
@@ -927,6 +936,14 @@ struct NewArrayExpression {
 
     TypeSpecifier*       type_specifier;
     DimensionExpression* dimension_expression;
+};
+
+struct ArrayLiteralExpression {
+    unsigned int         line_number;
+
+    TypeSpecifier*       type_specifier;
+    DimensionExpression* dimension_expression;
+    Expression*          expression_list;
 };
 
 // TODO: 这里应该是设计重复了 应该跟 basic type一致
@@ -1462,6 +1479,7 @@ Expression*              create_expression_identifier2(char* identifier, Identif
 Expression*              create_expression_identifier_with_index(Expression* array_expression, Expression* index);
 Expression*              create_expression_from_function_call(FunctionCallExpression* function_call_expression);
 Expression*              create_expression_from_method_call(MethodCallExpression* method_call_expression);
+Expression*              create_expression_from_array_literal(ArrayLiteralExpression* array_literal);
 Expression*              create_expression_assign(AssignExpression* assign_expression);
 Expression*              create_expression_ternary(Expression* condition, Expression* true_expression, Expression* false_expression);
 Expression*              create_expression_binary(ExpressionType type, Expression* left, Expression* right);
@@ -1477,6 +1495,7 @@ AssignExpression*        create_assign_expression(AssignExpressionType type, Exp
 AssignExpression*        create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* operand);
 FunctionCallExpression*  create_function_call_expression(char* identifier, ArgumentList* argument_list);
 MethodCallExpression*    create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list);
+ArrayLiteralExpression*  create_array_literal_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression, Expression* expression_list);
 Expression*              expression_list_add_item(Expression* expression_list, Expression* expression);
 ArgumentList*            argument_list_add_item(ArgumentList* argument_list, ArgumentList* argument);
 ArgumentList*            create_argument_list_from_expression(Expression* expression);
@@ -1557,6 +1576,7 @@ void                     fix_function_call_expression(FunctionCallExpression* fu
 void                     fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func);
 void                     fix_class_definition(ClassDefinition* class_definition);
 void                     fix_array_index_expression(Expression* expression, ArrayIndexExpression* array_index_expression, Block* block, Function* func);
+void                     fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func);
 void                     fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func);
 void                     fix_dot_expression(Expression* expression, DotExpression* dot_expression, Block* block, Function* func);
 void                     fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
@@ -1617,6 +1637,7 @@ void                     generate_vmcode_from_cast_expression(Package_Executer* 
 void                     generate_vmcode_from_member_expression(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
 void                     generate_vmcode_from_ternary_condition_expression(Package_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer);
 void                     generate_vmcode_from_new_array_expression(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer);
+void                     generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, ArrayLiteralExpression* array_literal_expression, RVM_OpcodeBuffer* opcode_buffer);
 void                     generate_vmcode_from_array_index_expression(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer);
 void                     generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal, unsigned int line_number);
 
@@ -1681,8 +1702,10 @@ void                     restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_C
 RVM_Value                native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Object*              rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension);
 RVM_Object*              rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimension);
+RVM_Object*              rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size);
+RVM_Object*              rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
 void                     rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
-void                     rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
+void                     rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
 // execute.c
 
 

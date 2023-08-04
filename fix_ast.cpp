@@ -151,6 +151,10 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
         fix_array_index_expression(expression, expression->u.array_index_expression, block, func);
         break;
 
+    case EXPRESSION_TYPE_ARRAY_LITERAL:
+        fix_array_literal_expression(expression, expression->u.array_literal_expression, block, func);
+        break;
+
     default: break;
     }
 }
@@ -417,6 +421,16 @@ void fix_array_index_expression(Expression* expression, ArrayIndexExpression* ar
     if (declaration == nullptr) {
         printf("not found identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
         exit(1);
+    }
+
+    array_index_expression->array_expression->u.identifier_expression->u.declaration = declaration;
+}
+
+void fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func) {
+    assert(array_literal_expression != nullptr);
+    Expression* pos = array_literal_expression->expression_list;
+    for (; pos != nullptr; pos = pos->next) {
+        fix_expression(pos, block, func);
     }
 }
 
