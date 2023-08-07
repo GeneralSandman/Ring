@@ -1,6 +1,14 @@
 #include "ring.h"
 #include <vector>
 
+/*
+make install 安装标准库
+/usr/local/ring/std/ 为默认标准库的安装路径
+
+通过 更改Makefile 编译宏 来控制调试标准库
+RING_PACKAGE_STD_PAHT_FMT 即为调试标准库路径
+RING_PACKAGE_STD_PATH_DEBUG 即为调试标准库路径
+*/
 #ifdef DEBUG_STD_LIB
 char RING_PACKAGE_STD_PAHT_FMT[]   = "/Users/bytedance/Desktop/Ring/std/fmt/";
 char RING_PACKAGE_STD_PATH_DEBUG[] = "/Users/bytedance/Desktop/Ring/std/debug/";

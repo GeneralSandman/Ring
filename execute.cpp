@@ -30,24 +30,19 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define STACK_GET_OBJECT_OFFSET(rvm, offset) \
     STACK_GET_OBJECT_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 
-
 // 通过绝对索引 设置
-void STACK_SET_BOOL_INDEX(Ring_VirtualMachine* rvm, unsigned int index, RVM_Bool value) {
-    rvm->runtime_stack->data[index].type         = RVM_VALUE_TYPE_BOOL;
-    rvm->runtime_stack->data[index].u.bool_value = value;
-}
-void STACK_SET_INT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, int value) {
-    rvm->runtime_stack->data[index].type        = RVM_VALUE_TYPE_INT;
-    rvm->runtime_stack->data[index].u.int_value = value;
-}
-void STACK_SET_DOUBLE_INDEX(Ring_VirtualMachine* rvm, unsigned int index, double value) {
-    rvm->runtime_stack->data[index].type           = RVM_VALUE_TYPE_DOUBLE;
-    rvm->runtime_stack->data[index].u.double_value = value;
-}
-void STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, RVM_Object* value) {
-    rvm->runtime_stack->data[index].type     = RVM_VALUE_TYPE_OBJECT;
-    rvm->runtime_stack->data[index].u.object = value;
-}
+#define STACK_SET_BOOL_INDEX(rvm, index, value)                             \
+    (rvm)->runtime_stack->data[(index)].type         = RVM_VALUE_TYPE_BOOL; \
+    (rvm)->runtime_stack->data[(index)].u.bool_value = (value);
+#define STACK_SET_INT_INDEX(rvm, index, value)                            \
+    (rvm)->runtime_stack->data[(index)].type        = RVM_VALUE_TYPE_INT; \
+    (rvm)->runtime_stack->data[(index)].u.int_value = (value);
+#define STACK_SET_DOUBLE_INDEX(rvm, index, value)                               \
+    (rvm)->runtime_stack->data[(index)].type           = RVM_VALUE_TYPE_DOUBLE; \
+    (rvm)->runtime_stack->data[(index)].u.double_value = (value);
+#define STACK_SET_OBJECT_INDEX(rvm, index, value)                         \
+    (rvm)->runtime_stack->data[(index)].type     = RVM_VALUE_TYPE_OBJECT; \
+    (rvm)->runtime_stack->data[(index)].u.object = (value);
 
 // 通过栈顶偏移 offset 设置
 #define STACK_SET_BOOL_OFFSET(rvm, offset, value) \
