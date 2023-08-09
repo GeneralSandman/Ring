@@ -299,8 +299,8 @@ typedef enum {
 } RVMFunctionType;
 
 struct RVM_LocalVariable {
-    char* identifier;
-    // TODO:
+    TypeSpecifier* type_specifier;
+    char*          identifier;
 };
 
 struct NativeFunction {
@@ -310,9 +310,6 @@ struct NativeFunction {
 struct DeriveFunction {
     unsigned int code_size;
     RVM_Byte*    code_list;
-
-
-    unsigned int local_variable_size;
 };
 struct RVM_Function {
     char*              func_name;
@@ -453,7 +450,7 @@ struct RVM_LabelTable {
 
 typedef struct {
     char*        source_file_name;
-    unsigned int line_number; // 对应Ring源代码文件的行数
+    unsigned int line_number;        // 对应Ring源代码文件的行数
 
     unsigned int opcode_begin_index; // 对应 opcode 的 开始索引
     unsigned int opcode_size;        // 一行Ring源代码 对应 opcode size
@@ -642,7 +639,7 @@ typedef enum {
 typedef struct {
     unsigned int  magic_number;
     RVM_Function* caller_function;
-    unsigned int  caller_pc; // 调用者的返回地址
+    unsigned int  caller_pc;            // 调用者的返回地址
     unsigned int  caller_stack_base;
     unsigned int  callee_argument_size; // 函数调用的参数数量，可变参数
 } RVM_CallInfo;
@@ -1033,7 +1030,7 @@ struct Identifier { // TODO: 以后废弃这个东西
 
     IdentifierType type;
     char*          identifier_name;
-    unsigned int   array_index; // 供数组使用，还要考虑一下负值索引的问题
+    unsigned int   array_index;  // 供数组使用，还要考虑一下负值索引的问题
 
     Function*      parent_scope; // 作用域
 
@@ -1441,12 +1438,12 @@ struct BinaryChunk {
 #define ErrorCodeToStr(code) "" #code ""
 
 #define ring_compile_error(filename, rowI, colI, lineContent, code, ...) \
-    printf("%s:%d:%d:\n", filename, rowI, colI);                         \
-    printf("|    %s\n", lineContent);                                    \
-    printf("|    %*s^......\n", colI, "");                               \
-    printf("|    ");                                                     \
-    printf(__VA_ARGS__);                                                 \
-    printf(", E:%s\n", ErrorCodeToStr(code));                            \
+    fprintf(stderr, "%s:%d:%d:\n", filename, rowI, colI);                \
+    fprintf(stderr, "|    %s\n", lineContent);                           \
+    fprintf(stderr, "|    %*s^......\n", colI, "");                      \
+    fprintf(stderr, "|    ");                                            \
+    fprintf(stderr, __VA_ARGS__);                                        \
+    fprintf(stderr, ", E:%s\n", ErrorCodeToStr(code));                   \
     exit(1);
 
 #define ring_runtime_error(code, ...)      \
@@ -1698,9 +1695,10 @@ RVM_RuntimeStack*        new_runtime_stack();
 RVM_RuntimeStatic*       new_runtime_static();
 Ring_VirtualMachine*     ring_virtualmachine_create();
 void                     ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry);
+void                     ring_virtualmachine_init(Ring_VirtualMachine* rvm);
 void                     rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
+void                     rvm_init_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 RVM_Object*              new_class_object(ClassDefinition* class_definition);
-void                     rvm_add_classs(Package_Executer* executer, Ring_VirtualMachine* rvm);
 void                     ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                     invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                     invoke_derive_function(Ring_VirtualMachine* rvm,

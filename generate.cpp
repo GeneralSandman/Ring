@@ -257,9 +257,7 @@ void add_functions(Package* package, Package_Executer* executer) {
     // 暂时只处理 native function
     for (Function* pos : package->function_list) {
         copy_function(pos, &executer->function_list[i]);
-        if (pos->block != nullptr) {
-            generate_code_from_function_definition(executer, pos, &executer->function_list[i]);
-        }
+        generate_code_from_function_definition(executer, pos, &executer->function_list[i]);
         // TODO: FIXME:
         // 注册main函数
         if (0 == strcmp(pos->function_name, "main")) {
@@ -335,10 +333,17 @@ void copy_function(Function* src, RVM_Function* dest) {
     } else if (src->type == FUNCTION_TYPE_DERIVE) {
         dest->type                = RVM_FUNCTION_TYPE_DERIVE;
         dest->parameter_size      = src->parameter_list_size;
-        dest->parameter_list      = nullptr; // TODO:
+        dest->parameter_list      = nullptr;                                                                                   // TODO:
         dest->local_variable_size = src->block->declaration_list_size;
-        dest->local_variable_list = nullptr; // TODO:
+        dest->local_variable_list = (RVM_LocalVariable*)malloc(sizeof(RVM_LocalVariable) * src->block->declaration_list_size); // TODO:
         dest->u.derive_func       = (DeriveFunction*)malloc(sizeof(DeriveFunction));
+
+        Declaration* pos          = src->block->declaration_list;
+        unsigned int i            = 0;
+        for (; pos != nullptr; pos = pos->next, i++) {
+            dest->local_variable_list[i].identifier     = pos->identifier;
+            dest->local_variable_list[i].type_specifier = pos->type;
+        }
     }
 
     dest->estimate_runtime_stack_capacity = 0;
@@ -380,6 +385,9 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
 
 void generate_code_from_function_definition(Package_Executer* executer, Function* src, RVM_Function* dest) {
     debug_log_with_darkgreen_coloar("\t");
+    if (src->block == nullptr) {
+        return;
+    }
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
     generate_vmcode_from_statement_list(executer, src->block, src->block->statement_list, opcode_buffer);
@@ -388,9 +396,8 @@ void generate_code_from_function_definition(Package_Executer* executer, Function
     opcode_buffer_fix_label(opcode_buffer);
 
 
-    dest->u.derive_func->code_list           = opcode_buffer->code_list;
-    dest->u.derive_func->code_size           = opcode_buffer->code_size;
-    dest->u.derive_func->local_variable_size = src->block->declaration_list_size;
+    dest->u.derive_func->code_list = opcode_buffer->code_list;
+    dest->u.derive_func->code_size = opcode_buffer->code_size;
 
 #ifdef DEBUG
     ring_vm_code_dump(dest, opcode_buffer->code_list, opcode_buffer->code_size, 0, 60, 1);
@@ -407,9 +414,9 @@ void generate_code_from_method_definition(Package_Executer* executer, MethodMemb
 
     opcode_buffer_fix_label(opcode_buffer);
 
-    dest->rvm_function->u.derive_func->code_list           = opcode_buffer->code_list;
-    dest->rvm_function->u.derive_func->code_size           = opcode_buffer->code_size;
-    dest->rvm_function->u.derive_func->local_variable_size = src->block->declaration_list_size;
+    dest->rvm_function->u.derive_func->code_list = opcode_buffer->code_list;
+    dest->rvm_function->u.derive_func->code_size = opcode_buffer->code_size;
+    dest->rvm_function->local_variable_size      = src->block->declaration_list_size;
 }
 
 void vm_executer_dump(Package_Executer* executer) {

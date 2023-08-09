@@ -101,29 +101,51 @@ Ring_VirtualMachine* ring_virtualmachine_create() {
     return rvm;
 }
 
+/*
+ * 将vmcode加载到vm
+ *
+ */
 void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry) {
     rvm->executer       = executer_entry->main_package_executer;
-
     rvm->executer_entry = executer_entry;
 
-    // // init something
-    rvm_add_static_variable(executer_entry->main_package_executer, rvm->runtime_static); // TODO: 只初始化main包的全局变量
-    rvm_add_classs(executer_entry->main_package_executer, rvm);                          // TODO: 只初始化main包的 class 定义
+    // FIXME: 只初始化main包的全局变量
+    rvm_add_static_variable(rvm->executer, rvm->runtime_static);
+
+    // add classes
+    // FIXME:
+    rvm->class_list = executer_entry->main_package_executer->class_list;
+    rvm->class_size = executer_entry->main_package_executer->class_size;
+}
+
+/*
+ * 做好执行虚拟机代码的初始化
+ * 对全局变量进行初始化
+ * 对运行栈做初始化
+ */
+void ring_virtualmachine_init(Ring_VirtualMachine* rvm) {
+    rvm_init_static_variable(rvm->executer, rvm->runtime_static);
 }
 
 void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
     debug_log_with_white_coloar("\t");
 
     // 分配空间
+    unsigned int size    = executer->global_variable_size;
+    runtime_static->size = size;
+    runtime_static->data = (RVM_Value*)malloc(size * sizeof(RVM_Value));
+}
+
+void rvm_init_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
+    debug_log_with_white_coloar("\t");
+
     // 初始化默认值
+    // 如果有初始化表达式的话，那就通过表达式来初始化
 
     unsigned int     size                 = executer->global_variable_size;
     RVM_Variable*    global_variable_list = executer->global_variable_list;
     TypeSpecifier*   type_specifier       = nullptr;
     ClassDefinition* class_definition     = nullptr;
-
-    runtime_static->size                  = size;
-    runtime_static->data                  = (RVM_Value*)malloc(size * sizeof(RVM_Value));
 
     for (int i = 0; i < size; i++) {
         type_specifier = global_variable_list[i].type;
@@ -180,13 +202,6 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
     // if class has constructor method, invoke it.
 
     return object;
-}
-
-void rvm_add_classs(Package_Executer* executer, Ring_VirtualMachine* rvm) {
-    debug_log_with_white_coloar("\t");
-
-    rvm->class_list = executer->class_list; // FIXME:
-    rvm->class_size = executer->class_size; // FIXME:
 }
 
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
@@ -940,11 +955,40 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
     debug_log_with_white_coloar("\t");
 
     // FIXME: 先忽略局部变量的类型，先用int
-    unsigned int arguement_list_size  = function->parameter_size;
-    unsigned int arguement_list_index = rvm->runtime_stack->top_index - CALL_INFO_SIZE - arguement_list_size;
+    unsigned int arguement_list_size        = function->parameter_size;
+    unsigned int arguement_list_index       = rvm->runtime_stack->top_index - CALL_INFO_SIZE - arguement_list_size;
 
-    for (int i = 0; i < arguement_list_size; i++) {
-        STACK_COPY_INDEX(rvm, arguement_list_index + i, rvm->runtime_stack->top_index + i);
+    // 通过实参 来初始化形参
+    // init argument with parameter
+    unsigned int local_variable_value_index = 0;
+    for (; local_variable_value_index < arguement_list_size; local_variable_value_index++) {
+        STACK_COPY_INDEX(rvm, arguement_list_index + local_variable_value_index, rvm->runtime_stack->top_index + local_variable_value_index);
+    }
+
+    // 局部变量为object的情况
+    // function->local_variable_list
+    ClassDefinition* class_definition = nullptr;
+    RVM_Object*      object           = nullptr;
+
+    for (int i = 0; i < function->local_variable_size; i++, local_variable_value_index++) {
+        TypeSpecifier* type_specifier = function->local_variable_list[i].type_specifier;
+        switch (type_specifier->kind) {
+        case RING_BASIC_TYPE_BOOL:
+        case RING_BASIC_TYPE_INT:
+        case RING_BASIC_TYPE_DOUBLE:
+
+            break;
+        case RING_BASIC_TYPE_CLASS:
+            // Search class-definition from variable declaration.
+            assert(type_specifier->u.class_type != nullptr);
+            class_definition = type_specifier->u.class_type->class_definition;
+            object           = new_class_object(class_definition);
+            STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_value_index, object);
+            break;
+
+        default:
+            break;
+        }
     }
 }
 

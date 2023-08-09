@@ -68,17 +68,20 @@ int main(int argc, char** argv) {
 
     // Step-1: flex 词法分析，
     // Step-2: bison 语法分析，构建语法树
-    // Step-4: 修正语法树
+    // Step-3: 修正语法树
     package_compile(main_package);
 
 
-    // Step-5: 生成虚拟机中间代码
+    // Step-4: 生成虚拟机中间代码
     ring_generate_vm_code(compiler_entry, executer_entry);
 
-    // Step-6: 链接符号表
+    // Step-5: 链接符号表
 
-    // Step-7: 加载虚拟机
+    // Step-6: 加载虚拟机
     ring_virtualmachine_load_executer(ring_vm, executer_entry);
+
+    // Step-7: 初始化虚拟机
+    ring_virtualmachine_init(ring_vm);
 
     // Step-8: 运行虚拟机
     ring_execute_vm_code(ring_vm);
