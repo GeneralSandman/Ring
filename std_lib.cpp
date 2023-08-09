@@ -13,8 +13,8 @@ RING_PACKAGE_STD_PATH_DEBUG 即为调试标准库路径
 char RING_PACKAGE_STD_PAHT_FMT[]   = "/Users/bytedance/Desktop/Ring/std/fmt/";
 char RING_PACKAGE_STD_PATH_DEBUG[] = "/Users/bytedance/Desktop/Ring/std/debug/";
 #else
-char RING_PACKAGE_STD_PAHT_FMT[]   = "/usr/local/ring/std/fmt/";
-char RING_PACKAGE_STD_PATH_DEBUG[] = "/usr/local/ring/std/debug/";
+char RING_PACKAGE_STD_PAHT_FMT[]   = "/usr/local/lib/ring/std/fmt/";
+char RING_PACKAGE_STD_PATH_DEBUG[] = "/usr/local/lib/ring/std/debug/";
 #endif
 
 std::vector<StdPackageInfo> Std_Lib_List = {

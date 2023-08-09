@@ -42,8 +42,8 @@ INCLUDES = \
 
 INSTALL_TOP= /usr/local
 INSTALL_BIN= $(INSTALL_TOP)/bin
-INSTALL_PACK= $(INSTALL_TOP)/ring
-INSTALL_PACK_STD = $(INSTALL_TOP)/ring/std
+INSTALL_PACK= $(INSTALL_TOP)/lib/ring
+INSTALL_PACK_STD = $(INSTALL_TOP)/lib/ring/std
 
 CMD_INSTALL= install -p
 CMD_INSTALL_EXEC= $(CMD_INSTALL) -m 0755
@@ -69,11 +69,15 @@ $(TARGET):$(OBJS); $(shell if [ ! -e $(BIN) ];then mkdir -p $(BIN); fi)
 	$(CC) $(OBJS) -lm -pthread -o $(BIN)/$@
 
 install:
-	$(CMD_INSTALL_EXEC) ./bin/ring $(INSTALL_BIN)
+	@echo "+Install Bin"
+	@echo "  "  $(CMD_INSTALL_EXEC) ./bin/ring $(INSTALL_BIN)
+
 	$(call install_package_std)
 
 uninstall:
-	$(CMD_RM) $(INSTALL_BIN)/ring
+	@echo "+Uninstall Bin"
+	@echo "  "  $(CMD_RM) $(INSTALL_BIN)/ring
+
 	$(call uninstall_package_std)
 
 clean:
@@ -91,14 +95,14 @@ echo:
 	@echo "T_STD_PACKS= $(T_STD_PACKS)"
 
 define func_install_package_std
-	@echo "install package std:$(1)"
-	$(CMD_MKDIR) $(INSTALL_PACK_STD)/$(1)
-	$(CMD_INSTALL_DATA) std/$(1)/* $(INSTALL_PACK_STD)/$(1)
+	@echo "+Install Package: Std/$(1)"
+	@echo "  "  $(CMD_MKDIR) $(INSTALL_PACK_STD)/$(1)
+	@echo "  "  $(CMD_INSTALL_DATA) std/$(1)/* $(INSTALL_PACK_STD)/$(1)
 endef
 
 define func_uninstall_package_std
-	@echo "uninstall package std:$(1)"
-	$(CMD_RM) $(INSTALL_PACK_STD)/$(1)
+	@echo "+Uninstall Package: Std/$(1)"
+	@echo "  "  $(CMD_RM) $(INSTALL_PACK_STD)/$(1)
 endef
 
 define install_package_std
