@@ -1,4 +1,5 @@
-TARGET=ring
+TARGET= ring
+VERSION= 0.2.5
 CC=g++
 OBJS = \
   lex.yy.o\
@@ -28,7 +29,7 @@ OBJS = \
 # DEBUG_RVM 控制调试RVM
 CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic \
 				 # -g \
-				 -DDEBUG1 \
+				 -DDEBUG \
 				 -DDEBUG_STD_LIB \
 				 -DDEBUG_COMPILER_SUMMARY1 \
 				 -DDEBUG_COMPILER_DETAIL1 \
@@ -57,6 +58,8 @@ T_BIN= ring
 T_STD_PACKS= debug fmt math strings
 
 
+UNAME= uname
+
 
 .SUFFIXES: .cpp .c
 .cpp.o:
@@ -79,6 +82,13 @@ clean:
 testall:
 	sh ./automated-testing.sh
   
+
+echo:
+	@echo "[Echo Build Info]"
+	@echo "PLATS= $(PLATS)"
+	@echo "PLAT=" `$(UNAME)`
+	@echo "VERSION= $(VERSION)"
+	@echo "T_STD_PACKS= $(T_STD_PACKS)"
 
 define func_install_package_std
 	@echo "install package std:$(1)"
