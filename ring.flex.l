@@ -159,6 +159,8 @@ extern "C" int yywrap(){
 <INITIAL>\n.* {
     debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(LF) line_number(%d)\n\n", package_unit_get_line_number());
 
+    package_unit_update_line_content((char*)"\n");
+
     package_unit_reset_column_number();
     package_unit_reset_line_content();
     package_unit_increa_line_number();
@@ -168,14 +170,22 @@ extern "C" int yywrap(){
 <INITIAL>\r\n.* {
     debug_log_with_red_coloar("[STATUS:INITIAL]\t new line(CRLF) line_number(%d)\n\n", package_unit_get_line_number());
 
+    package_unit_update_line_content((char*)"\r\n");
+
     package_unit_reset_column_number();
     package_unit_reset_line_content();
     package_unit_increa_line_number();
     strncpy(linebuf, yytext+1, sizeof(linebuf));
-    yyless(1);
+    yyless(2);
 }
-<INITIAL>"//" BEGIN LINE_COMMENT;
-<INITIAL>"/*" BEGIN BLOCK_COMMENT;
+<INITIAL>"//" {
+    package_unit_update_line_content(yytext);
+    BEGIN LINE_COMMENT;
+}
+<INITIAL>"/*" {
+    package_unit_update_line_content(yytext);
+    BEGIN BLOCK_COMMENT;
+}
 
 <INITIAL>. {
     package_unit_update_line_content(yytext);
@@ -183,6 +193,7 @@ extern "C" int yywrap(){
 
 
 <LINE_COMMENT>\n {
+    package_unit_update_line_content(yytext);
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
     package_unit_reset_column_number();
@@ -191,6 +202,7 @@ extern "C" int yywrap(){
     BEGIN INITIAL;
 }
 <LINE_COMMENT>\r\n {
+    package_unit_update_line_content(yytext);
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
     package_unit_reset_column_number();
@@ -199,11 +211,13 @@ extern "C" int yywrap(){
     BEGIN INITIAL;
 }
 <LINE_COMMENT>. {
+    package_unit_update_line_content(yytext);
     string_literal_add_char(yytext[0]);
 }
 
 
 <BLOCK_COMMENT>\n {
+    package_unit_update_line_content(yytext);
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
     package_unit_reset_column_number();
@@ -211,6 +225,7 @@ extern "C" int yywrap(){
     package_unit_increa_line_number();
 }
 <BLOCK_COMMENT>\r\n {
+    package_unit_update_line_content(yytext);
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
     package_unit_reset_column_number();
@@ -218,9 +233,11 @@ extern "C" int yywrap(){
     package_unit_increa_line_number();
 }
 <BLOCK_COMMENT>. {
+    package_unit_update_line_content(yytext);
     string_literal_add_char(yytext[0]);
 }
 <BLOCK_COMMENT>"*/" {
+    package_unit_update_line_content(yytext);
     yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
     BEGIN INITIAL;

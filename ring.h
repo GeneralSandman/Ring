@@ -251,6 +251,10 @@ struct Package {
     std::vector<PackageUnit*>     package_unit_list;
 };
 
+typedef struct SourceLineInfo {
+    off_t        start_offset; // 某行相对于文件开始的偏移
+    unsigned int size;         // 某行的字符数量
+} SourceLineInfo;
 // 一个Package 有多个 编译单元
 // 也就是一个包内有多个Ring源码文件
 // 一个编译单元 对应一个Ring源码文件
@@ -262,6 +266,14 @@ struct PackageUnit {
     unsigned int                    current_line_number;
     unsigned int                    current_column_number;
     Ring_String*                    current_line_content;
+
+    // 该文件每行的偏移量，用于快速获取某行的内容
+    // line_offset_map[0] 没有意义，因为文件都是从第1行开始的
+    // line_offset_map[3] 表示第3行开始的文件字节偏移量
+    // 可通过 lseek() 快速获取某行的内容
+    off_t                           current_line_start_offset;
+    off_t                           current_offset;
+    std::vector<SourceLineInfo>     line_offset_map;
 
     std::vector<ImportPackageInfo*> import_package_list;
 
@@ -913,6 +925,7 @@ typedef enum {
 
 struct IdentifierExpression {
     unsigned int             line_number;
+    unsigned int             row_number;
 
     char*                    package_posit;
 
@@ -1314,6 +1327,8 @@ typedef enum {
     // 语义分析错误
     ERROR_CODE_SEMANTIC_CHECH_ERROR,
 
+    ERROR_UNDECLARED_IDENTIFIER,
+
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
 
@@ -1423,6 +1438,22 @@ struct BinaryChunk {
 #define debug_log_with_white_coloar(format, ...)
 #endif
 
+#define ErrorCodeToStr(code) "" #code ""
+
+#define ring_compile_error(filename, rowI, colI, lineContent, code, ...) \
+    printf("%s:%d:%d:\n", filename, rowI, colI);                         \
+    printf("|    %s\n", lineContent);                                    \
+    printf("|    %*s^......\n", colI, "");                               \
+    printf("|    ");                                                     \
+    printf(__VA_ARGS__);                                                 \
+    printf(", E:%s\n", ErrorCodeToStr(code));                            \
+    exit(1);
+
+#define ring_runtime_error(code, ...)      \
+    printf("Runtime error, E:%d, ", code); \
+    printf(__VA_ARGS__);                   \
+    exit(1);
+
 void                     init_current_line_content();
 Ring_String*             get_current_line_content_string();
 Ring_String*             new_ring_string();
@@ -1456,6 +1487,7 @@ void                     package_unit_update_line_content(char* str);
 void                     package_unit_reset_line_content();
 char*                    package_unit_get_current_line_content();
 void                     package_unit_reset_column_number();
+std::string              package_unit_get_line_content(unsigned int line_number);
 int                      package_unit_add_class_definition(ClassDefinition* class_definition);
 
 

@@ -229,6 +229,10 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
     package_unit->current_column_number            = 1;
     package_unit->current_line_content             = new_ring_string();
 
+    package_unit->current_line_start_offset        = 0;
+    package_unit->current_offset                   = 0;
+    package_unit->line_offset_map                  = std::vector<SourceLineInfo>{{0, 0}};
+
     package_unit->import_package_list              = std::vector<ImportPackageInfo*>{};
 
     package_unit->global_block_statement_list_size = 0;
@@ -268,6 +272,14 @@ void package_unit_compile(PackageUnit* package_unit) {
         complie_err_log("%d syntax error detected.\n", package_unit->compile_error_num);
         exit(ERROR_CODE_COMPILE_ERROR);
     }
+
+#ifdef DEBUG
+    // check package_unit->line_offset_map is valid
+    printf("File:%s\n", package_unit->current_file_name.c_str());
+    for (int i = 1; i < package_unit->line_offset_map.size(); i++) {
+        printf("Line:%5d:%s\n", i, package_unit_get_line_content(i).c_str());
+    }
+#endif
 
     debug_log_with_yellow_coloar("\t package_unit COMPLIE SUCCESS\n\n");
 }
@@ -335,6 +347,16 @@ void package_unit_update_line_content(char* str) {
         ring_string_add_char(package_unit->current_line_content, str[i]);
     }
 
+    package_unit->current_offset += strlen(str);
+    if (0 == strcmp(str, "\n") || 0 == strcmp(str, "\r\n")) {
+        SourceLineInfo line_info{
+            package_unit->current_line_start_offset,
+            (unsigned int)(package_unit->current_offset - package_unit->current_line_start_offset - strlen(str) + 1),
+        };
+        package_unit->line_offset_map.push_back(line_info);
+        package_unit->current_line_start_offset = package_unit->current_offset;
+    }
+
     package_unit->current_column_number += strlen(str);
 }
 
@@ -348,6 +370,18 @@ char* package_unit_get_current_line_content() {
 
 void package_unit_reset_column_number() {
     package_unit->current_column_number = 1;
+}
+
+std::string package_unit_get_line_content(unsigned int line_number) {
+    off_t        line_offset = package_unit->line_offset_map[line_number].start_offset;
+    unsigned int size        = package_unit->line_offset_map[line_number].size;
+
+    fseek(package_unit->current_file_fp, line_offset, SEEK_SET);
+    char buffer[500];
+    if (fgets(buffer, size, package_unit->current_file_fp) != NULL) {
+    }
+
+    return std::string(buffer);
 }
 
 int package_unit_add_class_definition(ClassDefinition* class_definition) {
