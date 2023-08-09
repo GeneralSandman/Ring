@@ -164,7 +164,6 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
     }
 }
 
-
 void add_declaration(Declaration* declaration, Block* block, Function* func) {
     assert(declaration != nullptr);
 
@@ -238,7 +237,6 @@ void fix_if_statement(IfStatement* if_statement, Block* block, Function* func) {
     }
 }
 
-
 void fix_for_statement(ForStatement* for_statement, Block* block, Function* func) {
     if (for_statement == nullptr) {
         return;
@@ -283,7 +281,14 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
     Function*    function    = nullptr;
     switch (expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
-        declaration               = search_declaration(expression->package_posit, expression->identifier, block);
+        declaration = search_declaration(expression->package_posit, expression->identifier, block);
+        if (declaration == nullptr) {
+            ring_compile_error(get_package_unit()->current_file_name.c_str(),
+                               expression->line_number, expression->row_number,
+                               package_unit_get_line_content(expression->line_number).c_str(),
+                               ERROR_UNDECLARED_IDENTIFIER,
+                               "use undeclared identifier '%s'", expression->identifier);
+        }
         expression->u.declaration = declaration;
         return declaration->type;
         break;
@@ -546,9 +551,7 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
     }
 }
 
-
 // -----------------
-
 Declaration* search_declaration(char* package_posit, char* identifier, Block* block) {
     Declaration* decl = nullptr;
 
@@ -565,8 +568,6 @@ Declaration* search_declaration(char* package_posit, char* identifier, Block* bl
         }
     }
 
-    printf("can't find identifier %s\n", identifier);
-    exit(ERROR_CODE_COMPILE_ERROR);
     return nullptr;
 }
 
