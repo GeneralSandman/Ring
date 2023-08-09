@@ -1,5 +1,5 @@
 TARGET= ring
-VERSION= 0.2.6
+VERSION= ring-v0.2.6-beta
 CC=g++
 OBJS = \
   lex.yy.o\
@@ -30,6 +30,7 @@ OBJS = \
 CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic \
 				 # -g \
 				 -DDEBUG \
+				 -DDEBUG_FLEX_BISON \
 				 -DDEBUG_STD_LIB \
 				 -DDEBUG_COMPILER_SUMMARY1 \
 				 -DDEBUG_COMPILER_DETAIL1 \
@@ -69,13 +70,13 @@ $(TARGET):$(OBJS); $(shell if [ ! -e $(BIN) ];then mkdir -p $(BIN); fi)
 	$(CC) $(OBJS) -lm -pthread -o $(BIN)/$@
 
 install:
-	@echo "+Install Bin"
+	@echo "[+]Install Bin"
 	@echo "  "  $(CMD_INSTALL_EXEC) ./bin/ring $(INSTALL_BIN)
 
 	$(call install_package_std)
 
 uninstall:
-	@echo "+Uninstall Bin"
+	@echo "[+]Uninstall Bin"
 	@echo "  "  $(CMD_RM) $(INSTALL_BIN)/ring
 
 	$(call uninstall_package_std)
@@ -89,19 +90,22 @@ testall:
 
 echo:
 	@echo "[Echo Build Info]"
-	@echo "PLATS= $(PLATS)"
-	@echo "PLAT=" `$(UNAME)`
-	@echo "VERSION= $(VERSION)"
-	@echo "T_STD_PACKS= $(T_STD_PACKS)"
+	@echo "[+]g++ Version= `g++ --version`" # >= 2.6.4
+	@echo "[+]Flex Version= `flex --version`" # >= 2.6.4
+	@echo "[+]Bison Version= `bison --version`" # >= 2.3
+	@echo "[+]PLATS= $(PLATS)"
+	@echo "[+]PLAT=" `$(UNAME)`
+	@echo "[+]VERSION= $(VERSION)"
+	@echo "[+]T_STD_PACKS= $(T_STD_PACKS)"
 
 define func_install_package_std
-	@echo "+Install Package: Std/$(1)"
+	@echo "[+]Install Package: Std/$(1)"
 	@echo "  "  $(CMD_MKDIR) $(INSTALL_PACK_STD)/$(1)
 	@echo "  "  $(CMD_INSTALL_DATA) std/$(1)/* $(INSTALL_PACK_STD)/$(1)
 endef
 
 define func_uninstall_package_std
-	@echo "+Uninstall Package: Std/$(1)"
+	@echo "[+]Uninstall Package: Std/$(1)"
 	@echo "  "  $(CMD_RM) $(INSTALL_PACK_STD)/$(1)
 endef
 
