@@ -21,9 +21,7 @@ std::string command_help_message =
 
 int main(int argc, char** argv) {
     char* file_name;
-    FILE* fp;
     char* command;
-
 
     if (argc < 2) {
         fprintf(stderr, "%s", command_help_message.c_str());
@@ -51,13 +49,6 @@ int main(int argc, char** argv) {
     } else if (!strcmp(command, "dump")) {
         printf("ring dump\n");
         return 0;
-    }
-
-    // Step-0: 读取文件
-    fp = fopen(file_name, "r");
-    if (fp == nullptr) {
-        fprintf(stderr, "%s not found.\n", file_name);
-        exit(1);
     }
 
     CompilerEntry* compiler_entry         = compiler_entry_create();
