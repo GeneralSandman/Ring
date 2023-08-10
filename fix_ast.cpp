@@ -284,10 +284,12 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
         declaration = search_declaration(expression->package_posit, expression->identifier, block);
         if (declaration == nullptr) {
             ring_compile_error(get_package_unit()->current_file_name.c_str(),
-                               expression->line_number, expression->row_number,
+                               expression->line_number, 4,
                                package_unit_get_line_content(expression->line_number).c_str(),
                                ERROR_UNDECLARED_IDENTIFIER,
                                "use undeclared identifier '%s'", expression->identifier);
+
+            ring_check_exit_immediately();
         }
         expression->u.declaration = declaration;
         return declaration->type;

@@ -1440,11 +1440,10 @@ struct BinaryChunk {
 #define ring_compile_error(filename, rowI, colI, lineContent, code, ...) \
     fprintf(stderr, "%s:%d:%d:\n", filename, rowI, colI);                \
     fprintf(stderr, "|    %s\n", lineContent);                           \
-    fprintf(stderr, "|    %*s^......\n", colI, "");                      \
-    fprintf(stderr, "|    ");                                            \
+    fprintf(stderr, "|    %*s^......", colI, " ");                       \
     fprintf(stderr, __VA_ARGS__);                                        \
-    fprintf(stderr, ", E:%s\n", ErrorCodeToStr(code));                   \
-    exit(1);
+    fprintf(stderr, "; E:%s\n", ErrorCodeToStr(code));                   \
+    fprintf(stderr, "%s\n\n", ring_give_compile_advice(ERROR_UNDECLARED_IDENTIFIER).c_str())
 
 #define ring_runtime_error(code, ...)      \
     printf("Runtime error, E:%d, ", code); \
@@ -1459,6 +1458,8 @@ void                     ring_string_add_char(Ring_String* string, char ch);
 char*                    get_ring_string(Ring_String* string);
 
 void                     ring_compiler_error(SyntaxType syntax_type, int exit);
+std::string              ring_give_compile_advice(ErrorCode error_code);
+void                     ring_check_exit_immediately();
 CompilerEntry*           compiler_entry_create();
 CompilerEntry*           get_compiler_entry();
 void                     compiler_entry_dump(CompilerEntry* compiler_entry);

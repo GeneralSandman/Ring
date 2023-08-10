@@ -17,7 +17,7 @@ OBJS = \
 
 # CFLAGS -g 打开调试信息
 # CFLAGS -DDEBUG 开启 debug 编译信息
-# CFLAGS -DDEBUG_RVM 开启 debug ring virtual machine 信息
+# CFLAGS -DDEBUG_RVM_INTERACTIVE 开启 debug ring virtual machine 信息
 # -lm for fmod function
 # -lncurses for tigetnum tigetnum
 
@@ -26,7 +26,7 @@ OBJS = \
 # DEBUG_GENERATE_DETAIL 代码生成阶段 详情
 # DEBUG_GENERATE_SUMMARY 代码生成阶段 概要
 # DEBUG_STD_LIB 控制 std lib 的 debug 路径
-# DEBUG_RVM 控制调试RVM
+# DEBUG_RVM_INTERACTIVE 控制调试RVM
 CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic \
 				 # -g \
 				 -DDEBUG \
@@ -36,7 +36,7 @@ CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-
 				 -DDEBUG_COMPILER_DETAIL1 \
 				 -DDEBUG_GENERATE_SUMMARY1 \
 				 -DDEBUG_GENERATE_DETAIL1 \
-				 -DDEBUG_RVM1
+				 -DDEBUG_RVM_INTERACTIVE
 BIN = ./bin
 INCLUDES = \
 
@@ -127,7 +127,7 @@ endef
 y.tab.h : ring.bison.y
 	bison --yacc -dv ring.bison.y
 y.tab.c : ring.bison.y
-	bison --yacc -dv ring.bison.y
+	bison --yacc -dv ring.bison.y  # -t 诊断模式
 lex.yy.c : ring.flex.l ring.bison.y y.tab.h
 	flex ring.flex.l
 

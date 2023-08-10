@@ -212,8 +212,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_ConstantPool*  const_pool_list        = rvm->executer->constant_pool_list;
     RVM_RuntimeStack*  runtime_stack          = rvm->runtime_stack;
     RVM_RuntimeStatic* runtime_static         = rvm->runtime_static;
-    unsigned int       opcode_num             = 0;
-    /* unsigned int       const_pool_size = rvm->executer->constant_pool_size; */
 
     unsigned int       index                  = 0;
     unsigned int       package_index          = 0;
@@ -229,13 +227,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Function*      function               = nullptr;
     RVM_Object*        object                 = nullptr;
 
-    // char* string_buf;
-
     while (rvm->pc < code_size) {
         RVM_Byte opcode = code_list[rvm->pc];
-        // char*    name     = RVM_Opcode_Infos[opcode].name;
 
-#ifdef DEBUG_RVM
+#ifdef DEBUG_RVM_INTERACTIVE
         debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
 #endif
 
@@ -423,7 +418,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             object                                              = STACK_GET_OBJECT_OFFSET(rvm, -1);
             oper_num                                            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object->u.class_object.field[oper_num].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
-            // printf("-bool_value:%d\n", object->u.class_object.field[oper_num].u.bool_value);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
@@ -431,7 +425,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             object                                             = STACK_GET_OBJECT_OFFSET(rvm, -1);
             oper_num                                           = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object->u.class_object.field[oper_num].u.int_value = STACK_GET_INT_OFFSET(rvm, -2);
-            // printf("-int_value:%d\n", object->u.class_object.field[oper_num].u.int_value);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
@@ -439,7 +432,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             object                                                = STACK_GET_OBJECT_OFFSET(rvm, -1);
             oper_num                                              = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object->u.class_object.field[oper_num].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -2);
-            // printf("-double_value:%f\n", object->u.class_object.field[oper_num].u.double_value);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
@@ -816,11 +808,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             exit(ERROR_CODE_RUN_VM_ERROR);
             break;
         }
-
-        opcode_num++;
     }
 
-#ifdef DEBUG_RVM
+#ifdef DEBUG_RVM_INTERACTIVE
     debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
 #endif
 }

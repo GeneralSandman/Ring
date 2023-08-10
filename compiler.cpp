@@ -22,6 +22,21 @@ void                     ring_compiler_error(SyntaxType syntax_type, int need_ex
     }
 }
 
+std::string ring_give_compile_advice(ErrorCode error_code) {
+    switch (error_code) {
+    case ERROR_UNDECLARED_IDENTIFIER:
+        return std::string("Advice: definite variable `a` like: `var bool|int|double|string a;`");
+        break;
+    default:
+        break;
+    }
+    return "";
+}
+
+void ring_check_exit_immediately() {
+    exit(1);
+}
+
 CompilerEntry* compiler_entry_create() {
     compiler_entry               = (CompilerEntry*)malloc(sizeof(CompilerEntry));
     compiler_entry->package_list = std::vector<Package*>{};

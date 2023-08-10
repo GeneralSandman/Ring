@@ -42,7 +42,7 @@ autoTestFunc(){
 		result="FAILED"
         echo $source_code_file >> $TEST_RESULT
 	fi
-    printf "%-4s *%-15s %-60s %-60s [%s]\n" $all_num $model $source_code_file $run_result_file $result
+    printf "%-4s *%-20s %-80s %-80s [%s]\n" $all_num $model $source_code_file $run_result_file $result
     let all_num++
     rm $run_result_file_tmp
 }
@@ -58,7 +58,8 @@ printNotPassCase(){
 }
 
 
-printf "%-4s %-16s %-60s %-60s %s\n" num model source_code_file run_result_file result
+start_time=`date +%s`
+printf "%-4s *%-20s %-80s %-80s %s\n" num model source_code_file run_result_file result
 
 for i in {1..1}; do {
 
@@ -82,4 +83,10 @@ printf "\n\n"
 printf "[Result]:\n"
 printf "[pass/all=%s/%s]\n\n" $pass_num $all_num 
 
+
 printNotPassCase
+
+
+end_time=`date +%s`
+runtime=$((end_time-start_time))
+printf "Usetime:%4ds\n" $runtime

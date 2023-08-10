@@ -152,7 +152,7 @@
 
 ## 3. 如何调试栈虚拟机
 
-编译 Ring 时，在makefile中添加 -DDEBUG -DDEBUG_RVM，开起debug模式，开始debug虚拟机模式
+编译 Ring 时，在makefile中添加 -DDEBUG -DDEBUG_RVM_INTERACTIVE，开起debug模式，开始debug虚拟机模式
 
 
 编辑如下 Ring 源码：
