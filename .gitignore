@@ -3,10 +3,13 @@
 bin/ring
 
 lex.yy.c
+lex.yy.cpp
 
 y.output
 y.tab.c
+y.tab.cpp
 y.tab.h
+y.tab.hpp
 
 ring.bison.tab.c
 

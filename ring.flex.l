@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include "ring.h"
-#include "y.tab.h"
+#include "y.tab.hpp"
 
 char linebuf[500];
 

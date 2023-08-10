@@ -27,7 +27,7 @@ OBJS = \
 # DEBUG_GENERATE_SUMMARY 代码生成阶段 概要
 # DEBUG_STD_LIB 控制 std lib 的 debug 路径
 # DEBUG_RVM_INTERACTIVE 控制调试RVM
-CFLAGS = -c -std=c++11 -Wall -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-function -Wno-pedantic \
+CFLAGS = -c -std=c++11 -Wall -Wno-unused-function -Wno-unneeded-internal-declaration \
 				 # -g \
 				 -DDEBUG \
 				 -DDEBUG_FLEX_BISON \
@@ -82,7 +82,7 @@ uninstall:
 	$(call uninstall_package_std)
 
 clean:
-	rm -f *.o lex.yy.c y.tab.c y.tab.h y.output *~
+	rm -f *.o lex.yy.cpp y.tab.cpp y.tab.hpp y.output *~
 
 testall:
 	sh ./automated-testing.sh
@@ -124,12 +124,12 @@ define uninstall_package_std
 endef
 
 
-y.tab.h : ring.bison.y
-	bison --yacc -dv ring.bison.y
-y.tab.c : ring.bison.y
-	bison --yacc -dv ring.bison.y  # -t 诊断模式
-lex.yy.c : ring.flex.l ring.bison.y y.tab.h
-	flex ring.flex.l
+y.tab.hpp : ring.bison.y
+	bison -o y.tab.cpp --yacc -dv ring.bison.y
+y.tab.cpp : ring.bison.y
+	bison -o y.tab.cpp --yacc -dv ring.bison.y  # -t 诊断模式
+lex.yy.cpp : ring.flex.l ring.bison.y y.tab.hpp
+	flex -o lex.yy.cpp ring.flex.l
 
 
 # 构建 compile_commands.json 供 vim-lsp
@@ -137,8 +137,8 @@ compile_commands.json : Makefile
 	compiledb -n make
 
 
-lex.yy.o: lex.yy.c ring.h
-y.tab.o: y.tab.c
+lex.yy.o: lex.yy.cpp ring.h
+y.tab.o: y.tab.cpp
 string.o: string.cpp
 create_ast.o: create_ast.cpp ring.h
 semantic_check.o: semantic_check.cpp ring.h
