@@ -6,6 +6,7 @@ TEST_PATH="./test"
 
 TEST_MODELS=(
     "001-basic-type" 
+    "001-basic-type-string"
     "002-operator" 
     "003-native-function" 
     "004-derive-function" 
