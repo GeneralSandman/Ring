@@ -137,10 +137,10 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
             printf("%7d | %20f | %6s | %6s\n", i, value.u.double_value, space.c_str(), pointer.c_str());
             break;
         case RVM_VALUE_TYPE_STRING:
-            if (value.u.object == nullptr || value.u.object->u.string.data == nullptr) {
+            if (value.u.object == nullptr || value.u.object->u.string->data == nullptr) {
                 printf("%7d | %20.*s | %6s | %6s\n", i, 20, "", space.c_str(), pointer.c_str());
             } else {
-                printf("%7d | %20.*s | %6s | %6s\n", i, 20, value.u.object->u.string.data, space.c_str(), pointer.c_str());
+                printf("%7d | %20.*s | %6s | %6s\n", i, 20, value.u.object->u.string->data, space.c_str(), pointer.c_str());
             }
             break;
         case RVM_VALUE_TYPE_OBJECT:
@@ -174,8 +174,8 @@ std::vector<std::string> list_file(char* path) {
         strcpy(tmp_name, path);
         if (path[strlen(path) - 1] != '/') // 判断路径名是否带/
             strcat(tmp_name, "/");
-        strcat(tmp_name, st->d_name);      // 新文件路径名
-        ret = stat(tmp_name, &sta);        // 查看目录下文件属性
+        strcat(tmp_name, st->d_name); // 新文件路径名
+        ret = stat(tmp_name, &sta);   // 查看目录下文件属性
         if (ret < 0) {
             // TODO:
             printf("read stat fail\n");

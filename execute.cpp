@@ -266,7 +266,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_STRING:
             const_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_OBJECT_OFFSET(rvm, 0,
-                                    string_literal_to_rvm_object(const_pool_list[const_index].u.string_value));
+                                    string_literal_to_rvm_object(rvm, const_pool_list[const_index].u.string_value));
             rvm->runtime_stack->data[rvm->runtime_stack->top_index].type = RVM_VALUE_TYPE_STRING;
             runtime_stack->top_index++;
             rvm->pc += 3;
@@ -534,7 +534,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_CONCAT:
-            STACK_SET_OBJECT_OFFSET(rvm, -2, concat_string(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)));
+            STACK_SET_OBJECT_OFFSET(rvm, -2, concat_string(rvm, STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)));
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -585,7 +585,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_EQ_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) == 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) == 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -601,11 +601,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_NE_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) != 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) != 0);
             runtime_stack->top_index--;
             rvm->pc++;
-
             break;
+
         case RVM_CODE_RELATIONAL_GT_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) > STACK_GET_INT_OFFSET(rvm, -1));
             runtime_stack->top_index--;
@@ -617,7 +617,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GT_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) > 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) > 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -633,7 +633,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GE_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) >= 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) >= 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -649,7 +649,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LT_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) < 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) < 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -665,7 +665,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LE_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string.data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string.data) <= 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) <= 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -987,35 +987,18 @@ RVM_Object* create_rvm_object() {
     return object;
 }
 
-RVM_Object* string_literal_to_rvm_object(char* string_literal) {
-    RVM_Object* object    = create_rvm_object();
-    object->type          = RVM_OBJECT_TYPE_STRING;
-    object->u.string.data = string_literal;
+RVM_Object* string_literal_to_rvm_object(Ring_VirtualMachine* rvm, char* string_literal) {
+    RVM_Object* object     = create_rvm_object();
+    object->type           = RVM_OBJECT_TYPE_STRING;
+    object->u.string       = rvm_new_string(rvm, string_literal);
+    object->u.string->data = string_literal;
     return object;
 }
 
-RVM_Object* concat_string(RVM_Object* a, RVM_Object* b) {
-    char*        left       = nullptr;
-    char*        right      = nullptr;
-    char*        result     = nullptr;
-    unsigned int result_len = 0;
-
-    if (a != nullptr) {
-        left = a->u.string.data;
-    }
-    if (b != nullptr) {
-        right = b->u.string.data;
-    }
-
-    result_len = strlen(left) + strlen(right);
-    result     = (char*)malloc(sizeof(char) * (result_len + 1));
-
-    strcpy(result, left);
-    strcpy(result + strlen(left), right);
-
-    RVM_Object* object    = create_rvm_object();
-    object->type          = RVM_OBJECT_TYPE_STRING;
-    object->u.string.data = result;
+RVM_Object* concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b) {
+    RVM_Object* object = create_rvm_object();
+    object->type       = RVM_OBJECT_TYPE_STRING;
+    object->u.string   = rvm_concat_new_string(rvm, a->u.string, b->u.string);
     return object;
 }
 
@@ -1149,4 +1132,44 @@ void rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, 
 
 void rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value) {
     *value = object->u.array.u.double_array[index];
+}
+
+RVM_String* rvm_new_string(Ring_VirtualMachine* rvm, unsigned int size, unsigned int capacity) {
+    // TODO: capacity 需要是2的倍数
+    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
+    string->size       = size;
+    string->capacity   = capacity;
+    string->data       = (char*)malloc(sizeof(char) * size);
+    return string;
+}
+
+RVM_String* rvm_new_string(Ring_VirtualMachine* rvm, const char* string_literal) {
+    // capacity 需要是2的倍数
+    size_t      size   = strlen(string_literal);
+
+    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
+    string->size       = size;
+    string->capacity   = size;
+    string->data       = (char*)malloc(sizeof(char) * size);
+
+    strncpy(string->data, string_literal, size);
+
+    return string;
+}
+
+RVM_String* rvm_concat_new_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b) {
+    size_t size = 0;
+    if (a != nullptr) {
+        size += a->size;
+    }
+    if (b != nullptr) {
+        size += b->size;
+    }
+
+    RVM_String* result = rvm_new_string(rvm, size, size);
+
+    strncpy(result->data, a->data, a->size);
+    strncpy(result->data + a->size, b->data, b->size);
+
+    return result;
 }

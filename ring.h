@@ -384,7 +384,9 @@ typedef enum {
 
 struct RVM_String {
     // TODO:
-    char* data;
+    char*        data;
+    unsigned int size;
+    unsigned int capacity;
 };
 
 typedef enum {
@@ -412,7 +414,7 @@ struct RVM_ClassObject {
 struct RVM_Object {
     RVM_Object_Type type;
     union {
-        RVM_String      string;
+        RVM_String*     string;
         RVM_Array       array;
         RVM_ClassObject class_object;
     } u;
@@ -450,7 +452,7 @@ struct RVM_LabelTable {
 
 typedef struct {
     char*        source_file_name;
-    unsigned int line_number;        // 对应Ring源代码文件的行数
+    unsigned int line_number; // 对应Ring源代码文件的行数
 
     unsigned int opcode_begin_index; // 对应 opcode 的 开始索引
     unsigned int opcode_size;        // 一行Ring源代码 对应 opcode size
@@ -639,7 +641,7 @@ typedef enum {
 typedef struct {
     unsigned int  magic_number;
     RVM_Function* caller_function;
-    unsigned int  caller_pc;            // 调用者的返回地址
+    unsigned int  caller_pc; // 调用者的返回地址
     unsigned int  caller_stack_base;
     unsigned int  callee_argument_size; // 函数调用的参数数量，可变参数
 } RVM_CallInfo;
@@ -1030,7 +1032,7 @@ struct Identifier { // TODO: 以后废弃这个东西
 
     IdentifierType type;
     char*          identifier_name;
-    unsigned int   array_index;  // 供数组使用，还要考虑一下负值索引的问题
+    unsigned int   array_index; // 供数组使用，还要考虑一下负值索引的问题
 
     Function*      parent_scope; // 作用域
 
@@ -1723,8 +1725,8 @@ void                     init_derive_function_local_variable(Ring_VirtualMachine
 void                     debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base);
 
 RVM_Object*              create_rvm_object();
-RVM_Object*              string_literal_to_rvm_object(char* string_literal);
-RVM_Object*              concat_string(RVM_Object* a, RVM_Object* b);
+RVM_Object*              string_literal_to_rvm_object(Ring_VirtualMachine* rvm, char* string_literal);
+RVM_Object*              concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b);
 
 void                     store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo);
 void                     restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo);
@@ -1737,6 +1739,10 @@ RVM_Object*              rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int
 RVM_Object*              rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
 void                     rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
 void                     rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
+
+RVM_String*              rvm_new_string(Ring_VirtualMachine* rvm, unsigned int size, unsigned int capacity);
+RVM_String*              rvm_new_string(Ring_VirtualMachine* rvm, const char* string_literal);
+RVM_String*              rvm_concat_new_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b);
 // execute.c
 
 
