@@ -187,13 +187,14 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
             field_count++;
         }
     }
-    field                              = (RVM_Value*)malloc(field_count * sizeof(RVM_Value));
+    field                               = (RVM_Value*)malloc(field_count * sizeof(RVM_Value));
 
-    RVM_Object* object                 = (RVM_Object*)malloc(sizeof(RVM_Object));
-    object->type                       = RVM_OBJECT_TYPE_CLASS;
-    object->u.class_object.class_def   = class_definition;
-    object->u.class_object.field_count = field_count;
-    object->u.class_object.field       = field;
+    RVM_Object* object                  = (RVM_Object*)malloc(sizeof(RVM_Object));
+    object->type                        = RVM_OBJECT_TYPE_CLASS;
+    object->u.class_object              = (RVM_ClassObject*)malloc(sizeof(RVM_ClassObject));
+    object->u.class_object->class_def   = class_definition;
+    object->u.class_object->field_count = field_count;
+    object->u.class_object->field       = field;
 
     memset(field, 0, field_count * sizeof(RVM_Value));
 
@@ -415,42 +416,42 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // class
         case RVM_CODE_POP_FIELD_BOOL:
-            object                                              = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num                                            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object->u.class_object.field[oper_num].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
+            object                                               = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num                                             = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object->u.class_object->field[oper_num].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_INT:
-            object                                             = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num                                           = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object->u.class_object.field[oper_num].u.int_value = STACK_GET_INT_OFFSET(rvm, -2);
+            object                                              = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num                                            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object->u.class_object->field[oper_num].u.int_value = STACK_GET_INT_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_DOUBLE:
-            object                                                = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num                                              = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object->u.class_object.field[oper_num].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -2);
+            object                                                 = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num                                               = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object->u.class_object->field[oper_num].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_BOOL:
             object   = STACK_GET_OBJECT_OFFSET(rvm, -1);
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_BOOL_OFFSET(rvm, -1, object->u.class_object.field[oper_num].u.bool_value);
+            STACK_SET_BOOL_OFFSET(rvm, -1, object->u.class_object->field[oper_num].u.bool_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_INT:
             object   = STACK_GET_OBJECT_OFFSET(rvm, -1);
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_INT_OFFSET(rvm, -1, object->u.class_object.field[oper_num].u.int_value);
+            STACK_SET_INT_OFFSET(rvm, -1, object->u.class_object->field[oper_num].u.int_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_DOUBLE:
             object   = STACK_GET_OBJECT_OFFSET(rvm, -1);
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_DOUBLE_OFFSET(rvm, -1, object->u.class_object.field[oper_num].u.double_value);
+            STACK_SET_DOUBLE_OFFSET(rvm, -1, object->u.class_object->field[oper_num].u.double_value);
             rvm->pc += 3;
             break;
 
@@ -740,7 +741,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             object       = STACK_GET_OBJECT_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             invoke_derive_function(rvm,
-                                   &function, rvm->class_list[object->u.class_object.class_def->class_index].method_list[method_index].rvm_function,
+                                   &function, rvm->class_list[object->u.class_object->class_def->class_index].method_list[method_index].rvm_function,
                                    &code_list, &code_size,
                                    &rvm->pc,
                                    &caller_stack_base);
@@ -1088,12 +1089,13 @@ RVM_Value native_proc_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
 // support create one-dimensional array only.
 // TODO: support multi-dimensional array
 RVM_Object* rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension) {
-    RVM_Object* object          = (RVM_Object*)malloc(sizeof(RVM_Object));
-    object->type                = RVM_OBJECT_TYPE_ARRAY;
-    object->u.array.type        = RVM_ARRAY_INT;
-    object->u.array.size        = dimension;
-    object->u.array.capacity    = dimension;
-    object->u.array.u.int_array = (int*)malloc(sizeof(int) * dimension);
+    RVM_Object* object           = (RVM_Object*)malloc(sizeof(RVM_Object));
+    object->type                 = RVM_OBJECT_TYPE_ARRAY;
+    object->u.array              = (RVM_Array*)malloc(sizeof(RVM_Array));
+    object->u.array->type        = RVM_ARRAY_INT;
+    object->u.array->size        = dimension;
+    object->u.array->capacity    = dimension;
+    object->u.array->u.int_array = (int*)malloc(sizeof(int) * dimension);
     return object;
 }
 
@@ -1101,19 +1103,20 @@ RVM_Object* rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension) 
 // support create one-dimensional array only.
 // TODO: support multi-dimensional array
 RVM_Object* rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimension) {
-    RVM_Object* object             = (RVM_Object*)malloc(sizeof(RVM_Object));
-    object->type                   = RVM_OBJECT_TYPE_ARRAY;
-    object->u.array.type           = RVM_ARRAY_DOUBLE;
-    object->u.array.size           = dimension;
-    object->u.array.capacity       = dimension;
-    object->u.array.u.double_array = (double*)malloc(sizeof(double) * dimension);
+    RVM_Object* object              = (RVM_Object*)malloc(sizeof(RVM_Object));
+    object->type                    = RVM_OBJECT_TYPE_ARRAY;
+    object->u.array                 = (RVM_Array*)malloc(sizeof(RVM_Array));
+    object->u.array->type           = RVM_ARRAY_DOUBLE;
+    object->u.array->size           = dimension;
+    object->u.array->capacity       = dimension;
+    object->u.array->u.double_array = (double*)malloc(sizeof(double) * dimension);
     return object;
 }
 
 RVM_Object* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size) {
     RVM_Object* object = rvm_new_array_int(rvm, size);
     for (int i = 0; i < size; i++) {
-        object->u.array.u.int_array[i] = STACK_GET_INT_OFFSET(rvm, -size + i);
+        object->u.array->u.int_array[i] = STACK_GET_INT_OFFSET(rvm, -size + i);
     }
     return object;
 }
@@ -1121,17 +1124,17 @@ RVM_Object* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size) {
 RVM_Object* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size) {
     RVM_Object* object = rvm_new_array_double(rvm, size);
     for (int i = 0; i < size; i++) {
-        object->u.array.u.double_array[i] = STACK_GET_DOUBLE_OFFSET(rvm, -size + i);
+        object->u.array->u.double_array[i] = STACK_GET_DOUBLE_OFFSET(rvm, -size + i);
     }
     return object;
 }
 
 void rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value) {
-    *value = object->u.array.u.int_array[index];
+    *value = object->u.array->u.int_array[index];
 }
 
 void rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value) {
-    *value = object->u.array.u.double_array[index];
+    *value = object->u.array->u.double_array[index];
 }
 
 RVM_String* rvm_new_string(Ring_VirtualMachine* rvm, unsigned int size, unsigned int capacity) {
@@ -1172,4 +1175,62 @@ RVM_String* rvm_concat_new_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_S
     strncpy(result->data + a->size, b->data, b->size);
 
     return result;
+}
+
+RVM_Object* rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type) {
+    assert(rvm != nullptr);
+    assert(rvm->runtime_heap != nullptr);
+
+    RVM_Object* object = (RVM_Object*)realloc(nullptr, sizeof(RVM_Object));
+    if (object == nullptr) {
+        // TODO:
+        // alloc error
+    }
+    object->type                  = type;
+    object->prev                  = nullptr;
+    object->next                  = rvm->runtime_heap->list;
+    rvm->runtime_heap->list->prev = object;
+
+    switch (type) {
+    case RVM_OBJECT_TYPE_STRING:
+        object->u.string = nullptr;
+        break;
+    case RVM_OBJECT_TYPE_ARRAY:
+        object->u.array = nullptr;
+        break;
+    case RVM_OBJECT_TYPE_CLASS:
+        object->u.class_object = nullptr;
+        break;
+    default:
+        // TODO: error report
+        break;
+    }
+
+    return object;
+}
+
+RVM_String* rvm_heap_new_string(Ring_VirtualMachine* rvm) {
+    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
+    string->size       = 0;
+    string->capacity   = 0;
+    string->data       = (char*)realloc(nullptr, sizeof(char) * 0);
+    return string;
+}
+
+RVM_Array* rvm_heap_new_array(Ring_VirtualMachine* rvm) {
+    RVM_Array* array      = (RVM_Array*)malloc(sizeof(RVM_Array));
+    array->type           = RVM_ARRAY_UNKNOW;
+    array->size           = 0;
+    array->capacity       = 0;
+    array->u.int_array    = nullptr;
+    array->u.double_array = nullptr;
+    return array;
+}
+
+RVM_ClassObject* rvm_heap_new_class_object(Ring_VirtualMachine* rvm) {
+    RVM_ClassObject* class_object = (RVM_ClassObject*)malloc(sizeof(RVM_ClassObject));
+    class_object->class_def       = nullptr;
+    class_object->field_count     = 0;
+    class_object->field           = nullptr;
+    return class_object;
 }

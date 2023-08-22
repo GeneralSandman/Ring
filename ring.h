@@ -125,6 +125,9 @@ typedef struct StdPackageInfo           StdPackageInfo;
 
 typedef struct RVM_DebugConfig          RVM_DebugConfig;
 
+typedef struct ErrorMessageInfo         ErrorMessageInfo;
+typedef struct ErrorReportContext       ErrorReportContext;
+
 typedef struct IdentifierExpression     IdentifierExpression;
 
 typedef struct AttributeInfo            AttributeInfo;
@@ -414,10 +417,12 @@ struct RVM_ClassObject {
 struct RVM_Object {
     RVM_Object_Type type;
     union {
-        RVM_String*     string;
-        RVM_Array       array;
-        RVM_ClassObject class_object;
+        RVM_String*      string;
+        RVM_Array*       array;
+        RVM_ClassObject* class_object;
     } u;
+    RVM_Object* prev;
+    RVM_Object* next;
 };
 
 struct RVM_BasicTypeSpecifier {
@@ -441,8 +446,10 @@ struct RVM_RuntimeStatic {
 };
 
 struct RVM_RuntimeHeap {
-    // TODO: 稍后实现
-    unsigned int i;
+    unsigned int size;
+    unsigned int threshold;
+    RVM_Object*  list;
+    // RVM_MemoryPoll
 };
 
 struct RVM_LabelTable {
@@ -1350,6 +1357,17 @@ struct ErrorMessageInfo {
     std::string error_messaage;
 };
 
+struct ErrorReportContext {
+    std::string  source_file_name;
+    std::string  line_content;
+    unsigned int line_number;
+    unsigned int column_number;
+
+    ErrorCode    error_code;
+    std::string  error_message;
+    std::string  advice;
+};
+
 typedef enum {
     SYNTAX_VARIABLE_DEFINITION,
 
@@ -1743,6 +1761,11 @@ void                     rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Obje
 RVM_String*              rvm_new_string(Ring_VirtualMachine* rvm, unsigned int size, unsigned int capacity);
 RVM_String*              rvm_new_string(Ring_VirtualMachine* rvm, const char* string_literal);
 RVM_String*              rvm_concat_new_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b);
+
+RVM_Object*              rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type);
+RVM_String*              rvm_heap_new_string(Ring_VirtualMachine* rvm);
+RVM_Array*               rvm_heap_new_array(Ring_VirtualMachine* rvm);
+RVM_ClassObject*         rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
 // execute.c
 
 
