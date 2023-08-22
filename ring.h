@@ -1366,6 +1366,10 @@ struct ErrorReportContext {
     ErrorCode    error_code;
     std::string  error_message;
     std::string  advice;
+
+    bool         exit_now;
+    // exit_now 是否要立即退出
+    // false: 积攒一下错误，等错误的数量达到20的时候，才会exit。
 };
 
 typedef enum {
@@ -1455,23 +1459,14 @@ struct BinaryChunk {
 #define debug_log_with_white_coloar(format, ...)
 #endif
 
-#define ErrorCodeToStr(code) "" #code ""
-
-#define ring_compile_error(filename, rowI, colI, lineContent, code, ...) \
-    fprintf(stderr, "%s:%d:%d:\n", filename, rowI, colI);                \
-    fprintf(stderr, "|    %s\n", lineContent);                           \
-    fprintf(stderr, "|    %*s^......", colI, " ");                       \
-    fprintf(stderr, __VA_ARGS__);                                        \
-    fprintf(stderr, "; E:%s\n", ErrorCodeToStr(code));                   \
-    fprintf(stderr, "%s\n\n", ring_give_compile_advice(ERROR_UNDECLARED_IDENTIFIER).c_str())
+void ring_compile_error_report(ErrorReportContext* context);
 
 #define ring_runtime_error(code, ...)      \
     printf("Runtime error, E:%d, ", code); \
     printf(__VA_ARGS__);                   \
     exit(1);
 
-void                     init_current_line_content();
-Ring_String*             get_current_line_content_string();
+
 Ring_String*             new_ring_string();
 void                     reset_ring_string(Ring_String* string);
 void                     ring_string_add_char(Ring_String* string, char ch);

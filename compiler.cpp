@@ -7,11 +7,29 @@
 
 int                      yyerror(char const* str, ...);
 extern struct SyntaxInfo SyntaxInfos[];
-static PackageUnit*      package_unit   = nullptr;
-static CompilerEntry*    compiler_entry = nullptr;
+static PackageUnit*      package_unit      = nullptr;
+static CompilerEntry*    compiler_entry    = nullptr;
 
+unsigned int             compile_error_num = 0;
+
+void                     ring_compile_error_report(ErrorReportContext* context) {
+    fprintf(stderr, "%s:%d:%d:\n", context->source_file_name.c_str(), context->line_number, context->column_number);
+    fprintf(stderr, "|    %s\n", context->line_content.c_str());
+    fprintf(stderr, "|    %s%*s^......%s%s\n", LOG_COLOR_GREEN, context->column_number, " ", LOG_COLOR_CLEAR, context->error_message.c_str());
+    if (context->advice.size())
+        fprintf(stderr, "%s\n\n", context->advice.c_str());
+    fflush(stderr);
+
+    compile_error_num += 1;
+    if (context->exit_now || compile_error_num >= 1) {
+        fprintf(stderr, "\n%d errors generated, exit.\n", compile_error_num);
+        fflush(stderr);
+        exit(1);
+    }
+}
 // Error Attention 某些错误提示可以精细化识别、提示
-void                     ring_compiler_error(SyntaxType syntax_type, int need_exit) {
+//
+void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
     std::string message = "syntax error:\nRing Grammar Standard:\n\t" + std::string(SyntaxInfos[SYNTAX_VARIABLE_DEFINITION].bnf);
     yyerror(message.c_str());
     package_unit->compile_error_num++;

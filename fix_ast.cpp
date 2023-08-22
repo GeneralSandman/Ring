@@ -283,20 +283,59 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
         declaration = search_declaration(expression->package_posit, expression->identifier, block);
         if (declaration == nullptr) {
-            ring_compile_error(get_package_unit()->current_file_name.c_str(),
-                               expression->line_number, 4,
-                               package_unit_get_line_content(expression->line_number).c_str(),
-                               ERROR_UNDECLARED_IDENTIFIER,
-                               "use undeclared identifier '%s'", expression->identifier);
+            char error_message_buffer[1024];
+            char advice_buffer[1024];
+            snprintf(error_message_buffer, 1024, "%serror:use undeclared identifier `%s`; E:%d%s",
+                     LOG_COLOR_RED,
+                     expression->identifier,
+                     ERROR_UNDECLARED_IDENTIFIER,
+                     LOG_COLOR_CLEAR);
+            snprintf(advice_buffer, 1024, "Advice: definite variable `%s` like: `var bool|int|double|string %s;` before use it.",
+                     expression->identifier,
+                     expression->identifier);
 
-            ring_check_exit_immediately();
+            ErrorReportContext context = {
+                get_package_unit()->current_file_name,
+                package_unit_get_line_content(expression->line_number),
+                expression->line_number,
+                0,
+                ERROR_UNDECLARED_IDENTIFIER,
+                std::string(error_message_buffer),
+                std::string(advice_buffer),
+                true,
+            };
+            ring_compile_error_report(&context);
         }
         expression->u.declaration = declaration;
         return declaration->type;
         break;
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
-        function               = search_function(expression->package_posit, expression->identifier);
+        function = search_function(expression->package_posit, expression->identifier);
+        if (function == nullptr) {
+            char error_message_buffer[1024];
+            char advice_buffer[1024];
+            snprintf(error_message_buffer, 1024, "%serror:use undeclared function `%s`; E:%d%s",
+                     LOG_COLOR_RED,
+                     expression->identifier,
+                     ERROR_UNDECLARED_IDENTIFIER,
+                     LOG_COLOR_CLEAR);
+            snprintf(advice_buffer, 1024, "Advice: definite function `%s` like: `function %s() {}` before use it.",
+                     expression->identifier,
+                     expression->identifier);
+
+            ErrorReportContext context = {
+                get_package_unit()->current_file_name,
+                package_unit_get_line_content(expression->line_number),
+                expression->line_number,
+                0,
+                ERROR_UNDECLARED_IDENTIFIER,
+                std::string(error_message_buffer),
+                std::string(advice_buffer),
+                true,
+            };
+            ring_compile_error_report(&context);
+        }
         expression->u.function = function;
         break;
 
