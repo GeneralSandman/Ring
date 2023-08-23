@@ -178,12 +178,14 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
 
 
         if (block != nullptr) {
+            // 局部变量
             block->declaration_list =
                 declaration_list_add_item(block->declaration_list, pos);
 
             pos->variable_index = block->declaration_list_size++;
             pos->is_local       = 1;
         } else {
+            // 全局变量
             PackageUnit* package_unit = get_package_unit();
             pos->variable_index       = package_unit->global_declaration_list.size();
             pos->is_local             = 0;

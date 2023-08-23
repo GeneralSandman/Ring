@@ -198,18 +198,21 @@ void package_compile(Package* package) {
     }
 
     for (PackageUnit* package_unit : package->package_unit_list) {
-        ring_compiler_fix_ast(package_unit);
-
-        for (Declaration* decl : package_unit->global_declaration_list) {
-            package->global_declaration_list.push_back(decl);
-        }
-
         for (ClassDefinition* pos : package_unit->class_definition_list) {
             package->class_definition_list.push_back(pos);
         }
-
         for (Function* pos : package_unit->function_list) {
             package->function_list.push_back(pos);
+        }
+    }
+
+    for (PackageUnit* package_unit : package->package_unit_list) {
+        ring_compiler_fix_ast(package_unit);
+    }
+
+    for (PackageUnit* package_unit : package->package_unit_list) {
+        for (Declaration* decl : package_unit->global_declaration_list) {
+            package->global_declaration_list.push_back(decl);
         }
     }
 

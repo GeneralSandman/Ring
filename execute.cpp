@@ -740,6 +740,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             method_index = STACK_GET_INT_OFFSET(rvm, -1);
             object       = STACK_GET_OBJECT_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
+            // FIXME: object->u.class_object->class_def->class_index 这样使用是不对的
             invoke_derive_function(rvm,
                                    &function, rvm->class_list[object->u.class_object->class_def->class_index].method_list[method_index].rvm_function,
                                    &code_list, &code_size,
