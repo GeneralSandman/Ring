@@ -178,26 +178,13 @@ void package_compile(Package* package) {
     for (std::string source_file : package->source_file_list) {
         PackageUnit* package_unit = package_unit_create(package, source_file.c_str());
         package_unit_compile(package_unit);
-
-        // for (ImportPackageInfo* import_package_info : package_unit->import_package_list) {
-        // // TODO:
-        // char* package_name = import_package_info->package_name;
-        // char* package_path = (char*)"/Users/zhenhuli/Desktop/Ring//"; // TODO:
-
-        // if (nullptr != search_package(compiler_entry, package_name)) {
-        //     debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
-        //     continue;
-        // }
-        // Package* import_package       = package_create(compiler_entry, package_name, package_path);
-        // import_package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
-        // compiler_entry->package_list.push_back(import_package);
-        // package_compile(import_package);
-        //}
-
         package->package_unit_list.push_back(package_unit);
     }
 
     for (PackageUnit* package_unit : package->package_unit_list) {
+        for (Declaration* decl : package_unit->global_declaration_list) {
+            package->global_declaration_list.push_back(decl);
+        }
         for (ClassDefinition* pos : package_unit->class_definition_list) {
             package->class_definition_list.push_back(pos);
         }
@@ -206,15 +193,8 @@ void package_compile(Package* package) {
         }
     }
 
-    for (PackageUnit* package_unit : package->package_unit_list) {
-        ring_compiler_fix_ast(package_unit);
-    }
+    ring_compiler_fix_ast(package);
 
-    for (PackageUnit* package_unit : package->package_unit_list) {
-        for (Declaration* decl : package_unit->global_declaration_list) {
-            package->global_declaration_list.push_back(decl);
-        }
-    }
 
 #ifdef DEBUG_COMPILER_SUMMARY
     package_dump(package);

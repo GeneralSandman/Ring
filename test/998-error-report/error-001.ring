@@ -5,5 +5,5 @@
 //
 
 function main() {
-	var int d;
+  test();
 }

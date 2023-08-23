@@ -8,10 +8,33 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+void ring_compiler_fix_ast(Package* package) {
+    // fix class list
+    unsigned int class_index = 0;
+    for (ClassDefinition* pos : package->class_definition_list) {
+        pos->class_index = class_index++;
+        fix_class_definition(pos);
+    }
+
+    // fix function list
+    for (Function* pos : package->function_list) {
+        if (pos->block) {
+            add_parameter_to_declaration(pos->parameter_list, pos->block);
+            fix_statement_list(pos->block->statement_list, pos->block, pos);
+        }
+    }
+}
+
 // 修正ast
+// TODO: 废弃这个
 void ring_compiler_fix_ast(PackageUnit* package_unit) {
-    // fix global block
-    fix_statement_list(package_unit->global_block_statement_list, nullptr, nullptr);
+    // fix class list
+    unsigned int class_index = 0;
+    for (ClassDefinition* pos : package_unit->class_definition_list) {
+        pos->class_index = class_index++;
+        fix_class_definition(pos);
+    }
 
     // fix function list
     for (Function* pos : package_unit->function_list) {
@@ -19,13 +42,6 @@ void ring_compiler_fix_ast(PackageUnit* package_unit) {
             add_parameter_to_declaration(pos->parameter_list, pos->block);
             fix_statement_list(pos->block->statement_list, pos->block, pos);
         }
-    }
-
-    // fix class list
-    unsigned int class_index = 0;
-    for (ClassDefinition* pos : package_unit->class_definition_list) {
-        pos->class_index = class_index++;
-        fix_class_definition(pos);
     }
 }
 

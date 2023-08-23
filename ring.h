@@ -1603,6 +1603,7 @@ int                      attribute_is_destructor(Attribute attribute);
 // create_ast.c
 
 // fix.c
+void                     ring_compiler_fix_ast(Package* package);
 void                     ring_compiler_fix_ast(PackageUnit* package_unit);
 void                     fix_statement_list(Statement* statement_list, Block* block, Function* func);
 void                     fix_statement(Statement* statement, Block* block, Function* func);
