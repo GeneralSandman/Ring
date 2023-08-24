@@ -252,6 +252,8 @@ struct Package {
     std::vector<Function*>        function_list;
 
     std::vector<PackageUnit*>     package_unit_list;
+
+    unsigned int                  compile_error_num;
 };
 
 typedef struct SourceLineInfo {
@@ -1333,7 +1335,9 @@ typedef enum {
     // 语义分析错误
     ERROR_CODE_SEMANTIC_CHECH_ERROR,
 
-    ERROR_UNDECLARED_IDENTIFIER,
+    ERROR_UNDEFINITE_VARIABLE        = 200000,
+    ERROR_REDEFINITE_GLOBAL_VARIABLE = 200001,
+    ERROR_REDEFINITE_FUNCTION        = 200002,
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -1357,19 +1361,26 @@ struct ErrorMessageInfo {
     std::string error_messaage;
 };
 
+/*
+ * */
+typedef enum {
+    ERROR_REPORT_TYPE_UNKNOW,
+    ERROR_REPORT_TYPE_EXIT_NOW, // 立即退出
+    ERROR_REPORT_TYPE_COLL_ERR, // 收集错误，等error的数量到达20, 然后再退出
+} ErrorReportType;
+
 struct ErrorReportContext {
-    std::string  source_file_name;
-    std::string  line_content;
-    unsigned int line_number;
-    unsigned int column_number;
+    Package*        package;
 
-    ErrorCode    error_code;
-    std::string  error_message;
-    std::string  advice;
+    std::string     source_file_name;
+    std::string     line_content;
+    unsigned int    line_number;
+    unsigned int    column_number;
 
-    bool         exit_now;
-    // exit_now 是否要立即退出
-    // false: 积攒一下错误，等错误的数量达到20的时候，才会exit。
+    std::string     error_message;
+    std::string     advice;
+
+    ErrorReportType report_type;
 };
 
 typedef enum {
@@ -1473,7 +1484,6 @@ void                     ring_string_add_char(Ring_String* string, char ch);
 char*                    get_ring_string(Ring_String* string);
 
 void                     ring_compiler_error(SyntaxType syntax_type, int exit);
-std::string              ring_give_compile_advice(ErrorCode error_code);
 void                     ring_check_exit_immediately();
 CompilerEntry*           compiler_entry_create();
 CompilerEntry*           get_compiler_entry();
@@ -1604,6 +1614,7 @@ int                      attribute_is_destructor(Attribute attribute);
 
 // semantic_check.cpp
 void                     ring_compiler_semantic_analysis(Package* package);
+void                     ring_compiler_check_exit(Package* package);
 // semantic_check.cpp
 
 // fix.c
@@ -1793,6 +1804,11 @@ void                     ring_vm_code_dump(RVM_Function* function, RVM_Byte* cod
 void                     ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
 std::vector<std::string> list_file(char* path);
 // utils.c
+
+// man_help.cpp
+void                     ring_give_man_help(char* keyword);
+// man_help.cpp
+
 
 // thread_pool.c
 typedef struct thpool_*  threadpool;

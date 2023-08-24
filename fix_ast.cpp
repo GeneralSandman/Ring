@@ -306,21 +306,21 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
             snprintf(error_message_buffer, 1024, "%serror:use undeclared identifier `%s`; E:%d%s",
                      LOG_COLOR_RED,
                      expression->identifier,
-                     ERROR_UNDECLARED_IDENTIFIER,
+                     ERROR_UNDEFINITE_VARIABLE,
                      LOG_COLOR_CLEAR);
             snprintf(advice_buffer, 1024, "Advice: definite variable `%s` like: `var bool|int|double|string %s;` before use it.",
                      expression->identifier,
                      expression->identifier);
 
             ErrorReportContext context = {
+                nullptr,
                 get_package_unit()->current_file_name,
                 package_unit_get_line_content(expression->line_number),
                 expression->line_number,
                 0,
-                ERROR_UNDECLARED_IDENTIFIER,
                 std::string(error_message_buffer),
                 std::string(advice_buffer),
-                true,
+                ERROR_REPORT_TYPE_EXIT_NOW,
             };
             ring_compile_error_report(&context);
         }
@@ -336,21 +336,21 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
             snprintf(error_message_buffer, 1024, "%serror:use undeclared function `%s`; E:%d%s",
                      LOG_COLOR_RED,
                      expression->identifier,
-                     ERROR_UNDECLARED_IDENTIFIER,
+                     ERROR_UNDEFINITE_VARIABLE,
                      LOG_COLOR_CLEAR);
             snprintf(advice_buffer, 1024, "Advice: definite function `%s` like: `function %s() {}` before use it.",
                      expression->identifier,
                      expression->identifier);
 
             ErrorReportContext context = {
+                nullptr,
                 get_package_unit()->current_file_name,
                 package_unit_get_line_content(expression->line_number),
                 expression->line_number,
                 0,
-                ERROR_UNDECLARED_IDENTIFIER,
                 std::string(error_message_buffer),
                 std::string(advice_buffer),
-                true,
+                ERROR_REPORT_TYPE_EXIT_NOW,
             };
             ring_compile_error_report(&context);
         }
