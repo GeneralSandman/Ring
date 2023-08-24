@@ -1602,6 +1602,10 @@ int                      attribute_is_constructor(Attribute attribute);
 int                      attribute_is_destructor(Attribute attribute);
 // create_ast.c
 
+// semantic_check.cpp
+void                     ring_compiler_semantic_analysis(Package* package);
+// semantic_check.cpp
+
 // fix.c
 void                     ring_compiler_fix_ast(Package* package);
 void                     ring_compiler_fix_ast(PackageUnit* package_unit);

@@ -2,18 +2,19 @@ TARGET= ring
 VERSION= ring-v0.2.7-beta
 CC=g++
 OBJS = \
-  lex.yy.o\
-  y.tab.o\
-  string.o\
-  create_ast.o\
-  fix_ast.o\
-  generate.o\
-  execute.o\
-  compiler.o\
-  error_msg.o\
-  utils.o\
-  std_lib.o\
-  main.o
+	lex.yy.o\
+	y.tab.o\
+	string.o\
+	create_ast.o\
+	semantic_check.o\
+	fix_ast.o\
+	generate.o\
+	execute.o\
+	compiler.o\
+	error_msg.o\
+	utils.o\
+	std_lib.o\
+	main.o
 
 # CFLAGS -g 打开调试信息
 # CFLAGS -DDEBUG 开启 debug 编译信息

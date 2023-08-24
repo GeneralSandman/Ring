@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # 需要向下兼容，测试之前的所有测试用例
+#
+
+TEST_RING_BIN="./bin/ring"
 
 TEST_PATH="./test"
 
@@ -33,7 +36,7 @@ autoTestFunc(){
     run_result_file_tmp=$2"/"$3".result.tmp"
     result=""
 
-    ./bin/ring run $source_code_file > $run_result_file_tmp
+    $TEST_RING_BIN run $source_code_file > $run_result_file_tmp
     diff $run_result_file $run_result_file_tmp
 
     if [[ "$?" -eq 0 ]];then

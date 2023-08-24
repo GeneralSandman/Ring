@@ -193,6 +193,7 @@ void package_compile(Package* package) {
         }
     }
 
+    ring_compiler_semantic_analysis(package);
     ring_compiler_fix_ast(package);
 
 
