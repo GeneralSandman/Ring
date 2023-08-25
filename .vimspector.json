@@ -9,7 +9,7 @@
         "program": "${fileDirname}/bin/ring",
         "args": [
             "run", 
-            "${fileDirname}/test/007-array/array-000.ring"
+            "${fileDirname}/test/998-error-report/error-001.ring"
         ],
         "cwd": "${workspaceRoot}",
         "environment": [],
