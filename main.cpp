@@ -12,10 +12,10 @@ std::string command_help_message =
     "\n"
     "The commands are:\n"
     "    \n"
-    "        run  <filename>                                :compile and run Ring program\n"
-    "        build <filename>                               :compile and generate bytecode\n"
-    "        dump <filename>                                :dump bytecode\n"
-    "        man <keyword>                                 :get prompt of ring by keyword\n"
+    "        run    <filename>                              :compile and run Ring program\n"
+    "        build  <filename>                              :compile and generate bytecode\n"
+    "        dump   <filename>                              :dump bytecode\n"
+    "        man    <keyword>                               :get prompt of ring by keyword\n"
     "        version                                        :get Ring version\n"
     "        help                                           :get Ring version\n"
     "\n";
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
         printf("ring dump\n");
         return 0;
     } else if (!strcmp(command, "man")) {
-        char* keyword = argv[3];
+        char* keyword = argv[2];
         ring_give_man_help(keyword);
         return 0;
     }
