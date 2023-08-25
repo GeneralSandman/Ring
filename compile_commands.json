@@ -2,46 +2,6 @@
  {
   "directory": "/Users/bytedance/Desktop/Ring",
   "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
-   "-c",
-   "-o",
-   "lex.yy.o",
-   "lex.yy.c"
-  ],
-  "file": "lex.yy.c"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
-   "-c",
-   "-o",
-   "y.tab.o",
-   "y.tab.c"
-  ],
-  "file": "y.tab.c"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
    "gcc",
    "-c",
    "-std=c99",
@@ -63,12 +23,8 @@
    "-c",
    "-std=c++11",
    "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
+   "-Wno-unneeded-internal-declaration",
    "string.cpp"
   ],
   "file": "string.cpp"
@@ -80,12 +36,8 @@
    "-c",
    "-std=c++11",
    "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
+   "-Wno-unneeded-internal-declaration",
    "create_ast.cpp"
   ],
   "file": "create_ast.cpp"
@@ -97,12 +49,8 @@
    "-c",
    "-std=c++11",
    "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
+   "-Wno-unneeded-internal-declaration",
    "fix_ast.cpp"
   ],
   "file": "fix_ast.cpp"
@@ -114,12 +62,8 @@
    "-c",
    "-std=c++11",
    "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
+   "-Wno-unneeded-internal-declaration",
    "generate.cpp"
   ],
   "file": "generate.cpp"
@@ -131,12 +75,8 @@
    "-c",
    "-std=c++11",
    "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
+   "-Wno-unneeded-internal-declaration",
    "execute.cpp"
   ],
   "file": "execute.cpp"
@@ -148,12 +88,8 @@
    "-c",
    "-std=c++11",
    "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
+   "-Wno-unneeded-internal-declaration",
    "compiler.cpp"
   ],
   "file": "compiler.cpp"
@@ -165,12 +101,8 @@
    "-c",
    "-std=c++11",
    "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
+   "-Wno-unneeded-internal-declaration",
    "error_msg.cpp"
   ],
   "file": "error_msg.cpp"
@@ -182,12 +114,8 @@
    "-c",
    "-std=c++11",
    "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
+   "-Wno-unneeded-internal-declaration",
    "utils.cpp"
   ],
   "file": "utils.cpp"
@@ -199,12 +127,8 @@
    "-c",
    "-std=c++11",
    "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
+   "-Wno-unneeded-internal-declaration",
    "std_lib.cpp"
   ],
   "file": "std_lib.cpp"
@@ -216,14 +140,62 @@
    "-c",
    "-std=c++11",
    "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
    "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-g",
-   "-DDEBUG1",
-   "-DDEBUG_RVM1",
+   "-Wno-unneeded-internal-declaration",
    "main.cpp"
   ],
   "file": "main.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "lex.yy.cpp"
+  ],
+  "file": "lex.yy.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "y.tab.cpp"
+  ],
+  "file": "y.tab.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "semantic_check.cpp"
+  ],
+  "file": "semantic_check.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "man_help.cpp"
+  ],
+  "file": "man_help.cpp"
  }
 ]
