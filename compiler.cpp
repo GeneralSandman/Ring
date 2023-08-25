@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 int                      yyerror(char const* str, ...);
@@ -132,6 +134,12 @@ Package* package_create(CompilerEntry* compiler_entry, char* package_name, char*
     package->class_definition_list   = std::vector<ClassDefinition*>{};
     package->function_list           = std::vector<Function*>{};
 
+    package->global_identifier_map   = std::unordered_set<std::string>{};
+    package->global_declaration_map  = std::unordered_map<std::string, Declaration*>{};
+    package->class_definition_map    = std::unordered_map<std::string, ClassDefinition*>{};
+    package->function_map            = std::unordered_map<std::string, Function*>{};
+    package->import_package_map      = std::unordered_map<std::string, std::string>{};
+
     package->package_unit_list       = std::vector<PackageUnit*>{};
 
     package->compile_error_num       = 0;
@@ -156,6 +164,12 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
     package->global_declaration_list = std::vector<Declaration*>{};
     package->class_definition_list   = std::vector<ClassDefinition*>{};
     package->function_list           = std::vector<Function*>{};
+
+    package->global_identifier_map   = std::unordered_set<std::string>{};
+    package->global_declaration_map  = std::unordered_map<std::string, Declaration*>{};
+    package->class_definition_map    = std::unordered_map<std::string, ClassDefinition*>{};
+    package->function_map            = std::unordered_map<std::string, Function*>{};
+    package->import_package_map      = std::unordered_map<std::string, std::string>{};
 
     package->package_unit_list       = std::vector<PackageUnit*>{};
 

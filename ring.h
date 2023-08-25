@@ -4,136 +4,84 @@
 #include <stdio.h>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
-#define RING_VERSION "ring-v0.2.7-beta"
+#define RING_VERSION "ring-v0.2.8-beta"
 
 
 typedef struct Ring_VirtualMachine      Ring_VirtualMachine;
-
 typedef struct ImportPackageInfo        ImportPackageInfo;
-
 typedef struct CompilerEntry            CompilerEntry;
-
 typedef struct ExecuterEntry            ExecuterEntry;
-
 typedef struct Package_Executer         Package_Executer;
-
 typedef struct Package                  Package;
-
 typedef struct PackageUnit              PackageUnit;
 
 typedef struct RVM_Variable             RVM_Variable;
-
 typedef struct RVM_RuntimeStack         RVM_RuntimeStack;
-
 typedef struct RVM_RuntimeStatic        RVM_RuntimeStatic;
-
 typedef struct RVM_RuntimeHeap          RVM_RuntimeHeap;
-
 typedef struct RVM_OpcodeBuffer         RVM_OpcodeBuffer;
-
 typedef struct RVM_Opcode_Info          RVM_Opcode_Info;
 
 typedef struct RVM_LabelTable           RVM_LabelTable;
-
 typedef struct Ring_String              Ring_String;
-
 typedef struct Ring_BasicValue          Ring_BasicValue;
-
 typedef struct Ring_Array               Ring_Array;
 
 typedef struct ClassDefinition          ClassDefinition;
-
 typedef struct ClassMemberDeclaration   ClassMemberDeclaration;
-
 typedef struct FieldMember              FieldMember;
-
 typedef struct MethodMember             MethodMember;
-
 typedef struct Statement                Statement;
-
 typedef struct StatementExecResult      StatementExecResult;
-
 typedef struct Expression               Expression;
-
 typedef struct ArrayIndexExpression     ArrayIndexExpression;
-
 typedef struct NewArrayExpression       NewArrayExpression;
-
 typedef struct ArrayLiteralExpression   ArrayLiteralExpression;
-
 typedef struct CastExpression           CastExpression;
-
 typedef struct MemberExpression         MemberExpression;
-
 typedef struct DimensionExpression      DimensionExpression;
-
 typedef struct DotExpression            DotExpression;
-
 typedef struct BinaryExpression         BinaryExpression;
-
 typedef struct TernaryExpression        TernaryExpression;
-
 typedef struct FunctionCallExpression   FunctionCallExpression;
-
 typedef struct MethodCallExpression     MethodCallExpression;
-
 typedef struct AssignExpression         AssignExpression;
+typedef struct IdentifierExpression     IdentifierExpression;
 
 typedef struct ArgumentList             ArgumentList;
-
 typedef struct Variable                 Variable;
-
 typedef struct Parameter                Parameter;
-
 typedef struct Identifier               Identifier;
-
 typedef struct Function                 Function;
-
 typedef struct Block                    Block;
-
 typedef struct FunctionReturnList       FunctionReturnList;
 
 typedef struct IfStatement              IfStatement;
-
 typedef struct ElseIfStatement          ElseIfStatement;
-
 typedef struct ForStatement             ForStatement;
-
 typedef struct DoForStatement           DoForStatement;
-
 typedef struct BreakStatement           BreakStatement;
-
 typedef struct ReturnStatement          ReturnStatement;
-
 typedef struct ContinueStatement        ContinueStatement;
 
 typedef struct Ring_DeriveType_Array    Ring_DeriveType_Array;
-
 typedef struct Ring_DeriveType_Class    Ring_DeriveType_Class;
-
 typedef struct Ring_DeriveType          Ring_DeriveType;
-
 typedef struct Declaration              Declaration;
-
 typedef struct TypeSpecifier            TypeSpecifier;
-
 typedef struct StdPackageNativeFunction StdPackageNativeFunction;
 
 typedef struct StdPackageInfo           StdPackageInfo;
-
 typedef struct RVM_DebugConfig          RVM_DebugConfig;
-
 typedef struct ErrorMessageInfo         ErrorMessageInfo;
 typedef struct ErrorReportContext       ErrorReportContext;
-
-typedef struct IdentifierExpression     IdentifierExpression;
 
 typedef struct AttributeInfo            AttributeInfo;
 
 typedef struct RVM_ConstantPool         RVM_ConstantPool;
-
 typedef struct RVM_String               RVM_String;
 typedef struct RVM_Array                RVM_Array;
 typedef struct RVM_ClassObject          RVM_ClassObject;
@@ -240,20 +188,26 @@ struct Package_Executer {
 // Pacage 对应一个源代码的逻辑包  也就是一个路径
 // 其实它就是 就是将 PackageUnit 打包在一块
 struct Package {
-    CompilerEntry*                compiler_entry;
-    unsigned int                  package_index; // 在 CompilerEntry 中的 index
-    char*                         package_name;
-    char*                         package_path;
+    CompilerEntry*                                    compiler_entry;
+    unsigned int                                      package_index; // 在 CompilerEntry 中的 index
+    char*                                             package_name;
+    char*                                             package_path;
 
-    std::vector<std::string>      source_file_list;
+    std::vector<std::string>                          source_file_list;
 
-    std::vector<Declaration*>     global_declaration_list;
-    std::vector<ClassDefinition*> class_definition_list;
-    std::vector<Function*>        function_list;
+    std::vector<Declaration*>                         global_declaration_list;
+    std::vector<ClassDefinition*>                     class_definition_list;
+    std::vector<Function*>                            function_list;
 
-    std::vector<PackageUnit*>     package_unit_list;
+    std::unordered_set<std::string>                   global_identifier_map;
+    std::unordered_map<std::string, Declaration*>     global_declaration_map;
+    std::unordered_map<std::string, ClassDefinition*> class_definition_map;
+    std::unordered_map<std::string, Function*>        function_map;
+    std::unordered_map<std::string, std::string>      import_package_map;
 
-    unsigned int                  compile_error_num;
+    std::vector<PackageUnit*>                         package_unit_list;
+
+    unsigned int                                      compile_error_num;
 };
 
 typedef struct SourceLineInfo {
@@ -1614,6 +1568,12 @@ int                      attribute_is_destructor(Attribute attribute);
 
 // semantic_check.cpp
 void                     ring_compiler_semantic_analysis(Package* package);
+
+void                     ring_compiler_analysis_import_package(Package* package);
+void                     ring_compiler_analysis_global_variable(Package* package);
+void                     ring_compiler_analysis_function(Package* package);
+void                     ring_compiler_analysis_class(Package* package);
+
 void                     ring_compiler_check_exit(Package* package);
 // semantic_check.cpp
 

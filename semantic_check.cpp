@@ -6,14 +6,20 @@
 #include <stdlib.h>
 
 void ring_compiler_semantic_analysis(Package* package) {
-    std::unordered_map<std::string, Declaration*> global_declaration_map;
-    std::unordered_map<std::string, Function*>    function_map;
+    ring_compiler_analysis_import_package(package);
+    ring_compiler_analysis_global_variable(package);
+    ring_compiler_analysis_function(package);
+    ring_compiler_analysis_class(package);
+}
 
-    // TODO: fix import package
+void ring_compiler_analysis_import_package(Package* package) {
+}
+
+void ring_compiler_analysis_global_variable(Package* package) {
     for (Declaration* decl : package->global_declaration_list) {
         std::string identifier = std::string(decl->identifier);
-        auto        iter       = global_declaration_map.find(identifier);
-        if (iter != global_declaration_map.end()) {
+        auto        iter       = package->global_declaration_map.find(identifier);
+        if (iter != package->global_declaration_map.end()) {
             char error_message_buffer[1024];
             char advice_buffer[1024];
             snprintf(error_message_buffer, 1024, "%sError:%s "
@@ -41,14 +47,15 @@ void ring_compiler_semantic_analysis(Package* package) {
             ring_compile_error_report(&context);
             continue;
         }
-        global_declaration_map[identifier] = decl;
+        package->global_declaration_map[identifier] = decl;
     }
-    for (ClassDefinition* pos : package->class_definition_list) {
-    }
+}
+
+void ring_compiler_analysis_function(Package* package) {
     for (Function* function : package->function_list) {
         std::string identifier = std::string(function->function_name);
-        auto        iter       = function_map.find(identifier);
-        if (iter != function_map.end()) {
+        auto        iter       = package->function_map.find(identifier);
+        if (iter != package->function_map.end()) {
             char error_message_buffer[1024];
             char advice_buffer[1024];
             snprintf(error_message_buffer, 1024, "%sError:%s "
@@ -76,7 +83,12 @@ void ring_compiler_semantic_analysis(Package* package) {
             ring_compile_error_report(&context);
             continue;
         }
-        function_map[identifier] = function;
+        package->function_map[identifier] = function;
+    }
+}
+
+void ring_compiler_analysis_class(Package* package) {
+    for (ClassDefinition* pos : package->class_definition_list) {
     }
 }
 
