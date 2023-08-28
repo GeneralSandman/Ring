@@ -40,13 +40,14 @@ autoTestFunc(){
     diff $run_result_file $run_result_file_tmp
 
     if [[ "$?" -eq 0 ]];then
-		result="PASS"
+        result="PASS"
         let pass_num++
-	else
-		result="FAILED"
+        printf "%-4s *%-20s %-80s %-80s \033[32m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
+    else
+        result="FAILED"
         echo $source_code_file >> $TEST_RESULT
-	fi
-    printf "%-4s *%-20s %-80s %-80s [%s]\n" $all_num $model $source_code_file $run_result_file $result
+        printf "%-4s *%-20s %-80s %-80s \033[31m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
+    fi
     let all_num++
     rm $run_result_file_tmp
 }
@@ -55,9 +56,10 @@ printNotPassCase(){
     if [ ! -f "$TEST_RESULT" ]; then
     return 0
     fi
-    echo "[NotPassCase]"
+    echo "\033[31m[NotPassCase]"
     printf "%-60s %-60s\n" source_code_file err_nums
     awk '{count[$0]++;} END {for(i in count) {printf("%-60s %-60s\n",i,count[i])}}' $TEST_RESULT
+    echo "\033[0m"
     rm $TEST_RESULT
 }
 
@@ -84,13 +86,19 @@ done
 
 
 printf "\n\n"
+if [[ $pass_num -eq $all_num ]];then
+    printf "\033[32m"
+else
+    printf "\033[33m"
+fi
 printf "[Result]:\n"
-printf "[pass/all=%s/%s]\n\n" $pass_num $all_num 
+printf "[Pass/All=%s/%s]\n" $pass_num $all_num 
+end_time=`date +%s`
+runtime=$((end_time-start_time))
+printf "Usetime:%4ds\n\n" $runtime
+printf "\033[0m"
 
 
 printNotPassCase
 
 
-end_time=`date +%s`
-runtime=$((end_time-start_time))
-printf "Usetime:%4ds\n" $runtime

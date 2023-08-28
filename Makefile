@@ -70,21 +70,27 @@ UNAME= uname
 
 $(TARGET):$(OBJS); $(shell if [ ! -e $(BIN) ];then mkdir -p $(BIN); fi)
 	$(CC) $(OBJS) -lm -pthread -o $(BIN)/$@
+	@echo "\033[32mBuild Ring SUCCESS:" $(BIN)/$@ "\033[0m"
 
 install:
-	@echo "[+]Install Bin"
-	@echo "  "  $(CMD_INSTALL_EXEC) ./bin/ring $(INSTALL_BIN)
+	@echo "\033[34m[+]Install Bin\033[0m"
+	$(CMD_INSTALL_EXEC) ./bin/ring $(INSTALL_BIN)
+	@echo "\033[32m[+]Install Bin  SUCCESS\033[0m"
+	@echo ""
 
 	$(call install_package_std)
 
 uninstall:
-	@echo "[+]Uninstall Bin"
-	@echo "  "  $(CMD_RM) $(INSTALL_BIN)/ring
+	@echo "\033[34m[-]Uninstall Bin\033[0m"
+	$(CMD_RM) $(INSTALL_BIN)/ring
+	@echo "\033[32m[-]Uninstall Bin  SUCCESS\033[0m"
+	@echo ""
 
 	$(call uninstall_package_std)
 
 clean:
 	rm -f *.o lex.yy.cpp y.tab.cpp y.tab.hpp y.output *~
+	@echo "\033[32mClean SUCCESS\033[0m"
 
 testall:
 	sh ./automated-testing.sh
@@ -92,23 +98,29 @@ testall:
 
 echo:
 	@echo "[Echo Build Info]"
-	@echo "[+]g++ Version= `g++ --version`" # >= 2.6.4
-	@echo "[+]Flex Version= `flex --version`" # >= 2.6.4
-	@echo "[+]Bison Version= `bison --version`" # >= 2.3
-	@echo "[+]PLATS= $(PLATS)"
-	@echo "[+]PLAT=" `$(UNAME)`
-	@echo "[+]VERSION= $(VERSION)"
-	@echo "[+]T_STD_PACKS= $(T_STD_PACKS)"
+	@echo "[+]g++ Version= \033[32m`g++ --version`\033[0m" # >= 2.6.4
+	@echo "[+]Flex Version= \033[32m`flex --version`\033[0m" # >= 2.6.4
+	@echo "[+]Bison Version= \033[32m`bison --version`\033[0m" # >= 2.3
+	@echo "[+]PLATS= \033[32m$(PLATS)\033[0m"
+	@echo "[+]PLAT=" "\033[32m" `$(UNAME)` "\033[0m"
+	@echo "[+]VERSION= \033[32m$(VERSION)\033[0m"
+	@echo "[+]T_STD_PACKS= \033[32m$(T_STD_PACKS)\033[0m"
 
 define func_install_package_std
-	@echo "[+]Install Package: Std/$(1)"
-	@echo "  "  $(CMD_MKDIR) $(INSTALL_PACK_STD)/$(1)
-	@echo "  "  $(CMD_INSTALL_DATA) std/$(1)/* $(INSTALL_PACK_STD)/$(1)
+	@echo "\033[34m[+]Install Package: Std/$(1)\033[0m"
+	$(CMD_MKDIR) $(INSTALL_PACK_STD)/$(1)
+	$(CMD_INSTALL_DATA) std/$(1)/* $(INSTALL_PACK_STD)/$(1)
+	@echo "\033[32m[+]Install Package: Std/$(1)  SUCCESS\033[0m"
+	@echo ""
+
 endef
 
 define func_uninstall_package_std
-	@echo "[+]Uninstall Package: Std/$(1)"
-	@echo "  "  $(CMD_RM) $(INSTALL_PACK_STD)/$(1)
+	@echo "\033[34m[-]Uninstall Package: Std/$(1)\033[0m"
+	$(CMD_RM) $(INSTALL_PACK_STD)/$(1)
+	@echo "\033[32m[-]Uninstall Package: Std/$(1)  SUCCESS\033[0m"
+	@echo ""
+
 endef
 
 define install_package_std
@@ -155,3 +167,4 @@ man_help.o: man_help.cpp ring.h
 std_lib.o: std_lib.cpp ring.h
 thread_pool.o: thread_pool.c ring.h
 main.o: main.cpp ring.h
+
