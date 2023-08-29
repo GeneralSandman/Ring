@@ -1,0 +1,15 @@
+test case 1
+false
+debug_assert PASS
+
+test case 2
+true
+debug_assert PASS
+
+test case 3
+false
+debug_assert PASS
+
+test case 4
+false
+debug_assert PASS
