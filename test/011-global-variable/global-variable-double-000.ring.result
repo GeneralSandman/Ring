@@ -1,0 +1,15 @@
+test case 1
+0.000000
+debug_assert PASS
+
+test case 2
+2.000000
+debug_assert PASS
+
+test case 3
+65536.655360
+debug_assert PASS
+
+test case 4
+-65536.000000
+debug_assert PASS
