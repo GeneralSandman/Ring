@@ -11,5 +11,5 @@ test case 3
 debug_assert PASS
 
 test case 4
--65536.000000
+-65536.655360
 debug_assert PASS

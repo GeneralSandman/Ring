@@ -32,4 +32,9 @@ function main() {
 	global_string_value_1 = "this is ring";
 	fmt::println_string(global_string_value_1);
 	debug::debug_assert(global_string_value_1 == "this is ring");
+
+	fmt::println_string("\ntest case 5");
+	global_string_value_1 = "";
+	fmt::println_string(global_string_value_1);
+	debug::debug_assert(global_string_value_1 == "");
 }

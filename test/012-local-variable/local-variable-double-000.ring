@@ -29,8 +29,8 @@ function main() {
 	debug::debug_assert(local_double_value_1 == 65536.65536);
 
 	fmt::println_string("\ntest case 4");
-	local_double_value_1 = -65536.0;
+	local_double_value_1 = -65536.65536;
 	fmt::println_double(local_double_value_1);
-	debug::debug_assert(local_double_value_1 == -65536.0);
+	debug::debug_assert(local_double_value_1 == -65536.65536);
 
 }

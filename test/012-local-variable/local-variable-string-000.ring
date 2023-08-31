@@ -32,4 +32,10 @@ function main() {
 	local_string_value_1 = "this is ring";
 	fmt::println_string(local_string_value_1);
 	debug::debug_assert(local_string_value_1 == "this is ring");
+
+
+	fmt::println_string("\ntest case 5");
+	local_string_value_1 = "";
+	fmt::println_string(local_string_value_1);
+	debug::debug_assert(local_string_value_1 == "");
 }
