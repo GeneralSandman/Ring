@@ -87,13 +87,21 @@ RVM_RuntimeStatic* new_runtime_static() {
     return runtime_static;
 }
 
+RVM_RuntimeHeap* new_runtime_heap() {
+    RVM_RuntimeHeap* runtime_heap = (RVM_RuntimeHeap*)malloc(sizeof(RVM_RuntimeHeap));
+    runtime_heap->size            = 0;
+    runtime_heap->list            = nullptr;
+    runtime_heap->threshold       = 10;
+    return runtime_heap;
+}
+
 Ring_VirtualMachine* ring_virtualmachine_create() {
     Ring_VirtualMachine* rvm = (Ring_VirtualMachine*)malloc(sizeof(Ring_VirtualMachine));
     rvm->executer            = nullptr;
     rvm->executer_entry      = nullptr;
     rvm->runtime_static      = new_runtime_static();
     rvm->runtime_stack       = new_runtime_stack();
-    rvm->runtime_heap        = nullptr;
+    rvm->runtime_heap        = new_runtime_heap();
     rvm->pc                  = 0;
     rvm->class_list          = nullptr;
     rvm->class_size          = 0;
@@ -585,11 +593,16 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
-        case RVM_CODE_RELATIONAL_EQ_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) == 0);
+        case RVM_CODE_RELATIONAL_EQ_STRING: {
+            // RVM_Object* object2 = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            // RVM_Object* object1 = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            // printf("-----object2:%s-\n", object2->u.string->data);
+            // printf("-----object1:%s-\n", object1->u.string->data);
+            STACK_GET_BOOL_OFFSET(rvm, -2) = (RVM_Bool)(rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) == 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
+        }
 
         case RVM_CODE_RELATIONAL_NE_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) != STACK_GET_INT_OFFSET(rvm, -1));
@@ -968,7 +981,10 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
         case RING_BASIC_TYPE_BOOL:
         case RING_BASIC_TYPE_INT:
         case RING_BASIC_TYPE_DOUBLE:
-
+            break;
+        case RING_BASIC_TYPE_STRING:
+            object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_STRING);
+            STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_value_index, object);
             break;
         case RING_BASIC_TYPE_CLASS:
             // Search class-definition from variable declaration.
@@ -990,10 +1006,9 @@ RVM_Object* create_rvm_object() {
 }
 
 RVM_Object* string_literal_to_rvm_object(Ring_VirtualMachine* rvm, char* string_literal) {
-    RVM_Object* object     = create_rvm_object();
-    object->type           = RVM_OBJECT_TYPE_STRING;
-    object->u.string       = rvm_new_string(rvm, string_literal);
-    object->u.string->data = string_literal;
+    RVM_Object* object = create_rvm_object();
+    object->type       = RVM_OBJECT_TYPE_STRING;
+    object->u.string   = rvm_new_string(rvm, string_literal);
     return object;
 }
 
@@ -1143,7 +1158,9 @@ RVM_String* rvm_new_string(Ring_VirtualMachine* rvm, unsigned int size, unsigned
     RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
     string->size       = size;
     string->capacity   = capacity;
-    string->data       = (char*)malloc(sizeof(char) * size);
+    string->data       = nullptr;
+    if (size > 0)
+        string->data = (char*)malloc(sizeof(char) * size);
     return string;
 }
 
@@ -1154,7 +1171,9 @@ RVM_String* rvm_new_string(Ring_VirtualMachine* rvm, const char* string_literal)
     RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
     string->size       = size;
     string->capacity   = size;
-    string->data       = (char*)malloc(sizeof(char) * size);
+    string->data       = nullptr;
+    if (size > 0)
+        string->data = (char*)malloc(sizeof(char) * size);
 
     strncpy(string->data, string_literal, size);
 
@@ -1187,14 +1206,16 @@ RVM_Object* rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type) 
         // TODO:
         // alloc error
     }
-    object->type                  = type;
-    object->prev                  = nullptr;
-    object->next                  = rvm->runtime_heap->list;
-    rvm->runtime_heap->list->prev = object;
+    object->type = type;
+    object->prev = nullptr;
+    object->next = rvm->runtime_heap->list;
+    if (rvm->runtime_heap->list != nullptr) {
+        rvm->runtime_heap->list->prev = object;
+    }
 
     switch (type) {
     case RVM_OBJECT_TYPE_STRING:
-        object->u.string = nullptr;
+        object->u.string = rvm_heap_new_string(rvm);
         break;
     case RVM_OBJECT_TYPE_ARRAY:
         object->u.array = nullptr;
@@ -1214,7 +1235,7 @@ RVM_String* rvm_heap_new_string(Ring_VirtualMachine* rvm) {
     RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
     string->size       = 0;
     string->capacity   = 0;
-    string->data       = (char*)realloc(nullptr, sizeof(char) * 0);
+    string->data       = nullptr;
     return string;
 }
 
@@ -1234,4 +1255,30 @@ RVM_ClassObject* rvm_heap_new_class_object(Ring_VirtualMachine* rvm) {
     class_object->field_count     = 0;
     class_object->field           = nullptr;
     return class_object;
+}
+
+int rvm_string_cmp(RVM_Object* object1, RVM_Object* object2) {
+    char* str1 = nullptr;
+    char* str2 = nullptr;
+    if (object1 != nullptr) {
+        if (object1->u.string != nullptr) {
+            str1 = object1->u.string->data;
+        }
+    }
+    if (object2 != nullptr) {
+        if (object2->u.string != nullptr) {
+            str2 = object2->u.string->data;
+        }
+    }
+
+    if (str1 == nullptr && str2 == nullptr) {
+        return 0;
+    } else if (str1 != nullptr && str2 == nullptr) {
+        return 1;
+    } else if (str1 == nullptr && str2 != nullptr) {
+        return -1;
+    } else if (str1 != nullptr && str2 != nullptr) {
+        return strcmp(str1, str2);
+    }
+    return 0;
 }

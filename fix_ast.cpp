@@ -145,6 +145,7 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
         fix_method_call_expression(expression->u.method_call_expression, block, func);
         break;
 
+    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
     case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
     case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:

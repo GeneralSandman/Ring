@@ -1292,6 +1292,7 @@ typedef enum {
     ERROR_UNDEFINITE_VARIABLE        = 200000,
     ERROR_REDEFINITE_GLOBAL_VARIABLE = 200001,
     ERROR_REDEFINITE_FUNCTION        = 200002,
+    ERROR_MINUS_OPER_INVALID_USE     = 200003,
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -1645,7 +1646,8 @@ void                     generate_pop_to_leftvalue_identifier(Package_Executer* 
 void                     generate_pop_to_leftvalue_member(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
 void                     generate_vmcode_from_logical_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void                     generate_vmcode_from_binary_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
-void                     generate_vmcode_from_unitary_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
+void                     generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
+void                     generate_vmcode_from_unitary_not_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void                     generate_vmcode_from_increase_decrease_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
 void                     generate_vmcode_from_identifier_expression(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
 void                     generate_vmcode_from_bool_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
@@ -1685,6 +1687,7 @@ inline void              STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsign
 
 RVM_RuntimeStack*        new_runtime_stack();
 RVM_RuntimeStatic*       new_runtime_static();
+RVM_RuntimeHeap*         new_runtime_heap();
 Ring_VirtualMachine*     ring_virtualmachine_create();
 void                     ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry);
 void                     ring_virtualmachine_init(Ring_VirtualMachine* rvm);
@@ -1737,6 +1740,7 @@ RVM_Object*              rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Objec
 RVM_String*              rvm_heap_new_string(Ring_VirtualMachine* rvm);
 RVM_Array*               rvm_heap_new_array(Ring_VirtualMachine* rvm);
 RVM_ClassObject*         rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
+int                      rvm_string_cmp(RVM_Object* object1, RVM_Object* object2);
 // execute.c
 
 

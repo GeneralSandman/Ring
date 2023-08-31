@@ -333,7 +333,7 @@ void copy_function(Function* src, RVM_Function* dest) {
     } else if (src->type == FUNCTION_TYPE_DERIVE) {
         dest->type                = RVM_FUNCTION_TYPE_DERIVE;
         dest->parameter_size      = src->parameter_list_size;
-        dest->parameter_list      = nullptr;                                                                                   // TODO:
+        dest->parameter_list      = nullptr; // TODO:
         dest->local_variable_size = src->block->declaration_list_size;
         dest->local_variable_list = (RVM_LocalVariable*)malloc(sizeof(RVM_LocalVariable) * src->block->declaration_list_size); // TODO:
         dest->u.derive_func       = (DeriveFunction*)malloc(sizeof(DeriveFunction));
@@ -782,7 +782,7 @@ void generate_vmcode_from_expression(Package_Executer* executer, Expression* exp
         break;
 
     case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
-        generate_vmcode_from_unitary_expression(executer, expression->u.unitary_expression, opcode_buffer, RVM_CODE_MINUS_INT);
+        generate_vmcode_from_unitary_minus_expression(executer, expression->u.unitary_expression, opcode_buffer, RVM_CODE_MINUS_INT);
         break;
 
     case EXPRESSION_TYPE_LOGICAL_AND:
@@ -792,7 +792,7 @@ void generate_vmcode_from_expression(Package_Executer* executer, Expression* exp
         generate_vmcode_from_logical_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_LOGICAL_OR);
         break;
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
-        generate_vmcode_from_unitary_expression(executer, expression->u.unitary_expression, opcode_buffer, RVM_CODE_LOGICAL_NOT);
+        generate_vmcode_from_unitary_not_expression(executer, expression->u.unitary_expression, opcode_buffer, RVM_CODE_LOGICAL_NOT);
         break;
 
     case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
@@ -1091,7 +1091,54 @@ void generate_vmcode_from_increase_decrease_expression(Package_Executer* execute
     generate_pop_to_leftvalue(executer, unitary_expression, opcode_buffer);
 }
 
-void generate_vmcode_from_unitary_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (expression == nullptr) {
+        return;
+    }
+
+    generate_vmcode_from_expression(executer, expression, opcode_buffer, 1);
+
+    switch (expression->type) {
+    case EXPRESSION_TYPE_LITERAL_INT:
+        opcode = RVM_CODE_MINUS_INT;
+        break;
+    case EXPRESSION_TYPE_LITERAL_DOUBLE:
+        opcode = RVM_CODE_MINUS_DOUBLE;
+        break;
+    default: {
+        char error_message_buffer[1024];
+        char advice_buffer[1024];
+        snprintf(error_message_buffer, 1024, "%sError:%s "
+                                             "minus operator only be used in int/double literal; E:%d",
+                 LOG_COLOR_RED,
+                 LOG_COLOR_CLEAR,
+                 ERROR_MINUS_OPER_INVALID_USE);
+        snprintf(advice_buffer, 1024, "%sNotice:%s "
+                                      "minus operator used like: -1, -1.345",
+                 LOG_COLOR_YELLOW,
+                 LOG_COLOR_CLEAR);
+
+        ErrorReportContext context = {
+            nullptr,
+            get_package_unit()->current_file_name,
+            package_unit_get_line_content(expression->line_number),
+            expression->line_number,
+            0,
+            std::string(error_message_buffer),
+            std::string(advice_buffer),
+            ERROR_REPORT_TYPE_EXIT_NOW,
+        };
+        ring_compile_error_report(&context);
+    }
+    // TODO: 可以将 minus运算符 运用在 非 literal上
+    break;
+    }
+
+    generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
+}
+
+void generate_vmcode_from_unitary_not_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
     debug_log_with_darkgreen_coloar("\t");
     if (expression == nullptr) {
         return;

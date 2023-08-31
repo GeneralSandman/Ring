@@ -152,7 +152,7 @@ RVM_Value std_fmt_lib_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     RVM_Value ret;
     ret.u.int_value = 0;
 
-    if (args->u.object == nullptr || args->u.object->u.string->data == nullptr) {
+    if (args->u.object == nullptr || args->u.object->u.string == nullptr || args->u.object->u.string->data == nullptr) {
         printf("\n");
     } else {
         printf("%s\n", args->u.object->u.string->data);
