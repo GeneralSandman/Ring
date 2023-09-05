@@ -78,6 +78,13 @@ void fix_statement(Statement* statement, Block* block, Function* func) {
 
     case STATEMENT_TYPE_RETURN:
         fix_return_statement(statement->u.return_statement, block, func);
+        break;
+
+    case STATEMENT_TYPE_TAG_DEFINITION:
+        break;
+
+    case STATEMENT_TYPE_JUMP_TAG:
+        break;
 
     default: break;
     }

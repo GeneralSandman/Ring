@@ -483,6 +483,13 @@ void generate_vmcode_from_statement_list(Package_Executer* executer, Block* bloc
             generate_vmcode_from_initializer(executer, block, statement->u.declaration_statement, opcode_buffer);
             break;
 
+        case STATEMENT_TYPE_TAG_DEFINITION:
+            break;
+
+        case STATEMENT_TYPE_JUMP_TAG:
+            generate_vmcode_from_jump_tag_statement(executer, block, statement->u.jump_tag_statement, opcode_buffer);
+            break;
+
 
         default: break;
         }
@@ -733,6 +740,13 @@ void generate_vmcode_from_initializer(Package_Executer* executer, Block* block, 
             }
             generate_vmcode(executer, opcode_buffer, opcode, pos->variable_index, declaration->line_number);
         }
+    }
+}
+
+void generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* block, JumpTagStatement* jump_tag_statement, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    if (jump_tag_statement == nullptr) {
+        return;
     }
 }
 

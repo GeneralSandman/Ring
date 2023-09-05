@@ -601,7 +601,7 @@ BreakStatement* create_break_statement(char* literal_interface) {
     if (literal_interface == nullptr || strlen(literal_interface) == 0) {
         break_loop_num = 1;
     } else {
-        sscanf(literal_interface, "%ud", &break_loop_num);
+        break_loop_num = atoi(literal_interface);
         // TODO: check break_loop_num valid
     }
 
@@ -640,6 +640,28 @@ Statement* create_statement_from_return(ReturnStatement* return_statement) {
     statement->type               = STATEMENT_TYPE_RETURN;
     statement->u.return_statement = return_statement;
     statement->next               = nullptr;
+
+    return statement;
+}
+
+Statement* create_statement_from_tag_definition(TagDefinitionStatement* tag_def) {
+    debug_log_with_yellow_coloar("\t");
+    Statement* statement                  = (Statement*)malloc(sizeof(Statement));
+    statement->line_number                = package_unit_get_line_number();
+    statement->type                       = STATEMENT_TYPE_TAG_DEFINITION;
+    statement->u.tag_definition_statement = tag_def;
+    statement->next                       = nullptr;
+
+    return statement;
+}
+
+Statement* create_statement_from_jump_tag(JumpTagStatement* jump_tag_statement) {
+    debug_log_with_yellow_coloar("\t");
+    Statement* statement            = (Statement*)malloc(sizeof(Statement));
+    statement->line_number          = package_unit_get_line_number();
+    statement->type                 = STATEMENT_TYPE_JUMP_TAG;
+    statement->u.jump_tag_statement = jump_tag_statement;
+    statement->next                 = nullptr;
 
     return statement;
 }
@@ -985,6 +1007,22 @@ AttributeInfo* attribute_info_add_item(AttributeInfo* list, AttributeInfo* item)
         pos->next = item;
         return list;
     }
+}
+
+TagDefinitionStatement* create_tag_definition_statement(char* identifier) {
+    TagDefinitionStatement* tag_def = (TagDefinitionStatement*)malloc(sizeof(TagDefinitionStatement));
+    tag_def->line_number            = package_unit_get_line_number();
+    tag_def->identifier             = identifier;
+
+    return tag_def;
+}
+
+JumpTagStatement* create_jump_tag_statement(char* identifier) {
+    JumpTagStatement* jump_tag = (JumpTagStatement*)malloc(sizeof(JumpTagStatement));
+    jump_tag->line_number      = package_unit_get_line_number();
+    jump_tag->identifier       = identifier;
+
+    return jump_tag;
 }
 
 Attribute add_attribute(Attribute attribute, AttributeType type) {

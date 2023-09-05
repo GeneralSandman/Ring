@@ -36,6 +36,8 @@ int yyerror(char const *str, ...);
     Block*                      m_block;
     CastExpression*             m_cast;
     BreakStatement*             m_break_statement;
+    TagDefinitionStatement*     m_tag_definition_statement;
+    JumpTagStatement*           m_jump_tag_statement;
     ContinueStatement*          m_continue_statement;
     ReturnStatement*            m_return_statement;
     DimensionExpression*        m_dimension_expression;
@@ -81,6 +83,7 @@ int yyerror(char const *str, ...);
 %token TOKEN_FOR
 %token TOKEN_DO
 %token TOKEN_BREAK
+%token TOKEN_JUMP
 %token TOKEN_CONTINUE
 %token TOKEN_NULL
 
@@ -139,6 +142,7 @@ int yyerror(char const *str, ...);
 %token TOKEN_SEMICOLON 
 %token TOKEN_QUESTION_MARK
 %token TOKEN_ASSIGN
+%token TOKEN_NUM_SIGN
 
 %token INT_LITERAL
 %token DOUBLE_LITERAL
@@ -183,6 +187,8 @@ int yyerror(char const *str, ...);
 %type <m_return_list> return_list
 %type <m_block> block
 %type <m_break_statement> break_statement
+%type <m_tag_definition_statement> tag_definition_statement
+%type <m_jump_tag_statement> jump_tag_statement
 %type <m_continue_statement> continue_statement
 %type <m_return_statement> return_statement
 %type <m_dimension_expression> dimension_expression dimension_expression_list
@@ -516,6 +522,16 @@ statement
     {
         debug_log_with_green_coloar("[RULE::statement:return_statement]\t ");
         $$ = create_statement_from_return($1);
+    }
+    | tag_definition_statement
+    {
+        debug_log_with_green_coloar("[RULE::statement:jump_tag_definition_statement]\t ");
+        $$ = create_statement_from_tag_definition($1);
+    }
+    | jump_tag_statement
+    {
+        debug_log_with_green_coloar("[RULE::statement:jump_tag_statement]\t ");
+        $$ = create_statement_from_jump_tag($1);
     }
     ;
 
@@ -1247,6 +1263,22 @@ argument
         debug_log_with_green_coloar("[RULE::argument_list:expression]\t ");
 
         $$ = create_argument_list_from_expression($1);
+    }
+    ;
+
+tag_definition_statement
+    : TOKEN_NUM_SIGN identifier
+    {
+        debug_log_with_green_coloar("[RULE::tag_definition_statement]\t ");
+        $$ = create_tag_definition_statement($2);
+    }
+    ;
+
+jump_tag_statement
+    : TOKEN_JUMP TOKEN_NUM_SIGN identifier
+    {
+        debug_log_with_green_coloar("[RULE::jump_tag_statement]\t ");
+        $$ = create_jump_tag_statement($3);
     }
     ;
 

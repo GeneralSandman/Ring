@@ -71,6 +71,8 @@ typedef struct Ring_DeriveType_Array    Ring_DeriveType_Array;
 typedef struct Ring_DeriveType_Class    Ring_DeriveType_Class;
 typedef struct Ring_DeriveType          Ring_DeriveType;
 typedef struct Declaration              Declaration;
+typedef struct TagDefinitionStatement   TagDefinitionStatement;
+typedef struct JumpTagStatement         JumpTagStatement;
 typedef struct TypeSpecifier            TypeSpecifier;
 typedef struct StdPackageNativeFunction StdPackageNativeFunction;
 
@@ -637,6 +639,8 @@ typedef enum {
     STATEMENT_TYPE_CONTINUE,
     STATEMENT_TYPE_RETURN,
     STATEMENT_TYPE_DECLARATION,
+    STATEMENT_TYPE_TAG_DEFINITION,
+    STATEMENT_TYPE_JUMP_TAG,
 } StatementType;
 
 typedef enum {
@@ -828,15 +832,17 @@ struct Statement {
 
     StatementType type;
     union {
-        Expression*        expression;
-        Variable*          variable; // TODO: 以后废弃 使用 declaration_statement
-        IfStatement*       if_statement;
-        ForStatement*      for_statement;
-        DoForStatement*    dofor_statement;
-        BreakStatement*    break_statement;
-        ContinueStatement* continue_statement;
-        ReturnStatement*   return_statement;
-        Declaration*       declaration_statement;
+        Expression*             expression;
+        Variable*               variable; // TODO: 以后废弃 使用 declaration_statement
+        IfStatement*            if_statement;
+        ForStatement*           for_statement;
+        DoForStatement*         dofor_statement;
+        BreakStatement*         break_statement;
+        ContinueStatement*      continue_statement;
+        ReturnStatement*        return_statement;
+        Declaration*            declaration_statement;
+        TagDefinitionStatement* tag_definition_statement;
+        JumpTagStatement*       jump_tag_statement;
     } u;
     Statement* next;
 };
@@ -1172,6 +1178,18 @@ struct BreakStatement {
     unsigned int line_number;
 
     unsigned int break_loop_num; // break; break 1; break 2;
+};
+
+struct TagDefinitionStatement {
+    unsigned int line_number;
+
+    char*        identifier;
+};
+
+struct JumpTagStatement {
+    unsigned int line_number;
+
+    char*        identifier;
 };
 
 struct ContinueStatement {
@@ -1521,9 +1539,13 @@ Statement*               create_statement_from_dofor(DoForStatement* dofor_state
 DoForStatement*          create_dofor_statement(Expression* init_expression, Block* block, Expression* condition_expression, Expression* post_expression);
 Statement*               create_statement_from_break(BreakStatement* break_statement);
 BreakStatement*          create_break_statement(char* literal_interface);
+TagDefinitionStatement*  create_tag_definition_statement(char* identifier);
+JumpTagStatement*        create_jump_tag_statement(char* identifier);
 Statement*               create_statement_from_continue(ContinueStatement* continue_statement);
 ContinueStatement*       create_continue_statement();
 Statement*               create_statement_from_return(ReturnStatement* return_statement);
+Statement*               create_statement_from_tag_definition(TagDefinitionStatement* tag_def);
+Statement*               create_statement_from_jump_tag(JumpTagStatement* jump_tag_statement);
 ReturnStatement*         create_return_statement(Expression* expression);
 Block*                   start_new_block();
 Block*                   finish_block(Block* block, Statement* statement_list);
@@ -1638,6 +1660,7 @@ void                     generate_vmcode_from_break_statement(Package_Executer* 
 void                     generate_vmcode_from_continue_statement(Package_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer);
 void                     generate_vmcode_from_return_statement(Package_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer);
 void                     generate_vmcode_from_initializer(Package_Executer* executer, Block* block, Declaration* declaration, RVM_OpcodeBuffer* opcode_buffer);
+void                     generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* block, JumpTagStatement* jump_tag_statement, RVM_OpcodeBuffer* opcode_buffer);
 void                     generate_vmcode_from_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
 void                     generate_vmcode_from_assign_expression(Package_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
 void                     generate_pop_to_leftvalue_reverse(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);

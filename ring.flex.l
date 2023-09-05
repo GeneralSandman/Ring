@@ -47,6 +47,7 @@ extern "C" int yywrap(){
 <INITIAL>"for"          { package_unit_update_line_content(yytext); return TOKEN_FOR;            }
 <INITIAL>"do"           { package_unit_update_line_content(yytext); return TOKEN_DO;             }
 <INITIAL>"break"        { package_unit_update_line_content(yytext); return TOKEN_BREAK;          }
+<INITIAL>"jump"         { package_unit_update_line_content(yytext); return TOKEN_JUMP;           }
 <INITIAL>"continue"     { package_unit_update_line_content(yytext); return TOKEN_CONTINUE;       }
 <INITIAL>"null"         { package_unit_update_line_content(yytext); return TOKEN_NULL;           }
 
@@ -105,6 +106,7 @@ extern "C" int yywrap(){
 <INITIAL>";"            { package_unit_update_line_content(yytext); return TOKEN_SEMICOLON;      }
 <INITIAL>"?"            { package_unit_update_line_content(yytext); return TOKEN_QUESTION_MARK;  }
 <INITIAL>"="            { package_unit_update_line_content(yytext); return TOKEN_ASSIGN;         }
+<INITIAL>"#"            { package_unit_update_line_content(yytext); return TOKEN_NUM_SIGN;       }
 
 <INITIAL>[A-Za-z_][A-Za-z_0-9]* {
     debug_log_with_red_coloar("[STATUS:INITIAL]\t line_num(%d),column_num(%d),identifier(%s)",
