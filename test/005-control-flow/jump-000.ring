@@ -19,7 +19,7 @@ function main() {
       }
     }
 
-    #JUMP_TAG
+    #JUMP_TAG;
 
     debug::debug_assert(int_value_1 == 0);
     fmt::println_int(int_value_1);
