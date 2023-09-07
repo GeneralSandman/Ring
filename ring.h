@@ -1764,6 +1764,8 @@ RVM_String*              rvm_heap_new_string(Ring_VirtualMachine* rvm);
 RVM_Array*               rvm_heap_new_array(Ring_VirtualMachine* rvm);
 RVM_ClassObject*         rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
 int                      rvm_string_cmp(RVM_Object* object1, RVM_Object* object2);
+
+int                      rvm_heap_size(Ring_VirtualMachine* rvm);
 // execute.c
 
 
@@ -1780,6 +1782,8 @@ RVM_Value                std_fmt_lib_println_double(Ring_VirtualMachine* rvm, un
 RVM_Value                std_fmt_lib_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value                std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+
+RVM_Value                std_vm_lib_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value                std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 // std_lib.cpp

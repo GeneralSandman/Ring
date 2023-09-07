@@ -12,9 +12,11 @@ RING_PACKAGE_STD_PATH_DEBUG 即为调试标准库路径
 #ifdef DEBUG_STD_LIB
 char RING_PACKAGE_STD_PAHT_FMT[]   = "/Users/bytedance/Desktop/Ring/std/fmt/";
 char RING_PACKAGE_STD_PATH_DEBUG[] = "/Users/bytedance/Desktop/Ring/std/debug/";
+char RING_PACKAGE_STD_PATH_VM[]    = "/Users/bytedance/Desktop/Ring/std/vm/";
 #else
 char RING_PACKAGE_STD_PAHT_FMT[]   = "/usr/local/lib/ring/std/fmt/";
 char RING_PACKAGE_STD_PATH_DEBUG[] = "/usr/local/lib/ring/std/debug/";
+char RING_PACKAGE_STD_PATH_VM[]    = "/usr/local/lib/ring/std/vm/";
 #endif
 
 std::vector<StdPackageInfo> Std_Lib_List = {
@@ -34,6 +36,14 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         RING_PACKAGE_STD_PATH_DEBUG,
         std::vector<StdPackageNativeFunction>{
             {(char*)"debug_assert", std_debug_lib_debug_assert, 1},
+        },
+    },
+
+    {
+        (char*)"vm",
+        RING_PACKAGE_STD_PATH_VM,
+        std::vector<StdPackageNativeFunction>{
+            {(char*)"heap_size", std_vm_lib_heap_size, 0},
         },
     },
 };
@@ -175,6 +185,26 @@ RVM_Value std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
 
     RVM_Value ret;
     ret.u.int_value = 0;
+
+    if (args->u.int_value) {
+        printf("debug_assert PASS\n");
+    } else {
+        printf("debug_assert FAILED\n");
+    }
+    fflush(stdout);
+
+    return ret;
+}
+
+// ------------------ std vm ------------------
+// std_vm_lib_heap_size
+
+RVM_Value std_vm_lib_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    debug_log_with_white_coloar("\t");
+
+    RVM_Value ret;
+    ret.type        = RVM_VALUE_TYPE_INT;
+    ret.u.int_value = rvm_heap_size(rvm);
 
     if (args->u.int_value) {
         printf("debug_assert PASS\n");

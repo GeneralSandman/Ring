@@ -846,6 +846,8 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, un
     ret  = native_func_proc(rvm, argument_list_size, args);
 
 
+    // TODO: 如何在这里处理 return 返回值的问题
+    // 销毁 argument
     rvm->runtime_stack->top_index -= argument_list_size;
     rvm->runtime_stack->data[rvm->runtime_stack->top_index] = ret;
 }
@@ -1112,6 +1114,8 @@ RVM_Object* rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension) 
     object->u.array->size        = dimension;
     object->u.array->capacity    = dimension;
     object->u.array->u.int_array = (int*)malloc(sizeof(int) * dimension);
+    rvm->runtime_heap->size += sizeof(int) * dimension;
+    printf("size:%d\n", rvm->runtime_heap->size);
     return object;
 }
 
@@ -1281,4 +1285,10 @@ int rvm_string_cmp(RVM_Object* object1, RVM_Object* object2) {
         return strcmp(str1, str2);
     }
     return 0;
+}
+
+int rvm_heap_size(Ring_VirtualMachine* rvm) {
+    // FIXME: 这里会溢出
+    // TODO: 数据类型不够
+    return rvm->runtime_heap->size;
 }
