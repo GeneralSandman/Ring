@@ -836,20 +836,31 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, un
 
     RVM_Value           ret;
 
-    RVM_NativeFuncProc* native_func_proc = function->u.native_func->func_proc;
+    int                 return_list_count = function->u.native_func->return_list_count;
+    RVM_NativeFuncProc* native_func_proc  = function->u.native_func->func_proc;
     // unsigned int        arg_count        = function->u.native_func->arg_count;
     RVM_Value*          args; // TODO:
 
     // TODO: how to handle arg_count > 1
     args = &rvm->runtime_stack->data[rvm->runtime_stack->top_index - argument_list_size];
 
+    // TODO: how to handler return_list > 1
     ret  = native_func_proc(rvm, argument_list_size, args);
 
 
-    // TODO: 如何在这里处理 return 返回值的问题
     // 销毁 argument
     rvm->runtime_stack->top_index -= argument_list_size;
-    rvm->runtime_stack->data[rvm->runtime_stack->top_index] = ret;
+
+    // TODO: 需要补齐一个 return 指令
+    // TODO: 如何在这里处理 return 多返回值的问题
+    if (return_list_count == 0) {
+    } else if (return_list_count == 1) {
+        rvm->runtime_stack->data[rvm->runtime_stack->top_index++] = ret;
+    } else {
+        fprintf(stderr,
+                "native function return value count > 1");
+        exit(ERROR_CODE_RUN_VM_ERROR);
+    }
 }
 
 // invoke_derive_function
@@ -1057,7 +1068,7 @@ void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_
     if (terminal_size.ws_row < 38 || terminal_size.ws_col < 115) {
         runtime_err_log("In Debug RVM Mode:");
         runtime_err_log("    Please adjust current terminal window size: height > 38, width > 115\n");
-        exit(1);
+        // exit(1);
     }
 
     CLEAR_SCREEN;
@@ -1115,7 +1126,6 @@ RVM_Object* rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension) 
     object->u.array->capacity    = dimension;
     object->u.array->u.int_array = (int*)malloc(sizeof(int) * dimension);
     rvm->runtime_heap->size += sizeof(int) * dimension;
-    printf("size:%d\n", rvm->runtime_heap->size);
     return object;
 }
 

@@ -24,10 +24,10 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         (char*)"fmt",
         RING_PACKAGE_STD_PAHT_FMT,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"println_bool", std_fmt_lib_println_bool, 1},
-            {(char*)"println_int", std_fmt_lib_println_int, 1},
-            {(char*)"println_double", std_fmt_lib_println_double, 1},
-            {(char*)"println_string", std_fmt_lib_println_string, 1},
+            {(char*)"println_bool", std_fmt_lib_println_bool, 1, 0},
+            {(char*)"println_int", std_fmt_lib_println_int, 1, 0},
+            {(char*)"println_double", std_fmt_lib_println_double, 1, 0},
+            {(char*)"println_string", std_fmt_lib_println_string, 1, 0},
         },
     },
 
@@ -35,7 +35,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         (char*)"debug",
         RING_PACKAGE_STD_PATH_DEBUG,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"debug_assert", std_debug_lib_debug_assert, 1},
+            {(char*)"debug_assert", std_debug_lib_debug_assert, 1, 0},
         },
     },
 
@@ -43,7 +43,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         (char*)"vm",
         RING_PACKAGE_STD_PATH_VM,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"heap_size", std_vm_lib_heap_size, 0},
+            {(char*)"heap_size", std_vm_lib_heap_size, 0, 1},
         },
     },
 };
@@ -69,12 +69,12 @@ void compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entr
 
         // 注册native function
         for (StdPackageNativeFunction native_function : std_package_info.native_function_list) {
-            register_lib(package_executer, native_function.func_name, native_function.func_proc, native_function.arg_count);
+            register_lib(package_executer, native_function.func_name, native_function.func_proc, native_function.arg_count, native_function.return_list_count);
         }
     }
 }
 
-void register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count) {
+void register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count, int return_list_count) {
     debug_log_with_white_coloar("\t func_name:%s", func_name);
 
     for (int i = 0; i < package_executer->function_size; i++) {
@@ -82,9 +82,10 @@ void register_lib(Package_Executer* package_executer, char* func_name, RVM_Nativ
         if (function->type == RVM_FUNCTION_TYPE_NATIVE && 0 == strcmp(function->func_name, func_name)) {
             debug_log_with_white_coloar("\t func_name:%s register succ", func_name);
 
-            function->u.native_func            = (NativeFunction*)malloc(sizeof(NativeFunction));
-            function->u.native_func->func_proc = func_proc;
-            function->u.native_func->arg_count = arg_count;
+            function->u.native_func                    = (NativeFunction*)malloc(sizeof(NativeFunction));
+            function->u.native_func->func_proc         = func_proc;
+            function->u.native_func->arg_count         = arg_count;
+            function->u.native_func->return_list_count = return_list_count;
         }
     }
 }
@@ -205,13 +206,6 @@ RVM_Value std_vm_lib_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count,
     RVM_Value ret;
     ret.type        = RVM_VALUE_TYPE_INT;
     ret.u.int_value = rvm_heap_size(rvm);
-
-    if (args->u.int_value) {
-        printf("debug_assert PASS\n");
-    } else {
-        printf("debug_assert FAILED\n");
-    }
-    fflush(stdout);
 
     return ret;
 }

@@ -266,7 +266,8 @@ struct RVM_LocalVariable {
 
 struct NativeFunction {
     RVM_NativeFuncProc* func_proc;
-    int                 arg_count; // -1 表示可变参数
+    int                 arg_count;         // -1 表示可变参数
+    int                 return_list_count; // 返回值的数量
 };
 struct DeriveFunction {
     unsigned int code_size;
@@ -1272,6 +1273,7 @@ struct StdPackageNativeFunction {
     char*               func_name;
     RVM_NativeFuncProc* func_proc;
     int                 arg_count;
+    int                 return_list_count;
 };
 
 struct StdPackageInfo {
@@ -1775,7 +1777,7 @@ void                     ring_bytecode_load(Package_Executer* executer, FILE* in
 // bytecode.c
 
 // std_lib.cpp
-void                     register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count);
+void                     register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count, int return_list_count);
 RVM_Value                std_fmt_lib_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value                std_fmt_lib_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value                std_fmt_lib_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
