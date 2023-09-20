@@ -1410,39 +1410,59 @@ struct BinaryChunk {
 #define runtime_err_log(format, ...) \
     printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
-#ifdef DEBUG
-// debug 词法分析
+
+#ifdef DEBUG_FLEX
+// debug flex 词法分析
 #define debug_log_with_red_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_RED, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-// debug 语法分析
+#else
+#define debug_log_with_red_coloar(format, ...)
+#endif
+
+#ifdef DEBUG_BISON
+// debug bison 语法分析
 #define debug_log_with_green_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_GREEN, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#else
+#define debug_log_with_green_coloar(format, ...)
+#endif
+
+#ifdef DEBUG_CREATE_AST
 // debug 语法分析构建AST
 #define debug_log_with_yellow_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_YELLOW, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#else
+#define debug_log_with_yellow_coloar(format, ...)
+#endif
+
+#ifdef DEBUG_GENERATE_DETAIL
+// debug 生成 vm opcode
+#define debug_log_with_darkgreen_coloar(format, ...) \
+    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_DARKGREEN, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#else
+#define debug_log_with_darkgreen_coloar(format, ...)
+#endif
+
+#ifdef DEBUG_EXEC_VM
+#define debug_log_with_white_coloar(format, ...) \
+    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_WHITE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#else
+#define debug_log_with_white_coloar(format, ...)
+#endif
+
+#ifdef DEBUG
 // debug 解释执行AST
 #define debug_log_with_blue_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_BLUE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 // debug 生成 vm opcode
 #define debug_log_with_purple_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_PURPLE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-// debug 生成 vm opcode
-#define debug_log_with_darkgreen_coloar(format, ...) \
-    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_DARKGREEN, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-// debug 生成 vm opcode
-#define debug_log_with_white_coloar(format, ...) \
-    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_WHITE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 #else
 // 编译错误
-#define debug_log_with_red_coloar(format, ...)
 // 标示错误的地址
-#define debug_log_with_green_coloar(format, ...)
-#define debug_log_with_yellow_coloar(format, ...)
 #define debug_log_with_blue_coloar(format, ...)
 // 编译告警
 #define debug_log_with_purple_coloar(format, ...)
-#define debug_log_with_darkgreen_coloar(format, ...)
-#define debug_log_with_white_coloar(format, ...)
 #endif
 
 void ring_compile_error_report(ErrorReportContext* context);

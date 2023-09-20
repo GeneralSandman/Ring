@@ -55,7 +55,6 @@ void compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entr
 
         // 编译
         if (nullptr != search_package(compiler_entry, package_name)) {
-            debug_log_with_yellow_coloar("\t package[%s] already compiled", package_name);
             continue;
         }
         Package* std_package       = package_create(compiler_entry, package_name, package_path);
@@ -75,13 +74,9 @@ void compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entr
 }
 
 void register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count, int return_list_count) {
-    debug_log_with_white_coloar("\t func_name:%s", func_name);
-
     for (int i = 0; i < package_executer->function_size; i++) {
         RVM_Function* function = &package_executer->function_list[i];
         if (function->type == RVM_FUNCTION_TYPE_NATIVE && 0 == strcmp(function->func_name, func_name)) {
-            debug_log_with_white_coloar("\t func_name:%s register succ", func_name);
-
             function->u.native_func                    = (NativeFunction*)malloc(sizeof(NativeFunction));
             function->u.native_func->func_proc         = func_proc;
             function->u.native_func->arg_count         = arg_count;
@@ -97,8 +92,6 @@ void register_lib(Package_Executer* package_executer, char* func_name, RVM_Nativ
 // std_fmt_lib_println_string
 
 RVM_Value std_fmt_lib_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
     if (arg_count != 1) {
         printf("std_fmt_lib_println_bool only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
@@ -118,8 +111,6 @@ RVM_Value std_fmt_lib_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_co
 }
 
 RVM_Value std_fmt_lib_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
     if (arg_count != 1) {
         printf("std_fmt_lib_println_int only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
@@ -136,8 +127,6 @@ RVM_Value std_fmt_lib_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
 }
 
 RVM_Value std_fmt_lib_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
     if (arg_count != 1) {
         printf("std_fmt_lib_println_double only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
@@ -153,8 +142,6 @@ RVM_Value std_fmt_lib_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
 }
 
 RVM_Value std_fmt_lib_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
     if (arg_count != 1) {
         printf("std_fmt_lib_println_string only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
@@ -177,8 +164,6 @@ RVM_Value std_fmt_lib_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
 // std_debug_lib_debug_assert
 
 RVM_Value std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
     if (arg_count != 1) {
         printf("std_debug_lib_debug_assert only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
@@ -201,8 +186,6 @@ RVM_Value std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
 // std_vm_lib_heap_size
 
 RVM_Value std_vm_lib_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
     RVM_Value ret;
     ret.type        = RVM_VALUE_TYPE_INT;
     ret.u.int_value = rvm_heap_size(rvm);
@@ -214,8 +197,6 @@ RVM_Value std_vm_lib_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count,
 // std_math_lib_sqrt
 
 RVM_Value std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
-
     // if (arg_count != 1) {
     //     printf("native_proc_print only one arguement\n");
     //     exit(ERROR_CODE_RUN_VM_ERROR);
@@ -236,7 +217,6 @@ RVM_Value std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
 
 
 // RVM_Value native_proc_print(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-//     debug_log_with_white_coloar("\t");
 
 //     RVM_Value ret;
 //     ret.u.int_value = 0;
@@ -275,7 +255,6 @@ RVM_Value std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
 // }
 
 // RVM_Value native_proc_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-//     debug_log_with_white_coloar("\t");
 
 //     RVM_Value ret;
 //     ret.u.int_value = 0;
@@ -287,7 +266,6 @@ RVM_Value std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
 // }
 
 // RVM_Value native_proc_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-//     debug_log_with_white_coloar("\t");
 
 //     RVM_Value ret;
 //     ret.u.int_value = 0;
@@ -350,7 +328,6 @@ RVM_Value std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
 // }
 
 // RVM_Value native_proc_printfln(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-//     debug_log_with_white_coloar("\t");
 
 //     RVM_Value ret;
 //     ret.u.int_value = 0;

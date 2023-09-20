@@ -308,7 +308,7 @@ void package_unit_compile(PackageUnit* package_unit) {
         exit(ERROR_CODE_COMPILE_ERROR);
     }
 
-#ifdef DEBUG
+#ifdef DEBUG_CREATE_AST
     // check package_unit->line_offset_map is valid
     printf("File:%s\n", package_unit->current_file_name.c_str());
     for (int i = 1; i < package_unit->line_offset_map.size(); i++) {
