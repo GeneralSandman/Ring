@@ -7,7 +7,7 @@
 #include <unordered_set>
 #include <vector>
 
-#define RING_VERSION "ring-v0.2.8-beta"
+#define RING_VERSION "ring-v0.2.9-beta"
 
 
 typedef struct Ring_VirtualMachine      Ring_VirtualMachine;
