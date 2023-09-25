@@ -10,7 +10,7 @@
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 
-// 通过绝对索引 获取
+// 通过绝对索引 获取 runtime_stack value
 #define STACK_GET_BOOL_INDEX(rvm, index) \
     ((rvm)->runtime_stack->data[(index)].u.bool_value)
 #define STACK_GET_INT_INDEX(rvm, index) \
@@ -20,7 +20,7 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define STACK_GET_OBJECT_INDEX(rvm, index) \
     ((rvm)->runtime_stack->data[(index)].u.object)
 
-// 通过栈顶偏移 offset 获取
+// 通过栈顶偏移 offset 获取 runtime_stack value
 #define STACK_GET_BOOL_OFFSET(rvm, offset) \
     STACK_GET_BOOL_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 #define STACK_GET_INT_OFFSET(rvm, offset) \
@@ -30,7 +30,7 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define STACK_GET_OBJECT_OFFSET(rvm, offset) \
     STACK_GET_OBJECT_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 
-// 通过绝对索引 设置
+// 通过绝对索引 设置 runtime_stack value
 #define STACK_SET_BOOL_INDEX(rvm, index, value)                             \
     (rvm)->runtime_stack->data[(index)].type         = RVM_VALUE_TYPE_BOOL; \
     (rvm)->runtime_stack->data[(index)].u.bool_value = (value);
@@ -44,7 +44,7 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     (rvm)->runtime_stack->data[(index)].type     = RVM_VALUE_TYPE_OBJECT; \
     (rvm)->runtime_stack->data[(index)].u.object = (value);
 
-// 通过栈顶偏移 offset 设置
+// 通过栈顶偏移 offset 设置 runtime_stack value
 #define STACK_SET_BOOL_OFFSET(rvm, offset, value) \
     STACK_SET_BOOL_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
 #define STACK_SET_INT_OFFSET(rvm, offset, value) \
@@ -594,10 +594,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_EQ_STRING: {
-            // RVM_Object* object2 = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            // RVM_Object* object1 = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            // printf("-----object2:%s-\n", object2->u.string->data);
-            // printf("-----object1:%s-\n", object1->u.string->data);
             STACK_GET_BOOL_OFFSET(rvm, -2) = (RVM_Bool)(rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) == 0);
             runtime_stack->top_index--;
             rvm->pc++;
