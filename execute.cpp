@@ -168,6 +168,9 @@ void rvm_init_static_variable(Package_Executer* executer, RVM_RuntimeStatic* run
                 runtime_static->data[i].u.object = rvm_new_array_int(nullptr, 10);
             }
             break;
+        case RING_BASIC_TYPE_STRING:
+            runtime_static->data[i].u.object = new_string_object();
+            break;
         case RING_BASIC_TYPE_CLASS:
             // Search class-definition from variable declaration.
             assert(type_specifier->u.class_type != nullptr);
@@ -181,6 +184,19 @@ void rvm_init_static_variable(Package_Executer* executer, RVM_RuntimeStatic* run
     }
 }
 
+// 全局变量，static空间
+RVM_Object* new_string_object() {
+    RVM_Object* object         = (RVM_Object*)malloc(sizeof(RVM_Object));
+    object->type               = RVM_OBJECT_TYPE_STRING;
+    object->u.string           = (RVM_String*)malloc(sizeof(RVM_String));
+    object->u.string->size     = 0;
+    object->u.string->capacity = 0;
+    object->u.string->data     = nullptr;
+
+    return object;
+}
+
+// 全局变量，static空间
 RVM_Object* new_class_object(ClassDefinition* class_definition) {
     assert(class_definition != nullptr);
 
@@ -1014,7 +1030,7 @@ RVM_Object* create_rvm_object() {
     return object;
 }
 
-RVM_Object* string_literal_to_rvm_object(Ring_VirtualMachine* rvm, char* string_literal) {
+RVM_Object* string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* string_literal) {
     RVM_Object* object = create_rvm_object();
     object->type       = RVM_OBJECT_TYPE_STRING;
     object->u.string   = rvm_new_string(rvm, string_literal);

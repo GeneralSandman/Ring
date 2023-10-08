@@ -21,7 +21,6 @@ extern "C" int yywrap(){
 
 
 <INITIAL>"typedef"      { package_unit_update_line_content(yytext); return TOKEN_TYPEDEF;        }
-<INITIAL>"typeof"       { package_unit_update_line_content(yytext); return TOKEN_TYPEOF;         }
 <INITIAL>"bool"         { package_unit_update_line_content(yytext); return TOKEN_BOOL;           }
 <INITIAL>"int"          { package_unit_update_line_content(yytext); return TOKEN_INT;            }
 <INITIAL>"double"       { package_unit_update_line_content(yytext); return TOKEN_DOUBLE;         }

@@ -10,13 +10,15 @@ RING_PACKAGE_STD_PAHT_FMT 即为调试标准库路径
 RING_PACKAGE_STD_PATH_DEBUG 即为调试标准库路径
 */
 #ifdef DEBUG_STD_LIB
-char RING_PACKAGE_STD_PAHT_FMT[]   = "/Users/bytedance/Desktop/Ring/std/fmt/";
-char RING_PACKAGE_STD_PATH_DEBUG[] = "/Users/bytedance/Desktop/Ring/std/debug/";
-char RING_PACKAGE_STD_PATH_VM[]    = "/Users/bytedance/Desktop/Ring/std/vm/";
+char RING_PACKAGE_STD_PAHT_FMT[]     = "/Users/bytedance/Desktop/Ring/std/fmt/";
+char RING_PACKAGE_STD_PATH_DEBUG[]   = "/Users/bytedance/Desktop/Ring/std/debug/";
+char RING_PACKAGE_STD_PATH_VM[]      = "/Users/bytedance/Desktop/Ring/std/vm/";
+char RING_PACKAGE_STD_PATH_REFLECT[] = "/Users/bytedance/Desktop/Ring/std/reflect/";
 #else
-char RING_PACKAGE_STD_PAHT_FMT[]   = "/usr/local/lib/ring/std/fmt/";
-char RING_PACKAGE_STD_PATH_DEBUG[] = "/usr/local/lib/ring/std/debug/";
-char RING_PACKAGE_STD_PATH_VM[]    = "/usr/local/lib/ring/std/vm/";
+char RING_PACKAGE_STD_PAHT_FMT[]     = "/usr/local/lib/ring/std/fmt/";
+char RING_PACKAGE_STD_PATH_DEBUG[]   = "/usr/local/lib/ring/std/debug/";
+char RING_PACKAGE_STD_PATH_VM[]      = "/usr/local/lib/ring/std/vm/";
+char RING_PACKAGE_STD_PATH_REFLECT[] = "/usr/local/lib/ring/std/reflect/";
 #endif
 
 std::vector<StdPackageInfo> Std_Lib_List = {
@@ -44,6 +46,14 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         RING_PACKAGE_STD_PATH_VM,
         std::vector<StdPackageNativeFunction>{
             {(char*)"heap_size", std_vm_lib_heap_size, 0, 1},
+        },
+    },
+
+    {
+        (char*)"reflect",
+        RING_PACKAGE_STD_PATH_REFLECT,
+        std::vector<StdPackageNativeFunction>{
+            {(char*)"typeof", std_reflect_lib_typeof, 0, 1},
         },
     },
 };
@@ -189,6 +199,52 @@ RVM_Value std_vm_lib_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count,
     RVM_Value ret;
     ret.type        = RVM_VALUE_TYPE_INT;
     ret.u.int_value = rvm_heap_size(rvm);
+
+    return ret;
+}
+
+// ------------------ std reflect ------------------
+// std_reflect_lib_typeof
+
+RVM_Value std_reflect_lib_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    std::string str = "";
+
+    switch (args->type) {
+    case RVM_VALUE_TYPE_BOOL:
+        str = "bool";
+        break;
+    case RVM_VALUE_TYPE_INT:
+        str = "int";
+        break;
+    case RVM_VALUE_TYPE_DOUBLE:
+        str = "double";
+        break;
+    case RVM_VALUE_TYPE_STRING:
+        str = "string";
+        break;
+    case RVM_VALUE_TYPE_OBJECT:
+        switch (args->u.object->type) {
+        case RVM_OBJECT_TYPE_STRING:
+            str = "string";
+            break;
+        case RVM_OBJECT_TYPE_ARRAY:
+            str = "array";
+            break;
+        case RVM_OBJECT_TYPE_CLASS:
+            str = "class";
+            break;
+        default:
+            str = "unknow";
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+
+    RVM_Value ret;
+    ret.type     = RVM_VALUE_TYPE_OBJECT;
+    ret.u.object = string_literal_to_rvm_object(rvm, str.c_str());
 
     return ret;
 }

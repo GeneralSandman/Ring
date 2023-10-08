@@ -57,7 +57,6 @@ int yyerror(char const *str, ...);
 }
 
 %token TOKEN_TYPEDEF
-%token TOKEN_TYPEOF
 %token TOKEN_BOOL
 %token TOKEN_INT 
 %token TOKEN_DOUBLE 

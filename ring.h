@@ -1738,6 +1738,7 @@ void                     ring_virtualmachine_load_executer(Ring_VirtualMachine* 
 void                     ring_virtualmachine_init(Ring_VirtualMachine* rvm);
 void                     rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                     rvm_init_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
+RVM_Object*              new_string_object();
 RVM_Object*              new_class_object(ClassDefinition* class_definition);
 void                     ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                     invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
@@ -1762,7 +1763,7 @@ void                     init_derive_function_local_variable(Ring_VirtualMachine
 void                     debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base);
 
 RVM_Object*              create_rvm_object();
-RVM_Object*              string_literal_to_rvm_object(Ring_VirtualMachine* rvm, char* string_literal);
+RVM_Object*              string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* string_literal);
 RVM_Object*              concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b);
 
 void                     store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo);
@@ -1806,6 +1807,8 @@ RVM_Value                std_fmt_lib_println_string(Ring_VirtualMachine* rvm, un
 RVM_Value                std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value                std_vm_lib_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+
+RVM_Value                std_reflect_lib_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value                std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 // std_lib.cpp

@@ -66,7 +66,7 @@ CMD_RM= rm -rf
 PLATS= linux macosx
 
 T_BIN= ring
-T_STD_PACKS= debug fmt math strings
+T_STD_PACKS= debug fmt math strings reflect
 
 
 UNAME= uname
@@ -137,6 +137,7 @@ define install_package_std
 	$(call func_install_package_std,vm)
 	$(call func_install_package_std,math)
 	$(call func_install_package_std,strings)
+	$(call func_install_package_std,reflect)
 endef
 	
 define uninstall_package_std
@@ -145,6 +146,7 @@ define uninstall_package_std
 	$(call func_install_package_std,vm)
 	$(call func_uninstall_package_std,math)
 	$(call func_uninstall_package_std,strings)
+	$(call func_uninstall_package_std,reflect)
 endef
 
 
