@@ -22,3 +22,6 @@ function println_double(var double double_value);
 
 @native
 function println_string(var string string_value);
+
+@native
+function println(var any any_value);
