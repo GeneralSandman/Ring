@@ -5,11 +5,19 @@
 > 
 > https://ring.wiki
 > 
+> 备用网站
 > https://ring-1252697766.cos-website.ap-beijing.myqcloud.com
 >
-> Power by Docsify
 > 
 
+> [!NOTE|label:Ring Code Exapmle]
+> 
+> https://example.ring.wiki
+> 
+> 备用网站
+> https://example-ring-1252697766.cos-website.ap-beijing.myqcloud.com
+>
+> 
 
 
 ## 1. What is Ring Language
