@@ -10,12 +10,16 @@ RING_PACKAGE_STD_PAHT_FMT 即为调试标准库路径
 RING_PACKAGE_STD_PATH_DEBUG 即为调试标准库路径
 */
 #ifdef DEBUG_STD_LIB
-char RING_PACKAGE_STD_PAHT_FMT[]     = "/Users/bytedance/Desktop/Ring/std/fmt/";
+char RING_PACKAGE_STD_PATH_OS[]      = "/Users/bytedance/Desktop/Ring/std/os/";
+char RING_PACKAGE_STD_PATH_IO[]      = "/Users/bytedance/Desktop/Ring/std/io/";
+char RING_PACKAGE_STD_PATH_FMT[]     = "/Users/bytedance/Desktop/Ring/std/fmt/";
 char RING_PACKAGE_STD_PATH_DEBUG[]   = "/Users/bytedance/Desktop/Ring/std/debug/";
 char RING_PACKAGE_STD_PATH_VM[]      = "/Users/bytedance/Desktop/Ring/std/vm/";
 char RING_PACKAGE_STD_PATH_REFLECT[] = "/Users/bytedance/Desktop/Ring/std/reflect/";
 #else
-char RING_PACKAGE_STD_PAHT_FMT[]     = "/usr/local/lib/ring/std/fmt/";
+char RING_PACKAGE_STD_PATH_OS[]      = "/usr/local/lib/ring/std/os/";
+char RING_PACKAGE_STD_PATH_IO[]      = "/usr/local/lib/ring/std/io/";
+char RING_PACKAGE_STD_PATH_FMT[]     = "/usr/local/lib/ring/std/fmt/";
 char RING_PACKAGE_STD_PATH_DEBUG[]   = "/usr/local/lib/ring/std/debug/";
 char RING_PACKAGE_STD_PATH_VM[]      = "/usr/local/lib/ring/std/vm/";
 char RING_PACKAGE_STD_PATH_REFLECT[] = "/usr/local/lib/ring/std/reflect/";
@@ -23,13 +27,22 @@ char RING_PACKAGE_STD_PATH_REFLECT[] = "/usr/local/lib/ring/std/reflect/";
 
 std::vector<StdPackageInfo> Std_Lib_List = {
     {
-        (char*)"fmt",
-        RING_PACKAGE_STD_PAHT_FMT,
+        (char*)"io",
+        RING_PACKAGE_STD_PATH_IO,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"println_bool", std_fmt_lib_println_bool, 1, 0},
-            {(char*)"println_int", std_fmt_lib_println_int, 1, 0},
-            {(char*)"println_double", std_fmt_lib_println_double, 1, 0},
-            {(char*)"println_string", std_fmt_lib_println_string, 1, 0},
+            {(char*)"write", std_lib_io_write, 1, 0},
+        },
+    },
+
+    {
+        (char*)"fmt",
+        RING_PACKAGE_STD_PATH_FMT,
+        std::vector<StdPackageNativeFunction>{
+            {(char*)"println_bool", std_lib_fmt_println_bool, 1, 0},
+            {(char*)"println_int", std_lib_fmt_println_int, 1, 0},
+            {(char*)"println_double", std_lib_fmt_println_double, 1, 0},
+            {(char*)"println_string", std_lib_fmt_println_string, 1, 0},
+            {(char*)"println", std_lib_fmt_println, 1, 0},
         },
     },
 
@@ -37,7 +50,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         (char*)"debug",
         RING_PACKAGE_STD_PATH_DEBUG,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"debug_assert", std_debug_lib_debug_assert, 1, 0},
+            {(char*)"debug_assert", std_lib_debug_debug_assert, 1, 0},
         },
     },
 
@@ -45,7 +58,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         (char*)"vm",
         RING_PACKAGE_STD_PATH_VM,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"heap_size", std_vm_lib_heap_size, 0, 1},
+            {(char*)"heap_size", std_lib_vm_heap_size, 0, 1},
         },
     },
 
@@ -53,7 +66,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         (char*)"reflect",
         RING_PACKAGE_STD_PATH_REFLECT,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"typeof", std_reflect_lib_typeof, 0, 1},
+            {(char*)"typeof", std_lib_reflect_typeof, 0, 1},
         },
     },
 };
@@ -95,15 +108,61 @@ void register_lib(Package_Executer* package_executer, char* func_name, RVM_Nativ
     }
 }
 
-// ------------------ std fmt ------------------
-// std_fmt_lib_println_bool
-// std_fmt_lib_println_int
-// std_fmt_lib_println_double
-// std_fmt_lib_println_string
+// ------------------ std io ------------------
+// std_lib_io_write
 
-RVM_Value std_fmt_lib_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    std::string str = "";
+
+    switch (args->type) {
+    case RVM_VALUE_TYPE_BOOL:
+        str = "bool";
+        break;
+    case RVM_VALUE_TYPE_INT:
+        str = "int";
+        break;
+    case RVM_VALUE_TYPE_DOUBLE:
+        str = "double";
+        break;
+    case RVM_VALUE_TYPE_STRING:
+        str = "string";
+        break;
+    case RVM_VALUE_TYPE_OBJECT:
+        switch (args->u.object->type) {
+        case RVM_OBJECT_TYPE_STRING:
+            str = "string";
+            break;
+        case RVM_OBJECT_TYPE_ARRAY:
+            str = "array";
+            break;
+        case RVM_OBJECT_TYPE_CLASS:
+            str = "class";
+            break;
+        default:
+            str = "unknow";
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+
+    RVM_Value ret;
+    ret.type     = RVM_VALUE_TYPE_OBJECT;
+    ret.u.object = string_literal_to_rvm_object(rvm, str.c_str());
+
+    return ret;
+}
+
+// ------------------ std fmt ------------------
+// std_lib_fmt_println_bool
+// std_lib_fmt_println_int
+// std_lib_fmt_println_double
+// std_lib_fmt_println_string
+
+RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_fmt_lib_println_bool only one arguement\n");
+        printf("std_lib_fmt_println_bool only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
 
@@ -120,9 +179,9 @@ RVM_Value std_fmt_lib_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_co
     return ret;
 }
 
-RVM_Value std_fmt_lib_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_fmt_lib_println_int only one arguement\n");
+        printf("std_lib_fmt_println_int only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
 
@@ -136,9 +195,9 @@ RVM_Value std_fmt_lib_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
     return ret;
 }
 
-RVM_Value std_fmt_lib_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_fmt_lib_println_double only one arguement\n");
+        printf("std_lib_fmt_println_double only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
 
@@ -151,9 +210,28 @@ RVM_Value std_fmt_lib_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
     return ret;
 }
 
-RVM_Value std_fmt_lib_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_fmt_lib_println_string only one arguement\n");
+        printf("std_lib_fmt_println_string only one arguement\n");
+        exit(ERROR_CODE_RUN_VM_ERROR);
+    }
+
+    RVM_Value ret;
+    ret.u.int_value = 0;
+
+    if (args->u.object == nullptr || args->u.object->u.string == nullptr || args->u.object->u.string->data == nullptr) {
+        printf("\n");
+    } else {
+        printf("%s\n", args->u.object->u.string->data);
+    }
+    fflush(stdout);
+
+    return ret;
+}
+
+RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        printf("std_lib_fmt_println only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
 
@@ -171,11 +249,11 @@ RVM_Value std_fmt_lib_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
 }
 
 // ------------------ std debug ------------------
-// std_debug_lib_debug_assert
+// std_lib_debug_debug_assert
 
-RVM_Value std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_debug_lib_debug_assert only one arguement\n");
+        printf("std_lib_debug_debug_assert only one arguement\n");
         exit(ERROR_CODE_RUN_VM_ERROR);
     }
 
@@ -193,9 +271,9 @@ RVM_Value std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
 }
 
 // ------------------ std vm ------------------
-// std_vm_lib_heap_size
+// std_lib_vm_heap_size
 
-RVM_Value std_vm_lib_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     RVM_Value ret;
     ret.type        = RVM_VALUE_TYPE_INT;
     ret.u.int_value = rvm_heap_size(rvm);
@@ -204,9 +282,9 @@ RVM_Value std_vm_lib_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count,
 }
 
 // ------------------ std reflect ------------------
-// std_reflect_lib_typeof
+// std_lib_reflect_typeof
 
-RVM_Value std_reflect_lib_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     std::string str = "";
 
     switch (args->type) {
@@ -250,9 +328,9 @@ RVM_Value std_reflect_lib_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
 }
 
 // ------------------ std math ------------------
-// std_math_lib_sqrt
+// std_lib_math_sqrt
 
-RVM_Value std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+RVM_Value std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     // if (arg_count != 1) {
     //     printf("native_proc_print only one arguement\n");
     //     exit(ERROR_CODE_RUN_VM_ERROR);

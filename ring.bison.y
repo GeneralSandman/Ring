@@ -709,7 +709,12 @@ parameter
     : TOKEN_VAR type_specifier IDENTIFIER
     {
         debug_log_with_green_coloar("[RULE::parameter]\t ");
-        $$ = create_parameter($2, $3);
+        $$ = create_parameter($2, $3, false);
+    }
+    | TOKEN_VAR type_specifier TOKEN_3DOT IDENTIFIER
+    {
+        debug_log_with_green_coloar("[RULE::parameter:TOKEN_3DOT]\t ");
+        $$ = create_parameter($2, $4, true);
     }
     ;
 

@@ -839,10 +839,11 @@ Statement* create_declaration_statement(TypeSpecifier* type, char* identifier, E
     return statement;
 }
 
-Parameter* create_parameter(TypeSpecifier* type, char* identifier) {
+Parameter* create_parameter(TypeSpecifier* type, char* identifier, bool is_variadic) {
     Parameter* parameter   = (Parameter*)malloc(sizeof(Parameter));
     parameter->line_number = package_unit_get_line_number();
     parameter->type        = type;
+    parameter->is_variadic = is_variadic;
     parameter->identifier  = identifier;
     parameter->next        = nullptr;
 

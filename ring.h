@@ -7,7 +7,7 @@
 #include <unordered_set>
 #include <vector>
 
-#define RING_VERSION "ring-v0.2.9-beta"
+#define RING_VERSION "ring-v0.2.9-beta Copyright (C) 2021-2023 ring.wiki, ZhenhuLi"
 
 
 typedef struct Ring_VirtualMachine      Ring_VirtualMachine;
@@ -1061,6 +1061,7 @@ struct Parameter {
     unsigned int   line_number;
 
     TypeSpecifier* type;
+    bool           is_variadic; // variadic parameter function can be called with any number of trailing arguments.
     char*          identifier;
     Parameter*     next;
 };
@@ -1585,7 +1586,7 @@ Statement*               create_declaration_statement(TypeSpecifier* type_specif
 
 Statement*               create_multi_declaration_statement(TypeSpecifier* type_specifier, Identifier* identifier_list, Expression* initializer_list);
 
-Parameter*               create_parameter(TypeSpecifier* type, char* identifier);
+Parameter*               create_parameter(TypeSpecifier* type, char* identifier, bool is_variadic);
 Parameter*               parameter_list_add_statement(Parameter* head, Parameter* parameter);
 
 Package*                 create_package_info(char* package_name);
@@ -1799,18 +1800,22 @@ void                     ring_bytecode_load(Package_Executer* executer, FILE* in
 
 // std_lib.cpp
 void                     register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count, int return_list_count);
-RVM_Value                std_fmt_lib_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value                std_fmt_lib_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value                std_fmt_lib_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value                std_fmt_lib_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
-RVM_Value                std_debug_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value                std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
-RVM_Value                std_vm_lib_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value                std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value                std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value                std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value                std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value                std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
-RVM_Value                std_reflect_lib_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value                std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
-RVM_Value                std_math_lib_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value                std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+
+RVM_Value                std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+
+RVM_Value                std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 // std_lib.cpp
 
 // utils.c
