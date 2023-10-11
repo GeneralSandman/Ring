@@ -5,10 +5,9 @@
 make install 安装标准库
 /usr/local/ring/std/ 为默认标准库的安装路径
 
-通过 更改Makefile 编译宏 来控制调试标准库
-RING_PACKAGE_STD_PAHT_FMT 即为调试标准库路径
-RING_PACKAGE_STD_PATH_DEBUG 即为调试标准库路径
+通过 更改Makefile 编译宏 DEBUG_STD_LIB 来控制调试标准库路径
 */
+
 #ifdef DEBUG_STD_LIB
 char RING_PACKAGE_STD_PATH_OS[]      = "/Users/bytedance/Desktop/Ring/std/os/";
 char RING_PACKAGE_STD_PATH_IO[]      = "/Users/bytedance/Desktop/Ring/std/io/";
@@ -159,6 +158,7 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
 // std_lib_fmt_println_int
 // std_lib_fmt_println_double
 // std_lib_fmt_println_string
+// std_lib_fmt_println
 
 RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {

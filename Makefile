@@ -63,7 +63,7 @@ CMD_INSTALL_DATA= $(CMD_INSTALL) -m 0644
 CMD_MKDIR= mkdir -p
 CMD_RM= rm -rf
 
-PLATS= linux macosx
+PLATS= linux macosx windows Darwim
 
 T_BIN= ring
 T_STD_PACKS= os io debug fmt math strings reflect
