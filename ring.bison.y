@@ -66,6 +66,7 @@ int yyerror(char const *str, ...);
 %token TOKEN_LAMBDA 
 %token TOKEN_RETURN
 %token TOKEN_DEFER
+%token TOKEN_RANGE
 
 %token TOKEN_CLASS
 %token TOKEN_PRIVATE
@@ -583,7 +584,10 @@ for_statement
     {
         debug_log_with_green_coloar("[RULE::for_statement]\t ");
         $$ = create_for_statement($3, $5, $7, $9);
-
+    }
+    | TOKEN_FOR TOKEN_LP  TOKEN_ASSIGN TOKEN_RANGE TOKEN_RP block 
+    {
+        debug_log_with_green_coloar("[RULE::for_statement:range]\t ");
     }
     ;
 
