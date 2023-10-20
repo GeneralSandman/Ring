@@ -18,7 +18,7 @@ AlignConsecutiveDeclarations: AcrossEmptyLinesAndComments
 AlignEscapedNewlines: Right
 
 # 水平对齐二元和三元表达式的操作数
-AlignOperands: true
+AlignOperands: DontAlign
 
 # 对齐连续的尾随的注释
 AlignTrailingComments: true
@@ -27,7 +27,7 @@ AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: false
 
 # 不允许短的块放在同一行
-AllowShortBlocksOnASingleLine: true
+AllowShortBlocksOnASingleLine: Never
 
 # 允许短的case标签放在同一行
 AllowShortCaseLabelsOnASingleLine: true
@@ -36,7 +36,7 @@ AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: None
 
 # 允许短的if语句保持在同一行
-AllowShortIfStatementsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: Never
 
 # 允许短的循环保持在同一行
 AllowShortLoopsOnASingleLine: true
