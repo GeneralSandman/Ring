@@ -15,3 +15,5 @@ global {
 
 }
 
+@native
+function exit(var int int_value);

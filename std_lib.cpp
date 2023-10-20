@@ -26,6 +26,14 @@ char RING_PACKAGE_STD_PATH_REFLECT[] = "/usr/local/lib/ring/std/reflect/";
 
 std::vector<StdPackageInfo> Std_Lib_List = {
     {
+        (char*)"os",
+        RING_PACKAGE_STD_PATH_OS,
+        std::vector<StdPackageNativeFunction>{
+            {(char*)"exit", std_lib_os_exit, 1, 0},
+        },
+    },
+
+    {
         (char*)"io",
         RING_PACKAGE_STD_PATH_IO,
         std::vector<StdPackageNativeFunction>{
@@ -105,6 +113,28 @@ void register_lib(Package_Executer* package_executer, char* func_name, RVM_Nativ
             function->u.native_func->return_list_count = return_list_count;
         }
     }
+}
+
+// ------------------ std os ------------------
+// std_lib_os_exit
+
+RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    debug_log_with_white_coloar("\t");
+
+    RVM_Value ret;
+
+    ret.u.int_value = 0;
+
+
+    if (arg_count != 1) {
+        printf("native_proc_exit only one arguement\n");
+        exit(ERROR_CODE_RUN_VM_ERROR);
+    }
+
+    // TODO: 暂时只打印int, 以后都强制转换成int_value
+    exit(args->u.int_value);
+
+    return ret;
 }
 
 // ------------------ std io ------------------
