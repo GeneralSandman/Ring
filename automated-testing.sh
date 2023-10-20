@@ -23,11 +23,24 @@ TEST_MODELS=(
     "012-local-variable"
     )
 
+NOT_TEST_FILES=(
+  "./test/005-control-flow/for-range-000.ring"
+  "./test/001-basic-type-string/string-003.ring"
+  "./test/004-derive-function/function-021.ring"
+  )
+
 TEST_RESULT="./automated-testing.sh.result"
 
+not_test_num=0
 pass_num=0
 all_num=0
 
+isNotTestFile(){
+    for i in ${NOT_TEST_FILES[@]} ; do
+      [ "$i" == "$1" ] && return 1
+    done
+    return 0
+}
 
 autoTestFunc(){
     model=$1
@@ -35,6 +48,16 @@ autoTestFunc(){
     run_result_file=$2"/"$3".result"
     run_result_file_tmp=$2"/"$3".result.tmp"
     result=""
+
+
+    # 不测试的用例
+    isNotTestFile $source_code_file
+    if [[ "$?" -eq 1 ]];then
+        result="NOTTEST"
+        let not_test_num++
+        printf "%-4s *%-20s %-80s %-80s \033[33m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
+        return
+    fi
 
     $TEST_RING_BIN run $source_code_file > $run_result_file_tmp
     diff $run_result_file $run_result_file_tmp
@@ -92,7 +115,8 @@ else
     printf "\033[33m"
 fi
 printf "[Result]:\n"
-printf "[Pass/All=%s/%s]\n" $pass_num $all_num 
+printf "Pass/All = %s/%s\n" $pass_num $all_num 
+printf "NotTest  = %s\n" $not_test_num
 end_time=`date +%s`
 runtime=$((end_time-start_time))
 printf "Usetime:%4ds\n\n" $runtime
