@@ -1,5 +1,5 @@
 TARGET= ring
-VERSION= ring-v0.2.9-beta
+VERSION= ring-v0.2.10-beta
 CC=g++
 OBJS = \
 	lex.yy.o\
@@ -25,7 +25,7 @@ OBJS = \
 
 # DEBUG_XX 来控制不同阶段的debug日志
 # DEBUG_FLEX 控制flex工具日志
-# DEBUG_BISON 控制bison工具日志，一般来说与DEBUG_FLEX 一块效果比价好，能看到哪一行
+# DEBUG_BISON 控制bison工具日志，一般来说与DEBUG_FLEX 一块效果比较好，能看到哪一行
 # DEUBG_CREATE_AST 控制生成AST日志
 # DEBUG_STD_LIB 控制 std lib 的 debug 路径
 # DEBUG_COMPILER_SUMMARY 控制编译阶段的信息：词法分析、语法分析、语意分析
