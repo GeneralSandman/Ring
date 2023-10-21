@@ -1474,11 +1474,27 @@ void ring_compile_error_report(ErrorReportContext* context);
     exit(1);
 
 
+/* --------------------
+ * string.cpp
+ * function definition
+ *
+ */
 Ring_String*             new_ring_string();
 void                     reset_ring_string(Ring_String* string);
 void                     ring_string_add_char(Ring_String* string, char ch);
 char*                    get_ring_string(Ring_String* string);
+void                     init_string_literal_buffer();
+void                     reset_string_literal_buffer();
+void                     string_literal_add_char(char ch);
+char*                    get_string_literal();
+// --------------------
 
+
+/* --------------------
+ * compiler.cpp
+ * function definition
+ *
+ */
 void                     ring_compiler_error(SyntaxType syntax_type, int exit);
 void                     ring_check_exit_immediately();
 CompilerEntry*           compiler_entry_create();
@@ -1508,18 +1524,14 @@ char*                    package_unit_get_current_line_content();
 void                     package_unit_reset_column_number();
 std::string              package_unit_get_line_content(unsigned int line_number);
 int                      package_unit_add_class_definition(ClassDefinition* class_definition);
+// --------------------
 
 
-void                     init_string_literal_buffer();
-void                     reset_string_literal_buffer();
-void                     string_literal_add_char(char ch);
-char*                    get_string_literal();
-
-Identifier*              new_identifier(IdentifierType type, char* name);
-Identifier*              identifier_list_add_item(Identifier* identifier_list, Identifier* identifier);
-FunctionReturnList*      create_function_return_list(VariableType variable_type);
-FunctionReturnList*      function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type);
-
+/* --------------------
+ * create_ast.cpp
+ * function definition
+ *
+ */
 void                     finish_global_block(Statement* global_statement_list);
 Statement*               statement_list_add_item(Statement* statement_list, Statement* statement);
 Statement*               create_statemen_from_expression(Expression* expression);
@@ -1551,6 +1563,9 @@ Expression*              expression_list_add_item(Expression* expression_list, E
 ArgumentList*            argument_list_add_item(ArgumentList* argument_list, ArgumentList* argument);
 ArgumentList*            create_argument_list_from_expression(Expression* expression);
 Identifier*              new_identifier(IdentifierType type, char* name);
+Identifier*              identifier_list_add_item(Identifier* identifier_list, Identifier* identifier);
+FunctionReturnList*      create_function_return_list(VariableType variable_type);
+FunctionReturnList*      function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type);
 Function*                new_function_definition(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
 Statement*               create_statement_from_if(IfStatement* if_statement);
 IfStatement*             create_if_statement(Expression* expression, Block* if_block, ElseIfStatement* elseif_statement_list, Block* else_block);
@@ -1574,17 +1589,15 @@ Block*                   start_new_block();
 Block*                   finish_block(Block* block, Statement* statement_list);
 DimensionExpression*     create_dimension_expression(char* literal_interface);
 DimensionExpression*     dimension_expression_list_add_item(DimensionExpression* list, DimensionExpression* item);
-// Identifier *            create_identifier(IdentifierType type, char *name);
-// char **identifier_list_add_item(char **identifier_list, char *identifier);
 
 TypeSpecifier*           create_type_specifier(Ring_BasicType basic_type);
 TypeSpecifier*           create_type_specifier_array(Ring_BasicType basic_type);
 TypeSpecifier*           create_class_type_specifier(char* identifier);
 Declaration*             create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
 Declaration*             declaration_list_add_item(Declaration* head, Declaration* declaration);
-Statement*               create_declaration_statement(TypeSpecifier* type_specifier, char* identifier, Expression* initializer);
 
 Statement*               create_multi_declaration_statement(TypeSpecifier* type_specifier, Identifier* identifier_list, Expression* initializer_list);
+Statement*               create_declaration_statement(TypeSpecifier* type_specifier, char* identifier, Expression* initializer);
 
 Parameter*               create_parameter(TypeSpecifier* type, char* identifier, bool is_variadic);
 Parameter*               parameter_list_add_statement(Parameter* head, Parameter* parameter);
@@ -1604,15 +1617,19 @@ MethodMember*            create_class_member_method(FunctionType type, char* ide
 AttributeInfo*           create_attribute_info(char* name);
 AttributeInfo*           attribute_info_add_item(AttributeInfo* list, AttributeInfo* item);
 
-
 Attribute                add_attribute(Attribute attribute, AttributeType type);
 int                      attribute_is_public(Attribute attribute);
 int                      attribute_is_private(Attribute attribute);
 int                      attribute_is_constructor(Attribute attribute);
 int                      attribute_is_destructor(Attribute attribute);
-// create_ast.c
+// --------------------
 
-// semantic_check.cpp
+
+/* --------------------
+ * semantic_check.cpp
+ * function definition
+ *
+ */
 void                     ring_compiler_semantic_analysis(Package* package);
 
 void                     ring_compiler_analysis_import_package(Package* package);
@@ -1621,9 +1638,14 @@ void                     ring_compiler_analysis_function(Package* package);
 void                     ring_compiler_analysis_class(Package* package);
 
 void                     ring_compiler_check_exit(Package* package);
-// semantic_check.cpp
+// --------------------
 
-// fix.c
+
+/* --------------------
+ * fix.cpp
+ * function definition
+ *
+ */
 void                     ring_compiler_fix_ast(Package* package);
 void                     ring_compiler_fix_ast(PackageUnit* package_unit);
 void                     fix_statement_list(Statement* statement_list, Block* block, Function* func);
@@ -1653,11 +1675,14 @@ void                     fix_ternary_condition_expression(TernaryExpression* ter
 void                     add_parameter_to_declaration(Parameter* parameter, Block* block);
 Declaration*             search_declaration(char* package_posit, char* identifier, Block* block);
 Function*                search_function(char* package_posit, char* identifier);
+// --------------------
 
-// generate.c
-// PackageExecuter* package_executer_create();
-// void             package_generate_vm_code(Package* package, PackageExecuter* executer);
 
+/* --------------------
+ * generate.cpp
+ * function definition
+ *
+ */
 Package_Executer*        package_executer_create(ExecuterEntry* executer_entry, char* package_name);
 void                     package_executer_dump(Package_Executer* package_executer);
 
@@ -1715,7 +1740,6 @@ int                      constant_pool_add_int(Package_Executer* executer, int i
 int                      constant_pool_add_double(Package_Executer* executer, double double_literal);
 int                      constant_pool_add_string(Package_Executer* executer, char* string_literal);
 
-
 unsigned int             opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer);
 void                     opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address);
 void                     opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer);
@@ -1723,10 +1747,14 @@ RVM_Opcode               convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpeci
 unsigned int             calc_runtime_stack_capacity(RVM_Byte* code_list, unsigned int code_size);
 void                     add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number, unsigned int start_pc, unsigned int opcode_size);
 void                     dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map);
-// generate.c
+// --------------------
 
-// execute.c
 
+/* --------------------
+ * execute.cpp
+ * function definition
+ *
+ */
 inline void              STACK_SET_INT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, int value);
 inline void              STACK_SET_DOUBLE_INDEX(Ring_VirtualMachine* rvm, unsigned int index, double value);
 inline void              STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, RVM_Object* value);
@@ -1794,15 +1822,24 @@ int                      rvm_string_cmp(RVM_Object* object1, RVM_Object* object2
 int                      rvm_heap_size(Ring_VirtualMachine* rvm);
 
 void                     debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base);
-// execute.c
+// --------------------
 
 
-// bytecode.c
+/* --------------------
+ * bytecode.cpp
+ * function definition
+ *
+ */
 void                     ring_bytecode_dump(Package_Executer* executer, FILE* output);
 void                     ring_bytecode_load(Package_Executer* executer, FILE* input);
-// bytecode.c
+// --------------------
 
-// std_lib.cpp
+
+/* --------------------
+ * std_lib.cpp
+ * function definition
+ *
+ */
 void                     register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count, int return_list_count);
 
 RVM_Value                std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
@@ -1822,22 +1859,36 @@ RVM_Value                std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned
 RVM_Value                std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value                std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-// std_lib.cpp
+// --------------------
 
-// utils.c
+
+/* --------------------
+ * utils.cpp
+ * function definition
+ *
+ */
 void                     ring_compiler_functions_dump(PackageUnit* package_unit);
 void                     ring_vm_constantpool_dump(Package_Executer* executer);
 void                     ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
 void                     ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
 std::vector<std::string> list_file(char* path);
-// utils.c
+// --------------------
 
-// man_help.cpp
+
+/* --------------------
+ * man_help.cpp
+ * function definition
+ *
+ */
 void                     ring_give_man_help(char* keyword);
-// man_help.cpp
+// --------------------
 
 
-// thread_pool.c
+/* --------------------
+ * thread_pool.c
+ * function definition
+ *
+ */
 typedef struct thpool_*  threadpool;
 threadpool               thpool_init(int num_threads);
 int                      thpool_add_work(threadpool, void (*function_p)(void*), void* arg_p);
@@ -1846,6 +1897,7 @@ void                     thpool_pause(threadpool);
 void                     thpool_resume(threadpool);
 void                     thpool_destroy(threadpool);
 int                      thpool_num_threads_working(threadpool);
-// thread_pool.c
+// --------------------
+
 
 #endif

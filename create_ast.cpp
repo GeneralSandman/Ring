@@ -739,7 +739,6 @@ DimensionExpression* dimension_expression_list_add_item(DimensionExpression* lis
     return list;
 }
 
-// -
 TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
     debug_log_with_yellow_coloar("basic_type:%d", basic_type);
 
@@ -798,7 +797,8 @@ Declaration* declaration_list_add_item(Declaration* head, Declaration* declarati
     }
 
     Declaration* pos = head;
-    for (; pos->next != nullptr; pos = pos->next) {}
+    for (; pos->next != nullptr; pos = pos->next) {
+    }
     pos->next = declaration;
     return head;
 }
@@ -856,7 +856,8 @@ Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter) {
     }
 
     Parameter* pos = head;
-    for (; pos->next != nullptr; pos = pos->next) {}
+    for (; pos->next != nullptr; pos = pos->next) {
+    }
     pos->next = parameter;
     return head;
 }
@@ -880,11 +881,6 @@ void import_package_list_add_item(char* package_name, char* rename) {
 
     get_package_unit()->import_package_list.push_back(import_package_info);
 }
-
-
-// create_ast function ********************************
-
-// create_ast function ********************************
 
 
 // -------------
@@ -924,7 +920,8 @@ ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclar
     }
 
     ClassMemberDeclaration* pos = list;
-    for (; pos->next != nullptr; pos = pos->next) {}
+    for (; pos->next != nullptr; pos = pos->next) {
+    }
 
     pos->next = decl;
 
@@ -1004,7 +1001,8 @@ AttributeInfo* attribute_info_add_item(AttributeInfo* list, AttributeInfo* item)
         return item;
     } else {
         AttributeInfo* pos = list;
-        for (; pos->next != nullptr; pos = pos->next) {}
+        for (; pos->next != nullptr; pos = pos->next) {
+        }
         pos->next = item;
         return list;
     }

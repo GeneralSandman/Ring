@@ -39,18 +39,6 @@ void                     ring_compile_error_report(ErrorReportContext* context) 
         exit(1);
     }
 }
-// Error Attention 某些错误提示可以精细化识别、提示
-//
-void ring_compiler_error(SyntaxType syntax_type, int need_exit) {
-    std::string message = "syntax error:\nRing Grammar Standard:\n\t" + std::string(SyntaxInfos[SYNTAX_VARIABLE_DEFINITION].bnf);
-    yyerror(message.c_str());
-    package_unit->compile_error_num++;
-    if (need_exit) {
-        // Donot exit when detect a error.
-        // Get next line and compile.
-        exit(1);
-    }
-}
 
 void ring_check_exit_immediately() {
     exit(1);

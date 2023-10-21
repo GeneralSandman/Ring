@@ -1603,8 +1603,8 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
           || opcode == RVM_CODE_PUSH_STATIC_BOOL
           || opcode == RVM_CODE_POP_STACK_BOOL
           || opcode == RVM_CODE_PUSH_STACK_BOOL
-          || opcode == RVM_CODE_PUSH_FIELD_BOOL
-          || opcode == RVM_CODE_POP_FIELD_BOOL)) {
+          || opcode == RVM_CODE_POP_FIELD_BOOL
+          || opcode == RVM_CODE_PUSH_FIELD_BOOL)) {
         fprintf(stderr, "convert_opcode_by_rvm_type error(opcode is valid:%d)\n", opcode);
         exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
         return RVM_CODE_UNKNOW;
@@ -1612,21 +1612,51 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
 
     switch (type->kind) {
     case RING_BASIC_TYPE_BOOL:
+        // RVM_CODE_POP_STATIC_BOOL
+        // RVM_CODE_PUSH_STATIC_BOOL
+        // RVM_CODE_POP_STACK_BOOL
+        // RVM_CODE_PUSH_STACK_BOOL
+        // RVM_CODE_POP_FIELD_BOOL
+        // RVM_CODE_PUSH_FIELD_BOOL
         return opcode;
         break;
     case RING_BASIC_TYPE_INT:
+        // RVM_CODE_POP_STATIC_INT
+        // RVM_CODE_PUSH_STATIC_INT
+        // RVM_CODE_POP_STACK_INT
+        // RVM_CODE_PUSH_STACK_INT
+        // RVM_CODE_POP_FIELD_INT
+        // RVM_CODE_PUSH_FIELD_INT
         return RVM_Opcode(opcode + 1);
         break;
     case RING_BASIC_TYPE_DOUBLE:
+        // RVM_CODE_POP_STATIC_DOUBLE
+        // RVM_CODE_PUSH_STATIC_DOUBLE
+        // RVM_CODE_POP_STACK_DOUBLE
+        // RVM_CODE_PUSH_STACK_DOUBLE
+        // RVM_CODE_POP_FIELD_DOUBLE
+        // RVM_CODE_PUSH_FIELD_DOUBLE
         return RVM_Opcode(opcode + 2);
         break;
     case RING_BASIC_TYPE_STRING:
+        // RVM_CODE_POP_STATIC_OBJECT
+        // RVM_CODE_PUSH_STATIC_OBJECT
+        // RVM_CODE_POP_STACK_OBJECT
+        // RVM_CODE_PUSH_STACK_OBJECT
         return RVM_Opcode(opcode + 3);
         break;
     case RING_BASIC_TYPE_CLASS:
+        // RVM_CODE_POP_STATIC_OBJECT
+        // RVM_CODE_PUSH_STATIC_OBJECT
+        // RVM_CODE_POP_STACK_OBJECT
+        // RVM_CODE_PUSH_STACK_OBJECT
         return RVM_Opcode(opcode + 3);
         break;
     case RING_BASIC_TYPE_ARRAY:
+        // RVM_CODE_POP_STATIC_OBJECT
+        // RVM_CODE_PUSH_STATIC_OBJECT
+        // RVM_CODE_POP_STACK_OBJECT
+        // RVM_CODE_PUSH_STACK_OBJECT
         return RVM_Opcode(opcode + 3);
         break;
 
