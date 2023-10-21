@@ -17,4 +17,5 @@
   - [**Ring**历史版本🗑](./markdown/Ring编译器设计/Ring历史版本.md)
   - [**Ring**2023路线图🏆](./markdown/Ring编译器设计/Ring-2023路线图.md)
   - [**Ring**2022路线图🏆](./markdown/Ring编译器设计/Ring-2022路线图.md)
+  - [**Ring**编译器开发规范🏆](./markdown/Ring编译器设计/Ring-%E7%BC%96%E8%AF%91%E5%99%A8%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83.md)v
   - [Contributer    🧠](./markdown/Ring编译器设计/Ringcontributer.md)
