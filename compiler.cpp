@@ -116,7 +116,7 @@ Package* package_create(CompilerEntry* compiler_entry, char* package_name, char*
     package->package_name            = package_name;
     package->package_path            = package_path;
 
-    package->source_file_list        = list_file(package->package_path);
+    package->source_file_list        = list_files_of_dir(package->package_path);
 
     package->global_declaration_list = std::vector<Declaration*>{};
     package->class_definition_list   = std::vector<ClassDefinition*>{};

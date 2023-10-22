@@ -152,14 +152,20 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
     }
 }
 
-std::vector<std::string> list_file(char* path) {
+/*
+ * List all all source file of ring std package
+ * which locates in directory.
+ *
+ * TODO: need to do same error handling.
+ */
+std::vector<std::string> list_files_of_dir(char* dir) {
     std::vector<std::string> file_list;
     DIR*                     dp = nullptr;
     struct dirent*           st;
     struct stat              sta;
     int                      ret            = 0;
     char                     tmp_name[1024] = {0};
-    dp                                      = opendir(path);
+    dp                                      = opendir(dir);
     if (dp == nullptr) {
         // TODO:
         printf("open dir error!!\n");
@@ -171,8 +177,8 @@ std::vector<std::string> list_file(char* path) {
             // 读取完毕
             break;
         }
-        strcpy(tmp_name, path);
-        if (path[strlen(path) - 1] != '/') // 判断路径名是否带/
+        strcpy(tmp_name, dir);
+        if (dir[strlen(dir) - 1] != '/') // 判断路径名是否带/
             strcat(tmp_name, "/");
         strcat(tmp_name, st->d_name); // 新文件路径名
         ret = stat(tmp_name, &sta);   // 查看目录下文件属性

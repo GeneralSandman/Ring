@@ -1871,7 +1871,7 @@ void                     ring_compiler_functions_dump(PackageUnit* package_unit)
 void                     ring_vm_constantpool_dump(Package_Executer* executer);
 void                     ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
 void                     ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
-std::vector<std::string> list_file(char* path);
+std::vector<std::string> list_files_of_dir(char* dir);
 // --------------------
 
 
