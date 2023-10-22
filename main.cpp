@@ -29,6 +29,9 @@ int main(int argc, char** argv) {
         exit(ERROR_CODE_COMMAND_ERROR);
     }
     command = argv[1];
+
+    // ring version
+    // ring help
     if (!strcmp(command, "version")) {
         printf("Ring version: %s \n", RING_VERSION);
         return 0;
@@ -56,15 +59,26 @@ int main(int argc, char** argv) {
         return 0;
     }
 
+
+    /*
+     * 初始化语法处理节点相关的struct
+     */
     CompilerEntry* compiler_entry         = compiler_entry_create();
-    // TODO: 目前main package 只能有一个源文件
+    // FIX: 目前main package 只能有一个源文件
+    // main package 源文件即为 ring run 指定的输入文件
     Package*       main_package           = package_create_input_file(compiler_entry, (char*)"main", file_name);
     compiler_entry->main_package          = main_package; // TODO: optimize the method of set main_package;
 
+    /*
+     * 初始化代码生成阶段相关的struct
+     */
     ExecuterEntry*    executer_entry      = executer_entry_create();
     Package_Executer* package_executer    = package_executer_create(executer_entry, main_package->package_name);
     executer_entry->main_package_executer = package_executer; // TODO: optimize the method of set main_package_executer;
 
+    /*
+     * 初始化虚拟机相关的struct
+     */
     Ring_VirtualMachine* ring_vm          = ring_virtualmachine_create();
 
 
@@ -75,7 +89,6 @@ int main(int argc, char** argv) {
     // Step-2: bison 语法分析，构建语法树
     // Step-3: 修正语法树
     package_compile(main_package);
-
 
     // Step-4: 生成虚拟机中间代码
     ring_generate_vm_code(compiler_entry, executer_entry);
@@ -90,5 +103,6 @@ int main(int argc, char** argv) {
 
     // Step-8: 运行虚拟机
     ring_execute_vm_code(ring_vm);
+
     return 0;
 }

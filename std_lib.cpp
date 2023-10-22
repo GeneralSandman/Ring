@@ -2,12 +2,10 @@
 #include <vector>
 
 /*
-make install 安装标准库
-/usr/local/ring/std/ 为默认标准库的安装路径
-
-通过 更改Makefile 编译宏 DEBUG_STD_LIB 来控制调试标准库路径
-*/
-
+ * make install 安装标准库
+ * /usr/local/ring/std/ 为默认标准库的安装路径
+ * 通过 更改Makefile 编译宏 DEBUG_STD_LIB 来控制调试标准库路径
+ */
 #ifdef DEBUG_STD_LIB
 char RING_PACKAGE_STD_PATH_OS[]      = "/Users/bytedance/Desktop/Ring/std/os/";
 char RING_PACKAGE_STD_PATH_IO[]      = "/Users/bytedance/Desktop/Ring/std/io/";
@@ -24,6 +22,17 @@ char RING_PACKAGE_STD_PATH_VM[]      = "/usr/local/lib/ring/std/vm/";
 char RING_PACKAGE_STD_PATH_REFLECT[] = "/usr/local/lib/ring/std/reflect/";
 #endif
 
+/*
+ * Ring compiler 当前支持的std packages.
+ *
+ * Std Package List:
+ *  os
+ *  io
+ *  fmt
+ *  debug
+ *  vm
+ *  reflect
+ */
 std::vector<StdPackageInfo> Std_Lib_List = {
     {
         (char*)"os",
@@ -78,6 +87,14 @@ std::vector<StdPackageInfo> Std_Lib_List = {
     },
 };
 
+/*
+ * 将Ring std 相关的 packages都进行一起编译，
+ * 生成vmcode
+ *
+ * 1. std packages 预先都会编译一遍
+ * 2. 暂时未对package做到 lazy load，即main-package import的时候才去编译
+ * 3. 目前 std packages 中相关函数 都是 @native的
+ */
 void compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry) {
     for (StdPackageInfo std_package_info : Std_Lib_List) {
         char* package_name = std_package_info.package_name;
@@ -96,7 +113,7 @@ void compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entr
         ring_generate_vm_code(std_package, package_executer);
         executer_entry->package_executer_list.push_back(package_executer);
 
-        // 注册native function
+        // registe @native function
         for (StdPackageNativeFunction native_function : std_package_info.native_function_list) {
             register_lib(package_executer, native_function.func_name, native_function.func_proc, native_function.arg_count, native_function.return_list_count);
         }
@@ -115,9 +132,11 @@ void register_lib(Package_Executer* package_executer, char* func_name, RVM_Nativ
     }
 }
 
-// ------------------ std os ------------------
-// std_lib_os_exit
-
+/*
+ * Package: os
+ * Function: exit
+ * Type: @native
+ */
 RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     debug_log_with_white_coloar("\t");
 
@@ -137,9 +156,12 @@ RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
     return ret;
 }
 
-// ------------------ std io ------------------
-// std_lib_io_write
 
+/*
+ * Package: io
+ * Function: write
+ * Type: @native
+ */
 RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     std::string str = "";
 
@@ -183,13 +205,11 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
     return ret;
 }
 
-// ------------------ std fmt ------------------
-// std_lib_fmt_println_bool
-// std_lib_fmt_println_int
-// std_lib_fmt_println_double
-// std_lib_fmt_println_string
-// std_lib_fmt_println
-
+/*
+ * Package: fmt
+ * Function: println_bool
+ * Type: @native
+ */
 RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
         printf("std_lib_fmt_println_bool only one arguement\n");
@@ -209,6 +229,11 @@ RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_co
     return ret;
 }
 
+/*
+ * Package: fmt
+ * Function: println_int
+ * Type: @native
+ */
 RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
         printf("std_lib_fmt_println_int only one arguement\n");
@@ -225,6 +250,11 @@ RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
     return ret;
 }
 
+/*
+ * Package: fmt
+ * Function: println_double
+ * Type: @native
+ */
 RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
         printf("std_lib_fmt_println_double only one arguement\n");
@@ -240,6 +270,11 @@ RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
     return ret;
 }
 
+/*
+ * Package: fmt
+ * Function: println_string
+ * Type: @native
+ */
 RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
         printf("std_lib_fmt_println_string only one arguement\n");
@@ -259,6 +294,11 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     return ret;
 }
 
+/*
+ * Package: fmt
+ * Function: println
+ * Type: @native
+ */
 RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
         printf("std_lib_fmt_println only one arguement\n");
@@ -278,9 +318,12 @@ RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, 
     return ret;
 }
 
-// ------------------ std debug ------------------
-// std_lib_debug_debug_assert
 
+/*
+ * Package: debug
+ * Function: debug_assert
+ * Type: @native
+ */
 RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
         printf("std_lib_debug_debug_assert only one arguement\n");
@@ -300,9 +343,12 @@ RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
     return ret;
 }
 
-// ------------------ std vm ------------------
-// std_lib_vm_heap_size
 
+/*
+ * Package: vm
+ * Function: heap_size
+ * Type: @native
+ */
 RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     RVM_Value ret;
     ret.type        = RVM_VALUE_TYPE_INT;
@@ -311,9 +357,12 @@ RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count,
     return ret;
 }
 
-// ------------------ std reflect ------------------
-// std_lib_reflect_typeof
 
+/*
+ * Package: reflect
+ * Function: typeof
+ * Type: @native
+ */
 RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     std::string str = "";
 
@@ -357,9 +406,12 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
     return ret;
 }
 
-// ------------------ std math ------------------
-// std_lib_math_sqrt
 
+/*
+ * Package: math
+ * Function: sqrt
+ * Type: @native
+ */
 RVM_Value std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     // if (arg_count != 1) {
     //     printf("native_proc_print only one arguement\n");
