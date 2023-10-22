@@ -1,6 +1,6 @@
 # Ring 编译器开发规范
 
-- 更新时间：```2023-10-21```
+- 更新时间：*2023-10-21*
 
 ## 1. Ring Compiler coding style Guidelines
 
@@ -11,14 +11,14 @@ Anyway, here goes:
 ### 1.1 Formatting with Clang-Format:
 
 - Before pushing code to the origin repository, ensure that it is formatted using Clang-Format. Clang-Format automatically applies predefined rules, enhancing code readability.
-- The `.clang-format` file defines the basic code style, including the indentation rules.
+- The *.clang-format* file defines the basic code style, including the indentation rules.
 
 ### 1.2 Struct Naming:
 
-- Don't use `class`, only use `struct`.
+- Don't use *class*, only use *struct*.
 - Use Upper Camel Case (PascalCase) for struct names. This convention capitalizes the first letter of each word in the name, without underscores or hyphens.
     - e.g. `struct PackageUnit{};`
-- Must use `typedef` keyword to redefine the name of struct type.
+- Must use *typedef* keyword to redefine the name of struct type.
     - You can omit keyword `struct` when you definite variable of `struct XX`.
     - e.g. `typedef struct PackageUnit PackageUnit;`
     - e.g. `PackageUnit main_unit;`
@@ -33,9 +33,9 @@ By following these guidelines, you can create a consistent and easily understand
 ### 1.4 Commenting
 
 
-Comments are good, but there is also a danger of over-commenting. NEVER try to explain HOW your code works in a comment: it's much better to write the code so that the working is obvious, and it's a waste of time to explain badly written code.
+Comments are good, but there is also a danger of over-commenting. **NEVER** try to explain **HOW** your code works in a comment: it's much better to write the code so that the working is obvious, and it's a waste of time to explain badly written code.
 
-Generally, you want your comments to tell WHAT your code does, not HOW.
+Generally, you want your comments to tell **WHAT** your code does, not HOW.
 
 The preferred style for long (multi-line) comments is:
 ```
