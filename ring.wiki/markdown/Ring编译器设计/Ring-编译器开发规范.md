@@ -53,3 +53,20 @@ The preferred style for long (multi-line) comments is:
 It's also important to comment data, whether they are basic types or derived types. To this end, use just one data declaration per line (no commas for multiple data declarations). This leaves you room for a small comment on each item, explaining its use.
 
 https://www.kernel.org/doc/html/latest/process/coding-style.html
+
+
+## 2.Ring Github Source Code Repository
+
+
+### 2.1 Repository Summary
+
+
+### 2.2 IDE
+
+### 2.2 How to update *complie_commands.json*
+
+
+### 2.3 How to use *VimSpector* Debugging
+
+
+
