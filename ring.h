@@ -140,6 +140,10 @@ struct Ring_VirtualMachine {
     unsigned int       class_size; // TODO: 删除掉
 
     RVM_DebugConfig*   debug_config;
+
+#ifdef DEBUG_RVM_INTERACTIVE
+    std::vector<std::string> stdout_logs;
+#endif
 };
 
 struct ImportPackageInfo {
@@ -1374,6 +1378,7 @@ struct BinaryChunk {
 
 #define CLEAR_SCREEN printf("\e[1;1H\e[2J")
 
+// move cursor to terminal (row, col) location
 #define MOVE_CURSOR(row, col) printf("%c[%d;%dH", 27, (row), (col))
 
 #define print_debug_info(format, ...) \
@@ -1871,6 +1876,7 @@ void                     ring_compiler_functions_dump(PackageUnit* package_unit)
 void                     ring_vm_constantpool_dump(Package_Executer* executer);
 void                     ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
 void                     ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
+void                     ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm);
 std::vector<std::string> list_files_of_dir(char* dir);
 // --------------------
 

@@ -217,14 +217,22 @@ RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_co
     }
 
     RVM_Value ret;
-    ret.u.int_value = 0;
+    ret.u.int_value     = 0;
+
+    char* output_buffer = (char*)malloc(6 * sizeof(char));
 
     if (args->u.int_value) {
-        printf("true\n");
+        snprintf(output_buffer, 6, "true\n");
     } else {
-        printf("false\n");
+        snprintf(output_buffer, 7, "false\n");
     }
+
+    printf(output_buffer, "");
     fflush(stdout);
+
+#ifdef DEBUG_RVM_INTERACTIVE
+    rvm->stdout_logs.push_back(output_buffer);
+#endif
 
     return ret;
 }
@@ -241,11 +249,19 @@ RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
     }
 
     RVM_Value ret;
-    ret.u.int_value = 0;
+    ret.u.int_value     = 0;
+
+    char* output_buffer = (char*)malloc(12 * sizeof(char));
 
     // TODO: 暂时只打印int, 以后都强制转换成int_value
-    printf("%d\n", args->u.int_value);
+    snprintf(output_buffer, 13, "%d\n", args->u.int_value);
+
+    printf(output_buffer, "");
     fflush(stdout);
+
+#ifdef DEBUG_RVM_INTERACTIVE
+    rvm->stdout_logs.push_back(output_buffer);
+#endif
 
     return ret;
 }
@@ -262,10 +278,18 @@ RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
     }
 
     RVM_Value ret;
-    ret.u.int_value = 0;
+    ret.u.int_value     = 0;
 
-    printf("%f\n", args->u.double_value);
+    char* output_buffer = (char*)malloc(1024 * sizeof(char));
+
+    snprintf(output_buffer, 1024, "%f\n", args->u.double_value);
+
+    printf(output_buffer, "");
     fflush(stdout);
+
+#ifdef DEBUG_RVM_INTERACTIVE
+    rvm->stdout_logs.push_back(output_buffer);
+#endif
 
     return ret;
 }
@@ -282,14 +306,30 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     }
 
     RVM_Value ret;
-    ret.u.int_value = 0;
+    ret.u.int_value            = 0;
 
-    if (args->u.object == nullptr || args->u.object->u.string == nullptr || args->u.object->u.string->data == nullptr) {
-        printf("\n");
+    unsigned int length        = 2;
+    char*        output_buffer = (char*)malloc(length * sizeof(char));
+
+    if (args->u.object == nullptr
+        || args->u.object->u.string == nullptr
+        || args->u.object->u.string->data == nullptr) {
+        snprintf(output_buffer, length, "\n");
     } else {
-        printf("%s\n", args->u.object->u.string->data);
+        length        = args->u.object->u.string->size + 2;
+        output_buffer = (char*)realloc(output_buffer, length * sizeof(char));
+        // printf("str:(%s)\n", args->u.object->u.string->data);
+        snprintf(output_buffer, length, "%s\n", args->u.object->u.string->data);
     }
+    // printf("length:%d\n", length);
+    output_buffer[length - 1] = '\0';
+
+    printf(output_buffer, "");
     fflush(stdout);
+
+#ifdef DEBUG_RVM_INTERACTIVE
+    rvm->stdout_logs.push_back(output_buffer);
+#endif
 
     return ret;
 }

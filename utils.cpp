@@ -152,6 +152,9 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
     }
 }
 
+void ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm) {
+}
+
 /*
  * List all all source file of ring std package
  * which locates in directory.

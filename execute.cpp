@@ -1466,6 +1466,25 @@ void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_
     ring_vm_dump_runtime_stack(rvm->runtime_stack, caller_stack_base, 1, 0);
     ring_vm_code_dump(function, code_list, code_size, pc, 1, 60);
 
+#ifdef DEBUG_RVM_INTERACTIVE
+    // 输出框的大小
+    MOVE_CURSOR(terminal_size.ws_row - 17, 120);
+    printf("--------------------- Output ---------------------\n");
+
+    int row = terminal_size.ws_row - 1;
+    for (int i = rvm->stdout_logs.size() - 1; i >= 0 && row > terminal_size.ws_row - 17; i--, row--) {
+        MOVE_CURSOR(row, 120);
+        printf("|[%d]\"%s\"\n", i, rvm->stdout_logs[i].c_str());
+    }
+    for (; row > terminal_size.ws_row - 17; row--) {
+        MOVE_CURSOR(row, 120);
+        printf("|\n");
+    }
+
+    MOVE_CURSOR(terminal_size.ws_row - 1, 120);
+    printf("--------------------------------------------------\n");
+#endif
+
     MOVE_CURSOR(terminal_size.ws_row - 7, 0);
     printf("----------Operation--------\n");
     printf("|press   enter: step into.|\n");
@@ -1474,6 +1493,7 @@ void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_
     printf("|        'o'  : step out. |\n");
     printf("|        'q'  : quit.     |\n");
     printf("---------------------------\n");
+
     char ch = getchar();
     if (ch == 'i') {
         rvm->debug_config->debug_mode = RVM_DEBUG_MODE_STEPINTO;
