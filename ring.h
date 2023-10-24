@@ -1891,6 +1891,17 @@ void                     ring_give_man_help(char* keyword);
 
 
 /* --------------------
+ * gc.cpp
+ * function definition
+ *
+ */
+void                     gc(Ring_VirtualMachine* rvm);
+void                     gc_mark(Ring_VirtualMachine* rvm);
+void                     gc_sweep(Ring_VirtualMachine* rvm);
+// --------------------
+
+
+/* --------------------
  * thread_pool.c
  * function definition
  *

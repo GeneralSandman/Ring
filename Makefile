@@ -15,6 +15,7 @@ OBJS = \
 	utils.o\
 	man_help.o\
 	std_lib.o\
+	gc.o\
 	main.o
 
 # CFLAGS -g 打开调试信息
@@ -180,6 +181,7 @@ error_msg.o: error_msg.cpp ring.h
 utils.o: utils.cpp ring.h
 man_help.o: man_help.cpp ring.h
 std_lib.o: std_lib.cpp ring.h
+gc.o: gc.cpp ring.h
 thread_pool.o: thread_pool.c ring.h
 main.o: main.cpp ring.h
 

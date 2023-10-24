@@ -355,8 +355,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             oper_num                             = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             index                                = oper_num; //  在操作符后边获取
 
-            //  TODO: 这里是个浅拷贝, 需要深拷贝
-            // runtime_static->data[index].u.object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            /*
+             * 浅copy
+             * runtime_static->data[index].u.object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+             */
+            // deep copy
             runtime_static->data[index].u.object = rvm_deep_copy_object(rvm, STACK_GET_OBJECT_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
@@ -411,8 +414,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_POP_STACK_OBJECT:
             caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            // TODO: 这里是浅拷贝, 也需要深度copy
-            STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_OBJECT_OFFSET(rvm, -1));
+
+            /*
+             * 浅copy
+             * STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_OBJECT_OFFSET(rvm, -1));
+             */
+            // deep copy
+            STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, rvm_deep_copy_object(rvm, STACK_GET_OBJECT_OFFSET(rvm, -1)));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
@@ -786,7 +794,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             runtime_stack->top_index--;
             if (rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE) {
-                invoke_native_function(rvm, &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index], argument_list_size);
+                invoke_native_function(rvm, &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
+                                       argument_list_size);
                 rvm->pc += 1;
             } else if (rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE) {
                 invoke_derive_function(rvm,
