@@ -1456,7 +1456,7 @@ struct BinaryChunk {
 #define debug_log_with_white_coloar(format, ...)
 #endif
 
-#ifdef DEBUG
+#ifdef DEBUG // TODO: 这个宏需要修正一下
 // debug 解释执行AST
 #define debug_log_with_blue_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_BLUE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)

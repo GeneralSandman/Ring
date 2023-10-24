@@ -399,7 +399,7 @@ void generate_code_from_function_definition(Package_Executer* executer, Function
     dest->u.derive_func->code_list = opcode_buffer->code_list;
     dest->u.derive_func->code_size = opcode_buffer->code_size;
 
-#ifdef DEBUG
+#ifdef DEBUG_GENERATE_DETAIL
     ring_vm_code_dump(dest, opcode_buffer->code_list, opcode_buffer->code_size, 0, 60, 1);
     dump_code_line_map(opcode_buffer->code_line_map);
 #endif
@@ -1421,12 +1421,6 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
     assert(array_index_expression->array_expression != nullptr);
     assert(array_index_expression->index_expression != nullptr);
 
-    // Expression* array = array_index_expression->array_expression;
-    Expression* index = array_index_expression->index_expression;
-    // FIXME: 这里处理 array_expression 不对，需要修正，目前暂时写死
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STATIC_OBJECT, 1, array_index_expression->line_number);
-    generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
-
     // TODO：需要处理一下字符串 通过索引寻址
     // 这里暂时只处理数组
     // 暂时只处理一维数组
@@ -1436,6 +1430,10 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
         printf("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
         exit(1);
     }
+
+    Expression* index = array_index_expression->index_expression;
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STATIC_OBJECT, declaration->variable_index, array_index_expression->line_number);
+    generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
 
 
     if (declaration->type->next->kind == RING_BASIC_TYPE_INT) {

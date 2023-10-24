@@ -31,8 +31,8 @@ OBJS = \
 # DEBUG_STD_LIB 控制 std lib 的 debug 路径
 # DEBUG_COMPILER_SUMMARY 控制编译阶段的信息：词法分析、语法分析、语意分析
 # DEBUG_COMPILER_DETAIL 控制编译阶段的信息：词法分析、语法分析、语意分析
-# DEBUG_GENERATE_SUMMARY 代码生成阶段 概要
-# DEBUG_GENERATE_DETAIL 代码生成阶段 详情
+# DEBUG_GENERATE_SUMMARY 代码生成阶段 概要: 只会打印出相关的package package_unit信息
+# DEBUG_GENERATE_DETAIL 代码生成阶段 详情: 会打印出package对应的字节码
 # DEBUG_EXEC_VM  vm运行阶段的调试信息
 # DEBUG_RVM_INTERACTIVE 控制调试RVM
 CFLAGS = -c -std=c++11 -Wall -Wno-unused-function -Wno-unneeded-internal-declaration \
