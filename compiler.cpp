@@ -95,7 +95,7 @@ void executer_entry_dump(ExecuterEntry* executer_entry) {
 
     printf("|Package_Executer:\n");
     for (Package_Executer* package_executer : executer_entry->package_executer_list) {
-        printf("|\t package:%s\n", package_executer->package_name);
+        printf("|\t package: %s%s%s\n", LOG_COLOR_GREEN, package_executer->package_name, LOG_COLOR_CLEAR);
     }
 
     printf("|MainPackage_Executer:\n");
@@ -215,11 +215,12 @@ void package_compile(Package* package) {
 void package_dump(Package* package) {
     printf("|------------------ Package-Dump-begin ------------------\n");
 
-    printf("|## package_name:%s,package_path:%s\n", package->package_name, package->package_path);
+    printf("|## package_name: %s%s%s\n", LOG_COLOR_GREEN, package->package_name, LOG_COLOR_CLEAR);
+    printf("|## package_path: %s%s%s\n", LOG_COLOR_GREEN, package->package_path, LOG_COLOR_CLEAR);
 
     printf("|## PackageUnit:\n");
     for (auto package_unit : package->package_unit_list) {
-        printf("|\tfile_name:%s\n", package_unit->current_file_name.c_str());
+        printf("|\tfile_name: %s%s%s\n", LOG_COLOR_GREEN, package_unit->current_file_name.c_str(), LOG_COLOR_CLEAR);
     }
 
     printf("|## Declaration:\n");
@@ -234,7 +235,7 @@ void package_dump(Package* package) {
 
     printf("|## Function:\n");
     for (auto function : package->function_list) {
-        printf("|\tfunction function_name:%s\n", function->function_name);
+        printf("|\tfunction_name: %s%s%s\n", LOG_COLOR_YELLOW, function->function_name, LOG_COLOR_CLEAR);
     }
 
     printf("|------------------ Package-Dump-end  ------------------\n");
@@ -310,7 +311,7 @@ void package_unit_compile(PackageUnit* package_unit) {
 void package_unit_dump(PackageUnit* package_unit) {
     printf("|------------------ PackageUnit-Dump-begin ------------------\n");
 
-    printf("|## file_name:%s\n", package_unit->current_file_name.c_str());
+    printf("|## file_name: %s%s%s\n", LOG_COLOR_GREEN, package_unit->current_file_name.c_str(), LOG_COLOR_CLEAR);
 
     printf("|## Declaration:\n");
     for (Declaration* decl : package_unit->global_declaration_list) {
@@ -324,7 +325,7 @@ void package_unit_dump(PackageUnit* package_unit) {
 
     printf("|## Function:\n");
     for (auto function : package_unit->function_list) {
-        printf("|\tfunction function_name:%s\n", function->function_name);
+        printf("|\tfunction_name: %s%s%s\n", LOG_COLOR_YELLOW, function->function_name, LOG_COLOR_CLEAR);
     }
 
     printf("|------------------ PackageUnit-Dump-end  ------------------\n");

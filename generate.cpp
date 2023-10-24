@@ -171,16 +171,16 @@ void package_executer_dump(Package_Executer* package_executer) {
     assert(package_executer != nullptr);
     printf("|------------------ Package_Executer-Dump-begin ------------------\n");
 
-    printf("|PackageIndex:%d\n", package_executer->package_index);
-    printf("|PackageName:%s\n", package_executer->package_name);
+    printf("|PackageName: %s%s%s\n", LOG_COLOR_GREEN, package_executer->package_name, LOG_COLOR_CLEAR);
+    printf("|PackageIndex: %d\n", package_executer->package_index);
 
     printf("|FunctionList:\n");
 
     for (int i = 0; i < package_executer->function_size; i++) {
-        printf("|\t func_name:%s\n", package_executer->function_list[i].func_name);
+        printf("|\t func_name: %s%s%s\n", LOG_COLOR_YELLOW, package_executer->function_list[i].func_name, LOG_COLOR_CLEAR);
     }
 
-    printf("|------------------ Package_Executer-Dump-begin ------------------\n\n");
+    printf("|------------------ Package_Executer-Dump-end   ------------------\n\n");
 }
 
 // 生成 RVM 虚拟机代码
