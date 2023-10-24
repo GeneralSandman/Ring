@@ -36,7 +36,6 @@ OBJS = \
 # DEBUG_RVM_INTERACTIVE 控制调试RVM
 CFLAGS = -c -std=c++11 -Wall -Wno-unused-function -Wno-unneeded-internal-declaration \
 				 # -g \
-				 -DDEBUG \
 				 -DDEBUG_FLEX1 \
 				 -DDEBUG_BISON1 \
 				 -DDEBUG_CREATE_AST1 \
