@@ -8,6 +8,7 @@ OBJS = \
 	create_ast.o\
 	semantic_check.o\
 	fix_ast.o\
+	vm.o\
 	generate.o\
 	execute.o\
 	compiler.o\
@@ -17,6 +18,14 @@ OBJS = \
 	std_lib.o\
 	gc.o\
 	main.o
+
+# 生成一个脚本用于 将 Ring 虚拟机指令集生成一个 markdown表格
+# Usage:
+# 	  make tool_gen_vmcode_doc && ./bin/tool_gen_vmcode_doc
+TOOL_GEN_VMCODE_DOC_TARGET=tool_gen_vmcode_doc
+TOOL_GEN_VMCODE_DOC_OBJS = \
+														vm.o\
+														tool_gen_vmcode_doc.o
 
 # CFLAGS -g 打开调试信息
 # CFLAGS -DDEBUG 开启 debug 编译信息
@@ -79,6 +88,10 @@ UNAME= uname
 $(TARGET):$(OBJS); $(shell if [ ! -e $(BIN) ];then mkdir -p $(BIN); fi)
 	$(CC) $(OBJS) -lm -pthread -o $(BIN)/$@
 	@echo "\033[32mBuild Ring SUCCESS:" $(BIN)/$@ "\033[0m"
+
+$(TOOL_GEN_VMCODE_DOC_TARGET):$(TOOL_GEN_VMCODE_DOC_OBJS); $(shell if [ ! -e $(BIN) ];then mkdir -p $(BIN); fi)
+	$(CC) $(TOOL_GEN_VMCODE_DOC_OBJS) -lm -pthread -o $(BIN)/$@
+	@echo "\033[32mBuild Tool Generate Vmcode Doc SUCCESS:" $(BIN)/$@ "\033[0m"
 
 install:
 	@echo "\033[34m[+]Install Bin\033[0m"
@@ -173,6 +186,7 @@ string.o: string.cpp
 create_ast.o: create_ast.cpp ring.h
 semantic_check.o: semantic_check.cpp ring.h
 fix_ast.o: fix_ast.cpp ring.h
+vm.o: vm.cpp ring.h
 generate.o: generate.cpp ring.h
 execute.o: execute.cpp ring.h
 bytecode.o: bytecode.cpp ring.h
@@ -184,4 +198,5 @@ std_lib.o: std_lib.cpp ring.h
 gc.o: gc.cpp ring.h
 thread_pool.o: thread_pool.c ring.h
 main.o: main.cpp ring.h
+tool_gen_vmcode_doc.o: tool_gen_vmcode_doc.cpp ring.h
 

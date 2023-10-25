@@ -441,20 +441,28 @@ struct RVM_OpcodeBuffer {
 };
 
 typedef enum {
-    OPCODE_OPERAND_TYPE_UNKNOW,
     OPCODE_OPERAND_TYPE_0BYTE, // 后边没有操作数
-    OPCODE_OPERAND_TYPE_1BYTE,
-    OPCODE_OPERAND_TYPE_2BYTE,
+    OPCODE_OPERAND_TYPE_1BYTE, // 后边1BYTE操作数
+    OPCODE_OPERAND_TYPE_2BYTE, // 后边2BYTE操作数
 } OpcodeOperandType;
 
 struct RVM_Opcode_Info {
     RVM_Byte          code;                    // 字节码枚举
     std::string       name;                    // 字节码字符串
-    OpcodeOperandType type;                    // 操作数的类型
+    OpcodeOperandType type;                    // 字节码后边的操作数类型
     int               runtime_stack_increment; // 对运行时栈空间的增长 可为负值
-    int               pc_increment;            // 读取完本字节码，程序计数器的增长 ，便于读取下一字节码
+    int               pc_increment;            // 读取完本字节码，程序计数器的增长，用于读取下一字节码
     // 有的指令 pc_increment 是可以确定的
     // 有的指令 类似于 jump  只能运行时确定，所以会先配置0
+
+    /*
+     * 字节码的注释, 放在结构体里边, 用于快速生成文档, 目前暂无使用意义, 后续放在debug控制
+     *
+     * usage_comment: 字节码注释
+     * stack_top_change: 对 runtime_stack 的操作变化
+     */
+    std::string       usage_comment;
+    std::string       stack_top_change;
 };
 
 typedef enum {

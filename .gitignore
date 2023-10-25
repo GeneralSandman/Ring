@@ -1,6 +1,7 @@
 *.o
 
 bin/ring
+bin/tool_gen_vmcode_doc
 
 lex.yy.c
 lex.yy.cpp
