@@ -58,6 +58,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
             {(char*)"println_int", std_lib_fmt_println_int, 1, 0},
             {(char*)"println_double", std_lib_fmt_println_double, 1, 0},
             {(char*)"println_string", std_lib_fmt_println_string, 1, 0},
+            {(char*)"println_pointer", std_lib_fmt_println_pointer, 1, 0},
             {(char*)"println", std_lib_fmt_println, 1, 0},
         },
     },
@@ -331,6 +332,77 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     rvm->stdout_logs.push_back(output_buffer);
 #endif
 
+    return ret;
+}
+
+/*
+ * Package: fmt
+ * Function: println_pointer
+ * Type: @native
+ *
+ * TODO: 后续废弃
+ */
+RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        printf("std_lib_fmt_println_pointer only one arguement\n");
+        exit(ERROR_CODE_RUN_VM_ERROR);
+    }
+
+    unsigned int length        = 20;
+    char*        output_buffer = (char*)malloc(length * sizeof(char));
+
+    /*
+     * 这个地方是不对的, 因为 args 已经位于栈空间了,
+     * 也就是说:
+     *  fmt::println_pointer(global_bool_value_1);
+     *  是先copy 到 runtime_stack中, 又计算的栈空间,
+     *
+     *  需要弄个单独的关键字去计算 pointer
+     *
+     */
+
+    switch (args->type) {
+    case RVM_VALUE_TYPE_BOOL:
+        snprintf(output_buffer, length, "%p\n", &(args->u.bool_value));
+        break;
+    case RVM_VALUE_TYPE_INT:
+        snprintf(output_buffer, length, "%p\n", &(args->u.int_value));
+        break;
+    case RVM_VALUE_TYPE_DOUBLE:
+        snprintf(output_buffer, length, "%p\n", &(args->u.double_value));
+        break;
+    case RVM_VALUE_TYPE_OBJECT:
+        switch (args->u.object->type) {
+        case RVM_OBJECT_TYPE_STRING:
+            snprintf(output_buffer, length, "%p\n", args->u.object->u.string->data);
+            break;
+        case RVM_OBJECT_TYPE_ARRAY:
+            snprintf(output_buffer, length, "%p\n", args->u.object->u.array->u.int_array);
+            break;
+        case RVM_OBJECT_TYPE_CLASS:
+            snprintf(output_buffer, length, "%p\n", args->u.object->u.array->u.double_array);
+            break;
+        default:
+            snprintf(output_buffer, length, "%p\n", (void*)0);
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+
+
+    output_buffer[length - 1] = '\0';
+
+    printf(output_buffer, "");
+    fflush(stdout);
+
+#ifdef DEBUG_RVM_INTERACTIVE
+    rvm->stdout_logs.push_back(output_buffer);
+#endif
+
+    RVM_Value ret;
+    ret.u.int_value = 0;
     return ret;
 }
 
