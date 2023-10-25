@@ -55,11 +55,11 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     STACK_SET_OBJECT_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
 
 
-#define STACK_COPY_INDEX(rvm, src_index, dest_index) \
-    ((rvm)->runtime_stack->data[(dest_index)] = (rvm)->runtime_stack->data[(src_index)])
+#define STACK_COPY_INDEX(rvm, dst_index, src_index) \
+    ((rvm)->runtime_stack->data[(dst_index)] = (rvm)->runtime_stack->data[(src_index)])
 
-#define STACK_COPY_OFFSET(rvm, src_offset, dest_offset) \
-    STACK_COPY_INDEX((rvm), (rvm)->runtime_stack->top_index + (src_offset), (rvm)->runtime_stack->top_index + (dest_offset))
+#define STACK_COPY_OFFSET(rvm, dst_offset, src_offset) \
+    STACK_COPY_INDEX((rvm), (rvm)->runtime_stack->top_index + (dst_offset), (rvm)->runtime_stack->top_index + (src_offset))
 
 // 从后边获取 1BYTE的操作数
 #define OPCODE_GET_1BYTE(p) \
@@ -762,7 +762,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // duplicate
         case RVM_CODE_DUPLICATE:
-            STACK_COPY_OFFSET(rvm, -1, 0);
+            STACK_COPY_OFFSET(rvm, 0, -1);
             runtime_stack->top_index++;
             rvm->pc++;
             break;
@@ -1070,7 +1070,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
     // init argument with parameter
     unsigned int local_variable_value_index = 0;
     for (; local_variable_value_index < arguement_list_size; local_variable_value_index++) {
-        STACK_COPY_INDEX(rvm, arguement_list_index + local_variable_value_index, rvm->runtime_stack->top_index + local_variable_value_index);
+        STACK_COPY_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_value_index, arguement_list_index + local_variable_value_index);
     }
 
     // 局部变量为object的情况
