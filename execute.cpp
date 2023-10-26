@@ -416,11 +416,16 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
 
             /*
+             * 这里到底是 浅拷贝 还是 深拷贝 还真得好好斟酌一下
+             */
+
+            /*
              * 浅copy
              * STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_OBJECT_OFFSET(rvm, -1));
              */
             // deep copy
-            STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, rvm_deep_copy_object(rvm, STACK_GET_OBJECT_OFFSET(rvm, -1)));
+            // STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, rvm_deep_copy_object(rvm, STACK_GET_OBJECT_OFFSET(rvm, -1)));
+            STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_OBJECT_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;

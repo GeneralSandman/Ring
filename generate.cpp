@@ -255,7 +255,7 @@ void generate_code_from_function_definition(Package_Executer* executer, Function
     dest->u.derive_func->code_list = opcode_buffer->code_list;
     dest->u.derive_func->code_size = opcode_buffer->code_size;
 
-#ifdef DEBUG_GENERATE_DETAIL
+#ifdef DEBUG_GENERATE_OUTPUT_VMCODE
     ring_vm_code_dump(dest, opcode_buffer->code_list, opcode_buffer->code_size, 0, 60, 1);
     dump_code_line_map(opcode_buffer->code_line_map);
 #endif
@@ -1287,8 +1287,14 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
         exit(1);
     }
 
-    Expression* index = array_index_expression->index_expression;
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STATIC_OBJECT, declaration->variable_index, array_index_expression->line_number);
+    Expression* index  = array_index_expression->index_expression;
+    RVM_Opcode  opcode = RVM_CODE_UNKNOW;
+    if (declaration->is_local) {
+        opcode = RVM_CODE_PUSH_STACK_OBJECT;
+    } else {
+        opcode = RVM_CODE_PUSH_STATIC_OBJECT;
+    }
+    generate_vmcode(executer, opcode_buffer, opcode, declaration->variable_index, array_index_expression->line_number);
     generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
 
 
