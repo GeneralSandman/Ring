@@ -21,6 +21,7 @@ function main() {
   fmt::println_int(global_int_array_0[9]);
 
   use_glocal_variable();
+  pass_int_array_to_fun(global_int_array_0);
 }
 
 function use_glocal_variable() {
@@ -33,4 +34,9 @@ function use_glocal_variable() {
 function return_int_array() -> (int[]) {
     var int[] local_int_array_0 = int[]{1,2,3,4,5,6,7,8,9,10};
     return local_int_array_0;
+}
+
+function pass_int_array_to_fun(var int[] array) {
+  fmt::println_pointer(array);
+
 }
