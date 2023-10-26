@@ -320,6 +320,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_PUSH_STRING:
             const_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            // TOOD: 这里的写法需要优化一下
             STACK_SET_OBJECT_OFFSET(rvm, 0,
                                     string_literal_to_rvm_object(rvm,
                                                                  constant_pool_list[const_index].u.string_value));
@@ -675,7 +676,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_NE_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) != 0);
+            STACK_GET_BOOL_OFFSET(rvm, -2) = (RVM_Bool)(rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) != 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -691,7 +692,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GT_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) > 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) > 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -707,7 +708,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GE_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) >= 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) >= 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -723,7 +724,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LT_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) < 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) < 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -739,7 +740,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LE_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (strcmp(STACK_GET_OBJECT_OFFSET(rvm, -2)->u.string->data, STACK_GET_OBJECT_OFFSET(rvm, -1)->u.string->data) <= 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) <= 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -1438,12 +1439,12 @@ int rvm_string_cmp(RVM_Object* object1, RVM_Object* object2) {
         }
     }
 
-
-    if (str1_len != str2_len) {
-        return str1_len == std::max(str1_len, str2_len);
-    }
-    if (str1_len == 0) {
+    if (str1_len == 0 && str2_len == 0) {
         return 0;
+    } else if (str1_len == 0 && str2_len != 0) {
+        return -1;
+    } else if (str1_len != 0 && str2_len == 0) {
+        return 1;
     }
 
     return strcmp(str1, str2);
