@@ -21,12 +21,14 @@ TEST_MODELS=(
     "010-main-entry" 
     "011-global-variable" 
     "012-local-variable"
+    "013-gc"
     )
 
 NOT_TEST_FILES=(
-  "./test/005-control-flow/for-range-000.ring"
-  "./test/001-basic-type-string/string-003.ring"
-  "./test/004-derive-function/function-021.ring"
+  "./test/005-control-flow/for-range-000.ring" # ring 还未完全支持, 暂不测试
+  "./test/001-basic-type-string/string-003.ring" # ring 还未完全支持, 暂不测试
+  "./test/004-derive-function/function-021.ring" # bug
+  "./test/013-gc/gc-000.ring" # ring 还未完全支持, 暂不测试
   )
 
 TEST_RESULT="./automated-testing.sh.result"
