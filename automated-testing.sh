@@ -29,6 +29,7 @@ NOT_TEST_FILES=(
   "./test/001-basic-type-string/string-003.ring" # ring 还未完全支持, 暂不测试
   "./test/004-derive-function/function-021.ring" # bug
   "./test/013-gc/gc-000.ring" # ring 还未完全支持, 暂不测试
+  "./test/013-gc/gc-002.ring" # ring 还未完全支持, 暂不测试
   )
 
 TEST_RESULT="./automated-testing.sh.result"

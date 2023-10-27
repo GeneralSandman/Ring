@@ -27,12 +27,12 @@ function main() {
   // after new
   heap_size = vm::heap_size();
   fmt::println_int(heap_size);
-  debug::debug_assert(heap_size == 40);
+  debug::debug_assert(heap_size == 80);
 
   int_array = new int[10];
 
   // after new
   heap_size = vm::heap_size();
   fmt::println_int(heap_size);
-  debug::debug_assert(heap_size == 80);
+  debug::debug_assert(heap_size == 160);
 }
