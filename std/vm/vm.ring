@@ -12,3 +12,6 @@ import {
 
 @native
 function heap_size() -> (int);
+
+@native
+function garbage_collect();

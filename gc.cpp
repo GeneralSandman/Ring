@@ -9,6 +9,7 @@
  */
 
 void gc(Ring_VirtualMachine* rvm) {
+    printf("garbage collection\n");
 }
 
 void gc_mark(Ring_VirtualMachine* rvm) {

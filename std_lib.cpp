@@ -76,6 +76,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         RING_PACKAGE_STD_PATH_VM,
         std::vector<StdPackageNativeFunction>{
             {(char*)"heap_size", std_lib_vm_heap_size, 0, 1},
+            {(char*)"garbage_collect", std_lib_vm_garbage_collect, 0, 0},
         },
     },
 
@@ -466,6 +467,19 @@ RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count,
     return ret;
 }
 
+/*
+ * Package: vm
+ * Function: heap_size
+ * Type: @native
+ */
+RVM_Value std_lib_vm_garbage_collect(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    RVM_Value ret;
+    ret.u.int_value = 0;
+
+    gc(rvm);
+
+    return ret;
+}
 
 /*
  * Package: reflect
