@@ -441,14 +441,25 @@ RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
     }
 
     RVM_Value ret;
-    ret.u.int_value = 0;
+    ret.u.int_value            = 0;
+
+    unsigned int length        = 20;
+    char*        output_buffer = (char*)malloc(length * sizeof(char));
+
+    memset(output_buffer, '\0', length);
 
     if (args->u.int_value) {
-        printf("debug_assert PASS\n");
+        strncpy(output_buffer, "debug_assert PASS\n", 18);
     } else {
-        printf("debug_assert FAILED\n");
+        strncpy(output_buffer, "debug_assert FAILED\n", 20);
     }
+
+    printf("%s", output_buffer);
     fflush(stdout);
+
+#ifdef DEBUG_RVM_INTERACTIVE
+    rvm->stdout_logs.push_back(output_buffer);
+#endif
 
     return ret;
 }
