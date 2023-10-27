@@ -309,23 +309,20 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     RVM_Value ret;
     ret.u.int_value            = 0;
 
-    unsigned int length        = 2;
+    unsigned int length        = 1;
     char*        output_buffer = (char*)malloc(length * sizeof(char));
 
     if (args->u.object == nullptr
         || args->u.object->u.string == nullptr
         || args->u.object->u.string->data == nullptr) {
-        snprintf(output_buffer, length, "\n");
     } else {
-        length        = args->u.object->u.string->size + 2;
+        length        = args->u.object->u.string->size + 1;
         output_buffer = (char*)realloc(output_buffer, length * sizeof(char));
-        // printf("str:(%s)\n", args->u.object->u.string->data);
-        snprintf(output_buffer, length, "%s\n", args->u.object->u.string->data);
+        strncpy(output_buffer, args->u.object->u.string->data, length - 1);
     }
-    // printf("length:%d\n", length);
-    output_buffer[length - 1] = '\0';
+    output_buffer[length - 1] = '\n';
 
-    printf(output_buffer, "");
+    printf("%.*s", length, output_buffer);
     fflush(stdout);
 
 #ifdef DEBUG_RVM_INTERACTIVE

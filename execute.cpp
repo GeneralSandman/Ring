@@ -1237,13 +1237,18 @@ RVM_String* rvm_new_empty_string(Ring_VirtualMachine* rvm, unsigned int capacity
     string->capacity   = capacity;
     string->data       = (char*)malloc(sizeof(char) * capacity);
 
+    memset(string->data, '\0', string->capacity);
+
     return string;
 }
 
 
 RVM_String* rvm_new_string(Ring_VirtualMachine* rvm, const char* string_literal) {
     // capacity 需要是2的倍数
-    size_t      size   = strlen(string_literal);
+    size_t size = 0;
+    if (string_literal != nullptr) {
+        size = strlen(string_literal);
+    }
 
     RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
     string->size       = size;
@@ -1252,6 +1257,7 @@ RVM_String* rvm_new_string(Ring_VirtualMachine* rvm, const char* string_literal)
     if (size > 0)
         string->data = (char*)malloc(sizeof(char) * size);
 
+    memset(string->data, '\0', string->capacity);
     strncpy(string->data, string_literal, size);
 
     return string;
