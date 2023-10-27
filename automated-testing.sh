@@ -33,6 +33,8 @@ NOT_TEST_FILES=(
 
 TEST_RESULT="./automated-testing.sh.result"
 
+TEST_LOOP_NUM=1 # 测试的轮数, 多次执行
+
 not_test_num=0
 pass_num=0
 all_num=0
@@ -92,7 +94,7 @@ printNotPassCase(){
 start_time=`date +%s`
 printf "%-4s *%-20s %-80s %-80s %s\n" num model source_code_file run_result_file result
 
-for i in {1..1}; do {
+for((test_loop=1;test_loop<=$TEST_LOOP_NUM;test_loop++)); do {
 
     for model in ${TEST_MODELS[@]} ; do
         source_file_path=$TEST_PATH"/"$model

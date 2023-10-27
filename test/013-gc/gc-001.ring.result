@@ -23,6 +23,7 @@ debug_assert PASS
 debug_assert PASS
 debug_assert PASS
 [function main]
+
 [function use_glocal_variable]
 debug_assert PASS
 debug_assert PASS
