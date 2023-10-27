@@ -420,13 +420,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
              * 这里到底是 浅拷贝 还是 深拷贝 还真得好好斟酌一下
              */
 
-            /*
-             * 浅copy
-             * STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_OBJECT_OFFSET(rvm, -1));
-             */
             // deep copy
-            // STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, rvm_deep_copy_object(rvm, STACK_GET_OBJECT_OFFSET(rvm, -1)));
-            STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_OBJECT_OFFSET(rvm, -1));
+            STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, rvm_deep_copy_object(rvm, STACK_GET_OBJECT_OFFSET(rvm, -1)));
+            // 浅copy
+            // STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_OBJECT_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
@@ -953,13 +950,13 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     // FIXME:
     /* unsigned int arguement_count = 0; */
 
-    RVM_CallInfo callinfo;
-    callinfo.magic_number         = CALL_INFO_MAGIC_NUMBER;
-    callinfo.caller_function      = *caller_function;
-    callinfo.caller_pc            = *pc;
-    callinfo.caller_stack_base    = *caller_stack_base;
-    callinfo.callee_argument_size = callee_function->parameter_size; // FIXME: 支持可变参数
-    store_callinfo(rvm->runtime_stack, &callinfo);
+    RVM_CallInfo* callinfo         = (RVM_CallInfo*)malloc(sizeof(RVM_CallInfo));
+    callinfo->magic_number         = CALL_INFO_MAGIC_NUMBER;
+    callinfo->caller_function      = *caller_function;
+    callinfo->caller_pc            = *pc;
+    callinfo->caller_stack_base    = *caller_stack_base;
+    callinfo->callee_argument_size = callee_function->parameter_size; // FIXME: 支持可变参数
+    store_callinfo(rvm->runtime_stack, callinfo);
 
 
     *caller_function   = callee_function;
@@ -1006,10 +1003,10 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     unsigned int old_return_value_list_index;
 
     rvm->runtime_stack->top_index -= return_value_list_size;
-    old_return_value_list_index = rvm->runtime_stack->top_index;
+    old_return_value_list_index       = rvm->runtime_stack->top_index;
 
 
-    RVM_CallInfo* callinfo;
+    RVM_CallInfo* callinfo            = nullptr;
     // FIXME: local_variable_size
     unsigned int  local_variable_size = 20;
     rvm->runtime_stack->top_index -= local_variable_size;
@@ -1045,6 +1042,11 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
  *
  */
 void store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo) {
+    runtime_stack->data[runtime_stack->top_index].type        = RVM_VALUE_TYPE_CALLINFO;
+    runtime_stack->data[runtime_stack->top_index].u.call_info = callinfo;
+    runtime_stack->top_index += CALL_INFO_SIZE_V2;
+    return;
+
     RVM_CallInfo* dest;
     dest = (RVM_CallInfo*)(&runtime_stack->data[runtime_stack->top_index]);
     memcpy(dest, callinfo, sizeof(RVM_CallInfo));
@@ -1059,6 +1061,10 @@ void store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo) {
  *
  */
 void restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo) {
+    runtime_stack->top_index -= CALL_INFO_SIZE_V2;
+    *callinfo = runtime_stack->data[runtime_stack->top_index].u.call_info;
+    return;
+
     runtime_stack->top_index -= CALL_INFO_SIZE;
     *callinfo = (RVM_CallInfo*)(&runtime_stack->data[runtime_stack->top_index]);
 }
@@ -1070,7 +1076,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
 
     // FIXME: 先忽略局部变量的类型，先用int
     unsigned int arguement_list_size        = function->parameter_size;
-    unsigned int arguement_list_index       = rvm->runtime_stack->top_index - CALL_INFO_SIZE - arguement_list_size;
+    unsigned int arguement_list_index       = rvm->runtime_stack->top_index - CALL_INFO_SIZE_V2 - arguement_list_size;
 
     // 通过实参 来初始化形参
     // init argument with parameter
@@ -1164,14 +1170,15 @@ RVM_Object* concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b
  *
  */
 RVM_Object* rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension) {
-    RVM_Object* object           = (RVM_Object*)malloc(sizeof(RVM_Object));
-    object->type                 = RVM_OBJECT_TYPE_ARRAY;
-    object->u.array              = (RVM_Array*)malloc(sizeof(RVM_Array));
+    // TODO: malloc object in heap
+    RVM_Object* object           = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
+
     object->u.array->type        = RVM_ARRAY_INT;
     object->u.array->size        = dimension;
     object->u.array->capacity    = dimension;
     object->u.array->u.int_array = (int*)malloc(sizeof(int) * dimension);
 
+    // TODO: 这里需要重写
     rvm->runtime_heap->size += sizeof(int) * dimension;
     return object;
 }
@@ -1298,11 +1305,15 @@ RVM_Object* rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type) 
     RVM_Object* object = (RVM_Object*)malloc(sizeof(RVM_Object));
     object->type       = type;
     object->prev       = nullptr;
-    object->next       = rvm->runtime_heap->list;
+    object->next       = nullptr;
 
-    if (rvm->runtime_heap->list != nullptr) {
-        rvm->runtime_heap->list->prev = object;
+    // add to list
+    RVM_Object* head   = rvm->runtime_heap->list;
+    object->next       = head;
+    if (head != nullptr) {
+        head->prev = object;
     }
+    rvm->runtime_heap->list = object;
 
     switch (type) {
     case RVM_OBJECT_TYPE_STRING:
@@ -1329,11 +1340,15 @@ RVM_Object* rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src) {
     RVM_Object* object = (RVM_Object*)malloc(sizeof(RVM_Object));
     object->type       = src->type;
     object->prev       = nullptr;
-    object->next       = rvm->runtime_heap->list;
+    object->next       = nullptr;
 
-    if (rvm->runtime_heap->list != nullptr) {
-        rvm->runtime_heap->list->prev = object;
+    // add to list
+    RVM_Object* head   = rvm->runtime_heap->list;
+    object->next       = head;
+    if (head != nullptr) {
+        head->prev = object;
     }
+    rvm->runtime_heap->list = object;
 
     switch (src->type) {
     case RVM_OBJECT_TYPE_STRING:
@@ -1390,11 +1405,14 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
     case RVM_ARRAY_INT:
         array->u.int_array = (int*)malloc(sizeof(int) * array->capacity);
 
+        rvm->runtime_heap->size += sizeof(int) * array->capacity;
         // TODO: 这样写有点丑, 优化一下
         memcpy(array->u.int_array, src->u.int_array, sizeof(int) * src->capacity);
         break;
     case RVM_ARRAY_DOUBLE:
         array->u.double_array = (double*)malloc(sizeof(double) * array->capacity);
+
+        rvm->runtime_heap->size += sizeof(double) * array->capacity;
 
         // TODO: 这样写有点丑, 优化一下
         memcpy(array->u.double_array, src->u.double_array, sizeof(double) * src->capacity);
@@ -1455,6 +1473,13 @@ int rvm_string_cmp(RVM_Object* object1, RVM_Object* object2) {
 
     return strcmp(str1, str2);
 }
+
+// 这里下边统一放 heap 分配内存相关
+// 上边内存分配的都要 delete
+
+
+// 这里下边统一放 heap 分配内存相关
+// 上边内存分配的都要 delete
 
 int rvm_heap_size(Ring_VirtualMachine* rvm) {
     // FIXME: 这里会溢出

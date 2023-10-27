@@ -98,6 +98,7 @@ typedef struct RVM_Function             RVM_Function;
 typedef struct RVM_Field                RVM_Field;
 typedef struct RVM_Method               RVM_Method;
 typedef struct RVM_Class                RVM_Class;
+typedef struct RVM_CallInfo             RVM_CallInfo;
 
 typedef unsigned char                   RVM_Byte;
 
@@ -109,6 +110,8 @@ typedef enum {
     RVM_VALUE_TYPE_DOUBLE,
     RVM_VALUE_TYPE_STRING,
     RVM_VALUE_TYPE_OBJECT,
+
+    RVM_VALUE_TYPE_CALLINFO,
 } RVM_Value_Type;
 
 typedef enum {
@@ -119,10 +122,12 @@ typedef enum {
 typedef struct {
     RVM_Value_Type type;
     union {
-        RVM_Bool    bool_value;
-        int         int_value;
-        double      double_value;
-        RVM_Object* object;
+        RVM_Bool      bool_value;
+        int           int_value;
+        double        double_value;
+        RVM_Object*   object;
+
+        RVM_CallInfo* call_info;
     } u;
 
 } RVM_Value;
@@ -616,16 +621,18 @@ typedef enum {
     IDENTIFIER_TYPE_FUNCTION,
 } IdentifierType;
 
-typedef struct {
+struct RVM_CallInfo {
     unsigned int  magic_number;
     RVM_Function* caller_function;
     unsigned int  caller_pc; // 调用者的返回地址
     unsigned int  caller_stack_base;
     unsigned int  callee_argument_size; // 函数调用的参数数量，可变参数
-} RVM_CallInfo;
+};
 
 #define CALL_INFO_MAGIC_NUMBER (0x8421) // 33852
 #define CALL_INFO_SIZE ((sizeof(RVM_CallInfo) - 1) / sizeof(RVM_Value) + 1)
+
+#define CALL_INFO_SIZE_V2 2
 
 struct Ring_String {
     char* buffer;
