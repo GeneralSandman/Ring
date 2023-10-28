@@ -1128,15 +1128,6 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
     }
 }
 
-RVM_Object* create_rvm_object() {
-    RVM_Object* object = (RVM_Object*)malloc(sizeof(RVM_Object));
-    object->type       = RVM_OBJECT_TYPE_UNKNOW;
-    object->u.string   = nullptr;
-    object->gc_mark    = GC_MARK_COLOR_WHITE;
-    object->prev       = nullptr;
-    object->next       = nullptr;
-    return object;
-}
 
 /*
  * 通过string常量 去创建一个临时变量
@@ -1149,9 +1140,25 @@ RVM_Object* create_rvm_object() {
  *
  */
 RVM_Object* string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* string_literal) {
-    RVM_Object* object = create_rvm_object();
-    object->type       = RVM_OBJECT_TYPE_STRING;
-    object->u.string   = rvm_new_string(rvm, string_literal);
+    RVM_Object* object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_STRING);
+
+    size_t      length = 0;
+    if (string_literal != nullptr) {
+        length = strlen(string_literal);
+    }
+
+    // capacity 需要是2的倍数
+    object->u.string->size     = length;
+    object->u.string->capacity = length;
+    object->u.string->data     = nullptr;
+    if (length > 0) {
+        object->u.string->data = (char*)malloc(sizeof(char) * length);
+        rvm->runtime_heap->size += sizeof(char) * length;
+    }
+
+    memset(object->u.string->data, '\0', length);
+    strncpy(object->u.string->data, string_literal, length);
+
     return object;
 }
 
@@ -1167,9 +1174,34 @@ RVM_Object* string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* s
  *
  */
 RVM_Object* concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b) {
-    RVM_Object* object = create_rvm_object();
-    object->type       = RVM_OBJECT_TYPE_STRING;
-    object->u.string   = rvm_concat_new_string(rvm, a->u.string, b->u.string);
+    assert(a != nullptr);
+    assert(b != nullptr);
+    assert(a->u.string != nullptr);
+    assert(b->u.string != nullptr);
+
+    RVM_Object* object   = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_STRING);
+
+    size_t      sum_size = 0;
+    sum_size += a->u.string->size;
+    sum_size += b->u.string->size;
+
+    // capacity 需要是2的倍数
+
+    object->u.string->size     = 0;
+    object->u.string->capacity = sum_size;
+    object->u.string->data     = nullptr;
+    if (sum_size > 0) {
+        object->u.string->data = (char*)malloc(sizeof(char) * sum_size);
+        rvm->runtime_heap->size += sizeof(char) * sum_size;
+    }
+
+    memset(object->u.string->data, '\0', sum_size);
+
+    strncpy(object->u.string->data, a->u.string->data, a->u.string->size);
+    strncpy(object->u.string->data + a->u.string->size, b->u.string->data, b->u.string->size);
+    object->u.string->size = sum_size;
+
+
     return object;
 }
 
@@ -1209,6 +1241,7 @@ RVM_Object* rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimensio
     object->u.array->capacity       = dimension;
     object->u.array->u.double_array = (double*)malloc(sizeof(double) * dimension);
 
+    // TODO: 这里需要重写
     rvm->runtime_heap->size += sizeof(double) * dimension;
     return object;
 }
@@ -1237,76 +1270,6 @@ void rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int inde
     *value = object->u.array->u.double_array[index];
 }
 
-/*
- * new empty string in heap
- *
- * 1. In heap, 所以生命周期是由gc来控制的
- *
- * 2. TODO: Capacity 必须是2的倍数
- */
-RVM_String* rvm_new_empty_string(Ring_VirtualMachine* rvm, unsigned int capacity) {
-    if (capacity == 0) {
-        capacity = 4;
-    }
-
-    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
-    string->size       = 0;
-    string->capacity   = capacity;
-    string->data       = (char*)malloc(sizeof(char) * capacity);
-
-    memset(string->data, '\0', string->capacity);
-
-    return string;
-}
-
-
-RVM_String* rvm_new_string(Ring_VirtualMachine* rvm, const char* string_literal) {
-    // capacity 需要是2的倍数
-    size_t size = 0;
-    if (string_literal != nullptr) {
-        size = strlen(string_literal);
-    }
-
-    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
-    string->size       = size;
-    string->capacity   = size;
-    string->data       = nullptr;
-    if (size > 0)
-        string->data = (char*)malloc(sizeof(char) * size);
-
-    memset(string->data, '\0', string->capacity);
-    strncpy(string->data, string_literal, size);
-
-    return string;
-}
-
-/*
- * 往 string 中 append string
- *
- * 1. TODO: 要检查string的合法性
- * 2. TODO: 内存要自动增长
- *
- */
-void rvm_string_append(RVM_String* string, const char* src, unsigned int size) {
-    strncpy(string->data + string->size, src, size);
-    string->size += size;
-}
-
-RVM_String* rvm_concat_new_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b) {
-    size_t size = 0;
-    if (a != nullptr) {
-        size += a->size;
-    }
-    if (b != nullptr) {
-        size += b->size;
-    }
-
-    RVM_String* result = rvm_new_empty_string(rvm, size);
-    rvm_string_append(result, a->data, a->size);
-    rvm_string_append(result, b->data, b->size);
-
-    return result;
-}
 
 RVM_Object* rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type) {
     assert(rvm != nullptr);
@@ -1394,6 +1357,10 @@ RVM_String* rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src) {
     string->capacity   = src->capacity;
     string->data       = (char*)malloc(sizeof(char) * src->capacity);
     memcpy(string->data, src->data, src->capacity);
+
+    // TODO: rvm->runtime_heap->size 的变化需要统一一下
+    rvm->runtime_heap->size += sizeof(char) * src->capacity;
+
     return string;
 }
 
@@ -1488,6 +1455,88 @@ int rvm_string_cmp(RVM_Object* object1, RVM_Object* object2) {
 
 // 这里下边统一放 heap 分配内存相关
 // 上边内存分配的都要 delete
+
+/*
+ * 释放 object 的内存空间，
+ * 但是不会删除 heap list.
+ */
+void rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
+    assert(object != nullptr);
+
+    unsigned int free_size = 0;
+    switch (object->type) {
+    case RVM_OBJECT_TYPE_STRING:
+        free_size = rvm_free_string(rvm, object->u.string);
+        break;
+    case RVM_OBJECT_TYPE_ARRAY:
+        free_size = rvm_free_array(rvm, object->u.array);
+        break;
+    case RVM_OBJECT_TYPE_CLASS:
+        free_size = rvm_free_class_object(rvm, object->u.class_object);
+        break;
+    default:
+        break;
+    }
+
+    rvm->runtime_heap->size -= free_size;
+
+    if (object->prev != nullptr) {
+        object->prev->next = object->next;
+    }
+    if (object->next != nullptr) {
+        object->next->prev = object->prev;
+    }
+    // new head
+    if (object->prev == nullptr) {
+        rvm->runtime_heap->list = object->next;
+    }
+
+    free(object);
+}
+
+unsigned int rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string) {
+    assert(string != nullptr);
+
+    if (string->data != nullptr) {
+        free(string->data);
+    }
+    unsigned int free_size = string->capacity * sizeof(char);
+    free(string);
+    return free_size;
+}
+
+unsigned int rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
+    assert(array != nullptr);
+
+    unsigned int free_size = 0;
+
+    switch (array->type) {
+    case RVM_ARRAY_INT:
+        if (array->u.int_array != nullptr) {
+            free(array->u.int_array);
+            free_size = array->capacity * sizeof(int);
+        }
+        break;
+    case RVM_ARRAY_DOUBLE:
+        if (array->u.double_array != nullptr) {
+            free(array->u.double_array);
+            free_size = array->capacity * sizeof(double);
+        }
+        break;
+    default:
+        break;
+    }
+
+    free(array);
+    return free_size;
+}
+
+unsigned int rvm_free_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* class_object) {
+    unsigned int free_size = 0;
+    runtime_err_log("rvm free class-object failed");
+    exit(1);
+    return free_size;
+}
 
 
 // 这里下边统一放 heap 分配内存相关

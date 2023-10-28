@@ -1821,7 +1821,6 @@ void                     store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_Cal
 void                     restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo);
 void                     init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function* function);
 
-RVM_Object*              create_rvm_object();
 RVM_Object*              string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* string_literal);
 RVM_Object*              concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b);
 
@@ -1831,11 +1830,6 @@ RVM_Object*              rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int
 RVM_Object*              rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
 void                     rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
 void                     rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
-
-RVM_String*              rvm_new_empty_string(Ring_VirtualMachine* rvm, unsigned int capacity);
-RVM_String*              rvm_new_string(Ring_VirtualMachine* rvm, const char* string_literal);
-void                     rvm_string_append(RVM_String* string, const char* src, unsigned int size);
-RVM_String*              rvm_concat_new_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b);
 
 RVM_Object*              rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type);
 RVM_Object*              rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src);
@@ -1847,6 +1841,12 @@ RVM_Array*               rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array
 RVM_ClassObject*         rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
 RVM_ClassObject*         rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
 int                      rvm_string_cmp(RVM_Object* object1, RVM_Object* object2);
+
+void                     rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object);
+unsigned int             rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
+unsigned int             rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array);
+unsigned int             rvm_free_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* class_object);
+
 
 int                      rvm_heap_size(Ring_VirtualMachine* rvm);
 

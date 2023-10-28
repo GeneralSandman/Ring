@@ -109,45 +109,16 @@ void gc_mark(Ring_VirtualMachine* rvm) {
 }
 
 void gc_sweep(Ring_VirtualMachine* rvm) {
-    RVM_Object* head   = rvm->runtime_heap->list;
-    RVM_Object* sentry = (RVM_Object*)malloc(sizeof(RVM_Object));
-    sentry->prev       = nullptr;
-    sentry->next       = head;
-    if (head != nullptr) {
-        head->prev = sentry;
-    }
-
-
-    RVM_Object* prev = sentry;
+    RVM_Object* head = rvm->runtime_heap->list;
     RVM_Object* next = nullptr;
     for (; head != nullptr; head = next) {
         next = head->next;
-        prev = head->prev;
 
         if (head->gc_mark == GC_MARK_COLOR_BLACK) {
+            head->gc_mark = GC_MARK_COLOR_WHITE;
             // 不需要被清除
             continue;
         }
-        head->gc_mark = GC_MARK_COLOR_WHITE;
-
-        prev->next    = next;
-        if (next != nullptr) {
-            next->prev = prev;
-        }
-
-        /*
-         * 这里有个遗留问题
-         *
-         * 1. free object 并没有把实际的内存释放掉
-         *      free object->u.array
-         *      free object->u.string
-         *      free object->u.class_object
-         * 2. free 过程中 需要更新 heap_size
-         */
-        free(head);
+        rvm_free_object(rvm, head);
     }
-
-
-    rvm->runtime_heap->list = sentry->next;
-    free(sentry);
 }
