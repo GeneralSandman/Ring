@@ -382,6 +382,12 @@ struct RVM_ClassObject {
     RVM_Value*       field;
 };
 
+typedef enum {
+    GC_MARK_COLOR_UNKNOW,
+    GC_MARK_COLOR_WHITE, // 需要被回收
+    GC_MARK_COLOR_BLACK, // 不需要被回收
+} GC_Mark;
+
 struct RVM_Object {
     RVM_Object_Type type;
     union {
@@ -389,6 +395,9 @@ struct RVM_Object {
         RVM_Array*       array;
         RVM_ClassObject* class_object;
     } u;
+
+    GC_Mark     gc_mark;
+
     RVM_Object* prev;
     RVM_Object* next;
 };
@@ -1913,6 +1922,7 @@ void                     ring_give_man_help(char* keyword);
  *
  */
 void                     gc(Ring_VirtualMachine* rvm);
+void                     gc_summary(Ring_VirtualMachine* rvm);
 void                     gc_mark(Ring_VirtualMachine* rvm);
 void                     gc_sweep(Ring_VirtualMachine* rvm);
 // --------------------

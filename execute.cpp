@@ -214,6 +214,8 @@ RVM_Object* new_string_object() {
     object->u.string->size     = 0;
     object->u.string->capacity = 0;
     object->u.string->data     = nullptr;
+    object->gc_mark            = GC_MARK_COLOR_WHITE;
+
 
     return object;
 }
@@ -241,6 +243,8 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
     object->u.class_object->class_def   = class_definition;
     object->u.class_object->field_count = field_count;
     object->u.class_object->field       = field;
+    object->gc_mark                     = GC_MARK_COLOR_WHITE;
+
 
     memset(field, 0, field_count * sizeof(RVM_Value));
 
@@ -361,6 +365,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
              * runtime_static->data[index].u.object = STACK_GET_OBJECT_OFFSET(rvm, -1);
              */
             // deep copy
+            // runtime_static->data[index] 的设置方式需要重新写一下, 不然容易遗忘
+            runtime_static->data[index].type     = RVM_VALUE_TYPE_OBJECT;
             runtime_static->data[index].u.object = rvm_deep_copy_object(rvm, STACK_GET_OBJECT_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
@@ -1124,6 +1130,11 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
 
 RVM_Object* create_rvm_object() {
     RVM_Object* object = (RVM_Object*)malloc(sizeof(RVM_Object));
+    object->type       = RVM_OBJECT_TYPE_UNKNOW;
+    object->u.string   = nullptr;
+    object->gc_mark    = GC_MARK_COLOR_WHITE;
+    object->prev       = nullptr;
+    object->next       = nullptr;
     return object;
 }
 
@@ -1191,9 +1202,8 @@ RVM_Object* rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension) 
  *
  */
 RVM_Object* rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimension) {
-    RVM_Object* object              = (RVM_Object*)malloc(sizeof(RVM_Object));
-    object->type                    = RVM_OBJECT_TYPE_ARRAY;
-    object->u.array                 = (RVM_Array*)malloc(sizeof(RVM_Array));
+    RVM_Object* object              = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
+
     object->u.array->type           = RVM_ARRAY_DOUBLE;
     object->u.array->size           = dimension;
     object->u.array->capacity       = dimension;
@@ -1304,6 +1314,7 @@ RVM_Object* rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type) 
 
     RVM_Object* object = (RVM_Object*)malloc(sizeof(RVM_Object));
     object->type       = type;
+    object->gc_mark    = GC_MARK_COLOR_WHITE;
     object->prev       = nullptr;
     object->next       = nullptr;
 
@@ -1339,6 +1350,7 @@ RVM_Object* rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src) {
 
     RVM_Object* object = (RVM_Object*)malloc(sizeof(RVM_Object));
     object->type       = src->type;
+    object->gc_mark    = GC_MARK_COLOR_WHITE;
     object->prev       = nullptr;
     object->next       = nullptr;
 
