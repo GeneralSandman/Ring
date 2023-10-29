@@ -467,6 +467,16 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         // array
+        case RVM_CODE_PUSH_ARRAY_BOOL: {
+            object     = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index      = STACK_GET_INT_OFFSET(rvm, -1);
+            bool value = 0;
+            rvm_array_get_bool(rvm, object, index, &value);
+            runtime_stack->top_index -= 2;
+            STACK_SET_BOOL_OFFSET(rvm, 0, (RVM_Bool)((int)value));
+            runtime_stack->top_index++;
+            rvm->pc += 1;
+        } break;
         case RVM_CODE_PUSH_ARRAY_INT: {
             object    = STACK_GET_OBJECT_OFFSET(rvm, -2);
             index     = STACK_GET_INT_OFFSET(rvm, -1);
@@ -843,6 +853,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         // array
+        case RVM_CODE_NEW_ARRAY_BOOL:
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object   = rvm_new_array_bool(rvm, oper_num);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+            break;
         case RVM_CODE_NEW_ARRAY_INT:
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object   = rvm_new_array_int(rvm, oper_num);
@@ -859,6 +876,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_NEW_ARRAY_OBJECT:
             break;
+        case RVM_CODE_NEW_ARRAY_LITERAL_BOOL: {
+            int size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object   = rvm_new_array_literal_bool(rvm, size);
+            runtime_stack->top_index -= size;
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+        } break;
         case RVM_CODE_NEW_ARRAY_LITERAL_INT: {
             int size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object   = rvm_new_array_literal_int(rvm, size);
@@ -1212,6 +1237,27 @@ RVM_Object* concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b
  * TODO: support multi-dimensional array
  *
  */
+RVM_Object* rvm_new_array_bool(Ring_VirtualMachine* rvm, unsigned int dimension) {
+    // TODO: malloc object in heap
+    RVM_Object* object            = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
+
+    object->u.array->type         = RVM_ARRAY_BOOL;
+    object->u.array->length       = dimension;
+    object->u.array->capacity     = dimension;
+    object->u.array->u.bool_array = (bool*)malloc(sizeof(bool) * dimension);
+
+    // TODO: 这里需要重写
+    rvm->runtime_heap->alloc_size += sizeof(bool) * dimension;
+    return object;
+}
+
+/*
+ * create array in heap
+ *
+ * support create one-dimensional array only.
+ * TODO: support multi-dimensional array
+ *
+ */
 RVM_Object* rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension) {
     // TODO: malloc object in heap
     RVM_Object* object           = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
@@ -1246,6 +1292,14 @@ RVM_Object* rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimensio
     return object;
 }
 
+RVM_Object* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size) {
+    RVM_Object* object = rvm_new_array_bool(rvm, size);
+    for (int i = 0; i < size; i++) {
+        object->u.array->u.bool_array[i] = STACK_GET_INT_OFFSET(rvm, -size + i);
+    }
+    return object;
+}
+
 RVM_Object* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size) {
     RVM_Object* object = rvm_new_array_int(rvm, size);
     for (int i = 0; i < size; i++) {
@@ -1260,6 +1314,10 @@ RVM_Object* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size) {
         object->u.array->u.double_array[i] = STACK_GET_DOUBLE_OFFSET(rvm, -size + i);
     }
     return object;
+}
+
+void rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value) {
+    *value = object->u.array->u.bool_array[index];
 }
 
 void rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value) {
@@ -1381,6 +1439,13 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
     array->capacity  = src->capacity;
 
     switch (src->type) {
+    case RVM_ARRAY_BOOL:
+        array->u.bool_array = (bool*)malloc(sizeof(bool) * array->capacity);
+
+        rvm->runtime_heap->alloc_size += sizeof(bool) * array->capacity;
+        // TODO: 这样写有点丑, 优化一下
+        memcpy(array->u.bool_array, src->u.bool_array, sizeof(bool) * src->capacity);
+        break;
     case RVM_ARRAY_INT:
         array->u.int_array = (int*)malloc(sizeof(int) * array->capacity);
 
@@ -1511,6 +1576,12 @@ unsigned int rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
     unsigned int free_size = 0;
 
     switch (array->type) {
+    case RVM_ARRAY_BOOL:
+        if (array->u.bool_array != nullptr) {
+            free(array->u.bool_array);
+            free_size = array->capacity * sizeof(bool);
+        }
+        break;
     case RVM_ARRAY_INT:
         if (array->u.int_array != nullptr) {
             free(array->u.int_array);

@@ -362,6 +362,7 @@ struct RVM_String {
 
 typedef enum {
     RVM_ARRAY_UNKNOW,
+    RVM_ARRAY_BOOL,
     RVM_ARRAY_INT,
     RVM_ARRAY_DOUBLE,
 } RVM_Array_Type;
@@ -371,6 +372,7 @@ struct RVM_Array {
     unsigned int   length;
     unsigned int   capacity;
     union {
+        bool*   bool_array;
         int*    int_array;
         double* double_array;
     } u;
@@ -512,6 +514,7 @@ typedef enum {
     RVM_CODE_PUSH_STACK_OBJECT,
 
     // array
+    RVM_CODE_PUSH_ARRAY_BOOL,
     RVM_CODE_PUSH_ARRAY_INT,
     RVM_CODE_PUSH_ARRAY_DOUBLE,
     RVM_CODE_PUSH_ARRAY_OBJECT,
@@ -607,9 +610,11 @@ typedef enum {
     RVM_CODE_EXIT,
 
     // array
+    RVM_CODE_NEW_ARRAY_BOOL,
     RVM_CODE_NEW_ARRAY_INT,
     RVM_CODE_NEW_ARRAY_DOUBLE,
     RVM_CODE_NEW_ARRAY_OBJECT,
+    RVM_CODE_NEW_ARRAY_LITERAL_BOOL,
     RVM_CODE_NEW_ARRAY_LITERAL_INT,
     RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE,
     RVM_CODE_NEW_ARRAY_LITERAL_OBJECT,
@@ -1824,10 +1829,13 @@ void                     init_derive_function_local_variable(Ring_VirtualMachine
 RVM_Object*              string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* string_literal);
 RVM_Object*              concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b);
 
+RVM_Object*              rvm_new_array_bool(Ring_VirtualMachine* rvm, unsigned int dimension);
 RVM_Object*              rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension);
 RVM_Object*              rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimension);
+RVM_Object*              rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size);
 RVM_Object*              rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size);
 RVM_Object*              rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
+void                     rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
 void                     rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
 void                     rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
 
