@@ -1246,6 +1246,8 @@ RVM_Object* rvm_new_array_bool(Ring_VirtualMachine* rvm, unsigned int dimension)
     object->u.array->capacity     = dimension;
     object->u.array->u.bool_array = (bool*)malloc(sizeof(bool) * dimension);
 
+    memset(object->u.array->u.bool_array, 0, sizeof(bool) * dimension);
+
     // TODO: 这里需要重写
     rvm->runtime_heap->alloc_size += sizeof(bool) * dimension;
     return object;
@@ -1267,6 +1269,8 @@ RVM_Object* rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension) 
     object->u.array->capacity    = dimension;
     object->u.array->u.int_array = (int*)malloc(sizeof(int) * dimension);
 
+    memset(object->u.array->u.int_array, 0, sizeof(int) * dimension);
+
     // TODO: 这里需要重写
     rvm->runtime_heap->alloc_size += sizeof(int) * dimension;
     return object;
@@ -1286,6 +1290,8 @@ RVM_Object* rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimensio
     object->u.array->length         = dimension;
     object->u.array->capacity       = dimension;
     object->u.array->u.double_array = (double*)malloc(sizeof(double) * dimension);
+
+    memset(object->u.array->u.double_array, 0, sizeof(double) * dimension);
 
     // TODO: 这里需要重写
     rvm->runtime_heap->alloc_size += sizeof(double) * dimension;
