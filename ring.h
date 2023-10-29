@@ -356,7 +356,7 @@ typedef enum {
 struct RVM_String {
     // TODO:
     char*        data;
-    unsigned int size;
+    unsigned int length;
     unsigned int capacity;
 };
 
@@ -368,7 +368,7 @@ typedef enum {
 
 struct RVM_Array {
     RVM_Array_Type type;
-    unsigned int   size;
+    unsigned int   length;
     unsigned int   capacity;
     union {
         int*    int_array;
@@ -423,7 +423,7 @@ struct RVM_RuntimeStatic {
 };
 
 struct RVM_RuntimeHeap {
-    unsigned int size;
+    unsigned int alloc_size;
     unsigned int threshold;
     RVM_Object*  list;
     // RVM_MemoryPoll

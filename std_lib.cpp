@@ -317,7 +317,7 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
         || args->u.object->u.string == nullptr
         || args->u.object->u.string->data == nullptr) {
     } else {
-        length        = args->u.object->u.string->size + 1;
+        length        = args->u.object->u.string->length + 1;
         output_buffer = (char*)realloc(output_buffer, length * sizeof(char));
         strncpy(output_buffer, args->u.object->u.string->data, length - 1);
     }
