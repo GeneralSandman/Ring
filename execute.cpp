@@ -141,7 +141,7 @@ void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* 
  *
  */
 void ring_virtualmachine_init(Ring_VirtualMachine* rvm) {
-    rvm_init_static_variable(rvm->executer, rvm->runtime_static);
+    rvm_init_static_variable(rvm, rvm->executer, rvm->runtime_static);
 }
 
 void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
@@ -159,7 +159,7 @@ void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runt
  * 2. 通过默认值初始化
  *
  */
-void rvm_init_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
+void rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
     debug_log_with_white_coloar("\t");
 
     unsigned int     size                 = executer->global_variable_size;
@@ -191,13 +191,15 @@ void rvm_init_static_variable(Package_Executer* executer, RVM_RuntimeStatic* run
             // }
             break;
         case RING_BASIC_TYPE_STRING:
+            runtime_static->data[i].type     = RVM_VALUE_TYPE_STRING;
             runtime_static->data[i].u.object = new_string_object();
             break;
         case RING_BASIC_TYPE_CLASS:
             // Search class-definition from variable declaration.
             assert(type_specifier->u.class_type != nullptr);
             class_definition                 = type_specifier->u.class_type->class_definition;
-            runtime_static->data[i].u.object = new_class_object(class_definition);
+            runtime_static->data[i].type     = RVM_VALUE_TYPE_OBJECT;
+            runtime_static->data[i].u.object = new_class_object(rvm, class_definition);
             break;
 
         default:
@@ -221,13 +223,13 @@ RVM_Object* new_string_object() {
 }
 
 // 全局变量，static空间
-RVM_Object* new_class_object(ClassDefinition* class_definition) {
+RVM_Object* new_class_object(Ring_VirtualMachine* rvm, ClassDefinition* class_definition) {
     assert(class_definition != nullptr);
 
     // Search field-member's size and detail from class-definition.
     // Alloc and Init.
     unsigned int field_count = 0;
-    RVM_Value*   field       = (RVM_Value*)malloc(field_count * sizeof(RVM_Value));
+    RVM_Value*   field       = nullptr;
 
     // TODO: 先用笨办法
     for (ClassMemberDeclaration* pos = class_definition->member; pos != nullptr; pos = pos->next) {
@@ -235,19 +237,16 @@ RVM_Object* new_class_object(ClassDefinition* class_definition) {
             field_count++;
         }
     }
-    field                               = (RVM_Value*)malloc(field_count * sizeof(RVM_Value));
+    field = (RVM_Value*)malloc(field_count * sizeof(RVM_Value));
+    memset(field, 0, field_count * sizeof(RVM_Value));
 
-    RVM_Object* object                  = (RVM_Object*)malloc(sizeof(RVM_Object));
-    object->type                        = RVM_OBJECT_TYPE_CLASS;
-    object->u.class_object              = (RVM_ClassObject*)malloc(sizeof(RVM_ClassObject));
+    RVM_Object* object                  = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
     object->u.class_object->class_def   = class_definition;
     object->u.class_object->field_count = field_count;
     object->u.class_object->field       = field;
-    object->gc_mark                     = GC_MARK_COLOR_WHITE;
 
-
-    memset(field, 0, field_count * sizeof(RVM_Value));
-
+    // TODO: 这里得优化一下, 算得不对, 得分析具体 member的类型
+    rvm->runtime_heap->alloc_size += field_count * sizeof(RVM_Value);
 
     // TODO:
     // if class has constructor method, invoke it.
@@ -1143,7 +1142,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
             // Search class-definition from variable declaration.
             assert(type_specifier->u.class_type != nullptr);
             class_definition = type_specifier->u.class_type->class_definition;
-            object           = new_class_object(class_definition);
+            object           = new_class_object(rvm, class_definition);
             STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_value_index, object);
             break;
 
@@ -1610,8 +1609,12 @@ unsigned int rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
 
 unsigned int rvm_free_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* class_object) {
     unsigned int free_size = 0;
-    runtime_err_log("rvm free class-object failed");
-    exit(1);
+
+    if (class_object->field != nullptr) {
+        free(class_object->field);
+    }
+    free_size = class_object->field_count * sizeof(RVM_Value);
+    free(class_object);
     return free_size;
 }
 

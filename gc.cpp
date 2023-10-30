@@ -25,6 +25,37 @@ void gc(Ring_VirtualMachine* rvm) {
 }
 
 void gc_summary(Ring_VirtualMachine* rvm) {
+    printf("%sStatic:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
+    for (int i = 0; i < rvm->runtime_static->size; i++) {
+        RVM_Value*  value = &(rvm->runtime_static->data[i]);
+
+        std::string type;
+        switch (value->type) {
+        case RVM_VALUE_TYPE_BOOL:
+            type = "bool";
+            break;
+        case RVM_VALUE_TYPE_INT:
+            type = "int";
+            break;
+        case RVM_VALUE_TYPE_DOUBLE:
+            type = "double";
+            break;
+        case RVM_VALUE_TYPE_STRING:
+            type = "string";
+            break;
+        case RVM_VALUE_TYPE_OBJECT:
+            type = "object";
+            break;
+        case RVM_VALUE_TYPE_CALLINFO:
+            type = "callinfo";
+            break;
+        default:
+            type = "unknow";
+            break;
+        }
+        printf("\tRVM_Value: %s\n", type.c_str());
+    }
+
     printf("%sHeap:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
     for (RVM_Object* pos = rvm->runtime_heap->list; pos != nullptr; pos = pos->next) {
         std::string type;
@@ -45,7 +76,6 @@ void gc_summary(Ring_VirtualMachine* rvm) {
     }
 
     printf("%sStack:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
-
     for (int stack_index = 0; stack_index < rvm->runtime_stack->top_index; stack_index++) {
         RVM_Value*  value = &(rvm->runtime_stack->data[stack_index]);
         std::string type;

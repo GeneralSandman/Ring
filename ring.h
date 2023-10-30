@@ -108,8 +108,8 @@ typedef enum {
     RVM_VALUE_TYPE_BOOL,
     RVM_VALUE_TYPE_INT,
     RVM_VALUE_TYPE_DOUBLE,
-    RVM_VALUE_TYPE_STRING,
-    RVM_VALUE_TYPE_OBJECT,
+    RVM_VALUE_TYPE_STRING, // TODO: string object 需要重新规划一下
+    RVM_VALUE_TYPE_OBJECT, // TODO: string object 需要重新规划一下
 
     RVM_VALUE_TYPE_CALLINFO,
 } RVM_Value_Type;
@@ -1800,9 +1800,9 @@ Ring_VirtualMachine*     ring_virtualmachine_create();
 void                     ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry);
 void                     ring_virtualmachine_init(Ring_VirtualMachine* rvm);
 void                     rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
-void                     rvm_init_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
+void                     rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 RVM_Object*              new_string_object();
-RVM_Object*              new_class_object(ClassDefinition* class_definition);
+RVM_Object*              new_class_object(Ring_VirtualMachine* rvm, ClassDefinition* class_definition);
 void                     ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                     invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                     invoke_derive_function(Ring_VirtualMachine* rvm,

@@ -378,7 +378,7 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
             snprintf(output_buffer, length, "%p\n", args->u.object->u.array->u.int_array);
             break;
         case RVM_OBJECT_TYPE_CLASS:
-            snprintf(output_buffer, length, "%p\n", args->u.object->u.array->u.double_array);
+            snprintf(output_buffer, length, "%p\n", args->u.object->u.class_object->field);
             break;
         default:
             snprintf(output_buffer, length, "%p\n", (void*)0);
