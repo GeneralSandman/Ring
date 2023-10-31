@@ -1245,8 +1245,10 @@ void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewAr
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_INT, dimension, new_array_expression->line_number);
     } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_DOUBLE) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_DOUBLE, dimension, new_array_expression->line_number);
+    } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_STRING) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_STRING, dimension, new_array_expression->line_number);
     } else {
-        printf("error: new array only support bool[] int[] double[]\n");
+        printf("error: new array only support bool[] int[] double[] string[]\n");
         exit(1);
     }
 }
@@ -1269,8 +1271,10 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, A
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_INT, size, array_literal_expression->line_number);
     } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_DOUBLE) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE, size, array_literal_expression->line_number);
+    } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_STRING) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_STRING, size, array_literal_expression->line_number);
     } else {
-        printf("error: array literal expression only support bool[] int[] double[]\n");
+        printf("error: array literal expression only support bool[] int[] double[] string[]\n");
         exit(1);
     }
 }
@@ -1308,8 +1312,10 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_INT, 0, array_index_expression->line_number);
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_DOUBLE) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_DOUBLE, 0, array_index_expression->line_number);
+    } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_STRING, 0, array_index_expression->line_number);
     } else {
-        printf("error: array index expression only support bool[] int[] double[]\n");
+        printf("error: array index expression only support bool[] int[] double[] string[]\n");
         exit(1);
     }
 }

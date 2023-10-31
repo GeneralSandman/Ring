@@ -365,6 +365,7 @@ typedef enum {
     RVM_ARRAY_BOOL,
     RVM_ARRAY_INT,
     RVM_ARRAY_DOUBLE,
+    RVM_ARRAY_STRING,
 } RVM_Array_Type;
 
 struct RVM_Array {
@@ -372,9 +373,10 @@ struct RVM_Array {
     unsigned int   length;
     unsigned int   capacity;
     union {
-        bool*   bool_array;
-        int*    int_array;
-        double* double_array;
+        bool*       bool_array;
+        int*        int_array;
+        double*     double_array;
+        RVM_String* string_array;
     } u;
 };
 
@@ -517,6 +519,7 @@ typedef enum {
     RVM_CODE_PUSH_ARRAY_BOOL,
     RVM_CODE_PUSH_ARRAY_INT,
     RVM_CODE_PUSH_ARRAY_DOUBLE,
+    RVM_CODE_PUSH_ARRAY_STRING,
     RVM_CODE_PUSH_ARRAY_OBJECT,
 
     // class
@@ -613,10 +616,12 @@ typedef enum {
     RVM_CODE_NEW_ARRAY_BOOL,
     RVM_CODE_NEW_ARRAY_INT,
     RVM_CODE_NEW_ARRAY_DOUBLE,
+    RVM_CODE_NEW_ARRAY_STRING,
     RVM_CODE_NEW_ARRAY_OBJECT,
     RVM_CODE_NEW_ARRAY_LITERAL_BOOL,
     RVM_CODE_NEW_ARRAY_LITERAL_INT,
     RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE,
+    RVM_CODE_NEW_ARRAY_LITERAL_STRING,
     RVM_CODE_NEW_ARRAY_LITERAL_OBJECT,
 
     // 不能在生成代码的时候使用
@@ -1832,12 +1837,15 @@ RVM_Object*              concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, 
 RVM_Object*              rvm_new_array_bool(Ring_VirtualMachine* rvm, unsigned int dimension);
 RVM_Object*              rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension);
 RVM_Object*              rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimension);
+RVM_Object*              rvm_new_array_string(Ring_VirtualMachine* rvm, unsigned int dimension);
 RVM_Object*              rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size);
 RVM_Object*              rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size);
 RVM_Object*              rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
+RVM_Object*              rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size);
 void                     rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
 void                     rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
 void                     rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
+void                     rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
 
 RVM_Object*              rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type);
 RVM_Object*              rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src);

@@ -178,6 +178,9 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
 
     case EXPRESSION_TYPE_ARRAY_INDEX:
         fix_array_index_expression(expression, expression->u.array_index_expression, block, func);
+        expression->convert_type       = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+        // TODO: 这个写法太恶心了, 急需要优化
+        expression->convert_type->kind = expression->u.array_index_expression->array_expression->u.identifier_expression->u.declaration->type->next->kind;
         break;
 
     case EXPRESSION_TYPE_ARRAY_LITERAL:

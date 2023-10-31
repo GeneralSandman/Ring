@@ -39,6 +39,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_ARRAY_BOOL, "push_array_bool", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
     {RVM_CODE_PUSH_ARRAY_INT, "push_array_int", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
     {RVM_CODE_PUSH_ARRAY_DOUBLE, "push_array_double", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
+    {RVM_CODE_PUSH_ARRAY_STRING, "push_array_string", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
     {RVM_CODE_PUSH_ARRAY_OBJECT, "push_array_object", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
 
 
@@ -139,10 +140,12 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_NEW_ARRAY_BOOL, "new_array_bool", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
     {RVM_CODE_NEW_ARRAY_INT, "new_array_int", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
     {RVM_CODE_NEW_ARRAY_DOUBLE, "new_array_double", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
+    {RVM_CODE_NEW_ARRAY_STRING, "new_array_string", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
     {RVM_CODE_NEW_ARRAY_OBJECT, "new_array_object", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
     {RVM_CODE_NEW_ARRAY_LITERAL_BOOL, "new_array_literal_bool", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
     {RVM_CODE_NEW_ARRAY_LITERAL_INT, "new_array_literal_int", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
     {RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE, "new_array_literal_double", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
+    {RVM_CODE_NEW_ARRAY_LITERAL_STRING, "new_array_literal_string", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
     {RVM_CODE_NEW_ARRAY_LITERAL_OBJECT, "new_array_literal_object", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
 
 

@@ -496,6 +496,16 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 1;
         } break;
+        case RVM_CODE_PUSH_ARRAY_STRING: {
+            object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index  = STACK_GET_INT_OFFSET(rvm, -1);
+            RVM_Object* value;
+            rvm_array_get_string(rvm, object, index, &value);
+            runtime_stack->top_index -= 2;
+            STACK_SET_OBJECT_OFFSET(rvm, 0, value);
+            runtime_stack->top_index++;
+            rvm->pc += 1;
+        } break;
         case RVM_CODE_PUSH_ARRAY_OBJECT:
             break;
 
@@ -873,6 +883,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
+        case RVM_CODE_NEW_ARRAY_STRING:
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object   = rvm_new_array_string(rvm, oper_num);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+            break;
         case RVM_CODE_NEW_ARRAY_OBJECT:
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_BOOL: {
@@ -894,6 +911,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE: {
             int size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object   = rvm_new_array_literal_double(rvm, size);
+            runtime_stack->top_index -= size;
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+        } break;
+        case RVM_CODE_NEW_ARRAY_LITERAL_STRING: {
+            int size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            object   = rvm_new_array_literal_string(rvm, size);
             runtime_stack->top_index -= size;
             STACK_SET_OBJECT_OFFSET(rvm, 0, object);
             runtime_stack->top_index++;
@@ -1297,6 +1322,33 @@ RVM_Object* rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimensio
     return object;
 }
 
+/*
+ * create array in heap
+ *
+ * support create one-dimensional array only.
+ * TODO: support multi-dimensional array
+ *
+ */
+RVM_Object* rvm_new_array_string(Ring_VirtualMachine* rvm, unsigned int dimension) {
+    RVM_Object* object              = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
+
+    object->u.array->type           = RVM_ARRAY_STRING;
+    object->u.array->length         = dimension;
+    object->u.array->capacity       = dimension;
+    object->u.array->u.string_array = (RVM_String*)malloc(sizeof(RVM_String) * dimension);
+
+    for (unsigned int i = 0; i < dimension; i++) {
+        object->u.array->u.string_array[i].data     = nullptr;
+        object->u.array->u.string_array[i].length   = 0;
+        object->u.array->u.string_array[i].capacity = 0;
+    }
+
+
+    // TODO: 这里的计算方式不对
+    rvm->runtime_heap->alloc_size += sizeof(RVM_String) * dimension;
+    return object;
+}
+
 RVM_Object* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size) {
     RVM_Object* object = rvm_new_array_bool(rvm, size);
     for (int i = 0; i < size; i++) {
@@ -1321,6 +1373,16 @@ RVM_Object* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size) {
     return object;
 }
 
+RVM_Object* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size) {
+    RVM_Object* object = rvm_new_array_string(rvm, size);
+    for (int i = 0; i < size; i++) {
+        // TODO: 这个写法需要重构
+        object->u.array->u.string_array[i] = *(STACK_GET_OBJECT_OFFSET(rvm, -size + i)->u.string);
+    }
+    return object;
+}
+
+
 void rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value) {
     *value = object->u.array->u.bool_array[index];
 }
@@ -1331,6 +1393,16 @@ void rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, 
 
 void rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value) {
     *value = object->u.array->u.double_array[index];
+}
+
+void rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value) {
+    RVM_String* src_string = &(object->u.array->u.string_array[index]);
+    RVM_Object* new_object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_STRING);
+
+    RVM_String* dst_string = rvm_deep_copy_string(rvm, src_string);
+
+    new_object->u.string   = dst_string; // FIXME: 这里内存泄漏了
+    *value                 = new_object;
 }
 
 
@@ -1465,6 +1537,14 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
 
         // TODO: 这样写有点丑, 优化一下
         memcpy(array->u.double_array, src->u.double_array, sizeof(double) * src->capacity);
+        break;
+    case RVM_ARRAY_STRING:
+        array->u.string_array = (RVM_String*)malloc(sizeof(RVM_String) * array->capacity);
+
+        rvm->runtime_heap->alloc_size += sizeof(RVM_String) * array->capacity;
+
+        // TODO: 这样写有点丑, 优化一下
+        memcpy(array->u.string_array, src->u.string_array, sizeof(RVM_String) * array->capacity);
         break;
     default:
         break;
