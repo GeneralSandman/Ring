@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     // ring version
     // ring help
     if (!strcmp(command, "version")) {
-        printf("Ring version: %s \n", RING_VERSION);
+        printf("%s \n", RING_VERSION);
         return 0;
     } else if (!strcmp(command, "help")) {
         printf("%s", command_help_message.c_str());
