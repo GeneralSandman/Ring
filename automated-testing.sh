@@ -22,6 +22,11 @@ TEST_MODELS=(
     "011-global-variable" 
     "012-local-variable"
     "013-gc"
+
+    "020-array-bool"
+    "021-array-int"
+    "022-array-double"
+    "023-array-string"
     )
 
 NOT_TEST_FILES=(
