@@ -503,6 +503,8 @@ void fix_array_index_expression(Expression* expression, ArrayIndexExpression* ar
         exit(1);
     }
 
+    fix_expression(array_index_expression->index_expression, block, func);
+
     array_index_expression->array_expression->u.identifier_expression->u.declaration = declaration;
 }
 
