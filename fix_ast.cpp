@@ -186,6 +186,9 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
     case EXPRESSION_TYPE_ARRAY_LITERAL:
         fix_array_literal_expression(expression, expression->u.array_literal_expression, block, func);
         break;
+    case EXPRESSION_TYPE_CLASS_OBJECT_LITERAL:
+        fix_class_object_literal_expression(expression, expression->u.class_object_literal_expression, block, func);
+        break;
 
     default: break;
     }
@@ -513,6 +516,20 @@ void fix_array_literal_expression(Expression* expression, ArrayLiteralExpression
     Expression* pos = array_literal_expression->expression_list;
     for (; pos != nullptr; pos = pos->next) {
         fix_expression(pos, block, func);
+    }
+}
+
+void fix_class_object_literal_expression(Expression* expression, ClassObjectLiteralExpression* literal_expression, Block* block, Function* func) {
+    assert(literal_expression != nullptr);
+
+    fix_type_specfier(literal_expression->type_specifier);
+
+
+    FieldInitExpression* pos = literal_expression->field_init_expression_list;
+    for (; pos != nullptr; pos = pos->next) {
+        // 这里只修正 init_expression
+        // TODO: 修正 identifier 和 class field 的index关系
+        fix_expression(pos->init_expression, block, func);
     }
 }
 

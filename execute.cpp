@@ -222,7 +222,11 @@ RVM_Object* new_string_object() {
     return object;
 }
 
-// 全局变量，static空间
+/*
+ *全局变量，static空间
+ *
+ * 使用到了 class_definition ,  和编译器前端没有做到完全解耦
+ */
 RVM_Object* new_class_object(Ring_VirtualMachine* rvm, ClassDefinition* class_definition) {
     assert(class_definition != nullptr);
 
@@ -231,7 +235,8 @@ RVM_Object* new_class_object(Ring_VirtualMachine* rvm, ClassDefinition* class_de
     unsigned int field_count = 0;
     RVM_Value*   field       = nullptr;
 
-    // TODO: 先用笨办法
+    // TODO: 先用笨办法 初始化
+    // TODO: field_count 后续需要在 fix_ast 就要需要算好
     for (ClassMemberDeclaration* pos = class_definition->member; pos != nullptr; pos = pos->next) {
         if (pos->type == MEMBER_FIELD) {
             field_count++;
@@ -511,6 +516,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // class
         case RVM_CODE_POP_FIELD_BOOL:
+            /*
+             * TODO:
+             * 这里需要优化一下:
+             * 有没有必要 在 pop_field_bool 之前进行 push object
+             * 这里是不是反过来写更好理解
+             *
+             */
             object                                               = STACK_GET_OBJECT_OFFSET(rvm, -1);
             oper_num                                             = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             object->u.class_object->field[oper_num].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
@@ -927,6 +939,18 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_NEW_ARRAY_LITERAL_OBJECT:
             rvm->pc += 3;
             break;
+
+            // class
+        case RVM_CODE_NEW_CLASS_OBJECT_LITERAL: {
+            unsigned int field_count   = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]); // field 的数量不能超过 255
+            unsigned int init_exp_size = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]); // field 的数量不能超过 255
+
+            object                     = rvm_new_class_object_literal(rvm, field_count, init_exp_size);
+            runtime_stack->top_index -= init_exp_size;
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+        } break;
 
         default:
             fprintf(stderr,
@@ -1349,6 +1373,32 @@ RVM_Object* rvm_new_array_string(Ring_VirtualMachine* rvm, unsigned int dimensio
     return object;
 }
 
+/*
+ * create array in heap
+ *
+ * support create one-dimensional array only.
+ * TODO: support multi-dimensional array
+ *
+ */
+RVM_Object* rvm_new_class_object(Ring_VirtualMachine* rvm, unsigned int field_count) {
+    RVM_Object* object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
+
+    RVM_Value*  field  = nullptr;
+    field              = (RVM_Value*)malloc(field_count * sizeof(RVM_Value));
+    memset(field, 0, field_count * sizeof(RVM_Value));
+    // TODO: 有个遗留问题
+    // RVM_Value 的 type 没有设置
+
+    object->u.class_object->class_def   = nullptr;
+    object->u.class_object->field_count = field_count;
+    object->u.class_object->field       = field;
+
+
+    // TODO: 这里的计算方式不对
+    rvm->runtime_heap->alloc_size += 0;
+    return object;
+}
+
 RVM_Object* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size) {
     RVM_Object* object = rvm_new_array_bool(rvm, size);
     for (int i = 0; i < size; i++) {
@@ -1382,6 +1432,22 @@ RVM_Object* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size) {
     return object;
 }
 
+RVM_Object* rvm_new_class_object_literal(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int init_exp_size) {
+    RVM_Object* object = rvm_new_class_object(rvm, field_count);
+    if (field_count != init_exp_size) {
+        // error report
+        fprintf(stderr,
+                "the number of class init expresison list must equal to the number of class field");
+        exit(ERROR_CODE_RUN_VM_ERROR);
+    }
+
+    // 从 runtime_stack 中取出 已经push的, 然后依次初始化
+    unsigned init_exp_of_stack_index = rvm->runtime_stack->top_index - init_exp_size;
+    for (int i = 0; i < init_exp_size; i++) {
+        object->u.class_object->field[i] = rvm->runtime_stack->data[init_exp_of_stack_index + i];
+    }
+    return object;
+}
 
 void rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value) {
     *value = object->u.array->u.bool_array[index];
@@ -1567,7 +1633,10 @@ RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassO
     class_object->field_count     = src->field_count;
 
     // FIXME: 这里还要继续完善深度copy
-    class_object->field           = nullptr;
+    RVM_Value* field              = nullptr;
+    field                         = (RVM_Value*)malloc(src->field_count * sizeof(RVM_Value));
+    memcpy(field, src->field, src->field_count * sizeof(RVM_Value));
+    class_object->field = field;
     return class_object;
 }
 

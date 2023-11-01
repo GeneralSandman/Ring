@@ -156,6 +156,17 @@ Expression* create_expression_from_array_literal(ArrayLiteralExpression* array_l
     return expression;
 }
 
+Expression* create_expression_from_class_object_literal(ClassObjectLiteralExpression* object_literal) {
+    debug_log_with_yellow_coloar("\t");
+
+    Expression* expression                        = (Expression*)malloc(sizeof(Expression));
+    expression->line_number                       = package_unit_get_line_number();
+    expression->convert_type                      = nullptr; // fix in fix_ast
+    expression->type                              = EXPRESSION_TYPE_CLASS_OBJECT_LITERAL;
+    expression->u.class_object_literal_expression = object_literal;
+    return expression;
+}
+
 Expression* create_expression_assign(AssignExpression* assign_expression) {
     // debug_log_with_yellow_coloar("assign_expression->assign_identifier:%s", assign_expression->assign_identifier);
 
@@ -313,6 +324,23 @@ Expression* create_new_array_expression(TypeSpecifier* type_specifier, Dimension
     return expression;
 }
 
+FieldInitExpression* create_field_init_expression(char* field_identifier, Expression* init_expression) {
+    FieldInitExpression* expression = (FieldInitExpression*)malloc(sizeof(FieldInitExpression));
+    expression->line_number         = package_unit_get_line_number();
+    expression->field_identifier    = field_identifier;
+    expression->init_expression     = init_expression;
+    expression->next                = nullptr;
+    return expression;
+}
+
+FieldInitExpression* field_init_list_add_item(FieldInitExpression* list, FieldInitExpression* item) {
+    FieldInitExpression* pos = list;
+    for (; pos->next != nullptr; pos = pos->next)
+        ;
+    pos->next = item;
+    return list;
+}
+
 AssignExpression* create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand) {
     AssignExpression* assing_expression = (AssignExpression*)malloc(sizeof(AssignExpression));
 
@@ -373,6 +401,14 @@ ArrayLiteralExpression* create_array_literal_expression(TypeSpecifier* type_spec
     array_literal->dimension_expression   = dimension_expression;
     array_literal->expression_list        = expression_list;
     return array_literal;
+}
+
+ClassObjectLiteralExpression* create_class_object_literal_expression(TypeSpecifier* type_specifier, FieldInitExpression* field_init_expression_list) {
+    ClassObjectLiteralExpression* object_literal = (ClassObjectLiteralExpression*)malloc(sizeof(ClassObjectLiteralExpression));
+    object_literal->line_number                  = package_unit_get_line_number();
+    object_literal->type_specifier               = type_specifier;
+    object_literal->field_init_expression_list   = field_init_expression_list;
+    return object_literal;
 }
 
 Expression* expression_list_add_item(Expression* expression_list, Expression* expression) {

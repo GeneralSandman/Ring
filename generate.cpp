@@ -726,6 +726,10 @@ void generate_vmcode_from_expression(Package_Executer* executer, Expression* exp
         generate_vmcode_from_array_literal_expreesion(executer, expression->u.array_literal_expression, opcode_buffer);
         break;
 
+    case EXPRESSION_TYPE_CLASS_OBJECT_LITERAL:
+        generate_vmcode_from_class_object_literal_expreesion(executer, expression->u.class_object_literal_expression, opcode_buffer);
+        break;
+
     default:
         break;
     }
@@ -833,6 +837,9 @@ void generate_pop_to_leftvalue_identifier(Package_Executer* executer, Identifier
     generate_vmcode(executer, opcode_buffer, opcode, variable_index, identifier_expression->line_number);
 }
 
+/*
+ * 用于给成员变量赋值
+ */
 void generate_pop_to_leftvalue_member(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (member_expression == nullptr) {
@@ -1190,6 +1197,9 @@ void generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpres
     // generate_vmcode(executer, opcode_buffer, opcode, 0);
 }
 
+/*
+ * 用于访问成员变量
+ */
 void generate_vmcode_from_member_expression(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     if (member_expression == nullptr) {
@@ -1251,6 +1261,39 @@ void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewAr
         printf("error: new array only support bool[] int[] double[] string[]\n");
         exit(1);
     }
+}
+
+void generate_vmcode_from_class_object_literal_expreesion(Package_Executer* executer, ClassObjectLiteralExpression* literal_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    assert(literal_expression != nullptr);
+    assert(literal_expression->type_specifier != nullptr);
+    assert(literal_expression->field_init_expression_list != nullptr);
+
+    unsigned int         init_exp_size = 0;
+    unsigned int         field_count   = 0;
+    unsigned int         oper_num      = 0;
+
+    FieldInitExpression* pos           = literal_expression->field_init_expression_list;
+    for (; pos != nullptr; pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->init_expression, opcode_buffer, 0);
+        init_exp_size++;
+    }
+
+    // FIXME: 这里要做强制检查
+    ClassDefinition* class_definition = literal_expression->type_specifier->u.class_type->class_definition;
+    // TODO: 先用笨办法 初始化
+    // TODO: field_count 后续需要在 fix_ast 就要需要算好
+    for (ClassMemberDeclaration* pos = class_definition->member; pos != nullptr; pos = pos->next) {
+        if (pos->type == MEMBER_FIELD) {
+            field_count++;
+        }
+    }
+
+
+    // 需要知道初始化list中表达式的数量
+    // 需要知道 class object 占多大的空间
+    oper_num = (field_count << 8) | init_exp_size;
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLASS_OBJECT_LITERAL, oper_num, literal_expression->line_number);
 }
 
 void generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, ArrayLiteralExpression* array_literal_expression, RVM_OpcodeBuffer* opcode_buffer) {

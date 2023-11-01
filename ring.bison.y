@@ -15,45 +15,47 @@ int yyerror(char const *str, ...);
 %expect-rr 0    // legitimate 0 reduce/reduce conflicts
 
 %union {
-    char*                       m_comment_value;
-    char*                       m_literal_interface;
-    char*                       m_identifier;
-    Identifier*                 m_identifier_list;
-    Statement*                  m_statement_list;
-    Expression*                 m_expression;
-    AssignExpression*           m_assign_expression;
-    FunctionCallExpression*     m_function_call_expression;
-    MethodCallExpression*       m_method_call_expression;
-    ArrayLiteralExpression*     m_array_literal_expression;
-    ArgumentList*               m_argument_list;
-    Function*                   m_function_definition;
-    Parameter*                  m_parameter_list;
-    IfStatement*                m_if_statement;
-    ElseIfStatement*            m_elseif_statement;
-    ForStatement*               m_for_statement;
-    DoForStatement*             m_dofor_statement;
-    FunctionReturnList*         m_return_list;
-    Block*                      m_block;
-    CastExpression*             m_cast;
-    BreakStatement*             m_break_statement;
-    TagDefinitionStatement*     m_tag_definition_statement;
-    JumpTagStatement*           m_jump_tag_statement;
-    ContinueStatement*          m_continue_statement;
-    ReturnStatement*            m_return_statement;
-    DimensionExpression*        m_dimension_expression;
+    char*                               m_comment_value;
+    char*                               m_literal_interface;
+    char*                               m_identifier;
+    Identifier*                         m_identifier_list;
+    Statement*                          m_statement_list;
+    Expression*                         m_expression;
+    AssignExpression*                   m_assign_expression;
+    FunctionCallExpression*             m_function_call_expression;
+    MethodCallExpression*               m_method_call_expression;
+    ArrayLiteralExpression*             m_array_literal_expression;
+    ClassObjectLiteralExpression*       m_class_object_literal_expression;
+    FieldInitExpression*        m_field_init_expression;
+    ArgumentList*                       m_argument_list;
+    Function*                           m_function_definition;
+    Parameter*                          m_parameter_list;
+    IfStatement*                        m_if_statement;
+    ElseIfStatement*                    m_elseif_statement;
+    ForStatement*                       m_for_statement;
+    DoForStatement*                     m_dofor_statement;
+    FunctionReturnList*                 m_return_list;
+    Block*                              m_block;
+    CastExpression*                     m_cast;
+    BreakStatement*                     m_break_statement;
+    TagDefinitionStatement*             m_tag_definition_statement;
+    JumpTagStatement*                   m_jump_tag_statement;
+    ContinueStatement*                  m_continue_statement;
+    ReturnStatement*                    m_return_statement;
+    DimensionExpression*                m_dimension_expression;
 
-    Package*                    m_package;
+    Package*                            m_package;
 
-    ClassDefinition*            m_class_definition;
-    ClassMemberDeclaration*     m_class_member_declaration;
-    FieldMember*                m_field_member;
-    MethodMember*               m_method_member;
+    ClassDefinition*                    m_class_definition;
+    ClassMemberDeclaration*             m_class_member_declaration;
+    FieldMember*                        m_field_member;
+    MethodMember*                       m_method_member;
 
-    AttributeInfo*              m_attribute_info;
+    AttributeInfo*                      m_attribute_info;
 
-    TypeSpecifier*              m_type_specifier;
-    Ring_BasicType              m_basic_type_specifier;
-    AttributeType               m_attribute;
+    TypeSpecifier*                      m_type_specifier;
+    Ring_BasicType                      m_basic_type_specifier;
+    AttributeType                       m_attribute;
 }
 
 %token TOKEN_TYPEDEF
@@ -176,6 +178,8 @@ int yyerror(char const *str, ...);
 %type <m_function_call_expression> function_call_expression
 %type <m_method_call_expression> method_call_expression
 %type <m_array_literal_expression> array_literal_expression
+%type <m_class_object_literal_expression> class_object_literal_expression
+%type <m_field_init_expression> class_field_init_element_list class_field_init_element
 %type <m_argument_list> argument_list argument
 %type <m_function_definition> function_definition
 %type <m_parameter_list> parameter_list parameter
@@ -817,6 +821,23 @@ class_type_specifier
     }
     ;
 
+class_field_init_element_list
+    : class_field_init_element
+    | class_field_init_element_list TOKEN_COMMA class_field_init_element
+    {
+        debug_log_with_green_coloar("[RULE::class_field_init_element_list]\t ");
+        $$ = field_init_list_add_item($1, $3);
+    }
+    ;
+
+class_field_init_element
+    : IDENTIFIER TOKEN_COLON expression
+    {
+        debug_log_with_green_coloar("[RULE::class_field_init_element]\t ");
+        $$ = create_field_init_expression($1, $3);
+    }
+    ;
+
 expression_list
     : expression
     | expression_list TOKEN_COMMA expression
@@ -1077,6 +1098,11 @@ primary_not_new_array
         debug_log_with_green_coloar("[RULE::literal_term:array_literal_expression]\t ");
         $$ = create_expression_from_array_literal($1);
     }
+    | class_object_literal_expression
+    {
+        debug_log_with_green_coloar("[RULE::literal_term:class_object_literal_expression]\t ");
+        $$ = create_expression_from_class_object_literal($1);
+    }
     ;
 
 
@@ -1184,6 +1210,14 @@ array_literal_expression
     {
         debug_log_with_green_coloar("[RULE::array_literal_expression]\t ");
         $$ = create_array_literal_expression(create_type_specifier($1), $2, $4);
+    }
+    ;
+
+class_object_literal_expression
+    : class_type_specifier TOKEN_LC class_field_init_element_list TOKEN_RC
+    {
+        debug_log_with_green_coloar("[RULE::class_object_literal_expression]\t ");
+        $$ = create_class_object_literal_expression($1, $3);
     }
     ;
 
