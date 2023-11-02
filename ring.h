@@ -54,7 +54,6 @@ typedef struct FieldInitExpression          FieldInitExpression;
 typedef struct IdentifierExpression         IdentifierExpression;
 
 typedef struct ArgumentList                 ArgumentList;
-typedef struct Variable                     Variable;
 typedef struct Parameter                    Parameter;
 typedef struct Identifier                   Identifier;
 typedef struct Function                     Function;
@@ -198,8 +197,13 @@ struct Package_Executer {
     unsigned int      estimate_runtime_stack_capacity;
 };
 
-// Pacage 对应一个源代码的逻辑包  也就是一个路径
-// 其实它就是 就是将 PackageUnit 打包在一块
+/*
+ * PackageUnit 与 Package 的逻辑关系
+ *
+ * 一个PackageUnit 对应一个 Ring 源码文件
+ * 每个 PackageUnit 都有一个对应的 Package
+ * 一个 Package 可以有多个 PackageUnit
+ */
 struct Package {
     CompilerEntry*                                    compiler_entry;
     unsigned int                                      package_index; // 在 CompilerEntry 中的 index
@@ -227,9 +231,14 @@ typedef struct SourceLineInfo {
     off_t        start_offset; // 某行相对于文件开始的偏移
     unsigned int size;         // 某行的字符数量
 } SourceLineInfo;
-// 一个Package 有多个 编译单元
-// 也就是一个包内有多个Ring源码文件
-// 一个编译单元 对应一个Ring源码文件
+
+/*
+ * PackageUnit 与 Package 的逻辑关系
+ *
+ * 一个PackageUnit 对应一个 Ring 源码文件
+ * 每个 PackageUnit 都有一个对应的 Package
+ * 一个 Package 可以有多个 PackageUnit
+ */
 struct PackageUnit {
     Package*                        parent_package;
 
@@ -356,7 +365,6 @@ typedef enum {
 
 
 struct RVM_String {
-    // TODO:
     char*        data;
     unsigned int length;
     unsigned int capacity;
@@ -433,6 +441,7 @@ struct RVM_RuntimeHeap {
     unsigned int threshold;
     RVM_Object*  list;
     // RVM_MemoryPoll
+    // TODO: 是否需要使用内存池
 };
 
 struct RVM_LabelTable {
@@ -880,7 +889,6 @@ struct Statement {
     StatementType type;
     union {
         Expression*             expression;
-        Variable*               variable; // TODO: 以后废弃 使用 declaration_statement
         IfStatement*            if_statement;
         ForStatement*           for_statement;
         DoForStatement*         dofor_statement;
@@ -1007,14 +1015,19 @@ struct MemberExpression {
     Expression*             object_expression;
     char*                   member_identifier;
     ClassMemberDeclaration* member_declaration; // FIX_AST_UPDATE
-
-    // e.g.
-    // var Job job1;
-    // job1.JobID;
-    // job1 is object_expression
-    // JobID is member_identifier
-    // JobID is member_declaration
 };
+/*
+ * NOTE FOR MemberExpression
+ *
+ * e.g.
+ * var Job job1;
+ * job1.JobID;
+ *
+ * job1 : object_expression
+ * JobID : member_identifier
+ * JobID : member_declaration
+ */
+
 
 struct DimensionExpression {
     unsigned int         dimension;
@@ -1026,13 +1039,18 @@ struct DotExpression {
 
     Expression*  prefix_expression;
     Expression*  suffix_expression;
-
-    // e.g.
-    // object.member
-    // object.member()
-    // object -> prefix_expression
-    // member -> suffix_expression
 };
+/*
+ * NOTE FOR DotExpression
+ *
+ * e.g.
+ * object.member
+ * object.member()
+ *
+ * object -> prefix_expression
+ * member -> suffix_expression
+ */
+
 
 struct FunctionCallExpression {
     unsigned int  line_number;
@@ -1102,22 +1120,6 @@ struct ArgumentList {
 
     Expression*   expression;
     ArgumentList* next;
-};
-
-struct Variable {
-    unsigned int line_number;
-
-    char*        variable_identifer;
-    int          is_const;
-
-    VariableType type;
-    VariableType array_member_type; // 数组里的内置类型
-
-    union {
-        Ring_BasicValue* ring_basic_value;
-    } u;
-    Expression* init_expression;
-    Variable*   next;
 };
 
 struct Parameter {
@@ -1269,21 +1271,21 @@ struct ReturnStatement {
 };
 
 
-// TODO: 这里重新规划一下 还要考虑类型的嵌套
-// typedef
-// 考虑 函数类型
-/* TypeSpecifier
+/*
+ * TypeSpecifier
+ *
  * 基础类型：
- *  bool
- *  int
- *  double
+ *     - bool
+ *     - int
+ *     - double
  * 对象类型：
- *  string
- *  array
- *  class
+ *     - string
+ *     - array
+ *     - class
  * 范型推导
- *  any
- * */
+ *     - any
+ *
+ */
 typedef enum {
     RING_BASIC_TYPE_UNKNOW,
 
@@ -1298,6 +1300,10 @@ typedef enum {
     RING_BASIC_TYPE_CLASS,
     RING_BASIC_TYPE_NULL,
 } Ring_BasicType;
+// TODO: 这里重新规划一下 还要考虑类型的嵌套
+// typedef
+// 考虑 函数类型
+
 
 typedef enum {
     RING_DERIVE_TYPE_UNKNOW,
