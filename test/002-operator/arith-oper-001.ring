@@ -26,7 +26,7 @@ function main() {
 
 
 	for(int_value_1=0; int_value_1<100; int_value_1++){
-	    double_value_1 += 4.0; // FIXME: bug add_int add_double
+	    double_value_1 += 4.0;
 	    double_value_2 = double_value_2 + 4.0;
 	}
 

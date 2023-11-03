@@ -15,7 +15,7 @@ function main() {
 	
 	fmt::println_string("test case 1");
 	fmt::println_string(local_string_value_1);
-	debug::debug_assert(local_string_value_1 == ""); // 13547 segmentation fault
+	debug::debug_assert(local_string_value_1 == "");
 
 
 	fmt::println_string("\ntest case 2");

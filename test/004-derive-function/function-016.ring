@@ -31,7 +31,8 @@ function main() {
 
 	fmt::println_string("\ntest case 1");
 	fmt::println_int(add_one(1));
-	// fmt::println_int(2 == add_one(1)); // FIXME: compiler error
+	fmt::println_bool(2 == add_one(1));
+	debug::debug_assert(2 == add_one(1));
 
 
 

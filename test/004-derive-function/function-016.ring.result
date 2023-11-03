@@ -1,6 +1,8 @@
 
 test case 1
 2
+true
+debug_assert PASS
 4
 debug_assert PASS
 5

@@ -5,11 +5,11 @@ debug_assert PASS
 
 test case
 7.700000
-debug_assert FAILED
+debug_assert PASS
 
 test case
 8.800000
-debug_assert FAILED
+debug_assert PASS
 
 test case
 12.100000
