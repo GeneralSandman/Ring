@@ -91,6 +91,7 @@ void fix_statement(Statement* statement, Block* block, Function* func) {
 }
 
 void fix_expression(Expression* expression, Block* block, Function* func) {
+BEGIN:
     if (expression == nullptr) {
         return;
     }
@@ -192,6 +193,9 @@ void fix_expression(Expression* expression, Block* block, Function* func) {
 
     default: break;
     }
+
+    expression = expression->next;
+    goto BEGIN;
 }
 
 void add_declaration(Declaration* declaration, Block* block, Function* func) {
@@ -274,9 +278,19 @@ void fix_for_statement(ForStatement* for_statement, Block* block, Function* func
         return;
     }
 
-    fix_expression(for_statement->init_expression, block, func);
-    fix_expression(for_statement->condition_expression, block, func);
-    fix_expression(for_statement->post_expression, block, func);
+    if (for_statement->type == FOR_STATEMENT_TYPE_TERNARY) {
+        fix_expression(for_statement->u.ternary_statement->init_expression, block, func);
+        fix_expression(for_statement->u.ternary_statement->condition_expression, block, func);
+        fix_expression(for_statement->u.ternary_statement->post_expression, block, func);
+    } else if (for_statement->type == FOR_STATEMENT_TYPE_RANGE) {
+        fix_expression(for_statement->u.range_statement->left, block, func);
+        fix_expression(for_statement->u.range_statement->operand, block, func);
+    } else {
+        fprintf(stderr, "for statement type is invalid error\n");
+        exit(ERROR_CODE_COMPILE_ERROR);
+    }
+
+
     fix_block(for_statement->block, func);
 }
 

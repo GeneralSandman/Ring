@@ -26,7 +26,7 @@ int yyerror(char const *str, ...);
     MethodCallExpression*               m_method_call_expression;
     ArrayLiteralExpression*             m_array_literal_expression;
     ClassObjectLiteralExpression*       m_class_object_literal_expression;
-    FieldInitExpression*        m_field_init_expression;
+    FieldInitExpression*                m_field_init_expression;
     ArgumentList*                       m_argument_list;
     Function*                           m_function_definition;
     Parameter*                          m_parameter_list;
@@ -69,6 +69,7 @@ int yyerror(char const *str, ...);
 %token TOKEN_RETURN
 %token TOKEN_DEFER
 %token TOKEN_RANGE
+%token TOKEN_IN
 
 %token TOKEN_CLASS
 %token TOKEN_PRIVATE
@@ -587,11 +588,13 @@ for_statement
     : TOKEN_FOR TOKEN_LP maybe_empty_expression TOKEN_SEMICOLON maybe_empty_expression TOKEN_SEMICOLON maybe_empty_expression TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::for_statement]\t ");
-        $$ = create_for_statement($3, $5, $7, $9);
+        $$ = create_for_ternary_statement($3, $5, $7, $9);
     }
-    | TOKEN_FOR TOKEN_LP  TOKEN_ASSIGN TOKEN_RANGE TOKEN_RP block 
+    | TOKEN_FOR TOKEN_LP      identifier TOKEN_IN TOKEN_RANGE primary_not_new_array      TOKEN_RP block 
     {
         debug_log_with_green_coloar("[RULE::for_statement:range]\t ");
+        
+        $$ = create_for_range_statement(create_expression_identifier($3), $6, $8);
     }
     ;
 
@@ -1036,10 +1039,6 @@ postfix_expression
 primary_expression
     : literal_expression
     | primary_not_new_array
-    | identifier TOKEN_2COLON primary_not_new_array
-    {
-        $$ = expression_add_package_posit($3, $1);
-    }
     | primary_new_creation
     ;
 
@@ -1102,6 +1101,10 @@ primary_not_new_array
     {
         debug_log_with_green_coloar("[RULE::literal_term:class_object_literal_expression]\t ");
         $$ = create_expression_from_class_object_literal($1);
+    }
+    | identifier TOKEN_2COLON primary_not_new_array
+    {
+        $$ = expression_add_package_posit($3, $1);
     }
     ;
 

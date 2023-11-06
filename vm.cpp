@@ -36,11 +36,11 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
 
     // array
-    {RVM_CODE_PUSH_ARRAY_BOOL, "push_array_bool", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
-    {RVM_CODE_PUSH_ARRAY_INT, "push_array_int", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
-    {RVM_CODE_PUSH_ARRAY_DOUBLE, "push_array_double", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
-    {RVM_CODE_PUSH_ARRAY_STRING, "push_array_string", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
-    {RVM_CODE_PUSH_ARRAY_OBJECT, "push_array_object", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
+    {RVM_CODE_PUSH_ARRAY_BOOL, "push_array_bool", OPCODE_OPERAND_TYPE_2BYTE, 0, 3},
+    {RVM_CODE_PUSH_ARRAY_INT, "push_array_int", OPCODE_OPERAND_TYPE_2BYTE, 0, 3},
+    {RVM_CODE_PUSH_ARRAY_DOUBLE, "push_array_double", OPCODE_OPERAND_TYPE_2BYTE, 0, 3},
+    {RVM_CODE_PUSH_ARRAY_STRING, "push_array_string", OPCODE_OPERAND_TYPE_2BYTE, 0, 3},
+    {RVM_CODE_PUSH_ARRAY_OBJECT, "push_array_object", OPCODE_OPERAND_TYPE_2BYTE, 0, 3},
 
 
     // class
@@ -150,6 +150,10 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
     // class
     {RVM_CODE_NEW_CLASS_OBJECT_LITERAL, "new_class_object_literal", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
+
+    // range
+    {RVM_CODE_FOR_RANGE_LOOP, "for_range_loop", OPCODE_OPERAND_TYPE_2BYTE, 0, 3},
+    {RVM_CODE_FOR_RANGE_FINISH, "for_range_finish", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
 
 
     {RVM_CODES_NUM, "", OPCODE_OPERAND_TYPE_0BYTE, 0, 0},

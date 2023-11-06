@@ -572,15 +572,35 @@ Statement* create_statement_from_for(ForStatement* for_statement) {
     return statement;
 }
 
-ForStatement* create_for_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Block* block) {
+ForStatement* create_for_ternary_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Block* block) {
     debug_log_with_yellow_coloar("\t");
 
-    ForStatement* for_statement         = (ForStatement*)malloc(sizeof(ForStatement));
-    for_statement->line_number          = package_unit_get_line_number();
-    for_statement->init_expression      = init_expression;
-    for_statement->condition_expression = condition_expression;
-    for_statement->post_expression      = post_expression;
-    for_statement->block                = block;
+    ForStatement* for_statement                              = (ForStatement*)malloc(sizeof(ForStatement));
+    for_statement->line_number                               = package_unit_get_line_number();
+    for_statement->type                                      = FOR_STATEMENT_TYPE_TERNARY;
+    for_statement->u.ternary_statement                       = (ForTernaryStatement*)malloc(sizeof(ForTernaryStatement));
+    for_statement->u.ternary_statement->init_expression      = init_expression;
+    for_statement->u.ternary_statement->condition_expression = condition_expression;
+    for_statement->u.ternary_statement->post_expression      = post_expression;
+    for_statement->block                                     = block;
+
+    if (block) {
+        block->type = BLOCK_TYPE_FOR;
+    }
+
+    return for_statement;
+}
+
+ForStatement* create_for_range_statement(Expression* left, Expression* operand, Block* block) {
+    debug_log_with_yellow_coloar("\t");
+
+    ForStatement* for_statement               = (ForStatement*)malloc(sizeof(ForStatement));
+    for_statement->line_number                = package_unit_get_line_number();
+    for_statement->type                       = FOR_STATEMENT_TYPE_RANGE;
+    for_statement->u.range_statement          = (ForRangeStatement*)malloc(sizeof(ForRangeStatement));
+    for_statement->u.range_statement->left    = left;
+    for_statement->u.range_statement->operand = operand;
+    for_statement->block                      = block;
 
     if (block) {
         block->type = BLOCK_TYPE_FOR;

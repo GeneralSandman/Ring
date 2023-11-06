@@ -63,6 +63,8 @@ typedef struct FunctionReturnList           FunctionReturnList;
 typedef struct IfStatement                  IfStatement;
 typedef struct ElseIfStatement              ElseIfStatement;
 typedef struct ForStatement                 ForStatement;
+typedef struct ForTernaryStatement          ForTernaryStatement;
+typedef struct ForRangeStatement            ForRangeStatement;
 typedef struct DoForStatement               DoForStatement;
 typedef struct BreakStatement               BreakStatement;
 typedef struct ReturnStatement              ReturnStatement;
@@ -638,6 +640,10 @@ typedef enum {
     // class
     RVM_CODE_NEW_CLASS_OBJECT_LITERAL,
 
+    // range
+    RVM_CODE_FOR_RANGE_LOOP,
+    RVM_CODE_FOR_RANGE_FINISH,
+
     // 不能在生成代码的时候使用
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
 } RVM_Opcode;
@@ -740,7 +746,7 @@ typedef enum {
     EXPRESSION_TYPE_MEMBER,
     EXPRESSION_TYPE_DOT,
 
-    EXPRESSION_TYPE_FIELD_INIT, // class field 初始化表达式 : e.g. {JobID: 1}
+    EXPRESSION_TYPE_FIELD_INIT, // class field 初始化表达式 : e.g. {JobID: 1} FIXME: 这个暂时没有用到, 不要删除
 } ExpressionType;
 
 typedef enum {
@@ -1221,14 +1227,56 @@ struct ElseIfStatement {
     ElseIfStatement* next;
 };
 
+
+typedef enum {
+    FOR_STATEMENT_TYPE_UNKNOW = 0,
+    FOR_STATEMENT_TYPE_TERNARY,
+    FOR_STATEMENT_TYPE_RANGE,
+} ForStatementType;
+/*
+ * ForStatement 有两种形式
+ *
+ * 1. c语言传统 三元For语句
+ *    for(index = 0; index < 10; index++) {
+ *
+ *    }
+ *
+ * `index = 0`   : ternary_statement.init_expression
+ * `index < 10`  : ternary_statement.condition_expression
+ * `index++`     : ternary_statement.post_expression
+ *
+ * 2. 较为现代的 rang语句
+ *    for(index, value = range(int_array)) {
+ *
+ *    }
+ *
+ * `index, value` : range_statement.assign_identifier_list
+ * `int_array`    : range_statement.array_identifier
+ */
+
 struct ForStatement {
-    unsigned int line_number;
+    unsigned int     line_number;
 
-    Expression*  init_expression;
-    Expression*  condition_expression;
-    Expression*  post_expression;
+    ForStatementType type;
 
-    Block*       block;
+    union {
+        ForTernaryStatement* ternary_statement;
+        ForRangeStatement*   range_statement;
+    } u;
+
+    Block* block;
+};
+
+struct ForTernaryStatement {
+    Expression* init_expression;
+    Expression* condition_expression;
+    Expression* post_expression;
+};
+
+// 类似于 AssignExpression
+struct ForRangeStatement {
+    Expression* left;
+    Expression* operand;
 };
 
 struct DoForStatement {
@@ -1646,7 +1694,8 @@ IfStatement*                  create_if_statement(Expression* expression, Block*
 ElseIfStatement*              create_elseif_statement(Expression* expression, Block* elseif_block);
 ElseIfStatement*              elseif_statement_add_item(ElseIfStatement* list, ElseIfStatement* elseif_statement);
 Statement*                    create_statement_from_for(ForStatement* for_statement);
-ForStatement*                 create_for_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Block* block);
+ForStatement*                 create_for_ternary_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Block* block);
+ForStatement*                 create_for_range_statement(Expression* left, Expression* operand, Block* block);
 Statement*                    create_statement_from_dofor(DoForStatement* dofor_statement);
 DoForStatement*               create_dofor_statement(Expression* init_expression, Block* block, Expression* condition_expression, Expression* post_expression);
 Statement*                    create_statement_from_break(BreakStatement* break_statement);
@@ -1778,6 +1827,8 @@ void                          generate_vmcode_from_block(Package_Executer* execu
 void                          generate_vmcode_from_statement_list(Package_Executer* executer, Block* block, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_vmcode_from_if_statement(Package_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_vmcode_from_for_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
+void                          generate_vmcode_from_for_ternary_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
+void                          generate_vmcode_from_for_range_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_vmcode_from_dofor_statement(Package_Executer* executer, DoForStatement* dofor_statement, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_vmcode_from_break_statement(Package_Executer* executer, Block* block, BreakStatement* break_statement, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_vmcode_from_continue_statement(Package_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer);

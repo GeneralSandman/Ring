@@ -31,6 +31,7 @@ extern "C" int yywrap(){
 <INITIAL>"return"       { package_unit_update_line_content(yytext); return TOKEN_RETURN;         }
 <INITIAL>"defer"        { package_unit_update_line_content(yytext); return TOKEN_DEFER;          }
 <INITIAL>"range"        { package_unit_update_line_content(yytext); return TOKEN_RANGE;          }
+<INITIAL>"in"           { package_unit_update_line_content(yytext); return TOKEN_IN;             }
 
 <INITIAL>"class"        { package_unit_update_line_content(yytext); return TOKEN_CLASS;          }
 <INITIAL>"private"      { package_unit_update_line_content(yytext); return TOKEN_PRIVATE;        }
