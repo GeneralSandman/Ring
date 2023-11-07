@@ -964,7 +964,34 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         } break;
 
         // range
-        case RVM_CODE_FOR_RANGE_LOOP: {
+        case RVM_CODE_FOR_RANGE_INIT: {
+            // FIXME: 这里先写死, 检验一下功能
+            if (STACK_GET_INT_OFFSET(rvm, -1) >= 10) {
+                exit(0);
+            }
+
+            //--
+            object    = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index     = STACK_GET_INT_OFFSET(rvm, -1);
+            int value = 0;
+            rvm_array_get_int(rvm, object, index, &value);
+            // runtime_stack->top_index -= 2; // 与 RVM_CODE_PUSH_ARRAY_INT 区别
+            STACK_SET_INT_OFFSET(rvm, 0, value);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+            //--
+
+            STACK_GET_INT_OFFSET(rvm, -2)
+            ++;
+        }
+
+        break;
+        case RVM_CODE_FOR_RANGE: {
+            // STACK_COPY_OFFSET(rvm, -1, -3);
+
+            // // --------
+
+
             // object = STACK_GET_OBJECT_OFFSET(rvm, -2);
             // index  = STACK_GET_INT_OFFSET(rvm, -1);
 
@@ -979,7 +1006,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // object = rvm_new_class_object_literal(rvm, field_count, init_exp_size);
             // runtime_stack->top_index -= init_exp_size;
             // STACK_SET_OBJECT_OFFSET(rvm, 0, object);
-            // runtime_stack->top_index++;
+            // runtime_stack->top_index -= 2;
             rvm->pc += 3;
         } break;
         case RVM_CODE_FOR_RANGE_FINISH:

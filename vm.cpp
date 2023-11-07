@@ -152,7 +152,8 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_NEW_CLASS_OBJECT_LITERAL, "new_class_object_literal", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
 
     // range
-    {RVM_CODE_FOR_RANGE_LOOP, "for_range_loop", OPCODE_OPERAND_TYPE_2BYTE, 0, 3},
+    {RVM_CODE_FOR_RANGE_INIT, "for_range_init", OPCODE_OPERAND_TYPE_2BYTE, 0, 3},
+    {RVM_CODE_FOR_RANGE, "for_range", OPCODE_OPERAND_TYPE_2BYTE, 0, 3},
     {RVM_CODE_FOR_RANGE_FINISH, "for_range_finish", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
 
 

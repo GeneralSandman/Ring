@@ -641,7 +641,8 @@ typedef enum {
     RVM_CODE_NEW_CLASS_OBJECT_LITERAL,
 
     // range
-    RVM_CODE_FOR_RANGE_LOOP,
+    RVM_CODE_FOR_RANGE_INIT,
+    RVM_CODE_FOR_RANGE,
     RVM_CODE_FOR_RANGE_FINISH,
 
     // 不能在生成代码的时候使用
