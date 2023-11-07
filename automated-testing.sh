@@ -13,7 +13,6 @@ TEST_MODELS=(
     "002-operator" 
     "003-native-function" 
     "004-derive-function" 
-    "005-control-flow" 
     "006-variable" 
     "007-array"
     "008-class" 
@@ -27,10 +26,13 @@ TEST_MODELS=(
     "021-array-int"
     "022-array-double"
     "023-array-string"
+
+    "030-if"
+    "031-for"
+    "032-do-for"
     )
 
 NOT_TEST_FILES=(
-  "./test/005-control-flow/for-range-000.ring" # ring 还不支持 range
   "./test/004-derive-function/function-021.ring" # 函数传递 var int... int_value_list
   "./test/013-gc/gc-000.ring" # 数组的地址  如何进行 自动化测试
   )
