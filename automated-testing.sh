@@ -36,10 +36,6 @@ TEST_MODELS=(
 NOT_TEST_FILES=(
   "./test/004-derive-function/function-021.ring" # 函数传递 var int... int_value_list
   "./test/013-gc/gc-000.ring" # 数组的地址  如何进行 自动化测试
-
-  "./test/033-for-range/array-bool-000.ring"
-  "./test/033-for-range/array-double-000.ring"
-  "./test/033-for-range/array-string-000.ring"
   )
 
 TEST_RESULT="./automated-testing.sh.result"
