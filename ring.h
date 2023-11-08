@@ -534,6 +534,11 @@ typedef enum {
     RVM_CODE_PUSH_ARRAY_DOUBLE,
     RVM_CODE_PUSH_ARRAY_STRING,
     RVM_CODE_PUSH_ARRAY_OBJECT,
+    RVM_CODE_POP_ARRAY_BOOL,
+    RVM_CODE_POP_ARRAY_INT,
+    RVM_CODE_POP_ARRAY_DOUBLE,
+    RVM_CODE_POP_ARRAY_STRING,
+    RVM_CODE_POP_ARRAY_OBJECT,
 
     // class
     RVM_CODE_POP_FIELD_BOOL,
@@ -1849,6 +1854,7 @@ void                          generate_pop_to_leftvalue_reverse(Package_Executer
 void                          generate_pop_to_leftvalue(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_pop_to_leftvalue_identifier(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_pop_to_leftvalue_member(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
+void                          generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_vmcode_from_logical_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void                          generate_vmcode_from_binary_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void                          generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
@@ -1941,9 +1947,13 @@ RVM_Object*                   rvm_new_array_literal_double(Ring_VirtualMachine* 
 RVM_Object*                   rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size);
 RVM_Object*                   rvm_new_class_object_literal(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int init_exp_size);
 ErrorCode                     rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
+ErrorCode                     rvm_array_set_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
 ErrorCode                     rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
+ErrorCode                     rvm_array_set_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
 ErrorCode                     rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
+ErrorCode                     rvm_array_set_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
 ErrorCode                     rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
+ErrorCode                     rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
 
 RVM_Object*                   rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type);
 RVM_Object*                   rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src);

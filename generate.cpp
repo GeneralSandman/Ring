@@ -934,9 +934,17 @@ void generate_pop_to_leftvalue(Package_Executer* executer, Expression* expressio
         generate_pop_to_leftvalue_identifier(executer, expression->u.identifier_expression, opcode_buffer);
     } else if (expression->type == EXPRESSION_TYPE_MEMBER) {
         generate_pop_to_leftvalue_member(executer, expression->u.member_expression, opcode_buffer);
+    } else if (expression->type == EXPRESSION_TYPE_ARRAY_INDEX) {
+        generate_pop_to_leftvalue_array_index(executer, expression->u.array_index_expression, opcode_buffer);
+    } else {
+        printf("error: not support assign to left-value\n");
+        exit(1);
     }
 }
 
+/*
+ * 给变量赋值
+ */
 void generate_pop_to_leftvalue_identifier(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
     assert(identifier_expression != nullptr);
@@ -968,6 +976,47 @@ void generate_pop_to_leftvalue_member(Package_Executer* executer, MemberExpressi
 
     generate_vmcode_from_expression(executer, member_expression->object_expression, opcode_buffer, 0);
     generate_vmcode(executer, opcode_buffer, opcode, field_index, member_expression->line_number);
+}
+
+/*
+ * 给数组元素赋值
+ */
+void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    debug_log_with_darkgreen_coloar("\t");
+    assert(array_index_expression != nullptr);
+    assert(array_index_expression->array_expression != nullptr);
+    assert(array_index_expression->index_expression != nullptr);
+
+    Declaration* declaration = array_index_expression->array_expression->u.identifier_expression->u.declaration;
+    if (declaration == nullptr) {
+        printf("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
+        exit(1);
+    }
+
+    // push array-object to runtime_stack
+    Expression* index  = array_index_expression->index_expression;
+    RVM_Opcode  opcode = RVM_CODE_UNKNOW;
+    if (declaration->is_local) {
+        opcode = RVM_CODE_PUSH_STACK_OBJECT;
+    } else {
+        opcode = RVM_CODE_PUSH_STATIC_OBJECT;
+    }
+    generate_vmcode(executer, opcode_buffer, opcode, declaration->variable_index, array_index_expression->line_number);
+    generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
+
+    // assign
+    if (declaration->type->next->kind == RING_BASIC_TYPE_BOOL) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_BOOL, 0, array_index_expression->line_number);
+    } else if (declaration->type->next->kind == RING_BASIC_TYPE_INT) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_INT, 0, array_index_expression->line_number);
+    } else if (declaration->type->next->kind == RING_BASIC_TYPE_DOUBLE) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_DOUBLE, 0, array_index_expression->line_number);
+    } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_STRING, 0, array_index_expression->line_number);
+    } else {
+        printf("error: array index expression only support bool[] int[] double[] string[]\n");
+        exit(1);
+    }
 }
 
 void generate_vmcode_from_logical_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
@@ -1454,6 +1503,7 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
         exit(1);
     }
 
+    // push array-object to runtime_stack
     Expression* index  = array_index_expression->index_expression;
     RVM_Opcode  opcode = RVM_CODE_UNKNOW;
     if (declaration->is_local) {
@@ -1466,13 +1516,13 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
 
 
     if (declaration->type->next->kind == RING_BASIC_TYPE_BOOL) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_BOOL, (2 << 8) | (1), array_index_expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_BOOL, 0, array_index_expression->line_number);
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_INT) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_INT, (2 << 8) | (1), array_index_expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_INT, 0, array_index_expression->line_number);
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_DOUBLE) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_DOUBLE, (2 << 8) | (1), array_index_expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_DOUBLE, 0, array_index_expression->line_number);
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_STRING, (2 << 8) | (1), array_index_expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_STRING, 0, array_index_expression->line_number);
     } else {
         printf("error: array index expression only support bool[] int[] double[] string[]\n");
         exit(1);
