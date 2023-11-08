@@ -504,10 +504,10 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer, ForSta
     //       [RVM_CODE_FOR_RANGE_INIT]: add array-iter
     //       pop -> index & value
 
-    end_label = opcode_buffer_get_label(opcode_buffer);
-    generate_vmcode(executer, opcode_buffer,
-                    RVM_CODE_FOR_RANGE_INIT, end_label,
-                    range_statement->operand->u.identifier_expression->line_number);
+    end_label                = opcode_buffer_get_label(opcode_buffer);
+    // generate_vmcode(executer, opcode_buffer,
+    //                 RVM_CODE_FOR_RANGE_INIT, end_label,
+    //                 range_statement->operand->u.identifier_expression->line_number);
 
 
     // generate_vmcode(executer, opcode_buffer,
@@ -515,27 +515,27 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer, ForSta
     //                 range_statement->operand->u.identifier_expression->line_number);
 
 
-    // Declaration* declaration = range_statement->operand->u.identifier_expression->u.declaration;
-    // if (declaration == nullptr) {
-    //     printf("invalid operator[] in identifier:%s\n", range_statement->operand->u.identifier_expression->identifier);
-    //     exit(1);
-    // }
-    // if (declaration->type->next->kind == RING_BASIC_TYPE_BOOL) {
-    //     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_BOOL, (2 << 8) | (1), range_statement->operand->u.identifier_expression->line_number);
-    // } else if (declaration->type->next->kind == RING_BASIC_TYPE_INT) {
-    //     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_INT, (2 << 8) | (1), range_statement->operand->u.identifier_expression->line_number);
-    // } else if (declaration->type->next->kind == RING_BASIC_TYPE_DOUBLE) {
-    //     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_DOUBLE, (2 << 8) | (1), range_statement->operand->u.identifier_expression->line_number);
-    // } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
-    //     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_STRING, (2 << 8) | (1), range_statement->operand->u.identifier_expression->line_number);
-    // } else {
-    //     printf("error: range expression only support bool[] int[] double[] string[]\n");
-    //     exit(1);
-    // }
+    Declaration* declaration = range_statement->operand->u.identifier_expression->u.declaration;
+    if (declaration == nullptr) {
+        printf("invalid range operand:%s\n", range_statement->operand->u.identifier_expression->identifier);
+        exit(1);
+    }
+    if (declaration->type->next->kind == RING_BASIC_TYPE_BOOL) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_BOOL, end_label, range_statement->operand->u.identifier_expression->line_number);
+    } else if (declaration->type->next->kind == RING_BASIC_TYPE_INT) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_INT, end_label, range_statement->operand->u.identifier_expression->line_number);
+    } else if (declaration->type->next->kind == RING_BASIC_TYPE_DOUBLE) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_DOUBLE, end_label, range_statement->operand->u.identifier_expression->line_number);
+    } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_STRING, end_label, range_statement->operand->u.identifier_expression->line_number);
+    } else {
+        printf("error: range expression only support bool[] int[] double[] string[]\n");
+        exit(1);
+    }
 
-    generate_vmcode(executer, opcode_buffer,
-                    RVM_CODE_FOR_RANGE, 0,
-                    range_statement->operand->u.identifier_expression->line_number);
+    // generate_vmcode(executer, opcode_buffer,
+    //                 RVM_CODE_FOR_RANGE, 0,
+    //                 range_statement->operand->u.identifier_expression->line_number);
 
 
     generate_pop_to_leftvalue_reverse(executer, range_statement->left, opcode_buffer);
@@ -1596,7 +1596,12 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         case RVM_CODE_JUMP:
         case RVM_CODE_JUMP_IF_FALSE:
         case RVM_CODE_JUMP_IF_TRUE:
-        case RVM_CODE_FOR_RANGE_INIT:
+        case RVM_CODE_FOR_RANGE_ARRAY_BOOL:
+        case RVM_CODE_FOR_RANGE_ARRAY_INT:
+        case RVM_CODE_FOR_RANGE_ARRAY_DOUBLE:
+        case RVM_CODE_FOR_RANGE_ARRAY_STRING:
+        case RVM_CODE_FOR_RANGE_ARRAY_OBJECT:
+        case RVM_CODE_FOR_RANGE_STRING:
             label                           = (opcode_buffer->code_list[i + 1] << 8) + (opcode_buffer->code_list[i + 2]);
             label_address                   = opcode_buffer->lable_list[label].label_address;
 

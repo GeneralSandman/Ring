@@ -641,7 +641,12 @@ typedef enum {
     RVM_CODE_NEW_CLASS_OBJECT_LITERAL,
 
     // range
-    RVM_CODE_FOR_RANGE_INIT,
+    RVM_CODE_FOR_RANGE_ARRAY_BOOL,
+    RVM_CODE_FOR_RANGE_ARRAY_INT,
+    RVM_CODE_FOR_RANGE_ARRAY_DOUBLE,
+    RVM_CODE_FOR_RANGE_ARRAY_STRING,
+    RVM_CODE_FOR_RANGE_ARRAY_OBJECT,
+    RVM_CODE_FOR_RANGE_STRING,
     RVM_CODE_FOR_RANGE,
     RVM_CODE_FOR_RANGE_FINISH,
 
@@ -1448,6 +1453,8 @@ typedef enum {
 
     // 虚拟机执行失败
     ERROR_CODE_RUN_VM_ERROR,
+
+    RUNTIME_ERR_OUT_OF_ARRAY_RANGE,
 } ErrorCode;
 
 struct ErrorMessageInfo {
@@ -1933,10 +1940,10 @@ RVM_Object*                   rvm_new_array_literal_int(Ring_VirtualMachine* rvm
 RVM_Object*                   rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
 RVM_Object*                   rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size);
 RVM_Object*                   rvm_new_class_object_literal(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int init_exp_size);
-void                          rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
-void                          rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
-void                          rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
-void                          rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
+ErrorCode                     rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
+ErrorCode                     rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
+ErrorCode                     rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
+ErrorCode                     rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
 
 RVM_Object*                   rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type);
 RVM_Object*                   rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src);
