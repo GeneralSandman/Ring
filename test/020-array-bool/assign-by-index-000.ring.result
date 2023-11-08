@@ -1,0 +1,83 @@
+test cast 1 ------------------------
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+false
+debug_assert PASS
+
+test cast 2 ------------------------
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS
+true
+debug_assert PASS

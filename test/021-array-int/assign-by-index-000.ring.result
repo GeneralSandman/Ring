@@ -1,0 +1,83 @@
+test cast 1 ------------------------
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+0
+debug_assert PASS
+
+test cast 2 ------------------------
+0
+debug_assert PASS
+1
+debug_assert PASS
+2
+debug_assert PASS
+3
+debug_assert PASS
+4
+debug_assert PASS
+5
+debug_assert PASS
+6
+debug_assert PASS
+7
+debug_assert PASS
+8
+debug_assert PASS
+9
+debug_assert PASS
+10
+debug_assert PASS
+11
+debug_assert PASS
+12
+debug_assert PASS
+13
+debug_assert PASS
+14
+debug_assert PASS
+15
+debug_assert PASS
+16
+debug_assert PASS
+17
+debug_assert PASS
+18
+debug_assert PASS
+19
+debug_assert PASS
