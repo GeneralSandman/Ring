@@ -287,8 +287,16 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int       caller_stack_offset    = 0;
     unsigned int       return_value_list_size = 0;
 
+    bool               bool_value             = false;
+    int                int_value              = 0;
+    double             double_value           = 0;
+    RVM_Object*        object_value           = nullptr;
+
+
     RVM_Function*      function               = nullptr;
-    RVM_Object*        object                 = nullptr;
+    RVM_Object*        array_object           = nullptr;
+    // TODO: class_object 这个局部变量名称是不是要改一下, class_object->u.class_object 这样的情况不太好理解
+    RVM_Object*        class_object           = nullptr;
 
     ErrorCode          error_code             = ERROR_CODE_SUCCESS;
 
@@ -473,75 +481,71 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         // array
-        case RVM_CODE_PUSH_ARRAY_BOOL: {
-            object     = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            index      = STACK_GET_INT_OFFSET(rvm, -1);
-            bool value = 0;
-            rvm_array_get_bool(rvm, object, index, &value);
-            runtime_stack->top_index -= 2;
-            STACK_SET_BOOL_OFFSET(rvm, 0, (RVM_Bool)((int)value));
-            runtime_stack->top_index++;
-            rvm->pc += 1;
-        } break;
-        case RVM_CODE_PUSH_ARRAY_INT: {
-            object    = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            index     = STACK_GET_INT_OFFSET(rvm, -1);
-            int value = 0;
-            rvm_array_get_int(rvm, object, index, &value);
-            runtime_stack->top_index -= 2;
-            STACK_SET_INT_OFFSET(rvm, 0, value);
-            runtime_stack->top_index++;
-            rvm->pc += 1;
-        } break;
-        case RVM_CODE_PUSH_ARRAY_DOUBLE: {
-            object       = STACK_GET_OBJECT_OFFSET(rvm, -2);
+        case RVM_CODE_PUSH_ARRAY_BOOL:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
             index        = STACK_GET_INT_OFFSET(rvm, -1);
-            double value = 0;
-            rvm_array_get_double(rvm, object, index, &value);
+            rvm_array_get_bool(rvm, array_object, index, &bool_value);
             runtime_stack->top_index -= 2;
-            STACK_SET_DOUBLE_OFFSET(rvm, 0, value);
+            STACK_SET_BOOL_OFFSET(rvm, 0, (RVM_Bool)((int)bool_value));
             runtime_stack->top_index++;
             rvm->pc += 1;
-        } break;
-        case RVM_CODE_PUSH_ARRAY_STRING: {
-            object = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            index  = STACK_GET_INT_OFFSET(rvm, -1);
-            RVM_Object* value;
-            rvm_array_get_string(rvm, object, index, &value);
+            break;
+        case RVM_CODE_PUSH_ARRAY_INT:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            rvm_array_get_int(rvm, array_object, index, &int_value);
             runtime_stack->top_index -= 2;
-            STACK_SET_OBJECT_OFFSET(rvm, 0, value);
+            STACK_SET_INT_OFFSET(rvm, 0, int_value);
             runtime_stack->top_index++;
             rvm->pc += 1;
-        } break;
+            break;
+        case RVM_CODE_PUSH_ARRAY_DOUBLE:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            rvm_array_get_double(rvm, array_object, index, &double_value);
+            runtime_stack->top_index -= 2;
+            STACK_SET_DOUBLE_OFFSET(rvm, 0, double_value);
+            runtime_stack->top_index++;
+            rvm->pc += 1;
+            break;
+        case RVM_CODE_PUSH_ARRAY_STRING:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            rvm_array_get_string(rvm, array_object, index, &object_value);
+            runtime_stack->top_index -= 2;
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
+            runtime_stack->top_index++;
+            rvm->pc += 1;
+            break;
         case RVM_CODE_PUSH_ARRAY_OBJECT:
             break;
 
         case RVM_CODE_POP_ARRAY_BOOL: {
-            object     = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            index      = STACK_GET_INT_OFFSET(rvm, -1);
-            bool value = (bool)STACK_GET_BOOL_OFFSET(rvm, -3);
-            rvm_array_set_bool(rvm, object, index, &value);
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            bool_value   = (bool)STACK_GET_BOOL_OFFSET(rvm, -3);
+            rvm_array_set_bool(rvm, array_object, index, &bool_value);
             runtime_stack->top_index -= 3;
             rvm->pc += 1;
         } break;
         case RVM_CODE_POP_ARRAY_INT:
-            object = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            index  = STACK_GET_INT_OFFSET(rvm, -1);
-            rvm_array_set_int(rvm, object, index, &STACK_GET_INT_OFFSET(rvm, -3));
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            rvm_array_set_int(rvm, array_object, index, &STACK_GET_INT_OFFSET(rvm, -3));
             runtime_stack->top_index -= 3;
             rvm->pc += 1;
             break;
         case RVM_CODE_POP_ARRAY_DOUBLE:
-            object = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            index  = STACK_GET_INT_OFFSET(rvm, -1);
-            rvm_array_set_double(rvm, object, index, &STACK_GET_DOUBLE_OFFSET(rvm, -3));
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            rvm_array_set_double(rvm, array_object, index, &STACK_GET_DOUBLE_OFFSET(rvm, -3));
             runtime_stack->top_index -= 3;
             rvm->pc += 1;
             break;
         case RVM_CODE_POP_ARRAY_STRING:
-            object = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            index  = STACK_GET_INT_OFFSET(rvm, -1);
-            rvm_array_set_string(rvm, object, index, &STACK_GET_OBJECT_OFFSET(rvm, -3));
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            rvm_array_set_string(rvm, array_object, index, &STACK_GET_OBJECT_OFFSET(rvm, -3));
             runtime_stack->top_index -= 3;
             rvm->pc += 1;
             break;
@@ -557,42 +561,42 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
              * 这里是不是反过来写更好理解
              *
              */
-            object                                               = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num                                             = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object->u.class_object->field[oper_num].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
+            class_object                                               = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num                                                   = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_object->u.class_object->field[oper_num].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_INT:
-            object                                              = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num                                            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object->u.class_object->field[oper_num].u.int_value = STACK_GET_INT_OFFSET(rvm, -2);
+            class_object                                              = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num                                                  = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_object->u.class_object->field[oper_num].u.int_value = STACK_GET_INT_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_DOUBLE:
-            object                                                 = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num                                               = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object->u.class_object->field[oper_num].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -2);
+            class_object                                                 = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num                                                     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_object->u.class_object->field[oper_num].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_BOOL:
-            object   = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_BOOL_OFFSET(rvm, -1, object->u.class_object->field[oper_num].u.bool_value);
+            class_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_BOOL_OFFSET(rvm, -1, class_object->u.class_object->field[oper_num].u.bool_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_INT:
-            object   = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_INT_OFFSET(rvm, -1, object->u.class_object->field[oper_num].u.int_value);
+            class_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_INT_OFFSET(rvm, -1, class_object->u.class_object->field[oper_num].u.int_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_DOUBLE:
-            object   = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_DOUBLE_OFFSET(rvm, -1, object->u.class_object->field[oper_num].u.double_value);
+            class_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_DOUBLE_OFFSET(rvm, -1, class_object->u.class_object->field[oper_num].u.double_value);
             rvm->pc += 3;
             break;
 
@@ -726,12 +730,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc++;
             break;
-        case RVM_CODE_RELATIONAL_EQ_STRING: {
+        case RVM_CODE_RELATIONAL_EQ_STRING:
             STACK_GET_BOOL_OFFSET(rvm, -2) = (RVM_Bool)(rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) == 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
-        }
 
         case RVM_CODE_RELATIONAL_NE_INT:
             STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) != STACK_GET_INT_OFFSET(rvm, -1));
@@ -881,11 +884,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_INVOKE_METHOD:
             method_index = STACK_GET_INT_OFFSET(rvm, -1);
-            object       = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            class_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             // FIXME: object->u.class_object->class_def->class_index 这样使用是不对的
             invoke_derive_function(rvm,
-                                   &function, rvm->class_list[object->u.class_object->class_def->class_index].method_list[method_index].rvm_function,
+                                   &function, rvm->class_list[class_object->u.class_object->class_def->class_index].method_list[method_index].rvm_function,
                                    &code_list, &code_size,
                                    &rvm->pc,
                                    &caller_stack_base);
@@ -909,64 +912,64 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // array
         case RVM_CODE_NEW_ARRAY_BOOL:
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object   = rvm_new_array_bool(rvm, oper_num);
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_object = rvm_new_array_bool(rvm, oper_num);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, array_object);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_NEW_ARRAY_INT:
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object   = rvm_new_array_int(rvm, oper_num);
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_object = rvm_new_array_int(rvm, oper_num);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, array_object);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_NEW_ARRAY_DOUBLE:
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object   = rvm_new_array_double(rvm, oper_num);
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_object = rvm_new_array_double(rvm, oper_num);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, array_object);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_NEW_ARRAY_STRING:
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object   = rvm_new_array_string(rvm, oper_num);
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_object = rvm_new_array_string(rvm, oper_num);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, array_object);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_NEW_ARRAY_OBJECT:
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_BOOL: {
-            int size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object   = rvm_new_array_literal_bool(rvm, size);
+            int size     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_object = rvm_new_array_literal_bool(rvm, size);
             runtime_stack->top_index -= size;
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, array_object);
             runtime_stack->top_index++;
             rvm->pc += 3;
         } break;
         case RVM_CODE_NEW_ARRAY_LITERAL_INT: {
-            int size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object   = rvm_new_array_literal_int(rvm, size);
+            int size     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_object = rvm_new_array_literal_int(rvm, size);
             runtime_stack->top_index -= size;
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, array_object);
             runtime_stack->top_index++;
             rvm->pc += 3;
         } break;
         case RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE: {
-            int size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object   = rvm_new_array_literal_double(rvm, size);
+            int size     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_object = rvm_new_array_literal_double(rvm, size);
             runtime_stack->top_index -= size;
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, array_object);
             runtime_stack->top_index++;
             rvm->pc += 3;
         } break;
         case RVM_CODE_NEW_ARRAY_LITERAL_STRING: {
-            int size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            object   = rvm_new_array_literal_string(rvm, size);
+            int size     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_object = rvm_new_array_literal_string(rvm, size);
             runtime_stack->top_index -= size;
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, array_object);
             runtime_stack->top_index++;
             rvm->pc += 3;
         } break;
@@ -979,79 +982,75 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             unsigned int field_count   = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]); // field 的数量不能超过 255
             unsigned int init_exp_size = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]); // field 的数量不能超过 255
 
-            object                     = rvm_new_class_object_literal(rvm, field_count, init_exp_size);
+            class_object               = rvm_new_class_object_literal(rvm, field_count, init_exp_size);
             runtime_stack->top_index -= init_exp_size;
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, class_object);
             runtime_stack->top_index++;
             rvm->pc += 3;
         } break;
 
         // range
-        case RVM_CODE_FOR_RANGE_ARRAY_BOOL: {
-            object     = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            index      = STACK_GET_INT_OFFSET(rvm, -1);
-            bool value = 0;
-            error_code = rvm_array_get_bool(rvm, object, index, &value);
+        case RVM_CODE_FOR_RANGE_ARRAY_BOOL:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            error_code   = rvm_array_get_bool(rvm, array_object, index, &bool_value);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
                 rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
                 break;
             }
             // runtime_stack->top_index -= 2; // 与 RVM_CODE_PUSH_ARRAY_BOOL 的不同点 区别
-            STACK_SET_BOOL_OFFSET(rvm, 0, (RVM_Bool)((int)value));
+            STACK_SET_BOOL_OFFSET(rvm, 0, (RVM_Bool)((int)bool_value));
             runtime_stack->top_index++;
             rvm->pc += 3;
 
             // iter ++
             STACK_GET_INT_OFFSET(rvm, -2)
             ++;
-        } break;
-        case RVM_CODE_FOR_RANGE_ARRAY_INT: {
-            object     = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            index      = STACK_GET_INT_OFFSET(rvm, -1);
-            int value  = 0;
-            error_code = rvm_array_get_int(rvm, object, index, &value);
+            break;
+        case RVM_CODE_FOR_RANGE_ARRAY_INT:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            error_code   = rvm_array_get_int(rvm, array_object, index, &int_value);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
                 rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
                 break;
             }
             // runtime_stack->top_index -= 2; // 与 RVM_CODE_PUSH_ARRAY_INT 的不同点 区别
-            STACK_SET_INT_OFFSET(rvm, 0, value);
+            STACK_SET_INT_OFFSET(rvm, 0, int_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
 
             // iter ++
             STACK_GET_INT_OFFSET(rvm, -2)
             ++;
-        } break;
-        case RVM_CODE_FOR_RANGE_ARRAY_DOUBLE: {
-            object       = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            break;
+        case RVM_CODE_FOR_RANGE_ARRAY_DOUBLE:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
             index        = STACK_GET_INT_OFFSET(rvm, -1);
-            double value = 0;
-            error_code   = rvm_array_get_double(rvm, object, index, &value);
+            error_code   = rvm_array_get_double(rvm, array_object, index, &double_value);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
                 rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
                 break;
             }
             // runtime_stack->top_index -= 2; // 与 RVM_CODE_PUSH_ARRAY_DOUBLE 的不同点 区别
-            STACK_SET_DOUBLE_OFFSET(rvm, 0, value);
+            STACK_SET_DOUBLE_OFFSET(rvm, 0, double_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
 
             // iter ++
             STACK_GET_INT_OFFSET(rvm, -2)
             ++;
-        } break;
+            break;
         case RVM_CODE_FOR_RANGE_ARRAY_STRING: {
-            object = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            index  = STACK_GET_INT_OFFSET(rvm, -1);
-            RVM_Object* value;
-            error_code = rvm_array_get_string(rvm, object, index, &value);
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            error_code   = rvm_array_get_string(rvm, array_object, index, &object_value);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
                 rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
                 break;
             }
             // runtime_stack->top_index -= 2; // 与 RVM_CODE_PUSH_ARRAY_STRING 的不同点 区别
-            STACK_SET_OBJECT_OFFSET(rvm, 0, value);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
 
