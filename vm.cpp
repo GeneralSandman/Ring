@@ -153,6 +153,11 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_NEW_ARRAY_LITERAL_STRING, "new_array_literal_string", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
     {RVM_CODE_NEW_ARRAY_LITERAL_OBJECT, "new_array_literal_object", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
 
+    {RVM_CODE_PUSH_ARRAY_LEN, "push_array_len", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
+    {RVM_CODE_PUSH_ARRAY_CAPACITY, "push_array_capacity", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
+    {RVM_CODE_PUSH_STRING_LEN, "push_string_len", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
+    {RVM_CODE_PUSH_STRING_CAPACITY, "push_string_capacity", OPCODE_OPERAND_TYPE_0BYTE, 0, 1},
+
     // class
     {RVM_CODE_NEW_CLASS_OBJECT_LITERAL, "new_class_object_literal", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
 

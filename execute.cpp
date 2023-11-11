@@ -214,8 +214,8 @@ RVM_Object* new_string_object() {
     object->type               = RVM_OBJECT_TYPE_STRING;
     object->u.string           = (RVM_String*)malloc(sizeof(RVM_String));
     object->u.string->length   = 0;
-    object->u.string->capacity = 0;
-    object->u.string->data     = nullptr;
+    object->u.string->capacity = 10;
+    object->u.string->data     = (char*)malloc(10 * sizeof(char));
     object->gc_mark            = GC_MARK_COLOR_WHITE;
 
 
@@ -977,6 +977,39 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 3;
             break;
 
+        case RVM_CODE_PUSH_ARRAY_LEN:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            rvm_array_get_length(rvm, array_object, &int_value);
+            runtime_stack->top_index -= 1;
+            STACK_SET_INT_OFFSET(rvm, 0, int_value);
+            runtime_stack->top_index += 1;
+            rvm->pc += 1;
+            break;
+        case RVM_CODE_PUSH_ARRAY_CAPACITY:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            rvm_array_get_capacity(rvm, array_object, &int_value);
+            runtime_stack->top_index -= 1;
+            STACK_SET_INT_OFFSET(rvm, 0, int_value);
+            runtime_stack->top_index += 1;
+            rvm->pc += 1;
+            break;
+        case RVM_CODE_PUSH_STRING_LEN:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            rvm_string_get_length(rvm, array_object, &int_value);
+            runtime_stack->top_index -= 1;
+            STACK_SET_INT_OFFSET(rvm, 0, int_value);
+            runtime_stack->top_index += 1;
+            rvm->pc += 1;
+            break;
+        case RVM_CODE_PUSH_STRING_CAPACITY:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            rvm_string_get_capacity(rvm, array_object, &int_value);
+            runtime_stack->top_index -= 1;
+            STACK_SET_INT_OFFSET(rvm, 0, int_value);
+            runtime_stack->top_index += 1;
+            rvm->pc += 1;
+            break;
+
             // class
         case RVM_CODE_NEW_CLASS_OBJECT_LITERAL: {
             unsigned int field_count   = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]); // field 的数量不能超过 255
@@ -1561,6 +1594,34 @@ RVM_Object* rvm_new_class_object_literal(Ring_VirtualMachine* rvm, unsigned int 
         object->u.class_object->field[i] = rvm->runtime_stack->data[init_exp_of_stack_index + i];
     }
     return object;
+}
+
+void rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value) {
+    // FIXME: 这里unsigned int -> int
+    if (object == nullptr || object->u.array == nullptr) {
+        *value = 0;
+        return;
+    }
+    *value = (int)object->u.array->length;
+}
+
+void rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value) {
+    // FIXME: 这里unsigned int -> int
+    if (object == nullptr || object->u.array == nullptr) {
+        *value = 0;
+        return;
+    }
+    *value = (int)object->u.array->capacity;
+}
+
+void rvm_string_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value) {
+    // FIXME: 这里unsigned int -> int
+    *value = (int)object->u.string->length;
+}
+
+void rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value) {
+    // FIXME: 这里unsigned int -> int
+    *value = (int)object->u.string->capacity;
 }
 
 ErrorCode rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value) {

@@ -357,6 +357,9 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
         break;
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
+        if (is_native_function_identifier(expression->package_posit, expression->identifier)) {
+            return nullptr;
+        }
         function = search_function(expression->package_posit, expression->identifier);
         if (function == nullptr) {
             char error_message_buffer[1024];
@@ -697,4 +700,13 @@ Function* search_function(char* package_posit, char* identifier) {
         }
     }
     return nullptr;
+}
+
+int is_native_function_identifier(char* package_posit, char* identifier) {
+    if (strcmp(identifier, "len") == 0) {
+        return 1;
+    } else if (strcmp(identifier, "capacity") == 0) {
+        return 1;
+    }
+    return 0;
 }

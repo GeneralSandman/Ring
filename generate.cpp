@@ -1277,6 +1277,15 @@ void generate_vmcode_from_function_call_expression(Package_Executer* executer, F
     if (function_call_expression == nullptr) {
         return;
     }
+
+    Expression* function_identifier = function_call_expression->function_identifier_expression;
+    if (function_identifier->type == EXPRESSION_TYPE_IDENTIFIER) {
+        if (is_native_function_identifier(function_identifier->u.identifier_expression->package_posit, function_identifier->u.identifier_expression->identifier)) {
+            generate_vmcode_from_native_function_call_expression(executer, function_call_expression, opcode_buffer);
+            return;
+        }
+    }
+
     ArgumentList* pos                = function_call_expression->argument_list;
     unsigned int  argument_list_size = 0;
     for (; pos != nullptr; pos = pos->next) {
@@ -1288,6 +1297,31 @@ void generate_vmcode_from_function_call_expression(Package_Executer* executer, F
 
     generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer, 1);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, function_call_expression->line_number);
+}
+
+// native function 这个函数名起的 不太好
+// 容易跟 std-package 混淆
+// TODO: 这里需要重新设计一下 跟 is_native_function_identifier
+void generate_vmcode_from_native_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    Expression* function_identifier = function_call_expression->function_identifier_expression;
+
+    if (strcmp(function_identifier->u.identifier_expression->identifier, "len") == 0) {
+        if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
+            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_LEN, 0, function_call_expression->line_number);
+        } else if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_ARRAY) {
+            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_LEN, 0, function_call_expression->line_number);
+        }
+    } else if (strcmp(function_identifier->u.identifier_expression->identifier, "capacity") == 0) {
+        if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
+            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_CAPACITY, 0, function_call_expression->line_number);
+        } else if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_ARRAY) {
+            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_CAPACITY, 0, function_call_expression->line_number);
+        }
+    }
 }
 
 void generate_vmcode_from_method_call_expression(Package_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer) {

@@ -642,6 +642,11 @@ typedef enum {
     RVM_CODE_NEW_ARRAY_LITERAL_STRING,
     RVM_CODE_NEW_ARRAY_LITERAL_OBJECT,
 
+    RVM_CODE_PUSH_ARRAY_LEN,
+    RVM_CODE_PUSH_ARRAY_CAPACITY,
+    RVM_CODE_PUSH_STRING_LEN,
+    RVM_CODE_PUSH_STRING_CAPACITY,
+
     // class
     RVM_CODE_NEW_CLASS_OBJECT_LITERAL,
 
@@ -1812,6 +1817,7 @@ void                          fix_ternary_condition_expression(TernaryExpression
 void                          add_parameter_to_declaration(Parameter* parameter, Block* block);
 Declaration*                  search_declaration(char* package_posit, char* identifier, Block* block);
 Function*                     search_function(char* package_posit, char* identifier);
+int                           is_native_function_identifier(char* package_posit, char* identifier);
 // --------------------
 
 
@@ -1866,6 +1872,7 @@ void                          generate_vmcode_from_int_expression(Package_Execut
 void                          generate_vmcode_from_double_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_vmcode_from_string_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_vmcode_from_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
+void                          generate_vmcode_from_native_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_vmcode_from_method_call_expression(Package_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer);
 void                          generate_vmcode_from_member_expression(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
@@ -1946,6 +1953,10 @@ RVM_Object*                   rvm_new_array_literal_int(Ring_VirtualMachine* rvm
 RVM_Object*                   rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
 RVM_Object*                   rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size);
 RVM_Object*                   rvm_new_class_object_literal(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int init_exp_size);
+void                          rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
+void                          rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
+void                          rvm_string_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
+void                          rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
 ErrorCode                     rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
 ErrorCode                     rvm_array_set_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
 ErrorCode                     rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
