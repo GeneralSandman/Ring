@@ -47,6 +47,13 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_POP_ARRAY_STRING, "pop_array_string", OPCODE_OPERAND_TYPE_0BYTE, -3, 1, "assign to string array by index", "[int,object,int]->[]"},
     {RVM_CODE_POP_ARRAY_OBJECT, "pop_array_object", OPCODE_OPERAND_TYPE_0BYTE, -3, 1, "assign to object array by index", "[int,object,int]->[]"},
 
+    // array append
+    {RVM_CODE_ARRAY_APPEND_BOOL, "array_append_bool", OPCODE_OPERAND_TYPE_0BYTE, -2, 1, "assign to object array by index", "[object,bool]->[]"},
+    {RVM_CODE_ARRAY_APPEND_INT, "array_append_int", OPCODE_OPERAND_TYPE_0BYTE, -2, 1, "assign to object array by index", "[object,int]->[]"},
+    {RVM_CODE_ARRAY_APPEND_DOUBLE, "array_append_double", OPCODE_OPERAND_TYPE_0BYTE, -2, 1, "assign to object array by index", "[object,double]->[]"},
+    {RVM_CODE_ARRAY_APPEND_STRING, "array_append_string", OPCODE_OPERAND_TYPE_0BYTE, -2, 1, "assign to object array by index", "[object,string]->[]"},
+    {RVM_CODE_ARRAY_APPEND_OBJECT, "array_append_object", OPCODE_OPERAND_TYPE_0BYTE, -2, 1, "assign to object array by index", "[object,object]->[]"},
+
 
     // class
     {RVM_CODE_POP_FIELD_BOOL, "pop_field_bool", OPCODE_OPERAND_TYPE_2BYTE, -1, 3, "assign to class field whith bool", ""},

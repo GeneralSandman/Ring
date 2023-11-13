@@ -707,6 +707,10 @@ int is_native_function_identifier(char* package_posit, char* identifier) {
         return 1;
     } else if (strcmp(identifier, "capacity") == 0) {
         return 1;
+    } else if (strcmp(identifier, "push") == 0) {
+        return 1;
+    } else if (strcmp(identifier, "pop") == 0) {
+        return 1;
     }
     return 0;
 }
