@@ -573,6 +573,52 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_ARRAY_APPEND_OBJECT:
+            rvm->pc += 1;
+            break;
+
+        // array pop
+        case RVM_CODE_ARRAY_POP_BOOL:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            bool_value   = false;
+            rvm_array_pop_bool(rvm, array_object, &bool_value);
+            runtime_stack->top_index -= 1;
+            STACK_SET_BOOL_OFFSET(rvm, 0, (RVM_Bool)bool_value);
+            runtime_stack->top_index += 1;
+            rvm->pc += 1;
+            break;
+
+        case RVM_CODE_ARRAY_POP_INT:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            int_value    = 0;
+            rvm_array_pop_int(rvm, array_object, &int_value);
+            runtime_stack->top_index -= 1;
+            STACK_SET_INT_OFFSET(rvm, 0, int_value);
+            runtime_stack->top_index += 1;
+            rvm->pc += 1;
+            break;
+
+        case RVM_CODE_ARRAY_POP_DOUBLE:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            double_value = false;
+            rvm_array_pop_double(rvm, array_object, &double_value);
+            runtime_stack->top_index -= 1;
+            STACK_SET_DOUBLE_OFFSET(rvm, 0, double_value);
+            runtime_stack->top_index += 1;
+            rvm->pc += 1;
+            break;
+
+        case RVM_CODE_ARRAY_POP_STRING:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            object_value = nullptr;
+            rvm_array_pop_string(rvm, array_object, &object_value);
+            runtime_stack->top_index -= 1;
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
+            runtime_stack->top_index += 1;
+            rvm->pc += 1;
+            break;
+
+        case RVM_CODE_ARRAY_POP_OBJECT:
+            rvm->pc += 1;
             break;
 
 
@@ -1674,6 +1720,14 @@ ErrorCode rvm_array_append_bool(Ring_VirtualMachine* rvm, RVM_Object* object, bo
     return ERROR_CODE_SUCCESS;
 }
 
+ErrorCode rvm_array_pop_bool(Ring_VirtualMachine* rvm, RVM_Object* object, bool* value) {
+    if (object->u.array->length == 0) {
+        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
+    }
+    *value = object->u.array->u.bool_array[--object->u.array->length];
+    return ERROR_CODE_SUCCESS;
+}
+
 ErrorCode rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value) {
     if (index >= object->u.array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
@@ -1700,6 +1754,14 @@ ErrorCode rvm_array_append_int(Ring_VirtualMachine* rvm, RVM_Object* object, int
     return ERROR_CODE_SUCCESS;
 }
 
+ErrorCode rvm_array_pop_int(Ring_VirtualMachine* rvm, RVM_Object* object, int* value) {
+    if (object->u.array->length == 0) {
+        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
+    }
+    *value = object->u.array->u.int_array[--object->u.array->length];
+    return ERROR_CODE_SUCCESS;
+}
+
 ErrorCode rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value) {
     if (index >= object->u.array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
@@ -1723,6 +1785,14 @@ ErrorCode rvm_array_append_double(Ring_VirtualMachine* rvm, RVM_Object* object, 
                                                            object->u.array->capacity * sizeof(double));
     }
     object->u.array->u.double_array[object->u.array->length++] = *value;
+    return ERROR_CODE_SUCCESS;
+}
+
+ErrorCode rvm_array_pop_double(Ring_VirtualMachine* rvm, RVM_Object* object, double* value) {
+    if (object->u.array->length == 0) {
+        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
+    }
+    *value = object->u.array->u.double_array[--object->u.array->length];
     return ERROR_CODE_SUCCESS;
 }
 
@@ -1753,7 +1823,22 @@ ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Object* object, int
 }
 
 ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value) {
-    // TODO:
+    if (object->u.array->length >= object->u.array->capacity) {
+        object->u.array->capacity *= 2;
+
+        object->u.array->u.string_array = (RVM_String*)realloc(object->u.array->u.string_array, sizeof(RVM_String) * object->u.array->capacity);
+    }
+    object->u.array->u.string_array[object->u.array->length++] = *rvm_deep_copy_string(rvm, (*value)->u.string);
+    return ERROR_CODE_SUCCESS;
+}
+
+ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value) {
+    if (object->u.array->length == 0) {
+        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
+    }
+    *value                 = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_STRING);
+    RVM_String* dst_string = rvm_deep_copy_string(rvm, &(object->u.array->u.string_array[--object->u.array->length]));
+    (*value)->u.string     = dst_string; // FIXME: 这里内存泄漏了
     return ERROR_CODE_SUCCESS;
 }
 

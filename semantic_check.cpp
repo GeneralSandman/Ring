@@ -88,8 +88,8 @@ void ring_compiler_analysis_function(Package* package) {
 }
 
 void ring_compiler_analysis_class(Package* package) {
-    for (ClassDefinition* pos : package->class_definition_list) {
-    }
+    // for (ClassDefinition* pos : package->class_definition_list) {
+    // }
 }
 
 void ring_compiler_check_exit(Package* package) {

@@ -1345,6 +1345,23 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
         }
 
     } else if (strcmp(function_identifier->u.identifier_expression->identifier, "pop") == 0) {
+        pos = function_call_expression->argument_list;
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
+
+        if (function_call_expression->argument_list->expression->convert_type->kind != RING_BASIC_TYPE_ARRAY) {
+            printf("error: pop() only used to append value to array\n");
+            exit(1);
+        }
+
+        if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_BOOL) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_BOOL, 0, function_call_expression->line_number);
+        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_INT) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_INT, 0, function_call_expression->line_number);
+        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_DOUBLE) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_DOUBLE, 0, function_call_expression->line_number);
+        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_STRING) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_STRING, 0, function_call_expression->line_number);
+        }
     }
 }
 
