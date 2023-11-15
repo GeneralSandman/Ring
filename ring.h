@@ -673,6 +673,11 @@ typedef enum {
     RVM_CODE_FOR_RANGE,
     RVM_CODE_FOR_RANGE_FINISH,
 
+    // convert
+    RVM_CODE_BOOL_2_STRING,
+    RVM_CODE_INT_2_STRING,
+    RVM_CODE_DOUBLE_2_STRING,
+
     // 不能在生成代码的时候使用
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
 } RVM_Opcode;
