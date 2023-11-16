@@ -1,0 +1,19 @@
+test cast 1 ------------------------
+0
+0
+debug_assert PASS
+
+test cast 2 ------------------------
+123
+123
+debug_assert PASS
+
+test cast 3 ------------------------
+223
+223
+debug_assert PASS
+
+test cast 4 ------------------------
+9870
+9870
+debug_assert PASS
