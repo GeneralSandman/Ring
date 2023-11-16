@@ -184,6 +184,11 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_FOR_RANGE, "for_range", OPCODE_OPERAND_TYPE_2BYTE, 0, 3},
     {RVM_CODE_FOR_RANGE_FINISH, "for_range_finish", OPCODE_OPERAND_TYPE_2BYTE, 1, 3},
 
+    // convert
+    {RVM_CODE_BOOL_2_STRING, "bool_2_string", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "convert bool to string", "[bool]->[string]"},
+    {RVM_CODE_INT_2_STRING, "int_2_string", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "convert int to string", "[int]->[string]"},
+    {RVM_CODE_DOUBLE_2_STRING, "double_2_string", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "convert double to string", "[double]->[string]"},
+
 
     {RVM_CODES_NUM, "", OPCODE_OPERAND_TYPE_0BYTE, 0, 0},
 };

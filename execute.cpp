@@ -1169,6 +1169,34 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 3;
             break;
 
+
+        // convert
+        case RVM_CODE_BOOL_2_STRING:
+            bool_value   = STACK_GET_BOOL_OFFSET(rvm, -1);
+            object_value = rvm_heap_new_object_from_string(rvm,
+                                                           rvm_bool_2_string(rvm, bool_value));
+            STACK_SET_OBJECT_OFFSET(rvm, -1, object_value);
+            // FIXME: 这里set type 需要优化一下,
+            rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1].type = RVM_VALUE_TYPE_STRING;
+            rvm->pc += 1;
+            break;
+        case RVM_CODE_INT_2_STRING:
+            int_value    = STACK_GET_INT_OFFSET(rvm, -1);
+            object_value = rvm_heap_new_object_from_string(rvm, rvm_int_2_string(rvm, int_value));
+            STACK_SET_OBJECT_OFFSET(rvm, -1, object_value);
+            // FIXME: 这里set type 需要优化一下,
+            rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1].type = RVM_VALUE_TYPE_STRING;
+            rvm->pc += 1;
+            break;
+        case RVM_CODE_DOUBLE_2_STRING:
+            double_value = STACK_GET_DOUBLE_OFFSET(rvm, -1);
+            object_value = rvm_heap_new_object_from_string(rvm, rvm_double_2_string(rvm, double_value));
+            STACK_SET_OBJECT_OFFSET(rvm, -1, object_value);
+            // FIXME: 这里set type 需要优化一下,
+            rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1].type = RVM_VALUE_TYPE_STRING;
+            rvm->pc += 1;
+            break;
+
         default:
             fprintf(stderr,
                     "execute error: pc(%d)\n"
@@ -1915,6 +1943,29 @@ RVM_Object* rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src) {
     return object;
 }
 
+RVM_Object* rvm_heap_new_object_from_string(Ring_VirtualMachine* rvm, RVM_String* str) {
+    assert(rvm != nullptr);
+    assert(rvm->runtime_heap != nullptr);
+
+    RVM_Object* object = (RVM_Object*)malloc(sizeof(RVM_Object));
+    object->type       = RVM_OBJECT_TYPE_STRING;
+    object->gc_mark    = GC_MARK_COLOR_WHITE;
+    object->prev       = nullptr;
+    object->next       = nullptr;
+
+    // add to list
+    RVM_Object* head   = rvm->runtime_heap->list;
+    object->next       = head;
+    if (head != nullptr) {
+        head->prev = object;
+    }
+    rvm->runtime_heap->list = object;
+
+    object->u.string        = str;
+
+    return object;
+}
+
 RVM_String* rvm_heap_new_string(Ring_VirtualMachine* rvm) {
     RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
     string->length     = 0;
@@ -1935,6 +1986,61 @@ RVM_String* rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src) {
 
     return string;
 }
+
+RVM_String* rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value) {
+    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
+    string->length     = 0;
+    string->capacity   = 5;
+    string->data       = (char*)malloc(sizeof(char) * string->capacity);
+    memset(string->data, 0, string->capacity);
+    if (value) {
+        string->length = 4;
+        strncpy(string->data, "true", 4);
+    } else {
+        string->length = 5;
+        strncpy(string->data, "false", 5);
+    }
+
+    // TODO: rvm->runtime_heap->size 的变化需要统一一下
+    rvm->runtime_heap->alloc_size += sizeof(char) * string->capacity;
+
+    return string;
+}
+
+RVM_String* rvm_int_2_string(Ring_VirtualMachine* rvm, int value) {
+    // 这里直接用的 cpp的函数, 是否需要自己实现?
+    std::string tmp    = std::to_string(value);
+
+    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
+    string->length     = tmp.size();
+    string->capacity   = tmp.size();
+    string->data       = (char*)malloc(sizeof(char) * string->capacity);
+
+    strncpy(string->data, tmp.c_str(), tmp.size());
+
+    // TODO: rvm->runtime_heap->size 的变化需要统一一下
+    rvm->runtime_heap->alloc_size += sizeof(char) * string->capacity;
+
+    return string;
+}
+
+RVM_String* rvm_double_2_string(Ring_VirtualMachine* rvm, double value) {
+    // 这里直接用的 cpp的函数, 是否需要自己实现?
+    std::string tmp    = std::to_string(value);
+
+    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
+    string->length     = tmp.size();
+    string->capacity   = tmp.size();
+    string->data       = (char*)malloc(sizeof(char) * string->capacity);
+
+    strncpy(string->data, tmp.c_str(), tmp.size());
+
+    // TODO: rvm->runtime_heap->size 的变化需要统一一下
+    rvm->runtime_heap->alloc_size += sizeof(char) * string->capacity;
+
+    return string;
+}
+
 
 RVM_Array* rvm_heap_new_array(Ring_VirtualMachine* rvm) {
     RVM_Array* array      = (RVM_Array*)malloc(sizeof(RVM_Array));

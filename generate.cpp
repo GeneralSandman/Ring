@@ -1303,11 +1303,11 @@ void generate_vmcode_from_function_call_expression(Package_Executer* executer, F
 // 容易跟 std-package 混淆
 // TODO: 这里需要重新设计一下 跟 is_native_function_identifier
 void generate_vmcode_from_native_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
-    ArgumentList* pos                 = nullptr;
-    Expression*   function_identifier = function_call_expression->function_identifier_expression;
+    ArgumentList* pos                     = nullptr;
+    Expression*   function_identifier_exp = function_call_expression->function_identifier_expression;
+    char*         function_identifier     = function_identifier_exp->u.identifier_expression->identifier;
 
-
-    if (strcmp(function_identifier->u.identifier_expression->identifier, "len") == 0) {
+    if (strcmp(function_identifier, "len") == 0) {
         if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_LEN, 0, function_call_expression->line_number);
@@ -1315,7 +1315,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_LEN, 0, function_call_expression->line_number);
         }
-    } else if (strcmp(function_identifier->u.identifier_expression->identifier, "capacity") == 0) {
+    } else if (strcmp(function_identifier, "capacity") == 0) {
         if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_CAPACITY, 0, function_call_expression->line_number);
@@ -1323,7 +1323,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_CAPACITY, 0, function_call_expression->line_number);
         }
-    } else if (strcmp(function_identifier->u.identifier_expression->identifier, "push") == 0) {
+    } else if (strcmp(function_identifier, "push") == 0) {
         pos = function_call_expression->argument_list;
         for (; pos != nullptr; pos = pos->next) {
             generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
@@ -1344,23 +1344,39 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_STRING, 0, function_call_expression->line_number);
         }
 
-    } else if (strcmp(function_identifier->u.identifier_expression->identifier, "pop") == 0) {
+    } else if (strcmp(function_identifier, "pop") == 0) {
         pos = function_call_expression->argument_list;
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
 
-        if (function_call_expression->argument_list->expression->convert_type->kind != RING_BASIC_TYPE_ARRAY) {
+        if (pos->expression->convert_type->kind != RING_BASIC_TYPE_ARRAY) {
             printf("error: pop() only used to append value to array\n");
             exit(1);
         }
 
-        if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_BOOL) {
+        if (pos->expression->convert_type->next->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_BOOL, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_INT) {
+        } else if (pos->expression->convert_type->next->kind == RING_BASIC_TYPE_INT) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_INT, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_DOUBLE) {
+        } else if (pos->expression->convert_type->next->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_DOUBLE, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_STRING) {
+        } else if (pos->expression->convert_type->next->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_STRING, 0, function_call_expression->line_number);
+        }
+    } else if (strcmp(function_identifier, "to_string") == 0) {
+        pos = function_call_expression->argument_list;
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
+
+        if (pos->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
+            printf("error: to_string() only be used by bool/int/double\n");
+            exit(1);
+        }
+
+        if (pos->expression->convert_type->kind == RING_BASIC_TYPE_BOOL) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_BOOL_2_STRING, 0, function_call_expression->line_number);
+        } else if (pos->expression->convert_type->kind == RING_BASIC_TYPE_INT) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_INT_2_STRING, 0, function_call_expression->line_number);
+        } else if (pos->expression->convert_type->kind == RING_BASIC_TYPE_DOUBLE) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_DOUBLE_2_STRING, 0, function_call_expression->line_number);
         }
     }
 }

@@ -1998,9 +1998,15 @@ ErrorCode                     rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM
 
 RVM_Object*                   rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type);
 RVM_Object*                   rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src);
+RVM_Object*                   rvm_heap_new_object_from_string(Ring_VirtualMachine* rvm, RVM_String* str);
 
 RVM_String*                   rvm_heap_new_string(Ring_VirtualMachine* rvm);
 RVM_String*                   rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src);
+
+RVM_String*                   rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value);
+RVM_String*                   rvm_int_2_string(Ring_VirtualMachine* rvm, int value);
+RVM_String*                   rvm_double_2_string(Ring_VirtualMachine* rvm, double value);
+
 RVM_Array*                    rvm_heap_new_array(Ring_VirtualMachine* rvm);
 RVM_Array*                    rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src);
 RVM_ClassObject*              rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
