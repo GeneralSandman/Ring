@@ -6,21 +6,21 @@
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 Package_Executer*      package_executer_create(ExecuterEntry* executer_entry, char* package_name) {
-    Package_Executer* executer                = (Package_Executer*)malloc(sizeof(Package_Executer));
-    executer->executer_entry                  = executer_entry;
-    executer->package_index                   = -1;
-    executer->package_name                    = package_name;
-    executer->constant_pool_size              = 0;
-    executer->constant_pool_list              = nullptr;
-    executer->global_variable_size            = 0;
-    executer->global_variable_list            = nullptr;
-    executer->function_size                   = 0;
-    executer->function_list                   = nullptr;
-    executer->code_size                       = 0;
-    executer->code_list                       = nullptr;
-    executer->main_func_index                 = -1;
-    executer->estimate_runtime_stack_capacity = 0;
-    return executer;
+         Package_Executer* executer                = (Package_Executer*)malloc(sizeof(Package_Executer));
+         executer->executer_entry                  = executer_entry;
+         executer->package_index                   = -1;
+         executer->package_name                    = package_name;
+         executer->constant_pool_size              = 0;
+         executer->constant_pool_list              = nullptr;
+         executer->global_variable_size            = 0;
+         executer->global_variable_list            = nullptr;
+         executer->function_size                   = 0;
+         executer->function_list                   = nullptr;
+         executer->code_size                       = 0;
+         executer->code_list                       = nullptr;
+         executer->main_func_index                 = -1;
+         executer->estimate_runtime_stack_capacity = 0;
+         return executer;
 }
 
 void package_executer_dump(Package_Executer* package_executer) {
@@ -1632,7 +1632,7 @@ void generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer
     opcode_buffer->code_list                             = (RVM_Byte*)realloc(opcode_buffer->code_list, opcode_buffer->code_capacity * sizeof(RVM_Byte));
     opcode_buffer->code_list[opcode_buffer->code_size++] = opcode; // 操作码
 
-    switch (opcode_info.type) {
+    switch (opcode_info.operand_type) {
     case OPCODE_OPERAND_TYPE_0BYTE:
         break;
 
@@ -1755,7 +1755,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         }
 
 
-        switch (opcode_info.type) {
+        switch (opcode_info.operand_type) {
         case OPCODE_OPERAND_TYPE_0BYTE:
             i++;
             break;

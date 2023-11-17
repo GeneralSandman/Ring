@@ -12,7 +12,7 @@ AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: AcrossEmptyLinesAndComments
 
 # 连续声明时，对齐所有声明的变量名
-AlignConsecutiveDeclarations: AcrossEmptyLinesAndComments
+AlignConsecutiveDeclarations: AcrossEmptyLines
 
 # 右对齐逃脱换行(使用反斜杠换行)的反斜杠
 AlignEscapedNewlines: Right

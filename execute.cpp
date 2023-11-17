@@ -283,9 +283,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Function*      function               = nullptr;
     RVM_Object*        array_object           = nullptr;
     // TODO: class_object 这个局部变量名称是不是要改一下, class_object->u.class_object 这样的情况不太好理解
-    RVM_Object*        class_object           = nullptr;
+    RVM_Object* class_object                  = nullptr;
 
-    ErrorCode          error_code             = ERROR_CODE_SUCCESS;
+    ErrorCode   error_code                    = ERROR_CODE_SUCCESS;
 
     while (rvm->pc < code_size) {
         RVM_Byte opcode = code_list[rvm->pc];
@@ -1222,7 +1222,7 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, un
     int                 return_list_count = function->u.native_func->return_list_count;
     RVM_NativeFuncProc* native_func_proc  = function->u.native_func->func_proc;
     // unsigned int        arg_count        = function->u.native_func->arg_count;
-    RVM_Value*          args; // TODO:
+    RVM_Value* args; // TODO:
 
     // TODO: how to handle arg_count > 1
     args = &rvm->runtime_stack->data[rvm->runtime_stack->top_index - argument_list_size];
@@ -1327,12 +1327,12 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     unsigned int old_return_value_list_index;
 
     rvm->runtime_stack->top_index -= return_value_list_size;
-    old_return_value_list_index       = rvm->runtime_stack->top_index;
+    old_return_value_list_index      = rvm->runtime_stack->top_index;
 
 
-    RVM_CallInfo* callinfo            = nullptr;
+    RVM_CallInfo* callinfo           = nullptr;
     // FIXME: local_variable_size
-    unsigned int  local_variable_size = 20;
+    unsigned int local_variable_size = 20;
     rvm->runtime_stack->top_index -= local_variable_size;
 
     restore_callinfo(rvm->runtime_stack, &callinfo);

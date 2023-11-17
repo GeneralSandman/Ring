@@ -12,9 +12,9 @@ static int   string_literal_buffer_capacity = 0;
 Ring_String* new_ring_string() {
     Ring_String* string = (Ring_String*)malloc(sizeof(Ring_String));
 
-    string->buffer   = (char*)malloc(STRING_LITERAL_CAPACITY);
-    string->size     = 0;
-    string->capacity = STRING_LITERAL_CAPACITY;
+    string->buffer      = (char*)malloc(STRING_LITERAL_CAPACITY);
+    string->size        = 0;
+    string->capacity    = STRING_LITERAL_CAPACITY;
     return string;
 }
 

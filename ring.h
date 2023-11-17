@@ -177,7 +177,6 @@ struct Package_Executer {
     ExecuterEntry*    executer_entry;
     unsigned int      package_index; // 在 ExecuterEntry 中的 index
     char*             package_name;
-    // char*          package_path;
 
     unsigned int      constant_pool_size;
     RVM_ConstantPool* constant_pool_list;
@@ -242,13 +241,13 @@ typedef struct SourceLineInfo {
  * 一个 Package 可以有多个 PackageUnit
  */
 struct PackageUnit {
-    Package*                        parent_package;
+    Package*     parent_package;
 
-    std::string                     current_file_name;
-    FILE*                           current_file_fp;
-    unsigned int                    current_line_number;
-    unsigned int                    current_column_number;
-    Ring_String*                    current_line_content;
+    std::string  current_file_name;
+    FILE*        current_file_fp;
+    unsigned int current_line_number;
+    unsigned int current_column_number;
+    Ring_String* current_line_content;
 
     // 该文件每行的偏移量，用于快速获取某行的内容
     // line_offset_map[0] 没有意义，因为文件都是从第1行开始的
@@ -480,11 +479,10 @@ typedef enum {
 struct RVM_Opcode_Info {
     RVM_Byte          code;                    // 字节码枚举
     std::string       name;                    // 字节码字符串
-    OpcodeOperandType type;                    // 字节码后边的操作数类型
+    OpcodeOperandType operand_type;            // 字节码后边的操作数类型
     int               runtime_stack_increment; // 对运行时栈空间的增长 可为负值
-    int               pc_increment;            // 读取完本字节码，程序计数器的增长，用于读取下一字节码
-    // 有的指令 pc_increment 是可以确定的
-    // 有的指令 类似于 jump  只能运行时确定，所以会先配置0
+    int               pc_increment;            // 读取完本字节码，程序计数器的增长，用于读取下一字节码, 这个跟 operand_type 含义重复了, 后续优化
+
 
     /*
      * 字节码的注释, 放在结构体里边, 用于快速生成文档, 目前暂无使用意义, 后续放在debug控制
@@ -492,8 +490,8 @@ struct RVM_Opcode_Info {
      * usage_comment: 字节码注释
      * stack_top_change: 对 runtime_stack 的操作变化
      */
-    std::string       usage_comment;
-    std::string       stack_top_change;
+    std::string usage_comment;
+    std::string stack_top_change;
 };
 
 typedef enum {
@@ -1633,14 +1631,14 @@ void ring_compile_error_report(ErrorReportContext* context);
  * function definition
  *
  */
-Ring_String*                  new_ring_string();
-void                          reset_ring_string(Ring_String* string);
-void                          ring_string_add_char(Ring_String* string, char ch);
-char*                         get_ring_string(Ring_String* string);
-void                          init_string_literal_buffer();
-void                          reset_string_literal_buffer();
-void                          string_literal_add_char(char ch);
-char*                         get_string_literal();
+Ring_String* new_ring_string();
+void         reset_ring_string(Ring_String* string);
+void         ring_string_add_char(Ring_String* string, char ch);
+char*        get_ring_string(Ring_String* string);
+void         init_string_literal_buffer();
+void         reset_string_literal_buffer();
+void         string_literal_add_char(char ch);
+char*        get_string_literal();
 // --------------------
 
 
@@ -1649,35 +1647,35 @@ char*                         get_string_literal();
  * function definition
  *
  */
-void                          ring_compiler_error(SyntaxType syntax_type, int exit);
-void                          ring_check_exit_immediately();
-CompilerEntry*                compiler_entry_create();
-CompilerEntry*                get_compiler_entry();
-void                          compiler_entry_dump(CompilerEntry* compiler_entry);
-Package*                      search_package(CompilerEntry* compiler_entry, char* package_name);
-ExecuterEntry*                executer_entry_create();
-void                          executer_entry_dump(ExecuterEntry* executer_entry);
-Package*                      package_create(CompilerEntry* compiler_entry, char* package_name, char* package_path);
-Package*                      package_create_input_file(CompilerEntry* compiler_entry, char* package_name, char* input_main_file);
-void                          package_compile(Package* package);
-void                          package_dump(Package* package);
-void                          compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry);
-PackageUnit*                  package_unit_create(Package* parent_package, std::string file_name);
-PackageUnit*                  get_package_unit();
-void                          package_unit_compile(PackageUnit* package_unit);
-void                          package_unit_dump(PackageUnit* package_unit);
-const char*                   package_unit_get_file_name();
-Ring_String*                  get_package_unit_current_line_content();
-unsigned int                  package_unit_get_line_number();
-unsigned int                  package_unit_increa_line_number();
-unsigned int                  package_unit_get_column_number();
-unsigned int                  package_unit_increa_column_number(unsigned int len);
-void                          package_unit_update_line_content(char* str);
-void                          package_unit_reset_line_content();
-char*                         package_unit_get_current_line_content();
-void                          package_unit_reset_column_number();
-std::string                   package_unit_get_line_content(unsigned int line_number);
-int                           package_unit_add_class_definition(ClassDefinition* class_definition);
+void           ring_compiler_error(SyntaxType syntax_type, int exit);
+void           ring_check_exit_immediately();
+CompilerEntry* compiler_entry_create();
+CompilerEntry* get_compiler_entry();
+void           compiler_entry_dump(CompilerEntry* compiler_entry);
+Package*       search_package(CompilerEntry* compiler_entry, char* package_name);
+ExecuterEntry* executer_entry_create();
+void           executer_entry_dump(ExecuterEntry* executer_entry);
+Package*       package_create(CompilerEntry* compiler_entry, char* package_name, char* package_path);
+Package*       package_create_input_file(CompilerEntry* compiler_entry, char* package_name, char* input_main_file);
+void           package_compile(Package* package);
+void           package_dump(Package* package);
+void           compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry);
+PackageUnit*   package_unit_create(Package* parent_package, std::string file_name);
+PackageUnit*   get_package_unit();
+void           package_unit_compile(PackageUnit* package_unit);
+void           package_unit_dump(PackageUnit* package_unit);
+const char*    package_unit_get_file_name();
+Ring_String*   get_package_unit_current_line_content();
+unsigned int   package_unit_get_line_number();
+unsigned int   package_unit_increa_line_number();
+unsigned int   package_unit_get_column_number();
+unsigned int   package_unit_increa_column_number(unsigned int len);
+void           package_unit_update_line_content(char* str);
+void           package_unit_reset_line_content();
+char*          package_unit_get_current_line_content();
+void           package_unit_reset_column_number();
+std::string    package_unit_get_line_content(unsigned int line_number);
+int            package_unit_add_class_definition(ClassDefinition* class_definition);
 // --------------------
 
 
@@ -1789,14 +1787,14 @@ int                           attribute_is_destructor(Attribute attribute);
  * function definition
  *
  */
-void                          ring_compiler_semantic_analysis(Package* package);
+void ring_compiler_semantic_analysis(Package* package);
 
-void                          ring_compiler_analysis_import_package(Package* package);
-void                          ring_compiler_analysis_global_variable(Package* package);
-void                          ring_compiler_analysis_function(Package* package);
-void                          ring_compiler_analysis_class(Package* package);
+void ring_compiler_analysis_import_package(Package* package);
+void ring_compiler_analysis_global_variable(Package* package);
+void ring_compiler_analysis_function(Package* package);
+void ring_compiler_analysis_class(Package* package);
 
-void                          ring_compiler_check_exit(Package* package);
+void ring_compiler_check_exit(Package* package);
 // --------------------
 
 
@@ -1805,37 +1803,37 @@ void                          ring_compiler_check_exit(Package* package);
  * function definition
  *
  */
-void                          ring_compiler_fix_ast(Package* package);
-void                          ring_compiler_fix_ast(PackageUnit* package_unit);
-void                          fix_statement_list(Statement* statement_list, Block* block, Function* func);
-void                          fix_statement(Statement* statement, Block* block, Function* func);
-void                          fix_expression(Expression* expression, Block* block, Function* func);
-void                          add_declaration(Declaration* declaration, Block* block, Function* func);
-void                          fix_type_specfier(TypeSpecifier* type_specifier);
-void                          fix_block(Block* block, Function* func);
-void                          fix_if_statement(IfStatement* if_statement, Block* block, Function* func);
-void                          fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
-void                          fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
-void                          fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
-TypeSpecifier*                fix_identifier_expression(IdentifierExpression* expression, Block* block);
-void                          fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
-void                          fix_binary_expression(Expression* expression, Block* block, Function* func);
-void                          fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
-void                          fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func);
-void                          fix_class_definition(ClassDefinition* class_definition);
-void                          fix_array_index_expression(Expression* expression, ArrayIndexExpression* array_index_expression, Block* block, Function* func);
-void                          fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func);
-void                          fix_class_object_literal_expression(Expression* expression, ClassObjectLiteralExpression* literal_expression, Block* block, Function* func);
-void                          fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func);
-void                          fix_dot_expression(Expression* expression, DotExpression* dot_expression, Block* block, Function* func);
-void                          fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
-ClassDefinition*              search_class_definition(char* class_identifier);
-ClassMemberDeclaration*       search_class_member(ClassDefinition* class_definition, char* member_identifier);
-void                          fix_ternary_condition_expression(TernaryExpression* ternary_expression, Block* block, Function* func);
-void                          add_parameter_to_declaration(Parameter* parameter, Block* block);
-Declaration*                  search_declaration(char* package_posit, char* identifier, Block* block);
-Function*                     search_function(char* package_posit, char* identifier);
-int                           is_native_function_identifier(char* package_posit, char* identifier);
+void                    ring_compiler_fix_ast(Package* package);
+void                    ring_compiler_fix_ast(PackageUnit* package_unit);
+void                    fix_statement_list(Statement* statement_list, Block* block, Function* func);
+void                    fix_statement(Statement* statement, Block* block, Function* func);
+void                    fix_expression(Expression* expression, Block* block, Function* func);
+void                    add_declaration(Declaration* declaration, Block* block, Function* func);
+void                    fix_type_specfier(TypeSpecifier* type_specifier);
+void                    fix_block(Block* block, Function* func);
+void                    fix_if_statement(IfStatement* if_statement, Block* block, Function* func);
+void                    fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
+void                    fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
+void                    fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
+TypeSpecifier*          fix_identifier_expression(IdentifierExpression* expression, Block* block);
+void                    fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
+void                    fix_binary_expression(Expression* expression, Block* block, Function* func);
+void                    fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
+void                    fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func);
+void                    fix_class_definition(ClassDefinition* class_definition);
+void                    fix_array_index_expression(Expression* expression, ArrayIndexExpression* array_index_expression, Block* block, Function* func);
+void                    fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func);
+void                    fix_class_object_literal_expression(Expression* expression, ClassObjectLiteralExpression* literal_expression, Block* block, Function* func);
+void                    fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func);
+void                    fix_dot_expression(Expression* expression, DotExpression* dot_expression, Block* block, Function* func);
+void                    fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
+ClassDefinition*        search_class_definition(char* class_identifier);
+ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, char* member_identifier);
+void                    fix_ternary_condition_expression(TernaryExpression* ternary_expression, Block* block, Function* func);
+void                    add_parameter_to_declaration(Parameter* parameter, Block* block);
+Declaration*            search_declaration(char* package_posit, char* identifier, Block* block);
+Function*               search_function(char* package_posit, char* identifier);
+int                     is_native_function_identifier(char* package_posit, char* identifier);
 // --------------------
 
 
@@ -1844,75 +1842,75 @@ int                           is_native_function_identifier(char* package_posit,
  * function definition
  *
  */
-Package_Executer*             package_executer_create(ExecuterEntry* executer_entry, char* package_name);
-void                          package_executer_dump(Package_Executer* package_executer);
+Package_Executer* package_executer_create(ExecuterEntry* executer_entry, char* package_name);
+void              package_executer_dump(Package_Executer* package_executer);
 
-void                          ring_generate_vm_code(Package* package, Package_Executer* executer);
-void                          ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry);
-void                          add_global_variable(Package* package, Package_Executer* executer);
-void                          add_functions(Package* package, Package_Executer* executer);
-void                          add_classes(Package* package, Package_Executer* executer);
-void                          copy_class(Package_Executer* executer, ClassDefinition* src, RVM_Class* dest);
-void                          copy_function(Function* src, RVM_Function* dest);
-void                          copy_method(MethodMember* src, RVM_Method* dest);
-void                          add_top_level_code(Package* package, Package_Executer* executer);
-void                          generate_code_from_function_definition(Package_Executer* executer, Function* src, RVM_Function* dest);
-void                          generate_code_from_method_definition(Package_Executer* executer, MethodMember* src, RVM_Method* dest);
-void                          vm_executer_dump(Package_Executer* executer);
-RVM_OpcodeBuffer*             new_opcode_buffer();
-void                          generate_vmcode_from_block(Package_Executer* executer, Block* block, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_statement_list(Package_Executer* executer, Block* block, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_if_statement(Package_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_for_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_for_ternary_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_for_range_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_dofor_statement(Package_Executer* executer, DoForStatement* dofor_statement, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_break_statement(Package_Executer* executer, Block* block, BreakStatement* break_statement, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_continue_statement(Package_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_return_statement(Package_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_initializer(Package_Executer* executer, Block* block, Declaration* declaration, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* block, JumpTagStatement* jump_tag_statement, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
-void                          generate_vmcode_from_assign_expression(Package_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
-void                          generate_pop_to_leftvalue_reverse(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_pop_to_leftvalue(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_pop_to_leftvalue_identifier(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_pop_to_leftvalue_member(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_logical_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
-void                          generate_vmcode_from_binary_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
-void                          generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
-void                          generate_vmcode_from_unitary_not_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
-void                          generate_vmcode_from_increase_decrease_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
-void                          generate_vmcode_from_identifier_expression(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_bool_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_int_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_double_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_string_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_native_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_method_call_expression(Package_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_member_expression(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_ternary_condition_expression(Package_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_new_array_expression(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_class_object_literal_expreesion(Package_Executer* executer, ClassObjectLiteralExpression* literal_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, ArrayLiteralExpression* array_literal_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode_from_array_index_expression(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer);
-void                          generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal, unsigned int line_number);
+void              ring_generate_vm_code(Package* package, Package_Executer* executer);
+void              ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry);
+void              add_global_variable(Package* package, Package_Executer* executer);
+void              add_functions(Package* package, Package_Executer* executer);
+void              add_classes(Package* package, Package_Executer* executer);
+void              copy_class(Package_Executer* executer, ClassDefinition* src, RVM_Class* dest);
+void              copy_function(Function* src, RVM_Function* dest);
+void              copy_method(MethodMember* src, RVM_Method* dest);
+void              add_top_level_code(Package* package, Package_Executer* executer);
+void              generate_code_from_function_definition(Package_Executer* executer, Function* src, RVM_Function* dest);
+void              generate_code_from_method_definition(Package_Executer* executer, MethodMember* src, RVM_Method* dest);
+void              vm_executer_dump(Package_Executer* executer);
+RVM_OpcodeBuffer* new_opcode_buffer();
+void              generate_vmcode_from_block(Package_Executer* executer, Block* block, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_statement_list(Package_Executer* executer, Block* block, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_if_statement(Package_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_for_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_for_ternary_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_for_range_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_dofor_statement(Package_Executer* executer, DoForStatement* dofor_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_break_statement(Package_Executer* executer, Block* block, BreakStatement* break_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_continue_statement(Package_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_return_statement(Package_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_initializer(Package_Executer* executer, Block* block, Declaration* declaration, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* block, JumpTagStatement* jump_tag_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
+void              generate_vmcode_from_assign_expression(Package_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
+void              generate_pop_to_leftvalue_reverse(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_pop_to_leftvalue(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_pop_to_leftvalue_identifier(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_pop_to_leftvalue_member(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_logical_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
+void              generate_vmcode_from_binary_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
+void              generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
+void              generate_vmcode_from_unitary_not_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
+void              generate_vmcode_from_increase_decrease_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
+void              generate_vmcode_from_identifier_expression(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_bool_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_int_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_double_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_string_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_native_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_method_call_expression(Package_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_member_expression(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_ternary_condition_expression(Package_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_new_array_expression(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_class_object_literal_expreesion(Package_Executer* executer, ClassObjectLiteralExpression* literal_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, ArrayLiteralExpression* array_literal_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_array_index_expression(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal, unsigned int line_number);
 
-int                           constant_pool_grow(Package_Executer* executer, unsigned int growth_size);
-int                           constant_pool_add_int(Package_Executer* executer, int int_literal);
-int                           constant_pool_add_double(Package_Executer* executer, double double_literal);
-int                           constant_pool_add_string(Package_Executer* executer, char* string_literal);
+int               constant_pool_grow(Package_Executer* executer, unsigned int growth_size);
+int               constant_pool_add_int(Package_Executer* executer, int int_literal);
+int               constant_pool_add_double(Package_Executer* executer, double double_literal);
+int               constant_pool_add_string(Package_Executer* executer, char* string_literal);
 
-unsigned int                  opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer);
-void                          opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address);
-void                          opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer);
-RVM_Opcode                    convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type);
-unsigned int                  calc_runtime_stack_capacity(RVM_Byte* code_list, unsigned int code_size);
-void                          add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number, unsigned int start_pc, unsigned int opcode_size);
-void                          dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map);
+unsigned int      opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer);
+void              opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address);
+void              opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer);
+RVM_Opcode        convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type);
+unsigned int      calc_runtime_stack_capacity(RVM_Byte* code_list, unsigned int code_size);
+void              add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number, unsigned int start_pc, unsigned int opcode_size);
+void              dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map);
 // --------------------
 
 
@@ -1921,107 +1919,107 @@ void                          dump_code_line_map(std::vector<RVM_SourceCodeLineM
  * function definition
  *
  */
-inline void                   STACK_SET_INT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, int value);
-inline void                   STACK_SET_DOUBLE_INDEX(Ring_VirtualMachine* rvm, unsigned int index, double value);
-inline void                   STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, RVM_Object* value);
+inline void          STACK_SET_INT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, int value);
+inline void          STACK_SET_DOUBLE_INDEX(Ring_VirtualMachine* rvm, unsigned int index, double value);
+inline void          STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, RVM_Object* value);
 
-RVM_RuntimeStack*             new_runtime_stack();
-RVM_RuntimeStatic*            new_runtime_static();
-RVM_RuntimeHeap*              new_runtime_heap();
-Ring_VirtualMachine*          ring_virtualmachine_create();
-void                          ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry);
-void                          ring_virtualmachine_init(Ring_VirtualMachine* rvm);
-void                          rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
-void                          rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
-RVM_Object*                   new_string_object();
-RVM_Object*                   new_class_object(Ring_VirtualMachine* rvm, ClassDefinition* class_definition);
-void                          ring_execute_vm_code(Ring_VirtualMachine* rvm);
-void                          invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
-void                          invoke_derive_function(Ring_VirtualMachine* rvm,
-                                                     RVM_Function** caller_function, RVM_Function* callee_function,
-                                                     RVM_Byte** code_list, unsigned int* code_size,
-                                                     unsigned int* pc,
-                                                     unsigned int* caller_stack_base);
-void                          derive_function_return(Ring_VirtualMachine* rvm,
-                                                     RVM_Function** caller_function, RVM_Function* callee_function,
-                                                     RVM_Byte** code_list, unsigned int* code_size,
-                                                     unsigned int* pc,
-                                                     unsigned int* caller_stack_base,
-                                                     unsigned int  return_value_list_size);
-void                          derive_function_finish(Ring_VirtualMachine* rvm,
-                                                     RVM_Function** caller_function, RVM_Function* callee_function,
-                                                     RVM_Byte** code_list, unsigned int* code_size,
-                                                     unsigned int* pc,
-                                                     unsigned int* caller_stack_base,
-                                                     unsigned int  return_value_list_size);
-void                          store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo);
-void                          restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo);
-void                          init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function* function);
+RVM_RuntimeStack*    new_runtime_stack();
+RVM_RuntimeStatic*   new_runtime_static();
+RVM_RuntimeHeap*     new_runtime_heap();
+Ring_VirtualMachine* ring_virtualmachine_create();
+void                 ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry);
+void                 ring_virtualmachine_init(Ring_VirtualMachine* rvm);
+void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
+void                 rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
+RVM_Object*          new_string_object();
+RVM_Object*          new_class_object(Ring_VirtualMachine* rvm, ClassDefinition* class_definition);
+void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
+void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
+void                 invoke_derive_function(Ring_VirtualMachine* rvm,
+                                            RVM_Function** caller_function, RVM_Function* callee_function,
+                                            RVM_Byte** code_list, unsigned int* code_size,
+                                            unsigned int* pc,
+                                            unsigned int* caller_stack_base);
+void                 derive_function_return(Ring_VirtualMachine* rvm,
+                                            RVM_Function** caller_function, RVM_Function* callee_function,
+                                            RVM_Byte** code_list, unsigned int* code_size,
+                                            unsigned int* pc,
+                                            unsigned int* caller_stack_base,
+                                            unsigned int  return_value_list_size);
+void                 derive_function_finish(Ring_VirtualMachine* rvm,
+                                            RVM_Function** caller_function, RVM_Function* callee_function,
+                                            RVM_Byte** code_list, unsigned int* code_size,
+                                            unsigned int* pc,
+                                            unsigned int* caller_stack_base,
+                                            unsigned int  return_value_list_size);
+void                 store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo);
+void                 restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo);
+void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function* function);
 
-RVM_Object*                   string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* string_literal);
-RVM_Object*                   concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b);
+RVM_Object*          string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* string_literal);
+RVM_Object*          concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b);
 
-RVM_Object*                   rvm_new_array_bool(Ring_VirtualMachine* rvm, unsigned int dimension);
-RVM_Object*                   rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension);
-RVM_Object*                   rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimension);
-RVM_Object*                   rvm_new_array_string(Ring_VirtualMachine* rvm, unsigned int dimension);
-RVM_Object*                   rvm_new_class_object(Ring_VirtualMachine* rvm, unsigned int field_count);
-RVM_Object*                   rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size);
-RVM_Object*                   rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size);
-RVM_Object*                   rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
-RVM_Object*                   rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size);
-RVM_Object*                   rvm_new_class_object_literal(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int init_exp_size);
-void                          rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
-void                          rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
-void                          rvm_string_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
-void                          rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
+RVM_Object*          rvm_new_array_bool(Ring_VirtualMachine* rvm, unsigned int dimension);
+RVM_Object*          rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension);
+RVM_Object*          rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimension);
+RVM_Object*          rvm_new_array_string(Ring_VirtualMachine* rvm, unsigned int dimension);
+RVM_Object*          rvm_new_class_object(Ring_VirtualMachine* rvm, unsigned int field_count);
+RVM_Object*          rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size);
+RVM_Object*          rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size);
+RVM_Object*          rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
+RVM_Object*          rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size);
+RVM_Object*          rvm_new_class_object_literal(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int init_exp_size);
+void                 rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
+void                 rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
+void                 rvm_string_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
+void                 rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
 
-ErrorCode                     rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
-ErrorCode                     rvm_array_set_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
-ErrorCode                     rvm_array_append_bool(Ring_VirtualMachine* rvm, RVM_Object* object, bool* value);
-ErrorCode                     rvm_array_pop_bool(Ring_VirtualMachine* rvm, RVM_Object* object, bool* value);
+ErrorCode            rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
+ErrorCode            rvm_array_set_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
+ErrorCode            rvm_array_append_bool(Ring_VirtualMachine* rvm, RVM_Object* object, bool* value);
+ErrorCode            rvm_array_pop_bool(Ring_VirtualMachine* rvm, RVM_Object* object, bool* value);
 
-ErrorCode                     rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
-ErrorCode                     rvm_array_set_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
-ErrorCode                     rvm_array_append_int(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
-ErrorCode                     rvm_array_pop_int(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
+ErrorCode            rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
+ErrorCode            rvm_array_set_int(Ring_VirtualMachine* rvm, RVM_Object* object, int index, int* value);
+ErrorCode            rvm_array_append_int(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
+ErrorCode            rvm_array_pop_int(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
 
-ErrorCode                     rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
-ErrorCode                     rvm_array_set_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
-ErrorCode                     rvm_array_append_double(Ring_VirtualMachine* rvm, RVM_Object* object, double* value);
-ErrorCode                     rvm_array_pop_double(Ring_VirtualMachine* rvm, RVM_Object* object, double* value);
+ErrorCode            rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
+ErrorCode            rvm_array_set_double(Ring_VirtualMachine* rvm, RVM_Object* object, int index, double* value);
+ErrorCode            rvm_array_append_double(Ring_VirtualMachine* rvm, RVM_Object* object, double* value);
+ErrorCode            rvm_array_pop_double(Ring_VirtualMachine* rvm, RVM_Object* object, double* value);
 
-ErrorCode                     rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
-ErrorCode                     rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
-ErrorCode                     rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value);
-ErrorCode                     rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value);
+ErrorCode            rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
+ErrorCode            rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
+ErrorCode            rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value);
+ErrorCode            rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value);
 
-RVM_Object*                   rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type);
-RVM_Object*                   rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src);
-RVM_Object*                   rvm_heap_new_object_from_string(Ring_VirtualMachine* rvm, RVM_String* str);
+RVM_Object*          rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type);
+RVM_Object*          rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src);
+RVM_Object*          rvm_heap_new_object_from_string(Ring_VirtualMachine* rvm, RVM_String* str);
 
-RVM_String*                   rvm_heap_new_string(Ring_VirtualMachine* rvm);
-RVM_String*                   rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src);
+RVM_String*          rvm_heap_new_string(Ring_VirtualMachine* rvm);
+RVM_String*          rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src);
 
-RVM_String*                   rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value);
-RVM_String*                   rvm_int_2_string(Ring_VirtualMachine* rvm, int value);
-RVM_String*                   rvm_double_2_string(Ring_VirtualMachine* rvm, double value);
+RVM_String*          rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value);
+RVM_String*          rvm_int_2_string(Ring_VirtualMachine* rvm, int value);
+RVM_String*          rvm_double_2_string(Ring_VirtualMachine* rvm, double value);
 
-RVM_Array*                    rvm_heap_new_array(Ring_VirtualMachine* rvm);
-RVM_Array*                    rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src);
-RVM_ClassObject*              rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
-RVM_ClassObject*              rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
-int                           rvm_string_cmp(RVM_Object* object1, RVM_Object* object2);
+RVM_Array*           rvm_heap_new_array(Ring_VirtualMachine* rvm);
+RVM_Array*           rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src);
+RVM_ClassObject*     rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
+RVM_ClassObject*     rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
+int                  rvm_string_cmp(RVM_Object* object1, RVM_Object* object2);
 
-void                          rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object);
-unsigned int                  rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
-unsigned int                  rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array);
-unsigned int                  rvm_free_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* class_object);
+void                 rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object);
+unsigned int         rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
+unsigned int         rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array);
+unsigned int         rvm_free_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* class_object);
 
 
-int                           rvm_heap_size(Ring_VirtualMachine* rvm);
+int                  rvm_heap_size(Ring_VirtualMachine* rvm);
 
-void                          debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base);
+void                 debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base);
 // --------------------
 
 
@@ -2030,8 +2028,8 @@ void                          debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* 
  * function definition
  *
  */
-void                          ring_bytecode_dump(Package_Executer* executer, FILE* output);
-void                          ring_bytecode_load(Package_Executer* executer, FILE* input);
+void ring_bytecode_dump(Package_Executer* executer, FILE* output);
+void ring_bytecode_load(Package_Executer* executer, FILE* input);
 // --------------------
 
 
@@ -2040,27 +2038,27 @@ void                          ring_bytecode_load(Package_Executer* executer, FIL
  * function definition
  *
  */
-void                          register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count, int return_list_count);
+void      register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count, int return_list_count);
 
-RVM_Value                     std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
-RVM_Value                     std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
-RVM_Value                     std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value                     std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value                     std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value                     std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value                     std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value                     std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
-RVM_Value                     std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
-RVM_Value                     std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value                     std_lib_vm_garbage_collect(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_vm_garbage_collect(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
-RVM_Value                     std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
-RVM_Value                     std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 // --------------------
 
 
@@ -2069,12 +2067,12 @@ RVM_Value                     std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsign
  * function definition
  *
  */
-void                          ring_compiler_functions_dump(PackageUnit* package_unit);
-void                          ring_vm_constantpool_dump(Package_Executer* executer);
-void                          ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
-void                          ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
-void                          ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm);
-std::vector<std::string>      list_files_of_dir(char* dir);
+void                     ring_compiler_functions_dump(PackageUnit* package_unit);
+void                     ring_vm_constantpool_dump(Package_Executer* executer);
+void                     ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
+void                     ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
+void                     ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm);
+std::vector<std::string> list_files_of_dir(char* dir);
 // --------------------
 
 
@@ -2083,7 +2081,7 @@ std::vector<std::string>      list_files_of_dir(char* dir);
  * function definition
  *
  */
-void                          ring_give_man_help(char* keyword);
+void ring_give_man_help(char* keyword);
 // --------------------
 
 
@@ -2092,10 +2090,10 @@ void                          ring_give_man_help(char* keyword);
  * function definition
  *
  */
-void                          gc(Ring_VirtualMachine* rvm);
-void                          gc_summary(Ring_VirtualMachine* rvm);
-void                          gc_mark(Ring_VirtualMachine* rvm);
-void                          gc_sweep(Ring_VirtualMachine* rvm);
+void gc(Ring_VirtualMachine* rvm);
+void gc_summary(Ring_VirtualMachine* rvm);
+void gc_mark(Ring_VirtualMachine* rvm);
+void gc_sweep(Ring_VirtualMachine* rvm);
 // --------------------
 
 
@@ -2104,14 +2102,14 @@ void                          gc_sweep(Ring_VirtualMachine* rvm);
  * function definition
  *
  */
-typedef struct thpool_*       threadpool;
-threadpool                    thpool_init(int num_threads);
-int                           thpool_add_work(threadpool, void (*function_p)(void*), void* arg_p);
-void                          thpool_wait(threadpool);
-void                          thpool_pause(threadpool);
-void                          thpool_resume(threadpool);
-void                          thpool_destroy(threadpool);
-int                           thpool_num_threads_working(threadpool);
+typedef struct thpool_* threadpool;
+threadpool              thpool_init(int num_threads);
+int                     thpool_add_work(threadpool, void (*function_p)(void*), void* arg_p);
+void                    thpool_wait(threadpool);
+void                    thpool_pause(threadpool);
+void                    thpool_resume(threadpool);
+void                    thpool_destroy(threadpool);
+int                     thpool_num_threads_working(threadpool);
 // --------------------
 
 

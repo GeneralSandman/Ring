@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
     CompilerEntry* compiler_entry         = compiler_entry_create();
     // FIX: 目前main package 只能有一个源文件
     // main package 源文件即为 ring run 指定的输入文件
-    Package*       main_package           = package_create_input_file(compiler_entry, (char*)"main", file_name);
+    Package* main_package                 = package_create_input_file(compiler_entry, (char*)"main", file_name);
     compiler_entry->main_package          = main_package; // TODO: optimize the method of set main_package;
 
     /*
