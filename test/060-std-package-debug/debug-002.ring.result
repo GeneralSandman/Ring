@@ -1,6 +1,2 @@
-true
-123
-123.456000
-hello world
 debug_assert PASS
 debug_assert FAILED

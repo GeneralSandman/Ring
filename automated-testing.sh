@@ -3,10 +3,11 @@
 # 需要向下兼容，测试之前的所有测试用例
 #
 
+# 测试的可执行文件
 TEST_RING_BIN="./bin/ring"
 
+# 要测试的文件夹
 TEST_PATH="./test"
-
 TEST_MODELS=(
     "001-basic-type" 
     "001-basic-type-string"
@@ -16,7 +17,6 @@ TEST_MODELS=(
     "006-variable" 
     "007-array"
     "008-class" 
-    "009-package" 
     "010-main-entry" 
     "011-global-variable" 
     "012-local-variable"
@@ -31,16 +31,25 @@ TEST_MODELS=(
     "031-for"
     "032-do-for"
     "033-for-range"
+
+    "060-std-package-debug"
+    "061-std-package-fmt"
+    "062-std-package-reflect"
+    "063-std-package-os"
+    "064-std-package-vm"
     )
 
+# 跳过测试的case
 NOT_TEST_FILES=(
   "./test/004-derive-function/function-021.ring" # 函数传递 var int... int_value_list
   "./test/013-gc/gc-000.ring" # 数组的地址  如何进行 自动化测试
   )
 
+# 测试的结果文件
 TEST_RESULT="./automated-testing.sh.result"
 
-TEST_LOOP_NUM=1 # 测试的轮数, 多次执行
+# 测试的轮数, 用于多次执行
+TEST_LOOP_NUM=1
 
 not_test_num=0
 pass_num=0
