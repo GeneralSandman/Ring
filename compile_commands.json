@@ -2,153 +2,6 @@
  {
   "directory": "/Users/bytedance/Desktop/Ring",
   "arguments": [
-   "gcc",
-   "-c",
-   "-std=c99",
-   "-Wall",
-   "-Wno-gnu-zero-variadic-macro-arguments",
-   "-Wno-unused-function",
-   "-Wno-pedantic",
-   "-c",
-   "-o",
-   "thread_pool.o",
-   "thread_pool.c"
-  ],
-  "file": "thread_pool.c"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "string.cpp"
-  ],
-  "file": "string.cpp"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "create_ast.cpp"
-  ],
-  "file": "create_ast.cpp"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "fix_ast.cpp"
-  ],
-  "file": "fix_ast.cpp"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "generate.cpp"
-  ],
-  "file": "generate.cpp"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "execute.cpp"
-  ],
-  "file": "execute.cpp"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "compiler.cpp"
-  ],
-  "file": "compiler.cpp"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "error_msg.cpp"
-  ],
-  "file": "error_msg.cpp"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "utils.cpp"
-  ],
-  "file": "utils.cpp"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "std_lib.cpp"
-  ],
-  "file": "std_lib.cpp"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "main.cpp"
-  ],
-  "file": "main.cpp"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
    "g++",
    "-c",
    "-std=c++11",
@@ -173,7 +26,33 @@
   "file": "y.tab.cpp"
  },
  {
-  "directory": "/Users/bytedance/Desktop/Ring",
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "string.cpp"
+  ],
+  "file": "string.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "create_ast.cpp"
+  ],
+  "file": "create_ast.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
   "arguments": [
    "g++",
    "-c",
@@ -186,7 +65,98 @@
   "file": "semantic_check.cpp"
  },
  {
-  "directory": "/Users/bytedance/Desktop/Ring",
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "fix_ast.cpp"
+  ],
+  "file": "fix_ast.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "vm.cpp"
+  ],
+  "file": "vm.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "generate.cpp"
+  ],
+  "file": "generate.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "execute.cpp"
+  ],
+  "file": "execute.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "compiler.cpp"
+  ],
+  "file": "compiler.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "error_msg.cpp"
+  ],
+  "file": "error_msg.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "utils.cpp"
+  ],
+  "file": "utils.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
   "arguments": [
    "g++",
    "-c",
@@ -197,5 +167,44 @@
    "man_help.cpp"
   ],
   "file": "man_help.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "std_lib.cpp"
+  ],
+  "file": "std_lib.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "gc.cpp"
+  ],
+  "file": "gc.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wno-unused-function",
+   "-Wno-unneeded-internal-declaration",
+   "main.cpp"
+  ],
+  "file": "main.cpp"
  }
 ]
