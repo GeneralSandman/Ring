@@ -14,7 +14,7 @@ function main() {
   global_double_array_0 = new double[200];
 
   var int index = 0;
-  for(index = 0; index < 200; index = index + 1) {
+  for(index = 0; index < len(global_double_array_0); index = index + 1) {
 	  fmt::println_double(global_double_array_0[index]);
 	  debug::debug_assert(global_double_array_0[index] == 0.0);
   }
