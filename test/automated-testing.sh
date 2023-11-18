@@ -9,8 +9,14 @@ TEST_RING_BIN="./bin/ring"
 # 要测试的文件夹
 TEST_PATH="./test"
 TEST_MODELS=(
+    "001-bool"
+    "002-int"
+    "003-double"
+    "004-string"
+
     "001-basic-type" 
     "001-basic-type-string"
+
     "002-operator" 
     "003-native-function" 
     "004-derive-function" 
