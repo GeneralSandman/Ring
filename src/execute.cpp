@@ -1740,7 +1740,11 @@ ErrorCode rvm_array_set_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int i
 
 ErrorCode rvm_array_append_bool(Ring_VirtualMachine* rvm, RVM_Object* object, bool* value) {
     if (object->u.array->length == object->u.array->capacity) {
-        object->u.array->capacity *= 2;
+        if (object->u.array->capacity == 0) {
+            object->u.array->capacity = 4;
+        } else {
+            object->u.array->capacity *= 2;
+        }
         object->u.array->u.bool_array = (bool*)realloc(object->u.array->u.bool_array,
                                                        object->u.array->capacity * sizeof(bool));
     }
@@ -1774,7 +1778,11 @@ ErrorCode rvm_array_set_int(Ring_VirtualMachine* rvm, RVM_Object* object, int in
 
 ErrorCode rvm_array_append_int(Ring_VirtualMachine* rvm, RVM_Object* object, int* value) {
     if (object->u.array->length == object->u.array->capacity) {
-        object->u.array->capacity *= 2;
+        if (object->u.array->capacity == 0) {
+            object->u.array->capacity = 4;
+        } else {
+            object->u.array->capacity *= 2;
+        }
         object->u.array->u.int_array = (int*)realloc(object->u.array->u.int_array,
                                                      object->u.array->capacity * sizeof(int));
     }
@@ -1808,7 +1816,11 @@ ErrorCode rvm_array_set_double(Ring_VirtualMachine* rvm, RVM_Object* object, int
 
 ErrorCode rvm_array_append_double(Ring_VirtualMachine* rvm, RVM_Object* object, double* value) {
     if (object->u.array->length == object->u.array->capacity) {
-        object->u.array->capacity *= 2;
+        if (object->u.array->capacity == 0) {
+            object->u.array->capacity = 4;
+        } else {
+            object->u.array->capacity *= 2;
+        }
         object->u.array->u.double_array = (double*)realloc(object->u.array->u.double_array,
                                                            object->u.array->capacity * sizeof(double));
     }
@@ -1852,7 +1864,11 @@ ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Object* object, int
 
 ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value) {
     if (object->u.array->length >= object->u.array->capacity) {
-        object->u.array->capacity *= 2;
+        if (object->u.array->capacity == 0) {
+            object->u.array->capacity = 4;
+        } else {
+            object->u.array->capacity *= 2;
+        }
 
         object->u.array->u.string_array = (RVM_String*)realloc(object->u.array->u.string_array, sizeof(RVM_String) * object->u.array->capacity);
     }
