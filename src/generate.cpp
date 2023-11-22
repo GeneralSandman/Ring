@@ -1014,7 +1014,7 @@ void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayInde
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_STRING, 0, array_index_expression->line_number);
     } else {
-        printf("error: array index expression only support bool[] int[] double[] string[]\n");
+        printf("error: assign to item of array only support bool[] int[] double[] string[]\n");
         exit(1);
     }
 }
@@ -1513,8 +1513,10 @@ void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewAr
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_DOUBLE, dimension, new_array_expression->line_number);
     } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_STRING, dimension, new_array_expression->line_number);
+    } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_CLASS) {
+        generate_vmcode_from_array_class_object(executer, new_array_expression, opcode_buffer);
     } else {
-        printf("error: new array only support bool[] int[] double[] string[]\n");
+        printf("error: new array only support bool[] int[] double[] string[] class[]\n");
         exit(1);
     }
 }
@@ -1550,6 +1552,25 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer* exec
     // 需要知道 class object 占多大的空间
     oper_num = (field_count << 8) | init_exp_size;
     generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLASS_OBJECT_LITERAL, oper_num, literal_expression->line_number);
+}
+
+void generate_vmcode_from_array_class_object(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer) {
+    unsigned int     field_count      = 0;
+    unsigned int     oper_num         = 0;
+    unsigned int     dimension        = new_array_expression->dimension_expression->dimension;
+
+
+    ClassDefinition* class_definition = new_array_expression->type_specifier->u.class_type->class_definition;
+    // TODO: 先用笨办法 初始化
+    // TODO: field_count 后续需要在 fix_ast 就要需要算好
+    for (ClassMemberDeclaration* pos = class_definition->member; pos != nullptr; pos = pos->next) {
+        if (pos->type == MEMBER_FIELD) {
+            field_count++;
+        }
+    }
+
+    oper_num = (field_count << 16) | dimension;
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_OBJECT, oper_num, new_array_expression->line_number);
 }
 
 void generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, ArrayLiteralExpression* array_literal_expression, RVM_OpcodeBuffer* opcode_buffer) {
@@ -1614,8 +1635,10 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_DOUBLE, 0, array_index_expression->line_number);
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_STRING, 0, array_index_expression->line_number);
+    } else if (declaration->type->next->kind == RING_BASIC_TYPE_CLASS) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_OBJECT, 0, array_index_expression->line_number);
     } else {
-        printf("error: array index expression only support bool[] int[] double[] string[]\n");
+        printf("error: array index expression only support bool[] int[] double[] string[] class[]\n");
         exit(1);
     }
 }
@@ -1641,8 +1664,14 @@ void generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer
         break;
 
     case OPCODE_OPERAND_TYPE_2BYTE:
-        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(oper_num >> 8);
-        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(oper_num & 0Xff);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((oper_num >> 8) & 0XFF);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(oper_num & 0XFF);
+        break;
+
+    case OPCODE_OPERAND_TYPE_3BYTE:
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((oper_num >> 16) & 0XFF);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((oper_num >> 8) & 0XFF);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(oper_num & 0XFF);
         break;
 
     default: break;
@@ -1768,6 +1797,10 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
             i += 3;
             break;
 
+        case OPCODE_OPERAND_TYPE_3BYTE:
+            i += 4;
+            break;
+
         default:
             fprintf(stderr, "opcode_buffer_fix_label(opcode is valid:%d)\n", opcode);
             exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
@@ -1879,7 +1912,7 @@ void dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map) {
     printf("|------------------ CodeLineMap-Dump-begin ------------------\n");
 
     for (RVM_SourceCodeLineMap& code_line : code_line_map) {
-        printf("source_file_name:%10s line_number:%10d start_pc:%10d size:%10d\n",
+        printf("source_file_name:%10s,line_number:%10d,start_pc:%10d,size:%10d\n",
                code_line.source_file_name,
                code_line.line_number,
                code_line.opcode_begin_index,

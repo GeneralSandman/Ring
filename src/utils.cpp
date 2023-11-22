@@ -92,6 +92,13 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
             oper_num = std::to_string(tmp);
             break;
 
+        case OPCODE_OPERAND_TYPE_3BYTE:
+            tmp = code_list[i++] << 16;
+            tmp += code_list[i++] << 8;
+            tmp += code_list[i++];
+            oper_num = std::to_string(tmp);
+            break;
+
         default: break;
         }
 

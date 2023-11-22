@@ -806,17 +806,25 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
     return type_specifier;
 }
 
-TypeSpecifier* create_type_specifier_array(Ring_BasicType basic_type) {
-    debug_log_with_yellow_coloar("basic_type:%d", basic_type);
-
+/*
+ * 基础类型数组
+ *
+ * array-bool
+ * array-int
+ * array-double
+ * array-string
+ * 类数组 嵌套数组
+ */
+TypeSpecifier* create_type_specifier_array(TypeSpecifier* type) {
     TypeSpecifier* type_specifier = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
     type_specifier->kind          = RING_BASIC_TYPE_ARRAY;
     type_specifier->u.array_type  = nullptr;
     type_specifier->dimension     = 1; // 暂时只支持一维数组
-    type_specifier->next          = create_type_specifier(basic_type);
+    type_specifier->next          = type;
 
     return type_specifier;
 }
+
 
 TypeSpecifier* create_class_type_specifier(char* identifier) {
     debug_log_with_yellow_coloar("\t");

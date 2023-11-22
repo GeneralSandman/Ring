@@ -131,6 +131,12 @@ typedef struct {
         RVM_Object*   object;
 
         RVM_CallInfo* call_info;
+        /*
+         * TODO:
+         * Don't save call_info in runtime_stack.
+         * Save call_info in a double linked list
+         * to record function call stack.
+         */
     } u;
 
 } RVM_Value;
@@ -377,6 +383,7 @@ typedef enum {
     RVM_ARRAY_INT,
     RVM_ARRAY_DOUBLE,
     RVM_ARRAY_STRING,
+    RVM_ARRAY_OBJECT,
 } RVM_Array_Type;
 
 struct RVM_Array {
@@ -384,10 +391,11 @@ struct RVM_Array {
     unsigned int   length;
     unsigned int   capacity;
     union {
-        bool*       bool_array;
-        int*        int_array;
-        double*     double_array;
-        RVM_String* string_array;
+        bool*            bool_array;
+        int*             int_array;
+        double*          double_array;
+        RVM_String*      string_array;
+        RVM_ClassObject* class_object_array;
     } u;
 };
 
@@ -474,6 +482,7 @@ typedef enum {
     OPCODE_OPERAND_TYPE_0BYTE, // 后边没有操作数
     OPCODE_OPERAND_TYPE_1BYTE, // 后边1BYTE操作数
     OPCODE_OPERAND_TYPE_2BYTE, // 后边2BYTE操作数
+    OPCODE_OPERAND_TYPE_3BYTE, // 后边3BYTE操作数
 } OpcodeOperandType;
 
 struct RVM_Opcode_Info {
@@ -1748,8 +1757,9 @@ DimensionExpression*          create_dimension_expression(char* literal_interfac
 DimensionExpression*          dimension_expression_list_add_item(DimensionExpression* list, DimensionExpression* item);
 
 TypeSpecifier*                create_type_specifier(Ring_BasicType basic_type);
-TypeSpecifier*                create_type_specifier_array(Ring_BasicType basic_type);
+TypeSpecifier*                create_type_specifier_array(TypeSpecifier* type);
 TypeSpecifier*                create_class_type_specifier(char* identifier);
+
 Declaration*                  create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
 Declaration*                  declaration_list_add_item(Declaration* head, Declaration* declaration);
 
@@ -1821,8 +1831,11 @@ void                    fix_binary_expression(Expression* expression, Block* blo
 void                    fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
 void                    fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func);
 void                    fix_class_definition(ClassDefinition* class_definition);
+
 void                    fix_array_index_expression(Expression* expression, ArrayIndexExpression* array_index_expression, Block* block, Function* func);
+void                    fix_new_array_expression(Expression* expression, NewArrayExpression* new_array_expression, Block* block, Function* func);
 void                    fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func);
+
 void                    fix_class_object_literal_expression(Expression* expression, ClassObjectLiteralExpression* literal_expression, Block* block, Function* func);
 void                    fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func);
 void                    fix_dot_expression(Expression* expression, DotExpression* dot_expression, Block* block, Function* func);
@@ -1893,10 +1906,13 @@ void              generate_vmcode_from_method_call_expression(Package_Executer* 
 void              generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_member_expression(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_ternary_condition_expression(Package_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer);
+
 void              generate_vmcode_from_new_array_expression(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_class_object_literal_expreesion(Package_Executer* executer, ClassObjectLiteralExpression* literal_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_array_class_object(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, ArrayLiteralExpression* array_literal_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_array_index_expression(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer);
+
 void              generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal, unsigned int line_number);
 
 int               constant_pool_grow(Package_Executer* executer, unsigned int growth_size);
@@ -1963,6 +1979,8 @@ RVM_Object*          rvm_new_array_bool(Ring_VirtualMachine* rvm, unsigned int d
 RVM_Object*          rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension);
 RVM_Object*          rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimension);
 RVM_Object*          rvm_new_array_string(Ring_VirtualMachine* rvm, unsigned int dimension);
+RVM_Object*          rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int dimension);
+
 RVM_Object*          rvm_new_class_object(Ring_VirtualMachine* rvm, unsigned int field_count);
 RVM_Object*          rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size);
 RVM_Object*          rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size);
@@ -1993,6 +2011,8 @@ ErrorCode            rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Object* 
 ErrorCode            rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
 ErrorCode            rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value);
 ErrorCode            rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value);
+
+ErrorCode            rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
 
 RVM_Object*          rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type);
 RVM_Object*          rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src);

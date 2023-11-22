@@ -179,9 +179,10 @@ BEGIN:
 
     case EXPRESSION_TYPE_ARRAY_INDEX:
         fix_array_index_expression(expression, expression->u.array_index_expression, block, func);
-        expression->convert_type       = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
-        // TODO: 这个写法太恶心了, 急需要优化
-        expression->convert_type->kind = expression->u.array_index_expression->array_expression->u.identifier_expression->u.declaration->type->next->kind;
+        break;
+
+    case EXPRESSION_TYPE_NEW_ARRAY:
+        fix_new_array_expression(expression, expression->u.new_array_expression, block, func);
         break;
 
     case EXPRESSION_TYPE_ARRAY_LITERAL:
@@ -526,6 +527,24 @@ void fix_array_index_expression(Expression* expression, ArrayIndexExpression* ar
     fix_expression(array_index_expression->index_expression, block, func);
 
     array_index_expression->array_expression->u.identifier_expression->u.declaration = declaration;
+
+    // 修正最外层 expression 的 convert_type
+    // TODO: 这个写法太恶心了, 急需要优化
+    TypeSpecifier* type =
+        (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+    type->kind =
+        expression->u.array_index_expression->array_expression->u.identifier_expression->u.declaration->type->next->kind;
+    if (type->kind == RING_BASIC_TYPE_CLASS) {
+        type->u.class_type =
+            expression->u.array_index_expression->array_expression->u.identifier_expression->u.declaration->type->next->u.class_type;
+    }
+    fix_type_specfier(type);
+
+    expression->convert_type = type;
+}
+
+void fix_new_array_expression(Expression* expression, NewArrayExpression* new_array_expression, Block* block, Function* func) {
+    fix_type_specfier(new_array_expression->type_specifier);
 }
 
 void fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func) {

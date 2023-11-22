@@ -210,9 +210,10 @@ RVM_Object* new_string_object() {
 }
 
 /*
- *全局变量，static空间
+ * 类的全局变量，static空间
  *
  * 使用到了 class_definition ,  和编译器前端没有做到完全解耦
+ * TODO: 解耦
  */
 RVM_Object* new_class_object(Ring_VirtualMachine* rvm, ClassDefinition* class_definition) {
     assert(class_definition != nullptr);
@@ -505,6 +506,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 1;
             break;
         case RVM_CODE_PUSH_ARRAY_OBJECT:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            rvm_array_get_class_object(rvm, array_object, index, &object_value);
+            runtime_stack->top_index -= 2;
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
+            runtime_stack->top_index++;
+            rvm->pc += 1;
             break;
 
         case RVM_CODE_POP_ARRAY_BOOL:
@@ -1009,8 +1017,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
-        case RVM_CODE_NEW_ARRAY_OBJECT:
-            break;
+        case RVM_CODE_NEW_ARRAY_OBJECT: {
+            unsigned int field_count = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]); // field 的数量不能超过 255
+            unsigned int oper_num    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 2]);
+            array_object             = rvm_new_array_class_object(rvm, field_count, oper_num);
+            STACK_SET_OBJECT_OFFSET(rvm, 0, array_object);
+            runtime_stack->top_index++;
+            rvm->pc += 4;
+        } break;
         case RVM_CODE_NEW_ARRAY_LITERAL_BOOL: {
             int size     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             array_object = rvm_new_array_literal_bool(rvm, size);
@@ -1624,6 +1638,42 @@ RVM_Object* rvm_new_array_string(Ring_VirtualMachine* rvm, unsigned int dimensio
  * support create one-dimensional array only.
  * TODO: support multi-dimensional array
  *
+ * dimension: size of array
+ * class_def_index: index of class definition in class table
+ */
+RVM_Object* rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int dimension) {
+    RVM_Object* object                    = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
+
+    object->u.array->type                 = RVM_ARRAY_OBJECT;
+    object->u.array->length               = dimension;
+    object->u.array->capacity             = dimension;
+    object->u.array->u.class_object_array = (RVM_ClassObject*)malloc(sizeof(RVM_ClassObject) * dimension);
+
+
+    for (unsigned int i = 0; i < dimension; i++) {
+        RVM_Value* field = (RVM_Value*)malloc(field_count * sizeof(RVM_Value));
+        memset(field, 0, field_count * sizeof(RVM_Value));
+        // TODO: 有个遗留问题
+        // RVM_Value 的 type 没有设置
+
+        object->u.array->u.class_object_array[i].class_def   = nullptr;
+        object->u.array->u.class_object_array[i].field_count = field_count;
+        object->u.array->u.class_object_array[i].field       = field;
+    }
+
+
+    // TODO: 这里的计算方式不对
+    // rvm->runtime_heap->alloc_size += sizeof(RVM_String) * dimension;
+    return object;
+}
+
+/*
+ * create array in heap
+ *
+ * support create one-dimensional array only.
+ * TODO: support multi-dimensional array
+ * TODO: support field is string or array
+ *
  */
 RVM_Object* rvm_new_class_object(Ring_VirtualMachine* rvm, unsigned int field_count) {
     RVM_Object* object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
@@ -1886,6 +1936,20 @@ ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM
     return ERROR_CODE_SUCCESS;
 }
 
+ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value) {
+    if (index >= object->u.array->length) {
+        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
+    }
+    RVM_ClassObject* src_class_object = &(object->u.array->u.class_object_array[index]);
+
+    RVM_Object*      new_object       = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
+
+    RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
+
+    new_object->u.class_object        = dst_class_object; // FIXME: 这里内存泄漏了
+    *value                            = new_object;
+    return ERROR_CODE_SUCCESS;
+}
 
 RVM_Object* rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type) {
     assert(rvm != nullptr);
@@ -2082,6 +2146,7 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         // TODO: 这样写有点丑, 优化一下
         memcpy(array->u.bool_array, src->u.bool_array, sizeof(bool) * src->capacity);
         break;
+
     case RVM_ARRAY_INT:
         array->u.int_array = (int*)malloc(sizeof(int) * array->capacity);
 
@@ -2089,6 +2154,7 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         // TODO: 这样写有点丑, 优化一下
         memcpy(array->u.int_array, src->u.int_array, sizeof(int) * src->capacity);
         break;
+
     case RVM_ARRAY_DOUBLE:
         array->u.double_array = (double*)malloc(sizeof(double) * array->capacity);
 
@@ -2097,14 +2163,31 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         // TODO: 这样写有点丑, 优化一下
         memcpy(array->u.double_array, src->u.double_array, sizeof(double) * src->capacity);
         break;
+
     case RVM_ARRAY_STRING:
         array->u.string_array = (RVM_String*)malloc(sizeof(RVM_String) * array->capacity);
 
         rvm->runtime_heap->alloc_size += sizeof(RVM_String) * array->capacity;
-
+        // FIXME:
+        // This is not deep copy string.
         // TODO: 这样写有点丑, 优化一下
         memcpy(array->u.string_array, src->u.string_array, sizeof(RVM_String) * array->capacity);
         break;
+
+    case RVM_ARRAY_OBJECT: {
+        array->u.class_object_array = (RVM_ClassObject*)malloc(sizeof(RVM_ClassObject) * array->capacity);
+        rvm->runtime_heap->alloc_size += 0;
+
+        for (int i = 0; i < src->length; i++) {
+            RVM_ClassObject* tmp                       = rvm_deep_copy_class_object(rvm, &(src->u.class_object_array[i]));
+            // TODO: 这里的写法不太好, 还是直接 strcpy 的那种形式最好, 结果通过 指针传入
+            array->u.class_object_array[i].class_def   = tmp->class_def;
+            array->u.class_object_array[i].field_count = tmp->field_count;
+            array->u.class_object_array[i].field       = tmp->field;
+        }
+
+    } break;
+
     default:
         break;
     }
