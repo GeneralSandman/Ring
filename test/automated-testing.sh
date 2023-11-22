@@ -32,6 +32,7 @@ TEST_MODELS=(
     "021-array-int"
     "022-array-double"
     "023-array-string"
+    "024-array-class"
 
     "030-if"
     "031-for"

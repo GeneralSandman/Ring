@@ -1,0 +1,32 @@
+package main
+
+import {
+    fmt;
+    debug;
+}
+
+typedef class Job {
+    field bool    Running;
+    field int     JobID;
+    field double  Score;
+}
+
+global {
+    var Job[] global_job_array_0;
+}
+
+@main
+function main() {
+    global_job_array_0 = new Job[200];
+
+    var int index = 0;
+    for(index = 0; index < 200; index = index + 1) {
+        fmt::println_bool(global_job_array_0[index].Running);
+        fmt::println_int(global_job_array_0[index].JobID);
+        fmt::println_double(global_job_array_0[index].Score);
+
+        debug::debug_assert(global_job_array_0[index].Running == false);
+        debug::debug_assert(global_job_array_0[index].JobID   == 0);
+        debug::debug_assert(global_job_array_0[index].Score   == 0.0);
+    }
+}
