@@ -6,21 +6,21 @@
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 Package_Executer*      package_executer_create(ExecuterEntry* executer_entry, char* package_name) {
-         Package_Executer* executer                = (Package_Executer*)malloc(sizeof(Package_Executer));
-         executer->executer_entry                  = executer_entry;
-         executer->package_index                   = -1;
-         executer->package_name                    = package_name;
-         executer->constant_pool_size              = 0;
-         executer->constant_pool_list              = nullptr;
-         executer->global_variable_size            = 0;
-         executer->global_variable_list            = nullptr;
-         executer->function_size                   = 0;
-         executer->function_list                   = nullptr;
-         executer->code_size                       = 0;
-         executer->code_list                       = nullptr;
-         executer->main_func_index                 = -1;
-         executer->estimate_runtime_stack_capacity = 0;
-         return executer;
+    Package_Executer* executer                = (Package_Executer*)malloc(sizeof(Package_Executer));
+    executer->executer_entry                  = executer_entry;
+    executer->package_index                   = -1;
+    executer->package_name                    = package_name;
+    executer->constant_pool_size              = 0;
+    executer->constant_pool_list              = nullptr;
+    executer->global_variable_size            = 0;
+    executer->global_variable_list            = nullptr;
+    executer->function_size                   = 0;
+    executer->function_list                   = nullptr;
+    executer->code_size                       = 0;
+    executer->code_list                       = nullptr;
+    executer->main_func_index                 = -1;
+    executer->estimate_runtime_stack_capacity = 0;
+    return executer;
 }
 
 void package_executer_dump(Package_Executer* package_executer) {
@@ -528,14 +528,12 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer, ForSta
         generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_DOUBLE, end_label, range_statement->operand->u.identifier_expression->line_number);
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_STRING, end_label, range_statement->operand->u.identifier_expression->line_number);
+    } else if (declaration->type->next->kind == RING_BASIC_TYPE_CLASS) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_OBJECT, end_label, range_statement->operand->u.identifier_expression->line_number);
     } else {
         printf("error: range expression only support bool[] int[] double[] string[]\n");
         exit(1);
     }
-
-    // generate_vmcode(executer, opcode_buffer,
-    //                 RVM_CODE_FOR_RANGE, 0,
-    //                 range_statement->operand->u.identifier_expression->line_number);
 
 
     generate_pop_to_leftvalue_reverse(executer, range_statement->left, opcode_buffer);

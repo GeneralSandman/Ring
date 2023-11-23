@@ -1175,9 +1175,23 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_GET_INT_OFFSET(rvm, -2)
             ++;
         } break;
-        case RVM_CODE_FOR_RANGE:
+        case RVM_CODE_FOR_RANGE_ARRAY_OBJECT: {
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            error_code   = rvm_array_get_class_object(rvm, array_object, index, &object_value);
+            if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
+                rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+                break;
+            }
+            // runtime_stack->top_index -= 2; // 与 RVM_CODE_PUSH_ARRAY_OBJECT 的不同点 区别
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
+            runtime_stack->top_index++;
             rvm->pc += 3;
-            break;
+
+            // iter ++
+            STACK_GET_INT_OFFSET(rvm, -2)
+            ++;
+        } break;
         case RVM_CODE_FOR_RANGE_FINISH:
             runtime_stack->top_index -= 2;
             rvm->pc += 3;

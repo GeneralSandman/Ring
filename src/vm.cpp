@@ -181,7 +181,6 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_FOR_RANGE_ARRAY_STRING, "range_array_string", OPCODE_OPERAND_TYPE_2BYTE, 1, 3, "range string value for array", ""},
     {RVM_CODE_FOR_RANGE_ARRAY_OBJECT, "range_array_object", OPCODE_OPERAND_TYPE_2BYTE, 1, 3, "range object value for array", ""},
     {RVM_CODE_FOR_RANGE_STRING, "range_string", OPCODE_OPERAND_TYPE_2BYTE, 1, 3, "range char value for string", ""},
-    {RVM_CODE_FOR_RANGE, "for_range", OPCODE_OPERAND_TYPE_2BYTE, 0, 3, "", ""},
     {RVM_CODE_FOR_RANGE_FINISH, "for_range_finish", OPCODE_OPERAND_TYPE_2BYTE, 1, 3, "", ""},
 
     // convert
