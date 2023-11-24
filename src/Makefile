@@ -44,9 +44,10 @@ TOOL_GEN_VMCODE_DOC_OBJS = \
 # DEBUG_GENERATE_OUTPUT_VMCODE 代码生成节点： 只打印出相应的字节码
 # DEBUG_EXEC_VM  vm运行阶段的调试信息
 # DEBUG_RVM_INTERACTIVE 控制调试RVM
+# DDEBUG_RVM_MEM_POOL_DETAIL 展示 Memory Pool 内存分配的详情
 # DEBUG_RVM_GC_DETAIL 展示 Garbage Collect 的详情
 CFLAGS = -c -std=c++11 -Wall -Wno-unused-function -Wno-unneeded-internal-declaration \
-				 # -g \
+				  # -g \
 				 -DDEBUG_FLEX1 \
 				 -DDEBUG_BISON1 \
 				 -DDEBUG_CREATE_AST1 \
@@ -58,6 +59,7 @@ CFLAGS = -c -std=c++11 -Wall -Wno-unused-function -Wno-unneeded-internal-declara
 				 -DDEBUG_GENERATE_OUTPUT_VMCODE1 \
 				 -DDEBUG_EXEC_VM1 \
 				 -DDEBUG_RVM_INTERACTIVE1 \
+				 -DDEBUG_RVM_MEM_POOL_DETAIL \
 				 -DDEBUG_RVM_GC_DETAIL1
 BIN = ../bin
 INCLUDES = \
