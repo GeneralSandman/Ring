@@ -71,6 +71,9 @@ void dump_mem_pool() {
 // malloc memory space fo meta info
 void* meta_malloc(size_t size) {
     assert(mem_pool != nullptr);
+    if (size == 0) {
+        return nullptr;
+    }
 
     size_t    alloc_size   = ROUND_UP8(size);
     int       bucket_index = alloc_size / 8 - 1;
@@ -78,16 +81,26 @@ void* meta_malloc(size_t size) {
 
     if (mem_pool->free_buckets[bucket_index] == nullptr) {
         // TODO: 分配内存, 直接添加到 active_buckets
-        printf("memory-pool is out of memory\n");
-        exit(1);
-    } else {
-        block                                  = mem_pool->free_buckets[bucket_index];
-        mem_pool->free_buckets[bucket_index]   = block->next;
+        size_t    block_size = (bucket_index + 1) * 8;
 
-        block->next                            = mem_pool->active_buckets[bucket_index];
-        block->data                            = nullptr;
-        mem_pool->active_buckets[bucket_index] = block;
+        MemBlock* block      = nullptr;
+        MemBlock* next       = nullptr;
+        for (int j = 0; j < MEM_BLOCK_NUM; j++) {
+            block       = (MemBlock*)malloc(sizeof(MemBlock)); // 这里不计入分配空间的计算
+            block->data = malloc(block_size);
+            block->next = next;
+            next        = block;
+
+            mem_pool->free_mem_size += block_size;
+        }
+        mem_pool->free_buckets[bucket_index] = block;
     }
+
+    block                                  = mem_pool->free_buckets[bucket_index];
+    mem_pool->free_buckets[bucket_index]   = block->next;
+
+    block->next                            = mem_pool->active_buckets[bucket_index];
+    mem_pool->active_buckets[bucket_index] = block;
 
     mem_pool->free_mem_size -= alloc_size;
     mem_pool->active_mem_size += alloc_size;
@@ -98,6 +111,9 @@ void* meta_malloc(size_t size) {
 void meta_free(void* ptr, size_t size) {
     assert(mem_pool != nullptr);
     assert(size == ROUND_UP8(size));
+    if (ptr == nullptr || size == 0) {
+        return;
+    }
 
     int       bucket_index = size / 8 - 1;
     MemBlock* block        = nullptr;

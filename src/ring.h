@@ -1538,9 +1538,9 @@ struct BinaryChunk {
  * 默认初始化 64个 bucket
  * 每个bucket 有 1000 个 block
  */
-#define MEM_BUCKET_NUM 32
+#define MEM_BUCKET_NUM 64
 #define MEM_BUCKET_MAX_SIZE (MEM_BUCKET_NUM * 8)
-#define MEM_BLOCK_NUM 10
+#define MEM_BLOCK_NUM 100
 
 #define MEM_ALIGN 8
 #define MEM_ALIGN_LARGE 16

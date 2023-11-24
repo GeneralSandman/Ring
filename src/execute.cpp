@@ -197,9 +197,9 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* execut
 
 // 全局变量，static空间
 RVM_Object* new_string_object() {
-    RVM_Object* object         = (RVM_Object*)malloc(sizeof(RVM_Object));
+    RVM_Object* object         = (RVM_Object*)meta_malloc(sizeof(RVM_Object));
     object->type               = RVM_OBJECT_TYPE_STRING;
-    object->u.string           = (RVM_String*)malloc(sizeof(RVM_String));
+    object->u.string           = (RVM_String*)meta_malloc(sizeof(RVM_String));
     object->u.string->length   = 0;
     object->u.string->capacity = 10;
     object->u.string->data     = (char*)malloc(10 * sizeof(char));
@@ -1239,6 +1239,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 #ifdef DEBUG_RVM_INTERACTIVE
     debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
 #endif
+
+#ifdef DEBUG_RVM_MEM_POOL_DETAIL
+    dump_mem_pool();
+#endif
 }
 
 
@@ -1661,7 +1665,7 @@ RVM_Object* rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int fi
     object->u.array->type                 = RVM_ARRAY_OBJECT;
     object->u.array->length               = dimension;
     object->u.array->capacity             = dimension;
-    object->u.array->u.class_object_array = (RVM_ClassObject*)malloc(sizeof(RVM_ClassObject) * dimension);
+    object->u.array->u.class_object_array = (RVM_ClassObject*)meta_malloc(sizeof(RVM_ClassObject) * dimension);
 
 
     for (unsigned int i = 0; i < dimension; i++) {
@@ -1969,7 +1973,7 @@ RVM_Object* rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type) 
     assert(rvm != nullptr);
     assert(rvm->runtime_heap != nullptr);
 
-    RVM_Object* object = (RVM_Object*)malloc(sizeof(RVM_Object));
+    RVM_Object* object = (RVM_Object*)meta_malloc(sizeof(RVM_Object));
     object->type       = type;
     object->gc_mark    = GC_MARK_COLOR_WHITE;
     object->prev       = nullptr;
@@ -2005,7 +2009,7 @@ RVM_Object* rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src) {
     assert(rvm != nullptr);
     assert(rvm->runtime_heap != nullptr);
 
-    RVM_Object* object = (RVM_Object*)malloc(sizeof(RVM_Object));
+    RVM_Object* object = (RVM_Object*)meta_malloc(sizeof(RVM_Object));
     object->type       = src->type;
     object->gc_mark    = GC_MARK_COLOR_WHITE;
     object->prev       = nullptr;
@@ -2041,7 +2045,7 @@ RVM_Object* rvm_heap_new_object_from_string(Ring_VirtualMachine* rvm, RVM_String
     assert(rvm != nullptr);
     assert(rvm->runtime_heap != nullptr);
 
-    RVM_Object* object = (RVM_Object*)malloc(sizeof(RVM_Object));
+    RVM_Object* object = (RVM_Object*)meta_malloc(sizeof(RVM_Object));
     object->type       = RVM_OBJECT_TYPE_STRING;
     object->gc_mark    = GC_MARK_COLOR_WHITE;
     object->prev       = nullptr;
@@ -2061,7 +2065,7 @@ RVM_Object* rvm_heap_new_object_from_string(Ring_VirtualMachine* rvm, RVM_String
 }
 
 RVM_String* rvm_heap_new_string(Ring_VirtualMachine* rvm) {
-    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
+    RVM_String* string = (RVM_String*)meta_malloc(sizeof(RVM_String));
     string->length     = 0;
     string->capacity   = 0;
     string->data       = nullptr;
@@ -2069,7 +2073,7 @@ RVM_String* rvm_heap_new_string(Ring_VirtualMachine* rvm) {
 }
 
 RVM_String* rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src) {
-    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
+    RVM_String* string = (RVM_String*)meta_malloc(sizeof(RVM_String));
     string->length     = src->length;
     string->capacity   = src->capacity;
     string->data       = (char*)malloc(sizeof(char) * src->capacity);
@@ -2082,7 +2086,7 @@ RVM_String* rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src) {
 }
 
 RVM_String* rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value) {
-    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
+    RVM_String* string = (RVM_String*)meta_malloc(sizeof(RVM_String));
     string->length     = 0;
     string->capacity   = 5;
     string->data       = (char*)malloc(sizeof(char) * string->capacity);
@@ -2105,7 +2109,7 @@ RVM_String* rvm_int_2_string(Ring_VirtualMachine* rvm, int value) {
     // 这里直接用的 cpp的函数, 是否需要自己实现?
     std::string tmp    = std::to_string(value);
 
-    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
+    RVM_String* string = (RVM_String*)meta_malloc(sizeof(RVM_String));
     string->length     = tmp.size();
     string->capacity   = tmp.size();
     string->data       = (char*)malloc(sizeof(char) * string->capacity);
@@ -2122,7 +2126,7 @@ RVM_String* rvm_double_2_string(Ring_VirtualMachine* rvm, double value) {
     // 这里直接用的 cpp的函数, 是否需要自己实现?
     std::string tmp    = std::to_string(value);
 
-    RVM_String* string = (RVM_String*)malloc(sizeof(RVM_String));
+    RVM_String* string = (RVM_String*)meta_malloc(sizeof(RVM_String));
     string->length     = tmp.size();
     string->capacity   = tmp.size();
     string->data       = (char*)malloc(sizeof(char) * string->capacity);
@@ -2137,7 +2141,7 @@ RVM_String* rvm_double_2_string(Ring_VirtualMachine* rvm, double value) {
 
 
 RVM_Array* rvm_heap_new_array(Ring_VirtualMachine* rvm) {
-    RVM_Array* array      = (RVM_Array*)malloc(sizeof(RVM_Array));
+    RVM_Array* array      = (RVM_Array*)meta_malloc(sizeof(RVM_Array));
     array->type           = RVM_ARRAY_UNKNOW;
     array->length         = 0;
     array->capacity       = 0;
@@ -2147,7 +2151,7 @@ RVM_Array* rvm_heap_new_array(Ring_VirtualMachine* rvm) {
 }
 
 RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
-    RVM_Array* array = (RVM_Array*)malloc(sizeof(RVM_Array));
+    RVM_Array* array = (RVM_Array*)meta_malloc(sizeof(RVM_Array));
     array->type      = src->type;
     array->length    = src->length;
     array->capacity  = src->capacity;
@@ -2179,7 +2183,7 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         break;
 
     case RVM_ARRAY_STRING:
-        array->u.string_array = (RVM_String*)malloc(sizeof(RVM_String) * array->capacity);
+        array->u.string_array = (RVM_String*)meta_malloc(sizeof(RVM_String) * array->capacity);
 
         rvm->runtime_heap->alloc_size += sizeof(RVM_String) * array->capacity;
         // FIXME:
@@ -2189,7 +2193,7 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         break;
 
     case RVM_ARRAY_OBJECT: {
-        array->u.class_object_array = (RVM_ClassObject*)malloc(sizeof(RVM_ClassObject) * array->capacity);
+        array->u.class_object_array = (RVM_ClassObject*)meta_malloc(sizeof(RVM_ClassObject) * array->capacity);
         rvm->runtime_heap->alloc_size += 0;
 
         for (int i = 0; i < src->length; i++) {
@@ -2210,7 +2214,7 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
 }
 
 RVM_ClassObject* rvm_heap_new_class_object(Ring_VirtualMachine* rvm) {
-    RVM_ClassObject* class_object = (RVM_ClassObject*)malloc(sizeof(RVM_ClassObject));
+    RVM_ClassObject* class_object = (RVM_ClassObject*)meta_malloc(sizeof(RVM_ClassObject));
     class_object->class_def       = nullptr;
     class_object->field_count     = 0;
     class_object->field           = nullptr;
@@ -2218,13 +2222,13 @@ RVM_ClassObject* rvm_heap_new_class_object(Ring_VirtualMachine* rvm) {
 }
 
 RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src) {
-    RVM_ClassObject* class_object = (RVM_ClassObject*)malloc(sizeof(RVM_ClassObject));
+    RVM_ClassObject* class_object = (RVM_ClassObject*)meta_malloc(sizeof(RVM_ClassObject));
     class_object->class_def       = src->class_def;
     class_object->field_count     = src->field_count;
 
     // FIXME: 这里还要继续完善深度copy
     RVM_Value* field              = nullptr;
-    field                         = (RVM_Value*)malloc(src->field_count * sizeof(RVM_Value));
+    field                         = (RVM_Value*)meta_malloc(src->field_count * sizeof(RVM_Value));
     memcpy(field, src->field, src->field_count * sizeof(RVM_Value));
     class_object->field = field;
     return class_object;
@@ -2371,7 +2375,7 @@ void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_
     debug_log_with_white_coloar("\t");
 
     if (rvm->debug_config == nullptr) {
-        rvm->debug_config             = (RVM_DebugConfig*)malloc(sizeof(RVM_DebugConfig));
+        rvm->debug_config             = (RVM_DebugConfig*)meta_malloc(sizeof(RVM_DebugConfig));
         rvm->debug_config->debug_mode = RVM_DEBUG_MODE_UNKNOW;
     }
 

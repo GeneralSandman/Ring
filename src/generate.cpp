@@ -6,21 +6,21 @@
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 Package_Executer*      package_executer_create(ExecuterEntry* executer_entry, char* package_name) {
-    Package_Executer* executer                = (Package_Executer*)malloc(sizeof(Package_Executer));
-    executer->executer_entry                  = executer_entry;
-    executer->package_index                   = -1;
-    executer->package_name                    = package_name;
-    executer->constant_pool_size              = 0;
-    executer->constant_pool_list              = nullptr;
-    executer->global_variable_size            = 0;
-    executer->global_variable_list            = nullptr;
-    executer->function_size                   = 0;
-    executer->function_list                   = nullptr;
-    executer->code_size                       = 0;
-    executer->code_list                       = nullptr;
-    executer->main_func_index                 = -1;
-    executer->estimate_runtime_stack_capacity = 0;
-    return executer;
+         Package_Executer* executer                = (Package_Executer*)malloc(sizeof(Package_Executer));
+         executer->executer_entry                  = executer_entry;
+         executer->package_index                   = -1;
+         executer->package_name                    = package_name;
+         executer->constant_pool_size              = 0;
+         executer->constant_pool_list              = nullptr;
+         executer->global_variable_size            = 0;
+         executer->global_variable_list            = nullptr;
+         executer->function_size                   = 0;
+         executer->function_list                   = nullptr;
+         executer->code_size                       = 0;
+         executer->code_list                       = nullptr;
+         executer->main_func_index                 = -1;
+         executer->estimate_runtime_stack_capacity = 0;
+         return executer;
 }
 
 void package_executer_dump(Package_Executer* package_executer) {
@@ -224,7 +224,7 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
         // FIXME: (package->compiler_entry->package_list.size() - 1) << 8) 这里要修正一下
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, ((package->compiler_entry->package_list.size() - 1) << 8) | executer->main_func_index, 0);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, 0);
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
+        // generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
 
         executer->code_list = opcode_buffer->code_list;
         executer->code_size = opcode_buffer->code_size;
