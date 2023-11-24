@@ -105,6 +105,9 @@ typedef struct RVM_CallInfo                 RVM_CallInfo;
 
 typedef unsigned char                       RVM_Byte;
 
+typedef struct MemPool                      MemPool;
+typedef struct MemBlock                     MemBlock;
+
 typedef enum {
     RVM_VALUE_TYPE_UNKNOW,
 
@@ -1531,6 +1534,47 @@ struct SyntaxInfo {
 struct BinaryChunk {
 };
 
+/*
+ * 默认初始化 64个 bucket
+ * 每个bucket 有 1000 个 block
+ */
+#define MEM_BUCKET_NUM 32
+#define MEM_BUCKET_MAX_SIZE (MEM_BUCKET_NUM * 8)
+#define MEM_BLOCK_NUM 10
+
+#define MEM_ALIGN 8
+#define MEM_ALIGN_LARGE 16
+
+#define ROUND_UP8(n) \
+    (((n) + MEM_ALIGN - 1) & ~(MEM_ALIGN - 1))
+
+#define ROUND_UP16(n) \
+    (((n) + MEM_ALIGN_LARGE - 1) & ~(MEM_ALIGN_LARGE - 1))
+
+
+struct MemPool {
+    std::vector<MemBlock*> free_buckets;
+    std::vector<MemBlock*> active_buckets;
+
+    size_t                 free_mem_size;
+    size_t                 active_mem_size;
+
+    /*
+     * buckets[0] size = 8;
+     * buckets[1] size = 16;
+     * buckets[2] size = 24;
+     * buckets[3] size = 32;
+     * ......
+     * buckets[63] size = 512;
+     */
+};
+
+struct MemBlock {
+    void*     data;
+    size_t    size;
+    MemBlock* next;
+};
+
 #define CLEAR_SCREEN printf("\e[1;1H\e[2J")
 
 // move cursor to terminal (row, col) location
@@ -2103,6 +2147,17 @@ std::vector<std::string> list_files_of_dir(char* dir);
 void ring_give_man_help(char* keyword);
 // --------------------
 
+/* --------------------
+ * mem_pool.cpp
+ * function definition
+ *
+ */
+void  init_mem_pool();
+void  dump_mem_pool();
+void* meta_malloc(size_t size);
+void  meta_free(void* ptr, size_t size);
+void  test_mem_pool();
+// --------------------
 
 /* --------------------
  * gc.cpp
