@@ -13,7 +13,7 @@ CMD_INSTALL_DATA= $(CMD_INSTALL) -m 0644
 CMD_MKDIR= mkdir -p
 CMD_RM= rm -rf
 
-T_STD_PACKS= os io debug fmt math strings reflect
+T_STD_PACKS= os io debug fmt vm math strings reflect
 
 
 all:
@@ -62,23 +62,6 @@ compile_commands.json : Makefile
 	compiledb -n make
 
 
-define func_install_package_std
-	@echo "\033[34m[+]Install Package: Std/$(1)\033[0m"
-	$(CMD_MKDIR) $(INSTALL_PACK_STD)/$(1)
-	$(CMD_INSTALL_DATA) std/$(1)/* $(INSTALL_PACK_STD)/$(1)
-	@echo "\033[32m[+]Install Package: Std/$(1)  SUCCESS\033[0m"
-	@echo ""
-
-endef
-
-define func_uninstall_package_std
-	@echo "\033[34m[-]Uninstall Package: Std/$(1)\033[0m"
-	$(CMD_RM) $(INSTALL_PACK_STD)/$(1)
-	@echo "\033[32m[-]Uninstall Package: Std/$(1)  SUCCESS\033[0m"
-	@echo ""
-
-endef
-
 define install_package_std
 	$(call func_install_package_std,os)
 	$(call func_install_package_std,io)
@@ -102,3 +85,19 @@ define uninstall_package_std
 endef
 
 
+define func_install_package_std
+	@echo "\033[34m[+]Install Package: Std/$(1)\033[0m"
+	$(CMD_MKDIR) $(INSTALL_PACK_STD)/$(1)
+	$(CMD_INSTALL_DATA) std/$(1)/* $(INSTALL_PACK_STD)/$(1)
+	@echo "\033[32m[+]Install Package: Std/$(1)  SUCCESS\033[0m"
+	@echo ""
+
+endef
+
+define func_uninstall_package_std
+	@echo "\033[34m[-]Uninstall Package: Std/$(1)\033[0m"
+	$(CMD_RM) $(INSTALL_PACK_STD)/$(1)
+	@echo "\033[32m[-]Uninstall Package: Std/$(1)  SUCCESS\033[0m"
+	@echo ""
+
+endef
