@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     /*
      *初始化编译阶段的 Memory Pool
      *
-     * 在编译完成之后, 需要释放
+     * 在编译完成之后, destory_front_mem_pool
      * 解耦编译器前后端
      */
     init_front_mem_pool();
@@ -102,6 +102,8 @@ int main(int argc, char** argv) {
     ring_generate_vm_code(compiler_entry, executer_entry);
 
     // Step-5: 链接符号表
+
+    // destory_front_mem_pool();
 
     // Step-6: 加载虚拟机
     ring_virtualmachine_load_executer(ring_vm, executer_entry);

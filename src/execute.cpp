@@ -1242,7 +1242,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 #endif
 
 #ifdef DEBUG_RVM_MEM_POOL_DETAIL
-    dump_mem_pool();
+    dump_mem_pool(rvm->mem_pool);
 #endif
 }
 

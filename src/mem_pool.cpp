@@ -28,40 +28,66 @@ MemPool* create_mem_pool() {
     return pool;
 }
 
+void destory_mem_pool(MemPool* pool) {
+    // free memory of free buckets
+    for (int i = 0; i < MEM_BUCKET_NUM; i++) {
+        MemBlock* next = nullptr;
+        for (MemBlock* block = pool->free_buckets[i]; block != nullptr; block = next) {
+            next = block->next;
+
+            free(block->data);
+            free(block);
+        }
+    }
+
+    // free memory of active buckets
+    for (int i = 0; i < MEM_BUCKET_NUM; i++) {
+        MemBlock* next = nullptr;
+        for (MemBlock* block = pool->active_buckets[i]; block != nullptr; block = next) {
+            next = block->next;
+
+            free(block->data);
+            free(block);
+        }
+    }
+}
+
+
 void dump_mem_pool(MemPool* pool) {
     assert(pool != nullptr);
 
-    printf("-------------- free buckets --------------\n");
-    for (int i = 0; i < MEM_BUCKET_NUM; i++) {
-        size_t    block_size = (i + 1) * 8;
+    unsigned int free_block_num   = 0;
+    size_t       free_mem_size    = 0;
 
-        int       block_num  = 0;
-        MemBlock* block      = pool->free_buckets[i];
-        while (block != nullptr) {
-            block_num++;
-            block = block->next;
+    unsigned int active_block_num = 0;
+    size_t       active_mem_size  = 0;
+
+
+    for (int i = 0; i < MEM_BUCKET_NUM; i++) {
+        size_t block_size = (i + 1) * 8;
+
+        for (MemBlock* block = pool->free_buckets[i]; block != nullptr; block = block->next) {
+            free_block_num++;
+            free_mem_size += block_size;
         }
 
-        printf("i:%4d, block_size:%08ld block_num:%04d\n", i, block_size, block_num);
-    }
-    printf("-------------- free buckets --------------\n");
-
-    printf("++++++++++++++ allocated buckets ++++++++++++++\n");
-    for (int i = 0; i < MEM_BUCKET_NUM; i++) {
-        size_t    block_size = (i + 1) * 8;
-
-        int       block_num  = 0;
-        MemBlock* block      = pool->active_buckets[i];
-        while (block != nullptr) {
-            block_num++;
-            block = block->next;
+        for (MemBlock* block = pool->active_buckets[i]; block != nullptr; block = block->next) {
+            active_block_num++;
+            active_mem_size += block_size;
         }
-
-        printf("i:%4d, block_size:%08ld block_num:%04d\n", i, block_size, block_num);
     }
-    printf("++++++++++++++ allocated buckets ++++++++++++++\n");
 
-    printf("free_mem_size:%ld, active_mem_size:%ld\n", pool->free_mem_size, pool->active_mem_size);
+    assert(free_mem_size == pool->free_mem_size);
+    assert(active_mem_size == pool->active_mem_size);
+
+
+    printf("+++++++++++ Memory Pool Summary ++++++++++++\n");
+    printf("Free Block Num:      %7u\n", free_block_num);
+    printf("Active Block Num:    %7u\n", active_block_num);
+
+    printf("Free Memory Size:    %7ld\n", free_mem_size);
+    printf("Active Memory Size:  %7ld\n", active_mem_size);
+    printf("+++++++++++++++++++++++++++++++++++++++++++\n");
 }
 
 // malloc memory space fo meta info

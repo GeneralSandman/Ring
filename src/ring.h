@@ -1674,6 +1674,7 @@ struct MemBlock {
 #endif
 
 void init_front_mem_pool();
+void destory_front_mem_pool();
 
 void ring_compile_error_report(ErrorReportContext* context);
 
@@ -2158,6 +2159,8 @@ void ring_give_man_help(char* keyword);
  *
  */
 MemPool* create_mem_pool();
+void     destory_mem_pool(MemPool* pool);
+
 void     dump_mem_pool(MemPool* pool);
 void*    mem_malloc(MemPool* pool, size_t size);
 void     mem_free(MemPool* pool, void* ptr, size_t size);

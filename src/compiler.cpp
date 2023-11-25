@@ -14,7 +14,7 @@ static CompilerEntry*    compiler_entry = nullptr;
 
 // 编译阶段使用的 Memory Pool
 // 这里暂时使用全局变量
-const MemPool* front_mem_pool           = nullptr;
+MemPool* front_mem_pool                 = nullptr;
 
 // 初始化一次
 void init_front_mem_pool() {
@@ -23,6 +23,14 @@ void init_front_mem_pool() {
     }
 
     front_mem_pool = create_mem_pool();
+}
+
+void destory_front_mem_pool() {
+    if (front_mem_pool == nullptr) {
+        return;
+    }
+
+    destory_mem_pool(front_mem_pool);
 }
 
 // ring_compile_error_report
