@@ -81,9 +81,6 @@ int main(int argc, char** argv) {
      */
     Ring_VirtualMachine* ring_vm          = ring_virtualmachine_create();
 
-    // 初始化 virtual machine memory pool
-    init_mem_pool();
-
 
     // Step-0: 预编译官方std包, 并生成vmcode
     compile_std_lib(compiler_entry, executer_entry);

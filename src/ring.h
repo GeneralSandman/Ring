@@ -156,6 +156,8 @@ struct Ring_VirtualMachine {
     RVM_Class*         class_list; // TODO: 删除掉
     unsigned int       class_size; // TODO: 删除掉
 
+    MemPool*           mem_pool;
+
     RVM_DebugConfig*   debug_config;
 
 #ifdef DEBUG_RVM_INTERACTIVE
@@ -1990,7 +1992,7 @@ void                 ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm,
 void                 ring_virtualmachine_init(Ring_VirtualMachine* rvm);
 void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
-RVM_Object*          new_string_object();
+RVM_Object*          new_string_object(Ring_VirtualMachine* rvm);
 RVM_Object*          new_class_object(Ring_VirtualMachine* rvm, ClassDefinition* class_definition);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
@@ -2152,11 +2154,11 @@ void ring_give_man_help(char* keyword);
  * function definition
  *
  */
-void  init_mem_pool();
-void  dump_mem_pool();
-void* meta_malloc(size_t size);
-void  meta_free(void* ptr, size_t size);
-void  test_mem_pool();
+MemPool* create_mem_pool();
+void     dump_mem_pool(MemPool* pool);
+void*    mem_malloc(MemPool* pool, size_t size);
+void     mem_free(MemPool* pool, void* ptr, size_t size);
+void     test_mem_pool();
 // --------------------
 
 /* --------------------
