@@ -12,6 +12,19 @@ extern struct SyntaxInfo SyntaxInfos[];
 static PackageUnit*      package_unit   = nullptr;
 static CompilerEntry*    compiler_entry = nullptr;
 
+// 编译阶段使用的 Memory Pool
+// 这里暂时使用全局变量
+const MemPool* front_mem_pool           = nullptr;
+
+// 初始化一次
+void init_front_mem_pool() {
+    if (front_mem_pool != nullptr) {
+        return;
+    }
+
+    front_mem_pool = create_mem_pool();
+}
+
 // ring_compile_error_report
 void ring_compile_error_report(ErrorReportContext* context) {
     fprintf(stderr, "%s:%d:%d:\n", context->source_file_name.c_str(), context->line_number, context->column_number);

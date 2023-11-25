@@ -59,6 +59,14 @@ int main(int argc, char** argv) {
         return 0;
     }
 
+    /*
+     *初始化编译阶段的 Memory Pool
+     *
+     * 在编译完成之后, 需要释放
+     * 解耦编译器前后端
+     */
+    init_front_mem_pool();
+
 
     /*
      * 初始化语法处理节点相关的struct
