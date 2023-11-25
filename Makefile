@@ -16,8 +16,11 @@ CMD_RM= rm -rf
 T_STD_PACKS= os io debug fmt vm math strings reflect
 
 
+# 生成 Ring可执行文件
+# 最后在 src/Makefile
+# -j10 10进程并发编译
 all:
-	@cd src && $(MAKE) $(TARGET)
+	@cd src && $(MAKE) $(TARGET) -j10
 
 # 生成一个脚本用于 将 Ring 虚拟机指令集生成一个 markdown表格
 # Usage:
@@ -58,7 +61,7 @@ echo:
 	@echo "[+]T_STD_PACKS= \033[32m$(T_STD_PACKS)\033[0m"
 
 # 构建 compile_commands.json 供 vim-lsp
-compile_commands.json : Makefile
+compile_commands.json: .git
 	compiledb -n make
 
 
