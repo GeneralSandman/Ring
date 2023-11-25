@@ -105,7 +105,7 @@ Ring_VirtualMachine* ring_virtualmachine_create() {
     rvm->pc                  = 0;
     rvm->class_list          = nullptr;
     rvm->class_size          = 0;
-    rvm->mem_pool            = create_mem_pool();
+    rvm->mem_pool            = create_mem_pool((char*)"RVMMemoryPool");
     rvm->debug_config        = nullptr;
     return rvm;
 }
@@ -1241,9 +1241,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
 #endif
 
-#ifdef DEBUG_RVM_MEM_POOL_DETAIL
-    dump_mem_pool(rvm->mem_pool);
-#endif
+    destory_mem_pool(rvm->mem_pool);
 }
 
 

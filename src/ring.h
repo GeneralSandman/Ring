@@ -1556,6 +1556,8 @@ struct BinaryChunk {
 
 
 struct MemPool {
+    char*                  name;
+
     std::vector<MemBlock*> free_buckets;
     std::vector<MemBlock*> active_buckets;
 
@@ -2158,7 +2160,7 @@ void ring_give_man_help(char* keyword);
  * function definition
  *
  */
-MemPool* create_mem_pool();
+MemPool* create_mem_pool(char* name);
 void     destory_mem_pool(MemPool* pool);
 
 void     dump_mem_pool(MemPool* pool);

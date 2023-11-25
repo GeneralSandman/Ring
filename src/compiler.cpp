@@ -22,7 +22,7 @@ void init_front_mem_pool() {
         return;
     }
 
-    front_mem_pool = create_mem_pool();
+    front_mem_pool = create_mem_pool((char*)"FrontMemoryPool");
 }
 
 void destory_front_mem_pool() {

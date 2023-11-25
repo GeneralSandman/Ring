@@ -1,8 +1,9 @@
 #include "ring.h"
 
 // init meta mem pool
-MemPool* create_mem_pool() {
+MemPool* create_mem_pool(char* name) {
     MemPool* pool         = (MemPool*)malloc(sizeof(MemPool));
+    pool->name            = name;
     pool->free_buckets    = std::vector<MemBlock*>(MEM_BUCKET_NUM, nullptr);
     pool->active_buckets  = std::vector<MemBlock*>(MEM_BUCKET_NUM, nullptr);
     pool->free_mem_size   = 0;
@@ -29,6 +30,12 @@ MemPool* create_mem_pool() {
 }
 
 void destory_mem_pool(MemPool* pool) {
+    assert(pool != nullptr);
+
+#ifdef DEBUG_RVM_MEM_POOL_DETAIL
+    dump_mem_pool(pool);
+#endif
+
     // free memory of free buckets
     for (int i = 0; i < MEM_BUCKET_NUM; i++) {
         MemBlock* next = nullptr;
@@ -81,13 +88,15 @@ void dump_mem_pool(MemPool* pool) {
     assert(active_mem_size == pool->active_mem_size);
 
 
-    printf("+++++++++++ Memory Pool Summary ++++++++++++\n");
-    printf("Free Block Num:      %7u\n", free_block_num);
-    printf("Active Block Num:    %7u\n", active_block_num);
-
-    printf("Free Memory Size:    %7ld\n", free_mem_size);
+    printf("+++++++++++ [Memory Pool Summary] ++++++++++++\n");
+    printf("Name: %s\n", pool->name);
+    printf("\n");
+    printf("Free   Block  Num:   %7u\n", free_block_num);
+    printf("Active Block  Num:   %7u\n", active_block_num);
+    printf("\n");
+    printf("Free   Memory Size:  %7ld\n", free_mem_size);
     printf("Active Memory Size:  %7ld\n", active_mem_size);
-    printf("+++++++++++++++++++++++++++++++++++++++++++\n");
+    printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
 }
 
 // malloc memory space fo meta info
@@ -157,7 +166,7 @@ void mem_free(MemPool* pool, void* ptr, size_t size) {
 }
 
 void test_mem_pool() {
-    MemPool* pool = create_mem_pool();
+    MemPool* pool = create_mem_pool((char*)"test");
     dump_mem_pool(pool);
     std::vector<void*>              tmp(MEM_BLOCK_NUM, nullptr);
     std::vector<std::vector<void*>> res(MEM_BUCKET_NUM, tmp);
