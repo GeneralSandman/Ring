@@ -8,6 +8,7 @@ MemPool* create_mem_pool(char* name) {
     pool->active_buckets  = std::vector<MemBlock*>(MEM_BUCKET_NUM, nullptr);
     pool->free_mem_size   = 0;
     pool->active_mem_size = 0;
+    pool->all_mem_size    = 0;
 
     for (int i = 0; i < MEM_BUCKET_NUM; i++) {
         size_t    block_size = (i + 1) * 8;
@@ -25,6 +26,8 @@ MemPool* create_mem_pool(char* name) {
 
         pool->free_buckets[i] = block;
     }
+
+    pool->all_mem_size = pool->free_mem_size;
 
     return pool;
 }
@@ -53,7 +56,7 @@ void destory_mem_pool(MemPool* pool) {
         for (MemBlock* block = pool->active_buckets[i]; block != nullptr; block = next) {
             next = block->next;
 
-            free(block->data);
+            // free(block->data);
             free(block);
         }
     }
@@ -87,6 +90,8 @@ void dump_mem_pool(MemPool* pool) {
     assert(free_mem_size == pool->free_mem_size);
     assert(active_mem_size == pool->active_mem_size);
 
+    assert(pool->free_mem_size + pool->active_mem_size == pool->all_mem_size);
+
 
     printf("+++++++++++ [Memory Pool Summary] ++++++++++++\n");
     printf("Name: %s\n", pool->name);
@@ -100,7 +105,7 @@ void dump_mem_pool(MemPool* pool) {
 }
 
 // malloc memory space fo meta info
-void* mem_malloc(MemPool* pool, size_t size) {
+void* mem_alloc(MemPool* pool, size_t size) {
     assert(pool != nullptr);
     if (size == 0) {
         return nullptr;
@@ -127,7 +132,11 @@ void* mem_malloc(MemPool* pool, size_t size) {
         pool->free_buckets[bucket_index] = block;
     }
 
+    void* res                          = nullptr;
+
     block                              = pool->free_buckets[bucket_index];
+    res                                = block->data;
+    block->data                        = nullptr;
     pool->free_buckets[bucket_index]   = block->next;
 
     block->next                        = pool->active_buckets[bucket_index];
@@ -136,12 +145,23 @@ void* mem_malloc(MemPool* pool, size_t size) {
     pool->free_mem_size -= alloc_size;
     pool->active_mem_size += alloc_size;
 
-    return block->data;
+    return res;
+}
+
+void* mem_realloc(MemPool* pool, void* ptr, size_t old_size, size_t new_size) {
+    assert(pool != nullptr);
+    assert(old_size == ROUND_UP8(old_size));
+
+    void* new_ptr = mem_alloc(pool, new_size);
+    memcpy(new_ptr, ptr, old_size);
+    mem_free(pool, ptr, old_size);
+
+    return new_ptr;
 }
 
 void mem_free(MemPool* pool, void* ptr, size_t size) {
     assert(pool != nullptr);
-    assert(size == ROUND_UP8(size));
+    // assert(size == ROUND_UP8(size));
     if (ptr == nullptr || size == 0) {
         return;
     }
@@ -157,6 +177,7 @@ void mem_free(MemPool* pool, void* ptr, size_t size) {
         pool->active_buckets[bucket_index] = block->next;
 
         block->data                        = ptr;
+
         block->next                        = pool->free_buckets[bucket_index];
         pool->free_buckets[bucket_index]   = block;
     }
@@ -175,7 +196,7 @@ void test_mem_pool() {
     for (int i = 0; i < MEM_BUCKET_NUM; i++) {
         size_t block_size = (i + 1) * 8;
         for (int j = 0; j < MEM_BLOCK_NUM; j++) {
-            void* ptr = mem_malloc(pool, block_size);
+            void* ptr = mem_alloc(pool, block_size);
             res[i][j] = ptr;
             sum += block_size;
         }

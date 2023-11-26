@@ -156,7 +156,8 @@ struct Ring_VirtualMachine {
     RVM_Class*         class_list; // TODO: 删除掉
     unsigned int       class_size; // TODO: 删除掉
 
-    MemPool*           mem_pool;
+    MemPool*           meta_pool;
+    MemPool*           data_pool;
 
     RVM_DebugConfig*   debug_config;
 
@@ -405,9 +406,10 @@ struct RVM_Array {
 };
 
 struct RVM_ClassObject {
-    ClassDefinition* class_def;
-    unsigned int     field_count;
-    RVM_Value*       field;
+    // ClassDefinition* class_def; // 删除掉
+    RVM_Class*   class_ref;
+    unsigned int field_count;
+    RVM_Value*   field;
 };
 
 typedef enum {
@@ -1564,6 +1566,8 @@ struct MemPool {
     size_t                 free_mem_size;
     size_t                 active_mem_size;
 
+    size_t                 all_mem_size; // 整个生命周期都不变, 用于校验
+
     /*
      * buckets[0] size = 8;
      * buckets[1] size = 16;
@@ -2164,7 +2168,8 @@ MemPool* create_mem_pool(char* name);
 void     destory_mem_pool(MemPool* pool);
 
 void     dump_mem_pool(MemPool* pool);
-void*    mem_malloc(MemPool* pool, size_t size);
+void*    mem_alloc(MemPool* pool, size_t size);
+void*    mem_realloc(MemPool* pool, void* ptr, size_t old_size, size_t new_size);
 void     mem_free(MemPool* pool, void* ptr, size_t size);
 void     test_mem_pool();
 // --------------------
