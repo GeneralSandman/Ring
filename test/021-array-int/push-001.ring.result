@@ -6,25 +6,25 @@ debug_assert PASS
 
 test cast 1 length&capacity------------------------
 1
-4
+8
 debug_assert PASS
 debug_assert PASS
 
 test cast 2 length&capacity------------------------
 2
-4
+8
 debug_assert PASS
 debug_assert PASS
 
 test cast 3 length&capacity------------------------
 3
-4
+8
 debug_assert PASS
 debug_assert PASS
 
 test cast 4 length&capacity------------------------
 4
-4
+8
 debug_assert PASS
 debug_assert PASS
 

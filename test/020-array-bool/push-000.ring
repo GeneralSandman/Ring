@@ -3,6 +3,7 @@ package main
 import {
     fmt;
     debug;
+    vm;
 }
 
 global {
@@ -32,4 +33,6 @@ function main() {
     debug::debug_assert(global_bool_array_0[0]   == false);
     debug::debug_assert(global_bool_array_0[199] == false);
     debug::debug_assert(global_bool_array_0[200] == true);
+
+    vm::garbage_collect();
 }
