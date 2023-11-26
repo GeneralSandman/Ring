@@ -126,7 +126,7 @@ void register_lib(Package_Executer* package_executer, char* func_name, RVM_Nativ
     for (int i = 0; i < package_executer->function_size; i++) {
         RVM_Function* function = &package_executer->function_list[i];
         if (function->type == RVM_FUNCTION_TYPE_NATIVE && 0 == strcmp(function->func_name, func_name)) {
-            function->u.native_func                    = (NativeFunction*)malloc(sizeof(NativeFunction));
+            function->u.native_func                    = (NativeFunction*)mem_alloc(get_front_mem_pool(), sizeof(NativeFunction));
             function->u.native_func->func_proc         = func_proc;
             function->u.native_func->arg_count         = arg_count;
             function->u.native_func->return_list_count = return_list_count;
@@ -221,7 +221,7 @@ RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_co
     RVM_Value ret;
     ret.u.int_value     = 0;
 
-    char* output_buffer = (char*)malloc(6 * sizeof(char));
+    char* output_buffer = (char*)mem_alloc(get_front_mem_pool(), 6 * sizeof(char));
 
     if (args->u.int_value) {
         snprintf(output_buffer, 6, "true\n");
@@ -253,7 +253,7 @@ RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
     RVM_Value ret;
     ret.u.int_value     = 0;
 
-    char* output_buffer = (char*)malloc(12 * sizeof(char));
+    char* output_buffer = (char*)mem_alloc(get_front_mem_pool(), 12 * sizeof(char));
 
     // TODO: 暂时只打印int, 以后都强制转换成int_value
     snprintf(output_buffer, 13, "%d\n", args->u.int_value);
@@ -282,7 +282,7 @@ RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
     RVM_Value ret;
     ret.u.int_value     = 0;
 
-    char* output_buffer = (char*)malloc(1024 * sizeof(char));
+    char* output_buffer = (char*)mem_alloc(get_front_mem_pool(), 1024 * sizeof(char));
 
     snprintf(output_buffer, 1024, "%f\n", args->u.double_value);
 
@@ -311,7 +311,7 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     ret.u.int_value            = 0;
 
     unsigned int length        = 1;
-    char*        output_buffer = (char*)malloc(length * sizeof(char));
+    char*        output_buffer = (char*)mem_alloc(get_front_mem_pool(), length * sizeof(char));
 
     if (args->u.object == nullptr
         || args->u.object->u.string == nullptr
@@ -347,7 +347,7 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
     }
 
     unsigned int length        = 20;
-    char*        output_buffer = (char*)malloc(length * sizeof(char));
+    char*        output_buffer = (char*)mem_alloc(get_front_mem_pool(), length * sizeof(char));
 
     /*
      * 这个地方是不对的, 因为 args 已经位于栈空间了,
@@ -444,7 +444,7 @@ RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
     ret.u.int_value            = 0;
 
     unsigned int length        = 20;
-    char*        output_buffer = (char*)malloc(length * sizeof(char));
+    char*        output_buffer = (char*)mem_alloc(get_front_mem_pool(), length * sizeof(char));
 
     memset(output_buffer, '\0', length);
 

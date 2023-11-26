@@ -5,8 +5,9 @@
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
+
 Package_Executer*      package_executer_create(ExecuterEntry* executer_entry, char* package_name) {
-    Package_Executer* executer                = (Package_Executer*)malloc(sizeof(Package_Executer));
+    Package_Executer* executer                = (Package_Executer*)mem_alloc(get_front_mem_pool(), sizeof(Package_Executer));
     executer->executer_entry                  = executer_entry;
     executer->package_index                   = -1;
     executer->package_name                    = package_name;
@@ -92,7 +93,7 @@ void add_global_variable(Package* package, Package_Executer* executer) {
     }
 
     executer->global_variable_size = package->global_declaration_list.size();
-    executer->global_variable_list = (RVM_Variable*)malloc(executer->global_variable_size * sizeof(RVM_Variable));
+    executer->global_variable_list = (RVM_Variable*)mem_alloc(get_front_mem_pool(), executer->global_variable_size * sizeof(RVM_Variable));
 
     int i                          = 0;
     for (Declaration* pos : package->global_declaration_list) {
@@ -107,7 +108,7 @@ void add_functions(Package* package, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
     executer->function_size = package->function_list.size();
-    executer->function_list = (RVM_Function*)malloc(sizeof(RVM_Function) * package->function_list.size());
+    executer->function_list = (RVM_Function*)mem_alloc(get_front_mem_pool(), sizeof(RVM_Function) * package->function_list.size());
 
     unsigned int i          = 0;
     // 暂时只处理 native function
@@ -128,7 +129,7 @@ void add_classes(Package* package, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
     executer->class_size = package->class_definition_list.size();
-    executer->class_list = (RVM_Class*)malloc(sizeof(RVM_Class) * package->class_definition_list.size());
+    executer->class_list = (RVM_Class*)mem_alloc(get_front_mem_pool(), sizeof(RVM_Class) * package->class_definition_list.size());
 
     unsigned int i       = 0;
     for (ClassDefinition* pos : package->class_definition_list) {
@@ -155,7 +156,7 @@ void copy_class(Package_Executer* executer, ClassDefinition* src, RVM_Class* des
         }
     }
 
-    dest->method_list = (RVM_Method*)malloc(sizeof(RVM_Method) * dest->method_size);
+    dest->method_list = (RVM_Method*)mem_alloc(get_front_mem_pool(), sizeof(RVM_Method) * dest->method_size);
 
     unsigned int i    = 0;
     pos               = src->member;
@@ -191,8 +192,8 @@ void copy_function(Function* src, RVM_Function* dest) {
         dest->parameter_size      = src->parameter_list_size;
         dest->parameter_list      = nullptr; // TODO:
         dest->local_variable_size = src->block->declaration_list_size;
-        dest->local_variable_list = (RVM_LocalVariable*)malloc(sizeof(RVM_LocalVariable) * src->block->declaration_list_size); // TODO:
-        dest->u.derive_func       = (DeriveFunction*)malloc(sizeof(DeriveFunction));
+        dest->local_variable_list = (RVM_LocalVariable*)mem_alloc(get_front_mem_pool(), sizeof(RVM_LocalVariable) * src->block->declaration_list_size); // TODO:
+        dest->u.derive_func       = (DeriveFunction*)mem_alloc(get_front_mem_pool(), sizeof(DeriveFunction));
 
         Declaration* pos          = src->block->declaration_list;
         unsigned int i            = 0;
@@ -207,8 +208,8 @@ void copy_function(Function* src, RVM_Function* dest) {
 
 void copy_method(MethodMember* src, RVM_Method* dest) {
     dest->identifier                  = src->identifier;
-    dest->rvm_function                = (RVM_Function*)malloc(sizeof(RVM_Function));
-    dest->rvm_function->u.derive_func = (DeriveFunction*)malloc(sizeof(DeriveFunction));
+    dest->rvm_function                = (RVM_Function*)mem_alloc(get_front_mem_pool(), sizeof(RVM_Function));
+    dest->rvm_function->u.derive_func = (DeriveFunction*)mem_alloc(get_front_mem_pool(), sizeof(DeriveFunction));
 }
 
 void add_top_level_code(Package* package, Package_Executer* executer) {
@@ -284,7 +285,7 @@ void vm_executer_dump(Package_Executer* executer) {
 
 RVM_OpcodeBuffer* new_opcode_buffer() {
     debug_log_with_darkgreen_coloar("\t");
-    RVM_OpcodeBuffer* buffer = (RVM_OpcodeBuffer*)malloc(sizeof(RVM_OpcodeBuffer));
+    RVM_OpcodeBuffer* buffer = (RVM_OpcodeBuffer*)mem_alloc(get_front_mem_pool(), sizeof(RVM_OpcodeBuffer));
     buffer->code_list        = nullptr;
     buffer->code_size        = 0;
     buffer->code_capacity    = 0;

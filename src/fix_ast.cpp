@@ -108,19 +108,19 @@ BEGIN:
         break;
 
     case EXPRESSION_TYPE_LITERAL_BOOL:
-        expression->convert_type       = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+        expression->convert_type       = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
         expression->convert_type->kind = RING_BASIC_TYPE_BOOL;
         break;
     case EXPRESSION_TYPE_LITERAL_INT:
-        expression->convert_type       = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+        expression->convert_type       = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
         expression->convert_type->kind = RING_BASIC_TYPE_INT;
         break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
-        expression->convert_type       = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+        expression->convert_type       = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
         expression->convert_type->kind = RING_BASIC_TYPE_DOUBLE;
         break;
     case EXPRESSION_TYPE_LITERAL_STRING:
-        expression->convert_type       = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+        expression->convert_type       = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
         expression->convert_type->kind = RING_BASIC_TYPE_STRING;
         break;
 
@@ -421,7 +421,7 @@ void fix_binary_expression(Expression* expression, Block* block, Function* func)
     fix_expression(right_expression, block, func);
 
     if (expression->convert_type == nullptr) {
-        expression->convert_type = (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+        expression->convert_type = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
     }
 
     if (expression->type == EXPRESSION_TYPE_CONCAT) {
@@ -531,7 +531,7 @@ void fix_array_index_expression(Expression* expression, ArrayIndexExpression* ar
     // 修正最外层 expression 的 convert_type
     // TODO: 这个写法太恶心了, 急需要优化
     TypeSpecifier* type =
-        (TypeSpecifier*)malloc(sizeof(TypeSpecifier));
+        (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
     type->kind =
         expression->u.array_index_expression->array_expression->u.identifier_expression->u.declaration->type->next->kind;
     if (type->kind == RING_BASIC_TYPE_CLASS) {
@@ -662,7 +662,7 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
 
     Parameter* pos = parameter;
     for (; pos; pos = pos->next) {
-        Declaration* declaration    = (Declaration*)malloc(sizeof(Declaration));
+        Declaration* declaration    = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
         declaration->line_number    = pos->line_number;
         declaration->type           = pos->type;
         declaration->identifier     = pos->identifier;

@@ -1679,10 +1679,11 @@ struct MemBlock {
 #define debug_log_with_purple_coloar(format, ...)
 #endif
 
-void init_front_mem_pool();
-void destory_front_mem_pool();
+void     init_front_mem_pool();
+MemPool* get_front_mem_pool();
+void     destory_front_mem_pool();
 
-void ring_compile_error_report(ErrorReportContext* context);
+void     ring_compile_error_report(ErrorReportContext* context);
 
 #define ring_runtime_error(code, ...)      \
     printf("Runtime error, E:%d, ", code); \

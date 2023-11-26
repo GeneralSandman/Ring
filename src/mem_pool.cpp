@@ -104,7 +104,7 @@ void dump_mem_pool(MemPool* pool) {
     printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
 }
 
-// malloc memory space fo meta info
+// alloc memory space fo meta info
 void* mem_alloc(MemPool* pool, size_t size) {
     assert(pool != nullptr);
     if (size == 0) {

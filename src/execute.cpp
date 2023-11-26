@@ -105,8 +105,8 @@ Ring_VirtualMachine* ring_virtualmachine_create() {
     rvm->pc                  = 0;
     rvm->class_list          = nullptr;
     rvm->class_size          = 0;
-    rvm->meta_pool           = create_mem_pool((char*)"RVM Meta MemoryPool");
-    rvm->data_pool           = create_mem_pool((char*)"RVM Data MemoryPool");
+    rvm->meta_pool           = create_mem_pool((char*)"RVM-Meta-Memory-Pool");
+    rvm->data_pool           = create_mem_pool((char*)"RVM-Data-Memory-Pool");
     rvm->debug_config        = nullptr;
     return rvm;
 }
