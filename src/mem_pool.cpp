@@ -9,6 +9,9 @@ MemPool* create_mem_pool(char* name) {
     pool->free_mem_size   = 0;
     pool->active_mem_size = 0;
     pool->all_mem_size    = 0;
+#ifdef DEBUG_RVM_MEM_POOL_DETAIL
+    pool->active_mem_set = std::unordered_set<void*>();
+#endif
 
     for (int i = 0; i < MEM_BUCKET_NUM; i++) {
         size_t    block_size = (i + 1) * 8;
@@ -101,6 +104,11 @@ void dump_mem_pool(MemPool* pool) {
     printf("\n");
     printf("Free   Memory Size:  %7ld\n", free_mem_size);
     printf("Active Memory Size:  %7ld\n", active_mem_size);
+
+#ifdef DEBUG_RVM_MEM_POOL_DETAIL
+    printf("\n");
+    printf("Active Mem Set Num:  %7ld\n", pool->active_mem_set.size());
+#endif
     printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
 }
 
@@ -145,6 +153,10 @@ void* mem_alloc(MemPool* pool, size_t size) {
     pool->free_mem_size -= alloc_size;
     pool->active_mem_size += alloc_size;
 
+#ifdef DEBUG_RVM_MEM_POOL_DETAIL
+    pool->active_mem_set.insert(res);
+#endif
+
     return res;
 }
 
@@ -184,6 +196,15 @@ void mem_free(MemPool* pool, void* ptr, size_t size) {
 
     pool->free_mem_size += size;
     pool->active_mem_size -= size;
+
+#ifdef DEBUG_RVM_MEM_POOL_DETAIL
+    auto iter = pool->active_mem_set.find(ptr);
+    if (iter == pool->active_mem_set.end()) {
+        printf("ptr:%p is not allocated by memory pool", ptr);
+        exit(1);
+    }
+    pool->active_mem_set.erase(ptr);
+#endif
 }
 
 void test_mem_pool() {

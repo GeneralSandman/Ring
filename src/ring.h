@@ -1568,13 +1568,17 @@ struct MemPool {
 
     size_t                 all_mem_size; // 整个生命周期都不变, 用于校验
 
+
+#ifdef DEBUG_RVM_MEM_POOL_DETAIL
+    std::unordered_set<void*> active_mem_set;
+#endif
     /*
-     * buckets[0] size = 8;
-     * buckets[1] size = 16;
-     * buckets[2] size = 24;
-     * buckets[3] size = 32;
+     * free_buckets[0]: bucket size = 8;
+     * free_buckets[1]: bucket size = 16;
+     * free_buckets[2]: bucket size = 24;
+     * free_buckets[3]: bucket size = 32;
      * ......
-     * buckets[63] size = 512;
+     * free_buckets[63]: bucket size = 512;
      */
 };
 
