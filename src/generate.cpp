@@ -1341,6 +1341,11 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_DOUBLE, 0, function_call_expression->line_number);
         } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_STRING, 0, function_call_expression->line_number);
+        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_CLASS) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_OBJECT, 0, function_call_expression->line_number);
+        } else {
+            printf("error: push() is only be used by bool[] int[] double[] string[] class[]");
+            exit(1);
         }
 
     } else if (strcmp(function_identifier, "pop") == 0) {
@@ -1360,15 +1365,16 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_DOUBLE, 0, function_call_expression->line_number);
         } else if (pos->expression->convert_type->next->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_STRING, 0, function_call_expression->line_number);
+        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_CLASS) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_OBJECT, 0, function_call_expression->line_number);
+        } else {
+            printf("error: pop() is only be used by bool[] int[] double[] string[] class[]");
+            exit(1);
         }
     } else if (strcmp(function_identifier, "to_string") == 0) {
         pos = function_call_expression->argument_list;
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
 
-        if (pos->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
-            printf("error: to_string() only be used by bool/int/double\n");
-            exit(1);
-        }
 
         if (pos->expression->convert_type->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_BOOL_2_STRING, 0, function_call_expression->line_number);
@@ -1376,6 +1382,9 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
             generate_vmcode(executer, opcode_buffer, RVM_CODE_INT_2_STRING, 0, function_call_expression->line_number);
         } else if (pos->expression->convert_type->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_DOUBLE_2_STRING, 0, function_call_expression->line_number);
+        } else {
+            printf("error: to_string() only be used by bool/int/double\n");
+            exit(1);
         }
     }
 }

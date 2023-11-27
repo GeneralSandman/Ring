@@ -584,6 +584,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_ARRAY_APPEND_OBJECT:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            object_value = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            rvm_array_append_class_object(rvm, array_object, &object_value);
+            runtime_stack->top_index -= 2;
             rvm->pc += 1;
             break;
 
@@ -629,6 +633,12 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_ARRAY_POP_OBJECT:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
+            object_value = nullptr;
+            rvm_array_pop_class_object(rvm, array_object, &object_value);
+            runtime_stack->top_index -= 1;
+            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
+            runtime_stack->top_index += 1;
             rvm->pc += 1;
             break;
 
@@ -2029,15 +2039,58 @@ ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Object* objec
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
     RVM_ClassObject* src_class_object = &(object->u.array->u.class_object_array[index]);
-
-    RVM_Object*      new_object       = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
-
     RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
 
+    RVM_Object*      new_object       = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
     new_object->u.class_object        = dst_class_object; // FIXME: 这里内存泄漏了
+
     *value                            = new_object;
     return ERROR_CODE_SUCCESS;
 }
+
+
+ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value) {
+    size_t old_alloc_size = 0;
+    size_t new_alloc_size = 0;
+
+    if (object->u.array->length >= object->u.array->capacity) {
+        old_alloc_size = object->u.array->capacity * sizeof(RVM_ClassObject);
+
+        if (object->u.array->capacity == 0) {
+            object->u.array->capacity = 4;
+        } else {
+            object->u.array->capacity *= 2;
+        }
+
+        new_alloc_size                        = object->u.array->capacity * sizeof(RVM_ClassObject);
+
+
+        object->u.array->u.class_object_array = (RVM_ClassObject*)mem_realloc(rvm->meta_pool,
+                                                                              object->u.array->u.class_object_array,
+                                                                              old_alloc_size,
+                                                                              new_alloc_size);
+    }
+    object->u.array->u.class_object_array[object->u.array->length++] = *rvm_deep_copy_class_object(rvm, (*value)->u.class_object);
+    return ERROR_CODE_SUCCESS;
+}
+
+ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value) {
+    if (object->u.array->length == 0) {
+        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
+    }
+
+    RVM_ClassObject* src_class_object = &(object->u.array->u.class_object_array[--object->u.array->length]);
+    RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
+
+
+    RVM_Object*      new_object       = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
+    new_object->u.class_object        = dst_class_object;
+
+
+    *value                            = new_object;
+    return ERROR_CODE_SUCCESS;
+}
+
 
 RVM_Object* rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type) {
     assert(rvm != nullptr);
