@@ -28,5 +28,15 @@ function main() {
         debug::debug_assert(global_job_array_0[index].Running == false);
         debug::debug_assert(global_job_array_0[index].JobID   == 0);
         debug::debug_assert(global_job_array_0[index].Score   == 0.0);
+
+        global_job_array_0[index].Running = true;
+        global_job_array_0[index].JobID   = 1;
+        global_job_array_0[index].Score   = 2.34;
+    }
+
+    for(index = 0; index < 200; index = index + 1) {
+        fmt::println_bool(global_job_array_0[index].Running);
+        fmt::println_int(global_job_array_0[index].JobID);
+        fmt::println_double(global_job_array_0[index].Score);
     }
 }

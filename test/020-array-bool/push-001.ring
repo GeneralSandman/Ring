@@ -26,28 +26,28 @@ function main() {
     fmt::println_int(len(global_bool_array_0));
     fmt::println_int(capacity(global_bool_array_0));
     debug::debug_assert(len(global_bool_array_0) == 1);
-    debug::debug_assert(capacity(global_bool_array_0) == 4);
+    debug::debug_assert(capacity(global_bool_array_0) == 8);
 
     fmt::println_string("\ntest cast 2 length&capacity------------------------");
     push(global_bool_array_0, true);
     fmt::println_int(len(global_bool_array_0));
     fmt::println_int(capacity(global_bool_array_0));
     debug::debug_assert(len(global_bool_array_0) == 2);
-    debug::debug_assert(capacity(global_bool_array_0) == 4);
+    debug::debug_assert(capacity(global_bool_array_0) == 8);
 
     fmt::println_string("\ntest cast 3 length&capacity------------------------");
     push(global_bool_array_0, true);
     fmt::println_int(len(global_bool_array_0));
     fmt::println_int(capacity(global_bool_array_0));
     debug::debug_assert(len(global_bool_array_0) == 3);
-    debug::debug_assert(capacity(global_bool_array_0) == 4);
+    debug::debug_assert(capacity(global_bool_array_0) == 8);
 
     fmt::println_string("\ntest cast 4 length&capacity------------------------");
     push(global_bool_array_0, true);
     fmt::println_int(len(global_bool_array_0));
     fmt::println_int(capacity(global_bool_array_0));
     debug::debug_assert(len(global_bool_array_0) == 4);
-    debug::debug_assert(capacity(global_bool_array_0) == 4);
+    debug::debug_assert(capacity(global_bool_array_0) == 8);
 
     fmt::println_string("\ntest cast 5 length&capacity------------------------");
     push(global_bool_array_0, true);
