@@ -548,6 +548,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 1;
             break;
         case RVM_CODE_POP_ARRAY_OBJECT:
+            array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            index        = STACK_GET_INT_OFFSET(rvm, -1);
+            rvm_array_set_class_object(rvm, array_object, index, &STACK_GET_OBJECT_OFFSET(rvm, -3));
+            runtime_stack->top_index -= 3;
+            rvm->pc += 1;
             break;
 
         // array append
@@ -2045,6 +2050,19 @@ ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Object* objec
     new_object->u.class_object        = dst_class_object; // FIXME: 这里内存泄漏了
 
     *value                            = new_object;
+    return ERROR_CODE_SUCCESS;
+}
+
+ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value) {
+    if (index >= object->u.array->length) {
+        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
+    }
+
+    RVM_ClassObject* dst_class_object            = nullptr;
+    dst_class_object                             = rvm_deep_copy_class_object(rvm, (*value)->u.class_object);
+
+    object->u.array->u.class_object_array[index] = *dst_class_object;
+
     return ERROR_CODE_SUCCESS;
 }
 

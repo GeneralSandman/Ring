@@ -7,21 +7,21 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 
 Package_Executer*      package_executer_create(ExecuterEntry* executer_entry, char* package_name) {
-    Package_Executer* executer                = (Package_Executer*)mem_alloc(get_front_mem_pool(), sizeof(Package_Executer));
-    executer->executer_entry                  = executer_entry;
-    executer->package_index                   = -1;
-    executer->package_name                    = package_name;
-    executer->constant_pool_size              = 0;
-    executer->constant_pool_list              = nullptr;
-    executer->global_variable_size            = 0;
-    executer->global_variable_list            = nullptr;
-    executer->function_size                   = 0;
-    executer->function_list                   = nullptr;
-    executer->code_size                       = 0;
-    executer->code_list                       = nullptr;
-    executer->main_func_index                 = -1;
-    executer->estimate_runtime_stack_capacity = 0;
-    return executer;
+         Package_Executer* executer                = (Package_Executer*)mem_alloc(get_front_mem_pool(), sizeof(Package_Executer));
+         executer->executer_entry                  = executer_entry;
+         executer->package_index                   = -1;
+         executer->package_name                    = package_name;
+         executer->constant_pool_size              = 0;
+         executer->constant_pool_list              = nullptr;
+         executer->global_variable_size            = 0;
+         executer->global_variable_list            = nullptr;
+         executer->function_size                   = 0;
+         executer->function_list                   = nullptr;
+         executer->code_size                       = 0;
+         executer->code_list                       = nullptr;
+         executer->main_func_index                 = -1;
+         executer->estimate_runtime_stack_capacity = 0;
+         return executer;
 }
 
 void package_executer_dump(Package_Executer* package_executer) {
@@ -1012,8 +1012,10 @@ void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayInde
         generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_DOUBLE, 0, array_index_expression->line_number);
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_STRING, 0, array_index_expression->line_number);
+    } else if (declaration->type->next->kind == RING_BASIC_TYPE_CLASS) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_OBJECT, 0, array_index_expression->line_number);
     } else {
-        printf("error: assign to item of array only support bool[] int[] double[] string[]\n");
+        printf("error: assign to item of array only support bool[] int[] double[] string[] class[]\n");
         exit(1);
     }
 }

@@ -2073,6 +2073,7 @@ ErrorCode            rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Objec
 ErrorCode            rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value);
 
 ErrorCode            rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
+ErrorCode            rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
 ErrorCode            rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value);
 ErrorCode            rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value);
 
