@@ -478,9 +478,7 @@ struct RVM_OpcodeBuffer {
     unsigned int                       code_size;
     unsigned int                       code_capacity;
 
-    RVM_LabelTable*                    lable_list;
-    unsigned int                       lable_size;
-    unsigned int                       lable_capacity;
+    std::vector<RVM_LabelTable>        lable_list;
 
     std::vector<RVM_SourceCodeLineMap> code_line_map;
 };

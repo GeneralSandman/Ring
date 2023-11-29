@@ -7,21 +7,21 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 
 Package_Executer*      package_executer_create(ExecuterEntry* executer_entry, char* package_name) {
-         Package_Executer* executer                = (Package_Executer*)mem_alloc(get_front_mem_pool(), sizeof(Package_Executer));
-         executer->executer_entry                  = executer_entry;
-         executer->package_index                   = -1;
-         executer->package_name                    = package_name;
-         executer->constant_pool_size              = 0;
-         executer->constant_pool_list              = nullptr;
-         executer->global_variable_size            = 0;
-         executer->global_variable_list            = nullptr;
-         executer->function_size                   = 0;
-         executer->function_list                   = nullptr;
-         executer->code_size                       = 0;
-         executer->code_list                       = nullptr;
-         executer->main_func_index                 = -1;
-         executer->estimate_runtime_stack_capacity = 0;
-         return executer;
+    Package_Executer* executer                = (Package_Executer*)mem_alloc(get_front_mem_pool(), sizeof(Package_Executer));
+    executer->executer_entry                  = executer_entry;
+    executer->package_index                   = -1;
+    executer->package_name                    = package_name;
+    executer->constant_pool_size              = 0;
+    executer->constant_pool_list              = nullptr;
+    executer->global_variable_size            = 0;
+    executer->global_variable_list            = nullptr;
+    executer->function_size                   = 0;
+    executer->function_list                   = nullptr;
+    executer->code_size                       = 0;
+    executer->code_list                       = nullptr;
+    executer->main_func_index                 = -1;
+    executer->estimate_runtime_stack_capacity = 0;
+    return executer;
 }
 
 void package_executer_dump(Package_Executer* package_executer) {
@@ -289,9 +289,7 @@ RVM_OpcodeBuffer* new_opcode_buffer() {
     buffer->code_list        = nullptr;
     buffer->code_size        = 0;
     buffer->code_capacity    = 0;
-    buffer->lable_list       = nullptr;
-    buffer->lable_size       = 0;
-    buffer->lable_capacity   = 0;
+    buffer->lable_list       = std::vector<RVM_LabelTable>(1024);
     buffer->code_line_map    = std::vector<RVM_SourceCodeLineMap>{};
     return buffer;
 }
@@ -1737,18 +1735,9 @@ int constant_pool_add_string(Package_Executer* executer, char* string_literal) {
 
 unsigned int opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer) {
     debug_log_with_darkgreen_coloar("\t");
-    unsigned int old_index = opcode_buffer->lable_size;
+    unsigned int old_index = opcode_buffer->lable_list.size();
 
-    if (opcode_buffer->lable_capacity <= opcode_buffer->code_size) {
-        opcode_buffer->lable_capacity += 1024;
-        opcode_buffer->lable_list = (RVM_LabelTable*)realloc(opcode_buffer->lable_list,
-                                                             sizeof(RVM_LabelTable) * opcode_buffer->lable_capacity);
-    }
-
-    opcode_buffer->lable_list[opcode_buffer->lable_size].label_name    = nullptr;
-    opcode_buffer->lable_list[opcode_buffer->lable_size].label_address = 0; // update in opcode_buffer_set_label
-    opcode_buffer->lable_size++;
-
+    opcode_buffer->lable_list.push_back(RVM_LabelTable{});
 
     return old_index;
 }
