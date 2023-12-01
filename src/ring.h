@@ -1540,10 +1540,11 @@ struct BinaryChunk {
  * 默认初始化 64个 bucket
  * 每个bucket 有 1000 个 block
  */
-#define MEM_BUCKET_NUM 64
+#define MEM_MAX_BUCKET_NUM 2048
+#define MEM_INIT_BUCKET_NUM 512
 
-#define MEM_BLOCK_NUM 100
-#define MEM_BLOCK_MAX_SIZE (MEM_BUCKET_NUM * 8)
+#define MEM_BLOCK_NUM 8
+#define MEM_BLOCK_MAX_SIZE (MEM_MAX_BUCKET_NUM * 8)
 
 #define MEM_ALIGN 8
 #define MEM_ALIGN_LARGE 16
@@ -1556,20 +1557,19 @@ struct BinaryChunk {
 
 
 struct MemPool {
-    char*                  name;
+    char*                             name;
 
-    std::vector<MemBlock*> free_buckets;
-    std::vector<MemBlock*> active_buckets;
+    std::vector<MemBlock*>            free_buckets;
+    std::vector<MemBlock*>            active_buckets;
 
-    size_t                 free_mem_size;
-    size_t                 active_mem_size;
+    std::unordered_map<void*, size_t> active_mem_map;
 
-    size_t                 all_mem_size; // 整个生命周期都不变, 用于校验
+    size_t                            free_mem_size;
+    size_t                            active_mem_size;
+
+    size_t                            all_mem_size; // 整个生命周期都不变, 用于校验
 
 
-#ifdef DEBUG_RVM_MEM_POOL_DETAIL
-    std::unordered_set<void*> active_mem_set;
-#endif
     /*
      * free_buckets[0]: bucket size = 8;
      * free_buckets[1]: bucket size = 16;

@@ -4,16 +4,14 @@
 MemPool* create_mem_pool(char* name) {
     MemPool* pool         = (MemPool*)malloc(sizeof(MemPool));
     pool->name            = name;
-    pool->free_buckets    = std::vector<MemBlock*>(MEM_BUCKET_NUM, nullptr);
-    pool->active_buckets  = std::vector<MemBlock*>(MEM_BUCKET_NUM, nullptr);
+    pool->free_buckets    = std::vector<MemBlock*>(MEM_MAX_BUCKET_NUM, nullptr);
+    pool->active_buckets  = std::vector<MemBlock*>(MEM_MAX_BUCKET_NUM, nullptr);
+    pool->active_mem_map  = std::unordered_map<void*, size_t>();
     pool->free_mem_size   = 0;
     pool->active_mem_size = 0;
     pool->all_mem_size    = 0;
-#ifdef DEBUG_RVM_MEM_POOL_DETAIL
-    pool->active_mem_set = std::unordered_set<void*>();
-#endif
 
-    for (int i = 0; i < MEM_BUCKET_NUM; i++) {
+    for (int i = 0; i < MEM_INIT_BUCKET_NUM; i++) {
         size_t    block_size = (i + 1) * 8;
 
         MemBlock* block      = nullptr;
@@ -30,7 +28,7 @@ MemPool* create_mem_pool(char* name) {
         pool->free_buckets[i] = block;
     }
 
-    pool->all_mem_size = pool->free_mem_size;
+    pool->all_mem_size = pool->free_mem_size + pool->active_mem_size;
 
     return pool;
 }
@@ -43,7 +41,7 @@ void destory_mem_pool(MemPool* pool) {
 #endif
 
     // free memory of free buckets
-    for (int i = 0; i < MEM_BUCKET_NUM; i++) {
+    for (int i = 0; i < MEM_MAX_BUCKET_NUM; i++) {
         MemBlock* next = nullptr;
         for (MemBlock* block = pool->free_buckets[i]; block != nullptr; block = next) {
             next = block->next;
@@ -53,15 +51,21 @@ void destory_mem_pool(MemPool* pool) {
         }
     }
 
-    // free memory of active buckets
-    for (int i = 0; i < MEM_BUCKET_NUM; i++) {
+    // free memory of active bucket meta info
+    for (int i = 0; i < MEM_MAX_BUCKET_NUM; i++) {
         MemBlock* next = nullptr;
         for (MemBlock* block = pool->active_buckets[i]; block != nullptr; block = next) {
             next = block->next;
 
-            // free(block->data);
             free(block);
         }
+    }
+
+    // free active data
+    for (auto iter = pool->active_mem_map.begin();
+         iter != pool->active_mem_map.end();
+         iter++) {
+        free(iter->first);
     }
 }
 
@@ -76,7 +80,7 @@ void dump_mem_pool(MemPool* pool) {
     size_t       active_mem_size  = 0;
 
 
-    for (int i = 0; i < MEM_BUCKET_NUM; i++) {
+    for (int i = 0; i < MEM_MAX_BUCKET_NUM; i++) {
         size_t block_size = (i + 1) * 8;
 
         for (MemBlock* block = pool->free_buckets[i]; block != nullptr; block = block->next) {
@@ -90,11 +94,6 @@ void dump_mem_pool(MemPool* pool) {
         }
     }
 
-    assert(free_mem_size == pool->free_mem_size);
-    assert(active_mem_size == pool->active_mem_size);
-
-    assert(pool->free_mem_size + pool->active_mem_size == pool->all_mem_size);
-
 
     printf("+++++++++++ [Memory Pool Summary] ++++++++++++\n");
     printf("Name: %s\n", pool->name);
@@ -104,12 +103,24 @@ void dump_mem_pool(MemPool* pool) {
     printf("\n");
     printf("Free   Memory Size:  %7ld\n", free_mem_size);
     printf("Active Memory Size:  %7ld\n", active_mem_size);
-
-#ifdef DEBUG_RVM_MEM_POOL_DETAIL
     printf("\n");
-    printf("Active Mem Set Num:  %7ld\n", pool->active_mem_set.size());
-#endif
+    printf("Active Mem Set Num:  %7ld\n", pool->active_mem_map.size());
     printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
+
+    if (free_mem_size != pool->free_mem_size) {
+        printf("mem pool status is invalid [1]: free_mem_size= %ld, pool->free_mem_size= %ld\n", free_mem_size, pool->free_mem_size);
+        exit(1);
+    }
+
+    if (active_mem_size != pool->active_mem_size) {
+        printf("mem pool status is invalid [2]: active_mem_size= %ld, pool->active_mem_size= %ld\n", active_mem_size, pool->active_mem_size);
+        exit(1);
+    }
+
+    if (pool->free_mem_size + pool->active_mem_size != pool->all_mem_size) {
+        printf("mem pool status is invalid [3]: all_mem_size= %ld, pool->all_mem_size= %ld\n", pool->free_mem_size + pool->active_mem_size, pool->all_mem_size);
+        exit(1);
+    }
 }
 
 // alloc memory space fo meta info
@@ -119,12 +130,16 @@ void* mem_alloc(MemPool* pool, size_t size) {
         return nullptr;
     }
 
-    size_t    alloc_size   = ROUND_UP8(size);
-    int       bucket_index = alloc_size / 8 - 1;
+    size                   = ROUND_UP8(size);
+    int       bucket_index = size / 8 - 1;
     MemBlock* block        = nullptr;
 
+    if (bucket_index > MEM_MAX_BUCKET_NUM) {
+        printf("cant't alloc large sapce\n");
+        exit(1);
+    }
+
     if (pool->free_buckets[bucket_index] == nullptr) {
-        // TODO: 分配内存, 直接添加到 active_buckets
         size_t    block_size = (bucket_index + 1) * 8;
 
         MemBlock* block      = nullptr;
@@ -136,6 +151,7 @@ void* mem_alloc(MemPool* pool, size_t size) {
             next        = block;
 
             pool->free_mem_size += block_size;
+            pool->all_mem_size += block_size;
         }
         pool->free_buckets[bucket_index] = block;
     }
@@ -144,19 +160,19 @@ void* mem_alloc(MemPool* pool, size_t size) {
 
     block                              = pool->free_buckets[bucket_index];
     res                                = block->data;
-    block->data                        = nullptr;
     pool->free_buckets[bucket_index]   = block->next;
 
     block->next                        = pool->active_buckets[bucket_index];
     pool->active_buckets[bucket_index] = block;
 
-    pool->free_mem_size -= alloc_size;
-    pool->active_mem_size += alloc_size;
+    pool->free_mem_size -= size;
+    pool->active_mem_size += size;
+
+    pool->active_mem_map[res] = size;
 
 #ifdef DEBUG_RVM_MEM_POOL_DETAIL
-    pool->active_mem_set.insert(res);
+    dump_mem_pool(pool);
 #endif
-
     return res;
 }
 
@@ -171,12 +187,21 @@ void* mem_realloc(MemPool* pool, void* ptr, size_t old_size, size_t new_size) {
     return new_ptr;
 }
 
+// FIXME: 这里的逻辑不对, 内存泄漏
 void mem_free(MemPool* pool, void* ptr, size_t size) {
     assert(pool != nullptr);
     // assert(size == ROUND_UP8(size));
     if (ptr == nullptr || size == 0) {
         return;
     }
+
+    auto iter = pool->active_mem_map.find(ptr);
+    if (iter == pool->active_mem_map.end()) {
+        printf("ptr:%p is not allocated by memory pool", ptr);
+        exit(1);
+    }
+
+    size                   = iter->second;
 
     int       bucket_index = size / 8 - 1;
     MemBlock* block        = nullptr;
@@ -197,24 +222,17 @@ void mem_free(MemPool* pool, void* ptr, size_t size) {
     pool->free_mem_size += size;
     pool->active_mem_size -= size;
 
-#ifdef DEBUG_RVM_MEM_POOL_DETAIL
-    auto iter = pool->active_mem_set.find(ptr);
-    if (iter == pool->active_mem_set.end()) {
-        printf("ptr:%p is not allocated by memory pool", ptr);
-        exit(1);
-    }
-    pool->active_mem_set.erase(ptr);
-#endif
+    pool->active_mem_map.erase(ptr);
 }
 
 void test_mem_pool() {
     MemPool* pool = create_mem_pool((char*)"test");
     dump_mem_pool(pool);
     std::vector<void*>              tmp(MEM_BLOCK_NUM, nullptr);
-    std::vector<std::vector<void*>> res(MEM_BUCKET_NUM, tmp);
+    std::vector<std::vector<void*>> res(MEM_MAX_BUCKET_NUM, tmp);
     size_t                          sum = 0;
 
-    for (int i = 0; i < MEM_BUCKET_NUM; i++) {
+    for (int i = 0; i < MEM_MAX_BUCKET_NUM; i++) {
         size_t block_size = (i + 1) * 8;
         for (int j = 0; j < MEM_BLOCK_NUM; j++) {
             void* ptr = mem_alloc(pool, block_size);
@@ -225,7 +243,7 @@ void test_mem_pool() {
     printf("----------------sum:%ld\n", sum);
     dump_mem_pool(pool);
 
-    for (int i = 0; i < MEM_BUCKET_NUM; i++) {
+    for (int i = 0; i < MEM_MAX_BUCKET_NUM; i++) {
         size_t block_size = (i + 1) * 8;
         for (int j = 0; j < MEM_BLOCK_NUM; j++) {
             mem_free(pool, res[i][j], block_size);
