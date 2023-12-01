@@ -2336,7 +2336,7 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         break;
 
     case RVM_ARRAY_STRING:
-        array->u.string_array = (RVM_String*)mem_alloc(rvm->meta_pool, sizeof(RVM_String) * array->capacity);
+        array->u.string_array = (RVM_String*)mem_alloc(rvm->data_pool, sizeof(RVM_String) * array->capacity);
 
         rvm->runtime_heap->alloc_size += sizeof(RVM_String) * array->capacity;
         // FIXME:
