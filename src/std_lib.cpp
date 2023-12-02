@@ -310,21 +310,30 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     RVM_Value ret;
     ret.u.int_value            = 0;
 
-    unsigned int length        = 1;
-    char*        output_buffer = (char*)mem_alloc(get_front_mem_pool(), length * sizeof(char));
+    unsigned int length        = 0;
+    unsigned int capacity      = 8;
+    char*        output_buffer = nullptr;
 
     if (args->u.object == nullptr
         || args->u.object->u.string == nullptr
         || args->u.object->u.string->data == nullptr) {
+        output_buffer = (char*)mem_alloc(get_front_mem_pool(), capacity * sizeof(char));
+        length        = 1;
     } else {
-        length        = args->u.object->u.string->length + 1;
-        output_buffer = (char*)realloc(output_buffer, length * sizeof(char));
-        strncpy(output_buffer, args->u.object->u.string->data, length - 1);
+        unsigned int str_length = args->u.object->u.string->length;
+        if (str_length + 1 > capacity) {
+            capacity = str_length + 1;
+        }
+        length        = str_length + 1;
+        output_buffer = (char*)mem_alloc(get_front_mem_pool(), capacity * sizeof(char));
+        strncpy(output_buffer, args->u.object->u.string->data, str_length);
     }
     output_buffer[length - 1] = '\n';
 
     printf("%.*s", length, output_buffer);
     fflush(stdout);
+
+    mem_free(get_front_mem_pool(), (void*)output_buffer, capacity * sizeof(char));
 
 #ifdef DEBUG_RVM_INTERACTIVE
     rvm->stdout_logs.push_back(output_buffer);

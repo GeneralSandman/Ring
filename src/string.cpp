@@ -13,7 +13,7 @@ static int   string_literal_buffer_capacity = 0;
 Ring_String* new_ring_string() {
     Ring_String* string = (Ring_String*)mem_alloc(get_front_mem_pool(), sizeof(Ring_String));
 
-    string->buffer      = (char*)mem_alloc(get_front_mem_pool(), STRING_LITERAL_CAPACITY);
+    string->buffer      = (char*)mem_alloc(get_front_mem_pool(), STRING_LITERAL_CAPACITY * sizeof(char));
     string->size        = 0;
     string->capacity    = STRING_LITERAL_CAPACITY;
     return string;
@@ -25,8 +25,11 @@ void reset_ring_string(Ring_String* string) {
 
 void ring_string_add_char(Ring_String* string, char ch) {
     if (string->size == string->capacity) {
+        unsigned int old_alloc_size = string->capacity * sizeof(char);
         string->capacity += STRING_LITERAL_CAPACITY;
-        string->buffer = (char*)realloc(string->buffer, string->capacity);
+        unsigned int new_alloc_size = string->capacity * sizeof(char);
+
+        string->buffer              = (char*)mem_realloc(get_front_mem_pool(), string->buffer, old_alloc_size, new_alloc_size);
     }
     string->buffer[string->size] = ch;
     string->size++;
@@ -42,7 +45,7 @@ char* get_ring_string(Ring_String* string) {
 }
 
 void init_string_literal_buffer() {
-    string_literal_buffer = (char*)mem_alloc(get_front_mem_pool(), STRING_LITERAL_CAPACITY);
+    string_literal_buffer = (char*)mem_alloc(get_front_mem_pool(), STRING_LITERAL_CAPACITY * sizeof(char));
     if (string_literal_buffer == nullptr) {
         printf("[ERROR] alloc space error\n");
     }
@@ -56,10 +59,13 @@ void reset_string_literal_buffer() {
 
 void string_literal_add_char(char ch) {
     if (string_literal_buffer_size == string_literal_buffer_capacity) {
+        unsigned int old_alloc_size = string_literal_buffer_capacity * sizeof(char);
         string_literal_buffer_capacity += STRING_LITERAL_CAPACITY;
-        string_literal_buffer = (char*)realloc(string_literal_buffer, string_literal_buffer_capacity);
+        unsigned int new_alloc_size = string_literal_buffer_capacity * sizeof(char);
+
+        string_literal_buffer       = (char*)mem_realloc(get_front_mem_pool(), string_literal_buffer, old_alloc_size, new_alloc_size);
         if (string_literal_buffer == nullptr) {
-            printf("[ERROR] realloc error\n");
+            printf("[ERROR] mem_realloc error\n");
         }
     }
     string_literal_buffer[string_literal_buffer_size] = ch;
