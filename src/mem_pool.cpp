@@ -124,8 +124,10 @@ void dump_mem_pool(MemPool* pool) {
 }
 
 // alloc memory space fo meta info
-void* mem_alloc(MemPool* pool, size_t size) {
-    assert(pool != nullptr);
+inline void* mem_alloc(MemPool* pool, size_t size) {
+    if (pool == NULL_MEM_POOL) {
+        return malloc(size);
+    }
     if (size == 0) {
         return nullptr;
     }
@@ -177,7 +179,9 @@ void* mem_alloc(MemPool* pool, size_t size) {
 }
 
 void* mem_realloc(MemPool* pool, void* ptr, size_t old_size, size_t new_size) {
-    assert(pool != nullptr);
+    if (pool == NULL_MEM_POOL) {
+        return realloc(ptr, new_size);
+    }
     assert(old_size == ROUND_UP8(old_size));
 
     void* new_ptr = mem_alloc(pool, new_size);
@@ -189,7 +193,10 @@ void* mem_realloc(MemPool* pool, void* ptr, size_t old_size, size_t new_size) {
 
 // FIXME: 这里的逻辑不对, 内存泄漏
 void mem_free(MemPool* pool, void* ptr, size_t size) {
-    assert(pool != nullptr);
+    if (pool == NULL_MEM_POOL) {
+        free(ptr);
+        return;
+    }
     // assert(size == ROUND_UP8(size));
     if (ptr == nullptr || size == 0) {
         return;

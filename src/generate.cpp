@@ -8,7 +8,7 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 // init Package-Executer
 Package_Executer* package_executer_create(ExecuterEntry* executer_entry, char* package_name) {
-    Package_Executer* executer                = (Package_Executer*)mem_alloc(get_front_mem_pool(), sizeof(Package_Executer));
+    Package_Executer* executer                = (Package_Executer*)mem_alloc(NULL_MEM_POOL, sizeof(Package_Executer));
     executer->executer_entry                  = executer_entry;
     executer->package_index                   = -1;
     executer->package_name                    = package_name;

@@ -72,7 +72,6 @@ typedef struct ContinueStatement            ContinueStatement;
 
 typedef struct Ring_DeriveType_Array        Ring_DeriveType_Array;
 typedef struct Ring_DeriveType_Class        Ring_DeriveType_Class;
-typedef struct Ring_DeriveType              Ring_DeriveType;
 typedef struct Declaration                  Declaration;
 typedef struct TagDefinitionStatement       TagDefinitionStatement;
 typedef struct JumpTagStatement             JumpTagStatement;
@@ -1413,14 +1412,6 @@ struct Ring_DeriveType_Class {
     ClassDefinition* class_definition; // FIX_AST_UPDATE
 };
 
-struct Ring_DeriveType {
-    Ring_DeriveTypeKind kind;
-    union {
-        Ring_DeriveType_Array* array_type;
-        Ring_DeriveType_Class* class_type;
-    } u;
-};
-
 
 struct TypeSpecifier {
     Ring_BasicType kind;
@@ -1555,6 +1546,7 @@ struct BinaryChunk {
 #define ROUND_UP16(n) \
     (((n) + MEM_ALIGN_LARGE - 1) & ~(MEM_ALIGN_LARGE - 1))
 
+#define NULL_MEM_POOL nullptr
 
 struct MemPool {
     char*                             name;

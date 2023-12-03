@@ -71,7 +71,7 @@ void ring_check_exit_immediately() {
 }
 
 CompilerEntry* compiler_entry_create() {
-    compiler_entry               = (CompilerEntry*)mem_alloc(front_mem_pool, sizeof(CompilerEntry));
+    compiler_entry               = (CompilerEntry*)mem_alloc(NULL_MEM_POOL, sizeof(CompilerEntry));
     compiler_entry->package_list = std::vector<Package*>{};
     compiler_entry->main_package = nullptr;
     return compiler_entry;
@@ -109,7 +109,7 @@ Package* search_package(CompilerEntry* compiler_entry, char* package_name) {
 }
 
 ExecuterEntry* executer_entry_create() {
-    ExecuterEntry* executer_entry         = (ExecuterEntry*)mem_alloc(front_mem_pool, sizeof(ExecuterEntry));
+    ExecuterEntry* executer_entry         = (ExecuterEntry*)mem_alloc(NULL_MEM_POOL, sizeof(ExecuterEntry));
     executer_entry->package_executer_list = std::vector<Package_Executer*>{};
     executer_entry->main_package_executer = nullptr;
     return executer_entry;
@@ -135,7 +135,7 @@ Package* package_create(CompilerEntry* compiler_entry, char* package_name, char*
     assert(compiler_entry != nullptr);
     debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 
-    Package* package                 = (Package*)mem_alloc(front_mem_pool, sizeof(Package));
+    Package* package                 = (Package*)mem_alloc(NULL_MEM_POOL, sizeof(Package));
 
     package->compiler_entry          = compiler_entry;
     package->package_index           = -1; // TODO: 这个应该在 fix的时候 设置
@@ -166,7 +166,7 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
     assert(compiler_entry != nullptr);
     debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 
-    Package* package                 = (Package*)mem_alloc(front_mem_pool, sizeof(Package));
+    Package* package                 = (Package*)mem_alloc(NULL_MEM_POOL, sizeof(Package));
 
     package->compiler_entry          = compiler_entry;
     package->package_index           = -1; // TODO: 这个应该在 fix的时候 设置
@@ -269,7 +269,7 @@ void package_dump(Package* package) {
 
 // create packge by a input source file
 PackageUnit* package_unit_create(Package* parent_package, std::string file_name) {
-    package_unit                                   = (PackageUnit*)mem_alloc(front_mem_pool, sizeof(PackageUnit));
+    package_unit                                   = (PackageUnit*)mem_alloc(NULL_MEM_POOL, sizeof(PackageUnit));
 
     package_unit->parent_package                   = parent_package;
 
