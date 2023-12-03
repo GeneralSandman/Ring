@@ -94,7 +94,17 @@ autoTestFunc(){
         return
     fi
 
-    $TEST_RING_BIN run $source_code_file > $run_result_file_tmp
+    let all_num++
+
+
+    $TEST_RING_BIN run $source_code_file &> $run_result_file_tmp
+    if [[ "$?" -ne 0 ]];then
+        result="FAILED"
+        echo $source_code_file >> $TEST_RESULT
+        printf "%-4s *%-20s %-80s %-80s \033[31m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
+        return
+    fi
+    
     diff $run_result_file $run_result_file_tmp
 
     if [[ "$?" -eq 0 ]];then
@@ -106,7 +116,6 @@ autoTestFunc(){
         echo $source_code_file >> $TEST_RESULT
         printf "%-4s *%-20s %-80s %-80s \033[31m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
     fi
-    let all_num++
     rm $run_result_file_tmp
 }
 

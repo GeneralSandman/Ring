@@ -18,6 +18,6 @@ global {
 @main
 function main() {
     fmt::println_string("before invoke os::exit");
-    os::exit(2);
+    os::exit(0);
     fmt::println_string("after invoke os::exit");
 }
