@@ -1,7 +1,7 @@
-TARGET= ring
+TARGET = ring
 VERSION= ring-v0.2.11-beta
-CC=g++
-OBJS = \
+CC     = g++
+OBJS   = \
 	lex.yy.o\
 	y.tab.o\
 	string.o\
@@ -21,10 +21,8 @@ OBJS = \
 	main.o
 
 
-TOOL_GEN_VMCODE_DOC_TARGET=tool_gen_vmcode_doc
-TOOL_GEN_VMCODE_DOC_OBJS = \
-														vm.o\
-														tool_gen_vmcode_doc.o
+TOOL_GEN_VMCODE_DOC_TARGET= tool_gen_vmcode_doc
+TOOL_GEN_VMCODE_DOC_OBJS  = vm.o tool_gen_vmcode_doc.o
 
 # CFLAGS -g 打开调试信息
 # CFLAGS -DDEBUG 开启 debug 编译信息
@@ -33,21 +31,24 @@ TOOL_GEN_VMCODE_DOC_OBJS = \
 # -lncurses for tigetnum tigetnum
 
 # DEBUG_XX 来控制不同阶段的debug日志
-# DEBUG_FLEX 控制flex工具日志
-# DEBUG_BISON 控制bison工具日志，一般来说与DEBUG_FLEX 一块效果比较好，能看到哪一行
-# DEUBG_CREATE_AST 控制生成AST日志
-# DEBUG_STD_LIB 控制 std lib 的 debug 路径
-# DEBUG_COMPILER_SUMMARY 控制编译阶段的信息：词法分析、语法分析、语意分析
-# DEBUG_COMPILER_DETAIL 控制编译阶段的信息：词法分析、语法分析、语意分析
-# DEBUG_GENERATE_SUMMARY 代码生成阶段 概要: 只会打印出相关的package package_unit信息
-# DEBUG_GENERATE_DETAIL 代码生成阶段 详情: 会打印出package对应的字节码
-# DEBUG_GENERATE_OUTPUT_VMCODE 代码生成节点： 只打印出相应的字节码
-# DEBUG_EXEC_VM  vm运行阶段的调试信息
-# DEBUG_RVM_INTERACTIVE 控制调试RVM
-# DDEBUG_RVM_MEM_POOL_DETAIL 展示 Memory Pool 内存分配的详情
-# DEBUG_RVM_GC_DETAIL 展示 Garbage Collect 的详情
-CFLAGS = -c -std=c++11 -Wall -Wno-unused-function -Wno-unneeded-internal-declaration \
-				  # -g \
+#  DEBUG_FLEX 						控制flex工具日志
+#  DEBUG_BISON 						控制bison工具日志，一般来说与DEBUG_FLEX 一块效果比较好，能看到哪一行
+#  DEUBG_CREATE_AST 					控制生成AST日志
+#  DEBUG_STD_LIB 					控制 std lib 的 debug 路径
+#  DEBUG_COMPILER_SUMMARY 			控制编译阶段的信息：词法分析、语法分析、语意分析
+#  DEBUG_COMPILER_DETAIL 			控制编译阶段的信息：词法分析、语法分析、语意分析
+#  DEBUG_GENERATE_SUMMARY 			代码生成阶段 概要: 只会打印出相关的package package_unit信息
+#  DEBUG_GENERATE_DETAIL 			代码生成阶段 详情: 会打印出package对应的字节码
+#  DEBUG_GENERATE_OUTPUT_VMCODE 		代码生成节点： 只打印出相应的字节码
+#  DEBUG_EXEC_VM  					vm运行阶段的调试信息
+#  DEBUG_RVM_INTERACTIVE 			控制调试RVM
+#  DDEBUG_RVM_MEM_POOL_DETAIL 		展示 Memory Pool 内存分配的详情
+#  DEBUG_RVM_GC_DETAIL 				展示 Garbage Collect 的详情
+CFLAGS = -c -std=c++11 \
+				-Wall \
+				-Wno-unused-function \
+				-Wno-unneeded-internal-declaration \
+				# -g \
 				 -DDEBUG_FLEX1 \
 				 -DDEBUG_BISON1 \
 				 -DDEBUG_CREATE_AST1 \
@@ -59,7 +60,7 @@ CFLAGS = -c -std=c++11 -Wall -Wno-unused-function -Wno-unneeded-internal-declara
 				 -DDEBUG_GENERATE_OUTPUT_VMCODE1 \
 				 -DDEBUG_EXEC_VM1 \
 				 -DDEBUG_RVM_INTERACTIVE1 \
-				 -DDEBUG_RVM_MEM_POOL_DETAIL \
+				 -DDEBUG_RVM_MEM_POOL_DETAIL1 \
 				 -DDEBUG_RVM_GC_DETAIL1
 BIN = ../bin
 INCLUDES = \
