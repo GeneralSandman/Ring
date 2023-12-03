@@ -1706,7 +1706,6 @@ char*        get_string_literal();
  * function definition
  *
  */
-void           ring_compiler_error(SyntaxType syntax_type, int exit);
 void           ring_check_exit_immediately();
 CompilerEntry* compiler_entry_create();
 CompilerEntry* get_compiler_entry();
@@ -1719,6 +1718,7 @@ Package*       package_create_input_file(CompilerEntry* compiler_entry, char* pa
 void           package_compile(Package* package);
 void           package_dump(Package* package);
 void           compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry);
+
 PackageUnit*   package_unit_create(Package* parent_package, std::string file_name);
 PackageUnit*   get_package_unit();
 void           package_unit_compile(PackageUnit* package_unit);
@@ -1744,9 +1744,11 @@ int            package_unit_add_class_definition(ClassDefinition* class_definiti
  *
  */
 void                          finish_global_block(Statement* global_statement_list);
+
 Statement*                    statement_list_add_item(Statement* statement_list, Statement* statement);
 Statement*                    create_statemen_from_expression(Expression* expression);
 void                          add_function_definition(AttributeInfo* attribute_info, Function* function_definition);
+
 Expression*                   expression_add_package_posit(Expression* expression, char* package_posit);
 Expression*                   create_expression_identifier(char* identifier);
 Expression*                   create_expression_identifier2(char* identifier, IdentifierExpressionType type);
@@ -1766,6 +1768,7 @@ Expression*                   create_cast_expression(TypeSpecifier* cast_type, E
 Expression*                   create_member_expression(Expression* object_expression, char* member_identifier);
 Expression*                   create_dot_expression(Expression* prefix_expression, Expression* suffix_expression);
 Expression*                   create_new_array_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression);
+
 FieldInitExpression*          create_field_init_expression(char* field_identifier, Expression* init_expression);
 FieldInitExpression*          field_init_list_add_item(FieldInitExpression* list, FieldInitExpression* item);
 AssignExpression*             create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
@@ -1782,6 +1785,7 @@ Identifier*                   identifier_list_add_item(Identifier* identifier_li
 FunctionReturnList*           create_function_return_list(VariableType variable_type);
 FunctionReturnList*           function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type);
 Function*                     new_function_definition(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
+
 Statement*                    create_statement_from_if(IfStatement* if_statement);
 IfStatement*                  create_if_statement(Expression* expression, Block* if_block, ElseIfStatement* elseif_statement_list, Block* else_block);
 ElseIfStatement*              create_elseif_statement(Expression* expression, Block* elseif_block);
@@ -1801,8 +1805,10 @@ Statement*                    create_statement_from_return(ReturnStatement* retu
 Statement*                    create_statement_from_tag_definition(TagDefinitionStatement* tag_def);
 Statement*                    create_statement_from_jump_tag(JumpTagStatement* jump_tag_statement);
 ReturnStatement*              create_return_statement(Expression* expression);
+
 Block*                        start_new_block();
 Block*                        finish_block(Block* block, Statement* statement_list);
+
 DimensionExpression*          create_dimension_expression(char* literal_interface);
 DimensionExpression*          dimension_expression_list_add_item(DimensionExpression* list, DimensionExpression* item);
 
@@ -1921,6 +1927,7 @@ void              generate_code_from_function_definition(Package_Executer* execu
 void              generate_code_from_method_definition(Package_Executer* executer, MethodMember* src, RVM_Method* dest);
 void              vm_executer_dump(Package_Executer* executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
+
 void              generate_vmcode_from_block(Package_Executer* executer, Block* block, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_statement_list(Package_Executer* executer, Block* block, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_if_statement(Package_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer);
@@ -1985,14 +1992,12 @@ void              dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_li
  * function definition
  *
  */
-inline void          STACK_SET_INT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, int value);
-inline void          STACK_SET_DOUBLE_INDEX(Ring_VirtualMachine* rvm, unsigned int index, double value);
-inline void          STACK_SET_OBJECT_INDEX(Ring_VirtualMachine* rvm, unsigned int index, RVM_Object* value);
 
 RVM_RuntimeStack*    new_runtime_stack();
 RVM_RuntimeStatic*   new_runtime_static();
 RVM_RuntimeHeap*     new_runtime_heap();
 Ring_VirtualMachine* ring_virtualmachine_create();
+
 void                 ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry);
 void                 ring_virtualmachine_init(Ring_VirtualMachine* rvm);
 void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
