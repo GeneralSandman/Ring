@@ -283,6 +283,66 @@ struct PackageUnit {
 };
 
 
+/*
+ * TypeSpecifier
+ *
+ * 基础类型：
+ *     - bool
+ *     - int
+ *     - double
+ * 对象类型：
+ *     - string
+ *     - array
+ *     - class
+ * 范型推导
+ *     - any
+ *
+ */
+typedef enum {
+    RING_BASIC_TYPE_UNKNOW,
+
+    RING_BASIC_TYPE_ANY,
+
+    RING_BASIC_TYPE_BOOL,
+    RING_BASIC_TYPE_INT,
+    RING_BASIC_TYPE_DOUBLE,
+
+    RING_BASIC_TYPE_STRING,
+    RING_BASIC_TYPE_ARRAY,
+    RING_BASIC_TYPE_CLASS,
+    RING_BASIC_TYPE_NULL,
+} Ring_BasicType;
+// TODO: 这里重新规划一下 还要考虑类型的嵌套
+// typedef
+// 考虑 函数类型
+
+
+typedef enum {
+    RING_DERIVE_TYPE_UNKNOW,
+    RING_DERIVE_TYPE_ARRAY,
+    RING_DERIVE_TYPE_CLASS,
+} Ring_DeriveTypeKind;
+
+
+struct Ring_DeriveType_Array {
+};
+
+struct Ring_DeriveType_Class {
+    char*            class_identifier;
+    ClassDefinition* class_definition; // FIX_AST_UPDATE
+};
+
+
+struct TypeSpecifier {
+    Ring_BasicType kind;
+    union {
+        Ring_DeriveType_Array* array_type;
+        Ring_DeriveType_Class* class_type;
+    } u;
+    unsigned int   dimension; // 维度，用来指明next
+    TypeSpecifier* next;      // 用于嵌套类型
+};
+
 typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
 
 typedef enum {
@@ -324,7 +384,8 @@ struct RVM_Function {
 };
 
 struct RVM_Field {
-    char* identifier;
+    char*              identifier;
+    RVM_TypeSpecifier* type_specifier;
 };
 
 // 他的本质就是一个 函数
@@ -431,10 +492,13 @@ struct RVM_Object {
     RVM_Object* next;
 };
 
-struct RVM_BasicTypeSpecifier {
-};
-
 struct RVM_TypeSpecifier {
+    // TODO:
+    Ring_BasicType kind;
+
+    union {
+        unsigned int class_def_index;
+    } u;
 };
 
 // 支持线性寻址
@@ -1362,66 +1426,6 @@ struct ReturnStatement {
     Expression*  return_list;
 };
 
-
-/*
- * TypeSpecifier
- *
- * 基础类型：
- *     - bool
- *     - int
- *     - double
- * 对象类型：
- *     - string
- *     - array
- *     - class
- * 范型推导
- *     - any
- *
- */
-typedef enum {
-    RING_BASIC_TYPE_UNKNOW,
-
-    RING_BASIC_TYPE_ANY,
-
-    RING_BASIC_TYPE_BOOL,
-    RING_BASIC_TYPE_INT,
-    RING_BASIC_TYPE_DOUBLE,
-
-    RING_BASIC_TYPE_STRING,
-    RING_BASIC_TYPE_ARRAY,
-    RING_BASIC_TYPE_CLASS,
-    RING_BASIC_TYPE_NULL,
-} Ring_BasicType;
-// TODO: 这里重新规划一下 还要考虑类型的嵌套
-// typedef
-// 考虑 函数类型
-
-
-typedef enum {
-    RING_DERIVE_TYPE_UNKNOW,
-    RING_DERIVE_TYPE_ARRAY,
-    RING_DERIVE_TYPE_CLASS,
-} Ring_DeriveTypeKind;
-
-
-struct Ring_DeriveType_Array {
-};
-
-struct Ring_DeriveType_Class {
-    char*            class_identifier;
-    ClassDefinition* class_definition; // FIX_AST_UPDATE
-};
-
-
-struct TypeSpecifier {
-    Ring_BasicType kind;
-    union {
-        Ring_DeriveType_Array* array_type;
-        Ring_DeriveType_Class* class_type;
-    } u;
-    unsigned int   dimension; // 维度，用来指明next
-    TypeSpecifier* next;      // 用于嵌套类型
-};
 
 struct StdPackageNativeFunction {
     char*               func_name;

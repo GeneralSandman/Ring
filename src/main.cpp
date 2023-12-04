@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 
     // Step-5: 链接符号表
 
-    // destory_front_mem_pool();
+    destory_front_mem_pool();
 
     // Step-6: 加载虚拟机
     ring_virtualmachine_load_executer(ring_vm, executer_entry);
