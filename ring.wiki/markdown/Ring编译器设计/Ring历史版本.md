@@ -26,6 +26,65 @@
 >
 > 
 
+
+---------------------
+
+
+## v0.2.12
+
+> Date: 2023-12-05
+
+### Features
+
+
+1. 优化 class
+   1. 支持 对象的初始化和赋值, 通过class-object常量 ```job_0 = Job{Running: false};```
+   2. 支持 对对象的成员变量进行赋值, ``` job_0.Running = false; ```
+
+2. for-range 语法实现
+   1. 语法 ``` for(value in range array_value) {} ```
+   2. 对 bool[] int[] double[] string[] class-object[] 支持了 for-ranges
+   2. GC对象默认 标记为 WHITE
+   3. 从根节点(static, runtime_stack)出发, 遍历对象, 标记对象访问可达(BLACK),
+   4. 将 WHITE 的GC对象进行回收
+
+3. 数组: 支持通过数组+索引给数组内的元素赋值
+   1. 语法: ``` array_value[index] = value ```
+   2. 对 bool[] int[] double[] string[] class-object[]
+
+4. 数组/字符串: 获取 length capacity
+   1. 语法: ``` len(string_value) ```  ``` capacity(string_value) ```
+   2. 语法: ``` len(array_value) ```  ``` capacity(array_value) ```
+
+5. 数组: push pop
+   1. 语法: ``` push(array_value, value) ```  ``` value = pop(array_value) ```
+
+6. 内置函数: to_string
+   1. bool int double 都可以转成string
+
+7. 引入MemoryPool
+   1. 前期作为内存管理的方式, 主要用于检验gc算法的正确性, 后期不用MemPool, 完全依赖gc
+   2. 目前分为这几个内存池:   
+      1. front_mem_pool: 编译器前端MemPool, 主要存放AST, 包信息等结构
+      2. rvm->data_pool: 存放rvm运行过程中分配的数据
+      3. rvm->meta_pool: 存放rvm运行过程中分配的元信息, (因为rvm是有runtime的, 需要维护常量表等等数据结构)
+   3. 在前端编译完成之后, 强制释放 front_mem_pool, 用于前后端的解耦
+
+
+8. 可以通过工具快速到处字节码的详情, 输出markdown格式
+
+
+
+
+### Changed
+
+1. 编译过程中, 之前使用的c语言的方式去管理数组, 这里使用 std::vector 进行管理
+2. 调整目录结构, 分为 src/ test/ ring.wiki/ bin/
+   1. 分为两个 Makefile, 互不影响
+3. Debug宏可以 展示 Memory Pool 内存分配的详情
+   1. 打开 DEBUG_RVM_MEM_POOL_DETAIL 即可
+
+
 ---------------------
 
 
