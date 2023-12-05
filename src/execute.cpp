@@ -2499,7 +2499,7 @@ unsigned int rvm_free_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* cl
     unsigned int free_size = 0;
 
     if (class_object->field != nullptr) {
-        free(class_object->field);
+        mem_free(rvm->meta_pool, class_object->field, class_object->field_count * sizeof(RVM_Value));
     }
     free_size = class_object->field_count * sizeof(RVM_Value);
     mem_free(rvm->meta_pool, class_object, sizeof(RVM_ClassObject));
