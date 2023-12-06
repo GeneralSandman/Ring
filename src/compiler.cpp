@@ -1,5 +1,5 @@
 #include "ring.h"
-#include <assert.h>
+#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -9,12 +9,12 @@
 
 int                      yyerror(char const* str, ...);
 extern struct SyntaxInfo SyntaxInfos[];
-static PackageUnit*      package_unit   = nullptr;
-static CompilerEntry*    compiler_entry = nullptr;
+static PackageUnit*      g_package_unit   = nullptr;
+static CompilerEntry*    g_compiler_entry = nullptr;
 
 // 编译阶段使用的 Memory Pool
 // 这里暂时使用全局变量
-MemPool* front_mem_pool                 = nullptr;
+MemPool* front_mem_pool                   = nullptr;
 
 // 初始化一次
 void init_front_mem_pool() {
@@ -71,14 +71,14 @@ void ring_check_exit_immediately() {
 }
 
 CompilerEntry* compiler_entry_create() {
-    compiler_entry               = (CompilerEntry*)mem_alloc(NULL_MEM_POOL, sizeof(CompilerEntry));
-    compiler_entry->package_list = std::vector<Package*>{};
-    compiler_entry->main_package = nullptr;
-    return compiler_entry;
+    g_compiler_entry               = (CompilerEntry*)mem_alloc(NULL_MEM_POOL, sizeof(CompilerEntry));
+    g_compiler_entry->package_list = std::vector<Package*>{};
+    g_compiler_entry->main_package = nullptr;
+    return g_compiler_entry;
 }
 
 CompilerEntry* get_compiler_entry() {
-    return compiler_entry;
+    return g_compiler_entry;
 }
 
 void compiler_entry_dump(CompilerEntry* compiler_entry) {
@@ -207,7 +207,7 @@ void package_compile(Package* package) {
     compiler_entry->package_list.push_back(package);
 
     for (std::string source_file : package->source_file_list) {
-        PackageUnit* package_unit = package_unit_create(package, source_file.c_str());
+        PackageUnit* package_unit = package_unit_create(package, source_file);
         package_unit_compile(package_unit);
         package->package_unit_list.push_back(package_unit);
     }
@@ -269,45 +269,45 @@ void package_dump(Package* package) {
 
 // create packge by a input source file
 PackageUnit* package_unit_create(Package* parent_package, std::string file_name) {
-    package_unit                                   = (PackageUnit*)mem_alloc(NULL_MEM_POOL, sizeof(PackageUnit));
+    g_package_unit                                   = (PackageUnit*)malloc(sizeof(PackageUnit));
 
-    package_unit->parent_package                   = parent_package;
+    g_package_unit->parent_package                   = parent_package;
 
-    package_unit->current_file_name                = file_name;
-    package_unit->current_file_fp                  = nullptr;
-    package_unit->current_line_number              = 1;
-    package_unit->current_column_number            = 1;
-    package_unit->current_line_content             = new_ring_string();
+    // g_package_unit->current_file_name                = file_name;
+    g_package_unit->current_file_fp                  = nullptr;
+    g_package_unit->current_line_number              = 1;
+    g_package_unit->current_column_number            = 1;
+    g_package_unit->current_line_content             = new_ring_string();
 
-    package_unit->current_line_start_offset        = 0;
-    package_unit->current_offset                   = 0;
-    package_unit->line_offset_map                  = std::vector<SourceLineInfo>{{0, 0}};
+    g_package_unit->current_line_start_offset        = 0;
+    g_package_unit->current_offset                   = 0;
+    g_package_unit->line_offset_map                  = std::vector<SourceLineInfo>{{0, 0}};
 
-    package_unit->import_package_list              = std::vector<ImportPackageInfo*>{};
+    g_package_unit->import_package_list              = std::vector<ImportPackageInfo*>{};
 
-    package_unit->global_block_statement_list_size = 0;
-    package_unit->global_block_statement_list      = nullptr;
-    package_unit->global_declaration_list          = std::vector<Declaration*>{};
+    g_package_unit->global_block_statement_list_size = 0;
+    g_package_unit->global_block_statement_list      = nullptr;
+    g_package_unit->global_declaration_list          = std::vector<Declaration*>{};
 
-    package_unit->class_definition_list            = std::vector<ClassDefinition*>{};
+    g_package_unit->class_definition_list            = std::vector<ClassDefinition*>{};
 
-    package_unit->function_list                    = std::vector<Function*>{};
+    g_package_unit->function_list                    = std::vector<Function*>{};
 
-    package_unit->current_block                    = nullptr;
+    g_package_unit->current_block                    = nullptr;
 
-    package_unit->compile_error_num                = 0;
+    g_package_unit->compile_error_num                = 0;
 
-    package_unit->current_file_fp                  = fopen(file_name.c_str(), "r");
-    if (package_unit->current_file_fp == nullptr) {
+    g_package_unit->current_file_fp                  = fopen(file_name.c_str(), "r");
+    if (g_package_unit->current_file_fp == nullptr) {
         fprintf(stderr, "%s not found.\n", file_name.c_str());
         exit(1);
     }
 
-    return package_unit;
+    return g_package_unit;
 }
 
 PackageUnit* get_package_unit() {
-    return package_unit;
+    return g_package_unit;
 }
 
 void package_unit_compile(PackageUnit* package_unit) {
@@ -359,85 +359,85 @@ void package_unit_dump(PackageUnit* package_unit) {
 
 
 const char* package_unit_get_file_name() {
-    assert(package_unit != nullptr);
-    return package_unit->current_file_name.c_str();
+    assert(g_package_unit != nullptr);
+    return g_package_unit->current_file_name.c_str();
 }
 
 Ring_String* get_package_unit_current_line_content() {
-    assert(package_unit != nullptr);
-    return package_unit->current_line_content;
+    assert(g_package_unit != nullptr);
+    return g_package_unit->current_line_content;
 }
 
 unsigned int package_unit_get_line_number() {
-    assert(package_unit != nullptr);
-    return package_unit->current_line_number;
+    assert(g_package_unit != nullptr);
+    return g_package_unit->current_line_number;
 }
 
 unsigned int package_unit_increa_line_number() {
-    assert(package_unit != nullptr);
-    package_unit->current_line_number++;
-    return package_unit->current_line_number;
+    assert(g_package_unit != nullptr);
+    g_package_unit->current_line_number++;
+    return g_package_unit->current_line_number;
 }
 
 unsigned int package_unit_get_column_number() {
-    assert(package_unit != nullptr);
-    return package_unit->current_column_number;
+    assert(g_package_unit != nullptr);
+    return g_package_unit->current_column_number;
 }
 
 unsigned int package_unit_increa_column_number(unsigned int len) {
-    assert(package_unit != nullptr);
-    package_unit->current_column_number += len;
-    return package_unit->current_column_number;
+    assert(g_package_unit != nullptr);
+    g_package_unit->current_column_number += len;
+    return g_package_unit->current_column_number;
 }
 
 void package_unit_update_line_content(char* str) {
-    assert(package_unit != nullptr);
+    assert(g_package_unit != nullptr);
 
     for (int i = 0; i < strlen(str); i++) {
-        ring_string_add_char(package_unit->current_line_content, str[i]);
+        ring_string_add_char(g_package_unit->current_line_content, str[i]);
     }
 
-    package_unit->current_offset += strlen(str);
+    g_package_unit->current_offset += strlen(str);
     if (0 == strcmp(str, "\n") || 0 == strcmp(str, "\r\n")) {
         SourceLineInfo line_info{
-            package_unit->current_line_start_offset,
-            (unsigned int)(package_unit->current_offset - package_unit->current_line_start_offset - strlen(str) + 1),
+            g_package_unit->current_line_start_offset,
+            (unsigned int)(g_package_unit->current_offset - g_package_unit->current_line_start_offset - strlen(str) + 1),
         };
-        package_unit->line_offset_map.push_back(line_info);
-        package_unit->current_line_start_offset = package_unit->current_offset;
+        g_package_unit->line_offset_map.push_back(line_info);
+        g_package_unit->current_line_start_offset = g_package_unit->current_offset;
     }
 
-    package_unit->current_column_number += strlen(str);
+    g_package_unit->current_column_number += strlen(str);
 }
 
 void package_unit_reset_line_content() {
-    reset_ring_string(package_unit->current_line_content);
+    reset_ring_string(g_package_unit->current_line_content);
 }
 
 char* package_unit_get_current_line_content() {
-    return get_ring_string(package_unit->current_line_content);
+    return get_ring_string(g_package_unit->current_line_content);
 }
 
 void package_unit_reset_column_number() {
-    package_unit->current_column_number = 1;
+    g_package_unit->current_column_number = 1;
 }
 
 std::string package_unit_get_line_content(unsigned int line_number) {
-    off_t        line_offset = package_unit->line_offset_map[line_number].start_offset;
-    unsigned int size        = package_unit->line_offset_map[line_number].size;
+    off_t        line_offset = g_package_unit->line_offset_map[line_number].start_offset;
+    unsigned int size        = g_package_unit->line_offset_map[line_number].size;
 
-    fseek(package_unit->current_file_fp, line_offset, SEEK_SET);
+    fseek(g_package_unit->current_file_fp, line_offset, SEEK_SET);
     char buffer[500];
-    if (fgets(buffer, size, package_unit->current_file_fp) != NULL) {
+    if (fgets(buffer, size, g_package_unit->current_file_fp) != NULL) {
     }
 
     return std::string(buffer);
 }
 
 int package_unit_add_class_definition(ClassDefinition* class_definition) {
-    assert(package_unit != nullptr);
+    assert(g_package_unit != nullptr);
     assert(class_definition != nullptr);
 
-    package_unit->class_definition_list.push_back(class_definition);
+    g_package_unit->class_definition_list.push_back(class_definition);
     return 0;
 }
