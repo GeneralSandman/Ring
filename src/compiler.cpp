@@ -1,8 +1,8 @@
 #include "ring.h"
 #include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>

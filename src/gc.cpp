@@ -1,4 +1,5 @@
 #include "ring.h"
+#include <cstring>
 
 
 /*
