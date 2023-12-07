@@ -89,9 +89,9 @@ clean:
 	@echo "\033[32mClean SUCCESS\033[0m"
 
 y.tab.hpp : ring.bison.y
-	bison -o y.tab.cpp --yacc -dv ring.bison.y
+	bison -o y.tab.cpp -dv ring.bison.y
 y.tab.cpp : ring.bison.y
-	bison -o y.tab.cpp --yacc -dv ring.bison.y  # -t 诊断模式
+	bison -o y.tab.cpp -dv ring.bison.y  # -t 诊断模式
 lex.yy.cpp : ring.flex.l ring.bison.y y.tab.hpp
 	flex -o lex.yy.cpp ring.flex.l
 

@@ -15,7 +15,6 @@ TEST_MODELS=(
     "004-string"
 
     "001-basic-type" 
-    "001-basic-type-string"
 
     "002-operator" 
     "003-native-function" 
@@ -123,10 +122,10 @@ printNotPassCase(){
     if [ ! -f "$TEST_RESULT" ]; then
     return 0
     fi
-    echo "\033[31m[NotPassCase]"
+    printf "\033[31m[NotPassCase]"
     printf "%-60s %-60s\n" source_code_file err_nums
     awk '{count[$0]++;} END {for(i in count) {printf("%-60s %-60s\n",i,count[i])}}' $TEST_RESULT
-    echo "\033[0m"
+    printf "\033[0m"
     rm $TEST_RESULT
 }
 

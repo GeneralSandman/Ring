@@ -2210,4 +2210,4 @@ int                     thpool_num_threads_working(threadpool);
 // --------------------
 
 
-#endif
+#endif // RING_INCLUDE_H

@@ -1,5 +1,6 @@
 #include "ring.h"
 #include <cassert>
+#include <cstdlib>
 #include <cstring>
 
 // init meta mem pool

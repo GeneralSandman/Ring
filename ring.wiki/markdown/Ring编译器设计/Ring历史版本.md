@@ -83,7 +83,7 @@
    1. 分为两个 Makefile, 互不影响
 3. Debug宏可以 展示 Memory Pool 内存分配的详情
    1. 打开 DEBUG_RVM_MEM_POOL_DETAIL 即可
-
+4. 将所有的动态内存 统一在 MemoryPool中进行分配, 易于管理
 
 ---------------------
 

@@ -16,6 +16,11 @@ CMD_RM= rm -rf
 T_STD_PACKS= os io debug fmt vm math strings reflect
 
 
+# 编译工具要求
+# bison >= 3.8.2
+# flex >= 2.6.4
+
+
 # 生成 Ring可执行文件
 # 最后在 src/Makefile
 # -j10 10进程并发编译
@@ -32,7 +37,7 @@ clean:
 	@cd src && $(MAKE) $@
 
 testall:
-	sh ./test/automated-testing.sh
+	bash ./test/automated-testing.sh
   
 install:
 	@echo "\033[34m[+]Install Bin\033[0m"
