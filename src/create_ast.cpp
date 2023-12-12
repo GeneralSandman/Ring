@@ -800,7 +800,7 @@ DimensionExpression* dimension_expression_list_add_item(DimensionExpression* lis
 TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
     debug_log_with_yellow_coloar("basic_type:%d", basic_type);
 
-    TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(NULL_MEM_POOL, sizeof(TypeSpecifier));
+    TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
     type_specifier->kind          = basic_type;
     type_specifier->dimension     = 0;
     type_specifier->next          = nullptr;
@@ -818,7 +818,7 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
  * 类数组 嵌套数组
  */
 TypeSpecifier* create_type_specifier_array(TypeSpecifier* type) {
-    TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(NULL_MEM_POOL, sizeof(TypeSpecifier));
+    TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
     type_specifier->kind          = RING_BASIC_TYPE_ARRAY;
     type_specifier->u.array_type  = nullptr;
     type_specifier->dimension     = 1; // 暂时只支持一维数组
@@ -831,9 +831,9 @@ TypeSpecifier* create_type_specifier_array(TypeSpecifier* type) {
 TypeSpecifier* create_class_type_specifier(char* identifier) {
     debug_log_with_yellow_coloar("\t");
 
-    TypeSpecifier* type_specifier                  = (TypeSpecifier*)mem_alloc(NULL_MEM_POOL, sizeof(TypeSpecifier));
+    TypeSpecifier* type_specifier                  = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
     type_specifier->kind                           = RING_BASIC_TYPE_CLASS;
-    type_specifier->u.class_type                   = (Ring_DeriveType_Class*)mem_alloc(NULL_MEM_POOL, sizeof(Ring_DeriveType_Class));
+    type_specifier->u.class_type                   = (Ring_DeriveType_Class*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Class));
     type_specifier->u.class_type->class_identifier = identifier;
     type_specifier->u.class_type->class_definition = nullptr;
     type_specifier->dimension                      = 0;
@@ -956,7 +956,7 @@ void import_package_list_add_item(char* package_name, char* rename) {
 ClassDefinition* start_class_definition(char* class_identifier) {
     debug_log_with_yellow_coloar("\t");
 
-    ClassDefinition* class_def  = (ClassDefinition*)mem_alloc(NULL_MEM_POOL, sizeof(ClassDefinition));
+    ClassDefinition* class_def  = (ClassDefinition*)mem_alloc(get_front_mem_pool(), sizeof(ClassDefinition));
     class_def->line_number      = package_unit_get_line_number();
     class_def->class_identifier = class_identifier;
     class_def->member           = nullptr;
@@ -997,7 +997,7 @@ ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclar
 ClassMemberDeclaration* create_class_member_field_declaration(Attribute attribute, FieldMember* field_member) {
     assert(field_member != nullptr);
 
-    ClassMemberDeclaration* class_member_declar = (ClassMemberDeclaration*)mem_alloc(NULL_MEM_POOL, sizeof(ClassMemberDeclaration));
+    ClassMemberDeclaration* class_member_declar = (ClassMemberDeclaration*)mem_alloc(get_front_mem_pool(), sizeof(ClassMemberDeclaration));
     class_member_declar->line_number            = package_unit_get_line_number();
     class_member_declar->attribute              = attribute;
     class_member_declar->type                   = MEMBER_FIELD;
@@ -1010,7 +1010,7 @@ ClassMemberDeclaration* create_class_member_field_declaration(Attribute attribut
 ClassMemberDeclaration* create_class_member_method_declaration(Attribute attribute, MethodMember* method_member) {
     assert(method_member != nullptr);
 
-    ClassMemberDeclaration* class_member_declar = (ClassMemberDeclaration*)mem_alloc(NULL_MEM_POOL, sizeof(ClassMemberDeclaration));
+    ClassMemberDeclaration* class_member_declar = (ClassMemberDeclaration*)mem_alloc(get_front_mem_pool(), sizeof(ClassMemberDeclaration));
     class_member_declar->line_number            = package_unit_get_line_number();
     class_member_declar->attribute              = attribute;
     class_member_declar->type                   = MEMBER_METHOD;
@@ -1023,7 +1023,7 @@ ClassMemberDeclaration* create_class_member_method_declaration(Attribute attribu
 FieldMember* create_class_member_field(TypeSpecifier* type_specifier, Identifier* identifier_list) {
     debug_log_with_yellow_coloar("\t");
 
-    FieldMember* field_member    = (FieldMember*)mem_alloc(NULL_MEM_POOL, sizeof(FieldMember));
+    FieldMember* field_member    = (FieldMember*)mem_alloc(get_front_mem_pool(), sizeof(FieldMember));
     field_member->line_number    = package_unit_get_line_number();
     field_member->type           = type_specifier;
     field_member->identifier     = identifier_list->identifier_name;
@@ -1035,7 +1035,7 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier, Identifier
 MethodMember* create_class_member_method(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
     debug_log_with_yellow_coloar("\t");
 
-    MethodMember* method_member        = (MethodMember*)mem_alloc(NULL_MEM_POOL, sizeof(MethodMember));
+    MethodMember* method_member        = (MethodMember*)mem_alloc(get_front_mem_pool(), sizeof(MethodMember));
     method_member->line_number         = package_unit_get_line_number();
     method_member->index_of_class      = -1;
     method_member->identifier          = identifier;

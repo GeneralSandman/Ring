@@ -7,6 +7,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 
@@ -29,6 +30,7 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     STACK_GET_DOUBLE_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 #define STACK_GET_OBJECT_OFFSET(rvm, offset) \
     STACK_GET_OBJECT_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
+
 
 // 通过绝对索引 设置 rvm->runtime_stack->data
 #define STACK_SET_BOOL_INDEX(rvm, index, value)                             \
@@ -61,6 +63,7 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define STACK_COPY_OFFSET(rvm, dst_offset, src_offset) \
     STACK_COPY_INDEX((rvm), (rvm)->runtime_stack->top_index + (dst_offset), (rvm)->runtime_stack->top_index + (src_offset))
 
+
 // 从后边获取 1BYTE的操作数
 #define OPCODE_GET_1BYTE(p) \
     (((p)[0]))
@@ -70,6 +73,7 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 // 把两BYTE的操作数放到后边
 #define OPCODE_SET_2BYTE(p, value) \
     (((p)[0] = (value) >> 8), ((p)[1] = value & 0xff))
+
 
 RVM_RuntimeStack* new_runtime_stack() {
     RVM_RuntimeStack* stack = (RVM_RuntimeStack*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_RuntimeStack));
@@ -133,6 +137,18 @@ void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* 
 }
 
 /*
+ * 将 package 中 所有的 全局变量添加到 runtime_static中
+ */
+void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
+    debug_log_with_white_coloar("\t");
+
+    unsigned int size    = executer->global_variable_size;
+    runtime_static->size = size;
+    runtime_static->data = (RVM_Value*)mem_alloc(NULL_MEM_POOL, size * sizeof(RVM_Value));
+}
+
+
+/*
  * 对 vm 进行初始化
  *
  * 1. Init static/global variable
@@ -146,14 +162,6 @@ void ring_virtualmachine_init(Ring_VirtualMachine* rvm) {
     rvm_init_static_variable(rvm, rvm->executer, rvm->runtime_static);
 }
 
-void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
-    debug_log_with_white_coloar("\t");
-
-    unsigned int size    = executer->global_variable_size;
-    runtime_static->size = size;
-    runtime_static->data = (RVM_Value*)mem_alloc(NULL_MEM_POOL, size * sizeof(RVM_Value));
-}
-
 /*
  * 对全局变量进行初始化
  *
@@ -164,10 +172,10 @@ void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runt
 void rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
     debug_log_with_white_coloar("\t");
 
-    unsigned int     size                 = executer->global_variable_size;
-    RVM_Variable*    global_variable_list = executer->global_variable_list;
-    TypeSpecifier*   type_specifier       = nullptr;
-    ClassDefinition* class_definition     = nullptr;
+    unsigned int         size                 = executer->global_variable_size;
+    RVM_Variable*        global_variable_list = executer->global_variable_list;
+    RVM_TypeSpecifier*   type_specifier       = nullptr;
+    RVM_ClassDefinition* rvm_class_definition = nullptr;
 
     for (int i = 0; i < size; i++) {
         type_specifier = global_variable_list[i].type;
@@ -185,10 +193,10 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* execut
             break;
         case RING_BASIC_TYPE_CLASS:
             // Search class-definition from variable declaration.
-            assert(type_specifier->u.class_type != nullptr);
-            class_definition                 = type_specifier->u.class_type->class_definition;
+            rvm_class_definition             = &(rvm->class_list[type_specifier->u.class_def_index]);
+
             runtime_static->data[i].type     = RVM_VALUE_TYPE_OBJECT;
-            runtime_static->data[i].u.object = new_class_object(rvm, class_definition);
+            runtime_static->data[i].u.object = new_class_object(rvm, rvm_class_definition);
             break;
 
         default:
@@ -216,33 +224,25 @@ RVM_Object* new_string_object(Ring_VirtualMachine* rvm) {
  * 使用到了 class_definition ,  和编译器前端没有做到完全解耦
  * TODO: 解耦
  */
-RVM_Object* new_class_object(Ring_VirtualMachine* rvm, ClassDefinition* class_definition) {
+RVM_Object* new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition) {
     assert(class_definition != nullptr);
 
     // Search field-member's size and detail from class-definition.
     // Alloc and Init.
-    unsigned int field_count = 0;
-    RVM_Value*   field       = nullptr;
+    unsigned int field_size = class_definition->field_size;
+    RVM_Value*   field      = nullptr;
 
-    // TODO: 先用笨办法 初始化
-    // TODO: field_count 后续需要在 fix_ast 就要需要算好
-    for (ClassMemberDeclaration* pos = class_definition->member; pos != nullptr; pos = pos->next) {
-        if (pos->type == MEMBER_FIELD) {
-            field_count++;
-        }
-    }
-
-    size_t alloc_size = field_count * sizeof(RVM_Value);
-    field             = (RVM_Value*)mem_alloc(rvm->meta_pool, alloc_size);
+    size_t       alloc_size = field_size * sizeof(RVM_Value);
+    field                   = (RVM_Value*)mem_alloc(rvm->meta_pool, alloc_size);
     memset(field, 0, alloc_size);
 
     RVM_Object* object                  = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
     // object->u.class_object->class_def   = class_definition;
-    object->u.class_object->field_count = field_count;
+    object->u.class_object->field_count = field_size;
     object->u.class_object->field       = field;
 
     // TODO: 这里得优化一下, 算得不对, 得分析具体 member的类型
-    rvm->runtime_heap->alloc_size += field_count * sizeof(RVM_Value);
+    rvm->runtime_heap->alloc_size += field_size * sizeof(RVM_Value);
 
     // TODO:
     // if class has constructor method, invoke it.
@@ -1452,11 +1452,13 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
 
     // 局部变量为object的情况
     // function->local_variable_list
-    ClassDefinition* class_definition = nullptr;
-    RVM_Object*      object           = nullptr;
+    RVM_TypeSpecifier*   type_specifier       = nullptr;
+    RVM_ClassDefinition* rvm_class_definition = nullptr;
+    RVM_Object*          object               = nullptr;
 
     for (int i = 0; i < function->local_variable_size; i++, local_variable_value_index++) {
-        TypeSpecifier* type_specifier = function->local_variable_list[i].type_specifier;
+        type_specifier = function->local_variable_list[i].type_specifier;
+
         switch (type_specifier->kind) {
         case RING_BASIC_TYPE_BOOL:
         case RING_BASIC_TYPE_INT:
@@ -1475,9 +1477,9 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
             break;
         case RING_BASIC_TYPE_CLASS:
             // Search class-definition from variable declaration.
-            assert(type_specifier->u.class_type != nullptr);
-            class_definition = type_specifier->u.class_type->class_definition;
-            object           = new_class_object(rvm, class_definition);
+            rvm_class_definition = &(rvm->class_list[type_specifier->u.class_def_index]);
+
+            object               = new_class_object(rvm, rvm_class_definition);
             STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_value_index, object);
             break;
 

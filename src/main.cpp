@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
     ring_generate_vm_code(compiler_entry, executer_entry);
 
     // Step-5: 链接符号表
-
+    // Complier force destory memory of front-end.
     destory_front_mem_pool();
 
     // Step-6: 加载虚拟机

@@ -99,7 +99,7 @@ typedef struct DeriveFunction               DeriveFunction;
 typedef struct RVM_Function                 RVM_Function;
 typedef struct RVM_Field                    RVM_Field;
 typedef struct RVM_Method                   RVM_Method;
-typedef struct RVM_Class                    RVM_Class;
+typedef struct RVM_ClassDefinition          RVM_ClassDefinition;
 typedef struct RVM_CallInfo                 RVM_CallInfo;
 
 typedef unsigned char                       RVM_Byte;
@@ -144,21 +144,21 @@ typedef struct {
 } RVM_Value;
 
 struct Ring_VirtualMachine {
-    Package_Executer*  executer;
-    ExecuterEntry*     executer_entry;
+    Package_Executer*    executer;
+    ExecuterEntry*       executer_entry;
 
-    RVM_RuntimeStatic* runtime_static; // TODO: 暂时只支持main包的 全局变量
-    RVM_RuntimeStack*  runtime_stack;
-    RVM_RuntimeHeap*   runtime_heap;
-    unsigned int       pc;
+    RVM_RuntimeStatic*   runtime_static; // TODO: 暂时只支持main包的 全局变量
+    RVM_RuntimeStack*    runtime_stack;
+    RVM_RuntimeHeap*     runtime_heap;
+    unsigned int         pc;
 
-    RVM_Class*         class_list; // TODO: 删除掉
-    unsigned int       class_size; // TODO: 删除掉
+    RVM_ClassDefinition* class_list; // TODO: 删除掉
+    unsigned int         class_size; // TODO: 删除掉
 
-    MemPool*           meta_pool;
-    MemPool*           data_pool;
+    MemPool*             meta_pool;
+    MemPool*             data_pool;
 
-    RVM_DebugConfig*   debug_config;
+    RVM_DebugConfig*     debug_config;
 
 #ifdef DEBUG_RVM_INTERACTIVE
     std::vector<std::string> stdout_logs;
@@ -185,28 +185,28 @@ struct ExecuterEntry {
 };
 
 struct Package_Executer {
-    ExecuterEntry*    executer_entry;
-    unsigned int      package_index; // 在 ExecuterEntry 中的 index
-    char*             package_name;
+    ExecuterEntry*       executer_entry;
+    unsigned int         package_index; // 在 ExecuterEntry 中的 index
+    char*                package_name;
 
-    unsigned int      constant_pool_size;
-    RVM_ConstantPool* constant_pool_list;
+    unsigned int         constant_pool_size;
+    RVM_ConstantPool*    constant_pool_list;
 
-    unsigned int      global_variable_size;
-    RVM_Variable*     global_variable_list;
+    unsigned int         global_variable_size;
+    RVM_Variable*        global_variable_list;
 
-    unsigned int      function_size;
-    RVM_Function*     function_list;
+    unsigned int         function_size;
+    RVM_Function*        function_list;
 
-    unsigned int      class_size;
-    RVM_Class*        class_list;
+    unsigned int         class_size;
+    RVM_ClassDefinition* class_list;
 
-    unsigned int      code_size;
-    RVM_Byte*         code_list;
+    unsigned int         code_size;
+    RVM_Byte*            code_list;
 
-    unsigned int      main_func_index;
+    unsigned int         main_func_index;
 
-    unsigned int      estimate_runtime_stack_capacity;
+    unsigned int         estimate_runtime_stack_capacity;
 };
 
 /*
@@ -306,8 +306,8 @@ typedef enum {
     RING_BASIC_TYPE_BOOL,
     RING_BASIC_TYPE_INT,
     RING_BASIC_TYPE_DOUBLE,
-
     RING_BASIC_TYPE_STRING,
+
     RING_BASIC_TYPE_ARRAY,
     RING_BASIC_TYPE_CLASS,
     RING_BASIC_TYPE_NULL,
@@ -333,6 +333,7 @@ struct Ring_DeriveType_Class {
 };
 
 
+// Only used by front-end of compiler.
 struct TypeSpecifier {
     Ring_BasicType kind;
     union {
@@ -352,8 +353,8 @@ typedef enum {
 } RVMFunctionType;
 
 struct RVM_LocalVariable {
-    TypeSpecifier* type_specifier;
-    char*          identifier;
+    RVM_TypeSpecifier* type_specifier;
+    char*              identifier;
 };
 
 struct NativeFunction {
@@ -395,7 +396,7 @@ struct RVM_Method {
     RVM_Function* rvm_function;
 };
 
-struct RVM_Class {
+struct RVM_ClassDefinition {
     char*        identifier;
 
     unsigned int field_size;
@@ -424,8 +425,8 @@ struct RVM_ConstantPool {
 };
 
 struct RVM_Variable {
-    char*          identifier;
-    TypeSpecifier* type;
+    char*              identifier;
+    RVM_TypeSpecifier* type;
 };
 
 
@@ -467,9 +468,9 @@ struct RVM_Array {
 
 struct RVM_ClassObject {
     // ClassDefinition* class_def; // 删除掉
-    RVM_Class*   class_ref;
-    unsigned int field_count;
-    RVM_Value*   field;
+    RVM_ClassDefinition* class_ref;
+    unsigned int         field_count;
+    RVM_Value*           field;
 };
 
 typedef enum {
@@ -492,6 +493,7 @@ struct RVM_Object {
     RVM_Object* next;
 };
 
+// Only used by back-end of compiler.
 struct RVM_TypeSpecifier {
     // TODO:
     Ring_BasicType kind;
@@ -499,6 +501,8 @@ struct RVM_TypeSpecifier {
     union {
         unsigned int class_def_index;
     } u;
+
+    RVM_TypeSpecifier* next;
 };
 
 // 支持线性寻址
@@ -1923,7 +1927,7 @@ void              ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterE
 void              add_global_variable(Package* package, Package_Executer* executer);
 void              add_functions(Package* package, Package_Executer* executer);
 void              add_classes(Package* package, Package_Executer* executer);
-void              copy_class(Package_Executer* executer, ClassDefinition* src, RVM_Class* dest);
+void              class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dest, ClassDefinition* src);
 void              copy_function(Function* src, RVM_Function* dest);
 void              copy_method(MethodMember* src, RVM_Method* dest);
 void              add_top_level_code(Package* package, Package_Executer* executer);
@@ -1988,6 +1992,7 @@ RVM_Opcode        convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* t
 unsigned int      calc_runtime_stack_capacity(RVM_Byte* code_list, unsigned int code_size);
 void              add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number, unsigned int start_pc, unsigned int opcode_size);
 void              dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map);
+void              type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier* src);
 // --------------------
 
 
@@ -2003,11 +2008,12 @@ RVM_RuntimeHeap*     new_runtime_heap();
 Ring_VirtualMachine* ring_virtualmachine_create();
 
 void                 ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry);
+void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 ring_virtualmachine_init(Ring_VirtualMachine* rvm);
 void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 RVM_Object*          new_string_object(Ring_VirtualMachine* rvm);
-RVM_Object*          new_class_object(Ring_VirtualMachine* rvm, ClassDefinition* class_definition);
+RVM_Object*          new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,

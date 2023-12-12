@@ -85,7 +85,12 @@ void ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterEntry* execute
 #endif
 }
 
-// 添加全局变量
+/*
+ * Generate Global Variable Definition for RVM.
+ *
+ * 1. package->global_declaration_list is list.
+ * 2. executer->global_variable_list   is array.
+ */
 void add_global_variable(Package* package, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
     // FIXME: 在 Compiler 中大部分是链表：因为在编译的时候不确定存储空间
@@ -95,13 +100,19 @@ void add_global_variable(Package* package, Package_Executer* executer) {
     }
 
     executer->global_variable_size = package->global_declaration_list.size();
-    executer->global_variable_list = (RVM_Variable*)mem_alloc(NULL_MEM_POOL, executer->global_variable_size * sizeof(RVM_Variable));
+    executer->global_variable_list = (RVM_Variable*)mem_alloc(NULL_MEM_POOL,
+                                                              executer->global_variable_size * sizeof(RVM_Variable));
 
-    int i                          = 0;
-    for (Declaration* pos : package->global_declaration_list) {
+    Declaration* pos               = nullptr;
+    int          i                 = 0;
+    for (pos = package->global_declaration_list[i];
+         i < package->global_declaration_list.size();
+         i++, pos = package->global_declaration_list[i]) {
         executer->global_variable_list[i].identifier = pos->identifier;
-        executer->global_variable_list[i].type       = pos->type; // TODO: 这里考虑要深度复制
-        i++;
+        executer->global_variable_list[i].type       = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                                     sizeof(RVM_TypeSpecifier));
+
+        type_specifier_deep_copy(executer->global_variable_list[i].type, pos->type);
     }
 }
 
@@ -131,16 +142,27 @@ void add_classes(Package* package, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
     executer->class_size = package->class_definition_list.size();
-    executer->class_list = (RVM_Class*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Class) * package->class_definition_list.size());
+    executer->class_list = (RVM_ClassDefinition*)mem_alloc(NULL_MEM_POOL,
+                                                           sizeof(RVM_ClassDefinition) * executer->class_size);
 
     unsigned int i       = 0;
     for (ClassDefinition* pos : package->class_definition_list) {
-        copy_class(executer, pos, &executer->class_list[i]);
+        class_def_deep_copy(executer, &executer->class_list[i], pos);
         i++;
     }
 }
 
-void copy_class(Package_Executer* executer, ClassDefinition* src, RVM_Class* dest) {
+
+/*
+ * Deep copy from ClassDefinition to RVM_ClassDefinition
+ *
+ * front-end -> back-end
+ * front-end: RVM_ClassDefinition
+ * back-end:  RVM_ClassDefinition
+ *
+ * TODO: field not deep copy
+ */
+void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dest, ClassDefinition* src) {
     debug_log_with_darkgreen_coloar("\t");
 
     dest->identifier            = src->class_identifier;
@@ -171,12 +193,6 @@ void copy_class(Package_Executer* executer, ClassDefinition* src, RVM_Class* des
             i++;
         }
     }
-
-    // unsigned int index = 0;
-    // for(;index <  dest->method_size; index++) {
-    //     RVM_Method* tmp =  &dest->method_list[index];
-    //     printf("debug method_size:%s\n",  tmp->identifier);
-    // }
 }
 
 void copy_function(Function* src, RVM_Function* dest) {
@@ -201,7 +217,10 @@ void copy_function(Function* src, RVM_Function* dest) {
         unsigned int i            = 0;
         for (; pos != nullptr; pos = pos->next, i++) {
             dest->local_variable_list[i].identifier     = pos->identifier;
-            dest->local_variable_list[i].type_specifier = pos->type; // TODO: 需要 deep copy
+            dest->local_variable_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                                        sizeof(RVM_TypeSpecifier));
+
+            type_specifier_deep_copy(dest->local_variable_list[i].type_specifier, pos->type);
         }
     }
 
@@ -1926,4 +1945,21 @@ void dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map) {
     }
 
     printf("|------------------ CodeLineMap-Dump-begin ------------------\n");
+}
+
+/*
+ * Deep copy from TypeSpecifier to RVM_TypeSpecifier
+ *
+ * front-end -> back-end
+ * front-end: TypeSpecifier
+ * back-end:  RVM_TypeSpecifier
+ *
+ * TODO: just support bool,int,double,string
+ * TODO: need support array, class
+ */
+void type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier* src) {
+    assert(dst != nullptr);
+    assert(src != nullptr);
+
+    dst->kind = src->kind;
 }
