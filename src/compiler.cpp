@@ -71,7 +71,7 @@ void ring_check_exit_immediately() {
 }
 
 CompilerEntry* compiler_entry_create() {
-    g_compiler_entry               = (CompilerEntry*)mem_alloc(NULL_MEM_POOL, sizeof(CompilerEntry));
+    g_compiler_entry               = (CompilerEntry*)mem_alloc(get_front_mem_pool(), sizeof(CompilerEntry));
     g_compiler_entry->package_list = std::vector<Package*>{};
     g_compiler_entry->main_package = nullptr;
     return g_compiler_entry;
@@ -135,7 +135,7 @@ Package* package_create(CompilerEntry* compiler_entry, char* package_name, char*
     assert(compiler_entry != nullptr);
     debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 
-    Package* package                 = (Package*)mem_alloc(NULL_MEM_POOL, sizeof(Package));
+    Package* package                 = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
 
     package->compiler_entry          = compiler_entry;
     package->package_index           = -1; // TODO: 这个应该在 fix的时候 设置
@@ -166,7 +166,7 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
     assert(compiler_entry != nullptr);
     debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 
-    Package* package                 = (Package*)mem_alloc(NULL_MEM_POOL, sizeof(Package));
+    Package* package                 = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
 
     package->compiler_entry          = compiler_entry;
     package->package_index           = -1; // TODO: 这个应该在 fix的时候 设置

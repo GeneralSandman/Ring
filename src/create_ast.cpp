@@ -930,7 +930,7 @@ Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter) {
 
 Package* create_package_info(char* package_name) {
     debug_log_with_yellow_coloar("current package name:%s\n", package_name);
-    Package* package      = (Package*)mem_alloc(NULL_MEM_POOL, sizeof(Package));
+    Package* package      = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
     package->package_name = package_name;
 
     return package;
@@ -939,7 +939,7 @@ Package* create_package_info(char* package_name) {
 void import_package_list_add_item(char* package_name, char* rename) {
     debug_log_with_yellow_coloar("import package name:%s, rename:%s\n", package_name, rename);
 
-    ImportPackageInfo* import_package_info = (ImportPackageInfo*)mem_alloc(NULL_MEM_POOL, sizeof(ImportPackageInfo));
+    ImportPackageInfo* import_package_info = (ImportPackageInfo*)mem_alloc(get_front_mem_pool(), sizeof(ImportPackageInfo));
     import_package_info->line_number       = package_unit_get_line_number();
     import_package_info->package_name      = package_name;
     import_package_info->package_path      = nullptr;
