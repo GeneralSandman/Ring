@@ -66,7 +66,8 @@ TEST_RESULT="./automated-testing.sh.result"
 TEST_LOOP_NUM=1
 
 not_test_num=0
-pass_num=0
+succ_num=0
+fail_num=0
 all_num=0
 
 isNotTestFile(){
@@ -108,10 +109,11 @@ autoTestFunc(){
 
     if [[ "$?" -eq 0 ]];then
         result="PASS"
-        let pass_num++
+        let succ_num++
         printf "%-4s *%-20s %-80s %-80s \033[32m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
     else
         result="FAILED"
+        let fail_num++
         echo $source_code_file >> $TEST_RESULT
         printf "%-4s *%-20s %-80s %-80s \033[31m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
     fi
@@ -152,14 +154,15 @@ done
 
 
 printf "\n\n"
-if [[ $pass_num -eq $all_num ]];then
+if [[ $succ_num -eq $all_num ]];then
     printf "\033[32m"
 else
     printf "\033[33m"
 fi
 printf "[Result]:\n"
-printf "Pass/All = %s/%s\n" $pass_num $all_num 
+printf "Pass/All = %s/%s\n" $succ_num $all_num 
 printf "NotTest  = %s\n" $not_test_num
+printf "Fail     = %s\n" $fail_num
 end_time=`date +%s`
 runtime=$((end_time-start_time))
 printf "Usetime:%4ds\n\n" $runtime

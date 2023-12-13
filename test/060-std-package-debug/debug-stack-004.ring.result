@@ -1,0 +1,7 @@
+0000#ring!test_any(bool, int, double, string)
+0001#ring!test_two_string(string, string)
+0002#ring!test_two_double(double, double)
+0003#ring!test_two_int(int, int)
+0004#ring!test_two_bool(bool, bool)
+0005#ring!test0()
+0006#ring!main()
