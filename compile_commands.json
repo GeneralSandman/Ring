@@ -1,39 +1,15 @@
 [
  {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "lex.yy.cpp"
-  ],
-  "file": "lex.yy.cpp"
- },
- {
-  "directory": "/Users/bytedance/Desktop/Ring",
-  "arguments": [
-   "g++",
-   "-c",
-   "-std=c++11",
-   "-Wall",
-   "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
-   "y.tab.cpp"
-  ],
-  "file": "y.tab.cpp"
- },
- {
   "directory": "/Users/bytedance/Desktop/Ring/src",
   "arguments": [
    "g++",
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "string.cpp"
   ],
   "file": "string.cpp"
@@ -45,8 +21,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "create_ast.cpp"
   ],
   "file": "create_ast.cpp"
@@ -58,8 +36,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "semantic_check.cpp"
   ],
   "file": "semantic_check.cpp"
@@ -71,8 +51,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "fix_ast.cpp"
   ],
   "file": "fix_ast.cpp"
@@ -84,8 +66,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "vm.cpp"
   ],
   "file": "vm.cpp"
@@ -97,8 +81,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "generate.cpp"
   ],
   "file": "generate.cpp"
@@ -110,8 +96,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "execute.cpp"
   ],
   "file": "execute.cpp"
@@ -123,8 +111,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "compiler.cpp"
   ],
   "file": "compiler.cpp"
@@ -136,8 +126,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "error_msg.cpp"
   ],
   "file": "error_msg.cpp"
@@ -149,8 +141,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "utils.cpp"
   ],
   "file": "utils.cpp"
@@ -162,8 +156,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "man_help.cpp"
   ],
   "file": "man_help.cpp"
@@ -175,8 +171,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "std_lib.cpp"
   ],
   "file": "std_lib.cpp"
@@ -188,8 +186,10 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "gc.cpp"
   ],
   "file": "gc.cpp"
@@ -201,10 +201,57 @@
    "-c",
    "-std=c++11",
    "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
    "-Wno-unused-function",
-   "-Wno-unneeded-internal-declaration",
    "main.cpp"
   ],
   "file": "main.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
+   "-Wno-unused-function",
+   "lex.yy.cpp"
+  ],
+  "file": "lex.yy.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
+   "-Wno-unused-function",
+   "y.tab.cpp"
+  ],
+  "file": "y.tab.cpp"
+ },
+ {
+  "directory": "/Users/bytedance/Desktop/Ring/src",
+  "arguments": [
+   "g++",
+   "-c",
+   "-std=c++11",
+   "-Wall",
+   "-Wextra",
+   "-Wno-sign-compare",
+   "-Wno-unused-parameter",
+   "-Wno-unused-function",
+   "mem_pool.cpp"
+  ],
+  "file": "mem_pool.cpp"
  }
 ]

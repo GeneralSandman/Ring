@@ -3,7 +3,7 @@
         "*.ring": "go",
         "stdlib.h": "c",
         "stdio.h": "c",
-        "ring.h": "c",
+        "ring.hpp": "c",
         "system_error": "c",
         "inner_func.h": "c",
         "array": "c",
@@ -74,7 +74,8 @@
         "locale": "cpp",
         "mutex": "cpp",
         "__memory": "cpp",
-        "bit": "cpp"
+        "bit": "cpp",
+        "unordered_set": "cpp"
     },
     "editor.formatOnSave": true
 }
