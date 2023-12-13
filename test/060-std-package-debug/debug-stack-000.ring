@@ -16,4 +16,5 @@ function main() {
 }
 
 function test1(var bool bool_value) {
+  debug::print_call_stack();
 }
