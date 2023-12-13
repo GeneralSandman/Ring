@@ -69,6 +69,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         RING_PACKAGE_STD_PATH_DEBUG,
         std::vector<StdPackageNativeFunction>{
             {(char*)"debug_assert", std_lib_debug_debug_assert, 1, 0},
+            {(char*)"print_call_stack", std_lib_debug_print_call_stack, 0, 0},
         },
     },
 
@@ -485,6 +486,35 @@ RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
     rvm->stdout_logs.push_back(output_buffer);
 #endif
 
+    return ret;
+}
+
+/*
+ * Package: debug
+ * Function: print_call_stack
+ * Type: @native
+ */
+RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 0) {
+        printf("std_lib_debug_print_call_stack not need arguement\n");
+        exit(ERROR_CODE_RUN_VM_ERROR);
+    }
+
+    // TODO:  这里最好要打印函数的原型
+    unsigned int  offset = 0;
+    RVM_CallInfo* pos    = rvm->call_info;
+    for (; pos != nullptr; pos = pos->next, offset++) {
+        if (pos->callee_function == nullptr) {
+            printf("%04d#ring!start()\n", offset);
+        } else {
+            printf("%04d#ring!%s\n", offset, format_rvm_function(pos->callee_function).c_str());
+        }
+    }
+
+    fflush(stdout);
+
+    RVM_Value ret;
+    ret.u.int_value = 0;
     return ret;
 }
 

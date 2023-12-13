@@ -12,3 +12,7 @@ import {
 
 @native
 function debug_assert(var bool bool_value);
+
+
+@native
+function print_call_stack();

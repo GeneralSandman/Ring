@@ -208,13 +208,27 @@ void copy_function(Function* src, RVM_Function* dest) {
     } else if (src->type == FUNCTION_TYPE_DERIVE) {
         dest->type                = RVM_FUNCTION_TYPE_DERIVE;
         dest->parameter_size      = src->parameter_list_size;
-        dest->parameter_list      = nullptr; // TODO:
+        dest->parameter_list      = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
+                                                                  sizeof(RVM_LocalVariable) * dest->parameter_size);
         dest->local_variable_size = src->block->declaration_list_size;
-        dest->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_LocalVariable) * src->block->declaration_list_size); // TODO:
+        dest->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
+                                                                  sizeof(RVM_LocalVariable) * dest->local_variable_size);
         dest->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
 
-        Declaration* pos          = src->block->declaration_list;
+        // deep copy function parameters
         unsigned int i            = 0;
+        Parameter*   param        = src->parameter_list;
+        for (; param != nullptr; param = param->next, i++) {
+            dest->parameter_list[i].identifier     = param->identifier;
+            dest->parameter_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                                   sizeof(RVM_TypeSpecifier));
+            type_specifier_deep_copy(dest->parameter_list[i].type_specifier, param->type);
+        }
+
+
+        // deep copy local variable
+        Declaration* pos = src->block->declaration_list;
+        i                = 0;
         for (; pos != nullptr; pos = pos->next, i++) {
             dest->local_variable_list[i].identifier     = pos->identifier;
             dest->local_variable_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,

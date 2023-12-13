@@ -1,4 +1,5 @@
 #include "ring.hpp"
+#include <string>
 
 RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_UNKNOW, "", OPCODE_OPERAND_TYPE_0BYTE, 0, 0, "", ""},
@@ -191,3 +192,48 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
     {RVM_CODES_NUM, "", OPCODE_OPERAND_TYPE_0BYTE, 0, 0, "", ""},
 };
+
+// TODO: 这里直接使用Cpp::string, 后续需要改成 Ring_String
+std::string format_rvm_function(RVM_Function* function) {
+    assert(function != nullptr);
+
+    std::string result;
+
+    result += std::string(function->func_name);
+    result += "(";
+    // formate parameters
+    for (unsigned int i = 0; i < function->parameter_size; i++) {
+        if (i != 0) {
+            result += ", ";
+        }
+        result += format_rvm_type_specifier(function->parameter_list[i].type_specifier);
+    }
+    result += ")";
+
+    return result;
+}
+
+
+// TODO: 这里直接使用Cpp::string, 后续需要改成 Ring_String
+// TODO: 这里暂时 只能 formate 参数为 bool, int, double, string 其余的类型需要继续支持
+std::string format_rvm_type_specifier(RVM_TypeSpecifier* type_specifier) {
+    assert(type_specifier != nullptr);
+
+    switch (type_specifier->kind) {
+    case RING_BASIC_TYPE_BOOL:
+        return "bool";
+    case RING_BASIC_TYPE_INT:
+        return "int";
+    case RING_BASIC_TYPE_DOUBLE:
+        return "double";
+    case RING_BASIC_TYPE_STRING:
+        return "string";
+    case RING_BASIC_TYPE_CLASS:
+        // TODO: 这里要获取类的真实名称
+        return "class";
+    default:
+        // TODO:  后续还要处理 数组
+        break;
+    }
+    return "";
+}

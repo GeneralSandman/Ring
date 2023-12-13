@@ -770,6 +770,8 @@ struct RVM_CallInfo {
     RVM_Function* caller_function;
     unsigned int  caller_pc; // 调用者的返回地址
     unsigned int  caller_stack_base;
+
+    RVM_Function* callee_function;
     unsigned int  callee_argument_size; // 函数调用的参数数量，可变参数
 
     RVM_CallInfo* prev;
@@ -2137,6 +2139,7 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
 RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_vm_garbage_collect(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
@@ -2146,6 +2149,15 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
 RVM_Value std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 // --------------------
 
+
+/* --------------------
+ * vm.cpp
+ * function definition
+ *
+ */
+std::string format_rvm_function(RVM_Function* function);
+std::string format_rvm_type_specifier(RVM_TypeSpecifier* type_specifier);
+// --------------------
 
 /* --------------------
  * utils.cpp
