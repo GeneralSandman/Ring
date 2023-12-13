@@ -1,6 +1,6 @@
-#include "ring.h"
-#include <stdio.h>
-#include <string.h>
+#include "ring.hpp"
+#include <cstdio>
+#include <cstring>
 #include <string>
 
 std::string help_list =

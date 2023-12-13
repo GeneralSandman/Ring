@@ -1,8 +1,8 @@
 %{
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include "ring.h"
+#include <cstdio>
+#include <cstring>
+#include <cstdarg>
+#include "ring.hpp"
 #include "y.tab.hpp"
 
 char linebuf[500];

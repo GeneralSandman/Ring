@@ -1,4 +1,4 @@
-#include "ring.h"
-#include <stdlib.h>
-#include <string.h>
+#include "ring.hpp"
+#include <cstdlib>
+#include <cstring>
 #include <time.h>

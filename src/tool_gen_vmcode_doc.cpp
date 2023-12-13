@@ -1,4 +1,4 @@
-#include "ring.h"
+#include "ring.hpp"
 
 extern RVM_Opcode_Info
             RVM_Opcode_Infos[];

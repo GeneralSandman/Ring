@@ -1,5 +1,4 @@
-#include "ring.h"
-#include <stdio.h>
+#include "ring.hpp"
 
 
 void ring_bytecode_dump(Package_Executer* executer, FILE* output) {

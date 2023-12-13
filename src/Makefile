@@ -46,8 +46,10 @@ TOOL_GEN_VMCODE_DOC_OBJS  = vm.o tool_gen_vmcode_doc.o
 #  DEBUG_RVM_GC_DETAIL 				展示 Garbage Collect 的详情
 CFLAGS = -c -std=c++11 \
 				-Wall \
+				-Wextra \
+				-Wno-sign-compare \
+				-Wno-unused-parameter \
 				-Wno-unused-function \
-				-Wno-unneeded-internal-declaration \
 				# -g \
 				 -DDEBUG_FLEX1 \
 				 -DDEBUG_BISON1 \
@@ -96,24 +98,24 @@ lex.yy.cpp : ring.flex.l ring.bison.y y.tab.hpp
 	flex -o lex.yy.cpp ring.flex.l
 
 
-lex.yy.o: lex.yy.cpp ring.h
+lex.yy.o: lex.yy.cpp ring.hpp
 y.tab.o: y.tab.cpp
 string.o: string.cpp
-create_ast.o: create_ast.cpp ring.h
-semantic_check.o: semantic_check.cpp ring.h
-fix_ast.o: fix_ast.cpp ring.h
-vm.o: vm.cpp ring.h
-generate.o: generate.cpp ring.h
-execute.o: execute.cpp ring.h
-bytecode.o: bytecode.cpp ring.h
-compiler.o: compiler.cpp ring.h
-error_msg.o: error_msg.cpp ring.h
-utils.o: utils.cpp ring.h
-man_help.o: man_help.cpp ring.h
-std_lib.o: std_lib.cpp ring.h
-mem_pool.o: mem_pool.cpp ring.h
-gc.o: gc.cpp ring.h
-thread_pool.o: thread_pool.c ring.h
-main.o: main.cpp ring.h
-tool_gen_vmcode_doc.o: tool_gen_vmcode_doc.cpp ring.h
+create_ast.o: create_ast.cpp ring.hpp
+semantic_check.o: semantic_check.cpp ring.hpp
+fix_ast.o: fix_ast.cpp ring.hpp
+vm.o: vm.cpp ring.hpp
+generate.o: generate.cpp ring.hpp
+execute.o: execute.cpp ring.hpp
+bytecode.o: bytecode.cpp ring.hpp
+compiler.o: compiler.cpp ring.hpp
+error_msg.o: error_msg.cpp ring.hpp
+utils.o: utils.cpp ring.hpp
+man_help.o: man_help.cpp ring.hpp
+std_lib.o: std_lib.cpp ring.hpp
+mem_pool.o: mem_pool.cpp ring.hpp
+gc.o: gc.cpp ring.hpp
+thread_pool.o: thread_pool.c ring.hpp
+main.o: main.cpp ring.hpp
+tool_gen_vmcode_doc.o: tool_gen_vmcode_doc.cpp ring.hpp
 

@@ -1,6 +1,6 @@
 %{
-#include <stdio.h>
-#include "ring.h"
+#include "ring.hpp"
+#include <cstdio>
 #define YYDEBUG 1
 
 int yylex();

@@ -1,8 +1,9 @@
-#include "ring.h"
+#include "ring.hpp"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
 
 
 std::string command_help_message =

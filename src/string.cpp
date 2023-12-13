@@ -1,7 +1,7 @@
-#include "ring.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "ring.hpp"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #define STRING_LITERAL_CAPACITY (1024)
 

@@ -1,7 +1,7 @@
-#include "ring.h"
+#include "ring.hpp"
+#include <cstdio>
+#include <cstring>
 #include <dirent.h>
-#include <stdio.h>
-#include <string.h>
 #include <string>
 #include <sys/stat.h>
 #include <vector>
@@ -34,7 +34,7 @@ void                   ring_compiler_functions_dump(PackageUnit* package_unit) {
 
 void ring_vm_constantpool_dump(Package_Executer* executer) {
     printf(" ************  rvm constant pool  ****\n");
-    for (int i = 0; i < executer->constant_pool_size; i++) {
+    for (unsigned int i = 0; i < executer->constant_pool_size; i++) {
         printf("%10d | ", i);
         switch (executer->constant_pool_list[i].type) {
         case CONSTANTPOOL_TYPE_INT:
@@ -116,7 +116,7 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
     MOVE_CURSOR(screen_row++, screen_col);
     // width 49
     printf("%7s | %20s | %6s | %6s\n", "index", "oper_num", "space", "pointer");
-    for (int i = 0; i < runtime_stack->top_index; i++) {
+    for (unsigned int i = 0; i < runtime_stack->top_index; i++) {
         std::string space   = "";
         std::string pointer = "";
         if (i >= caller_stack_base) {

@@ -1,4 +1,4 @@
-#include "ring.h"
+#include "ring.hpp"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -393,7 +393,7 @@ unsigned int package_unit_increa_column_number(unsigned int len) {
 void package_unit_update_line_content(char* str) {
     assert(g_package_unit != nullptr);
 
-    for (int i = 0; i < strlen(str); i++) {
+    for (unsigned int i = 0; i < strlen(str); i++) {
         ring_string_add_char(g_package_unit->current_line_content, str[i]);
     }
 

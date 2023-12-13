@@ -1,4 +1,4 @@
-#include "ring.h"
+#include "ring.hpp"
 #include <cstring>
 
 
@@ -27,7 +27,7 @@ void gc(Ring_VirtualMachine* rvm) {
 
 void gc_summary(Ring_VirtualMachine* rvm) {
     printf("%sStatic:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
-    for (int i = 0; i < rvm->runtime_static->size; i++) {
+    for (unsigned int i = 0; i < rvm->runtime_static->size; i++) {
         RVM_Value*  value = &(rvm->runtime_static->data[i]);
 
         std::string type;
@@ -77,7 +77,7 @@ void gc_summary(Ring_VirtualMachine* rvm) {
     }
 
     printf("%sStack:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
-    for (int stack_index = 0; stack_index < rvm->runtime_stack->top_index; stack_index++) {
+    for (unsigned int stack_index = 0; stack_index < rvm->runtime_stack->top_index; stack_index++) {
         RVM_Value*  value = &(rvm->runtime_stack->data[stack_index]);
         std::string type;
         switch (value->type) {
@@ -123,7 +123,7 @@ void gc_summary(Ring_VirtualMachine* rvm) {
  */
 void gc_mark(Ring_VirtualMachine* rvm) {
     // 1. static 变量指向的位置 需要标记
-    for (int i = 0; i < rvm->runtime_static->size; i++) {
+    for (unsigned int i = 0; i < rvm->runtime_static->size; i++) {
         RVM_Value* value = &(rvm->runtime_static->data[i]);
         if (value->type == RVM_VALUE_TYPE_OBJECT) {
             value->u.object->gc_mark = GC_MARK_COLOR_BLACK;
@@ -131,7 +131,7 @@ void gc_mark(Ring_VirtualMachine* rvm) {
     }
 
     //  2. runtime stack 变量 指向的位置 需要标记
-    for (int stack_index = 0; stack_index < rvm->runtime_stack->top_index; stack_index++) {
+    for (unsigned int stack_index = 0; stack_index < rvm->runtime_stack->top_index; stack_index++) {
         RVM_Value* value = &(rvm->runtime_stack->data[stack_index]);
         if (value->type == RVM_VALUE_TYPE_OBJECT) {
             value->u.object->gc_mark = GC_MARK_COLOR_BLACK;

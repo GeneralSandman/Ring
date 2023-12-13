@@ -1,8 +1,8 @@
-#include "ring.h"
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "ring.hpp"
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 
 // finish a block compile

@@ -3,10 +3,10 @@
     语法树的修正和语义检查
 **********************************************/
 
-#include "ring.h"
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+#include "ring.hpp"
+#include <cassert>
+#include <cstdlib>
+#include <cstring>
 
 
 void ring_compiler_fix_ast(Package* package) {

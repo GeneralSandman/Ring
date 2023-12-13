@@ -1,9 +1,9 @@
-#include "ring.h"
+#include "ring.hpp"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <pthread.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 void task(void* arg) {

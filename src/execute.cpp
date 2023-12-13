@@ -1,9 +1,9 @@
-#include "ring.h"
-#include <assert.h>
+#include "ring.hpp"
+#include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
@@ -177,7 +177,7 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* execut
     RVM_TypeSpecifier*   type_specifier       = nullptr;
     RVM_ClassDefinition* rvm_class_definition = nullptr;
 
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         type_specifier = global_variable_list[i].type;
 
         switch (type_specifier->kind) {
@@ -982,7 +982,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_RETURN:
             return_value_list_size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             rvm->pc += 3;
-            // break; // ATTEN: no need break
+            [[fallthrough]];
         case RVM_CODE_FUNCTION_FINISH:
             derive_function_finish(rvm,
                                    &function, nullptr,
@@ -1394,7 +1394,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
 
 
     // copy return value to top of stack.
-    for (int i = 0; i < return_value_list_size; i++) {
+    for (unsigned int i = 0; i < return_value_list_size; i++) {
         rvm->runtime_stack->data[rvm->runtime_stack->top_index++] = rvm->runtime_stack->data[old_return_value_list_index + i];
     }
 }
@@ -1456,7 +1456,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
     RVM_ClassDefinition* rvm_class_definition = nullptr;
     RVM_Object*          object               = nullptr;
 
-    for (int i = 0; i < function->local_variable_size; i++, local_variable_value_index++) {
+    for (unsigned int i = 0; i < function->local_variable_size; i++, local_variable_value_index++) {
         type_specifier = function->local_variable_list[i].type_specifier;
 
         switch (type_specifier->kind) {
@@ -1793,7 +1793,7 @@ RVM_Object* rvm_new_class_object_literal(Ring_VirtualMachine* rvm, unsigned int 
 
     // 从 runtime_stack 中取出 已经push的, 然后依次初始化
     unsigned init_exp_of_stack_index = rvm->runtime_stack->top_index - init_exp_size;
-    for (int i = 0; i < init_exp_size; i++) {
+    for (unsigned int i = 0; i < init_exp_size; i++) {
         object->u.class_object->field[i] = rvm->runtime_stack->data[init_exp_of_stack_index + i];
     }
     return object;
@@ -2343,7 +2343,7 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         array->u.class_object_array = (RVM_ClassObject*)mem_alloc(rvm->meta_pool, sizeof(RVM_ClassObject) * array->capacity);
         rvm->runtime_heap->alloc_size += 0;
 
-        for (int i = 0; i < src->length; i++) {
+        for (unsigned int i = 0; i < src->length; i++) {
             RVM_ClassObject* tmp                       = rvm_deep_copy_class_object(rvm, &(src->u.class_object_array[i]));
             // TODO: 这里的写法不太好, 还是直接 strcpy 的那种形式最好, 结果通过 指针传入
             // array->u.class_object_array[i].class_def   = tmp->class_def;

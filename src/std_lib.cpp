@@ -1,4 +1,4 @@
-#include "ring.h"
+#include "ring.hpp"
 #include <cstring>
 #include <vector>
 
@@ -124,7 +124,7 @@ void compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entr
 }
 
 void register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count, int return_list_count) {
-    for (int i = 0; i < package_executer->function_size; i++) {
+    for (unsigned int i = 0; i < package_executer->function_size; i++) {
         RVM_Function* function = &package_executer->function_list[i];
         if (function->type == RVM_FUNCTION_TYPE_NATIVE && 0 == strcmp(function->func_name, func_name)) {
             function->u.native_func                    = (NativeFunction*)mem_alloc(NULL_MEM_POOL, sizeof(NativeFunction));
@@ -470,9 +470,9 @@ RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
     memset(output_buffer, '\0', length);
 
     if (args->u.int_value) {
-        strncpy(output_buffer, "debug_assert PASS\n", 18);
+        strncpy(output_buffer, "debug_assert PASS\n", length);
     } else {
-        strncpy(output_buffer, "debug_assert FAILED\n", 20);
+        strncpy(output_buffer, "debug_assert FAILED\n", length);
     }
 
     printf("%s", output_buffer);

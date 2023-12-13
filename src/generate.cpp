@@ -1,8 +1,8 @@
-#include "ring.h"
-#include <assert.h>
+#include "ring.hpp"
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
-#include <stdio.h>
-#include <stdlib.h>
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
@@ -35,7 +35,7 @@ void package_executer_dump(Package_Executer* package_executer) {
 
     printf("|FunctionList:\n");
 
-    for (int i = 0; i < package_executer->function_size; i++) {
+    for (unsigned int i = 0; i < package_executer->function_size; i++) {
         printf("|\t func_name: %s%s%s\n", LOG_COLOR_YELLOW, package_executer->function_list[i].func_name, LOG_COLOR_CLEAR);
     }
 
@@ -104,7 +104,7 @@ void add_global_variable(Package* package, Package_Executer* executer) {
                                                               executer->global_variable_size * sizeof(RVM_Variable));
 
     Declaration* pos               = nullptr;
-    int          i                 = 0;
+    unsigned int i                 = 0;
     for (pos = package->global_declaration_list[i];
          i < package->global_declaration_list.size();
          i++, pos = package->global_declaration_list[i]) {
@@ -236,6 +236,7 @@ void copy_method(MethodMember* src, RVM_Method* dest) {
 void add_top_level_code(Package* package, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
+    // FIXME: executer->main_func_index is unsigned int
     if (executer->main_func_index != -1) {
         // printf("executer->main_func_index\n");
         // 生成一下字节码

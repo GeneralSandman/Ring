@@ -1,7 +1,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
