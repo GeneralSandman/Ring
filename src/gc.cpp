@@ -47,9 +47,6 @@ void gc_summary(Ring_VirtualMachine* rvm) {
         case RVM_VALUE_TYPE_OBJECT:
             type = "object";
             break;
-        case RVM_VALUE_TYPE_CALLINFO:
-            type = "callinfo";
-            break;
         default:
             type = "unknow";
             break;
@@ -95,9 +92,6 @@ void gc_summary(Ring_VirtualMachine* rvm) {
             break;
         case RVM_VALUE_TYPE_OBJECT:
             type = "object";
-            break;
-        case RVM_VALUE_TYPE_CALLINFO:
-            type = "callinfo";
             break;
         default:
             type = "unknow";

@@ -116,7 +116,6 @@ typedef enum {
     RVM_VALUE_TYPE_STRING, // TODO: string object 需要重新规划一下
     RVM_VALUE_TYPE_OBJECT, // TODO: string object 需要重新规划一下
 
-    RVM_VALUE_TYPE_CALLINFO,
 } RVM_Value_Type;
 
 typedef enum {
@@ -127,18 +126,10 @@ typedef enum {
 typedef struct {
     RVM_Value_Type type;
     union {
-        RVM_Bool      bool_value;
-        int           int_value;
-        double        double_value;
-        RVM_Object*   object;
-
-        RVM_CallInfo* call_info;
-        /*
-         * TODO:
-         * Don't save call_info in runtime_stack.
-         * Save call_info in a double linked list
-         * to record function call stack.
-         */
+        RVM_Bool    bool_value;
+        int         int_value;
+        double      double_value;
+        RVM_Object* object;
     } u;
 
 } RVM_Value;
@@ -151,6 +142,8 @@ struct Ring_VirtualMachine {
     RVM_RuntimeStack*    runtime_stack;
     RVM_RuntimeHeap*     runtime_heap;
     unsigned int         pc;
+
+    RVM_CallInfo*        call_info;
 
     RVM_ClassDefinition* class_list; // TODO: 删除掉
     unsigned int         class_size; // TODO: 删除掉
@@ -778,12 +771,15 @@ struct RVM_CallInfo {
     unsigned int  caller_pc; // 调用者的返回地址
     unsigned int  caller_stack_base;
     unsigned int  callee_argument_size; // 函数调用的参数数量，可变参数
+
+    RVM_CallInfo* prev;
+    RVM_CallInfo* next;
 };
 
 #define CALL_INFO_MAGIC_NUMBER (0x8421) // 33852
 #define CALL_INFO_SIZE ((sizeof(RVM_CallInfo) - 1) / sizeof(RVM_Value) + 1)
 
-#define CALL_INFO_SIZE_V2 2
+#define CALL_INFO_SIZE_V2 1
 
 struct Ring_String {
     char* buffer;
@@ -2033,8 +2029,8 @@ void                 derive_function_finish(Ring_VirtualMachine* rvm,
                                             unsigned int* pc,
                                             unsigned int* caller_stack_base,
                                             unsigned int  return_value_list_size);
-void                 store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo);
-void                 restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo);
+void                 store_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo* call_info);
+void                 restore_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo** call_info);
 void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function* function);
 
 RVM_Object*          string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* string_literal);

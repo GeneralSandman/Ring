@@ -107,6 +107,7 @@ Ring_VirtualMachine* ring_virtualmachine_create() {
     rvm->runtime_stack       = new_runtime_stack();
     rvm->runtime_heap        = new_runtime_heap();
     rvm->pc                  = 0;
+    rvm->call_info           = nullptr;
     rvm->class_list          = nullptr;
     rvm->class_size          = 0;
     rvm->meta_pool           = create_mem_pool((char*)"RVM-Meta-Memory-Pool");
@@ -951,12 +952,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_INVOKE_FUNC:
             oper_num      = STACK_GET_INT_OFFSET(rvm, -1);
+            // TODO: 这里是不是直接放在字节码里比较好, 不放在 runtime_stack中
             package_index = oper_num >> 8;
             func_index    = oper_num & 0XFF;
 
             runtime_stack->top_index--;
             if (rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE) {
-                invoke_native_function(rvm, &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
+                invoke_native_function(rvm,
+                                       &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
                                        argument_list_size);
                 rvm->pc += 1;
             } else if (rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE) {
@@ -1321,9 +1324,11 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     callinfo->caller_pc            = *pc;
     callinfo->caller_stack_base    = *caller_stack_base;
     callinfo->callee_argument_size = callee_function->parameter_size; // FIXME: 支持可变参数
-    store_callinfo(rvm->runtime_stack, callinfo);
+    callinfo->prev                 = nullptr;
+    callinfo->next                 = nullptr;
+    store_callinfo(rvm, callinfo);
 
-
+    // 上下文切换
     *caller_function   = callee_function;
     *code_list         = callee_function->u.derive_func->code_list;
     *code_size         = callee_function->u.derive_func->code_size;
@@ -1376,8 +1381,9 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     unsigned int local_variable_size = 20;
     rvm->runtime_stack->top_index -= local_variable_size;
 
-    restore_callinfo(rvm->runtime_stack, &callinfo);
+    restore_callinfo(rvm, &callinfo);
     assert(callinfo->magic_number == CALL_INFO_MAGIC_NUMBER);
+
     *caller_function   = callinfo->caller_function;
     *pc                = callinfo->caller_pc + 1;
     *caller_stack_base = callinfo->caller_stack_base;
@@ -1406,16 +1412,19 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
  * 2. Push to runtime_stack
  *
  */
-void store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo) {
-    runtime_stack->data[runtime_stack->top_index].type        = RVM_VALUE_TYPE_CALLINFO;
-    runtime_stack->data[runtime_stack->top_index].u.call_info = callinfo;
-    runtime_stack->top_index += CALL_INFO_SIZE_V2;
-    return;
+void store_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo* call_info) {
+    // TODO: 这里有点兼容逻辑, 需要吧 CALL_INFO_SIZE_V2 去掉
+    rvm->runtime_stack->top_index += CALL_INFO_SIZE_V2;
 
-    RVM_CallInfo* dest;
-    dest = (RVM_CallInfo*)(&runtime_stack->data[runtime_stack->top_index]);
-    memcpy(dest, callinfo, sizeof(RVM_CallInfo));
-    runtime_stack->top_index += CALL_INFO_SIZE;
+    if (rvm->call_info == nullptr) {
+        rvm->call_info = call_info;
+        return;
+    }
+
+    call_info->next      = rvm->call_info;
+    rvm->call_info->prev = call_info;
+
+    rvm->call_info       = call_info;
 }
 
 /*
@@ -1425,13 +1434,22 @@ void store_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo* callinfo) {
  * 2. Decode callinfo
  *
  */
-void restore_callinfo(RVM_RuntimeStack* runtime_stack, RVM_CallInfo** callinfo) {
-    runtime_stack->top_index -= CALL_INFO_SIZE_V2;
-    *callinfo = runtime_stack->data[runtime_stack->top_index].u.call_info;
-    return;
+void restore_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo** call_info) {
+    // TODO: 这里有点兼容逻辑, 需要吧 CALL_INFO_SIZE_V2 去掉
+    rvm->runtime_stack->top_index -= CALL_INFO_SIZE_V2;
 
-    runtime_stack->top_index -= CALL_INFO_SIZE;
-    *callinfo = (RVM_CallInfo*)(&runtime_stack->data[runtime_stack->top_index]);
+    assert(rvm->call_info != nullptr);
+
+    RVM_CallInfo* head = rvm->call_info;
+
+    rvm->call_info     = head->next;
+    if (rvm->call_info != nullptr) {
+        rvm->call_info->prev = nullptr;
+    }
+
+    head->next = nullptr;
+    head->prev = nullptr;
+    *call_info = head;
 }
 
 // FIXME:  初始化局部变量列表的时候存在问题
@@ -1442,12 +1460,15 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
     // FIXME: 先忽略局部变量的类型，先用int
     unsigned int arguement_list_size        = function->parameter_size;
     unsigned int arguement_list_index       = rvm->runtime_stack->top_index - CALL_INFO_SIZE_V2 - arguement_list_size;
+    // TODO: 这里有点兼容逻辑, 需要吧 CALL_INFO_SIZE_V2 去掉
 
     // 通过实参 来初始化形参
     // init argument with parameter
     unsigned int local_variable_value_index = 0;
     for (; local_variable_value_index < arguement_list_size; local_variable_value_index++) {
-        STACK_COPY_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_value_index, arguement_list_index + local_variable_value_index);
+        STACK_COPY_INDEX(rvm,
+                         rvm->runtime_stack->top_index + local_variable_value_index,
+                         arguement_list_index + local_variable_value_index);
     }
 
     // 局部变量为object的情况
@@ -1456,6 +1477,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
     RVM_ClassDefinition* rvm_class_definition = nullptr;
     RVM_Object*          object               = nullptr;
 
+    // 初始化函数中声明的局部变量
     for (unsigned int i = 0; i < function->local_variable_size; i++, local_variable_value_index++) {
         type_specifier = function->local_variable_list[i].type_specifier;
 
