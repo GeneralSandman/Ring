@@ -10,55 +10,77 @@ std::string command_help_message =
     "\n"
     "        ring <command> [arguments]\n"
     "\n"
-    "The commands are:\n"
+    "All Commands:\n"
     "    \n"
     "        run    <filename>                              :compile and run Ring program\n"
     "        build  <filename>                              :compile and generate bytecode\n"
-    "        dump   <filename>                              :dump bytecode\n"
+    "        dump   <filename>                              :dump bytecode detail after compile\n"
     "        man    <keyword>                               :get prompt of ring by keyword\n"
     "        version                                        :get Ring version\n"
     "        help                                           :get Ring version\n"
     "\n";
 
+typedef struct {
+    bool  command_run;
+    bool  command_dump;
 
-int main(int argc, char** argv) {
-    char* file_name;
+    char* input_file_name;
+} Args;
+
+Args parse_args(int argc, char** argv) {
     char* command;
-    int   command_dump = 0;
+    char* input_file_name;
+    char* keyword;
+    Args  res;
 
     if (argc < 2) {
-        fprintf(stderr, "%s", command_help_message.c_str());
-        exit(ERROR_CODE_COMMAND_ERROR);
+        goto ERR_ARG;
     }
     command = argv[1];
-
-    // ring version
-    // ring help
     if (!strcmp(command, "version")) {
         printf("%s \n", RING_VERSION);
-        return 0;
+        exit(ERROR_CODE_SUCCESS);
     } else if (!strcmp(command, "help")) {
         printf("%s", command_help_message.c_str());
-        return 0;
+        exit(ERROR_CODE_SUCCESS);
     }
 
 
     if (argc < 3) {
-        fprintf(stderr, "%s", command_help_message.c_str());
-        exit(ERROR_CODE_COMMAND_ERROR);
+        goto ERR_ARG;
     }
-    file_name = argv[2];
+    input_file_name = argv[2];
     if (!strcmp(command, "run")) {
+        res = Args{
+            .command_run     = true,
+            .command_dump    = false,
+            .input_file_name = input_file_name,
+        };
+        return res;
     } else if (!strcmp(command, "build")) {
         printf("ring build\n");
-        return 0;
+        exit(ERROR_CODE_SUCCESS);
     } else if (!strcmp(command, "dump")) {
-        command_dump = 1;
+        res = Args{
+            .command_run     = false,
+            .command_dump    = true,
+            .input_file_name = input_file_name,
+        };
+        return res;
     } else if (!strcmp(command, "man")) {
-        char* keyword = argv[2];
+        keyword = input_file_name;
         ring_give_man_help(keyword);
-        return 0;
+        exit(ERROR_CODE_SUCCESS);
     }
+
+ERR_ARG:
+    fprintf(stderr, "%s", command_help_message.c_str());
+    exit(ERROR_CODE_COMMAND_ERROR);
+}
+
+int main(int argc, char** argv) {
+    Args args;
+    args = parse_args(argc, argv);
 
     /*
      *初始化编译阶段的 Memory Pool
@@ -75,7 +97,9 @@ int main(int argc, char** argv) {
     CompilerEntry* compiler_entry           = compiler_entry_create();
     // FIX: 目前main package 只能有一个源文件
     // main package 源文件即为 ring run 指定的输入文件
-    Package* main_package                   = package_create_input_file(compiler_entry, (char*)"main", file_name);
+    Package* main_package                   = package_create_input_file(compiler_entry,
+                                                                        (char*)"main",
+                                                                        args.input_file_name);
     compiler_entry->main_package            = main_package; // TODO: optimize the method of set main_package;
 
     /*
@@ -106,7 +130,7 @@ int main(int argc, char** argv) {
     // Complier force destory memory of front-end.
     destory_front_mem_pool();
 
-    if (command_dump) {
+    if (args.command_dump) {
         // Only dump `main` package bytecode detail.
         print_package_executer(executer_entry->main_package_executer);
         return 0;

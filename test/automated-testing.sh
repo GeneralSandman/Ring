@@ -165,7 +165,7 @@ printf "NotTest  = %s\n" $not_test_num
 printf "Fail     = %s\n" $fail_num
 end_time=`date +%s`
 runtime=$((end_time-start_time))
-printf "Usetime:%4ds\n\n" $runtime
+printf "Usetime  = %dS\n\n" $runtime
 printf "\033[0m"
 
 
