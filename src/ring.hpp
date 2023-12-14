@@ -552,16 +552,19 @@ struct RVM_OpcodeBuffer {
 };
 
 typedef enum {
-    OPCODE_OPERAND_TYPE_0BYTE, // 后边没有操作数
-    OPCODE_OPERAND_TYPE_1BYTE, // 后边1BYTE操作数
-    OPCODE_OPERAND_TYPE_2BYTE, // 后边2BYTE操作数
-    OPCODE_OPERAND_TYPE_3BYTE, // 后边3BYTE操作数
+    OPCODE_OPERAND_TYPE_0BYTE,     // 后边没有操作数
+    OPCODE_OPERAND_TYPE_1BYTE,     // 后边1BYTE操作数
+    OPCODE_OPERAND_TYPE_2BYTE_As,  // 后边2BYTE操作数 两个字节组合成一个操作数
+    OPCODE_OPERAND_TYPE_2BYTE_AB,  // 后边2BYTE操作数 两个字节分别为两个不同的操作数
+    OPCODE_OPERAND_TYPE_3BYTE_ABs, // 后边3BYTE操作数 第1个字节为一个操作数, 第2,3个字节为一个操作数
+
+
 } OpcodeOperandType;
 
 struct RVM_Opcode_Info {
     RVM_Byte          code;                    // 字节码枚举
     std::string       name;                    // 字节码字符串
-    OpcodeOperandType operand_type;            // 字节码后边的操作数类型
+    OpcodeOperandType operand_type;            // 字节码后边的操作数所占字节数量
     int               runtime_stack_increment; // 对运行时栈空间的增长 可为负值
     int               pc_increment;            // 读取完本字节码，程序计数器的增长，用于读取下一字节码, 这个跟 operand_type 含义重复了, 后续优化
 

@@ -79,6 +79,8 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
         std::string     opcode_name = opcode_info.name;
         std::string     oper_num    = "";
         int             tmp         = 0;
+        int             tmp1        = 0;
+        int             tmp2        = 0;
 
         switch (opcode_info.operand_type) {
         case OPCODE_OPERAND_TYPE_0BYTE:
@@ -88,17 +90,23 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
             oper_num = std::to_string(code_list[i++]);
             break;
 
-        case OPCODE_OPERAND_TYPE_2BYTE:
+        case OPCODE_OPERAND_TYPE_2BYTE_As:
             tmp = code_list[i++] << 8;
             tmp += code_list[i++];
             oper_num = std::to_string(tmp);
             break;
 
-        case OPCODE_OPERAND_TYPE_3BYTE:
-            tmp = code_list[i++] << 16;
-            tmp += code_list[i++] << 8;
-            tmp += code_list[i++];
-            oper_num = std::to_string(tmp);
+        case OPCODE_OPERAND_TYPE_2BYTE_AB:
+            tmp1     = code_list[i++];
+            tmp2     = code_list[i++];
+            oper_num = std::to_string(tmp1) + " " + std::to_string(tmp2);
+            break;
+
+        case OPCODE_OPERAND_TYPE_3BYTE_ABs:
+            tmp1 = code_list[i++];
+            tmp2 = code_list[i++] << 8;
+            tmp2 += code_list[i++];
+            oper_num = std::to_string(tmp1) + " " + std::to_string(tmp2);
             break;
 
         default: break;
@@ -236,7 +244,7 @@ void dump_vm_function(RVM_Function* function) {
     printf("+Local:       %d\n", function->local_variable_size);
 
     printf("+Instructions:\n");
-    printf(" ├──%-8s%-20s%-20s%-18s\n",
+    printf(" ├──%-8s%-30s%-20s%-18s\n",
            "*Num", "*Instruction", "*Operand", "*SourceLineNum");
     if (function->type == RVM_FUNCTION_TYPE_DERIVE) {
         RVM_Byte*                          code_list      = nullptr;
@@ -261,6 +269,8 @@ void dump_vm_function(RVM_Function* function) {
             std::string     opcode_name = opcode_info.name;
             std::string     oper_num    = "";
             int             tmp         = 0;
+            int             tmp1        = 0;
+            int             tmp2        = 0;
 
             switch (opcode_info.operand_type) {
             case OPCODE_OPERAND_TYPE_0BYTE:
@@ -270,23 +280,29 @@ void dump_vm_function(RVM_Function* function) {
                 oper_num = std::to_string(code_list[i++]);
                 break;
 
-            case OPCODE_OPERAND_TYPE_2BYTE:
+            case OPCODE_OPERAND_TYPE_2BYTE_As:
                 tmp = code_list[i++] << 8;
                 tmp += code_list[i++];
                 oper_num = std::to_string(tmp);
                 break;
 
-            case OPCODE_OPERAND_TYPE_3BYTE:
-                tmp = code_list[i++] << 16;
-                tmp += code_list[i++] << 8;
-                tmp += code_list[i++];
-                oper_num = std::to_string(tmp);
+            case OPCODE_OPERAND_TYPE_2BYTE_AB:
+                tmp1     = code_list[i++];
+                tmp2     = code_list[i++];
+                oper_num = std::to_string(tmp1) + " " + std::to_string(tmp2);
+                break;
+
+            case OPCODE_OPERAND_TYPE_3BYTE_ABs:
+                tmp1 = code_list[i++];
+                tmp2 = code_list[i++] << 8;
+                tmp2 += code_list[i++];
+                oper_num = std::to_string(tmp1) + " " + std::to_string(tmp2);
                 break;
 
             default: break;
             }
 
-            printf(" ├──%-8d%-20s%-20s%-18s\n",
+            printf(" ├──%-8d%-30s%-20s%-18s\n",
                    code_num_index,
                    opcode_name.c_str(),
                    oper_num.c_str(),

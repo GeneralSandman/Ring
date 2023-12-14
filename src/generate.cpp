@@ -1731,12 +1731,13 @@ void generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer
         opcode_buffer->code_list[opcode_buffer->code_size++] = oper_num;
         break;
 
-    case OPCODE_OPERAND_TYPE_2BYTE:
+    case OPCODE_OPERAND_TYPE_2BYTE_As:
+    case OPCODE_OPERAND_TYPE_2BYTE_AB:
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((oper_num >> 8) & 0XFF);
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(oper_num & 0XFF);
         break;
 
-    case OPCODE_OPERAND_TYPE_3BYTE:
+    case OPCODE_OPERAND_TYPE_3BYTE_ABs:
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((oper_num >> 16) & 0XFF);
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((oper_num >> 8) & 0XFF);
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(oper_num & 0XFF);
@@ -1853,11 +1854,12 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
             i += 2;
             break;
 
-        case OPCODE_OPERAND_TYPE_2BYTE:
+        case OPCODE_OPERAND_TYPE_2BYTE_As:
+        case OPCODE_OPERAND_TYPE_2BYTE_AB:
             i += 3;
             break;
 
-        case OPCODE_OPERAND_TYPE_3BYTE:
+        case OPCODE_OPERAND_TYPE_3BYTE_ABs:
             i += 4;
             break;
 

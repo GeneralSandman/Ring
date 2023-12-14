@@ -932,6 +932,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // func
         case RVM_CODE_PUSH_FUNC:
+            // 这里设计的不太好
             oper_num   = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             func_index = oper_num;
             STACK_SET_INT_OFFSET(rvm, 0, func_index);
