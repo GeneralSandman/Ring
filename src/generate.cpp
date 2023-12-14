@@ -26,6 +26,7 @@ Package_Executer* package_executer_create(ExecuterEntry* executer_entry, char* p
     return executer;
 }
 
+// compiler 开发者使用
 void package_executer_dump(Package_Executer* package_executer) {
     assert(package_executer != nullptr);
     printf("|------------------ Package_Executer-Dump-begin ------------------\n");
@@ -40,6 +41,18 @@ void package_executer_dump(Package_Executer* package_executer) {
     }
 
     printf("|------------------ Package_Executer-Dump-end   ------------------\n\n");
+}
+
+// ring 使用者
+void print_package_executer(Package_Executer* package_executer) {
+    printf("%sPackage:    %s%s\n",
+           LOG_COLOR_GREEN,
+           package_executer->package_name,
+           LOG_COLOR_CLEAR);
+
+    for (unsigned int i = 0; i < package_executer->function_size; i++) {
+        dump_vm_function(&(package_executer->function_list[i]));
+    }
 }
 
 // 生成 RVM 虚拟机代码
@@ -198,7 +211,11 @@ void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dest, 
 void copy_function(Function* src, RVM_Function* dest) {
     debug_log_with_darkgreen_coloar("\t");
 
-    dest->func_name = src->function_name;
+    dest->func_name         = src->function_name;
+    dest->source_file       = src->source_file;
+    dest->start_line_number = src->start_line_number;
+    dest->end_line_number   = src->end_line_number;
+
     if (src->type == FUNCTION_TYPE_NATIVE) {
         dest->type                = RVM_FUNCTION_TYPE_NATIVE;
         dest->parameter_size      = src->parameter_list_size;
@@ -285,17 +302,18 @@ void generate_code_from_function_definition(Package_Executer* executer, Function
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
     generate_vmcode_from_statement_list(executer, src->block, src->block->statement_list, opcode_buffer);
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_FUNCTION_FINISH, 0, src->line_number);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_FUNCTION_FINISH, 0, src->end_line_number);
 
     opcode_buffer_fix_label(opcode_buffer);
 
 
-    dest->u.derive_func->code_list = opcode_buffer->code_list;
-    dest->u.derive_func->code_size = opcode_buffer->code_size;
+    dest->u.derive_func->code_list     = opcode_buffer->code_list;
+    dest->u.derive_func->code_size     = opcode_buffer->code_size;
+    dest->u.derive_func->code_line_map = opcode_buffer->code_line_map;
+
 
 #ifdef DEBUG_GENERATE_OUTPUT_VMCODE
-    ring_vm_code_dump(dest, opcode_buffer->code_list, opcode_buffer->code_size, 0, 60, 1);
-    dump_code_line_map(opcode_buffer->code_line_map);
+    dump_vm_function(dest);
 #endif
 }
 
@@ -308,9 +326,10 @@ void generate_code_from_method_definition(Package_Executer* executer, MethodMemb
 
     opcode_buffer_fix_label(opcode_buffer);
 
-    dest->rvm_function->u.derive_func->code_list = opcode_buffer->code_list;
-    dest->rvm_function->u.derive_func->code_size = opcode_buffer->code_size;
-    dest->rvm_function->local_variable_size      = src->block->declaration_list_size;
+    dest->rvm_function->u.derive_func->code_list     = opcode_buffer->code_list;
+    dest->rvm_function->u.derive_func->code_size     = opcode_buffer->code_size;
+    dest->rvm_function->u.derive_func->code_line_map = opcode_buffer->code_line_map;
+    dest->rvm_function->local_variable_size          = src->block->declaration_list_size;
 }
 
 void vm_executer_dump(Package_Executer* executer) {
@@ -1935,7 +1954,6 @@ void add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number
     if (opcode_buffer->code_line_map.empty()
         || opcode_buffer->code_line_map.rbegin()->line_number != line_number) {
         RVM_SourceCodeLineMap tmp = {
-            nullptr,
             line_number,
             start_pc,
             opcode_size,
@@ -1950,17 +1968,16 @@ void add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number
 // 这里实现完成了：但是有点bug，还未测试  因为 executer 和 rvm 有点耦合，所以这里设计的有点问题，需要重新设计
 // FIXME:
 void dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map) {
-    printf("|------------------ CodeLineMap-Dump-begin ------------------\n");
-
+    printf("------------------ CodeLineMap-Dump-begin ------------------\n");
+    printf("    line_number       start_pc           size\n");
     for (RVM_SourceCodeLineMap& code_line : code_line_map) {
-        printf("source_file_name:%10s,line_number:%10d,start_pc:%10d,size:%10d\n",
-               code_line.source_file_name,
+        printf("%15d  %15d %15d\n",
                code_line.line_number,
                code_line.opcode_begin_index,
                code_line.opcode_size);
     }
 
-    printf("|------------------ CodeLineMap-Dump-begin ------------------\n");
+    printf("------------------ CodeLineMap-Dump-begin ------------------\n");
 }
 
 /*

@@ -233,6 +233,7 @@ std::string format_rvm_type_specifier(RVM_TypeSpecifier* type_specifier) {
         return "class";
     default:
         // TODO:  后续还要处理 数组
+        return ".unknow";
         break;
     }
     return "";

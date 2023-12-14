@@ -117,7 +117,7 @@ ExecuterEntry* executer_entry_create() {
 
 void executer_entry_dump(ExecuterEntry* executer_entry) {
     assert(executer_entry != nullptr);
-    printf("|------------------ ExecuterEntry-Dump-begin ------------------\n");
+    printf("|------------------ ExecuterEntry-Dump-Summary ------------------\n");
 
     printf("|Package_Executer:\n");
     for (Package_Executer* package_executer : executer_entry->package_executer_list) {
@@ -127,7 +127,7 @@ void executer_entry_dump(ExecuterEntry* executer_entry) {
     printf("|MainPackage_Executer:\n");
     printf("|## package_name:%s\n", executer_entry->main_package_executer->package_name);
 
-    printf("|------------------ ExecuterEntry-Dump-end  ------------------\n\n");
+    printf("|------------------ ExecuterEntry-Dump-Summary  ------------------\n\n");
 }
 
 // create package from a package's dir which contains multi files
@@ -273,7 +273,7 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
 
     g_package_unit->parent_package                   = parent_package;
 
-    // g_package_unit->current_file_name                = file_name;
+    g_package_unit->current_file_name                = file_name;
     g_package_unit->current_file_fp                  = nullptr;
     g_package_unit->current_line_number              = 1;
     g_package_unit->current_column_number            = 1;
@@ -358,7 +358,7 @@ void package_unit_dump(PackageUnit* package_unit) {
 }
 
 
-const char* package_unit_get_file_name() {
+std::string package_unit_get_file_name() {
     assert(g_package_unit != nullptr);
     return g_package_unit->current_file_name.c_str();
 }

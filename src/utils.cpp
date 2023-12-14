@@ -53,6 +53,9 @@ void ring_vm_constantpool_dump(Package_Executer* executer) {
     }
 }
 
+/*
+ * dump function detail
+ */
 void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col) {
     MOVE_CURSOR(screen_row++, screen_col);
     std::string func_name = "top_level";
@@ -75,7 +78,6 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
         RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
         std::string     opcode_name = opcode_info.name;
         std::string     oper_num    = "";
-
         int             tmp         = 0;
 
         switch (opcode_info.operand_type) {
@@ -103,7 +105,11 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
         }
 
         MOVE_CURSOR(screen_row++, screen_col);
-        printf("%10d | %20s | %10s | %5s\n", index, opcode_name.c_str(), oper_num.c_str(), pointer.c_str());
+        printf("%10d | %20s | %10s | %5s\n",
+               index,
+               opcode_name.c_str(),
+               oper_num.c_str(),
+               pointer.c_str());
     }
 }
 
@@ -214,4 +220,79 @@ std::vector<std::string> list_files_of_dir(char* dir) {
     }
     closedir(dp);
     return file_list;
+}
+
+void dump_vm_function(RVM_Function* function) {
+    assert(function != nullptr);
+
+    printf("%s$%s    <%s:%d,%d>%s\n",
+           LOG_COLOR_GREEN,
+           format_rvm_function(function).c_str(),
+           function->source_file.c_str(),
+           function->start_line_number, function->end_line_number,
+           LOG_COLOR_CLEAR);
+
+    printf("+Parameter:   %d\n", function->parameter_size);
+    printf("+Local:       %d\n", function->local_variable_size);
+
+    printf("+Instructions:\n");
+    printf(" ├──%-8s%-20s%-20s%-18s\n",
+           "*Num", "*Instruction", "*Operand", "*SourceLineNum");
+    if (function->type == RVM_FUNCTION_TYPE_DERIVE) {
+        RVM_Byte*                          code_list      = nullptr;
+        unsigned int                       code_size      = 0;
+        unsigned int                       code_num_index = 0; // 多个 RVM_Byte 组成一个 有效的字节码, 不定长字节码
+        std::vector<RVM_SourceCodeLineMap> code_line_map;
+        unsigned int                       code_line_map_index = 0;
+
+        code_list                                              = function->u.derive_func->code_list;
+        code_size                                              = function->u.derive_func->code_size;
+        code_line_map                                          = function->u.derive_func->code_line_map;
+
+        for (unsigned int i = 0; i < code_size; code_num_index++) {
+            std::string source_code_line_number;
+            if (i == code_line_map[code_line_map_index].opcode_begin_index) {
+                source_code_line_number = std::to_string(code_line_map[code_line_map_index].line_number);
+                code_line_map_index++;
+            }
+
+            RVM_Byte        opcode      = code_list[i++];
+            RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
+            std::string     opcode_name = opcode_info.name;
+            std::string     oper_num    = "";
+            int             tmp         = 0;
+
+            switch (opcode_info.operand_type) {
+            case OPCODE_OPERAND_TYPE_0BYTE:
+                break;
+
+            case OPCODE_OPERAND_TYPE_1BYTE:
+                oper_num = std::to_string(code_list[i++]);
+                break;
+
+            case OPCODE_OPERAND_TYPE_2BYTE:
+                tmp = code_list[i++] << 8;
+                tmp += code_list[i++];
+                oper_num = std::to_string(tmp);
+                break;
+
+            case OPCODE_OPERAND_TYPE_3BYTE:
+                tmp = code_list[i++] << 16;
+                tmp += code_list[i++] << 8;
+                tmp += code_list[i++];
+                oper_num = std::to_string(tmp);
+                break;
+
+            default: break;
+            }
+
+            printf(" ├──%-8d%-20s%-20s%-18s\n",
+                   code_num_index,
+                   opcode_name.c_str(),
+                   oper_num.c_str(),
+                   source_code_line_number.c_str());
+        }
+    }
+
+    printf("\n");
 }

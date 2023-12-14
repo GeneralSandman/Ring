@@ -13,36 +13,40 @@ static int   string_literal_buffer_capacity = 0;
 Ring_String* new_ring_string() {
     Ring_String* string = (Ring_String*)mem_alloc(NULL_MEM_POOL, sizeof(Ring_String));
 
-    string->buffer      = (char*)mem_alloc(NULL_MEM_POOL, STRING_LITERAL_CAPACITY * sizeof(char));
-    string->size        = 0;
+    string->data        = (char*)mem_alloc(NULL_MEM_POOL, STRING_LITERAL_CAPACITY * sizeof(char));
+    string->length      = 0;
     string->capacity    = STRING_LITERAL_CAPACITY;
     return string;
 }
 
 void reset_ring_string(Ring_String* string) {
-    string->size = 0;
+    string->length = 0;
 }
 
 void ring_string_add_char(Ring_String* string, char ch) {
-    if (string->size == string->capacity) {
+    if (string->length == string->capacity) {
         unsigned int old_alloc_size = string->capacity * sizeof(char);
         string->capacity += STRING_LITERAL_CAPACITY;
         unsigned int new_alloc_size = string->capacity * sizeof(char);
 
-        string->buffer              = (char*)mem_realloc(NULL_MEM_POOL, string->buffer, old_alloc_size, new_alloc_size);
+        string->data                = (char*)mem_realloc(NULL_MEM_POOL, string->data, old_alloc_size, new_alloc_size);
     }
-    string->buffer[string->size] = ch;
-    string->size++;
+    string->data[string->length] = ch;
+    string->length++;
 }
 
 char* get_ring_string(Ring_String* string) {
     char* new_str;
 
-    new_str = (char*)mem_alloc(NULL_MEM_POOL, string->size + 1);
-    memcpy(new_str, string->buffer, string->size);
-    new_str[string->size] = '\0';
+    new_str = (char*)mem_alloc(NULL_MEM_POOL, string->length + 1);
+    memcpy(new_str, string->data, string->length);
+    new_str[string->length] = '\0';
     return new_str;
 }
+
+
+// ------------------------------
+
 
 void init_string_literal_buffer() {
     string_literal_buffer = (char*)mem_alloc(NULL_MEM_POOL, STRING_LITERAL_CAPACITY * sizeof(char));

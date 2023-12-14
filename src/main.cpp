@@ -5,7 +5,6 @@
 #include <iostream>
 
 
-
 std::string command_help_message =
     "Ring Command Usage: \n"
     "\n"
@@ -21,9 +20,11 @@ std::string command_help_message =
     "        help                                           :get Ring version\n"
     "\n";
 
+
 int main(int argc, char** argv) {
     char* file_name;
     char* command;
+    int   command_dump = 0;
 
     if (argc < 2) {
         fprintf(stderr, "%s", command_help_message.c_str());
@@ -52,8 +53,7 @@ int main(int argc, char** argv) {
         printf("ring build\n");
         return 0;
     } else if (!strcmp(command, "dump")) {
-        printf("ring dump\n");
-        return 0;
+        command_dump = 1;
     } else if (!strcmp(command, "man")) {
         char* keyword = argv[2];
         ring_give_man_help(keyword);
@@ -72,23 +72,23 @@ int main(int argc, char** argv) {
     /*
      * 初始化语法处理节点相关的struct
      */
-    CompilerEntry* compiler_entry         = compiler_entry_create();
+    CompilerEntry* compiler_entry           = compiler_entry_create();
     // FIX: 目前main package 只能有一个源文件
     // main package 源文件即为 ring run 指定的输入文件
-    Package* main_package                 = package_create_input_file(compiler_entry, (char*)"main", file_name);
-    compiler_entry->main_package          = main_package; // TODO: optimize the method of set main_package;
+    Package* main_package                   = package_create_input_file(compiler_entry, (char*)"main", file_name);
+    compiler_entry->main_package            = main_package; // TODO: optimize the method of set main_package;
 
     /*
      * 初始化代码生成阶段相关的struct
      */
-    ExecuterEntry*    executer_entry      = executer_entry_create();
-    Package_Executer* package_executer    = package_executer_create(executer_entry, main_package->package_name);
-    executer_entry->main_package_executer = package_executer; // TODO: optimize the method of set main_package_executer;
+    ExecuterEntry*    executer_entry        = executer_entry_create();
+    Package_Executer* main_package_executer = package_executer_create(executer_entry, (char*)"main");
+    executer_entry->main_package_executer   = main_package_executer; // TODO: optimize the method of set main_package_executer;
 
     /*
      * 初始化虚拟机相关的struct
      */
-    Ring_VirtualMachine* ring_vm          = ring_virtualmachine_create();
+    Ring_VirtualMachine* ring_vm            = ring_virtualmachine_create();
 
 
     // Step-0: 预编译官方std包, 并生成vmcode
@@ -105,6 +105,12 @@ int main(int argc, char** argv) {
     // Step-5: 链接符号表
     // Complier force destory memory of front-end.
     destory_front_mem_pool();
+
+    if (command_dump) {
+        // Only dump `main` package bytecode detail.
+        print_package_executer(executer_entry->main_package_executer);
+        return 0;
+    }
 
     // Step-6: 加载虚拟机
     ring_virtualmachine_load_executer(ring_vm, executer_entry);

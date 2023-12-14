@@ -26,6 +26,7 @@ typedef struct RVM_OpcodeBuffer             RVM_OpcodeBuffer;
 typedef struct RVM_Opcode_Info              RVM_Opcode_Info;
 
 typedef struct RVM_LabelTable               RVM_LabelTable;
+typedef struct RVM_SourceCodeLineMap        RVM_SourceCodeLineMap;
 typedef struct Ring_String                  Ring_String;
 typedef struct Ring_BasicValue              Ring_BasicValue;
 typedef struct Ring_Array                   Ring_Array;
@@ -356,10 +357,16 @@ struct NativeFunction {
     int                 return_list_count; // 返回值的数量
 };
 struct DeriveFunction {
-    unsigned int code_size;
-    RVM_Byte*    code_list;
+    unsigned int                       code_size;
+    RVM_Byte*                          code_list;
+
+    std::vector<RVM_SourceCodeLineMap> code_line_map;
 };
 struct RVM_Function {
+    std::string        source_file;
+    unsigned int       start_line_number; // 源码的开始行
+    unsigned int       end_line_number;   // 源码的结束行
+
     char*              func_name;
     RVMFunctionType    type;
 
@@ -431,6 +438,9 @@ typedef enum {
 } RVM_Object_Type;
 
 
+/*
+ * RVM 中 string 运行时表示, 专用
+ */
 struct RVM_String {
     char*        data;
     unsigned int length;
@@ -525,13 +535,11 @@ struct RVM_LabelTable {
     unsigned int label_address;
 };
 
-typedef struct {
-    char*        source_file_name;
-    unsigned int line_number; // 对应Ring源代码文件的行数
-
+struct RVM_SourceCodeLineMap {
+    unsigned int line_number;        // 对应Ring源代码文件的行数
     unsigned int opcode_begin_index; // 对应 opcode 的 开始索引
     unsigned int opcode_size;        // 一行Ring源代码 对应 opcode size
-} RVM_SourceCodeLineMap;
+};
 
 struct RVM_OpcodeBuffer {
     RVM_Byte*                          code_list;
@@ -783,10 +791,15 @@ struct RVM_CallInfo {
 
 #define CALL_INFO_SIZE_V2 1
 
+/*
+ * Ring_String 是专门给源信息使用的
+ * 不是 虚拟机使用的
+ * 虚拟机使用 RVM_String
+ */
 struct Ring_String {
-    char* buffer;
-    int   size;
-    int   capacity;
+    char*        data;
+    unsigned int length;
+    unsigned int capacity;
 };
 
 typedef enum {
@@ -1186,13 +1199,12 @@ struct MethodCallExpression {
     ArgumentList*           argument_list;
 };
 
-struct Identifier { // TODO: 以后废弃这个东西
+struct Identifier {
     unsigned int   line_number;
 
     IdentifierType type;
     char*          identifier_name;
-    unsigned int   array_index; // 供数组使用，还要考虑一下负值索引的问题
-
+    unsigned int   array_index;  // 供数组使用，还要考虑一下负值索引的问题
     Function*      parent_scope; // 作用域
 
     Identifier*    next;
@@ -1290,7 +1302,9 @@ struct Block {
 };
 
 struct Function {
-    unsigned int        line_number;
+    std::string         source_file;
+    unsigned int        start_line_number; // 源码的开始行
+    unsigned int        end_line_number;   // 源码的结束行
 
     Package*            package; // 所属的package
 
@@ -1729,7 +1743,7 @@ PackageUnit*   package_unit_create(Package* parent_package, std::string file_nam
 PackageUnit*   get_package_unit();
 void           package_unit_compile(PackageUnit* package_unit);
 void           package_unit_dump(PackageUnit* package_unit);
-const char*    package_unit_get_file_name();
+std::string    package_unit_get_file_name();
 Ring_String*   get_package_unit_current_line_content();
 unsigned int   package_unit_get_line_number();
 unsigned int   package_unit_increa_line_number();
@@ -1790,7 +1804,7 @@ Identifier*                   new_identifier(IdentifierType type, char* name);
 Identifier*                   identifier_list_add_item(Identifier* identifier_list, Identifier* identifier);
 FunctionReturnList*           create_function_return_list(VariableType variable_type);
 FunctionReturnList*           function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type);
-Function*                     new_function_definition(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
+Function*                     new_function_definition(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
 
 Statement*                    create_statement_from_if(IfStatement* if_statement);
 IfStatement*                  create_if_statement(Expression* expression, Block* if_block, ElseIfStatement* elseif_statement_list, Block* else_block);
@@ -1919,6 +1933,7 @@ int                     is_native_function_identifier(char* package_posit, char*
  */
 Package_Executer* package_executer_create(ExecuterEntry* executer_entry, char* package_name);
 void              package_executer_dump(Package_Executer* package_executer);
+void              print_package_executer(Package_Executer* package_executer);
 
 void              ring_generate_vm_code(Package* package, Package_Executer* executer);
 void              ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry);
@@ -2170,6 +2185,8 @@ void                     ring_vm_code_dump(RVM_Function* function, RVM_Byte* cod
 void                     ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
 void                     ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm);
 std::vector<std::string> list_files_of_dir(char* dir);
+
+void                     dump_vm_function(RVM_Function* function);
 // --------------------
 
 

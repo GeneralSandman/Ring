@@ -445,8 +445,11 @@ Identifier* new_identifier(IdentifierType type, char* name) {
     debug_log_with_yellow_coloar("identifier name:%s", name);
 
     Identifier* identifier      = (Identifier*)mem_alloc(get_front_mem_pool(), sizeof(Identifier));
+    identifier->line_number     = package_unit_get_line_number();
     identifier->type            = type;
     identifier->identifier_name = name;
+    identifier->array_index     = 0;
+    identifier->parent_scope    = nullptr;
     identifier->next            = nullptr;
 
     return identifier;
@@ -477,16 +480,18 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
     return return_list;
 }
 
-Function* new_function_definition(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
+Function* new_function_definition(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
     debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier);
 
     Function* function            = (Function*)mem_alloc(get_front_mem_pool(), sizeof(Function));
-    function->line_number         = package_unit_get_line_number();
+    function->source_file         = package_unit_get_file_name();
+    function->start_line_number   = identifier->line_number;
+    function->end_line_number     = package_unit_get_line_number();
     function->package             = get_package_unit()->parent_package;
     function->attribute_info      = nullptr;
     function->func_index          = get_package_unit()->function_list.size();
     function->type                = type;
-    function->function_name       = identifier;
+    function->function_name       = identifier->identifier_name;
     function->parameter_list_size = 0;
     function->parameter_list      = parameter_list;
     function->block               = block;

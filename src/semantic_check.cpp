@@ -73,8 +73,8 @@ void ring_compiler_analysis_function(Package* package) {
             ErrorReportContext context = {
                 package,
                 get_package_unit()->current_file_name,
-                package_unit_get_line_content(function->line_number),
-                function->line_number,
+                package_unit_get_line_content(function->start_line_number),
+                function->start_line_number,
                 0,
                 std::string(error_message_buffer),
                 std::string(advice_buffer),

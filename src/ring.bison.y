@@ -17,7 +17,8 @@ int yyerror(char const *str, ...);
 %union {
     char*                               m_comment_value;
     char*                               m_literal_interface;
-    char*                               m_identifier;
+    char*                               m_identifier; // TODO: 废弃, 使用 identifier_v2
+    Identifier*                         m_identifier_v2;
     Identifier*                         m_identifier_list;
     Statement*                          m_statement_list;
     Expression*                         m_expression;
@@ -153,7 +154,8 @@ int yyerror(char const *str, ...);
 %token IDENTIFIER
 
 %type <m_literal_interface> INT_LITERAL DOUBLE_LITERAL STRING_LITERAL TOKEN_TRUE TOKEN_FALSE
-%type <m_identifier> identifier IDENTIFIER
+%type <m_identifier> identifier IDENTIFIER // TODO: 废弃, 使用 identifier_v2
+%type <m_identifier_v2>   identifier_v2
 %type <m_identifier_list> identifier_list
 %type <m_statement_list> statement statement_list
 %type <m_statement_list> multi_variable_definition_statement
@@ -636,48 +638,48 @@ multi_variable_definition_statement
 
 
 function_definition
-    : TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP block
+    : TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, nullptr, $5);
 
     }
-    | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, nullptr, nullptr);
 
     }
-    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP block
+    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
 
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, $6);
 
     }
-    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, nullptr);
     }
-    | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, $7, $9);
     }
-    | TOKEN_FUNCTION identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, $7, nullptr);
     }
-    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, $10);
     }
-    | TOKEN_FUNCTION identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::function_definition]\t ");
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, nullptr);
@@ -1193,6 +1195,15 @@ identifier_list
     }
     ;
 
+identifier_v2
+    : IDENTIFIER
+    {
+        debug_log_with_green_coloar("[RULE::identifier_v2]\t identifier_v2(%s)", $1);
+        $$ = new_identifier(IDENTIFIER_TYPE_UNKNOW, $1); // TODO: 在 fix_ast 中修正
+    }
+    ;
+
+// TODO: 废弃, 使用 identifier_v2
 identifier
     : IDENTIFIER
     {
