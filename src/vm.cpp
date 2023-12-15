@@ -1,4 +1,5 @@
 #include "ring.hpp"
+#include <cassert>
 #include <string>
 
 RVM_Opcode_Info RVM_Opcode_Infos[] = {

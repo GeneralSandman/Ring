@@ -134,7 +134,8 @@ void add_functions(Package* package, Package_Executer* executer) {
     debug_log_with_darkgreen_coloar("\t");
 
     executer->function_size = package->function_list.size();
-    executer->function_list = (RVM_Function*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Function) * package->function_list.size());
+    executer->function_list = (RVM_Function*)mem_alloc(NULL_MEM_POOL,
+                                                       sizeof(RVM_Function) * executer->function_size);
 
     unsigned int i          = 0;
     // 暂时只处理 native function
@@ -211,10 +212,10 @@ void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dest, 
 void copy_function(Function* src, RVM_Function* dest) {
     debug_log_with_darkgreen_coloar("\t");
 
-    dest->func_name         = src->function_name;
     dest->source_file       = src->source_file;
     dest->start_line_number = src->start_line_number;
     dest->end_line_number   = src->end_line_number;
+    dest->func_name         = src->function_name;
 
     if (src->type == FUNCTION_TYPE_NATIVE) {
         dest->type                = RVM_FUNCTION_TYPE_NATIVE;
@@ -345,8 +346,8 @@ RVM_OpcodeBuffer* new_opcode_buffer() {
     buffer->code_list        = nullptr;
     buffer->code_size        = 0;
     buffer->code_capacity    = 0;
-    buffer->lable_list       = std::vector<RVM_LabelTable>(0);
-    buffer->code_line_map    = std::vector<RVM_SourceCodeLineMap>();
+    buffer->lable_list       = std::vector<RVM_LabelTable>{};
+    buffer->code_line_map    = std::vector<RVM_SourceCodeLineMap>{};
 
     buffer->lable_list.reserve(1024);
     return buffer;

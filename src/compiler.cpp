@@ -173,7 +173,7 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
     package->package_name            = package_name;
     package->package_path            = nullptr;
 
-    package->source_file_list        = std::vector<std::string>{std::string(input_main_file)};
+    package->source_file_list        = std::vector<std::string>{};
 
     package->global_declaration_list = std::vector<Declaration*>{};
     package->class_definition_list   = std::vector<ClassDefinition*>{};
@@ -188,6 +188,8 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
     package->package_unit_list       = std::vector<PackageUnit*>{};
 
     package->compile_error_num       = 0;
+
+    package->source_file_list.push_back(std::string(input_main_file));
 
     return package;
 }
@@ -281,7 +283,7 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
 
     g_package_unit->current_line_start_offset        = 0;
     g_package_unit->current_offset                   = 0;
-    g_package_unit->line_offset_map                  = std::vector<SourceLineInfo>{{0, 0}};
+    g_package_unit->line_offset_map                  = std::vector<SourceLineInfo>{};
 
     g_package_unit->import_package_list              = std::vector<ImportPackageInfo*>{};
 
@@ -290,14 +292,15 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
     g_package_unit->global_declaration_list          = std::vector<Declaration*>{};
 
     g_package_unit->class_definition_list            = std::vector<ClassDefinition*>{};
-
     g_package_unit->function_list                    = std::vector<Function*>{};
 
     g_package_unit->current_block                    = nullptr;
 
     g_package_unit->compile_error_num                = 0;
 
-    g_package_unit->current_file_fp                  = fopen(file_name.c_str(), "r");
+    g_package_unit->line_offset_map.push_back(SourceLineInfo{0, 0});
+
+    g_package_unit->current_file_fp = fopen(file_name.c_str(), "r");
     if (g_package_unit->current_file_fp == nullptr) {
         fprintf(stderr, "%s not found.\n", file_name.c_str());
         exit(1);
@@ -360,7 +363,7 @@ void package_unit_dump(PackageUnit* package_unit) {
 
 std::string package_unit_get_file_name() {
     assert(g_package_unit != nullptr);
-    return g_package_unit->current_file_name.c_str();
+    return g_package_unit->current_file_name;
 }
 
 Ring_String* get_package_unit_current_line_content() {

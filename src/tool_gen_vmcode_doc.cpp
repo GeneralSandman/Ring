@@ -32,4 +32,6 @@ int main() {
                runtime_stack_increment_str.c_str(),
                opcode_info.usage_comment.c_str());
     }
+
+    return 0;
 }

@@ -1,4 +1,5 @@
 #include "ring.hpp"
+#include <cassert>
 #include <cstdio>
 #include <cstring>
 #include <dirent.h>
