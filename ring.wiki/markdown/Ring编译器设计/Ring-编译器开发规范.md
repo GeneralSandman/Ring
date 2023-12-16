@@ -55,6 +55,12 @@ It's also important to comment data, whether they are basic types or derived typ
 https://www.kernel.org/doc/html/latest/process/coding-style.html
 
 
+### 1.5 Using C++17 
+
+https://en.cppreference.com/w/cpp/17
+
+
+
 ## 2.Ring Github Source Code Repository
 
 
