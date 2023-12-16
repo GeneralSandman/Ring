@@ -142,7 +142,7 @@ Package* package_create(CompilerEntry* compiler_entry, char* package_name, char*
     package->package_name            = package_name;
     package->package_path            = package_path;
 
-    package->source_file_list        = list_files_of_dir(package->package_path);
+    package->source_file_list        = list_files_of_dir(package_path);
 
     package->global_declaration_list = std::vector<Declaration*>{};
     package->class_definition_list   = std::vector<ClassDefinition*>{};
@@ -173,7 +173,7 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
     package->package_name            = package_name;
     package->package_path            = nullptr;
 
-    package->source_file_list        = std::vector<std::string>{};
+    package->source_file_list        = std::vector<std::string>{std::string(input_main_file)};
 
     package->global_declaration_list = std::vector<Declaration*>{};
     package->class_definition_list   = std::vector<ClassDefinition*>{};
@@ -189,7 +189,6 @@ Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_
 
     package->compile_error_num       = 0;
 
-    package->source_file_list.push_back(std::string(input_main_file));
 
     return package;
 }
@@ -271,7 +270,7 @@ void package_dump(Package* package) {
 
 // create packge by a input source file
 PackageUnit* package_unit_create(Package* parent_package, std::string file_name) {
-    g_package_unit                                   = (PackageUnit*)malloc(sizeof(PackageUnit));
+    g_package_unit                                   = (PackageUnit*)mem_alloc(get_front_mem_pool(), sizeof(PackageUnit));
 
     g_package_unit->parent_package                   = parent_package;
 
@@ -283,7 +282,7 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
 
     g_package_unit->current_line_start_offset        = 0;
     g_package_unit->current_offset                   = 0;
-    g_package_unit->line_offset_map                  = std::vector<SourceLineInfo>{};
+    g_package_unit->line_offset_map                  = std::vector<SourceLineInfo>{SourceLineInfo{0, 0}};
 
     g_package_unit->import_package_list              = std::vector<ImportPackageInfo*>{};
 
@@ -298,9 +297,8 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
 
     g_package_unit->compile_error_num                = 0;
 
-    g_package_unit->line_offset_map.push_back(SourceLineInfo{0, 0});
 
-    g_package_unit->current_file_fp = fopen(file_name.c_str(), "r");
+    g_package_unit->current_file_fp                  = fopen(file_name.c_str(), "r");
     if (g_package_unit->current_file_fp == nullptr) {
         fprintf(stderr, "%s not found.\n", file_name.c_str());
         exit(1);

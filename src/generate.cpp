@@ -140,8 +140,8 @@ void add_functions(Package* package, Package_Executer* executer) {
     unsigned int i          = 0;
     // 暂时只处理 native function
     for (Function* pos : package->function_list) {
-        copy_function(pos, &executer->function_list[i]);
-        generate_code_from_function_definition(executer, pos, &executer->function_list[i]);
+        copy_function(pos, &(executer->function_list[i]));
+        generate_code_from_function_definition(executer, pos, &(executer->function_list[i]));
         // TODO: FIXME:
         // 注册main函数
         if (0 == strcmp(pos->function_name, "main")) {
@@ -240,6 +240,7 @@ void copy_function(Function* src, RVM_Function* dest) {
             dest->parameter_list[i].identifier     = param->identifier;
             dest->parameter_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
                                                                                    sizeof(RVM_TypeSpecifier));
+
             type_specifier_deep_copy(dest->parameter_list[i].type_specifier, param->type);
         }
 
@@ -343,6 +344,7 @@ void vm_executer_dump(Package_Executer* executer) {
 RVM_OpcodeBuffer* new_opcode_buffer() {
     debug_log_with_darkgreen_coloar("\t");
     RVM_OpcodeBuffer* buffer = (RVM_OpcodeBuffer*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_OpcodeBuffer));
+
     buffer->code_list        = nullptr;
     buffer->code_size        = 0;
     buffer->code_capacity    = 0;

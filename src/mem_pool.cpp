@@ -5,11 +5,11 @@
 
 // init meta mem pool
 MemPool* create_mem_pool(char* name) {
-    MemPool* pool         = (MemPool*)malloc(sizeof(MemPool));
+    MemPool* pool         = (MemPool*)calloc(1, sizeof(MemPool));
     pool->name            = name;
     pool->free_buckets    = std::vector<MemBlock*>(MEM_MAX_BUCKET_NUM, nullptr);
     pool->active_buckets  = std::vector<MemBlock*>(MEM_MAX_BUCKET_NUM, nullptr);
-    pool->active_mem_map  = std::unordered_map<void*, size_t>();
+    pool->active_mem_map  = std::unordered_map<void*, size_t>{};
     pool->free_mem_size   = 0;
     pool->active_mem_size = 0;
     pool->all_mem_size    = 0;
@@ -20,8 +20,8 @@ MemPool* create_mem_pool(char* name) {
         MemBlock* block      = nullptr;
         MemBlock* next       = nullptr;
         for (int j = 0; j < MEM_BLOCK_NUM; j++) {
-            block       = (MemBlock*)malloc(sizeof(MemBlock)); // 这里不计入分配空间的计算
-            block->data = malloc(block_size);
+            block       = (MemBlock*)calloc(1, sizeof(MemBlock)); // 这里不计入分配空间的计算
+            block->data = calloc(1, block_size);
             block->next = next;
             next        = block;
 
@@ -127,10 +127,14 @@ void dump_mem_pool(MemPool* pool) {
 }
 
 // alloc memory space fo meta info
-inline void* mem_alloc(MemPool* pool, size_t size) {
+void* mem_alloc(MemPool* pool, size_t size) {
+    void* res = nullptr;
+
     if (pool == NULL_MEM_POOL) {
-        return malloc(size);
+        res = calloc(1, size);
+        return res;
     }
+
     if (size == 0) {
         return nullptr;
     }
@@ -150,8 +154,8 @@ inline void* mem_alloc(MemPool* pool, size_t size) {
         MemBlock* block      = nullptr;
         MemBlock* next       = nullptr;
         for (int j = 0; j < MEM_BLOCK_NUM; j++) {
-            block       = (MemBlock*)malloc(sizeof(MemBlock)); // 这里不计入分配空间的计算
-            block->data = malloc(block_size);
+            block       = (MemBlock*)calloc(1, sizeof(MemBlock)); // 这里不计入分配空间的计算
+            block->data = calloc(1, block_size);
             block->next = next;
             next        = block;
 
@@ -161,7 +165,6 @@ inline void* mem_alloc(MemPool* pool, size_t size) {
         pool->free_buckets[bucket_index] = block;
     }
 
-    void* res                          = nullptr;
 
     block                              = pool->free_buckets[bucket_index];
     res                                = block->data;
@@ -174,6 +177,8 @@ inline void* mem_alloc(MemPool* pool, size_t size) {
     pool->active_mem_size += size;
 
     pool->active_mem_map[res] = size;
+
+    memset(res, 0, size);
 
 #ifdef DEBUG_RVM_MEM_POOL_DETAIL
     dump_mem_pool(pool);

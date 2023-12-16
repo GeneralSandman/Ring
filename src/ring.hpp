@@ -1597,7 +1597,6 @@ struct MemPool {
 
 struct MemBlock {
     void*     data;
-    size_t    size;
     MemBlock* next;
 };
 
