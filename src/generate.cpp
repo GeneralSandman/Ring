@@ -2000,4 +2000,7 @@ void type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier* src) {
     assert(src != nullptr);
 
     dst->kind = src->kind;
+    if (src->kind == RING_BASIC_TYPE_CLASS) {
+        dst->u.class_def_index = src->u.class_type->class_definition->class_index;
+    }
 }

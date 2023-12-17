@@ -12,11 +12,6 @@ typedef class Job {
     field bool    Running;
     field int     JobID;
     field double  Score;
-
-    @constructor
-    method Job(var bool _Running, var int _JobID, var double _Score);
-
-    method PrintInfo();
 }
 
 global {
