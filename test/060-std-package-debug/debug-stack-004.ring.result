@@ -1,7 +1,14 @@
-0000#ring!test_any(var bool, var int, var double, var string)
-0001#ring!test_two_string(var string, var string)
-0002#ring!test_two_double(var double, var double)
-0003#ring!test_two_int(var int, var int)
-0004#ring!test_two_bool(var bool, var bool)
-0005#ring!test0()
-0006#ring!main()
+0000$ring!test_any(var bool, var int, var double, var string)
+    ./test/060-std-package-debug/debug-stack-004.ring:42
+0001$ring!test_two_string(var string, var string)
+    ./test/060-std-package-debug/debug-stack-004.ring:38
+0002$ring!test_two_double(var double, var double)
+    ./test/060-std-package-debug/debug-stack-004.ring:34
+0003$ring!test_two_int(var int, var int)
+    ./test/060-std-package-debug/debug-stack-004.ring:30
+0004$ring!test_two_bool(var bool, var bool)
+    ./test/060-std-package-debug/debug-stack-004.ring:26
+0005$ring!test0()
+    ./test/060-std-package-debug/debug-stack-004.ring:22
+0006$ring!main()
+    ./test/060-std-package-debug/debug-stack-004.ring:15
