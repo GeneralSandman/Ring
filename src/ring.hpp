@@ -361,6 +361,9 @@ struct DeriveFunction {
     RVM_Byte*                          code_list;
 
     std::vector<RVM_SourceCodeLineMap> code_line_map;
+    // 一行Ring源代码 对应 一个 RVM_SourceCodeLineMap
+    // 空行、注释行 没有对应的 RVM_SourceCodeLineMap
+    // RVM_SourceCodeLineMap.opcode_begin_index 是单调递增的
 };
 struct RVM_Function {
     std::string        source_file;
@@ -549,6 +552,9 @@ struct RVM_OpcodeBuffer {
     std::vector<RVM_LabelTable>        lable_list;
 
     std::vector<RVM_SourceCodeLineMap> code_line_map;
+    // 一行Ring源代码 对应 一个 RVM_SourceCodeLineMap
+    // 空行、注释行 没有对应的 RVM_SourceCodeLineMap
+    // RVM_SourceCodeLineMap.opcode_begin_index 是单调递增的
 };
 
 typedef enum {
@@ -2189,6 +2195,7 @@ void                     ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm);
 std::vector<std::string> list_files_of_dir(char* dir);
 
 void                     dump_vm_function(RVM_Function* function);
+unsigned int             get_source_line_number_by_pc(RVM_Function* function, unsigned int pc);
 // --------------------
 
 

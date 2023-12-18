@@ -234,12 +234,10 @@ std::vector<std::string> list_files_of_dir(char* dir) {
 void dump_vm_function(RVM_Function* function) {
     assert(function != nullptr);
 
-    printf("%s$%s    <%s:%d,%d>%s\n",
-           LOG_COLOR_GREEN,
+    printf("$%s    <%s:%d,%d>\n",
            format_rvm_function(function).c_str(),
            function->source_file.c_str(),
-           function->start_line_number, function->end_line_number,
-           LOG_COLOR_CLEAR);
+           function->start_line_number, function->end_line_number);
 
     printf("+Parameter:   %d\n", function->parameter_size);
     printf("+Local:       %d\n", function->local_variable_size);
@@ -258,14 +256,14 @@ void dump_vm_function(RVM_Function* function) {
         code_size                                              = function->u.derive_func->code_size;
         code_line_map                                          = function->u.derive_func->code_line_map;
 
-        for (unsigned int i = 0; i < code_size; code_num_index++) {
+        for (unsigned int pc = 0; pc < code_size; code_num_index++) {
             std::string source_code_line_number;
-            if (i == code_line_map[code_line_map_index].opcode_begin_index) {
+            if (pc == code_line_map[code_line_map_index].opcode_begin_index) {
                 source_code_line_number = std::to_string(code_line_map[code_line_map_index].line_number);
                 code_line_map_index++;
             }
 
-            RVM_Byte        opcode      = code_list[i++];
+            RVM_Byte        opcode      = code_list[pc++];
             RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
             std::string     opcode_name = opcode_info.name;
             std::string     oper_num    = "";
@@ -278,25 +276,25 @@ void dump_vm_function(RVM_Function* function) {
                 break;
 
             case OPCODE_OPERAND_TYPE_1BYTE:
-                oper_num = std::to_string(code_list[i++]);
+                oper_num = std::to_string(code_list[pc++]);
                 break;
 
             case OPCODE_OPERAND_TYPE_2BYTE_As:
-                tmp = code_list[i++] << 8;
-                tmp += code_list[i++];
+                tmp = code_list[pc++] << 8;
+                tmp += code_list[pc++];
                 oper_num = std::to_string(tmp);
                 break;
 
             case OPCODE_OPERAND_TYPE_2BYTE_AB:
-                tmp1     = code_list[i++];
-                tmp2     = code_list[i++];
+                tmp1     = code_list[pc++];
+                tmp2     = code_list[pc++];
                 oper_num = std::to_string(tmp1) + " " + std::to_string(tmp2);
                 break;
 
             case OPCODE_OPERAND_TYPE_3BYTE_ABs:
-                tmp1 = code_list[i++];
-                tmp2 = code_list[i++] << 8;
-                tmp2 += code_list[i++];
+                tmp1 = code_list[pc++];
+                tmp2 = code_list[pc++] << 8;
+                tmp2 += code_list[pc++];
                 oper_num = std::to_string(tmp1) + " " + std::to_string(tmp2);
                 break;
 
@@ -312,4 +310,39 @@ void dump_vm_function(RVM_Function* function) {
     }
 
     printf("\n");
+}
+
+/*
+ * 通过当前Function 的 Pc 计算出 对应的源代码所在的行数
+ *
+ * 只能计算 derive function 对应的源代码行数
+ * binary search
+ * 单调性可查看 RVM_SourceCodeLineMap
+ */
+unsigned int get_source_line_number_by_pc(RVM_Function* function, unsigned int pc) {
+    DeriveFunction* derive_function = function->u.derive_func;
+
+    unsigned int    left            = 0;
+    unsigned int    right           = derive_function->code_line_map.size();
+
+    while (left < right) {
+        unsigned int mid = (left + right) / 2;
+
+        if (derive_function->code_line_map[mid].opcode_begin_index == pc) {
+            return derive_function->code_line_map[mid].line_number;
+        } else if (derive_function->code_line_map[mid].opcode_begin_index < pc) {
+            if (mid == derive_function->code_line_map.size() - 1
+                || derive_function->code_line_map[mid + 1].opcode_begin_index > pc) {
+                return derive_function->code_line_map[mid].line_number;
+            }
+            left = mid + 1;
+        } else {
+            if (mid == 0)
+                return derive_function->code_line_map[mid].line_number;
+            else
+                right = mid - 1;
+        }
+    }
+
+    return derive_function->code_line_map[left].line_number;
 }

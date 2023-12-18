@@ -505,9 +505,24 @@ RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int 
     RVM_CallInfo* pos    = rvm->call_info;
     for (; pos != nullptr; pos = pos->next, offset++) {
         if (pos->callee_function == nullptr) {
-            printf("%04d#ring!start()\n", offset);
+            printf("%04d$ring!start()\n", offset);
         } else {
-            printf("%04d#ring!%s\n", offset, format_rvm_function(pos->callee_function).c_str());
+            unsigned int source_line_number = 0;
+            std::string  source_file        = pos->callee_function->source_file;
+
+            if (offset == 0) {
+                // 当前正在执行的函数
+                source_line_number = get_source_line_number_by_pc(pos->callee_function, rvm->pc);
+            } else {
+                // 调用栈内的函数
+                source_line_number = get_source_line_number_by_pc(pos->callee_function, pos->caller_pc);
+            }
+
+            printf("%04d$ring!%s\n",
+                   offset,
+                   format_rvm_function(pos->callee_function).c_str());
+
+            printf("    %s:%d\n", source_file.c_str(), source_line_number);
         }
     }
 

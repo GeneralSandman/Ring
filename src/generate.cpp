@@ -45,10 +45,10 @@ void package_executer_dump(Package_Executer* package_executer) {
 
 // ring 使用者
 void print_package_executer(Package_Executer* package_executer) {
-    printf("%sPackage:    %s%s\n",
-           LOG_COLOR_GREEN,
-           package_executer->package_name,
-           LOG_COLOR_CLEAR);
+    // printf("%sPackage:    %s%s\n",
+    //        LOG_COLOR_GREEN,
+    //        package_executer->package_name,
+    //        LOG_COLOR_CLEAR);
 
     for (unsigned int i = 0; i < package_executer->function_size; i++) {
         dump_vm_function(&(package_executer->function_list[i]));
