@@ -9,26 +9,28 @@
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
-void                   ring_compiler_functions_dump(PackageUnit* package_unit) {
-                      printf(" ************  compiler functions dump ****\n");
-                      Declaration* decl;
-                      int          i = 0;
-                      int          j = 0;
 
-                      for (Declaration* decl : package_unit->global_declaration_list) {
-                          printf("global-variable: name:%s\n", decl->identifier);
+// dump function by PackageUnit
+void ring_compiler_functions_dump(PackageUnit* package_unit) {
+    printf(" ************  compiler functions dump ****\n");
+    Declaration* decl;
+    int          i = 0;
+    int          j = 0;
+
+    for (Declaration* decl : package_unit->global_declaration_list) {
+        printf("global-variable: name:%s\n", decl->identifier);
     }
-                      printf("\n");
+    printf("\n");
 
-                      for (Function* func : package_unit->function_list) {
-                          printf("function[%d]: name:%s\n", i, func->function_name);
-                          if (func->block) {
-                              decl = func->block->declaration_list;
-                              for (j = 0, decl = func->block->declaration_list; decl; decl = decl->next, j++) {
-                                  printf("\tlocal-variable[%d]: name:%s\n", j, decl->identifier);
+    for (Function* func : package_unit->function_list) {
+        printf("function[%d]: name:%s\n", i, func->function_name);
+        if (func->block) {
+            decl = func->block->declaration_list;
+            for (j = 0, decl = func->block->declaration_list; decl; decl = decl->next, j++) {
+                printf("\tlocal-variable[%d]: name:%s\n", j, decl->identifier);
             }
         }
-                          i++;
+        i++;
     }
 }
 
