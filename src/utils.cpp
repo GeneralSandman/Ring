@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <vector>
 
+
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 

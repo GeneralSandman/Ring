@@ -1606,6 +1606,7 @@ struct MemBlock {
     MemBlock* next;
 };
 
+// clear terminal printf
 #define CLEAR_SCREEN printf("\e[1;1H\e[2J")
 
 // move cursor to terminal (row, col) location
@@ -1637,12 +1638,15 @@ struct MemBlock {
 #define printf_witch_blue(format, ...) \
     printf("%s" format "%s", LOG_COLOR_BLUE, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
+// TODO: delete
 #define complie_err_log(format, ...) \
     printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
+// TODO: delete
 #define complie_err_log2(format, ...) \
     printf("%s" format "%s\n", LOG_COLOR_GREEN, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
+// TODO: delete
 #define runtime_err_log(format, ...) \
     printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
@@ -1712,6 +1716,10 @@ void     ring_compile_error_report(ErrorReportContext* context);
     printf(__VA_ARGS__);                   \
     exit(1);
 
+// 以后通用的错误提示统一使用这个
+#define ring_error_report(format, ...)                                                  \
+    fprintf(stderr, "%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR); \
+    exit(1);
 
 /* --------------------
  * string.cpp
