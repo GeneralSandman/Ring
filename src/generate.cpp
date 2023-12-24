@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 
+
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 
@@ -278,9 +279,13 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
         // exit code
         RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
         // FIXME: (package->compiler_entry->package_list.size() - 1) << 8) 这里要修正一下
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, 0, 0);
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, ((package->compiler_entry->package_list.size() - 1) << 8) | executer->main_func_index, 0);
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, 0);
+        generate_vmcode(executer, opcode_buffer,
+                        RVM_CODE_ARGUMENT_NUM, 0, 0);
+        generate_vmcode(executer, opcode_buffer,
+                        RVM_CODE_PUSH_FUNC,
+                        ((package->compiler_entry->package_list.size() - 1) << 8) | executer->main_func_index, 0);
+        generate_vmcode(executer, opcode_buffer,
+                        RVM_CODE_INVOKE_FUNC, 0, 0);
         // generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
 
         executer->code_list = opcode_buffer->code_list;

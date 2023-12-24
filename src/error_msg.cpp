@@ -1,5 +1,6 @@
 #include "ring.hpp"
 
+
 struct ErrorMessageInfo ErrorMessageInfos[] = {
     {ERROR_CODE_SUCCESS, "SUCCESS"},
 

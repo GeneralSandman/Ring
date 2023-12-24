@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 
+
 #define STRING_LITERAL_CAPACITY (1024)
 
 static char* string_literal_buffer          = nullptr;

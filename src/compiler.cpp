@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <vector>
 
+
 int                      yyerror(char const* str, ...);
 extern struct SyntaxInfo SyntaxInfos[];
 static PackageUnit*      g_package_unit   = nullptr;
@@ -15,6 +16,7 @@ static CompilerEntry*    g_compiler_entry = nullptr;
 // 编译阶段使用的 Memory Pool
 // 这里暂时使用全局变量
 MemPool* front_mem_pool                   = nullptr;
+
 
 // 初始化一次
 void init_front_mem_pool() {

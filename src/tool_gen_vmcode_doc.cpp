@@ -1,10 +1,12 @@
 #include "ring.hpp"
 
+
 extern RVM_Opcode_Info
             RVM_Opcode_Infos[];
 
 
 std::string title = "## 1. Ring Stacked-Based VM 指令集";
+
 
 // tool
 int main() {

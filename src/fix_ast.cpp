@@ -1,7 +1,17 @@
-/**********************************************
-主要做：
-    语法树的修正和语义检查
-**********************************************/
+/*
+ * fix_ast.cpp
+ *
+ * 主要对 AST进行修正, 同时做语义检查
+ * 1. search global class definition.
+ * 2. search global function definition.
+ * 3. search global variable definition.
+ * 4. search local variable definition.
+ *
+ * 1. Fix TypeSpecifier of every Expression.
+ * 2. Update class definition index.
+ * 3. Update global function index.
+ */
+
 
 #include "ring.hpp"
 #include <cassert>

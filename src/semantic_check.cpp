@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+
 void ring_compiler_semantic_analysis(Package* package) {
     ring_compiler_analysis_import_package(package);
     ring_compiler_analysis_global_variable(package);
