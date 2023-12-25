@@ -1,4 +1,13 @@
 
+# build release sh
+
+
+git clone https://GeneralSandman/Ring Ring && cd Ring
+
+git checkout -
+
+
+
 
 # start ubuntu docker
 
@@ -44,3 +53,4 @@ yum install gdb && \
 yum install valgrind && \
 cd /home/Ring && \
 make clean && make && make install && make testall
+

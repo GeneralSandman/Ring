@@ -44,7 +44,7 @@ TOOL_GEN_VMCODE_DOC_OBJS  = vm.o tool_gen_vmcode_doc.o
 #  DEBUG_RVM_INTERACTIVE 			控制调试RVM
 #  DDEBUG_RVM_MEM_POOL_DETAIL 		展示 Memory Pool 内存分配的详情
 #  DEBUG_RVM_GC_DETAIL 				展示 Garbage Collect 的详情
-CFLAGS = -c -O2 -std=c++17 \
+CFLAGS = -c -static -O2 -std=c++17 \
 				-Wall \
 				-Wextra \
 				-Wno-sign-compare \
