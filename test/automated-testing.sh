@@ -6,6 +6,13 @@
 # 测试的可执行文件
 TEST_RING_BIN="./bin/ring"
 
+# 通过第1个参数指定 TEST_RING_BIN
+if [[ "$1" != "" ]]; then
+    TEST_RING_BIN="$1"
+fi
+
+
+
 # 要测试的文件夹
 TEST_PATH="./test"
 TEST_MODELS=(
