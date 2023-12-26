@@ -342,12 +342,16 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
         if (declaration == nullptr) {
             char error_message_buffer[1024];
             char advice_buffer[1024];
-            snprintf(error_message_buffer, 1024, "%serror:use undeclared identifier `%s`; E:%d%s",
+            snprintf(error_message_buffer, 1024, "%sError:%s "
+                                                 "use undeclared identifier `%s`; E:%d.",
                      LOG_COLOR_RED,
+                     LOG_COLOR_CLEAR,
                      expression->identifier,
-                     ERROR_UNDEFINITE_VARIABLE,
-                     LOG_COLOR_CLEAR);
-            snprintf(advice_buffer, 1024, "Advice: definite variable `%s` like: `var bool|int|double|string %s;` before use it.",
+                     ERROR_UNDEFINITE_VARIABLE);
+            snprintf(advice_buffer, 1024, "%sNotice:%s "
+                                          "definite variable `%s` like: `var bool|int|double|string %s;` before use it.",
+                     LOG_COLOR_YELLOW,
+                     LOG_COLOR_CLEAR,
                      expression->identifier,
                      expression->identifier);
 

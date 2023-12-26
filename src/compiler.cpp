@@ -51,13 +51,8 @@ void ring_compile_error_report(ErrorReportContext* context) {
     fprintf(stderr, "\n\n\n\n");
     fflush(stderr);
 
-    if (context->report_type == ERROR_REPORT_TYPE_EXIT_NOW) {
-        fprintf(stderr, "%d errors generated, exit.\n", context->package->compile_error_num);
-        fflush(stderr);
-        exit(1);
-    }
-
-    if (context->package == nullptr) {
+    if (context->report_type == ERROR_REPORT_TYPE_EXIT_NOW
+        || context->package == nullptr) {
         exit(1);
     }
 
