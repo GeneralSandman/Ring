@@ -41,9 +41,10 @@ void destory_front_mem_pool() {
 
 // ring_compile_error_report
 void ring_compile_error_report(ErrorReportContext* context) {
-    fprintf(stderr, "%s:%d:%d:\n", context->source_file_name.c_str(), context->line_number, context->column_number);
+    fprintf(stderr, "%s:%d:%d\n", context->source_file_name.c_str(), context->line_number, context->column_number);
     fprintf(stderr, "|%s\n", context->line_content.c_str());
     fprintf(stderr, "|%s%*s^......%s\n", LOG_COLOR_GREEN, context->column_number, " ", LOG_COLOR_CLEAR);
+    fprintf(stderr, "|\n");
     fprintf(stderr, "|%s\n", context->error_message.c_str());
     if (context->advice.size())
         fprintf(stderr, "|%s", context->advice.c_str());

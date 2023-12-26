@@ -957,18 +957,20 @@ void import_package_list_add_item(char* package_name, char* rename) {
                      import_pack->package_name,
                      ERROR_DUPLICATE_IMPORT_PACKAGE);
             snprintf(compile_adv_buf, sizeof(compile_adv_buf), "%sNotice:%s "
-                                                               "the first import package `%s` is here.",
+                                                               "the first import package `%s` in %s:%d:%d.",
                      LOG_COLOR_YELLOW,
                      LOG_COLOR_CLEAR,
-                     import_pack->package_name);
+                     import_pack->package_name,
+                     get_package_unit()->current_file_name.c_str(),
+                     import_pack->line_number, 0);
 
             ErrorReportContext context = {
                 .package          = nullptr,
                 .package_unit     = get_package_unit(),
                 .source_file_name = get_package_unit()->current_file_name,
                 .line_content     = package_unit_get_line_content(import_pack->line_number),
-                .line_number      = import_pack->line_number,
-                .column_number    = 0,
+                .line_number      = package_unit_get_line_number(),
+                .column_number    = package_unit_get_column_number(),
                 .error_message    = std::string(compile_err_buf),
                 .advice           = std::string(compile_adv_buf),
                 .report_type      = ERROR_REPORT_TYPE_COLL_ERR,
