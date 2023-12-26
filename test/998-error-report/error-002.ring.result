@@ -1,0 +1,28 @@
+./test/998-error-report/error-002.ring:9:0
+|    var int int_value_0;
+| ^......
+|
+|Error: redefinition of global variable `int_value_0`; E:200001.
+|Notice: the first definition of global variable `int_value_0` is here.
+
+
+
+./test/998-error-report/error-002.ring:10:0
+|    var int int_value_0;
+| ^......
+|
+|Error: redefinition of global variable `int_value_0`; E:200001.
+|Notice: the first definition of global variable `int_value_0` is here.
+
+
+
+./test/998-error-report/error-002.ring:11:0
+|    var int int_value_0;
+| ^......
+|
+|Error: redefinition of global variable `int_value_0`; E:200001.
+|Notice: the first definition of global variable `int_value_0` is here.
+
+
+
+3 errors generated, exit.

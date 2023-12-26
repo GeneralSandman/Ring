@@ -1,0 +1,9 @@
+./test/998-error-report/error-000.ring:10:0
+|	a;
+| ^......
+|
+|Error: use undeclared identifier `a`; E:200000.
+|Notice: definite variable `a` like: `var bool|int|double|string a;` before use it.
+
+
+

@@ -1,0 +1,10 @@
+./test/998-error-report/error-003.ring:15:0
+|function main() {
+| ^......
+|
+|Error: redefinition of function `main`; E:200002.
+|Notice: the first definition of function `main` is here.
+
+
+
+1 errors generated, exit.

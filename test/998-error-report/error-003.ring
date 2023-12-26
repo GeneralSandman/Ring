@@ -6,11 +6,13 @@
 
 global {
     var int int_value_0;
-    var int int_value_0;
-    var int int_value_0;
-    var int int_value_0;
 }
 
 function main() {
+
+}
+
+function main() {
+
 
 }

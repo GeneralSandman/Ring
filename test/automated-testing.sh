@@ -77,6 +77,9 @@ succ_num=0
 fail_num=0
 all_num=0
 
+# 去除颜色控制字符
+STRIP_COLOR=sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g'
+
 isNotTestFile(){
     for i in ${NOT_TEST_FILES[@]} ; do
       [ "$i" == "$1" ] && return 1
@@ -179,3 +182,15 @@ printf "\033[0m"
 printNotPassCase
 
 
+
+#
+# 998-error-report 测试用例说明
+# 测试方法  去除颜色控制字符
+# ./bin/ring run ./test/998-error-report/error-004.ring 2>&1 | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g'  > ./test/998-error-report/error-004.ring.result
+# 
+# 
+# error-000.ring  使用未定义变量
+# error-001.ring  使用未定义函数
+# error-002.ring  重复定义全局变量
+# error-003.ring  重复定义函数
+# error-004.ring  重复 import package

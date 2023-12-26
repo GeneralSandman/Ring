@@ -1,0 +1,9 @@
+./test/998-error-report/error-004.ring:13:8
+|	debug;
+|        ^......
+|
+|Error: duplicate import package `debug`; E:200004.
+|Notice: the first import package `debug` in ./test/998-error-report/error-004.ring:12:0.
+
+
+

@@ -1,0 +1,9 @@
+./test/998-error-report/error-001.ring:8:0
+|  test();
+| ^......
+|
+|error:use undeclared function `test`; E:200000
+|Advice: definite function `test` like: `function test() {}` before use it.
+
+
+
