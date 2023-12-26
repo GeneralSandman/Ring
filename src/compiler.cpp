@@ -57,7 +57,7 @@ void ring_compile_error_report(ErrorReportContext* context) {
     }
 
     if (context->package == nullptr) {
-        return;
+        exit(1);
     }
 
     context->package->compile_error_num += 1;

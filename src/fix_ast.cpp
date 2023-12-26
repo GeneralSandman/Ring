@@ -353,6 +353,7 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
 
             ErrorReportContext context = {
                 nullptr,
+                nullptr,
                 get_package_unit()->current_file_name,
                 package_unit_get_line_content(expression->line_number),
                 expression->line_number,
@@ -385,6 +386,7 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
                      expression->identifier);
 
             ErrorReportContext context = {
+                nullptr,
                 nullptr,
                 get_package_unit()->current_file_name,
                 package_unit_get_line_content(expression->line_number),

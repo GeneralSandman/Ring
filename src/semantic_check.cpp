@@ -6,6 +6,11 @@
 #include <cstdlib>
 
 
+// TODO: 后续改成局部变量
+char compile_err_buf[2048];
+char compile_adv_buf[2048];
+
+
 void ring_compiler_semantic_analysis(Package* package) {
     ring_compiler_analysis_import_package(package);
     ring_compiler_analysis_global_variable(package);
@@ -21,29 +26,30 @@ void ring_compiler_analysis_global_variable(Package* package) {
         std::string identifier = std::string(decl->identifier);
         auto        iter       = package->global_declaration_map.find(identifier);
         if (iter != package->global_declaration_map.end()) {
-            char error_message_buffer[1024];
-            char advice_buffer[1024];
-            snprintf(error_message_buffer, 1024, "%sError:%s "
-                                                 "redefinition of global variable `%s`; E:%d",
+            memset(compile_err_buf, 0, sizeof(compile_err_buf));
+            memset(compile_adv_buf, 0, sizeof(compile_adv_buf));
+            snprintf(compile_err_buf, sizeof(compile_err_buf), "%sError:%s "
+                                                               "redefinition of global variable `%s`; E:%d.",
                      LOG_COLOR_RED,
                      LOG_COLOR_CLEAR,
                      decl->identifier,
                      ERROR_REDEFINITE_GLOBAL_VARIABLE);
-            snprintf(advice_buffer, 1024, "%sNotice:%s "
-                                          "the first definition of global variable `%s` is here",
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf), "%sNotice:%s "
+                                                               "the first definition of global variable `%s` is here.",
                      LOG_COLOR_YELLOW,
                      LOG_COLOR_CLEAR,
                      decl->identifier);
 
             ErrorReportContext context = {
-                package,
-                get_package_unit()->current_file_name,
-                package_unit_get_line_content(decl->line_number),
-                decl->line_number,
-                0,
-                std::string(error_message_buffer),
-                std::string(advice_buffer),
-                ERROR_REPORT_TYPE_COLL_ERR,
+                .package          = package,
+                .package_unit     = nullptr,
+                .source_file_name = get_package_unit()->current_file_name,
+                .line_content     = package_unit_get_line_content(decl->line_number),
+                .line_number      = decl->line_number,
+                .column_number    = 0,
+                .error_message    = std::string(compile_err_buf),
+                .advice           = std::string(compile_adv_buf),
+                .report_type      = ERROR_REPORT_TYPE_COLL_ERR,
             };
             ring_compile_error_report(&context);
             continue;
@@ -57,29 +63,30 @@ void ring_compiler_analysis_function(Package* package) {
         std::string identifier = std::string(function->function_name);
         auto        iter       = package->function_map.find(identifier);
         if (iter != package->function_map.end()) {
-            char error_message_buffer[1024];
-            char advice_buffer[1024];
-            snprintf(error_message_buffer, 1024, "%sError:%s "
-                                                 "redefinition of function `%s`; E:%d",
+            memset(compile_err_buf, 0, sizeof(compile_err_buf));
+            memset(compile_adv_buf, 0, sizeof(compile_adv_buf));
+            snprintf(compile_err_buf, sizeof(compile_err_buf), "%sError:%s "
+                                                               "redefinition of function `%s`; E:%d.",
                      LOG_COLOR_RED,
                      LOG_COLOR_CLEAR,
                      function->function_name,
                      ERROR_REDEFINITE_FUNCTION);
-            snprintf(advice_buffer, 1024, "%sNotice:%s "
-                                          "the first definition of function `%s` is here",
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf), "%sNotice:%s "
+                                                               "the first definition of function `%s` is here.",
                      LOG_COLOR_YELLOW,
                      LOG_COLOR_CLEAR,
                      function->function_name);
 
             ErrorReportContext context = {
-                package,
-                get_package_unit()->current_file_name,
-                package_unit_get_line_content(function->start_line_number),
-                function->start_line_number,
-                0,
-                std::string(error_message_buffer),
-                std::string(advice_buffer),
-                ERROR_REPORT_TYPE_COLL_ERR,
+                .package          = package,
+                .package_unit     = nullptr,
+                .source_file_name = get_package_unit()->current_file_name,
+                .line_content     = package_unit_get_line_content(function->start_line_number),
+                .line_number      = function->start_line_number,
+                .column_number    = 0,
+                .error_message    = std::string(compile_err_buf),
+                .advice           = std::string(compile_adv_buf),
+                .report_type      = ERROR_REPORT_TYPE_COLL_ERR,
             };
             ring_compile_error_report(&context);
             continue;

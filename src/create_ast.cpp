@@ -941,8 +941,41 @@ Package* create_package_info(char* package_name) {
     return package;
 }
 
+// TODO:
 void import_package_list_add_item(char* package_name, char* rename) {
     debug_log_with_yellow_coloar("import package name:%s, rename:%s\n", package_name, rename);
+
+    // duplicate import package
+    for (ImportPackageInfo* import_pack : get_package_unit()->import_package_list) {
+        if (strcmp(import_pack->package_name, package_name) == 0) {
+            char compile_err_buf[2048];
+            char compile_adv_buf[2048];
+            snprintf(compile_err_buf, sizeof(compile_err_buf), "%sError:%s "
+                                                               "duplicate import package `%s`; E:%d.",
+                     LOG_COLOR_RED,
+                     LOG_COLOR_CLEAR,
+                     import_pack->package_name,
+                     ERROR_DUPLICATE_IMPORT_PACKAGE);
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf), "%sNotice:%s "
+                                                               "the first import package `%s` is here.",
+                     LOG_COLOR_YELLOW,
+                     LOG_COLOR_CLEAR,
+                     import_pack->package_name);
+
+            ErrorReportContext context = {
+                .package          = nullptr,
+                .package_unit     = get_package_unit(),
+                .source_file_name = get_package_unit()->current_file_name,
+                .line_content     = package_unit_get_line_content(import_pack->line_number),
+                .line_number      = import_pack->line_number,
+                .column_number    = 0,
+                .error_message    = std::string(compile_err_buf),
+                .advice           = std::string(compile_adv_buf),
+                .report_type      = ERROR_REPORT_TYPE_COLL_ERR,
+            };
+            ring_compile_error_report(&context);
+        }
+    }
 
     ImportPackageInfo* import_package_info = (ImportPackageInfo*)mem_alloc(get_front_mem_pool(), sizeof(ImportPackageInfo));
     import_package_info->line_number       = package_unit_get_line_number();

@@ -165,6 +165,23 @@ struct ImportPackageInfo {
     char*        package_name;
     char*        package_path;
     char*        rename;
+    std::string  package_md5;
+
+    /*
+     * package_name:
+     *     用户 import : 是包含远程路径的/也可以是一个标准包/也可以是个本项目包,
+     *     e.g. github.com/G/P
+     *     主要通过这个来裁定是否重复编译了
+     *
+     * package_path:
+     *     可以 重定向到本地 Pakcage 的路径
+     *
+     * rename:
+     *     多个package 可能有重复, 支持用户重命名 package
+     *
+     * package_md5:
+     *     用于链接使用, 主要为编译和链接 生成一个唯一ID
+     */
 };
 
 struct CompilerEntry {
@@ -1493,9 +1510,10 @@ typedef enum {
     ERROR_CODE_SEMANTIC_CHECH_ERROR,
 
     ERROR_UNDEFINITE_VARIABLE        = 200000,
-    ERROR_REDEFINITE_GLOBAL_VARIABLE = 200001,
-    ERROR_REDEFINITE_FUNCTION        = 200002,
-    ERROR_MINUS_OPER_INVALID_USE     = 200003,
+    ERROR_REDEFINITE_GLOBAL_VARIABLE = 200001, // 重复定义全局变量
+    ERROR_REDEFINITE_FUNCTION        = 200002, // 重复定义函数
+    ERROR_MINUS_OPER_INVALID_USE     = 200003, // - 符号 不合法使用
+    ERROR_DUPLICATE_IMPORT_PACKAGE   = 200004, // 重复 import package
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -1531,6 +1549,7 @@ typedef enum {
 
 struct ErrorReportContext {
     Package*        package;
+    PackageUnit*    package_unit;
 
     std::string     source_file_name;
     std::string     line_content;

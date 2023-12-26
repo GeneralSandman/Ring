@@ -1228,6 +1228,7 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, E
 
         ErrorReportContext context = {
             nullptr,
+            nullptr,
             get_package_unit()->current_file_name,
             package_unit_get_line_content(expression->line_number),
             expression->line_number,
