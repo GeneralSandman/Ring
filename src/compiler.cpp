@@ -52,13 +52,13 @@ void ring_compile_error_report(ErrorReportContext* context) {
     fflush(stderr);
 
     if (context->report_type == ERROR_REPORT_TYPE_EXIT_NOW
-        || context->package == nullptr) {
+        || context->package_unit == nullptr) {
         exit(1);
     }
 
-    context->package->compile_error_num += 1;
-    if (context->package->compile_error_num >= 20) {
-        fprintf(stderr, "%d errors generated, exit.\n", context->package->compile_error_num);
+    context->package_unit->compile_error_num += 1;
+    if (context->package_unit->compile_error_num >= 7) {
+        fprintf(stderr, "%d errors generated, exit.\n", context->package_unit->compile_error_num);
         fflush(stderr);
         exit(1);
     }
@@ -439,4 +439,42 @@ int package_unit_add_class_definition(ClassDefinition* class_definition) {
 
     g_package_unit->class_definition_list.push_back(class_definition);
     return 0;
+}
+
+Ring_Grammar_Info Ring_Grammar_Infos[] = {
+    {
+        GRAMMAR_UNKNOW,
+        "",
+    },
+    {
+        GRAMMAR_IMPORT_PACKAGE,
+        "import {\n"
+        "    package-a;\n"
+        "    package-b;\n"
+        "}",
+    },
+    {
+        GRAMMAR_FUNCTION_DEFIN,
+        "function <identifier> (parameter_list) -> (return_value_list) {\n"
+        "    code_block;\n"
+        "}",
+    },
+
+};
+
+extern char linebuf[1024];
+
+//
+void ring_grammar_error(RING_GRAMMAR_ID grammar_id) {
+    char compile_adv_buf[2048];
+    snprintf(compile_adv_buf, sizeof(compile_adv_buf), "%sNotice:%s "
+                                                       "%s",
+             LOG_COLOR_YELLOW,
+             LOG_COLOR_CLEAR,
+             Ring_Grammar_Infos[grammar_id].grammar.c_str());
+
+    printf("|%s\n", compile_adv_buf);
+
+    // TODO: 这里不能进行 多个错误的上报了
+    exit(1);
 }

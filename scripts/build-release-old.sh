@@ -41,16 +41,13 @@ docker run -it -v /Users/bytedance/Desktop/Ring:/home/Ring --name test-ring-cent
 cd /etc/yum.repos.d/ && \
 sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && \
 sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* && \
-yum update -y
-
-
-
-yum install make && \
-yum install flex && \
-yum install bison && \
-yum install clang && \
-yum install gdb && \
-yum install valgrind && \
+yum update -y && \
+    yum install make && \
+    yum install flex && \
+    yum install bison && \
+    yum install clang && \
+    yum install gdb
+    
 cd /home/Ring && \
 make clean && make && make install && make testall
 

@@ -20,6 +20,12 @@ OBJS   = \
 	gc.o\
 	main.o
 
+# bison 可执行文件
+Bison  = /usr/local/Cellar/bison/3.8.2/bin/bison
+
+# flex 可执行文件
+Flex = flex
+
 
 TOOL_GEN_VMCODE_DOC_TARGET= tool_gen_vmcode_doc
 TOOL_GEN_VMCODE_DOC_OBJS  = vm.o tool_gen_vmcode_doc.o
@@ -91,11 +97,11 @@ clean:
 	@echo "\033[32mClean SUCCESS\033[0m"
 
 y.tab.hpp : ring.bison.y
-	bison -o y.tab.cpp -dv ring.bison.y
+	$(Bison) -o y.tab.cpp -dv ring.bison.y
 y.tab.cpp : ring.bison.y
-	bison -o y.tab.cpp -dv ring.bison.y  # -t 诊断模式
+	$(Bison) -o y.tab.cpp -dv ring.bison.y  # -t 诊断模式
 lex.yy.cpp : ring.flex.l ring.bison.y y.tab.hpp
-	flex -o lex.yy.cpp ring.flex.l
+	$(Flex) -o lex.yy.cpp ring.flex.l
 
 
 lex.yy.o: lex.yy.cpp ring.hpp

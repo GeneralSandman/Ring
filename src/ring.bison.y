@@ -4,15 +4,27 @@
 #define YYDEBUG 1
 
 int yylex();
-int yyerror(char const *str, ...);
+int yyerror(char const* str, ...);
 
 
 %}
 
+
 %locations
-%glr-parser     // 使用 GLR 解析
-%expect    0    // legitimate 0 shift/reduce conflicts
-%expect-rr 0    // legitimate 0 reduce/reduce conflicts
+%glr-parser                      // 使用 GLR 解析
+%expect    0                     // legitimate 0 shift/reduce conflicts
+%expect-rr 0                     // legitimate 0 reduce/reduce conflicts
+
+%define parse.error detailed     // 调用 yyerror时, 可以传递更多的细节进去
+
+%require "3.8.2"                 // bison 版本 要求
+
+%start  translation_unit_list    // 解析的开始位置
+
+// %define api.pure true
+
+// %define api.location.type {location_t}
+
 
 %union {
     char*                               m_comment_value;
@@ -263,6 +275,11 @@ import_package_info
     | IDENTIFIER TOKEN_ARROW IDENTIFIER TOKEN_SEMICOLON
     {
         import_package_list_add_item($1, $3);
+    }
+    | error
+    {
+        ring_grammar_error(GRAMMAR_IMPORT_PACKAGE);
+        yyerrok;
     }
     ;
 

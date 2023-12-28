@@ -108,6 +108,20 @@ typedef unsigned char                       RVM_Byte;
 typedef struct MemPool                      MemPool;
 typedef struct MemBlock                     MemBlock;
 
+typedef struct Ring_Grammar_Info            Ring_Grammar_Info;
+
+typedef enum {
+    GRAMMAR_UNKNOW = 0,
+    GRAMMAR_IMPORT_PACKAGE,
+    GRAMMAR_FUNCTION_DEFIN,
+
+} RING_GRAMMAR_ID;
+
+struct Ring_Grammar_Info {
+    RING_GRAMMAR_ID id;
+    std::string     grammar;
+};
+
 typedef enum {
     RVM_VALUE_TYPE_UNKNOW,
 
@@ -1509,6 +1523,10 @@ typedef enum {
     // 语义分析错误
     ERROR_CODE_SEMANTIC_CHECH_ERROR,
 
+
+    ERROR_CODE_GRAMMAR_ERROR         = 100000, // 语法错误
+
+
     ERROR_UNDEFINITE_VARIABLE        = 200000,
     ERROR_REDEFINITE_GLOBAL_VARIABLE = 200001, // 重复定义全局变量
     ERROR_REDEFINITE_FUNCTION        = 200002, // 重复定义函数
@@ -1790,6 +1808,8 @@ char*          package_unit_get_current_line_content();
 void           package_unit_reset_column_number();
 std::string    package_unit_get_line_content(unsigned int line_number);
 int            package_unit_add_class_definition(ClassDefinition* class_definition);
+
+void           ring_grammar_error(RING_GRAMMAR_ID grammar_id);
 // --------------------
 
 

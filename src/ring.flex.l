@@ -5,7 +5,7 @@
 #include "ring.hpp"
 #include "y.tab.hpp"
 
-char linebuf[500];
+char linebuf[1024];
 
 extern "C" int yywrap(){
     return 1;
@@ -189,7 +189,6 @@ extern "C" int yywrap(){
     package_unit_update_line_content(yytext);
     BEGIN BLOCK_COMMENT;
 }
-
 <INITIAL>. {
     package_unit_update_line_content(yytext);
 }
@@ -290,7 +289,7 @@ extern "C" int yywrap(){
 
 extern char *yytext;
 
-int yyerror(char const *str, ...){
+int yyerror(char const* str, ...){
     // 调用 ring_compiler_error 
     // 在这里捕获详细信息
 
