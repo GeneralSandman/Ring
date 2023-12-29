@@ -1968,6 +1968,8 @@ void                    fix_binary_expression(Expression* expression, Block* blo
 void                    fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
 void                    fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func);
 void                    fix_class_definition(ClassDefinition* class_definition);
+void                    fix_class_method(ClassDefinition* class_definition, MethodMember* method);
+
 
 void                    fix_array_index_expression(Expression* expression, ArrayIndexExpression* array_index_expression, Block* block, Function* func);
 void                    fix_new_array_expression(Expression* expression, NewArrayExpression* new_array_expression, Block* block, Function* func);
@@ -1993,8 +1995,8 @@ int                     is_native_function_identifier(char* package_posit, char*
  *
  */
 Package_Executer* package_executer_create(ExecuterEntry* executer_entry, char* package_name);
-void              package_executer_dump(Package_Executer* package_executer);
 void              print_package_executer(Package_Executer* package_executer);
+void              package_executer_dump(Package_Executer* package_executer);
 
 void              ring_generate_vm_code(Package* package, Package_Executer* executer);
 void              ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry);
@@ -2002,7 +2004,7 @@ void              add_global_variable(Package* package, Package_Executer* execut
 void              add_functions(Package* package, Package_Executer* executer);
 void              add_classes(Package* package, Package_Executer* executer);
 void              class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dest, ClassDefinition* src);
-void              copy_function(Function* src, RVM_Function* dest);
+void              copy_function(Package_Executer* executer, Function* src, RVM_Function* dest);
 void              copy_method(MethodMember* src, RVM_Method* dest);
 void              add_top_level_code(Package* package, Package_Executer* executer);
 void              generate_code_from_function_definition(Package_Executer* executer, Function* src, RVM_Function* dest);
@@ -2248,6 +2250,8 @@ void                     ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm);
 std::vector<std::string> list_files_of_dir(char* dir);
 
 void                     dump_vm_function(RVM_Function* function);
+void                     dump_vm_class(RVM_ClassDefinition* class_definition);
+
 unsigned int             get_source_line_number_by_pc(RVM_Function* function, unsigned int pc);
 // --------------------
 

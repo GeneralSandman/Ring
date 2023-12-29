@@ -512,11 +512,34 @@ void fix_class_definition(ClassDefinition* class_definition) {
             pos->u.field->index_of_class = field_index++;
         } else if (pos->type == MEMBER_METHOD) {
             pos->u.method->index_of_class = method_index++;
-
-            if (pos->u.method->block) {
-                fix_statement_list(pos->u.method->block->statement_list, pos->u.method->block, nullptr);
-            }
+            fix_class_method(class_definition, pos->u.method);
         }
+    }
+}
+
+void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
+    // add self declaration
+    Block* block = method->block;
+
+
+    // // self
+    // TypeSpecifier* type_specifier    = create_class_type_specifier(class_definition->class_identifier);
+
+    // Declaration*   self_declaration  = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
+    // self_declaration->line_number    = class_definition->line_number;
+    // self_declaration->type           = type_specifier;
+    // self_declaration->identifier     = "self";
+    // self_declaration->initializer    = nullptr;
+    // self_declaration->is_const       = false;
+    // self_declaration->is_local       = false;
+    // self_declaration->variable_index = -1;
+    // self_declaration->next           = nullptr;
+
+    // // 在 method 添加 self 变量命名
+    // add_declaration(self_declaration, block, nullptr);
+
+    if (block != nullptr) {
+        fix_statement_list(block->statement_list, block, nullptr);
     }
 }
 

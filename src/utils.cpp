@@ -315,6 +315,18 @@ void dump_vm_function(RVM_Function* function) {
     printf("\n");
 }
 
+void dump_vm_class(RVM_ClassDefinition* class_definition) {
+    assert(class_definition != nullptr);
+    return;
+
+    // 这里会 core dump
+
+    for (unsigned int i = 0; i < class_definition->method_size; i++) {
+        dump_vm_function(class_definition->method_list[i].rvm_function);
+    }
+    printf("\n");
+}
+
 /*
  * 通过当前Function 的 Pc 计算出 对应的源代码所在的行数
  *

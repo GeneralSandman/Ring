@@ -28,7 +28,7 @@ Package_Executer* package_executer_create(ExecuterEntry* executer_entry, char* p
 }
 
 // compiler 开发者使用
-void package_executer_dump(Package_Executer* package_executer) {
+void print_package_executer(Package_Executer* package_executer) {
     assert(package_executer != nullptr);
     printf("|------------------ Package_Executer-Dump-begin ------------------\n");
 
@@ -45,7 +45,7 @@ void package_executer_dump(Package_Executer* package_executer) {
 }
 
 // ring 使用者
-void print_package_executer(Package_Executer* package_executer) {
+void package_executer_dump(Package_Executer* package_executer) {
     // printf("%sPackage:    %s%s\n",
     //        LOG_COLOR_GREEN,
     //        package_executer->package_name,
@@ -53,6 +53,10 @@ void print_package_executer(Package_Executer* package_executer) {
 
     for (unsigned int i = 0; i < package_executer->function_size; i++) {
         dump_vm_function(&(package_executer->function_list[i]));
+    }
+
+    for (unsigned int i = 0; i < package_executer->class_size; i++) {
+        dump_vm_class(&(package_executer->class_list[i]));
     }
 }
 
@@ -141,8 +145,7 @@ void add_functions(Package* package, Package_Executer* executer) {
     unsigned int i          = 0;
     // 暂时只处理 native function
     for (Function* pos : package->function_list) {
-        copy_function(pos, &(executer->function_list[i]));
-        generate_code_from_function_definition(executer, pos, &(executer->function_list[i]));
+        copy_function(executer, pos, &(executer->function_list[i]));
         // TODO: FIXME:
         // 注册main函数
         if (0 == strcmp(pos->function_name, "main")) {
@@ -210,7 +213,7 @@ void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dest, 
     }
 }
 
-void copy_function(Function* src, RVM_Function* dest) {
+void copy_function(Package_Executer* executer, Function* src, RVM_Function* dest) {
     debug_log_with_darkgreen_coloar("\t");
 
     dest->source_file       = src->source_file;
@@ -258,10 +261,14 @@ void copy_function(Function* src, RVM_Function* dest) {
         }
     }
 
+    generate_code_from_function_definition(executer, src, dest);
+
     dest->estimate_runtime_stack_capacity = 0;
 }
 
 void copy_method(MethodMember* src, RVM_Method* dest) {
+    debug_log_with_darkgreen_coloar("\t");
+
     dest->identifier                  = src->identifier;
     dest->rvm_function                = (RVM_Function*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Function));
     dest->rvm_function->u.derive_func = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
@@ -317,6 +324,8 @@ void generate_code_from_function_definition(Package_Executer* executer, Function
     dest->u.derive_func->code_list     = opcode_buffer->code_list;
     dest->u.derive_func->code_size     = opcode_buffer->code_size;
     dest->u.derive_func->code_line_map = opcode_buffer->code_line_map;
+    // dest->local_variable_size          = 0;
+    // dest->local_variable_list          = nullptr;
 
 
 #ifdef DEBUG_GENERATE_OUTPUT_VMCODE
@@ -328,7 +337,10 @@ void generate_code_from_method_definition(Package_Executer* executer, MethodMemb
     debug_log_with_darkgreen_coloar("\t");
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
-    generate_vmcode_from_statement_list(executer, src->block, src->block->statement_list, opcode_buffer);
+    generate_vmcode_from_statement_list(executer,
+                                        src->block,
+                                        src->block->statement_list,
+                                        opcode_buffer);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_FUNCTION_FINISH, 0, src->line_number);
 
     opcode_buffer_fix_label(opcode_buffer);
@@ -337,6 +349,9 @@ void generate_code_from_method_definition(Package_Executer* executer, MethodMemb
     dest->rvm_function->u.derive_func->code_size     = opcode_buffer->code_size;
     dest->rvm_function->u.derive_func->code_line_map = opcode_buffer->code_line_map;
     dest->rvm_function->local_variable_size          = src->block->declaration_list_size;
+    dest->rvm_function->local_variable_list          = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
+                                                                                     sizeof(RVM_LocalVariable) * dest->rvm_function->local_variable_size);
+    // TODO: dump method detail
 }
 
 void vm_executer_dump(Package_Executer* executer) {

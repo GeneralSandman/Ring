@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
 
     if (args.command_dump) {
         // Only dump `main` package bytecode detail.
-        print_package_executer(executer_entry->main_package_executer);
+        package_executer_dump(executer_entry->main_package_executer);
         return 0;
     }
 
