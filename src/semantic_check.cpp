@@ -28,16 +28,12 @@ void ring_compiler_analysis_global_variable(Package* package) {
         if (iter != package->global_declaration_map.end()) {
             memset(compile_err_buf, 0, sizeof(compile_err_buf));
             memset(compile_adv_buf, 0, sizeof(compile_adv_buf));
-            snprintf(compile_err_buf, sizeof(compile_err_buf), "%sError:%s "
-                                                               "redefinition of global variable `%s`; E:%d.",
-                     LOG_COLOR_RED,
-                     LOG_COLOR_CLEAR,
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "redefinition of global variable `%s`; E:%d.",
                      decl->identifier,
                      ERROR_REDEFINITE_GLOBAL_VARIABLE);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf), "%sNotice:%s "
-                                                               "the first definition of global variable `%s` is here.",
-                     LOG_COLOR_YELLOW,
-                     LOG_COLOR_CLEAR,
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                     "the first definition of global variable `%s` is here.",
                      decl->identifier);
 
             ErrorReportContext context = {
@@ -65,16 +61,14 @@ void ring_compiler_analysis_function(Package* package) {
         if (iter != package->function_map.end()) {
             memset(compile_err_buf, 0, sizeof(compile_err_buf));
             memset(compile_adv_buf, 0, sizeof(compile_adv_buf));
-            snprintf(compile_err_buf, sizeof(compile_err_buf), "%sError:%s "
-                                                               "redefinition of function `%s`; E:%d.",
-                     LOG_COLOR_RED,
-                     LOG_COLOR_CLEAR,
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "redefinition of function `%s`; E:%d.",
+
                      function->function_name,
                      ERROR_REDEFINITE_FUNCTION);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf), "%sNotice:%s "
-                                                               "the first definition of function `%s` is here.",
-                     LOG_COLOR_YELLOW,
-                     LOG_COLOR_CLEAR,
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                     "the first definition of function `%s` is here.",
+
                      function->function_name);
 
             ErrorReportContext context = {

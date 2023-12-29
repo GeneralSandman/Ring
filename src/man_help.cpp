@@ -37,7 +37,7 @@ std::string variable_definite =
     "    var string string_value;\n"
     "\n"
 
-    "\033[0;33m+Notice:\033[0m\n"
+    "\033[0;33m+Tip:\033[0m\n"
     "\n";
 
 std::string function_definite =
@@ -64,7 +64,7 @@ std::string function_definite =
     "   }\n"
     "\n"
 
-    "\033[0;33m+Notice:\033[0m\n"
+    "\033[0;33m+Tip:\033[0m\n"
     "\n";
 
 std::string global_variable_definite =
@@ -94,7 +94,7 @@ std::string global_variable_definite =
     "   }\n"
     "\n"
 
-    "\033[0;33m+Notice:\033[0m\n"
+    "\033[0;33m+Tip:\033[0m\n"
     "\n";
 
 std::string import =
@@ -122,7 +122,7 @@ std::string import =
     "   }\n"
     "\n"
 
-    "\033[0;33m+Notice:\033[0m\n"
+    "\033[0;33m+Tip:\033[0m\n"
     "\n";
 
 std::string class_definite =
@@ -158,7 +158,7 @@ std::string class_definite =
     "\n"
 
 
-    "\033[0;33m+Notice:\033[0m\n"
+    "\033[0;33m+Tip:\033[0m\n"
     "\n";
 
 void ring_give_man_help(char* keyword) {

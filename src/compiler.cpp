@@ -8,7 +8,6 @@
 #include <vector>
 
 
-int                      yyerror(char const* str, ...);
 extern struct SyntaxInfo SyntaxInfos[];
 static PackageUnit*      g_package_unit   = nullptr;
 static CompilerEntry*    g_compiler_entry = nullptr;
@@ -39,34 +38,6 @@ void destory_front_mem_pool() {
     destory_mem_pool(front_mem_pool);
 }
 
-// ring_compile_error_report
-void ring_compile_error_report(ErrorReportContext* context) {
-    fprintf(stderr, "%s:%d:%d\n", context->source_file_name.c_str(), context->line_number, context->column_number);
-    fprintf(stderr, "|%s\n", context->line_content.c_str());
-    fprintf(stderr, "|%s%*s^......%s\n", LOG_COLOR_GREEN, context->column_number, " ", LOG_COLOR_CLEAR);
-    fprintf(stderr, "|\n");
-    fprintf(stderr, "|%s\n", context->error_message.c_str());
-    if (context->advice.size())
-        fprintf(stderr, "|%s", context->advice.c_str());
-    fprintf(stderr, "\n\n\n\n");
-    fflush(stderr);
-
-    if (context->report_type == ERROR_REPORT_TYPE_EXIT_NOW
-        || context->package_unit == nullptr) {
-        exit(1);
-    }
-
-    context->package_unit->compile_error_num += 1;
-    if (context->package_unit->compile_error_num >= 7) {
-        fprintf(stderr, "%d errors generated, exit.\n", context->package_unit->compile_error_num);
-        fflush(stderr);
-        exit(1);
-    }
-}
-
-void ring_check_exit_immediately() {
-    exit(1);
-}
 
 CompilerEntry* compiler_entry_create() {
     g_compiler_entry               = (CompilerEntry*)mem_alloc(get_front_mem_pool(), sizeof(CompilerEntry));
@@ -274,6 +245,7 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
 
     g_package_unit->current_file_name                = file_name;
     g_package_unit->current_file_fp                  = nullptr;
+    g_package_unit->file_fp_random                   = nullptr;
     g_package_unit->current_line_number              = 1;
     g_package_unit->current_column_number            = 1;
     g_package_unit->current_line_content             = new_ring_string();
@@ -297,7 +269,10 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
 
 
     g_package_unit->current_file_fp                  = fopen(file_name.c_str(), "r");
-    if (g_package_unit->current_file_fp == nullptr) {
+    g_package_unit->file_fp_random                   = fopen(file_name.c_str(), "r");
+
+    if (g_package_unit->current_file_fp == nullptr
+        || g_package_unit->file_fp_random == nullptr) {
         fprintf(stderr, "%s not found.\n", file_name.c_str());
         exit(1);
     }
@@ -314,11 +289,13 @@ void package_unit_compile(PackageUnit* package_unit) {
     extern FILE* yyin;
 
     yyin = package_unit->current_file_fp;
+
+    // bison 在 yyparse 过程中如果遇到不合法的语法, 会调用 yyerror
     if (yyparse()) {
         package_unit->compile_error_num++;
     }
     if (package_unit->compile_error_num) {
-        complie_err_log("%d syntax error detected.\n", package_unit->compile_error_num);
+        complie_err_log("%d grammar error detected.\n", package_unit->compile_error_num);
         exit(ERROR_CODE_COMPILE_ERROR);
     }
 
@@ -422,12 +399,18 @@ void package_unit_reset_column_number() {
 }
 
 std::string package_unit_get_line_content(unsigned int line_number) {
+    if (line_number >= g_package_unit->line_offset_map.size()) {
+        return "";
+    }
     off_t        line_offset = g_package_unit->line_offset_map[line_number].start_offset;
     unsigned int size        = g_package_unit->line_offset_map[line_number].size;
 
-    fseek(g_package_unit->current_file_fp, line_offset, SEEK_SET);
+    // 这里得使用一个新的随机指针, 不然会印象 bision继续 向下分析
+    fseek(g_package_unit->file_fp_random, line_offset, SEEK_SET);
     char buffer[500];
-    if (fgets(buffer, size, g_package_unit->current_file_fp) != NULL) {
+    if (fgets(buffer, size, g_package_unit->file_fp_random) == NULL) {
+        fprintf(stderr, "Warning: fgets line content is error.\n");
+        exit(1);
     }
 
     return std::string(buffer);
@@ -444,20 +427,24 @@ int package_unit_add_class_definition(ClassDefinition* class_definition) {
 Ring_Grammar_Info Ring_Grammar_Infos[] = {
     {
         GRAMMAR_UNKNOW,
-        "",
+        std::vector<std::string>{},
     },
     {
         GRAMMAR_IMPORT_PACKAGE,
-        "import {\n"
-        "    package-a;\n"
-        "    package-b;\n"
-        "}",
+        std::vector<std::string>{
+            "import {",
+            "    package-name;",
+            "}",
+        },
     },
     {
         GRAMMAR_FUNCTION_DEFIN,
-        "function <identifier> (parameter_list) -> (return_value_list) {\n"
-        "    code_block;\n"
-        "}",
+        std::vector<std::string>{
+            "function <identifier> (parameter_list) -> (return_value_list) {",
+            "    code_block;",
+            "}",
+        },
+
     },
 
 };
@@ -467,14 +454,122 @@ extern char linebuf[1024];
 //
 void ring_grammar_error(RING_GRAMMAR_ID grammar_id) {
     char compile_adv_buf[2048];
-    snprintf(compile_adv_buf, sizeof(compile_adv_buf), "%sNotice:%s "
-                                                       "%s",
+    snprintf(compile_adv_buf, sizeof(compile_adv_buf), "%sTip:%s import package grammar",
              LOG_COLOR_YELLOW,
-             LOG_COLOR_CLEAR,
-             Ring_Grammar_Infos[grammar_id].grammar.c_str());
+             LOG_COLOR_CLEAR);
 
     printf("|%s\n", compile_adv_buf);
+    for (std::string grammar : Ring_Grammar_Infos[grammar_id].grammar) {
+        printf("|%s\n", grammar.c_str());
+    }
 
     // TODO: 这里不能进行 多个错误的上报了
+    fprintf(stderr, "\n\n%d errors generated, exit.\n", 1);
+    fflush(stderr);
     exit(1);
+}
+
+int yyerror(char const* str, ...) {
+    // 调用 ring_compiler_error
+    // 在这里捕获详细信息
+
+    fprintf(stderr, "\n%s:%d:%d: \n",
+            package_unit_get_file_name().c_str(),
+            package_unit_get_line_number(),
+            package_unit_get_column_number());
+
+    fprintf(stderr, "|%s\n", linebuf);
+    fprintf(stderr, "|%s%*s^......%s\n",
+            LOG_COLOR_GREEN,
+            package_unit_get_column_number(), " ",
+            LOG_COLOR_CLEAR);
+    fprintf(stderr, "|\n");
+
+    fprintf(stderr, "|%sError:%s %s\n",
+            LOG_COLOR_RED,
+            LOG_COLOR_CLEAR,
+            str);
+
+    // fprintf(stderr, "\n\n\n\n");
+    fflush(stderr);
+
+    return 0;
+}
+
+
+// ring_compile_error_report
+void ring_compile_error_report(ErrorReportContext* context) {
+    fprintf(stderr, "%s:%d:%d: \n",
+            context->source_file_name.c_str(),
+            context->line_number,
+            context->column_number);
+
+    fprintf(stderr, "|%s\n", context->line_content.c_str());
+    fprintf(stderr, "|%s%*s^......%s\n",
+            LOG_COLOR_GREEN,
+            context->column_number, " ",
+            LOG_COLOR_CLEAR);
+    fprintf(stderr, "|\n");
+
+    if (context->error_message.size()) {
+        fprintf(stderr, "|%sError:%s %s\n",
+                LOG_COLOR_RED,
+                LOG_COLOR_CLEAR,
+                context->error_message.c_str());
+    }
+
+    if (context->advice.size()) {
+        fprintf(stderr, "|%sTip:%s %s\n",
+                LOG_COLOR_YELLOW,
+                LOG_COLOR_CLEAR,
+                context->advice.c_str());
+    }
+
+    // fprintf(stderr, "\n\n\n\n");
+    fflush(stderr);
+
+    if (context->report_type == ERROR_REPORT_TYPE_EXIT_NOW
+        || context->package_unit == nullptr) {
+        exit(1);
+    }
+
+    context->package_unit->compile_error_num += 1;
+    if (context->package_unit->compile_error_num >= 7) {
+        fprintf(stderr, "%d errors generated, exit.\n", context->package_unit->compile_error_num);
+        fflush(stderr);
+        exit(1);
+    }
+}
+
+void ring_check_exit_immediately() {
+    exit(1);
+}
+
+// 将 TOKEN_COMMA 转换成  ','
+std::string trans_flex_token_to_char(std::string) {
+    return "";
+}
+
+// 用于错误恢复
+// 将 yyin移动到下一行中
+void yyin_move_to_next_line() {
+    extern FILE* yyin;
+
+
+    // printf("yyin_move_to_next_line\n");
+
+    // printf("_offset %ld\n", yyin->_offset);
+    // char buffer[500];
+    // fgets(buffer, 50, yyin);
+    // printf("=%s\n", buffer);
+    // exit(1);
+    // char buffer;
+    // while(fgets(&buffer, 1, yyin) != NULL) {
+    //     printf("buffer:%c\n", buffer);
+    //     if (buffer == '\n') {
+    //         break;
+    //     }
+    //     fseek(yyin, 1, SEEK_CUR);
+    //     exit(1);
+    // }
 }

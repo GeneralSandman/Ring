@@ -118,8 +118,8 @@ typedef enum {
 } RING_GRAMMAR_ID;
 
 struct Ring_Grammar_Info {
-    RING_GRAMMAR_ID id;
-    std::string     grammar;
+    RING_GRAMMAR_ID          id;
+    std::vector<std::string> grammar;
 };
 
 typedef enum {
@@ -280,7 +280,9 @@ struct PackageUnit {
     Package*     parent_package;
 
     std::string  current_file_name;
-    FILE*        current_file_fp;
+    FILE*        current_file_fp; // 这个 FILE* 只能给 bison使用
+    FILE*        file_fp_random;  // 用来获取文件内容
+
     unsigned int current_line_number;
     unsigned int current_column_number;
     Ring_String* current_line_content;
@@ -1747,6 +1749,8 @@ MemPool* get_front_mem_pool();
 void     destory_front_mem_pool();
 
 void     ring_compile_error_report(ErrorReportContext* context);
+void     ring_check_exit_immediately();
+void     yyin_move_to_next_line();
 
 #define ring_runtime_error(code, ...)      \
     printf("Runtime error, E:%d, ", code); \
@@ -1779,7 +1783,6 @@ char*        get_string_literal();
  * function definition
  *
  */
-void           ring_check_exit_immediately();
 CompilerEntry* compiler_entry_create();
 CompilerEntry* get_compiler_entry();
 void           compiler_entry_dump(CompilerEntry* compiler_entry);
@@ -1810,6 +1813,7 @@ std::string    package_unit_get_line_content(unsigned int line_number);
 int            package_unit_add_class_definition(ClassDefinition* class_definition);
 
 void           ring_grammar_error(RING_GRAMMAR_ID grammar_id);
+int            yyerror(char const* str, ...);
 // --------------------
 
 

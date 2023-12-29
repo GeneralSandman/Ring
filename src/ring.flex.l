@@ -289,20 +289,6 @@ extern "C" int yywrap(){
 
 extern char *yytext;
 
-int yyerror(char const* str, ...){
-    // 调用 ring_compiler_error 
-    // 在这里捕获详细信息
-
-    printf("\n%s:%d:%d: ", 
-        package_unit_get_file_name().c_str(), 
-        package_unit_get_line_number(), 
-        package_unit_get_column_number());
-    complie_err_log("error: compiler error, syntax error");
-    complie_err_log("        %s", linebuf);
-    complie_err_log2("%*s^.....%s\n", package_unit_get_column_number() + 8, "", str);
-
-    return 0;
-}
 
 
 

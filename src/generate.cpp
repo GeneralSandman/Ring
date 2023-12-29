@@ -1221,7 +1221,7 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, E
                  LOG_COLOR_RED,
                  LOG_COLOR_CLEAR,
                  ERROR_MINUS_OPER_INVALID_USE);
-        snprintf(advice_buffer, 1024, "%sNotice:%s "
+        snprintf(advice_buffer, 1024, "%sTip:%s "
                                       "minus operator used like: -1, -1.345",
                  LOG_COLOR_YELLOW,
                  LOG_COLOR_CLEAR);

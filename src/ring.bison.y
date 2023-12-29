@@ -4,7 +4,6 @@
 #define YYDEBUG 1
 
 int yylex();
-int yyerror(char const* str, ...);
 
 
 %}
@@ -279,6 +278,8 @@ import_package_info
     | error
     {
         ring_grammar_error(GRAMMAR_IMPORT_PACKAGE);
+        yylex();
+        yyin_move_to_next_line();
         yyerrok;
     }
     ;

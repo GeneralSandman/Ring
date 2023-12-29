@@ -481,7 +481,7 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
 }
 
 Function* new_function_definition(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
-    debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier);
+    debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier->identifier_name);
 
     Function* function            = (Function*)mem_alloc(get_front_mem_pool(), sizeof(Function));
     function->source_file         = package_unit_get_file_name();
@@ -950,16 +950,12 @@ void import_package_list_add_item(char* package_name, char* rename) {
         if (strcmp(import_pack->package_name, package_name) == 0) {
             char compile_err_buf[2048];
             char compile_adv_buf[2048];
-            snprintf(compile_err_buf, sizeof(compile_err_buf), "%sError:%s "
-                                                               "duplicate import package `%s`; E:%d.",
-                     LOG_COLOR_RED,
-                     LOG_COLOR_CLEAR,
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "duplicate import package `%s`; E:%d.",
                      import_pack->package_name,
                      ERROR_DUPLICATE_IMPORT_PACKAGE);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf), "%sNotice:%s "
-                                                               "the first import package `%s` in %s:%d:%d.",
-                     LOG_COLOR_YELLOW,
-                     LOG_COLOR_CLEAR,
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                     "the first import package `%s` in %s:%d:%d.",
                      import_pack->package_name,
                      get_package_unit()->current_file_name.c_str(),
                      import_pack->line_number, 0);
