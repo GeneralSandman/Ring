@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.ring": "go",
+        "*.cpp": "cpp",
         "stdlib.h": "c",
         "stdio.h": "c",
         "ring.hpp": "c",
@@ -75,11 +76,15 @@
         "mutex": "cpp",
         "__memory": "cpp",
         "bit": "cpp",
-        "unordered_set": "cpp"
+        "unordered_set": "cpp",
+        "cassert": "cpp"
     },
     "editor.formatOnSave": true,
     "code-runner.executorMap": {
         "c": "cd $dir && gcc $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
         "cpp": "cd $dir && g++ -std=c++17 $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
-    }
+    },
+    "clang.cxxflags": [
+        "-std=c++17"
+    ]
 }
