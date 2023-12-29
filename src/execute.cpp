@@ -241,6 +241,7 @@ RVM_Object* new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* clas
     // object->u.class_object->class_def   = class_definition;
     object->u.class_object->field_count = field_size;
     object->u.class_object->field       = field;
+    object->u.class_object->class_ref   = class_definition;
 
     // TODO: 这里得优化一下, 算得不对, 得分析具体 member的类型
     rvm->runtime_heap->alloc_size += field_size * sizeof(RVM_Value);
@@ -971,18 +972,19 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                        &caller_stack_base);
             }
             break;
-        case RVM_CODE_INVOKE_METHOD:
-            // method_index = STACK_GET_INT_OFFSET(rvm, -1);
-            // class_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            // runtime_stack->top_index -= 2;
-            // // FIXME: object->u.class_object->class_def->class_index 这样使用是不对的
-            // invoke_derive_function(rvm,
-            //                        &function, rvm->class_list[class_object->u.class_object->class_def->class_index].method_list[method_index].rvm_function,
-            //                        &code_list, &code_size,
-            //                        &rvm->pc,
-            //                        &caller_stack_base);
-
-            break;
+        case RVM_CODE_INVOKE_METHOD: {
+            method_index = STACK_GET_INT_OFFSET(rvm, -1);
+            class_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            runtime_stack->top_index -= 2;
+            // 每个对象的成员变量 是单独存储的
+            // 但是 method 没必要单独存储, 在 class_definition 中就可以, 通过指针寻找 class_definition
+            RVM_Method* method = &(class_object->u.class_object->class_ref->method_list[method_index]);
+            invoke_derive_function(rvm,
+                                   &function, method->rvm_function,
+                                   &code_list, &code_size,
+                                   &rvm->pc,
+                                   &caller_stack_base);
+        } break;
         case RVM_CODE_RETURN:
             return_value_list_size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             rvm->pc += 3;
@@ -992,6 +994,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                    &function, nullptr,
                                    &code_list, &code_size,
                                    &rvm->pc, &caller_stack_base, return_value_list_size);
+            rvm->pc += 1;
             return_value_list_size = 0;
             break;
 
@@ -1387,7 +1390,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     assert(callinfo->magic_number == CALL_INFO_MAGIC_NUMBER);
 
     *caller_function   = callinfo->caller_function;
-    *pc                = callinfo->caller_pc + 1;
+    *pc                = callinfo->caller_pc; // 调用完成之后, caller_pc + 1, 在 execute 中统一update
     *caller_stack_base = callinfo->caller_stack_base;
     if (*caller_function == nullptr) {
         *code_list = rvm->executer->code_list;

@@ -435,6 +435,8 @@ struct RVM_Method {
 struct RVM_ClassDefinition {
     char*        identifier;
 
+    unsigned int class_index;
+
     unsigned int field_size;
     RVM_Field*   field_list;
 
