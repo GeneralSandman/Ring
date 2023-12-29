@@ -9,11 +9,9 @@ package main
 
 import {
 	fmt;
-	debug;
-	debug;
+	fmt;
 }
 
 @main
 function main() {
-
 }
