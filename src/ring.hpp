@@ -427,6 +427,7 @@ struct RVM_Field {
 
 // 他的本质就是一个 函数
 // 只不过他可以引用 field
+// TODO: RVM_Method 需要简化一下, 跟 RVM_Function其实是一样的
 struct RVM_Method {
     char*         identifier;
     RVM_Function* rvm_function;
@@ -1037,9 +1038,16 @@ struct FieldMember {
 
 // 类方法
 struct MethodMember {
-    unsigned int        line_number;
+    std::string         source_file;
+    unsigned int        start_line_number; // 源码的开始行
+    unsigned int        end_line_number;   // 源码的结束行
+
+    Package*            package; // 所属的package
+
+    AttributeInfo*      attribute_info;
 
     unsigned int        index_of_class; // fix it in fix_ast
+
     char*               identifier;
 
     unsigned int        parameter_list_size;
@@ -1916,7 +1924,8 @@ ClassMemberDeclaration*       class_member_declaration_list_add_item(ClassMember
 ClassMemberDeclaration*       create_class_member_field_declaration(Attribute attribute, FieldMember* field_member);
 ClassMemberDeclaration*       create_class_member_method_declaration(Attribute attribute, MethodMember* method_member);
 FieldMember*                  create_class_member_field(TypeSpecifier* type_specifier, Identifier* identifier_list);
-MethodMember*                 create_class_member_method(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
+MethodMember*                 create_class_member_method(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
+
 
 AttributeInfo*                create_attribute_info(char* name);
 AttributeInfo*                attribute_info_add_item(AttributeInfo* list, AttributeInfo* item);
@@ -2005,7 +2014,7 @@ void              add_functions(Package* package, Package_Executer* executer);
 void              add_classes(Package* package, Package_Executer* executer);
 void              class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dest, ClassDefinition* src);
 void              copy_function(Package_Executer* executer, Function* src, RVM_Function* dest);
-void              copy_method(MethodMember* src, RVM_Method* dest);
+void              copy_method(Package_Executer* executer, MethodMember* src, RVM_Method* dest);
 void              add_top_level_code(Package* package, Package_Executer* executer);
 void              generate_code_from_function_definition(Package_Executer* executer, Function* src, RVM_Function* dest);
 void              generate_code_from_method_definition(Package_Executer* executer, MethodMember* src, RVM_Method* dest);

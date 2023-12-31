@@ -978,6 +978,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index -= 2;
             // 每个对象的成员变量 是单独存储的
             // 但是 method 没必要单独存储, 在 class_definition 中就可以, 通过指针寻找 class_definition
+            // 需要将 class_object 赋值给 self 变量
             RVM_Method* method = &(class_object->u.class_object->class_ref->method_list[method_index]);
             invoke_derive_function(rvm,
                                    &function, method->rvm_function,

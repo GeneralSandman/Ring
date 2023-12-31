@@ -205,9 +205,8 @@ void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dest, 
     for (; pos != nullptr; pos = pos->next) {
         if (pos->type == MEMBER_FIELD) {
         } else if (pos->type == MEMBER_METHOD) {
-            copy_method(pos->u.method, &dest->method_list[i]);
-            if (pos->u.method->block != nullptr)
-                generate_code_from_method_definition(executer, pos->u.method, &dest->method_list[i]);
+            copy_method(executer, pos->u.method, &dest->method_list[i]);
+
             i++;
         }
     }
@@ -266,12 +265,43 @@ void copy_function(Package_Executer* executer, Function* src, RVM_Function* dest
     dest->estimate_runtime_stack_capacity = 0;
 }
 
-void copy_method(MethodMember* src, RVM_Method* dest) {
+void copy_method(Package_Executer* executer, MethodMember* src, RVM_Method* dest) {
     debug_log_with_darkgreen_coloar("\t");
 
-    dest->identifier                  = src->identifier;
-    dest->rvm_function                = (RVM_Function*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Function));
-    dest->rvm_function->u.derive_func = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
+    dest->identifier                        = src->identifier;
+    dest->rvm_function                      = (RVM_Function*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Function));
+
+    dest->rvm_function->source_file         = src->source_file;
+    dest->rvm_function->start_line_number   = src->start_line_number;
+    dest->rvm_function->end_line_number     = src->end_line_number;
+    dest->rvm_function->func_name           = src->identifier;
+    dest->rvm_function->type                = RVM_FUNCTION_TYPE_DERIVE;
+    dest->rvm_function->parameter_size      = 0;       // TODO:
+    dest->rvm_function->parameter_list      = nullptr; // TODO:
+
+    // 目前只有 self
+    dest->rvm_function->local_variable_size = 1; // TODO:
+    dest->rvm_function->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
+                                                                            sizeof(RVM_LocalVariable) * 1); // TODO:
+
+    dest->rvm_function->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
+
+    // TODO: deep copy method parameters
+
+    // TODO: deep copy local variable
+    // 目前 local variable 只有 self
+    Declaration* pos                        = src->block->declaration_list;
+    unsigned int i                          = 0;
+    for (; pos != nullptr; pos = pos->next, i++) {
+        dest->rvm_function->local_variable_list[i].identifier     = pos->identifier;
+        dest->rvm_function->local_variable_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                                                  sizeof(RVM_TypeSpecifier));
+
+        type_specifier_deep_copy(dest->rvm_function->local_variable_list[i].type_specifier, pos->type);
+    }
+
+    if (src->block != nullptr)
+        generate_code_from_method_definition(executer, src, dest);
 }
 
 void add_top_level_code(Package* package, Package_Executer* executer) {
@@ -341,16 +371,13 @@ void generate_code_from_method_definition(Package_Executer* executer, MethodMemb
                                         src->block,
                                         src->block->statement_list,
                                         opcode_buffer);
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_FUNCTION_FINISH, 0, src->line_number);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_FUNCTION_FINISH, 0, src->start_line_number);
 
     opcode_buffer_fix_label(opcode_buffer);
 
     dest->rvm_function->u.derive_func->code_list     = opcode_buffer->code_list;
     dest->rvm_function->u.derive_func->code_size     = opcode_buffer->code_size;
     dest->rvm_function->u.derive_func->code_line_map = opcode_buffer->code_line_map;
-    dest->rvm_function->local_variable_size          = src->block->declaration_list_size;
-    dest->rvm_function->local_variable_list          = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
-                                                                                     sizeof(RVM_LocalVariable) * dest->rvm_function->local_variable_size);
     // TODO: dump method detail
 }
 

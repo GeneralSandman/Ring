@@ -1068,18 +1068,31 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier, Identifier
     return field_member;
 }
 
-MethodMember* create_class_member_method(FunctionType type, char* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
+MethodMember* create_class_member_method(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
     debug_log_with_yellow_coloar("\t");
 
     MethodMember* method_member        = (MethodMember*)mem_alloc(get_front_mem_pool(), sizeof(MethodMember));
-    method_member->line_number         = package_unit_get_line_number();
+
+    method_member->source_file         = package_unit_get_file_name();
+    method_member->start_line_number   = identifier->line_number;
+    method_member->end_line_number     = package_unit_get_line_number();
+
+    method_member->package             = get_package_unit()->parent_package;
+
+    method_member->attribute_info      = nullptr;
+
     method_member->index_of_class      = -1;
-    method_member->identifier          = identifier;
+
+    method_member->identifier          = identifier->identifier_name;
+
     method_member->parameter_list_size = 0;
     method_member->parameter_list      = parameter_list;
+
     method_member->return_list_size    = 0;
     method_member->return_list         = return_list;
+
     method_member->block               = block;
+
     for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
         method_member->parameter_list_size++;
     }

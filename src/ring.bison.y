@@ -374,42 +374,42 @@ field_member
     ;
 
 method_member
-    : TOKEN_METHOD identifier TOKEN_LP TOKEN_RP block
+    : TOKEN_METHOD identifier_v2 TOKEN_LP TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, nullptr, nullptr, $5);
     }
-    | TOKEN_METHOD identifier TOKEN_LP TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_METHOD identifier_v2 TOKEN_LP TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, nullptr, nullptr, nullptr);
     }
-    | TOKEN_METHOD identifier TOKEN_LP parameter_list TOKEN_RP block
+    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, nullptr, $6);
     }
-    | TOKEN_METHOD identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, nullptr, nullptr);
     }
-    | TOKEN_METHOD identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_METHOD identifier_v2 TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, nullptr, $7, $9);
     }
-    | TOKEN_METHOD identifier TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_METHOD identifier_v2 TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, nullptr, $7, nullptr);
     }
-    | TOKEN_METHOD identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, $10);
     }
-    | TOKEN_METHOD identifier TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_log_with_green_coloar("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, nullptr);
