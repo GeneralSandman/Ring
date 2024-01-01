@@ -26,13 +26,38 @@ global {
 
 @main
 function main() {
+
+    fmt::println_string("\ntest case 1");
     job_0.PrintInfo();
 
+
+
+    fmt::println_string("\ntest case 2");
     job_0 = Job{
         Running: true,
         JobID: 1, 
         Score: 1.1
     };
-
     job_0.PrintInfo();
+
+
+
+    fmt::println_string("\ntest case 3");
+    job_0 = Job{
+        Running: true,
+        JobID: 123, 
+        Score: 123.123
+    };
+    job_0.PrintInfo();
+
+
+    fmt::println_string("\ntest case 4");
+    job_0 = Job{
+        Running: false,
+        JobID: 0, 
+        Score: 0.0
+    };
+    job_0.PrintInfo();
+
+
 }
