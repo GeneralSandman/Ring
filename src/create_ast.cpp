@@ -879,6 +879,31 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Ide
     Identifier*  pos_ider = identifier_list;
     Expression*  pos_init = initializer_list;
     for (pos_ider = identifier_list; pos_ider; pos_ider = pos_ider->next) {
+        if (strcmp(pos_ider->identifier_name, "self") == 0) {
+            char compile_err_buf[2048];
+            char compile_adv_buf[2048];
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "forbid definite `self` variable; E:%d.",
+                     ERROR_INVALID_VARIABLE_IDENTIFIER);
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                     "`self` only be used to access field of class in method block.");
+
+
+            ErrorReportContext context = {
+                .package          = nullptr,
+                .package_unit     = get_package_unit(),
+                .source_file_name = get_package_unit()->current_file_name,
+                .line_content     = package_unit_get_line_content(pos_ider->line_number),
+                .line_number      = pos_ider->line_number,
+                .column_number    = package_unit_get_column_number(),
+                .error_message    = std::string(compile_err_buf),
+                .advice           = std::string(compile_adv_buf),
+                .report_type      = ERROR_REPORT_TYPE_COLL_ERR,
+            };
+            ring_compile_error_report(&context);
+        }
+
+
         Declaration* decl = create_declaration(type_specifier, pos_ider->identifier_name, pos_init);
         if (pos_init) {
             decl->initializer       = pos_init;

@@ -295,7 +295,7 @@ void package_unit_compile(PackageUnit* package_unit) {
         package_unit->compile_error_num++;
     }
     if (package_unit->compile_error_num) {
-        complie_err_log("%d grammar error detected.\n", package_unit->compile_error_num);
+        complie_err_log("\n\n%d grammars error detected.\n", package_unit->compile_error_num);
         exit(ERROR_CODE_COMPILE_ERROR);
     }
 
@@ -373,18 +373,26 @@ void package_unit_update_line_content(char* str) {
         ring_string_add_char(g_package_unit->current_line_content, str[i]);
     }
 
-    g_package_unit->current_offset += strlen(str);
-    if (0 == strcmp(str, "\n") || 0 == strcmp(str, "\r\n")) {
-        SourceLineInfo line_info{
-            g_package_unit->current_line_start_offset,
-            (unsigned int)(g_package_unit->current_offset - g_package_unit->current_line_start_offset - strlen(str) + 1),
-        };
-        g_package_unit->line_offset_map.push_back(line_info);
-        g_package_unit->current_line_start_offset = g_package_unit->current_offset;
+    if (g_package_unit->current_line_number == g_package_unit->line_offset_map.size()) {
+        g_package_unit->line_offset_map.push_back(SourceLineInfo{
+            .start_offset = g_package_unit->current_line_start_offset,
+            .size         = 0,
+        });
     }
 
+    g_package_unit->line_offset_map[g_package_unit->current_line_number].size += strlen(str);
+
+    g_package_unit->current_offset += strlen(str);
     g_package_unit->current_column_number += strlen(str);
+
+    if (strcmp(str, "\n") == 0 || strcmp(str, "\r\n") == 0) {
+        // TODO: 这里 -1 没搞明白
+        g_package_unit->line_offset_map[g_package_unit->current_line_number].size -= (strlen(str) - 1);
+
+        g_package_unit->current_line_start_offset = g_package_unit->current_offset;
+    }
 }
+
 
 void package_unit_reset_line_content() {
     reset_ring_string(g_package_unit->current_line_content);
