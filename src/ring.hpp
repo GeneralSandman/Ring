@@ -2012,12 +2012,12 @@ void              ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterE
 void              add_global_variable(Package* package, Package_Executer* executer);
 void              add_functions(Package* package, Package_Executer* executer);
 void              add_classes(Package* package, Package_Executer* executer);
-void              class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dest, ClassDefinition* src);
-void              copy_function(Package_Executer* executer, Function* src, RVM_Function* dest);
-void              copy_method(Package_Executer* executer, MethodMember* src, RVM_Method* dest);
+void              class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dst, ClassDefinition* src);
+void              copy_function(Package_Executer* executer, RVM_Function* dst, Function* src);
+void              copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src);
 void              add_top_level_code(Package* package, Package_Executer* executer);
-void              generate_code_from_function_definition(Package_Executer* executer, Function* src, RVM_Function* dest);
-void              generate_code_from_method_definition(Package_Executer* executer, MethodMember* src, RVM_Method* dest);
+void              generate_code_from_function_definition(Package_Executer* executer, RVM_Function* dst, Function* src);
+void              generate_code_from_method_definition(Package_Executer* executer, RVM_Method* dst, MethodMember* src);
 void              vm_executer_dump(Package_Executer* executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
 

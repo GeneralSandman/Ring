@@ -145,7 +145,7 @@ void add_functions(Package* package, Package_Executer* executer) {
     unsigned int i          = 0;
     // 暂时只处理 native function
     for (Function* pos : package->function_list) {
-        copy_function(executer, pos, &(executer->function_list[i]));
+        copy_function(executer, &(executer->function_list[i]), pos);
         // TODO: FIXME:
         // 注册main函数
         if (0 == strcmp(pos->function_name, "main")) {
@@ -180,71 +180,71 @@ void add_classes(Package* package, Package_Executer* executer) {
  *
  * TODO: field not deep copy
  */
-void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dest, ClassDefinition* src) {
+void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dst, ClassDefinition* src) {
     debug_log_with_darkgreen_coloar("\t");
 
-    dest->identifier            = src->class_identifier;
-    dest->field_size            = 0;
-    dest->field_list            = nullptr;
-    dest->method_size           = 0;
-    dest->method_list           = nullptr;
+    dst->identifier             = src->class_identifier;
+    dst->field_size             = 0;
+    dst->field_list             = nullptr;
+    dst->method_size            = 0;
+    dst->method_list            = nullptr;
 
     ClassMemberDeclaration* pos = src->member;
     for (; pos != nullptr; pos = pos->next) {
         if (pos->type == MEMBER_FIELD) {
-            dest->field_size++;
+            dst->field_size++;
         } else if (pos->type == MEMBER_METHOD) {
-            dest->method_size++;
+            dst->method_size++;
         }
     }
 
-    dest->method_list = (RVM_Method*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Method) * dest->method_size);
+    dst->method_list = (RVM_Method*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Method) * dst->method_size);
 
-    unsigned int i    = 0;
-    pos               = src->member;
+    unsigned int i   = 0;
+    pos              = src->member;
     for (; pos != nullptr; pos = pos->next) {
         if (pos->type == MEMBER_FIELD) {
         } else if (pos->type == MEMBER_METHOD) {
-            copy_method(executer, pos->u.method, &dest->method_list[i]);
+            copy_method(executer, &dst->method_list[i], pos->u.method);
 
             i++;
         }
     }
 }
 
-void copy_function(Package_Executer* executer, Function* src, RVM_Function* dest) {
+void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src) {
     debug_log_with_darkgreen_coloar("\t");
 
-    dest->source_file       = src->source_file;
-    dest->start_line_number = src->start_line_number;
-    dest->end_line_number   = src->end_line_number;
-    dest->func_name         = src->function_name;
+    dst->source_file       = src->source_file;
+    dst->start_line_number = src->start_line_number;
+    dst->end_line_number   = src->end_line_number;
+    dst->func_name         = src->function_name;
 
     if (src->type == FUNCTION_TYPE_NATIVE) {
-        dest->type                = RVM_FUNCTION_TYPE_NATIVE;
-        dest->parameter_size      = src->parameter_list_size;
-        dest->parameter_list      = nullptr; // TODO:
-        dest->local_variable_size = 0;
-        dest->local_variable_list = nullptr; // TODO:
+        dst->type                = RVM_FUNCTION_TYPE_NATIVE;
+        dst->parameter_size      = src->parameter_list_size;
+        dst->parameter_list      = nullptr; // TODO:
+        dst->local_variable_size = 0;
+        dst->local_variable_list = nullptr; // TODO:
     } else if (src->type == FUNCTION_TYPE_DERIVE) {
-        dest->type                = RVM_FUNCTION_TYPE_DERIVE;
-        dest->parameter_size      = src->parameter_list_size;
-        dest->parameter_list      = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
-                                                                  sizeof(RVM_LocalVariable) * dest->parameter_size);
-        dest->local_variable_size = src->block->declaration_list_size;
-        dest->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
-                                                                  sizeof(RVM_LocalVariable) * dest->local_variable_size);
-        dest->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
+        dst->type                = RVM_FUNCTION_TYPE_DERIVE;
+        dst->parameter_size      = src->parameter_list_size;
+        dst->parameter_list      = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
+                                                                 sizeof(RVM_LocalVariable) * dst->parameter_size);
+        dst->local_variable_size = src->block->declaration_list_size;
+        dst->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
+                                                                 sizeof(RVM_LocalVariable) * dst->local_variable_size);
+        dst->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
 
         // deep copy function parameters
-        unsigned int i            = 0;
-        Parameter*   param        = src->parameter_list;
+        unsigned int i           = 0;
+        Parameter*   param       = src->parameter_list;
         for (; param != nullptr; param = param->next, i++) {
-            dest->parameter_list[i].identifier     = param->identifier;
-            dest->parameter_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
-                                                                                   sizeof(RVM_TypeSpecifier));
+            dst->parameter_list[i].identifier     = param->identifier;
+            dst->parameter_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                                  sizeof(RVM_TypeSpecifier));
 
-            type_specifier_deep_copy(dest->parameter_list[i].type_specifier, param->type);
+            type_specifier_deep_copy(dst->parameter_list[i].type_specifier, param->type);
         }
 
 
@@ -252,56 +252,56 @@ void copy_function(Package_Executer* executer, Function* src, RVM_Function* dest
         Declaration* pos = src->block->declaration_list;
         i                = 0;
         for (; pos != nullptr; pos = pos->next, i++) {
-            dest->local_variable_list[i].identifier     = pos->identifier;
-            dest->local_variable_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
-                                                                                        sizeof(RVM_TypeSpecifier));
+            dst->local_variable_list[i].identifier     = pos->identifier;
+            dst->local_variable_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                                       sizeof(RVM_TypeSpecifier));
 
-            type_specifier_deep_copy(dest->local_variable_list[i].type_specifier, pos->type);
+            type_specifier_deep_copy(dst->local_variable_list[i].type_specifier, pos->type);
         }
     }
 
-    generate_code_from_function_definition(executer, src, dest);
+    generate_code_from_function_definition(executer, dst, src);
 
-    dest->estimate_runtime_stack_capacity = 0;
+    dst->estimate_runtime_stack_capacity = 0;
 }
 
-void copy_method(Package_Executer* executer, MethodMember* src, RVM_Method* dest) {
+void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src) {
     debug_log_with_darkgreen_coloar("\t");
 
-    dest->identifier                        = src->identifier;
-    dest->rvm_function                      = (RVM_Function*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Function));
+    dst->identifier                        = src->identifier;
+    dst->rvm_function                      = (RVM_Function*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Function));
 
-    dest->rvm_function->source_file         = src->source_file;
-    dest->rvm_function->start_line_number   = src->start_line_number;
-    dest->rvm_function->end_line_number     = src->end_line_number;
-    dest->rvm_function->func_name           = src->identifier;
-    dest->rvm_function->type                = RVM_FUNCTION_TYPE_DERIVE;
-    dest->rvm_function->parameter_size      = 0;       // TODO:
-    dest->rvm_function->parameter_list      = nullptr; // TODO:
+    dst->rvm_function->source_file         = src->source_file;
+    dst->rvm_function->start_line_number   = src->start_line_number;
+    dst->rvm_function->end_line_number     = src->end_line_number;
+    dst->rvm_function->func_name           = src->identifier;
+    dst->rvm_function->type                = RVM_FUNCTION_TYPE_DERIVE;
+    dst->rvm_function->parameter_size      = 0;       // TODO:
+    dst->rvm_function->parameter_list      = nullptr; // TODO:
 
     // 目前只有 self
-    dest->rvm_function->local_variable_size = 1; // TODO:
-    dest->rvm_function->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
-                                                                            sizeof(RVM_LocalVariable) * 1); // TODO:
+    dst->rvm_function->local_variable_size = 1; // TODO:
+    dst->rvm_function->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
+                                                                           sizeof(RVM_LocalVariable) * 1); // TODO:
 
-    dest->rvm_function->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
+    dst->rvm_function->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
 
     // TODO: deep copy method parameters
 
     // TODO: deep copy local variable
     // 目前 local variable 只有 self
-    Declaration* pos                        = src->block->declaration_list;
-    unsigned int i                          = 0;
+    Declaration* pos                       = src->block->declaration_list;
+    unsigned int i                         = 0;
     for (; pos != nullptr; pos = pos->next, i++) {
-        dest->rvm_function->local_variable_list[i].identifier     = pos->identifier;
-        dest->rvm_function->local_variable_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
-                                                                                                  sizeof(RVM_TypeSpecifier));
+        dst->rvm_function->local_variable_list[i].identifier     = pos->identifier;
+        dst->rvm_function->local_variable_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                                                 sizeof(RVM_TypeSpecifier));
 
-        type_specifier_deep_copy(dest->rvm_function->local_variable_list[i].type_specifier, pos->type);
+        type_specifier_deep_copy(dst->rvm_function->local_variable_list[i].type_specifier, pos->type);
     }
 
     if (src->block != nullptr)
-        generate_code_from_method_definition(executer, src, dest);
+        generate_code_from_method_definition(executer, dst, src);
 }
 
 void add_top_level_code(Package* package, Package_Executer* executer) {
@@ -338,7 +338,7 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
     }
 }
 
-void generate_code_from_function_definition(Package_Executer* executer, Function* src, RVM_Function* dest) {
+void generate_code_from_function_definition(Package_Executer* executer, RVM_Function* dst, Function* src) {
     debug_log_with_darkgreen_coloar("\t");
     if (src->block == nullptr) {
         return;
@@ -351,19 +351,19 @@ void generate_code_from_function_definition(Package_Executer* executer, Function
     opcode_buffer_fix_label(opcode_buffer);
 
 
-    dest->u.derive_func->code_list     = opcode_buffer->code_list;
-    dest->u.derive_func->code_size     = opcode_buffer->code_size;
-    dest->u.derive_func->code_line_map = opcode_buffer->code_line_map;
-    // dest->local_variable_size          = 0;
-    // dest->local_variable_list          = nullptr;
+    dst->u.derive_func->code_list     = opcode_buffer->code_list;
+    dst->u.derive_func->code_size     = opcode_buffer->code_size;
+    dst->u.derive_func->code_line_map = opcode_buffer->code_line_map;
+    // dst->local_variable_size          = 0;
+    // dst->local_variable_list          = nullptr;
 
 
 #ifdef DEBUG_GENERATE_OUTPUT_VMCODE
-    dump_vm_function(dest);
+    dump_vm_function(dst);
 #endif
 }
 
-void generate_code_from_method_definition(Package_Executer* executer, MethodMember* src, RVM_Method* dest) {
+void generate_code_from_method_definition(Package_Executer* executer, RVM_Method* dst, MethodMember* src) {
     debug_log_with_darkgreen_coloar("\t");
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
@@ -375,9 +375,9 @@ void generate_code_from_method_definition(Package_Executer* executer, MethodMemb
 
     opcode_buffer_fix_label(opcode_buffer);
 
-    dest->rvm_function->u.derive_func->code_list     = opcode_buffer->code_list;
-    dest->rvm_function->u.derive_func->code_size     = opcode_buffer->code_size;
-    dest->rvm_function->u.derive_func->code_line_map = opcode_buffer->code_line_map;
+    dst->rvm_function->u.derive_func->code_list     = opcode_buffer->code_list;
+    dst->rvm_function->u.derive_func->code_size     = opcode_buffer->code_size;
+    dst->rvm_function->u.derive_func->code_line_map = opcode_buffer->code_line_map;
     // TODO: dump method detail
 }
 
