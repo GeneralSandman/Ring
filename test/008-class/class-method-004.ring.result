@@ -1,8 +1,24 @@
+
+test case 1
 invoke Job::PrintInfo
 false
 0
 0.000000
+
+test case 2
 invoke Job::PrintInfo
 true
+1
+1.100000
+
+test case 3
+invoke Job::PrintInfo
+true
+123
+123.123000
+
+test case 4
+invoke Job::PrintInfo
+false
 0
 0.000000
