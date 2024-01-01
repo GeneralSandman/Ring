@@ -966,7 +966,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 rvm->pc += 1;
             } else if (rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE) {
                 invoke_derive_function(rvm,
-                                       &function, &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
+                                       &function,
+                                       nullptr, &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
                                        &code_list, &code_size,
                                        &rvm->pc,
                                        &caller_stack_base);
@@ -979,9 +980,11 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // 每个对象的成员变量 是单独存储的
             // 但是 method 没必要单独存储, 在 class_definition 中就可以, 通过指针寻找 class_definition
             // 需要将 class_object 赋值给 self 变量
+            // TODO: 但是这里, gc会释放么, 让 invoke_derive_function变得不合法
             RVM_Method* method = &(class_object->u.class_object->class_ref->method_list[method_index]);
             invoke_derive_function(rvm,
-                                   &function, method->rvm_function,
+                                   &function,
+                                   class_object, method->rvm_function,
                                    &code_list, &code_size,
                                    &rvm->pc,
                                    &caller_stack_base);
@@ -1312,9 +1315,17 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, un
  * 3. change vm code to callee
  * 4. change pc
  *
+ * callee_object 是 callee_function的 所属对象
+ *
+ * callee_object == nullptr:
+ *      -> 是 function调用
+ * callee_object != nullptr:
+ *      -> 是method调用
+ *
  */
 void invoke_derive_function(Ring_VirtualMachine* rvm,
-                            RVM_Function** caller_function, RVM_Function* callee_function,
+                            RVM_Function**       caller_function,
+                            RVM_Object* callee_object, RVM_Function* callee_function,
                             RVM_Byte** code_list, unsigned int* code_size,
                             unsigned int* pc,
                             unsigned int* caller_stack_base) {
@@ -1342,7 +1353,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     *caller_stack_base = rvm->runtime_stack->top_index; // FIXME:
 
 
-    init_derive_function_local_variable(rvm, callee_function);
+    init_derive_function_local_variable(rvm, callee_object, callee_function);
 
     // FIXME:a local_variable_size
     // 暂时先写死为20
@@ -1458,9 +1469,14 @@ void restore_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo** call_info) {
     *call_info = head;
 }
 
-// FIXME:  初始化局部变量列表的时候存在问题
-// 如果局部变量是个数组
-void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function* function) {
+/*
+ * callee_class_object 是 callee_function的 所属对象
+ *
+ * FIXME: 初始化局部变量列表的时候存在问题
+ * FIXME: 如果局部变量是个数组
+ */
+void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
+                                         RVM_Object* callee_object, RVM_Function* function) {
     debug_log_with_white_coloar("\t");
 
     // FIXME: 先忽略局部变量的类型，先用int
@@ -1484,8 +1500,19 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function*
     RVM_Object*          object               = nullptr;
 
     // 初始化函数中声明的局部变量
+
     for (unsigned int i = 0; i < function->local_variable_size; i++, local_variable_value_index++) {
         type_specifier = function->local_variable_list[i].type_specifier;
+
+        // 初始化 self 变量
+        if (callee_object != nullptr && i == 0) {
+            // 如果 callee_object != nullptr
+            // function->local_variable_list[0] 必是self 变量
+            // 将 callee_object 初始化给 self
+            // 浅copy
+            STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_value_index, callee_object);
+            continue;
+        }
 
         switch (type_specifier->kind) {
         case RING_BASIC_TYPE_BOOL:

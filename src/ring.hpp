@@ -2102,7 +2102,8 @@ RVM_Object*          new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinit
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
-                                            RVM_Function** caller_function, RVM_Function* callee_function,
+                                            RVM_Function**       caller_function,
+                                            RVM_Object* callee_object, RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
                                             unsigned int* caller_stack_base);
@@ -2120,7 +2121,8 @@ void                 derive_function_finish(Ring_VirtualMachine* rvm,
                                             unsigned int  return_value_list_size);
 void                 store_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo* call_info);
 void                 restore_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo** call_info);
-void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm, RVM_Function* function);
+void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm,
+                                                         RVM_Object* callee_object, RVM_Function* function);
 
 RVM_Object*          string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* string_literal);
 RVM_Object*          concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b);
