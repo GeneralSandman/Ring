@@ -193,3 +193,4 @@ printNotPassCase
 # error-002.ring  重复定义全局变量
 # error-003.ring  重复定义函数
 # error-004.ring  重复 import package
+# error-006.ring  定义self变量
