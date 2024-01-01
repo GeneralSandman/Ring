@@ -1645,7 +1645,6 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer* exec
     assert(literal_expression->field_init_expression_list != nullptr);
 
     unsigned int         init_exp_size = 0;
-    unsigned int         field_count   = 0;
     unsigned int         oper_num      = 0;
 
     FieldInitExpression* pos           = literal_expression->field_init_expression_list;
@@ -1656,18 +1655,10 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer* exec
 
     // FIXME: 这里要做强制检查
     ClassDefinition* class_definition = literal_expression->type_specifier->u.class_type->class_definition;
-    // TODO: 先用笨办法 初始化
-    // TODO: field_count 后续需要在 fix_ast 就要需要算好
-    for (ClassMemberDeclaration* pos = class_definition->member; pos != nullptr; pos = pos->next) {
-        if (pos->type == MEMBER_FIELD) {
-            field_count++;
-        }
-    }
-
 
     // 需要知道初始化list中表达式的数量
     // 需要知道 class object 占多大的空间
-    oper_num = (field_count << 8) | init_exp_size;
+    oper_num                          = (class_definition->class_index << 8) | init_exp_size;
     generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLASS_OBJECT_LITERAL, oper_num, literal_expression->line_number);
 }
 
@@ -2049,6 +2040,8 @@ void type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier* src) {
 
     dst->kind = src->kind;
     if (src->kind == RING_BASIC_TYPE_CLASS) {
+        // class_index 在 type_specifier_deep_copy 没有修正
+        // TODO: 后期修正
         dst->u.class_def_index = src->u.class_type->class_definition->class_index;
     }
 }

@@ -1115,10 +1115,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             // class
         case RVM_CODE_NEW_CLASS_OBJECT_LITERAL: {
-            unsigned int field_count   = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]); // field 的数量不能超过 255
-            unsigned int init_exp_size = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]); // field 的数量不能超过 255
+            unsigned int class_index                  = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]); // field 的数量不能超过 255
+            unsigned int init_exp_size                = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]); // field 的数量不能超过 255
+            // class_index 在 type_specifier_deep_copy 没有修正
+            // TODO: 后期修正
+            RVM_ClassDefinition* rvm_class_definition = &(rvm->class_list[class_index]);
 
-            class_object               = rvm_new_class_object_literal(rvm, field_count, init_exp_size);
+            class_object                              = rvm_new_class_object_literal(rvm, rvm_class_definition, init_exp_size);
             runtime_stack->top_index -= init_exp_size;
             STACK_SET_OBJECT_OFFSET(rvm, 0, class_object);
             runtime_stack->top_index++;
@@ -1784,18 +1787,18 @@ RVM_Object* rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int fi
  * TODO: support field is string or array
  *
  */
-RVM_Object* rvm_new_class_object(Ring_VirtualMachine* rvm, unsigned int field_count) {
+RVM_Object* rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition) {
     RVM_Object* object     = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
 
-    size_t      alloc_size = field_count * sizeof(RVM_Value);
+    size_t      alloc_size = class_definition->field_size * sizeof(RVM_Value);
     RVM_Value*  field      = nullptr;
     field                  = (RVM_Value*)mem_alloc(rvm->meta_pool, alloc_size);
     memset(field, 0, alloc_size);
     // TODO: 有个遗留问题
     // RVM_Value 的 type 没有设置
 
-    // object->u.class_object->class_def   = nullptr;
-    object->u.class_object->field_count = field_count;
+    object->u.class_object->class_ref   = class_definition;
+    object->u.class_object->field_count = class_definition->field_size;
     object->u.class_object->field       = field;
 
 
@@ -1837,9 +1840,11 @@ RVM_Object* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size) {
     return object;
 }
 
-RVM_Object* rvm_new_class_object_literal(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int init_exp_size) {
-    RVM_Object* object = rvm_new_class_object(rvm, field_count);
-    if (field_count != init_exp_size) {
+RVM_Object* rvm_new_class_object_literal(Ring_VirtualMachine* rvm,
+                                         RVM_ClassDefinition* class_definition, unsigned int init_exp_size) {
+    // rvm_new_class_object 这个需要重写一下
+    RVM_Object* object = rvm_new_class_object(rvm, class_definition);
+    if (class_definition->field_size != init_exp_size) {
         // error report
         fprintf(stderr,
                 "the number of class init expresison list must equal to the number of class field");
@@ -2425,7 +2430,7 @@ RVM_ClassObject* rvm_heap_new_class_object(Ring_VirtualMachine* rvm) {
 
 RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src) {
     RVM_ClassObject* class_object = (RVM_ClassObject*)mem_alloc(rvm->meta_pool, sizeof(RVM_ClassObject));
-    // class_object->class_def       = src->class_def;
+    class_object->class_ref       = src->class_ref;
     class_object->field_count     = src->field_count;
 
     // FIXME: 这里还要继续完善深度copy

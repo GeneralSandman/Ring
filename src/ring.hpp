@@ -2133,12 +2133,12 @@ RVM_Object*          rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int
 RVM_Object*          rvm_new_array_string(Ring_VirtualMachine* rvm, unsigned int dimension);
 RVM_Object*          rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int dimension);
 
-RVM_Object*          rvm_new_class_object(Ring_VirtualMachine* rvm, unsigned int field_count);
+RVM_Object*          rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
 RVM_Object*          rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size);
 RVM_Object*          rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size);
 RVM_Object*          rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
 RVM_Object*          rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size);
-RVM_Object*          rvm_new_class_object_literal(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int init_exp_size);
+RVM_Object*          rvm_new_class_object_literal(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition, unsigned int init_exp_size);
 void                 rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
 void                 rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
 void                 rvm_string_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
