@@ -1,0 +1,18 @@
+
+test case 1
+invoke Job::PrintInfo
+false
+0
+0.000000
+true
+1
+1.100000
+
+test case 1
+invoke Job::PrintInfo
+true
+1
+1.100000
+false
+0
+0.000000
