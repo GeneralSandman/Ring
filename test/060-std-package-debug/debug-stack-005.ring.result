@@ -1,0 +1,12 @@
+
+test case 1
+0000$ring!Job.PrintInfo(var bool, var int, var double)
+    ./test/060-std-package-debug/debug-stack-005.ring:16
+0001$ring!main()
+    ./test/060-std-package-debug/debug-stack-005.ring:31
+
+test case 2
+0000$ring!PrintInfo(var bool, var int, var double)
+    ./test/060-std-package-debug/debug-stack-005.ring:25
+0001$ring!main()
+    ./test/060-std-package-debug/debug-stack-005.ring:31
