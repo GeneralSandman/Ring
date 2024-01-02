@@ -235,20 +235,22 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
                 char compile_err_buf[2048], compile_adv_buf[2048];
                 snprintf(compile_err_buf, sizeof(compile_err_buf),
                          "the number of local variable is greater than 255 in this block; E:%d.",
-                         ERROR_TOO_MANY_LOCAL_VARIABLE);
+                         ERROR_TOO_MANY_LOCAL_VARIABLES);
                 snprintf(compile_adv_buf, sizeof(compile_adv_buf),
                          "delete useless local variable in this block.");
 
                 ErrorReportContext context = {
-                    .package          = nullptr,
-                    .package_unit     = get_package_unit(),
-                    .source_file_name = get_package_unit()->current_file_name,
-                    .line_content     = package_unit_get_line_content(declaration->line_number),
-                    .line_number      = declaration->line_number,
-                    .column_number    = package_unit_get_column_number(),
-                    .error_message    = std::string(compile_err_buf),
-                    .advice           = std::string(compile_adv_buf),
-                    .report_type      = ERROR_REPORT_TYPE_COLL_ERR,
+                    .package                 = nullptr,
+                    .package_unit            = get_package_unit(),
+                    .source_file_name        = get_package_unit()->current_file_name,
+                    .line_content            = package_unit_get_line_content(declaration->line_number),
+                    .line_number             = declaration->line_number,
+                    .column_number           = package_unit_get_column_number(),
+                    .error_message           = std::string(compile_err_buf),
+                    .advice                  = std::string(compile_adv_buf),
+                    .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                    .ring_compiler_file      = (char*)__FILE__,
+                    .ring_compiler_file_line = __LINE__,
                 };
                 ring_compile_error_report(&context);
             }
@@ -362,6 +364,8 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
     switch (expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
         declaration = search_declaration(expression->package_posit, expression->identifier, block);
+
+        // error-report ERROR_UNDEFINITE_VARIABLE
         if (declaration == nullptr) {
             char error_message_buffer[1024];
             char advice_buffer[1024];
@@ -375,15 +379,17 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
                      expression->identifier);
 
             ErrorReportContext context = {
-                nullptr,
-                nullptr,
-                get_package_unit()->current_file_name,
-                package_unit_get_line_content(expression->line_number),
-                expression->line_number,
-                0,
-                std::string(error_message_buffer),
-                std::string(advice_buffer),
-                ERROR_REPORT_TYPE_EXIT_NOW,
+                .package                 = nullptr,
+                .package_unit            = nullptr,
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(expression->line_number),
+                .line_number             = expression->line_number,
+                .column_number           = 0,
+                .error_message           = std::string(error_message_buffer),
+                .advice                  = std::string(advice_buffer),
+                .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
             };
             ring_compile_error_report(&context);
         }
@@ -396,6 +402,8 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
             return nullptr;
         }
         function = search_function(expression->package_posit, expression->identifier);
+
+        // error-report ERROR_UNDEFINITE_VARIABLE
         if (function == nullptr) {
             char error_message_buffer[1024];
             char advice_buffer[1024];
@@ -407,15 +415,17 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
                      expression->identifier);
 
             ErrorReportContext context = {
-                nullptr,
-                nullptr,
-                get_package_unit()->current_file_name,
-                package_unit_get_line_content(expression->line_number),
-                expression->line_number,
-                0,
-                std::string(error_message_buffer),
-                std::string(advice_buffer),
-                ERROR_REPORT_TYPE_EXIT_NOW,
+                .package                 = nullptr,
+                .package_unit            = nullptr,
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(expression->line_number),
+                .line_number             = expression->line_number,
+                .column_number           = 0,
+                .error_message           = std::string(error_message_buffer),
+                .advice                  = std::string(advice_buffer),
+                .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
             };
             ring_compile_error_report(&context);
         }

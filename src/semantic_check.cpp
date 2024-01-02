@@ -25,6 +25,8 @@ void ring_compiler_analysis_global_variable(Package* package) {
     for (Declaration* decl : package->global_declaration_list) {
         std::string identifier = std::string(decl->identifier);
         auto        iter       = package->global_declaration_map.find(identifier);
+
+        // error-report ERROR_REDEFINITE_GLOBAL_VARIABLE
         if (iter != package->global_declaration_map.end()) {
             memset(compile_err_buf, 0, sizeof(compile_err_buf));
             memset(compile_adv_buf, 0, sizeof(compile_adv_buf));
@@ -37,15 +39,17 @@ void ring_compiler_analysis_global_variable(Package* package) {
                      decl->identifier);
 
             ErrorReportContext context = {
-                .package          = package,
-                .package_unit     = nullptr,
-                .source_file_name = get_package_unit()->current_file_name,
-                .line_content     = package_unit_get_line_content(decl->line_number),
-                .line_number      = decl->line_number,
-                .column_number    = 0,
-                .error_message    = std::string(compile_err_buf),
-                .advice           = std::string(compile_adv_buf),
-                .report_type      = ERROR_REPORT_TYPE_COLL_ERR,
+                .package                 = package,
+                .package_unit            = nullptr,
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(decl->line_number),
+                .line_number             = decl->line_number,
+                .column_number           = 0,
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
             };
             ring_compile_error_report(&context);
             continue;
@@ -58,6 +62,8 @@ void ring_compiler_analysis_function(Package* package) {
     for (Function* function : package->function_list) {
         std::string identifier = std::string(function->function_name);
         auto        iter       = package->function_map.find(identifier);
+
+        // error-report ERROR_REDEFINITE_FUNCTION
         if (iter != package->function_map.end()) {
             memset(compile_err_buf, 0, sizeof(compile_err_buf));
             memset(compile_adv_buf, 0, sizeof(compile_adv_buf));
@@ -72,15 +78,17 @@ void ring_compiler_analysis_function(Package* package) {
                      function->function_name);
 
             ErrorReportContext context = {
-                .package          = package,
-                .package_unit     = nullptr,
-                .source_file_name = get_package_unit()->current_file_name,
-                .line_content     = package_unit_get_line_content(function->start_line_number),
-                .line_number      = function->start_line_number,
-                .column_number    = 0,
-                .error_message    = std::string(compile_err_buf),
-                .advice           = std::string(compile_adv_buf),
-                .report_type      = ERROR_REPORT_TYPE_COLL_ERR,
+                .package                 = package,
+                .package_unit            = nullptr,
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(function->start_line_number),
+                .line_number             = function->start_line_number,
+                .column_number           = 0,
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
             };
             ring_compile_error_report(&context);
             continue;

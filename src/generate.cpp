@@ -201,6 +201,60 @@ void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dst, C
         }
     }
 
+    // error-report ERROR_TOO_MANY_FIELDS_IN_CLASS
+    if (dst->field_size > 255) {
+        char compile_err_buf[2048], compile_adv_buf[2048];
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "class `%s` has %d fields, greater than 255; E:%d.",
+                 dst->identifier, dst->field_size,
+                 ERROR_TOO_MANY_FIELDS_IN_CLASS);
+        snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                 "delete useless field of class `%s`.",
+                 dst->identifier);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(dst->start_line_number),
+            .line_number             = dst->start_line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+    // error-report ERROR_TOO_MANY_METHODS_IN_CLASS
+    if (dst->method_size > 255) {
+        char compile_err_buf[2048], compile_adv_buf[2048];
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "class `%s` has %d methods, greater than 255; E:%d.",
+                 dst->identifier, dst->method_size,
+                 ERROR_TOO_MANY_METHODS_IN_CLASS);
+        snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                 "delete useless field of class `%s`.",
+                 dst->identifier);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(dst->start_line_number),
+            .line_number             = dst->start_line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
     dst->field_list           = (RVM_Field*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Field) * dst->field_size);
     dst->method_list          = (RVM_Method*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Method) * dst->method_size);
 
@@ -1282,6 +1336,7 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, E
         opcode = RVM_CODE_MINUS_DOUBLE;
         break;
     default: {
+        // error-report ERROR_MINUS_OPER_INVALID_USE
         char error_message_buffer[1024];
         char advice_buffer[1024];
         snprintf(error_message_buffer, 1024, "%sError:%s "
@@ -1295,15 +1350,17 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, E
                  LOG_COLOR_CLEAR);
 
         ErrorReportContext context = {
-            nullptr,
-            nullptr,
-            get_package_unit()->current_file_name,
-            package_unit_get_line_content(expression->line_number),
-            expression->line_number,
-            0,
-            std::string(error_message_buffer),
-            std::string(advice_buffer),
-            ERROR_REPORT_TYPE_EXIT_NOW,
+            .package                 = nullptr,
+            .package_unit            = nullptr,
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(expression->line_number),
+            .line_number             = expression->line_number,
+            .column_number           = 0,
+            .error_message           = std::string(error_message_buffer),
+            .advice                  = std::string(advice_buffer),
+            .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
         };
         ring_compile_error_report(&context);
     }

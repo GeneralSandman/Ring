@@ -533,6 +533,10 @@ void ring_compile_error_report(ErrorReportContext* context) {
                 context->advice.c_str());
     }
 
+#ifdef DEBUG
+    fprintf(stderr, "|RingDebug: %s:%d\n", context->ring_compiler_file, context->ring_compiler_file_line);
+#endif
+
     // fprintf(stderr, "\n\n\n\n");
     fflush(stderr);
 

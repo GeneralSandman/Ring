@@ -882,6 +882,7 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Ide
     Identifier*  pos_ider = identifier_list;
     Expression*  pos_init = initializer_list;
     for (pos_ider = identifier_list; pos_ider; pos_ider = pos_ider->next) {
+        // error-report ERROR_INVALID_VARIABLE_IDENTIFIER
         if (strcmp(pos_ider->identifier_name, "self") == 0) {
             char compile_err_buf[2048], compile_adv_buf[2048];
             snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -892,15 +893,17 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Ide
 
 
             ErrorReportContext context = {
-                .package          = nullptr,
-                .package_unit     = get_package_unit(),
-                .source_file_name = get_package_unit()->current_file_name,
-                .line_content     = package_unit_get_line_content(pos_ider->line_number),
-                .line_number      = pos_ider->line_number,
-                .column_number    = package_unit_get_column_number(),
-                .error_message    = std::string(compile_err_buf),
-                .advice           = std::string(compile_adv_buf),
-                .report_type      = ERROR_REPORT_TYPE_COLL_ERR,
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(pos_ider->line_number),
+                .line_number             = pos_ider->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
             };
             ring_compile_error_report(&context);
         }
@@ -974,6 +977,7 @@ void import_package_list_add_item(char* package_name, char* rename) {
 
     // duplicate import package
     for (ImportPackageInfo* import_pack : get_package_unit()->import_package_list) {
+        // error-report ERROR_DUPLICATE_IMPORT_PACKAGE
         if (strcmp(import_pack->package_name, package_name) == 0) {
             char compile_err_buf[2048], compile_adv_buf[2048];
             snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -987,15 +991,17 @@ void import_package_list_add_item(char* package_name, char* rename) {
                      import_pack->line_number, 0);
 
             ErrorReportContext context = {
-                .package          = nullptr,
-                .package_unit     = get_package_unit(),
-                .source_file_name = get_package_unit()->current_file_name,
-                .line_content     = package_unit_get_line_content(import_pack->line_number),
-                .line_number      = package_unit_get_line_number(),
-                .column_number    = package_unit_get_column_number(),
-                .error_message    = std::string(compile_err_buf),
-                .advice           = std::string(compile_adv_buf),
-                .report_type      = ERROR_REPORT_TYPE_COLL_ERR,
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(import_pack->line_number),
+                .line_number             = package_unit_get_line_number(),
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
             };
             ring_compile_error_report(&context);
         }

@@ -1551,9 +1551,9 @@ typedef enum {
     ERROR_MINUS_OPER_INVALID_USE      = 200003, // - 符号 不合法使用
     ERROR_DUPLICATE_IMPORT_PACKAGE    = 200004, // 重复 import package
     ERROR_INVALID_VARIABLE_IDENTIFIER = 200005, // 不合法的变量标识符
-    ERROR_TOO_MANY_LOCAL_VARIABLE     = 200006, // 局部变量数量超过限制
-    ERROR_TOO_MANY_FIELD_IN_CLASS     = 200007, // class 中 field 的数量超过限制
-    ERROR_TOO_MANY_METHOD_IN_CLASS    = 200008, // class 中 method 的数量超过限制
+    ERROR_TOO_MANY_LOCAL_VARIABLES    = 200006, // 局部变量数量超过限制
+    ERROR_TOO_MANY_FIELDS_IN_CLASS    = 200007, // class 中 field 的数量超过限制
+    ERROR_TOO_MANY_METHODS_IN_CLASS   = 200008, // class 中 method 的数量超过限制
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -1600,6 +1600,15 @@ struct ErrorReportContext {
     std::string     advice;
 
     ErrorReportType report_type;
+
+
+    /*
+    ring_compiler_file
+    ring_compiler_file_line
+        ring 编译器的源文件, 可以快速定位 error-report 所在的位置
+    */
+    char*        ring_compiler_file;
+    unsigned int ring_compiler_file_line;
 };
 
 typedef enum {
