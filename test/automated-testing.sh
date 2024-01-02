@@ -194,3 +194,10 @@ printNotPassCase
 # error-003.ring  重复定义函数
 # error-004.ring  重复 import package
 # error-006.ring  定义self变量
+
+
+
+# 
+# 如何 测试 ring dump 修改的正确性
+# 
+# ./bin/ring dump ./test/008-class/class-method-001.ring

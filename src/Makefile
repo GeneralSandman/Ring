@@ -57,6 +57,7 @@ CFLAGS = -c -static -O2 -std=c++17 \
 				-Wno-unused-parameter \
 				-Wno-unused-function \
 				# -g \
+				 -DDEBUG \
 				 -DDEBUG_FLEX1 \
 				 -DDEBUG_BISON1 \
 				 -DDEBUG_CREATE_AST1 \

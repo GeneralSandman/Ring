@@ -250,6 +250,56 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 
 1. 一个 package中 有多个 class定义
 
+
+-----------------------------
+
+## 2024-01-01周
+
+### *A. 优化: ring dump*
+
+ring dump 支持 dump class的详情
+
+class:
+1. class 名称 ✅ 
+2. class 对应的源代码文件,行数  ✅ 
+3. field 数量/详情 ✅ 
+4. method数量/详情 ✅ 
+5. method局部变量的数量/详情 ✅ 
+6. method返回值的数量  ✅ 
+
+
+function:
+1. 局部变量的数量/详情
+2. 返回值的数量/详情
+
+
+
+### *B. 类 method*
+
+
+1. 定义 method的时候支持 传递参数 ✅ 
+2. 调用 method的时候支持 传递参数 ✅ 
+3. method 参数 + 局部变量的数量 不能超过 254. (self 占用一个)
+4. function 参数 + 局部变量的数量 不能超过 255.
+5. return list 也得有数量限制, 不能超过 255.
+6. class 中 method 的数量不能超过 255 ✅ 
+7. class 中 field 的数量不能超过 255 ✅ 
+
+
+
+### *C. error-report的时候添加 location* ✅
+
+bison  在报语法错误的时候, 需要将 TOKEN_XXX  转化成对应的字符, 方便用户查看.
+
+
+ring 编译报错的时候添加一个 debug 控制 报错所在的位置,  __FILE__ __LINE__ 方便调试
+
+
+
+### *D. 编写测试用例一览图, 说明每个测试用例覆盖的场景*
+
+
+
 -----------------------------
 
 ## 2023-12-15周
@@ -275,13 +325,14 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 
 ### *C. 设计: 类*
 
-规划类方法 ✅
-
-类 self 变量
+1. 调用 class method
+2. support `self` variable in class-method.
 
 self 不是个关键字, self可以是任何变量名, 但是在 method中比较特殊.
 
 需要在 method 的中 添加一个隐藏的变量, self
+
+在 method中, 只能通过 self.<field> 去访问成员变量
 
 对象调用方法 ✅
 
@@ -296,10 +347,7 @@ self 不是个关键字, self可以是任何变量名, 但是在 method中比较
 
 
 
-
-
-
-### D
+### *D. 重构: 调整相关API*
 
 所有copy函数的 dst src 都要调整成 std-api的那种形式
 
