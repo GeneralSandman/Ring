@@ -1,4 +1,4 @@
-# Ring 2023年 规划表
+# Ring 演进规划
 
 
 > [!TIP|label:tip]
@@ -13,7 +13,7 @@
 > 
 
 
-## 年总规划
+## 总规划
 
 1. 通读 diksam_v0.4 
    - https://github.com/GeneralSandman/diksam_v0.4
@@ -34,7 +34,8 @@
    9. package 源代码的组织形式 import/package ✅
    10. 生成字节码 到二进制文件 解析字节码 Dump ByteCode (需要拆分出 编译前 和 加载虚拟机代码)
    11. linux man手册
-   12. 完善Ring的数据类型 int double 是远远不够的 ✅
+   12. 支持 `ring dump`
+   13. 完善Ring的数据类型 int double 是远远不够的 ✅
 4. 完善Ring的高级功能
    1.  类型的强制转换 与 隐式转换
    2.  垃圾回收 Grabage Collection ✅
@@ -207,11 +208,11 @@ www.runoob.com
 ## 测试集
 
 ```
-2023-12-15
+2024-01-02
 
 [Result]:
-Pass/All = 207/207
-NotTest  = 5
+Pass/All = 214/214
+NotTest  = 4
 Fail     = 0
 Usetime  = 10S
 
