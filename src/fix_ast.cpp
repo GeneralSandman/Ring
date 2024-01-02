@@ -526,9 +526,9 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
     TypeSpecifier* type_specifier    = create_class_type_specifier(class_definition->class_identifier);
 
     Declaration*   self_declaration  = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
-    self_declaration->line_number    = class_definition->line_number;
+    self_declaration->line_number    = method->start_line_number;
     self_declaration->type           = type_specifier;
-    self_declaration->identifier     = "self";
+    self_declaration->identifier     = (char*)"self";
     self_declaration->initializer    = nullptr;
     self_declaration->is_const       = false;
     self_declaration->is_local       = false;

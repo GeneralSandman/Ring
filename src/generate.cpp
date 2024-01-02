@@ -52,7 +52,7 @@ void package_executer_dump(Package_Executer* package_executer) {
     //        LOG_COLOR_CLEAR);
 
     for (unsigned int i = 0; i < package_executer->function_size; i++) {
-        dump_vm_function(&(package_executer->function_list[i]));
+        dump_vm_function(nullptr, &(package_executer->function_list[i]));
     }
 
     for (unsigned int i = 0; i < package_executer->class_size; i++) {
@@ -183,6 +183,9 @@ void add_classes(Package* package, Package_Executer* executer) {
 void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dst, ClassDefinition* src) {
     debug_log_with_darkgreen_coloar("\t");
 
+    dst->source_file            = src->source_file;
+    dst->start_line_number      = src->start_line_number;
+    dst->end_line_number        = src->end_line_number;
     dst->identifier             = src->class_identifier;
     dst->field_size             = 0;
     dst->field_list             = nullptr;
@@ -198,16 +201,19 @@ void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dst, C
         }
     }
 
-    dst->method_list = (RVM_Method*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Method) * dst->method_size);
+    dst->field_list           = (RVM_Field*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Field) * dst->field_size);
+    dst->method_list          = (RVM_Method*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Method) * dst->method_size);
 
-    unsigned int i   = 0;
-    pos              = src->member;
+    unsigned int field_index  = 0;
+    unsigned int method_index = 0;
+    pos                       = src->member;
     for (; pos != nullptr; pos = pos->next) {
         if (pos->type == MEMBER_FIELD) {
+            copy_field(executer, &dst->field_list[field_index], pos->u.field);
+            field_index++;
         } else if (pos->type == MEMBER_METHOD) {
-            copy_method(executer, &dst->method_list[i], pos->u.method);
-
-            i++;
+            copy_method(executer, &dst->method_list[method_index], pos->u.method);
+            method_index++;
         }
     }
 }
@@ -265,6 +271,7 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
     dst->estimate_runtime_stack_capacity = 0;
 }
 
+
 void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src) {
     debug_log_with_darkgreen_coloar("\t");
 
@@ -302,6 +309,15 @@ void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src)
 
     if (src->block != nullptr)
         generate_code_from_method_definition(executer, dst, src);
+}
+
+void copy_field(Package_Executer* executer, RVM_Field* dst, FieldMember* src) {
+    dst->identifier     = src->identifier;
+
+    dst->type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                        sizeof(RVM_TypeSpecifier));
+
+    type_specifier_deep_copy(dst->type_specifier, src->type);
 }
 
 void add_top_level_code(Package* package, Package_Executer* executer) {

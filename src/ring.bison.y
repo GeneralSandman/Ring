@@ -188,7 +188,6 @@ int yylex();
 %type <m_expression> maybe_empty_expression
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
-%type <m_method_call_expression> method_call_expression
 %type <m_array_literal_expression> array_literal_expression
 %type <m_class_object_literal_expression> class_object_literal_expression
 %type <m_field_init_expression> class_field_init_element_list class_field_init_element
@@ -223,6 +222,7 @@ int yylex();
 %type <m_attribute> attribute attribute_list
 
 
+// %type <m_method_call_expression> method_call_expression
 
 %%
 
@@ -1138,13 +1138,6 @@ function_call_expression
     }
     ;
 
-method_call_expression
-    : identifier TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
-    {
-        debug_log_with_green_coloar("[RULE::function_call_expression]\t ");
-        $$ = create_method_call_expression(create_expression_identifier($1), $3, $5);
-    }
-    ;
 
 array_literal_expression
     : basic_type_specifier dimension_expression_list TOKEN_LC expression_list TOKEN_RC
@@ -1292,6 +1285,17 @@ dot_expression
         debug_log_with_green_coloar("[RULE::dot_expression:4]\t ");
     }
     ;
+*/
+
+/*
+method_call_expression
+    : identifier TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
+    {
+        debug_log_with_green_coloar("[RULE::function_call_expression]\t ");
+        $$ = create_method_call_expression(create_expression_identifier($1), $3, $5);
+    }
+    ;
+
 */
 
 

@@ -1017,11 +1017,13 @@ void import_package_list_add_item(char* package_name, char* rename) {
 ClassDefinition* start_class_definition(char* class_identifier) {
     debug_log_with_yellow_coloar("\t");
 
-    ClassDefinition* class_def  = (ClassDefinition*)mem_alloc(get_front_mem_pool(), sizeof(ClassDefinition));
-    class_def->line_number      = package_unit_get_line_number();
-    class_def->class_identifier = class_identifier;
-    class_def->member           = nullptr;
-    class_def->next             = nullptr;
+    ClassDefinition* class_def   = (ClassDefinition*)mem_alloc(get_front_mem_pool(), sizeof(ClassDefinition));
+    class_def->source_file       = package_unit_get_file_name();
+    class_def->start_line_number = package_unit_get_line_number();
+    class_def->end_line_number   = package_unit_get_line_number();
+    class_def->class_identifier  = class_identifier;
+    class_def->member            = nullptr;
+    class_def->next              = nullptr;
 
 
     package_unit_add_class_definition(class_def);
@@ -1034,7 +1036,8 @@ ClassDefinition* finish_class_definition(ClassDefinition* class_def, ClassMember
 
     assert(class_def != nullptr);
 
-    class_def->member = class_member_declar;
+    class_def->end_line_number = package_unit_get_line_number();
+    class_def->member          = class_member_declar;
 
     return class_def;
 }

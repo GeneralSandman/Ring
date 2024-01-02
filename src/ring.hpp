@@ -434,6 +434,10 @@ struct RVM_Method {
 };
 
 struct RVM_ClassDefinition {
+    std::string  source_file;
+    unsigned int start_line_number; // 源码的开始行
+    unsigned int end_line_number;   // 源码的结束行
+
     char*        identifier;
 
     unsigned int class_index;
@@ -982,7 +986,9 @@ struct Ring_Array {
 
 
 struct ClassDefinition {
-    unsigned int            line_number;
+    std::string             source_file;
+    unsigned int            start_line_number; // 源码的开始行
+    unsigned int            end_line_number;   // 源码的结束行
 
     unsigned int            class_index;
     char*                   class_identifier;
@@ -2014,8 +2020,11 @@ void              add_global_variable(Package* package, Package_Executer* execut
 void              add_functions(Package* package, Package_Executer* executer);
 void              add_classes(Package* package, Package_Executer* executer);
 void              class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dst, ClassDefinition* src);
+
 void              copy_function(Package_Executer* executer, RVM_Function* dst, Function* src);
 void              copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src);
+void              copy_field(Package_Executer* executer, RVM_Field* dst, FieldMember* src);
+
 void              add_top_level_code(Package* package, Package_Executer* executer);
 void              generate_code_from_function_definition(Package_Executer* executer, RVM_Function* dst, Function* src);
 void              generate_code_from_method_definition(Package_Executer* executer, RVM_Method* dst, MethodMember* src);
@@ -2261,7 +2270,7 @@ void                     ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_st
 void                     ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm);
 std::vector<std::string> list_files_of_dir(char* dir);
 
-void                     dump_vm_function(RVM_Function* function);
+void                     dump_vm_function(RVM_ClassDefinition* class_definition, RVM_Function* function);
 void                     dump_vm_class(RVM_ClassDefinition* class_definition);
 
 unsigned int             get_source_line_number_by_pc(RVM_Function* function, unsigned int pc);

@@ -234,11 +234,28 @@ std::vector<std::string> list_files_of_dir(char* dir) {
     return file_list;
 }
 
-void dump_vm_function(RVM_Function* function) {
+/*
+ * ring dump derive function 细节
+ * Detail:
+ * 1. 函数名
+ * 2. 所在源代码文件名, 源代码文件行树
+ * 3. 函数参数的数量
+ * 4. 局部变量的数量
+ * 5. 代码对应的虚拟机字节码
+ *
+ * TIP:
+ * class_definition == nullptr: 打印 非 method的细节
+ * class_definition != nullptr: 是打印 method的细节
+ */
+void dump_vm_function(RVM_ClassDefinition* class_definition, RVM_Function* function) {
     assert(function != nullptr);
 
-    printf("$%s    <%s:%d,%d>\n",
-           format_rvm_function(function).c_str(),
+    if (class_definition == nullptr) {
+        printf("$%s    ", format_rvm_function(function).c_str());
+    } else {
+        printf("$%s.%s    ", class_definition->identifier, format_rvm_function(function).c_str());
+    }
+    printf("<%s:%d,%d>\n",
            function->source_file.c_str(),
            function->start_line_number, function->end_line_number);
 
@@ -317,12 +334,28 @@ void dump_vm_function(RVM_Function* function) {
 
 void dump_vm_class(RVM_ClassDefinition* class_definition) {
     assert(class_definition != nullptr);
-    return;
 
-    // 这里会 core dump
+    printf("%%%s    <%s:%d,%d>\n",
+           class_definition->identifier,
+           class_definition->source_file.c_str(),
+           class_definition->start_line_number, class_definition->end_line_number);
+
+    printf("+Field:     %d\n", class_definition->field_size);
+    for (unsigned int i = 0; i < class_definition->field_size; i++) {
+        printf(" ├──%-30s    ", class_definition->field_list[i].identifier);
+        printf("%s\n", format_rvm_type_specifier(class_definition->field_list[i].type_specifier).c_str());
+    }
+
+    printf("+Method:    %d\n", class_definition->method_size);
+    for (unsigned int i = 0; i < class_definition->method_size; i++) {
+        printf(" ├──%s\n", class_definition->method_list[i].identifier);
+    }
+
+    printf("\n");
+
 
     for (unsigned int i = 0; i < class_definition->method_size; i++) {
-        dump_vm_function(class_definition->method_list[i].rvm_function);
+        dump_vm_function(class_definition, class_definition->method_list[i].rvm_function);
     }
     printf("\n");
 }
