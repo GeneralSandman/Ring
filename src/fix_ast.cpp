@@ -229,6 +229,29 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
 
             pos->variable_index = block->declaration_list_size++;
             pos->is_local       = 1;
+
+            // error-report ERROR_TOO_MANY_LOCAL_VARIABLE
+            if (block->declaration_list_size > 255) {
+                char compile_err_buf[2048], compile_adv_buf[2048];
+                snprintf(compile_err_buf, sizeof(compile_err_buf),
+                         "the number of local variable is greater than 255 in this block; E:%d.",
+                         ERROR_TOO_MANY_LOCAL_VARIABLE);
+                snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                         "delete useless local variable in this block.");
+
+                ErrorReportContext context = {
+                    .package          = nullptr,
+                    .package_unit     = get_package_unit(),
+                    .source_file_name = get_package_unit()->current_file_name,
+                    .line_content     = package_unit_get_line_content(declaration->line_number),
+                    .line_number      = declaration->line_number,
+                    .column_number    = package_unit_get_column_number(),
+                    .error_message    = std::string(compile_err_buf),
+                    .advice           = std::string(compile_adv_buf),
+                    .report_type      = ERROR_REPORT_TYPE_COLL_ERR,
+                };
+                ring_compile_error_report(&context);
+            }
         } else {
             // 全局变量
             PackageUnit* package_unit = get_package_unit();
@@ -539,6 +562,7 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
     add_declaration(self_declaration, block, nullptr);
 
     if (block != nullptr) {
+        add_parameter_to_declaration(method->parameter_list, block);
         fix_statement_list(block->statement_list, block, nullptr);
     }
 }

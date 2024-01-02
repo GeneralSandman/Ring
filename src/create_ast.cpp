@@ -483,6 +483,13 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
 Function* new_function_definition(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
     debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier->identifier_name);
 
+    unsigned int parameter_list_size = 0;
+    // 把函数参数的变量添加到 variable_list 中
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
+        parameter_list_size++;
+    }
+
+
     Function* function            = (Function*)mem_alloc(get_front_mem_pool(), sizeof(Function));
     function->source_file         = package_unit_get_file_name();
     function->start_line_number   = identifier->line_number;
@@ -492,15 +499,11 @@ Function* new_function_definition(FunctionType type, Identifier* identifier, Par
     function->func_index          = get_package_unit()->function_list.size();
     function->type                = type;
     function->function_name       = identifier->identifier_name;
-    function->parameter_list_size = 0;
+    function->parameter_list_size = parameter_list_size;
     function->parameter_list      = parameter_list;
     function->block               = block;
     function->next                = nullptr;
 
-    // 把函数参数的变量添加到 variable_list 中
-    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
-        function->parameter_list_size++;
-    }
 
     return function;
 }
@@ -880,8 +883,7 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Ide
     Expression*  pos_init = initializer_list;
     for (pos_ider = identifier_list; pos_ider; pos_ider = pos_ider->next) {
         if (strcmp(pos_ider->identifier_name, "self") == 0) {
-            char compile_err_buf[2048];
-            char compile_adv_buf[2048];
+            char compile_err_buf[2048], compile_adv_buf[2048];
             snprintf(compile_err_buf, sizeof(compile_err_buf),
                      "forbid definite `self` variable; E:%d.",
                      ERROR_INVALID_VARIABLE_IDENTIFIER);
@@ -973,8 +975,7 @@ void import_package_list_add_item(char* package_name, char* rename) {
     // duplicate import package
     for (ImportPackageInfo* import_pack : get_package_unit()->import_package_list) {
         if (strcmp(import_pack->package_name, package_name) == 0) {
-            char compile_err_buf[2048];
-            char compile_adv_buf[2048];
+            char compile_err_buf[2048], compile_adv_buf[2048];
             snprintf(compile_err_buf, sizeof(compile_err_buf),
                      "duplicate import package `%s`; E:%d.",
                      import_pack->package_name,

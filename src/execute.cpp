@@ -1482,18 +1482,24 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                          RVM_Object* callee_object, RVM_Function* function) {
     debug_log_with_white_coloar("\t");
 
-    // FIXME: 先忽略局部变量的类型，先用int
-    unsigned int arguement_list_size        = function->parameter_size;
-    unsigned int arguement_list_index       = rvm->runtime_stack->top_index - CALL_INFO_SIZE_V2 - arguement_list_size;
-    // TODO: 这里有点兼容逻辑, 需要吧 CALL_INFO_SIZE_V2 去掉
+    unsigned int arguement_list_size   = function->parameter_size;
+    unsigned int arguement_list_index  = rvm->runtime_stack->top_index - CALL_INFO_SIZE_V2 - arguement_list_size;
+    // TODO: 这里有点兼容逻辑, 需要把 CALL_INFO_SIZE_V2 去掉
 
-    // 通过实参 来初始化形参
-    // init argument with parameter
-    unsigned int local_variable_value_index = 0;
-    for (; local_variable_value_index < arguement_list_size; local_variable_value_index++) {
+    unsigned int local_variable_offset = 0;
+
+    // Step-1: 初始化 self 变量
+    if (callee_object != nullptr) {
+        rvm->runtime_stack->data[rvm->runtime_stack->top_index + 0].type     = RVM_VALUE_TYPE_OBJECT;
+        rvm->runtime_stack->data[rvm->runtime_stack->top_index + 0].u.object = callee_object;
+        local_variable_offset++;
+    }
+
+    // Step-2: 通过实参 来初始化形参
+    for (unsigned int i = 0; i < arguement_list_size; i++, local_variable_offset++) {
         STACK_COPY_INDEX(rvm,
-                         rvm->runtime_stack->top_index + local_variable_value_index,
-                         arguement_list_index + local_variable_value_index);
+                         rvm->runtime_stack->top_index + local_variable_offset,
+                         arguement_list_index + i);
     }
 
     // 局部变量为object的情况
@@ -1502,9 +1508,8 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
     RVM_ClassDefinition* rvm_class_definition = nullptr;
     RVM_Object*          object               = nullptr;
 
-    // 初始化函数中声明的局部变量
-
-    for (unsigned int i = 0; i < function->local_variable_size; i++, local_variable_value_index++) {
+    // Step-3: 初始化函数中声明的局部变量
+    for (unsigned int i = 0; i < function->local_variable_size; i++, local_variable_offset++) {
         type_specifier = function->local_variable_list[i].type_specifier;
 
         // 初始化 self 变量
@@ -1513,7 +1518,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             // function->local_variable_list[0] 必是self 变量
             // 将 callee_object 初始化给 self
             // 浅copy
-            STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_value_index, callee_object);
+            // 这个操作 已经在 Step-1 完成了, 改步骤需要忽略.
             continue;
         }
 
@@ -1531,14 +1536,14 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             break;
         case RING_BASIC_TYPE_STRING:
             object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_STRING);
-            STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_value_index, object);
+            STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_offset, object);
             break;
         case RING_BASIC_TYPE_CLASS:
             // Search class-definition from variable declaration.
             rvm_class_definition = &(rvm->class_list[type_specifier->u.class_def_index]);
 
             object               = new_class_object(rvm, rvm_class_definition);
-            STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_value_index, object);
+            STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_offset, object);
             break;
 
         default:

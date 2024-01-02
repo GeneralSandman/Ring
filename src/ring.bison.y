@@ -1091,9 +1091,15 @@ member_expression
     }
     | primary_not_new_array TOKEN_DOT identifier TOKEN_LP TOKEN_RP
     {
-        debug_log_with_green_coloar("[RULE::function_call_expression]\t ");
+        debug_log_with_green_coloar("[RULE::function_call_expression:1]\t ");
 
         $$ = create_expression_from_method_call(create_method_call_expression($1, $3, nullptr));
+    }
+    | primary_not_new_array TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
+    {
+        debug_log_with_green_coloar("[RULE::function_call_expression:2]\t ");
+
+        $$ = create_expression_from_method_call(create_method_call_expression($1, $3, $5));
     }
     ;
 
