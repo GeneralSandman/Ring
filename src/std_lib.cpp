@@ -519,9 +519,14 @@ RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int 
                 source_line_number = get_source_line_number_by_pc(pos->callee_function, pos->caller_pc);
             }
 
-            printf("%04d$ring!%s\n",
-                   offset,
-                   format_rvm_function(pos->callee_function).c_str());
+            printf("%04d$ring!", offset);
+            // TODO: 这里想个更好的办法, 减少代码重复
+            if (pos->callee_object == nullptr) {
+                printf("%s\n", format_rvm_function(pos->callee_function).c_str());
+            } else {
+                printf("%s.%s\n", pos->callee_object->u.class_object->class_ref->identifier, format_rvm_function(pos->callee_function).c_str());
+            }
+
 
             printf("    %s:%d\n", source_file.c_str(), source_line_number);
         }

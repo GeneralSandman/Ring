@@ -250,6 +250,7 @@ std::vector<std::string> list_files_of_dir(char* dir) {
 void dump_vm_function(RVM_ClassDefinition* class_definition, RVM_Function* function) {
     assert(function != nullptr);
 
+    // TODO: 这里想个更好的办法, 减少代码重复
     if (class_definition == nullptr) {
         printf("$%s    ", format_rvm_function(function).c_str());
     } else {

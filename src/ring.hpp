@@ -828,6 +828,7 @@ struct RVM_CallInfo {
     unsigned int  caller_pc; // 调用者的返回地址
     unsigned int  caller_stack_base;
 
+    RVM_Object*   callee_object;
     RVM_Function* callee_function;
     unsigned int  callee_argument_size; // 函数调用的参数数量，可变参数
 
