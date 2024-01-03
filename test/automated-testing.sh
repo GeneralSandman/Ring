@@ -65,8 +65,10 @@ NOT_TEST_FILES=(
   # double 数值比对, 存在bug
   )
 
-# 测试的结果文件
+# 测试的结果文件, 主要用于存放本次测试的失败结果
 TEST_RESULT="./automated-testing.sh.result"
+
+TEST_DETAIL_SUMMARY="./test/ring-测试用例表.md"
 
 # 测试的轮数, 用于多次执行
 TEST_LOOP_NUM=1
@@ -86,7 +88,32 @@ isNotTestFile(){
     return 0
 }
 
-autoTestFunc(){
+# 导出一个的测试用例case 说明和 测试情况
+exportTestCase(){
+    num=$1
+    model=$2
+    source_code_file=$3
+    result=$5
+
+    if [[ $num -eq 1 ]];then
+        echo "" > $TEST_DETAIL_SUMMARY
+        printf "# Ring 测试用例表\n" >> $TEST_DETAIL_SUMMARY
+        printf "\n\n" >> $TEST_DETAIL_SUMMARY
+        printf "- 测试时间:" >> $TEST_DETAIL_SUMMARY
+        echo $(date +"%Y-%m-%d %H:%M:%S")  >> $TEST_DETAIL_SUMMARY
+        printf "\n\n" >> $TEST_DETAIL_SUMMARY
+        printf "|Num | 模块 | 文件                           | 测试内容 | 通过 |\n" >> $TEST_DETAIL_SUMMARY
+        printf "|--- | -----| ------------------------------| -------- | -- |\n" >> $TEST_DETAIL_SUMMARY
+    fi
+
+
+    tmp=$(grep "^// TestDetail:" $source_code_file | awk -F"// TestDetail: " '{print $2}')
+    testDetail=${tmp//$'\n'/<br>}
+    printf  "| %-4s | *%-20s | %-80s | %-80s | %-10s |\n" $num $model $source_code_file "$testDetail" $result >> $TEST_DETAIL_SUMMARY
+
+}
+
+autoTestAction(){
     model=$1
     source_code_file=$2"/"$3
     run_result_file=$2"/"$3".result"
@@ -127,6 +154,8 @@ autoTestFunc(){
         printf "%-4s *%-20s %-80s %-80s \033[31m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
     fi
     rm $run_result_file_tmp
+
+    exportTestCase $all_num $model $source_code_file $run_result_file $result
 }
 
 printNotPassCase(){
@@ -152,7 +181,7 @@ for((test_loop=1;test_loop<=$TEST_LOOP_NUM;test_loop++)); do {
             extension=${file##*.}
             if [ $extension == "ring" ]
             then
-            autoTestFunc $model $source_file_path $file
+            autoTestAction $model $source_file_path $file
             fi
         done
         printf "\n"

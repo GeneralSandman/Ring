@@ -1,3 +1,5 @@
+// TestDetail: class method
+// TestDetail: return value from invoke method
 
 package main
 
