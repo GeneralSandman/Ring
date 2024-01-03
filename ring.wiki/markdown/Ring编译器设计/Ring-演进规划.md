@@ -253,6 +253,17 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 
 -----------------------------
 
+
+## 需要完善的语义报错
+
+1. 变量名称重复
+   1. block中定义的 局部变量重复(函数没有参数)
+   2. block中定义的 局部变量和 函数参数中的变量 名称重复
+   3. 函数参数中的变量 他们之间重复
+
+
+-----------------------------
+
 ## 2024-01-01周
 
 ### *A. 优化: ring dump*
@@ -279,11 +290,13 @@ function:
 
 1. 定义 method的时候支持 传递参数 ✅ 
 2. 调用 method的时候支持 传递参数 ✅ 
-3. method 参数 + 局部变量的数量 不能超过 254. (self 占用一个)
-4. function 参数 + 局部变量的数量 不能超过 255.
-5. return list 也得有数量限制, 不能超过 255.
-6. class 中 method 的数量不能超过 255 ✅ 
-7. class 中 field 的数量不能超过 255 ✅ 
+3. method中支持自定义 local variable ✅ 
+4. method支持返回值
+5. method 参数 + 局部变量的数量 不能超过 254. (self 占用一个)
+6. function 参数 + 局部变量的数量 不能超过 255.
+7. return list 也得有数量限制, 不能超过 255.
+8. class 中 method 的数量不能超过 255 ✅ 
+9. class 中 field 的数量不能超过 255 ✅ 
 
 
 
@@ -299,6 +312,33 @@ ring 编译报错的时候添加一个 debug 控制 报错所在的位置,  __FI
 ### *D. 编写测试用例一览图, 说明每个测试用例覆盖的场景*
 
 
+### *E. print_call_stack 支持 打印 调用method的时栈信息* ✅
+
+
+```
+
+test case 1
+0000$ring!Job.PrintInfo(var bool, var int, var double)
+    ./test/060-std-package-debug/debug-stack-005.ring:16
+0001$ring!main()
+    ./test/060-std-package-debug/debug-stack-005.ring:31
+
+test case 2
+0000$ring!PrintInfo(var bool, var int, var double)
+    ./test/060-std-package-debug/debug-stack-005.ring:25
+0001$ring!main()
+    ./test/060-std-package-debug/debug-stack-005.ring:31
+```
+
+Job.PrintInfo: 表示调用 method
+PrintInfo: 表示调用 function
+
+
+### *F. 需要写一个工具, 将所有的测试用例都导出来, 同时说明用途, 和是否通过*
+
+应该在测试用例中描述用法, 直接导出
+
+测试用例的细节用 `// TestDetail:` 前缀表示, 可以方便导出
 
 -----------------------------
 
@@ -347,7 +387,7 @@ self 不是个关键字, self可以是任何变量名, 但是在 method中比较
 
 
 
-### *D. 重构: 调整相关API*
+### *D. 重构: 调整相关API* ✅
 
 所有copy函数的 dst src 都要调整成 std-api的那种形式
 

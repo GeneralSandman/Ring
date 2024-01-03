@@ -288,9 +288,11 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
         dst->local_variable_list = nullptr; // TODO:
     } else if (src->type == FUNCTION_TYPE_DERIVE) {
         dst->type                = RVM_FUNCTION_TYPE_DERIVE;
+
         dst->parameter_size      = src->parameter_list_size;
         dst->parameter_list      = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
                                                                  sizeof(RVM_LocalVariable) * dst->parameter_size);
+
         dst->local_variable_size = src->block->declaration_list_size;
         dst->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
                                                                  sizeof(RVM_LocalVariable) * dst->local_variable_size);
@@ -337,18 +339,18 @@ void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src)
     dst->rvm_function->end_line_number     = src->end_line_number;
     dst->rvm_function->func_name           = src->identifier;
     dst->rvm_function->type                = RVM_FUNCTION_TYPE_DERIVE;
+
     dst->rvm_function->parameter_size      = src->parameter_list_size;
     dst->rvm_function->parameter_list      = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
                                                                            sizeof(RVM_LocalVariable) * dst->rvm_function->parameter_size);
 
-    // 目前只有 self 变量
     dst->rvm_function->local_variable_size = src->block->declaration_list_size;
     dst->rvm_function->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
                                                                            sizeof(RVM_LocalVariable) * dst->rvm_function->local_variable_size);
 
     dst->rvm_function->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
 
-    // TODO: deep copy method parameters
+    // deep copy method parameters
     unsigned int i                         = 0;
     Parameter*   param                     = src->parameter_list;
     for (; param != nullptr; param = param->next, i++) {
@@ -359,8 +361,7 @@ void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src)
         type_specifier_deep_copy(dst->rvm_function->parameter_list[i].type_specifier, param->type);
     }
 
-    // TODO: deep copy local variable
-    // 目前 local variable 只有 self
+    // deep copy local variable
     Declaration* pos = src->block->declaration_list;
     i                = 0;
     for (; pos != nullptr; pos = pos->next, i++) {
