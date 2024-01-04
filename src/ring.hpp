@@ -1774,13 +1774,17 @@ struct MemBlock {
 #define debug_log_with_purple_coloar(format, ...)
 #endif
 
-void     init_front_mem_pool();
-MemPool* get_front_mem_pool();
-void     destory_front_mem_pool();
+void        init_front_mem_pool();
+MemPool*    get_front_mem_pool();
+void        destory_front_mem_pool();
 
-void     ring_compile_error_report(ErrorReportContext* context);
-void     ring_check_exit_immediately();
-void     yyin_move_to_next_line();
+void        ring_compile_error_report(ErrorReportContext* context);
+void        ring_check_exit_immediately();
+std::string trans_flex_token_to_human_char(std::string str);
+std::string str_replace_all(std::string        subject,
+                            const std::string& search,
+                            const std::string& replace);
+void        yyin_move_to_next_line();
 
 #define ring_runtime_error(code, ...)      \
     printf("Runtime error, E:%d, ", code); \

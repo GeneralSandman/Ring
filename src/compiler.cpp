@@ -369,7 +369,9 @@ unsigned int package_unit_increa_column_number(unsigned int len) {
 void package_unit_update_line_content(char* str) {
     assert(g_package_unit != nullptr);
 
-    for (unsigned int i = 0; i < strlen(str); i++) {
+    unsigned int str_len = strlen(str);
+
+    for (unsigned int i = 0; i < str_len; i++) {
         ring_string_add_char(g_package_unit->current_line_content, str[i]);
     }
 
@@ -380,14 +382,14 @@ void package_unit_update_line_content(char* str) {
         });
     }
 
-    g_package_unit->line_offset_map[g_package_unit->current_line_number].size += strlen(str);
+    g_package_unit->line_offset_map[g_package_unit->current_line_number].size += str_len;
 
-    g_package_unit->current_offset += strlen(str);
-    g_package_unit->current_column_number += strlen(str);
+    g_package_unit->current_offset += str_len;
+    g_package_unit->current_column_number += str_len;
 
     if (strcmp(str, "\n") == 0 || strcmp(str, "\r\n") == 0) {
         // TODO: 这里 -1 没搞明白
-        g_package_unit->line_offset_map[g_package_unit->current_line_number].size -= (strlen(str) - 1);
+        g_package_unit->line_offset_map[g_package_unit->current_line_number].size -= (str_len - 1);
 
         g_package_unit->current_line_start_offset = g_package_unit->current_offset;
     }
@@ -481,6 +483,8 @@ int yyerror(char const* str, ...) {
     // 调用 ring_compiler_error
     // 在这里捕获详细信息
 
+    std::string err_str = trans_flex_token_to_human_char(std::string(str));
+
     fprintf(stderr, "\n%s:%d:%d: \n",
             package_unit_get_file_name().c_str(),
             package_unit_get_line_number(),
@@ -496,7 +500,7 @@ int yyerror(char const* str, ...) {
     fprintf(stderr, "|%sError:%s %s\n",
             LOG_COLOR_RED,
             LOG_COLOR_CLEAR,
-            str);
+            err_str.c_str());
 
     // fprintf(stderr, "\n\n\n\n");
     fflush(stderr);
@@ -557,9 +561,116 @@ void ring_check_exit_immediately() {
     exit(1);
 }
 
-// 将 TOKEN_COMMA 转换成  ','
-std::string trans_flex_token_to_char(std::string) {
-    return "";
+/*
+ * 将bison报错的原始信息进行转化, 转化成更人性化的形式
+ */
+std::string trans_flex_token_to_human_char(std::string str) {
+    // e.g.  TOKEN_TYPEDEF 转化成  typedef
+    std::vector<std::pair<std::string, std::string>> replace_tokens = {
+        {"grammar error", "syntax error"},
+
+        {"`typedef`", "TOKEN_TYPEDEF"},
+        {"`bool`", "TOKEN_BOOL"},
+        {"`int`", "TOKEN_INT"},
+        {"`double`", "TOKEN_DOUBLE"},
+        {"`string`", "TOKEN_STRING"},
+        {"`struct`", "TOKEN_STRUCT"},
+        {"`bind`", "TOKEN_BIND"},
+        {"`lambda`", "TOKEN_LAMBDA"},
+        {"`return`", "TOKEN_RETURN"},
+        {"`defer`", "TOKEN_DEFER"},
+        {"`range`", "TOKEN_RANGE"},
+        {"`in`", "TOKEN_IN"},
+        {"`class`", "TOKEN_CLASS"},
+        {"`private`", "TOKEN_PRIVATE"},
+        {"`public`", "TOKEN_PUBLIC"},
+        {"`@`", "TOKEN_ATTRIBUTE"},
+        {"`field`", "TOKEN_FIELD"},
+        {"`method`", "TOKEN_METHOD"},
+        {"`constructor`", "TOKEN_CONSTRUCTOR"},
+        {"`global`", "TOKEN_GLOBAL"},
+        {"`if`", "TOKEN_IF"},
+        {"`elseif`", "TOKEN_ELSEIF"},
+        {"`else`", "TOKEN_ELSE"},
+        {"`for`", "TOKEN_FOR"},
+        {"`do`", "TOKEN_DO"},
+        {"`break`", "TOKEN_BREAK"},
+        {"`jump`", "TOKEN_JUMP"},
+        {"`continue`", "TOKEN_CONTINUE"},
+        {"`null`", "TOKEN_NULL"},
+        {"`true`", "TOKEN_TRUE"},
+        {"`false`", "TOKEN_FALSE"},
+        {"`var`", "TOKEN_VAR"},
+        {"`auto`", "TOKEN_AUTO"},
+        {"`any`", "TOKEN_ANY"},
+        {"`const`", "TOKEN_CONST"},
+        {"`function`", "TOKEN_FUNCTION"},
+        {"`new`", "TOKEN_NEW"},
+        {"`delete`", "TOKEN_DELETE"},
+        {"`.`", "TOKEN_DOT"},
+        {"`..`", "TOKEN_2DOT"},
+        {"`...`", "TOKEN_3DOT"},
+        {"`->`", "TOKEN_ARROW"},
+        {"`package`", "TOKEN_PACKAGE"},
+        {"`import`", "TOKEN_IMPORT"},
+        {"`+`", "TOKEN_ADD"},
+        {"`-`", "TOKEN_SUB"},
+        {"`*`", "TOKEN_MUL"},
+        {"`/`", "TOKEN_DIV"},
+        {"`%`", "TOKEN_MOD"},
+        {"`++`", "TOKEN_INCREASE"},
+        {"`--`", "TOKEN_DECREASE"},
+        {"`+=`", "TOKEN_ADD_ASSIGN"},
+        {"`-=`", "TOKEN_SUB_ASSIGN"},
+        {"`*=`", "TOKEN_MUL_ASSIGN"},
+        {"`/=`", "TOKEN_DIV_ASSIGN"},
+        {"`%=`", "TOKEN_MOD_ASSIGN"},
+        {"`and`", "TOKEN_AND"},
+        {"`or`", "TOKEN_OR"},
+        {"`not`", "TOKEN_NOT"},
+        {"`==`", "TOKEN_EQ"},
+        {"`!=`", "TOKEN_NE"},
+        {"`>`", "TOKEN_GT"},
+        {"`>=`", "TOKEN_GE"},
+        {"`<`", "TOKEN_LT"},
+        {"`<=`", "TOKEN_LE"},
+        {"`(`", "TOKEN_LP"},
+        {"`)`", "TOKEN_RP"},
+        {"`{`", "TOKEN_LC"},
+        {"`}`", "TOKEN_RC"},
+        {"`[`", "TOKEN_LB"},
+        {"`]`", "TOKEN_RB"},
+        {"`,`", "TOKEN_COMMA"},
+        {"`:`", "TOKEN_COLON"},
+        {"`::`", "TOKEN_2COLON"},
+        {"`;`", "TOKEN_SEMICOLON"},
+        {"`?`", "TOKEN_QUESTION_MARK"},
+        {"`=`", "TOKEN_ASSIGN"},
+        {"`#`", "TOKEN_NUM_SIGN"},
+    };
+
+    // 先排一下顺序, 在字符串替换的时候要先匹配最长的, 再匹配最短的
+    std::sort(replace_tokens.begin(), replace_tokens.end(),
+              [](const std::pair<std::string, std::string>& a, const std::pair<std::string, std::string>& b) {
+                  return a.second.length() > b.second.length();
+              });
+
+    for (int i = 0; i < replace_tokens.size(); i++) {
+        str = str_replace_all(str, replace_tokens[i].second, replace_tokens[i].first);
+    }
+
+    return str;
+}
+
+std::string str_replace_all(std::string        subject,
+                            const std::string& search,
+                            const std::string& replace) {
+    size_t pos = 0;
+    while ((pos = subject.find(search, pos)) != std::string::npos) {
+        subject.replace(pos, search.length(), replace);
+        pos += replace.length();
+    }
+    return subject;
 }
 
 // 用于错误恢复
