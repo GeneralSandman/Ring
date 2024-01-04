@@ -809,6 +809,7 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
     debug_log_with_yellow_coloar("basic_type:%d", basic_type);
 
     TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type_specifier->line_number   = package_unit_get_line_number();
     type_specifier->kind          = basic_type;
     type_specifier->dimension     = 0;
     type_specifier->next          = nullptr;
@@ -827,6 +828,7 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
  */
 TypeSpecifier* create_type_specifier_array(TypeSpecifier* type) {
     TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type_specifier->line_number   = package_unit_get_line_number();
     type_specifier->kind          = RING_BASIC_TYPE_ARRAY;
     type_specifier->u.array_type  = nullptr;
     type_specifier->dimension     = 1; // 暂时只支持一维数组
@@ -841,6 +843,7 @@ TypeSpecifier* create_class_type_specifier(char* identifier) {
 
     TypeSpecifier* type_specifier                  = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
     type_specifier->kind                           = RING_BASIC_TYPE_CLASS;
+    type_specifier->line_number                    = package_unit_get_line_number();
     type_specifier->u.class_type                   = (Ring_DeriveType_Class*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Class));
     type_specifier->u.class_type->class_identifier = identifier;
     type_specifier->u.class_type->class_definition = nullptr;

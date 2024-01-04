@@ -114,6 +114,7 @@ typedef enum {
     GRAMMAR_UNKNOW = 0,
     GRAMMAR_IMPORT_PACKAGE,
     GRAMMAR_FUNCTION_DEFIN,
+    GRAMMAR_CLASS_DEFIN,
 
 } RING_GRAMMAR_ID;
 
@@ -362,6 +363,8 @@ struct Ring_DeriveType_Class {
 
 // Only used by front-end of compiler.
 struct TypeSpecifier {
+    unsigned int   line_number;
+
     Ring_BasicType kind;
     union {
         Ring_DeriveType_Array* array_type;
@@ -1555,6 +1558,7 @@ typedef enum {
     ERROR_TOO_MANY_LOCAL_VARIABLES    = 200006, // 局部变量数量超过限制
     ERROR_TOO_MANY_FIELDS_IN_CLASS    = 200007, // class 中 field 的数量超过限制
     ERROR_TOO_MANY_METHODS_IN_CLASS   = 200008, // class 中 method 的数量超过限制
+    ERROR_MISS_CLASS_DEFINITION       = 200009, // 缺少 class 定义
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,

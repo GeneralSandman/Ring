@@ -392,6 +392,7 @@ std::string dump_vm_constant(RVM_ConstantPool* constant) {
         // TODO: error-report
         break;
     }
+    return "";
 }
 
 /*

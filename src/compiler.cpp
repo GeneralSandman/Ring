@@ -456,6 +456,14 @@ Ring_Grammar_Info Ring_Grammar_Infos[] = {
         },
 
     },
+    {
+        GRAMMAR_CLASS_DEFIN,
+        std::vector<std::string>{
+            "typedef class <identifier> {",
+            "    code_block;",
+            "}",
+        },
+    },
 
 };
 

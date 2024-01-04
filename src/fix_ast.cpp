@@ -118,20 +118,24 @@ BEGIN:
         break;
 
     case EXPRESSION_TYPE_LITERAL_BOOL:
-        expression->convert_type       = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-        expression->convert_type->kind = RING_BASIC_TYPE_BOOL;
+        expression->convert_type              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+        expression->convert_type->line_number = expression->line_number;
+        expression->convert_type->kind        = RING_BASIC_TYPE_BOOL;
         break;
     case EXPRESSION_TYPE_LITERAL_INT:
-        expression->convert_type       = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-        expression->convert_type->kind = RING_BASIC_TYPE_INT;
+        expression->convert_type              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+        expression->convert_type->line_number = expression->line_number;
+        expression->convert_type->kind        = RING_BASIC_TYPE_INT;
         break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
-        expression->convert_type       = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-        expression->convert_type->kind = RING_BASIC_TYPE_DOUBLE;
+        expression->convert_type              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+        expression->convert_type->line_number = expression->line_number;
+        expression->convert_type->kind        = RING_BASIC_TYPE_DOUBLE;
         break;
     case EXPRESSION_TYPE_LITERAL_STRING:
-        expression->convert_type       = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-        expression->convert_type->kind = RING_BASIC_TYPE_STRING;
+        expression->convert_type              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+        expression->convert_type->line_number = expression->line_number;
+        expression->convert_type->kind        = RING_BASIC_TYPE_STRING;
         break;
 
     case EXPRESSION_TYPE_CONCAT:
@@ -274,18 +278,45 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
     char*            class_identifier = nullptr;
 
 
-    if (type_specifier->kind == RING_BASIC_TYPE_CLASS && type_specifier->u.class_type != nullptr) {
+    if (type_specifier->kind == RING_BASIC_TYPE_CLASS
+        && type_specifier->u.class_type != nullptr) {
         class_identifier = type_specifier->u.class_type->class_identifier;
         class_definition = search_class_definition(class_identifier);
 
+        // error-report ERROR_MISS_CLASS_DEFINITION
         if (class_definition == nullptr) {
-            // error
-            // exit
-            complie_err_log("not find class definition [%s]", class_identifier);
-            exit(ERROR_CODE_COMPILE_ERROR);
+            char compile_err_buf[2048], compile_adv_buf[2048];
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "miss class `%s` definition; E:%d.",
+                     class_identifier,
+                     ERROR_MISS_CLASS_DEFINITION);
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                     "definite class `%s` before use it.",
+                     class_identifier);
+
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(type_specifier->line_number),
+                .line_number             = type_specifier->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
         }
 
         type_specifier->u.class_type->class_definition = class_definition;
+    }
+
+    // 递归修正数组
+    if (type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
+        fix_type_specfier(type_specifier->next);
     }
 }
 
@@ -464,7 +495,8 @@ void fix_binary_expression(Expression* expression, Block* block, Function* func)
     fix_expression(right_expression, block, func);
 
     if (expression->convert_type == nullptr) {
-        expression->convert_type = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+        expression->convert_type              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+        expression->convert_type->line_number = expression->line_number;
     }
 
     if (expression->type == EXPRESSION_TYPE_CONCAT) {
@@ -599,6 +631,7 @@ void fix_array_index_expression(Expression* expression, ArrayIndexExpression* ar
     // TODO: 这个写法太恶心了, 急需要优化
     TypeSpecifier* type =
         (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type->line_number = expression->line_number;
     type->kind =
         expression->u.array_index_expression->array_expression->u.identifier_expression->u.declaration->type->next->kind;
     if (type->kind == RING_BASIC_TYPE_CLASS) {
