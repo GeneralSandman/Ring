@@ -8,8 +8,7 @@
 package main
 
 import {
-	fmt;
-	fmt;
+	fmt,
 }
 
 @main

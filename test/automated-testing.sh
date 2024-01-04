@@ -68,6 +68,10 @@ NOT_TEST_FILES=(
 # 测试的结果文件, 主要用于存放本次测试的失败结果
 TEST_RESULT="./automated-testing.sh.result"
 
+# 输出ring-测试用例表
+# 是否输出测试用例表
+IS_EXPORT_TEST_DETAIL_SUMMARY=0 
+# 输出测试用例表文件
 TEST_DETAIL_SUMMARY="./test/ring-测试用例表.md"
 
 # 测试的轮数, 用于多次执行
@@ -155,7 +159,9 @@ autoTestAction(){
     fi
     rm $run_result_file_tmp
 
-    exportTestCase $all_num $model $source_code_file $run_result_file $result
+    if [[ $IS_EXPORT_TEST_DETAIL_SUMMARY -eq 1 ]];then
+        exportTestCase $all_num $model $source_code_file $run_result_file $result
+    fi
 }
 
 printNotPassCase(){
