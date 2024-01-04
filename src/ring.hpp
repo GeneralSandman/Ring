@@ -2289,6 +2289,7 @@ std::vector<std::string> list_files_of_dir(char* dir);
 
 void                     dump_vm_function(RVM_ClassDefinition* class_definition, RVM_Function* function);
 void                     dump_vm_class(RVM_ClassDefinition* class_definition);
+std::string              dump_vm_constant(RVM_ConstantPool* constant);
 
 unsigned int             get_source_line_number_by_pc(RVM_Function* function, unsigned int pc);
 // --------------------

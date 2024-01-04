@@ -251,6 +251,7 @@ void dump_vm_function(RVM_ClassDefinition* class_definition, RVM_Function* funct
     assert(function != nullptr);
 
     // TODO: 这里想个更好的办法, 减少代码重复
+    // 1. function name
     if (class_definition == nullptr) {
         printf("$%s    ", format_rvm_function(function).c_str());
     } else {
@@ -260,8 +261,22 @@ void dump_vm_function(RVM_ClassDefinition* class_definition, RVM_Function* funct
            function->source_file.c_str(),
            function->start_line_number, function->end_line_number);
 
+    // 2. function parameters
     printf("+Parameter:   %d\n", function->parameter_size);
+    for (unsigned int i = 0; i < function->parameter_size; i++) {
+        printf(" ├──%-20s %-20s\n",
+               format_rvm_type_specifier(function->parameter_list[i].type_specifier).c_str(),
+               function->parameter_list[i].identifier);
+    }
+
+
+    // 3. function local variable
     printf("+Local:       %d\n", function->local_variable_size);
+    for (unsigned int i = 0; i < function->local_variable_size; i++) {
+        printf(" ├──%-20s %-20s\n",
+               format_rvm_type_specifier(function->local_variable_list[i].type_specifier).c_str(),
+               function->local_variable_list[i].identifier);
+    }
 
     printf("+Instructions:\n");
     printf(" ├──%-8s%-30s%-20s%-18s\n",
@@ -343,8 +358,9 @@ void dump_vm_class(RVM_ClassDefinition* class_definition) {
 
     printf("+Field:     %d\n", class_definition->field_size);
     for (unsigned int i = 0; i < class_definition->field_size; i++) {
-        printf(" ├──%-30s    ", class_definition->field_list[i].identifier);
-        printf("%s\n", format_rvm_type_specifier(class_definition->field_list[i].type_specifier).c_str());
+        printf(" ├──%-30s %-20s\n",
+               format_rvm_type_specifier(class_definition->field_list[i].type_specifier).c_str(),
+               class_definition->field_list[i].identifier);
     }
 
     printf("+Method:    %d\n", class_definition->method_size);
@@ -359,6 +375,23 @@ void dump_vm_class(RVM_ClassDefinition* class_definition) {
         dump_vm_function(class_definition, class_definition->method_list[i].rvm_function);
     }
     printf("\n");
+}
+
+std::string dump_vm_constant(RVM_ConstantPool* constant) {
+    switch (constant->type) {
+    case CONSTANTPOOL_TYPE_INT:
+        return "int(" + std::to_string(constant->u.int_value) + ")";
+        break;
+    case CONSTANTPOOL_TYPE_DOUBLE:
+        return "double(" + std::to_string(constant->u.double_value) + ")";
+        break;
+    case CONSTANTPOOL_TYPE_STRING:
+        return "string(" + std::string(constant->u.string_value) + ")";
+        break;
+    default:
+        // TODO: error-report
+        break;
+    }
 }
 
 /*

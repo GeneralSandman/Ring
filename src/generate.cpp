@@ -51,10 +51,31 @@ void package_executer_dump(Package_Executer* package_executer) {
     //        package_executer->package_name,
     //        LOG_COLOR_CLEAR);
 
+    // 1. dump constant
+    printf("#Constants:       %d\n", package_executer->constant_pool_size);
+    for (unsigned int i = 0; i < package_executer->constant_pool_size; i++) {
+        printf(" ├──%6d: %s\n",
+               i,
+               dump_vm_constant(&(package_executer->constant_pool_list[i])).c_str());
+    }
+    printf("\n");
+
+
+    // 2. dump global variables
+    printf("#Globals:       %d\n", package_executer->global_variable_size);
+    for (unsigned int i = 0; i < package_executer->global_variable_size; i++) {
+        printf(" ├──%-20s %-20s\n",
+               format_rvm_type_specifier(package_executer->global_variable_list[i].type).c_str(),
+               package_executer->global_variable_list[i].identifier);
+    }
+    printf("\n");
+
+    // 3. dump functions
     for (unsigned int i = 0; i < package_executer->function_size; i++) {
         dump_vm_function(nullptr, &(package_executer->function_list[i]));
     }
 
+    // 4. dump classes
     for (unsigned int i = 0; i < package_executer->class_size; i++) {
         dump_vm_class(&(package_executer->class_list[i]));
     }
@@ -2123,9 +2144,15 @@ void type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier* src) {
     assert(src != nullptr);
 
     dst->kind = src->kind;
+
     if (src->kind == RING_BASIC_TYPE_CLASS) {
         // class_index 在 type_specifier_deep_copy 没有修正
         // TODO: 后期修正
         dst->u.class_def_index = src->u.class_type->class_definition->class_index;
+    }
+
+    if (src->kind == RING_BASIC_TYPE_ARRAY && src->next != nullptr) {
+        dst->next = (RVM_TypeSpecifier*)malloc(sizeof(RVM_TypeSpecifier));
+        type_specifier_deep_copy(dst->next, src->next);
     }
 }
