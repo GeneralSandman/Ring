@@ -68,9 +68,11 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_POP_FIELD_BOOL, "pop_field_bool", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "assign to class field whith bool", "[bool,object]->[]"},
     {RVM_CODE_POP_FIELD_INT, "pop_field_int", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", "[int,object]->[]"},
     {RVM_CODE_POP_FIELD_DOUBLE, "pop_field_double", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", "[double,object]->[]"},
+    {RVM_CODE_POP_FIELD_STRING, "pop_field_string", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", "[string,object]->[]"},
     {RVM_CODE_PUSH_FIELD_BOOL, "push_field_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[bool]"},
     {RVM_CODE_PUSH_FIELD_INT, "push_field_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[int]"},
     {RVM_CODE_PUSH_FIELD_DOUBLE, "push_field_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[double]"},
+    {RVM_CODE_PUSH_FIELD_STRING, "push_field_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[string]"},
 
 
     // arithmetic

@@ -224,7 +224,8 @@ void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dst, C
 
     // error-report ERROR_TOO_MANY_FIELDS_IN_CLASS
     if (dst->field_size > 255) {
-        char compile_err_buf[2048], compile_adv_buf[2048];
+        DEFINE_ERROR_REPORT_STR;
+
         snprintf(compile_err_buf, sizeof(compile_err_buf),
                  "class `%s` has %d fields, greater than 255; E:%d.",
                  dst->identifier, dst->field_size,
@@ -251,7 +252,8 @@ void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dst, C
 
     // error-report ERROR_TOO_MANY_METHODS_IN_CLASS
     if (dst->method_size > 255) {
-        char compile_err_buf[2048], compile_adv_buf[2048];
+        DEFINE_ERROR_REPORT_STR;
+
         snprintf(compile_err_buf, sizeof(compile_err_buf),
                  "class `%s` has %d methods, greater than 255; E:%d.",
                  dst->identifier, dst->method_size,

@@ -689,9 +689,11 @@ typedef enum {
     RVM_CODE_POP_FIELD_BOOL,
     RVM_CODE_POP_FIELD_INT,
     RVM_CODE_POP_FIELD_DOUBLE,
+    RVM_CODE_POP_FIELD_STRING,
     RVM_CODE_PUSH_FIELD_BOOL,
     RVM_CODE_PUSH_FIELD_INT,
     RVM_CODE_PUSH_FIELD_DOUBLE,
+    RVM_CODE_PUSH_FIELD_STRING,
 
     // arithmetic
     RVM_CODE_ADD_INT,
@@ -1559,6 +1561,7 @@ typedef enum {
     ERROR_TOO_MANY_FIELDS_IN_CLASS    = 200007, // class 中 field 的数量超过限制
     ERROR_TOO_MANY_METHODS_IN_CLASS   = 200008, // class 中 method 的数量超过限制
     ERROR_MISS_CLASS_DEFINITION       = 200009, // 缺少 class 定义
+    ERROR_INVALID_FIELD_IN_CLASS      = 200010, // field 不合法
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -1678,6 +1681,13 @@ struct MemBlock {
     void*     data;
     MemBlock* next;
 };
+
+// ring 语法报错str
+#define DEFINE_ERROR_REPORT_STR                          \
+    char compile_err_buf[2048];                          \
+    char compile_adv_buf[2048];                          \
+    memset(compile_err_buf, 0, sizeof(compile_err_buf)); \
+    memset(compile_adv_buf, 0, sizeof(compile_adv_buf));
 
 // clear terminal printf
 #define CLEAR_SCREEN printf("\e[1;1H\e[2J")

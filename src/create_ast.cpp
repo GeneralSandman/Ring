@@ -887,7 +887,8 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Ide
     for (pos_ider = identifier_list; pos_ider; pos_ider = pos_ider->next) {
         // error-report ERROR_INVALID_VARIABLE_IDENTIFIER
         if (strcmp(pos_ider->identifier_name, "self") == 0) {
-            char compile_err_buf[2048], compile_adv_buf[2048];
+            DEFINE_ERROR_REPORT_STR;
+
             snprintf(compile_err_buf, sizeof(compile_err_buf),
                      "forbid definite `self` variable; E:%d.",
                      ERROR_INVALID_VARIABLE_IDENTIFIER);
@@ -982,7 +983,7 @@ void import_package_list_add_item(char* package_name, char* rename) {
     for (ImportPackageInfo* import_pack : get_package_unit()->import_package_list) {
         // error-report ERROR_DUPLICATE_IMPORT_PACKAGE
         if (strcmp(import_pack->package_name, package_name) == 0) {
-            char compile_err_buf[2048], compile_adv_buf[2048];
+            DEFINE_ERROR_REPORT_STR;
             snprintf(compile_err_buf, sizeof(compile_err_buf),
                      "duplicate import package `%s`; E:%d.",
                      import_pack->package_name,
@@ -1096,6 +1097,34 @@ ClassMemberDeclaration* create_class_member_method_declaration(Attribute attribu
 
 FieldMember* create_class_member_field(TypeSpecifier* type_specifier, Identifier* identifier_list) {
     debug_log_with_yellow_coloar("\t");
+
+    // 当前field 的类型只能是 bool int double string
+    // error-report
+    if (type_specifier->kind != RING_BASIC_TYPE_BOOL
+        && type_specifier->kind != RING_BASIC_TYPE_INT
+        && type_specifier->kind != RING_BASIC_TYPE_DOUBLE
+        && type_specifier->kind != RING_BASIC_TYPE_STRING) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "class field's type only support bool/int/double/string; E:%d.",
+                 ERROR_INVALID_FIELD_IN_CLASS);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(type_specifier->line_number),
+            .line_number             = type_specifier->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
 
     FieldMember* field_member    = (FieldMember*)mem_alloc(get_front_mem_pool(), sizeof(FieldMember));
     field_member->line_number    = package_unit_get_line_number();

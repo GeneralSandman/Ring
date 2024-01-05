@@ -7,11 +7,6 @@
 #include <cstring>
 
 
-// TODO: 后续改成局部变量
-char compile_err_buf[2048];
-char compile_adv_buf[2048];
-
-
 void ring_compiler_semantic_analysis(Package* package) {
     ring_compiler_analysis_import_package(package);
     ring_compiler_analysis_global_variable(package);
@@ -29,8 +24,8 @@ void ring_compiler_analysis_global_variable(Package* package) {
 
         // error-report ERROR_REDEFINITE_GLOBAL_VARIABLE
         if (iter != package->global_declaration_map.end()) {
-            memset(compile_err_buf, 0, sizeof(compile_err_buf));
-            memset(compile_adv_buf, 0, sizeof(compile_adv_buf));
+            DEFINE_ERROR_REPORT_STR;
+
             snprintf(compile_err_buf, sizeof(compile_err_buf),
                      "redefinition of global variable `%s`; E:%d.",
                      decl->identifier,
@@ -66,8 +61,8 @@ void ring_compiler_analysis_function(Package* package) {
 
         // error-report ERROR_REDEFINITE_FUNCTION
         if (iter != package->function_map.end()) {
-            memset(compile_err_buf, 0, sizeof(compile_err_buf));
-            memset(compile_adv_buf, 0, sizeof(compile_adv_buf));
+            DEFINE_ERROR_REPORT_STR;
+
             snprintf(compile_err_buf, sizeof(compile_err_buf),
                      "redefinition of function `%s`; E:%d.",
 

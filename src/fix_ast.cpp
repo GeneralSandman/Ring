@@ -236,7 +236,8 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
 
             // error-report ERROR_TOO_MANY_LOCAL_VARIABLE
             if (block->declaration_list_size > 255) {
-                char compile_err_buf[2048], compile_adv_buf[2048];
+                DEFINE_ERROR_REPORT_STR;
+
                 snprintf(compile_err_buf, sizeof(compile_err_buf),
                          "the number of local variable is greater than 255 in this block; E:%d.",
                          ERROR_TOO_MANY_LOCAL_VARIABLES);
@@ -285,7 +286,8 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
 
         // error-report ERROR_MISS_CLASS_DEFINITION
         if (class_definition == nullptr) {
-            char compile_err_buf[2048], compile_adv_buf[2048];
+            DEFINE_ERROR_REPORT_STR;
+
             snprintf(compile_err_buf, sizeof(compile_err_buf),
                      "miss class `%s` definition; E:%d.",
                      class_identifier,
