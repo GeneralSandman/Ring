@@ -693,7 +693,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_FIELD_STRING:
             class_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
             oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_OBJECT_OFFSET(rvm, -1, class_object->u.class_object->field[oper_num].u.string_value);
+            // STACK_SET_OBJECT_OFFSET(rvm, -1, class_object->u.class_object->field[oper_num].u.string_value);
             rvm->pc += 3;
             break;
 
