@@ -22,20 +22,23 @@
    1. 好好掌握 Lua的语法用法
    2. 力求完全掌握设计逻辑、包括协程、table
    3. 重新读那本 《自己动手实现Lua：虚拟机、编译器和标准库》
-3. 完善Ring的基本功能
+3. 完善Ring的基本功能  争取 2024-12-31之前发布第一个release版本
    1. 完善栈式虚拟机 ✅
    2. 面向对象 Class (field, method)
    3. 数组 Array ✅
    4. 字符串 String ✅
-   5. 完善语义分析 报错机制
-   6. Any类型  ✅
-   7. 实现可变参数   ✅
-   8. 完善内置 printf 函数  很重要  可变参数 format
-   9. package 源代码的组织形式 import/package ✅
-   10. 生成字节码 到二进制文件 解析字节码 Dump ByteCode (需要拆分出 编译前 和 加载虚拟机代码)
-   11. linux man手册
-   12. 支持 `ring dump`
-   13. 完善Ring的数据类型 int double 是远远不够的 ✅
+   5. 数组+对象+字符串 各种嵌套定义
+   6. 多维数组
+   7. 完善语义分析 报错机制
+   8. Any类型  ✅
+   9. 实现可变参数   ✅
+   10. 完善内置 printf 函数  很重要  可变参数 format
+   11. switch case 实现
+   12. package 源代码的组织形式 import/package ✅
+   13. 生成字节码 到二进制文件 解析字节码 Dump ByteCode (需要拆分出 编译前 和 加载虚拟机代码)
+   14. linux man手册
+   15. 支持 `ring dump`
+   16. 完善Ring的数据类型 int double 是远远不够的 ✅
 4. 完善Ring的高级功能
    1.  类型的强制转换 与 隐式转换
    2.  垃圾回收 Grabage Collection ✅
@@ -54,6 +57,7 @@
 9. 学习函数式编程
 10. 学习 Ocaml
 11. 学习 V8
+12. 中间代码优化, 死代码消除, 常量折叠.
 
 
 -----------------------------
@@ -126,7 +130,7 @@ gc算法比较老旧
 
 但是相关的设计都是比较现代的
 
-TIP: 推荐 Lua 5.4.4 版本作为研究对象.
+TIP: 推荐 Lua 5.4.6 版本作为研究对象.
 
 ## 《自己动手实现Lua：虚拟机、编译器和标准库》
 
@@ -261,6 +265,30 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
    2. block中定义的 局部变量和 函数参数中的变量 名称重复
    3. 函数参数中的变量 他们之间重复
 
+2. 函数名重复
+   1. 一个package中函数名称重复
+
+3. function/method 返回值
+   1. 返回值数量不对
+   2. 返回值类型不对
+   3. 调用函数 接受返回值的数量不对
+   4. 调用函数 接受返回值的类型不对
+
+4. function/method 参数
+   1. 参数数量不对
+   2. 参数类型不对 
+
+
+5. class field/method
+   1. field 重复
+   2. method 重复
+   3. field method 不能重复, 得是唯一id
+   4. field 只能是 bool int double string 
+
+
+6. import std package
+   1. 没有找到标准包
+   2. import重复
 
 -----------------------------
 
@@ -279,11 +307,20 @@ class:
 6. method返回值的数量  ✅ 
 
 
-function:
-1. 局部变量的数量/详情
-2. 返回值的数量/详情
+function/method:
+1. 函数参数的数量/详情 ✅
+2. 局部变量的数量/详情 ✅
+3. 返回值的数量/详情
 
 
+global 全局变量 ✅ 
+
+constant 常量 ✅
+
+数组变量 ✅ 
+
+
+TODO: bug: 如何变量是 class Job, dump的时候显示`class``, 而不是显示`Job`
 
 ### *B. 类 method*
 
@@ -291,7 +328,7 @@ function:
 1. 定义 method的时候支持 传递参数 ✅ 
 2. 调用 method的时候支持 传递参数 ✅ 
 3. method中支持自定义 local variable ✅ 
-4. method支持返回值
+4. method支持返回值 ✅ 
 5. method 参数 + 局部变量的数量 不能超过 254. (self 占用一个)
 6. function 参数 + 局部变量的数量 不能超过 255.
 7. return list 也得有数量限制, 不能超过 255.
@@ -307,9 +344,6 @@ bison  在报语法错误的时候, 需要将 TOKEN_XXX  转化成对应的字�
 
 ring 编译报错的时候添加一个 debug 控制 报错所在的位置,  __FILE__ __LINE__ 方便调试
 
-
-
-### *D. 编写测试用例一览图, 说明每个测试用例覆盖的场景*
 
 
 ### *E. print_call_stack 支持 打印 调用method的时栈信息* ✅
@@ -334,11 +368,47 @@ Job.PrintInfo: 表示调用 method
 PrintInfo: 表示调用 function
 
 
-### *F. 需要写一个工具, 将所有的测试用例都导出来, 同时说明用途, 和是否通过*
+### *F. 需要写一个自动化工具, 编写测试用例一览图, 说明每个测试用例覆盖的场景* ✅
 
-应该在测试用例中描述用法, 直接导出
+1. 在 测试用例的文件中, 需要用注释写明测试用途, `// TestDetail:` 前缀表示,
+2. 在 `make testall` 的时候, 可以导出:
+   1. 测试时间
+   2. 测试数量
+   3. 测试模块
+   4. 测试文件
+   5. 测试内容
+   6. 是否通过
 
-测试用例的细节用 `// TestDetail:` 前缀表示, 可以方便导出
+
+3. 参见 `test/automated-testing.sh`:
+
+```
+# 输出ring-测试用例表
+# 是否输出测试用例表: 0/1
+IS_EXPORT_TEST_DETAIL_SUMMARY=0 
+# 输出测试用例表文件
+TEST_DETAIL_SUMMARY="./test/ring-测试用例表.md"
+```
+
+
+## *G. 研究一下 bison的安装方法*
+
+```
+./configure
+
+make && make install
+```
+
+
+bison 安装到指定位置之后, 需要动态设置 src/Makefile $(Bison) $(Flex)
+
+
+
+
+## *H. class 中存放string*
+
+
+
 
 -----------------------------
 
