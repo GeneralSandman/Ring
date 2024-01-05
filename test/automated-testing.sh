@@ -69,7 +69,7 @@ NOT_TEST_FILES=(
 TEST_RESULT="./automated-testing.sh.result"
 
 # 输出ring-测试用例表
-# 是否输出测试用例表
+# 是否输出测试用例表: 0/1
 IS_EXPORT_TEST_DETAIL_SUMMARY=0 
 # 输出测试用例表文件
 TEST_DETAIL_SUMMARY="./test/ring-测试用例表.md"

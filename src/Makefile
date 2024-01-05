@@ -21,9 +21,11 @@ OBJS   = \
 	main.o
 
 # bison 可执行文件
+# bison >= 3.8.2
 Bison  = /usr/local/Cellar/bison/3.8.2/bin/bison
 
 # flex 可执行文件
+# flex >= 2.6.4
 Flex = flex
 
 

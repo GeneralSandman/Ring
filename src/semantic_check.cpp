@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 
 // TODO: 后续改成局部变量

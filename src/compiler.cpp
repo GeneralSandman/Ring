@@ -1,4 +1,5 @@
 #include "ring.hpp"
+#include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -684,7 +685,7 @@ std::string str_replace_all(std::string        subject,
 // 用于错误恢复
 // 将 yyin移动到下一行中
 void yyin_move_to_next_line() {
-    extern FILE* yyin;
+    // extern FILE* yyin;
 
 
     // printf("yyin_move_to_next_line\n");
