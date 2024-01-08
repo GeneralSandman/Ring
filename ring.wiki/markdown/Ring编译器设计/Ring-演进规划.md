@@ -50,14 +50,15 @@
    8.  lsp
    9.  优化控制语句中  break continue return ✅
 5. 实现相对完善的官方标准库 fmt sys math debug strings ✅
-6. 将 栈式虚拟机 转为 寄存式虚拟机
-7. 支持Ring Eval 
+6. 实现一键安装release版本.
+7. 将 栈式虚拟机 转为 寄存式虚拟机
+8. 支持Ring Eval 
    1. e.g.  ./bin/lua eval "fmt::println_string("hello world");"
-8. chatgpt + 智能终端 + ring -> 交互式入门ring
-9. 学习函数式编程
-10. 学习 Ocaml
-11. 学习 V8
-12. 中间代码优化, 死代码消除, 常量折叠.
+9. chatgpt + 智能终端 + ring -> 交互式入门ring
+10. 学习函数式编程
+11. 学习 Ocaml
+12. 学习 V8
+13. 中间代码优化, 死代码消除, 常量折叠.
 
 
 -----------------------------
@@ -212,13 +213,13 @@ www.runoob.com
 ## 测试集
 
 ```
-2024-01-02
+2024-01-08
 
 [Result]:
-Pass/All = 214/214
+Pass/All = 220/220
 NotTest  = 4
 Fail     = 0
-Usetime  = 10S
+Usetime  = 11S
 
 ```
 
@@ -289,6 +290,36 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 6. import std package
    1. 没有找到标准包
    2. import重复
+
+
+-----------------------------
+
+## 2024-01-08周
+
+
+### A. 设计支持多维数组
+
+
+1. 语法层面的设计
+2. 用户如何命名多维数组
+3. 用户如何创建多维数组
+4. 用户如何访问多维数组
+
+TypeSpecifier如何组织多维数组
+
+deep copy TypeSpecifier 如何copy多维数组
+
+
+generate的时候需要支持多维数组
+
+execute的时候需要支持多维数组
+
+
+如果对于一个二维数组 a[][], a[1] 其实是个一维数组, 还需要完善一下语义检查.
+
+
+如何 printf一个一维数组.
+
 
 -----------------------------
 
@@ -405,7 +436,7 @@ bison 安装到指定位置之后, 需要动态设置 src/Makefile $(Bison) $(Fl
 
 
 
-## *H. class 中存放string*
+## *H. class 中存放string* ✅
 
 
 
