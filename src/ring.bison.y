@@ -55,6 +55,7 @@ int yylex();
     ContinueStatement*                  m_continue_statement;
     ReturnStatement*                    m_return_statement;
     DimensionExpression*                m_dimension_expression;
+    SubDimensionExpression*             m_sub_dimension_expression;
 
     Package*                            m_package;
 
@@ -206,7 +207,8 @@ int yylex();
 %type <m_jump_tag_statement> jump_tag_statement
 %type <m_continue_statement> continue_statement
 %type <m_return_statement> return_statement
-%type <m_dimension_expression> dimension_expression dimension_expression_list
+%type <m_dimension_expression> dimension_expression
+%type <m_sub_dimension_expression> sub_dimension_expression sub_dimension_expression_list
 
 %type <m_package> package_definition
 
@@ -770,12 +772,12 @@ type_specifier
     {
         debug_log_with_green_coloar("[RULE::type_specifier:class_type_specifier]");
     }
-    | basic_type_specifier TOKEN_LB TOKEN_RB
+    | basic_type_specifier dimension_expression
     {
         debug_log_with_green_coloar("[RULE::type_specifier:array_type_specifier]");
         $$ = create_type_specifier_array(create_type_specifier($1));
     }
-    | class_type_specifier TOKEN_LB TOKEN_RB
+    | class_type_specifier dimension_expression
     {
         debug_log_with_green_coloar("[RULE::type_specifier:array-class]");
         $$ = create_type_specifier_array($1);
@@ -1019,35 +1021,40 @@ primary_expression
     ;
 
 primary_new_creation
-    : TOKEN_NEW basic_type_specifier dimension_expression_list
+    : TOKEN_NEW basic_type_specifier dimension_expression
     {
         $$ = create_new_array_expression(create_type_specifier($2), $3);
     }
-    | TOKEN_NEW class_type_specifier dimension_expression_list
+    | TOKEN_NEW class_type_specifier dimension_expression
     {
         $$ = create_new_array_expression($2, $3);
     }
     ;
 
-dimension_expression_list
-    : dimension_expression
+dimension_expression
+    : TOKEN_LB sub_dimension_expression_list TOKEN_RB
     {
-    }
-    | dimension_expression_list dimension_expression
-    {
-      $$ = dimension_expression_list_add_item($1, $2);
+        $$ = create_dimension_expression($2);
     }
     ;
 
 
-dimension_expression
-    : TOKEN_LB INT_LITERAL TOKEN_RB
+sub_dimension_expression_list
+    : sub_dimension_expression
+    | sub_dimension_expression_list TOKEN_COMMA sub_dimension_expression
     {
-      $$ = create_dimension_expression($2);
+        $$ = sub_dimension_expression_list_add_item($1, $3);
     }
-    | TOKEN_LB TOKEN_RB
+    ;
+
+sub_dimension_expression
+    : INT_LITERAL
     {
-      $$ = create_dimension_expression(nullptr);
+        $$ = create_sub_dimension_expression($1);
+    }
+    | // empty
+    {
+
     }
     ;
 
@@ -1146,7 +1153,7 @@ function_call_expression
 
 
 array_literal_expression
-    : basic_type_specifier dimension_expression_list TOKEN_LC expression_list TOKEN_RC
+    : basic_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_RC
     {
         debug_log_with_green_coloar("[RULE::array_literal_expression]\t ");
         $$ = create_array_literal_expression(create_type_specifier($1), $2, $4);

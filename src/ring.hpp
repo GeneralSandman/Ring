@@ -45,6 +45,7 @@ typedef struct ClassObjectLiteralExpression ClassObjectLiteralExpression;
 typedef struct CastExpression               CastExpression;
 typedef struct MemberExpression             MemberExpression;
 typedef struct DimensionExpression          DimensionExpression;
+typedef struct SubDimensionExpression       SubDimensionExpression;
 typedef struct DotExpression                DotExpression;
 typedef struct BinaryExpression             BinaryExpression;
 typedef struct TernaryExpression            TernaryExpression;
@@ -1223,8 +1224,13 @@ struct MemberExpression {
 
 
 struct DimensionExpression {
-    unsigned int         dimension;
-    DimensionExpression* next;
+    unsigned int            line_number;
+    SubDimensionExpression* dimension_list;
+};
+struct SubDimensionExpression {
+    unsigned int            line_number;
+    unsigned int            dimension;
+    SubDimensionExpression* next;
 };
 
 struct DotExpression {
@@ -1936,8 +1942,9 @@ ReturnStatement*              create_return_statement(Expression* expression);
 Block*                        start_new_block();
 Block*                        finish_block(Block* block, Statement* statement_list);
 
-DimensionExpression*          create_dimension_expression(char* literal_interface);
-DimensionExpression*          dimension_expression_list_add_item(DimensionExpression* list, DimensionExpression* item);
+DimensionExpression*          create_dimension_expression(SubDimensionExpression* dimension_list);
+SubDimensionExpression*       create_sub_dimension_expression(char* literal_interface);
+SubDimensionExpression*       sub_dimension_expression_list_add_item(SubDimensionExpression* list, SubDimensionExpression* item);
 
 TypeSpecifier*                create_type_specifier(Ring_BasicType basic_type);
 TypeSpecifier*                create_type_specifier_array(TypeSpecifier* type);

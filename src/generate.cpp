@@ -1727,7 +1727,8 @@ void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewAr
     assert(new_array_expression != nullptr);
     assert(new_array_expression->dimension_expression != nullptr);
 
-    unsigned int dimension = new_array_expression->dimension_expression->dimension;
+    // TODO: 目前只能支持一维数组
+    unsigned int dimension = new_array_expression->dimension_expression->dimension_list->dimension;
 
     if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_BOOL) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_BOOL, dimension, new_array_expression->line_number);
@@ -1770,9 +1771,10 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer* exec
 }
 
 void generate_vmcode_from_array_class_object(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer) {
-    unsigned int     field_count      = 0;
-    unsigned int     oper_num         = 0;
-    unsigned int     dimension        = new_array_expression->dimension_expression->dimension;
+    unsigned int field_count          = 0;
+    unsigned int oper_num             = 0;
+    // TODO: 目前只能支持一维数组
+    unsigned int     dimension        = new_array_expression->dimension_expression->dimension_list->dimension;
 
 
     ClassDefinition* class_definition = new_array_expression->type_specifier->u.class_type->class_definition;

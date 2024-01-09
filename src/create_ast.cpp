@@ -782,23 +782,31 @@ Block* finish_block(Block* block, Statement* statement_list) {
     return block;
 }
 
-
-DimensionExpression* create_dimension_expression(char* literal_interface) {
-    debug_log_with_yellow_coloar("\tdimension:%s", literal_interface);
+DimensionExpression* create_dimension_expression(SubDimensionExpression* dimension_list) {
     DimensionExpression* dim = (DimensionExpression*)mem_alloc(get_front_mem_pool(), sizeof(DimensionExpression));
-    dim->dimension           = 0;
-    dim->next                = nullptr;
+    dim->line_number         = package_unit_get_line_number();
+    dim->dimension_list      = dimension_list;
+    return dim;
+}
+
+SubDimensionExpression* create_sub_dimension_expression(char* literal_interface) {
+    debug_log_with_yellow_coloar("\tdimension:%s", literal_interface);
+    SubDimensionExpression* dim = (SubDimensionExpression*)mem_alloc(get_front_mem_pool(), sizeof(SubDimensionExpression));
+    dim->line_number            = package_unit_get_line_number();
+    dim->dimension              = 0;
+    dim->next                   = nullptr;
+    // TODO: 当前只能是 int_literal
     if (literal_interface != nullptr) {
         sscanf(literal_interface, "%ud", &(dim->dimension));
     }
     return dim;
 }
 
-DimensionExpression* dimension_expression_list_add_item(DimensionExpression* list, DimensionExpression* item) {
+SubDimensionExpression* sub_dimension_expression_list_add_item(SubDimensionExpression* list, SubDimensionExpression* item) {
     if (list == nullptr) {
         return item;
     }
-    DimensionExpression* pos = list;
+    SubDimensionExpression* pos = list;
     for (; pos->next != nullptr; pos = pos->next)
         ;
     pos->next = item;
