@@ -775,12 +775,12 @@ type_specifier
     | basic_type_specifier dimension_expression
     {
         debug_log_with_green_coloar("[RULE::type_specifier:array_type_specifier]");
-        $$ = create_type_specifier_array(create_type_specifier($1));
+        $$ = create_type_specifier_array(create_type_specifier($1), $2);
     }
     | class_type_specifier dimension_expression
     {
         debug_log_with_green_coloar("[RULE::type_specifier:array-class]");
-        $$ = create_type_specifier_array($1);
+        $$ = create_type_specifier_array($1, $2);
     }
     ;
 
@@ -1034,6 +1034,7 @@ primary_new_creation
 dimension_expression
     : TOKEN_LB sub_dimension_expression_list TOKEN_RB
     {
+        debug_log_with_green_coloar("[RULE::dimension_expression]");
         $$ = create_dimension_expression($2);
     }
     ;
@@ -1043,6 +1044,7 @@ sub_dimension_expression_list
     : sub_dimension_expression
     | sub_dimension_expression_list TOKEN_COMMA sub_dimension_expression
     {
+        debug_log_with_green_coloar("[RULE::sub_dimension_expression_list]");
         $$ = sub_dimension_expression_list_add_item($1, $3);
     }
     ;
@@ -1050,11 +1052,13 @@ sub_dimension_expression_list
 sub_dimension_expression
     : INT_LITERAL
     {
+        debug_log_with_green_coloar("[RULE::sub_dimension_expression:1]");
         $$ = create_sub_dimension_expression($1);
     }
     | // empty
     {
-
+        debug_log_with_green_coloar("[RULE::sub_dimension_expression:2]");
+        $$ = create_sub_dimension_expression(nullptr);
     }
     ;
 
@@ -1064,7 +1068,7 @@ primary_not_new_array
         debug_log_with_green_coloar("[RULE::literal_term:identifier]\t ");
         $$ = create_expression_identifier($1);
     }
-    | identifier TOKEN_LB expression TOKEN_RB
+    | identifier TOKEN_LB expression_list TOKEN_RB
     {
         $$ = create_expression_identifier_with_index(create_expression_identifier($1), $3);
     }

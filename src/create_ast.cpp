@@ -313,6 +313,14 @@ Expression* create_dot_expression(Expression* prefix_expression, Expression* suf
     return expression;
 }
 
+/*
+ * new 关键字  创建数组
+ *
+ * 在这里, type_specifier 是没有嵌套的
+ * 也就是说 type_specifier 是 booll int double string class
+ *
+ * TODO: 支持多维数组的
+ */
 Expression* create_new_array_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression) {
     Expression* expression                                   = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                                  = package_unit_get_line_number();
@@ -785,7 +793,9 @@ Block* finish_block(Block* block, Statement* statement_list) {
 DimensionExpression* create_dimension_expression(SubDimensionExpression* dimension_list) {
     DimensionExpression* dim = (DimensionExpression*)mem_alloc(get_front_mem_pool(), sizeof(DimensionExpression));
     dim->line_number         = package_unit_get_line_number();
+    dim->dimension           = dimension_list->index; // head 的 index 就是size
     dim->dimension_list      = dimension_list;
+
     return dim;
 }
 
@@ -793,11 +803,12 @@ SubDimensionExpression* create_sub_dimension_expression(char* literal_interface)
     debug_log_with_yellow_coloar("\tdimension:%s", literal_interface);
     SubDimensionExpression* dim = (SubDimensionExpression*)mem_alloc(get_front_mem_pool(), sizeof(SubDimensionExpression));
     dim->line_number            = package_unit_get_line_number();
-    dim->dimension              = 0;
+    dim->index                  = 1;
+    dim->num                    = 0;
     dim->next                   = nullptr;
     // TODO: 当前只能是 int_literal
     if (literal_interface != nullptr) {
-        sscanf(literal_interface, "%ud", &(dim->dimension));
+        sscanf(literal_interface, "%ud", &(dim->num));
     }
     return dim;
 }
@@ -807,8 +818,10 @@ SubDimensionExpression* sub_dimension_expression_list_add_item(SubDimensionExpre
         return item;
     }
     SubDimensionExpression* pos = list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next) {
+        pos->index++;
+    }
+    pos->index++;
     pos->next = item;
     return list;
 }
@@ -834,13 +847,39 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
  * array-string
  * 类数组 嵌套数组
  */
-TypeSpecifier* create_type_specifier_array(TypeSpecifier* type) {
+TypeSpecifier* create_type_specifier_array(TypeSpecifier* type, DimensionExpression* dimension) {
     TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
     type_specifier->line_number   = package_unit_get_line_number();
     type_specifier->kind          = RING_BASIC_TYPE_ARRAY;
     type_specifier->u.array_type  = nullptr;
-    type_specifier->dimension     = 1; // 暂时只支持一维数组
+    type_specifier->dimension     = dimension->dimension;
     type_specifier->next          = type;
+
+    // error-report ERROR_ARRAY_DIMENSION_INVALID
+    if (type_specifier->dimension > 8) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "dimension of array is %d, greater then 8; E:%d.",
+                 type_specifier->dimension,
+                 ERROR_ARRAY_DIMENSION_INVALID);
+
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(type_specifier->line_number),
+            .line_number             = type_specifier->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
 
     return type_specifier;
 }

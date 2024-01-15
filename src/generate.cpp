@@ -740,7 +740,7 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer, ForSta
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_STRING, end_label, range_statement->operand->u.identifier_expression->line_number);
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_CLASS) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_OBJECT, end_label, range_statement->operand->u.identifier_expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_CLASS_OBJECT, end_label, range_statement->operand->u.identifier_expression->line_number);
     } else {
         printf("error: range expression only support bool[] int[] double[] string[]\n");
         exit(1);
@@ -1201,6 +1201,10 @@ void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayInde
         printf("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
         exit(1);
     }
+    if (declaration->type->kind != RING_BASIC_TYPE_ARRAY) {
+        printf("invalid declaration in operation[] identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
+        exit(1);
+    }
 
     // push array-object to runtime_stack
     Expression* index  = array_index_expression->index_expression;
@@ -1211,7 +1215,20 @@ void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayInde
         opcode = RVM_CODE_PUSH_STATIC_OBJECT;
     }
     generate_vmcode(executer, opcode_buffer, opcode, declaration->variable_index, array_index_expression->line_number);
-    generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
+
+    // push index-expression to runtime_stack
+    // generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
+
+
+    Expression* pos_index = array_index_expression->index_expression;
+    for (unsigned int i = 0; i < declaration->type->dimension - 1; i++, pos_index = pos_index->next) {
+        generate_vmcode_from_expression(executer, pos_index, opcode_buffer, 0);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_A, 0, array_index_expression->line_number);
+    }
+
+    // 最后一个纬度
+    generate_vmcode_from_expression(executer, pos_index, opcode_buffer, 0);
+
 
     // assign
     if (declaration->type->next->kind == RING_BASIC_TYPE_BOOL) {
@@ -1223,7 +1240,7 @@ void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayInde
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_STRING, 0, array_index_expression->line_number);
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_CLASS) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_OBJECT, 0, array_index_expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_CLASS_OBJECT, 0, array_index_expression->line_number);
     } else {
         printf("error: assign to item of array only support bool[] int[] double[] string[] class[]\n");
         exit(1);
@@ -1558,7 +1575,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
         } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_STRING, 0, function_call_expression->line_number);
         } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_CLASS) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_OBJECT, 0, function_call_expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_CLASS_OBJECT, 0, function_call_expression->line_number);
         } else {
             printf("error: push() is only be used by bool[] int[] double[] string[] class[]");
             exit(1);
@@ -1582,7 +1599,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
         } else if (pos->expression->convert_type->next->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_STRING, 0, function_call_expression->line_number);
         } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_CLASS) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_OBJECT, 0, function_call_expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_CLASS_OBJECT, 0, function_call_expression->line_number);
         } else {
             printf("error: pop() is only be used by bool[] int[] double[] string[] class[]");
             exit(1);
@@ -1727,8 +1744,21 @@ void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewAr
     assert(new_array_expression != nullptr);
     assert(new_array_expression->dimension_expression != nullptr);
 
-    // TODO: 目前只能支持一维数组
-    unsigned int dimension = new_array_expression->dimension_expression->dimension_list->dimension;
+    // TODO: 继续支持多维数组
+    // dimension 当前只能是1
+    unsigned int dimension      = new_array_expression->dimension_expression->dimension;
+
+    // 将每个维度的size push stack
+    SubDimensionExpression* pos = new_array_expression->dimension_expression->dimension_list;
+    for (unsigned int i = 0; i < dimension; i++, pos = pos->next) {
+        generate_vmcode(executer, opcode_buffer,
+                        RVM_CODE_PUSH_INT_2BYTE, pos->num,
+                        new_array_expression->line_number);
+    }
+
+    // 将维度 push stack 中
+
+    // unsigned int size = new_array_expression->dimension_expression->dimension_list->num;
 
     if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_BOOL) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_BOOL, dimension, new_array_expression->line_number);
@@ -1774,7 +1804,7 @@ void generate_vmcode_from_array_class_object(Package_Executer* executer, NewArra
     unsigned int field_count          = 0;
     unsigned int oper_num             = 0;
     // TODO: 目前只能支持一维数组
-    unsigned int     dimension        = new_array_expression->dimension_expression->dimension_list->dimension;
+    unsigned int     size             = new_array_expression->dimension_expression->dimension_list->num;
 
 
     ClassDefinition* class_definition = new_array_expression->type_specifier->u.class_type->class_definition;
@@ -1786,8 +1816,8 @@ void generate_vmcode_from_array_class_object(Package_Executer* executer, NewArra
         }
     }
 
-    oper_num = (field_count << 16) | dimension;
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_OBJECT, oper_num, new_array_expression->line_number);
+    oper_num = (field_count << 16) | size;
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_CLASS_OBJECT, oper_num, new_array_expression->line_number);
 }
 
 void generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, ArrayLiteralExpression* array_literal_expression, RVM_OpcodeBuffer* opcode_buffer) {
@@ -1831,6 +1861,10 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
         printf("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
         exit(1);
     }
+    if (declaration->type->kind != RING_BASIC_TYPE_ARRAY) {
+        printf("invalid declaration in operation[] identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
+        exit(1);
+    }
 
     // push array-object to runtime_stack
     Expression* index  = array_index_expression->index_expression;
@@ -1841,9 +1875,20 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
         opcode = RVM_CODE_PUSH_STATIC_OBJECT;
     }
     generate_vmcode(executer, opcode_buffer, opcode, declaration->variable_index, array_index_expression->line_number);
-    generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
 
+    // push index-expression to runtime_stack
+    // generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
 
+    Expression* pos_index = array_index_expression->index_expression;
+    for (unsigned int i = 0; i < declaration->type->dimension - 1; i++, pos_index = pos_index->next) {
+        generate_vmcode_from_expression(executer, pos_index, opcode_buffer, 0);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_A, 0, array_index_expression->line_number);
+    }
+
+    // 最后一个纬度
+    generate_vmcode_from_expression(executer, pos_index, opcode_buffer, 0);
+
+    // access value by array-object and index-expression
     if (declaration->type->next->kind == RING_BASIC_TYPE_BOOL) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_BOOL, 0, array_index_expression->line_number);
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_INT) {
@@ -1853,7 +1898,7 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_STRING, 0, array_index_expression->line_number);
     } else if (declaration->type->next->kind == RING_BASIC_TYPE_CLASS) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_OBJECT, 0, array_index_expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_CLASS_OBJECT, 0, array_index_expression->line_number);
     } else {
         printf("error: array index expression only support bool[] int[] double[] string[] class[]\n");
         exit(1);
@@ -1982,7 +2027,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         case RVM_CODE_FOR_RANGE_ARRAY_INT:
         case RVM_CODE_FOR_RANGE_ARRAY_DOUBLE:
         case RVM_CODE_FOR_RANGE_ARRAY_STRING:
-        case RVM_CODE_FOR_RANGE_ARRAY_OBJECT:
+        case RVM_CODE_FOR_RANGE_ARRAY_CLASS_OBJECT:
         case RVM_CODE_FOR_RANGE_STRING:
             label                           = (opcode_buffer->code_list[i + 1] << 8) + (opcode_buffer->code_list[i + 2]);
             label_address                   = opcode_buffer->lable_list[label].label_address;

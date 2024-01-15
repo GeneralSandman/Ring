@@ -39,29 +39,30 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
 
     // array
+    {RVM_CODE_PUSH_ARRAY_A, "push_array_a", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", ""},
     {RVM_CODE_PUSH_ARRAY_BOOL, "push_array_bool", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", ""},
     {RVM_CODE_PUSH_ARRAY_INT, "push_array_int", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", ""},
     {RVM_CODE_PUSH_ARRAY_DOUBLE, "push_array_double", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", ""},
     {RVM_CODE_PUSH_ARRAY_STRING, "push_array_string", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", ""},
-    {RVM_CODE_PUSH_ARRAY_OBJECT, "push_array_object", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", ""},
+    {RVM_CODE_PUSH_ARRAY_CLASS_OBJECT, "push_array_class_object", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", ""},
     {RVM_CODE_POP_ARRAY_BOOL, "pop_array_bool", OPCODE_OPERAND_TYPE_0BYTE, -3, 1, "assign to bool array by index", "[int,object,int]->[]"},
     {RVM_CODE_POP_ARRAY_INT, "pop_array_int", OPCODE_OPERAND_TYPE_0BYTE, -3, 1, "assign to int array by index", "[int,object,int]->[]"},
     {RVM_CODE_POP_ARRAY_DOUBLE, "pop_array_double", OPCODE_OPERAND_TYPE_0BYTE, -3, 1, "assign to double array by index", "[int,object,int]->[]"},
     {RVM_CODE_POP_ARRAY_STRING, "pop_array_string", OPCODE_OPERAND_TYPE_0BYTE, -3, 1, "assign to string array by index", "[int,object,int]->[]"},
-    {RVM_CODE_POP_ARRAY_OBJECT, "pop_array_object", OPCODE_OPERAND_TYPE_0BYTE, -3, 1, "assign to object array by index", "[int,object,int]->[]"},
+    {RVM_CODE_POP_ARRAY_CLASS_OBJECT, "pop_array_class_object", OPCODE_OPERAND_TYPE_0BYTE, -3, 1, "assign to object array by index", "[int,object,int]->[]"},
 
     // array append
     {RVM_CODE_ARRAY_APPEND_BOOL, "array_append_bool", OPCODE_OPERAND_TYPE_0BYTE, -2, 1, "assign to object array by index", "[object,bool]->[]"},
     {RVM_CODE_ARRAY_APPEND_INT, "array_append_int", OPCODE_OPERAND_TYPE_0BYTE, -2, 1, "assign to object array by index", "[object,int]->[]"},
     {RVM_CODE_ARRAY_APPEND_DOUBLE, "array_append_double", OPCODE_OPERAND_TYPE_0BYTE, -2, 1, "assign to object array by index", "[object,double]->[]"},
     {RVM_CODE_ARRAY_APPEND_STRING, "array_append_string", OPCODE_OPERAND_TYPE_0BYTE, -2, 1, "assign to object array by index", "[object,string]->[]"},
-    {RVM_CODE_ARRAY_APPEND_OBJECT, "array_append_object", OPCODE_OPERAND_TYPE_0BYTE, -2, 1, "assign to object array by index", "[object,object]->[]"},
+    {RVM_CODE_ARRAY_APPEND_CLASS_OBJECT, "array_append_class_object", OPCODE_OPERAND_TYPE_0BYTE, -2, 1, "assign to object array by index", "[object,object]->[]"},
     // array pop
     {RVM_CODE_ARRAY_POP_BOOL, "array_pop_bool", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "assign to object array by index", "[object]->[bool]"},
     {RVM_CODE_ARRAY_POP_INT, "array_pop_int", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "assign to object array by index", "[object]->[int]"},
     {RVM_CODE_ARRAY_POP_DOUBLE, "array_pop_double", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "assign to object array by index", "[object]->[double]"},
     {RVM_CODE_ARRAY_POP_STRING, "array_pop_string", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "assign to object array by index", "[object]->[string]"},
-    {RVM_CODE_ARRAY_POP_OBJECT, "array_pop_object", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "assign to object array by index", "[object]->[object]"},
+    {RVM_CODE_ARRAY_POP_CLASS_OBJECT, "array_pop_class_object", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "assign to object array by index", "[object]->[object]"},
 
 
     // class
@@ -164,12 +165,12 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_NEW_ARRAY_INT, "new_array_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_NEW_ARRAY_DOUBLE, "new_array_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_NEW_ARRAY_STRING, "new_array_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
-    {RVM_CODE_NEW_ARRAY_OBJECT, "new_array_object", OPCODE_OPERAND_TYPE_3BYTE_ABs, 1, 4, "", ""},
+    {RVM_CODE_NEW_ARRAY_CLASS_OBJECT, "new_array_class_object", OPCODE_OPERAND_TYPE_3BYTE_ABs, 1, 4, "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_BOOL, "new_array_literal_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_INT, "new_array_literal_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE, "new_array_literal_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_STRING, "new_array_literal_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
-    {RVM_CODE_NEW_ARRAY_LITERAL_OBJECT, "new_array_literal_object", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
+    {RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OBJECT, "new_array_literal_class_object", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
 
     {RVM_CODE_PUSH_ARRAY_LEN, "push_array_len", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "", ""},
     {RVM_CODE_PUSH_ARRAY_CAPACITY, "push_array_capacity", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "", ""},
@@ -184,7 +185,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_FOR_RANGE_ARRAY_INT, "range_array_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "range int value for array", ""},
     {RVM_CODE_FOR_RANGE_ARRAY_DOUBLE, "range_array_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "range double value for array", ""},
     {RVM_CODE_FOR_RANGE_ARRAY_STRING, "range_array_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "range string value for array", ""},
-    {RVM_CODE_FOR_RANGE_ARRAY_OBJECT, "range_array_object", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "range object value for array", ""},
+    {RVM_CODE_FOR_RANGE_ARRAY_CLASS_OBJECT, "range_array_class_object", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "range object value for array", ""},
     {RVM_CODE_FOR_RANGE_STRING, "range_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "range char value for string", ""},
     {RVM_CODE_FOR_RANGE_FINISH, "for_range_finish", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
 

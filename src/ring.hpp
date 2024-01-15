@@ -372,7 +372,7 @@ struct TypeSpecifier {
         Ring_DeriveType_Class* class_type;
     } u;
     unsigned int   dimension; // 维度，用来指明next
-    TypeSpecifier* next;      // 用于嵌套类型
+    TypeSpecifier* next;      // 用于嵌套类型, TODO: 这里是不是名字应该换成sub 更好, 因为没有继续往下嵌套了
 };
 
 typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
@@ -496,11 +496,12 @@ struct RVM_String {
 
 typedef enum {
     RVM_ARRAY_UNKNOW,
-    RVM_ARRAY_BOOL,
-    RVM_ARRAY_INT,
-    RVM_ARRAY_DOUBLE,
-    RVM_ARRAY_STRING,
-    RVM_ARRAY_OBJECT,
+    RVM_ARRAY_BOOL,         // bool 数组
+    RVM_ARRAY_INT,          // int 数组
+    RVM_ARRAY_DOUBLE,       // double 数组
+    RVM_ARRAY_STRING,       // string 数组
+    RVM_ARRAY_CLASS_OBJECT, // 类 数组
+    RVM_ARRAY_A,            // 多维数组
 } RVM_Array_Type;
 
 struct RVM_Array {
@@ -513,6 +514,7 @@ struct RVM_Array {
         double*          double_array;
         RVM_String*      string_array;
         RVM_ClassObject* class_object_array;
+        RVM_Array*       a_array; // 多维数组
     } u;
 };
 
@@ -529,18 +531,19 @@ typedef enum {
     GC_MARK_COLOR_BLACK, // 不需要被回收
 } GC_Mark;
 
+#define RVM_GC_Object_Header \
+    RVM_Object_Type type;    \
+    GC_Mark         gc_mark; \
+    RVM_Object*     prev;    \
+    RVM_Object*     next;
+
 struct RVM_Object {
-    RVM_Object_Type type;
+    RVM_GC_Object_Header;
     union {
         RVM_String*      string;
         RVM_Array*       array;
         RVM_ClassObject* class_object;
     } u;
-
-    GC_Mark     gc_mark;
-
-    RVM_Object* prev;
-    RVM_Object* next;
 };
 
 // Only used by back-end of compiler.
@@ -662,29 +665,30 @@ typedef enum {
     RVM_CODE_PUSH_STACK_OBJECT,
 
     // array
+    RVM_CODE_PUSH_ARRAY_A,
     RVM_CODE_PUSH_ARRAY_BOOL,
     RVM_CODE_PUSH_ARRAY_INT,
     RVM_CODE_PUSH_ARRAY_DOUBLE,
     RVM_CODE_PUSH_ARRAY_STRING,
-    RVM_CODE_PUSH_ARRAY_OBJECT,
+    RVM_CODE_PUSH_ARRAY_CLASS_OBJECT,
     RVM_CODE_POP_ARRAY_BOOL,
     RVM_CODE_POP_ARRAY_INT,
     RVM_CODE_POP_ARRAY_DOUBLE,
     RVM_CODE_POP_ARRAY_STRING,
-    RVM_CODE_POP_ARRAY_OBJECT,
+    RVM_CODE_POP_ARRAY_CLASS_OBJECT,
 
     // array append
     RVM_CODE_ARRAY_APPEND_BOOL,
     RVM_CODE_ARRAY_APPEND_INT,
     RVM_CODE_ARRAY_APPEND_DOUBLE,
     RVM_CODE_ARRAY_APPEND_STRING,
-    RVM_CODE_ARRAY_APPEND_OBJECT,
+    RVM_CODE_ARRAY_APPEND_CLASS_OBJECT,
     // array pop
     RVM_CODE_ARRAY_POP_BOOL,
     RVM_CODE_ARRAY_POP_INT,
     RVM_CODE_ARRAY_POP_DOUBLE,
     RVM_CODE_ARRAY_POP_STRING,
-    RVM_CODE_ARRAY_POP_OBJECT,
+    RVM_CODE_ARRAY_POP_CLASS_OBJECT,
 
     // class
     RVM_CODE_POP_FIELD_BOOL,
@@ -783,12 +787,12 @@ typedef enum {
     RVM_CODE_NEW_ARRAY_INT,
     RVM_CODE_NEW_ARRAY_DOUBLE,
     RVM_CODE_NEW_ARRAY_STRING,
-    RVM_CODE_NEW_ARRAY_OBJECT,
+    RVM_CODE_NEW_ARRAY_CLASS_OBJECT,
     RVM_CODE_NEW_ARRAY_LITERAL_BOOL,
     RVM_CODE_NEW_ARRAY_LITERAL_INT,
     RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE,
     RVM_CODE_NEW_ARRAY_LITERAL_STRING,
-    RVM_CODE_NEW_ARRAY_LITERAL_OBJECT,
+    RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OBJECT,
 
     RVM_CODE_PUSH_ARRAY_LEN,
     RVM_CODE_PUSH_ARRAY_CAPACITY,
@@ -803,7 +807,7 @@ typedef enum {
     RVM_CODE_FOR_RANGE_ARRAY_INT,
     RVM_CODE_FOR_RANGE_ARRAY_DOUBLE,
     RVM_CODE_FOR_RANGE_ARRAY_STRING,
-    RVM_CODE_FOR_RANGE_ARRAY_OBJECT,
+    RVM_CODE_FOR_RANGE_ARRAY_CLASS_OBJECT,
     RVM_CODE_FOR_RANGE_STRING,
     RVM_CODE_FOR_RANGE_FINISH,
 
@@ -1224,13 +1228,23 @@ struct MemberExpression {
 
 
 struct DimensionExpression {
-    unsigned int            line_number;
+    unsigned int line_number;
+    // TODO: 这里想要加一个语法糖, [,,,] 是一个三维数组  [!3]应该也是一个三维数组
+    unsigned int            dimension;
     SubDimensionExpression* dimension_list;
 };
 struct SubDimensionExpression {
     unsigned int            line_number;
-    unsigned int            dimension;
+    unsigned int            index;
+    unsigned int            num;
     SubDimensionExpression* next;
+
+    // field: index
+    // index = 2 为二维数组
+
+    // field: num
+    // when new array, num is array size.
+    // when access array, num is index.
 };
 
 struct DotExpression {
@@ -1568,6 +1582,7 @@ typedef enum {
     ERROR_TOO_MANY_METHODS_IN_CLASS   = 200008, // class 中 method 的数量超过限制
     ERROR_MISS_CLASS_DEFINITION       = 200009, // 缺少 class 定义
     ERROR_INVALID_FIELD_IN_CLASS      = 200010, // field 不合法
+    ERROR_ARRAY_DIMENSION_INVALID     = 200011, // 数组维度不合法
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -1947,7 +1962,7 @@ SubDimensionExpression*       create_sub_dimension_expression(char* literal_inte
 SubDimensionExpression*       sub_dimension_expression_list_add_item(SubDimensionExpression* list, SubDimensionExpression* item);
 
 TypeSpecifier*                create_type_specifier(Ring_BasicType basic_type);
-TypeSpecifier*                create_type_specifier_array(TypeSpecifier* type);
+TypeSpecifier*                create_type_specifier_array(TypeSpecifier* type, DimensionExpression* dimension);
 TypeSpecifier*                create_class_type_specifier(char* identifier);
 
 Declaration*                  create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
@@ -2175,10 +2190,24 @@ void                 init_derive_function_local_variable(Ring_VirtualMachine* rv
 RVM_Object*          string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* string_literal);
 RVM_Object*          concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b);
 
-RVM_Object*          rvm_new_array_bool(Ring_VirtualMachine* rvm, unsigned int dimension);
-RVM_Object*          rvm_new_array_int(Ring_VirtualMachine* rvm, unsigned int dimension);
-RVM_Object*          rvm_new_array_double(Ring_VirtualMachine* rvm, unsigned int dimension);
-RVM_Object*          rvm_new_array_string(Ring_VirtualMachine* rvm, unsigned int dimension);
+RVM_Array*           rvm_new_array(Ring_VirtualMachine* rvm,
+                                   unsigned int         dimension,
+                                   unsigned int*        dimension_list,
+                                   unsigned int         dimension_index,
+                                   RVM_Array_Type       array_type);
+
+RVM_Object*          rvm_new_array_bool(Ring_VirtualMachine* rvm,
+                                        unsigned int         dimension,
+                                        unsigned int*        dimension_list);
+RVM_Object*          rvm_new_array_int(Ring_VirtualMachine* rvm,
+                                       unsigned int         dimension,
+                                       unsigned int*        dimension_list);
+RVM_Object*          rvm_new_array_double(Ring_VirtualMachine* rvm,
+                                          unsigned int         dimension,
+                                          unsigned int*        dimension_list);
+RVM_Object*          rvm_new_array_string(Ring_VirtualMachine* rvm,
+                                          unsigned int         dimension,
+                                          unsigned int*        dimension_list);
 RVM_Object*          rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int dimension);
 
 RVM_Object*          rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
@@ -2191,6 +2220,8 @@ void                 rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Object* 
 void                 rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
 void                 rvm_string_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
 void                 rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
+
+ErrorCode            rvm_array_get_array(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
 
 ErrorCode            rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
 ErrorCode            rvm_array_set_bool(Ring_VirtualMachine* rvm, RVM_Object* object, int index, bool* value);
