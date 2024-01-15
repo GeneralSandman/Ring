@@ -26,19 +26,20 @@
    1. 完善栈式虚拟机 ✅
    2. 面向对象 Class (field, method)
    3. 数组 Array ✅
-   4. 字符串 String ✅
-   5. 数组+对象+字符串 各种嵌套定义
-   6. 多维数组
-   7. 完善语义分析 报错机制
-   8. Any类型  ✅
-   9. 实现可变参数   ✅
-   10. 完善内置 printf 函数  很重要  可变参数 format
-   11. switch case 实现
-   12. package 源代码的组织形式 import/package ✅
-   13. 生成字节码 到二进制文件 解析字节码 Dump ByteCode (需要拆分出 编译前 和 加载虚拟机代码)
-   14. linux man手册
-   15. 支持 `ring dump`
-   16. 完善Ring的数据类型 int double 是远远不够的 ✅
+   4. 多维数组
+   5. 字符串 String ✅
+   6. 数组+对象+字符串 各种嵌套定义
+   7. 多维数组
+   8. 完善语义分析 报错机制
+   9. Any类型  ✅
+   10. 实现可变参数   ✅
+   11. 完善内置 printf 函数  很重要  可变参数 format
+   12. switch case 实现
+   13. package 源代码的组织形式 import/package ✅
+   14. 生成字节码 到二进制文件 解析字节码 Dump ByteCode (需要拆分出 编译前 和 加载虚拟机代码)
+   15. linux man手册
+   16. 支持 `ring dump`
+   17. 完善Ring的数据类型 int double 是远远不够的 ✅
 4. 完善Ring的高级功能
    1.  类型的强制转换 与 隐式转换
    2.  垃圾回收 Grabage Collection ✅
@@ -317,9 +318,33 @@ execute的时候需要支持多维数组
 
 如果对于一个二维数组 a[][], a[1] 其实是个一维数组, 还需要完善一下语义检查.
 
+var int[] a; // 一维数组
+var int[,] a; // 二位数组
+var int[,,] a; // 二位数组
+
+new int[10];    // 创建一维数组
+new int[10,20]; // 创建二维数组
+new int[10,20,30]; // 创建二维数组
+
+a[1,2,3]; // 访问数组
+
 
 如何 printf一个一维数组.
 
+dimension: 纬度
+size: 数组的大小
+
+a[1,2,4] 纬度为3, 大小分别为 1, 2, 4 
+
+
+new 多维数组的时候, size只能放int常量, 也就是还不能完全动态分配
+a[1,2,4] 访问的时候, 可以放非int常量
+
+
+ TODO: array literal 暂时只支持一维数组 
+
+
+ ### 应该把 RVM_String 放在基础类型里边
 
 -----------------------------
 
