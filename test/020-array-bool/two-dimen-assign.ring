@@ -51,15 +51,12 @@ function main() {
 
     var int i = 0;
     var int j = 0;
-    var int sum = 0;
 
     for(i = 0; i < 2; i = i+1) {
         for(j = 0; j < 4; j = j+1) {
             fmt::println_bool(global_bool_array_0[i, j]);
-            sum = sum + 1;
         }
     }
-    fmt::println_int(sum);
 
 
 

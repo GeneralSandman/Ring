@@ -1,0 +1,49 @@
+test cast 1 ------------------------
+false
+false
+false
+false
+false
+false
+false
+false
+
+test cast 2 ------------------------
+true
+true
+true
+true
+true
+true
+true
+true
+
+test cast 3 ------------------------
+true
+true
+true
+true
+true
+true
+true
+true
+
+test cast 4 ------------------------
+false
+true
+false
+true
+false
+true
+false
+true
+
+test cast 5 ------------------------
+false
+true
+false
+true
+false
+true
+false
+true
