@@ -1760,11 +1760,10 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
 RVM_Object* rvm_new_array_bool(Ring_VirtualMachine* rvm,
                                unsigned int         dimension,
                                unsigned int*        dimension_list) {
-    unsigned int capacity = ROUND_UP8(dimension);
-    RVM_Object*  object   = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
+    RVM_Object* object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
 
     // FIXME: 内存泄漏
-    object->u.array       = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL);
+    object->u.array    = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL);
 
     return object;
 }
@@ -1779,11 +1778,10 @@ RVM_Object* rvm_new_array_bool(Ring_VirtualMachine* rvm,
 RVM_Object* rvm_new_array_int(Ring_VirtualMachine* rvm,
                               unsigned int         dimension,
                               unsigned int*        dimension_list) {
-    unsigned int capacity = ROUND_UP8(dimension);
-    RVM_Object*  object   = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
+    RVM_Object* object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
 
     // FIXME: 内存泄漏
-    object->u.array       = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT);
+    object->u.array    = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT);
 
     return object;
 }
@@ -1798,11 +1796,10 @@ RVM_Object* rvm_new_array_int(Ring_VirtualMachine* rvm,
 RVM_Object* rvm_new_array_double(Ring_VirtualMachine* rvm,
                                  unsigned int         dimension,
                                  unsigned int*        dimension_list) {
-    unsigned int capacity = ROUND_UP8(dimension);
-    RVM_Object*  object   = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
+    RVM_Object* object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
 
     // FIXME: 内存泄漏
-    object->u.array       = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE);
+    object->u.array    = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE);
 
     return object;
 }
@@ -1817,11 +1814,10 @@ RVM_Object* rvm_new_array_double(Ring_VirtualMachine* rvm,
 RVM_Object* rvm_new_array_string(Ring_VirtualMachine* rvm,
                                  unsigned int         dimension,
                                  unsigned int*        dimension_list) {
-    unsigned int capacity = ROUND_UP8(dimension);
-    RVM_Object*  object   = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
+    RVM_Object* object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_ARRAY);
 
     // FIXME: 内存泄漏
-    object->u.array       = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING);
+    object->u.array    = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING);
 
     return object;
 }

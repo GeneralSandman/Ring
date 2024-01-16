@@ -1207,8 +1207,7 @@ void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayInde
     }
 
     // push array-object to runtime_stack
-    Expression* index  = array_index_expression->index_expression;
-    RVM_Opcode  opcode = RVM_CODE_UNKNOW;
+    RVM_Opcode opcode = RVM_CODE_UNKNOW;
     if (declaration->is_local) {
         opcode = RVM_CODE_PUSH_STACK_OBJECT;
     } else {
@@ -1867,8 +1866,7 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
     }
 
     // push array-object to runtime_stack
-    Expression* index  = array_index_expression->index_expression;
-    RVM_Opcode  opcode = RVM_CODE_UNKNOW;
+    RVM_Opcode opcode = RVM_CODE_UNKNOW;
     if (declaration->is_local) {
         opcode = RVM_CODE_PUSH_STACK_OBJECT;
     } else {
