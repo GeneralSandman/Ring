@@ -22,7 +22,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     ((rvm)->runtime_stack->data[(index)].u.object)
 #define STACK_GET_STRING_INDEX(rvm, index) \
     ((rvm)->runtime_stack->data[(index)].u.string_value)
-
+#define STACK_GET_CLASS_OB_INDEX(rvm, index) \
+    ((rvm)->runtime_stack->data[(index)].u.class_ob_value)
 
 // 通过栈顶偏移 offset 获取 rvm->runtime_stack->data
 #define STACK_GET_BOOL_OFFSET(rvm, offset) \
@@ -35,6 +36,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     STACK_GET_OBJECT_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 #define STACK_GET_STRING_OFFSET(rvm, offset) \
     STACK_GET_STRING_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
+#define STACK_GET_CLASS_OB_OFFSET(rvm, offset) \
+    STACK_GET_CLASS_OB_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 
 
 // 通过绝对索引 设置 rvm->runtime_stack->data
@@ -53,6 +56,9 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define STACK_SET_STRING_INDEX(rvm, index, value)                               \
     (rvm)->runtime_stack->data[(index)].type           = RVM_VALUE_TYPE_STRING; \
     (rvm)->runtime_stack->data[(index)].u.string_value = (value);
+#define STACK_SET_CLASS_OB_INDEX(rvm, index, value)                                 \
+    (rvm)->runtime_stack->data[(index)].type             = RVM_VALUE_TYPE_CLASS_OB; \
+    (rvm)->runtime_stack->data[(index)].u.class_ob_value = (value);
 
 
 // 通过栈顶偏移 offset 设置 rvm->runtime_stack->data
@@ -66,6 +72,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     STACK_SET_OBJECT_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
 #define STACK_SET_STRING_OFFSET(rvm, offset, value) \
     STACK_SET_STRING_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
+#define STACK_SET_CLASS_OB_OFFSET(rvm, offset, value) \
+    STACK_SET_CLASS_OB_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
 
 
 #define STACK_COPY_INDEX(rvm, dst_index, src_index) \
@@ -205,10 +213,10 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* execut
             break;
         case RING_BASIC_TYPE_CLASS:
             // Search class-definition from variable declaration.
-            rvm_class_definition             = &(rvm->class_list[type_specifier->u.class_def_index]);
+            rvm_class_definition                     = &(rvm->class_list[type_specifier->u.class_def_index]);
 
-            runtime_static->data[i].type     = RVM_VALUE_TYPE_OBJECT;
-            runtime_static->data[i].u.object = new_class_object(rvm, rvm_class_definition);
+            runtime_static->data[i].type             = RVM_VALUE_TYPE_CLASS_OB;
+            runtime_static->data[i].u.class_ob_value = new_class_object(rvm, rvm_class_definition);
             break;
 
         default:
@@ -233,7 +241,7 @@ RVM_String* new_string_object(Ring_VirtualMachine* rvm) {
  * 使用到了 class_definition ,  和编译器前端没有做到完全解耦
  * TODO: 解耦
  */
-RVM_Object* new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition) {
+RVM_ClassObject* new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition) {
     assert(class_definition != nullptr);
 
     // Search field-member's size and detail from class-definition.
@@ -245,11 +253,11 @@ RVM_Object* new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* clas
     field                   = (RVM_Value*)mem_alloc(rvm->meta_pool, alloc_size);
     memset(field, 0, alloc_size);
 
-    RVM_Object* object                  = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
+    RVM_ClassObject* class_object = rvm_heap_new_class_object(rvm);
     // object->u.class_object->class_def   = class_definition;
-    object->u.class_object->field_count = field_size;
-    object->u.class_object->field       = field;
-    object->u.class_object->class_ref   = class_definition;
+    class_object->field_count     = field_size;
+    class_object->field           = field;
+    class_object->class_ref       = class_definition;
 
     // TODO: 这里得优化一下, 算得不对, 得分析具体 member的类型
     rvm->runtime_heap->alloc_size += field_size * sizeof(RVM_Value);
@@ -257,7 +265,7 @@ RVM_Object* new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* clas
     // TODO:
     // if class has constructor method, invoke it.
 
-    return object;
+    return class_object;
 }
 
 /*
@@ -299,9 +307,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Object*        array_object           = nullptr;
     RVM_String*        rvm_string             = nullptr;
     // TODO: class_object 这个局部变量名称是不是要改一下, class_object->u.class_object 这样的情况不太好理解
-    RVM_Object* class_object                  = nullptr;
+    RVM_ClassObject* class_ob                 = nullptr;
 
-    ErrorCode   error_code                    = ERROR_CODE_SUCCESS;
+    ErrorCode        error_code               = ERROR_CODE_SUCCESS;
 
     while (rvm->pc < code_size) {
         RVM_Byte opcode = code_list[rvm->pc];
@@ -380,6 +388,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
+        case RVM_CODE_POP_STATIC_CLASS_OB:
+            oper_num                                     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            index                                        = oper_num;                           //  在操作符后边获取
+            runtime_static->data[index].u.class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -1); // 找到对应的 static 变量
+            runtime_stack->top_index--;
+            rvm->pc += 3;
+            break;
         case RVM_CODE_POP_STATIC_OBJECT:
             oper_num                             = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             index                                = oper_num; //  在操作符后边获取
@@ -422,6 +437,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
+        case RVM_CODE_PUSH_STATIC_CLASS_OB:
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            index    = oper_num; //  在操作符后边获取
+            STACK_SET_CLASS_OB_OFFSET(rvm, 0, rvm->runtime_static->data[index].u.class_ob_value);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+            break;
         case RVM_CODE_PUSH_STATIC_OBJECT:
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             index    = oper_num; //  在操作符后边获取
@@ -452,6 +474,12 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_STACK_STRING:
             caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_STRING_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_STRING_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_POP_STACK_CLASS_OB:
+            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_CLASS_OB_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_CLASS_OB_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
@@ -498,6 +526,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             caller_stack_offset = oper_num; //  在操作符后边获取
             STACK_SET_STRING_OFFSET(rvm, 0,
                                     STACK_GET_STRING_INDEX(rvm, caller_stack_base + caller_stack_offset));
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_PUSH_STACK_CLASS_OB:
+            oper_num            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            caller_stack_offset = oper_num; //  在操作符后边获取
+            STACK_SET_CLASS_OB_OFFSET(rvm, 0,
+                                      STACK_GET_CLASS_OB_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
@@ -559,9 +595,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_ARRAY_CLASS_OBJECT:
             array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
             index        = STACK_GET_INT_OFFSET(rvm, -1);
-            rvm_array_get_class_object(rvm, array_object, index, &object_value);
+            rvm_array_get_class_object(rvm, array_object, index, &class_ob);
             runtime_stack->top_index -= 2;
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
+            STACK_SET_CLASS_OB_OFFSET(rvm, 0, class_ob);
             runtime_stack->top_index++;
             rvm->pc += 1;
             break;
@@ -598,7 +634,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_ARRAY_CLASS_OBJECT:
             array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
             index        = STACK_GET_INT_OFFSET(rvm, -1);
-            rvm_array_set_class_object(rvm, array_object, index, &STACK_GET_OBJECT_OFFSET(rvm, -3));
+            rvm_array_set_class_object(rvm, array_object, index, &STACK_GET_CLASS_OB_OFFSET(rvm, -3));
             runtime_stack->top_index -= 3;
             rvm->pc += 1;
             break;
@@ -634,8 +670,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_ARRAY_APPEND_CLASS_OBJECT:
             array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            object_value = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            rvm_array_append_class_object(rvm, array_object, &object_value);
+            class_ob     = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            rvm_array_append_class_object(rvm, array_object, &class_ob);
             runtime_stack->top_index -= 2;
             rvm->pc += 1;
             break;
@@ -680,9 +716,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_ARRAY_POP_CLASS_OBJECT:
             array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
             object_value = nullptr;
-            rvm_array_pop_class_object(rvm, array_object, &object_value);
+            rvm_array_pop_class_object(rvm, array_object, &class_ob);
             runtime_stack->top_index -= 1;
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
+            STACK_SET_CLASS_OB_OFFSET(rvm, 0, class_ob);
             runtime_stack->top_index += 1;
             rvm->pc += 1;
             break;
@@ -697,55 +733,55 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
              * 这里是不是反过来写更好理解
              *
              */
-            class_object                                               = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num                                                   = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            class_object->u.class_object->field[oper_num].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
+            class_ob                               = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            oper_num                               = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_ob->field[oper_num].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_INT:
-            class_object                                              = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num                                                  = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            class_object->u.class_object->field[oper_num].u.int_value = STACK_GET_INT_OFFSET(rvm, -2);
+            class_ob                              = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            oper_num                              = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_ob->field[oper_num].u.int_value = STACK_GET_INT_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_DOUBLE:
-            class_object                                                 = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num                                                     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            class_object->u.class_object->field[oper_num].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -2);
+            class_ob                                 = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            oper_num                                 = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_ob->field[oper_num].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_STRING:
-            class_object                                           = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num                                               = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            class_object->u.class_object->field[oper_num].u.object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            class_ob                           = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            oper_num                           = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_ob->field[oper_num].u.object = STACK_GET_OBJECT_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_BOOL:
-            class_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_BOOL_OFFSET(rvm, -1, class_object->u.class_object->field[oper_num].u.bool_value);
+            class_ob = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_BOOL_OFFSET(rvm, -1, class_ob->field[oper_num].u.bool_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_INT:
-            class_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_INT_OFFSET(rvm, -1, class_object->u.class_object->field[oper_num].u.int_value);
+            class_ob = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_INT_OFFSET(rvm, -1, class_ob->field[oper_num].u.int_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_DOUBLE:
-            class_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_DOUBLE_OFFSET(rvm, -1, class_object->u.class_object->field[oper_num].u.double_value);
+            class_ob = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_DOUBLE_OFFSET(rvm, -1, class_ob->field[oper_num].u.double_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_STRING:
-            class_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_OBJECT_OFFSET(rvm, -1, class_object->u.class_object->field[oper_num].u.object);
+            class_ob = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_OBJECT_OFFSET(rvm, -1, class_ob->field[oper_num].u.object);
             rvm->pc += 3;
             break;
 
@@ -1037,16 +1073,16 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_INVOKE_METHOD: {
             method_index = STACK_GET_INT_OFFSET(rvm, -1);
-            class_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
+            class_ob     = STACK_GET_CLASS_OB_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             // 每个对象的成员变量 是单独存储的
             // 但是 method 没必要单独存储, 在 class_definition 中就可以, 通过指针寻找 class_definition
             // 需要将 class_object 赋值给 self 变量
             // TODO: 但是这里, gc会释放么, 让 invoke_derive_function变得不合法
-            RVM_Method* method = &(class_object->u.class_object->class_ref->method_list[method_index]);
+            RVM_Method* method = &(class_ob->class_ref->method_list[method_index]);
             invoke_derive_function(rvm,
                                    &function,
-                                   class_object, method->rvm_function,
+                                   class_ob, method->rvm_function,
                                    &code_list, &code_size,
                                    &rvm->pc,
                                    &caller_stack_base);
@@ -1208,9 +1244,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // TODO: 后期修正
             RVM_ClassDefinition* rvm_class_definition = &(rvm->class_list[class_index]);
 
-            class_object                              = rvm_new_class_object_literal(rvm, rvm_class_definition, init_exp_size);
+            class_ob                                  = rvm_new_class_object_literal(rvm, rvm_class_definition, init_exp_size);
             runtime_stack->top_index -= init_exp_size;
-            STACK_SET_OBJECT_OFFSET(rvm, 0, class_object);
+            STACK_SET_CLASS_OB_OFFSET(rvm, 0, class_ob);
             runtime_stack->top_index++;
             rvm->pc += 3;
         } break;
@@ -1287,13 +1323,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_FOR_RANGE_ARRAY_CLASS_OBJECT: {
             array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
             index        = STACK_GET_INT_OFFSET(rvm, -1);
-            error_code   = rvm_array_get_class_object(rvm, array_object, index, &object_value);
+            error_code   = rvm_array_get_class_object(rvm, array_object, index, &class_ob);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
                 rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
                 break;
             }
             // runtime_stack->top_index -= 2; // 与 RVM_CODE_PUSH_ARRAY_OBJECT 的不同点 区别
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
+            STACK_SET_CLASS_OB_OFFSET(rvm, 0, class_ob);
             runtime_stack->top_index++;
             rvm->pc += 3;
 
@@ -1414,7 +1450,7 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, un
  */
 void invoke_derive_function(Ring_VirtualMachine* rvm,
                             RVM_Function**       caller_function,
-                            RVM_Object* callee_object, RVM_Function* callee_function,
+                            RVM_ClassObject* callee_object, RVM_Function* callee_function,
                             RVM_Byte** code_list, unsigned int* code_size,
                             unsigned int* pc,
                             unsigned int* caller_stack_base) {
@@ -1566,7 +1602,7 @@ void restore_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo** call_info) {
  * FIXME: 如果局部变量是个数组
  */
 void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
-                                         RVM_Object* callee_object, RVM_Function* function) {
+                                         RVM_ClassObject* callee_object, RVM_Function* function) {
     debug_log_with_white_coloar("\t");
 
     unsigned int arguement_list_size   = function->parameter_size;
@@ -1577,8 +1613,8 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
 
     // Step-1: 初始化 self 变量
     if (callee_object != nullptr) {
-        rvm->runtime_stack->data[rvm->runtime_stack->top_index + 0].type     = RVM_VALUE_TYPE_OBJECT;
-        rvm->runtime_stack->data[rvm->runtime_stack->top_index + 0].u.object = callee_object;
+        rvm->runtime_stack->data[rvm->runtime_stack->top_index + 0].type             = RVM_VALUE_TYPE_CLASS_OB;
+        rvm->runtime_stack->data[rvm->runtime_stack->top_index + 0].u.class_ob_value = callee_object;
         local_variable_offset++;
     }
 
@@ -1593,7 +1629,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
     // function->local_variable_list
     RVM_TypeSpecifier*   type_specifier       = nullptr;
     RVM_ClassDefinition* rvm_class_definition = nullptr;
-    RVM_Object*          object               = nullptr;
+    RVM_ClassObject*     class_ob             = nullptr;
     RVM_String*          string               = nullptr;
 
     // Step-3: 初始化函数中声明的局部变量
@@ -1623,8 +1659,8 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             // Search class-definition from variable declaration.
             rvm_class_definition = &(rvm->class_list[type_specifier->u.class_def_index]);
 
-            object               = new_class_object(rvm, rvm_class_definition);
-            STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_offset, object);
+            class_ob             = new_class_object(rvm, rvm_class_definition);
+            STACK_SET_CLASS_OB_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_offset, class_ob);
             break;
 
         default:
@@ -1897,24 +1933,24 @@ RVM_Object* rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int fi
  * TODO: support field is string or array
  *
  */
-RVM_Object* rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition) {
-    RVM_Object* object     = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
+RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition) {
+    RVM_ClassObject* class_ob   = rvm_heap_new_class_object(rvm);
 
-    size_t      alloc_size = class_definition->field_size * sizeof(RVM_Value);
-    RVM_Value*  field      = nullptr;
-    field                  = (RVM_Value*)mem_alloc(rvm->meta_pool, alloc_size);
+    size_t           alloc_size = class_definition->field_size * sizeof(RVM_Value);
+    RVM_Value*       field      = nullptr;
+    field                       = (RVM_Value*)mem_alloc(rvm->meta_pool, alloc_size);
     memset(field, 0, alloc_size);
     // TODO: 有个遗留问题
     // RVM_Value 的 type 没有设置
 
-    object->u.class_object->class_ref   = class_definition;
-    object->u.class_object->field_count = class_definition->field_size;
-    object->u.class_object->field       = field;
+    class_ob->class_ref   = class_definition;
+    class_ob->field_count = class_definition->field_size;
+    class_ob->field       = field;
 
 
     // TODO: 这里的计算方式不对
     rvm->runtime_heap->alloc_size += 0;
-    return object;
+    return class_ob;
 }
 
 RVM_Object* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size) {
@@ -1971,7 +2007,6 @@ RVM_Object* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size) {
     RVM_Object* object           = rvm_new_array_string(rvm, dimension, dimension_list);
     for (int i = 0; i < size; i++) {
         // TODO: 这个写法需要重构
-        RVM_String a                       = *(STACK_GET_STRING_OFFSET(rvm, -size + i));
         object->u.array->u.string_array[i] = *(STACK_GET_STRING_OFFSET(rvm, -size + i));
     }
 
@@ -1979,10 +2014,10 @@ RVM_Object* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size) {
     return object;
 }
 
-RVM_Object* rvm_new_class_object_literal(Ring_VirtualMachine* rvm,
-                                         RVM_ClassDefinition* class_definition, unsigned int init_exp_size) {
+RVM_ClassObject* rvm_new_class_object_literal(Ring_VirtualMachine* rvm,
+                                              RVM_ClassDefinition* class_definition, unsigned int init_exp_size) {
     // rvm_new_class_object 这个需要重写一下
-    RVM_Object* object = rvm_new_class_object(rvm, class_definition);
+    RVM_ClassObject* class_ob = rvm_new_class_object(rvm, class_definition);
     if (class_definition->field_size != init_exp_size) {
         // error report
         fprintf(stderr,
@@ -1993,9 +2028,9 @@ RVM_Object* rvm_new_class_object_literal(Ring_VirtualMachine* rvm,
     // 从 runtime_stack 中取出 已经push的, 然后依次初始化
     unsigned init_exp_of_stack_index = rvm->runtime_stack->top_index - init_exp_size;
     for (unsigned int i = 0; i < init_exp_size; i++) {
-        object->u.class_object->field[i] = rvm->runtime_stack->data[init_exp_of_stack_index + i];
+        class_ob->field[i] = rvm->runtime_stack->data[init_exp_of_stack_index + i];
     }
-    return object;
+    return class_ob;
 }
 
 void rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value) {
@@ -2244,27 +2279,24 @@ ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM
     return ERROR_CODE_SUCCESS;
 }
 
-ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value) {
+ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_ClassObject** value) {
     if (index >= object->u.array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
     RVM_ClassObject* src_class_object = &(object->u.array->u.class_object_array[index]);
     RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
 
-    RVM_Object*      new_object       = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
-    new_object->u.class_object        = dst_class_object; // FIXME: 这里内存泄漏了
-
-    *value                            = new_object;
+    *value                            = dst_class_object;
     return ERROR_CODE_SUCCESS;
 }
 
-ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value) {
+ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_ClassObject** value) {
     if (index >= object->u.array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
 
     RVM_ClassObject* dst_class_object            = nullptr;
-    dst_class_object                             = rvm_deep_copy_class_object(rvm, (*value)->u.class_object);
+    dst_class_object                             = rvm_deep_copy_class_object(rvm, *value);
 
     object->u.array->u.class_object_array[index] = *dst_class_object;
 
@@ -2272,7 +2304,7 @@ ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Object* objec
 }
 
 
-ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value) {
+ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_ClassObject** value) {
     size_t old_alloc_size = 0;
     size_t new_alloc_size = 0;
 
@@ -2293,11 +2325,11 @@ ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Object* ob
                                                                               old_alloc_size,
                                                                               new_alloc_size);
     }
-    object->u.array->u.class_object_array[object->u.array->length++] = *rvm_deep_copy_class_object(rvm, (*value)->u.class_object);
+    object->u.array->u.class_object_array[object->u.array->length++] = *rvm_deep_copy_class_object(rvm, *value);
     return ERROR_CODE_SUCCESS;
 }
 
-ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value) {
+ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_ClassObject** value) {
     if (object->u.array->length == 0) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
@@ -2305,12 +2337,7 @@ ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Object* objec
     RVM_ClassObject* src_class_object = &(object->u.array->u.class_object_array[--object->u.array->length]);
     RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
 
-
-    RVM_Object*      new_object       = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_CLASS);
-    new_object->u.class_object        = dst_class_object;
-
-
-    *value                            = new_object;
+    *value                            = dst_class_object;
     return ERROR_CODE_SUCCESS;
 }
 
@@ -2336,9 +2363,6 @@ RVM_Object* rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type) 
     switch (type) {
     case RVM_OBJECT_TYPE_ARRAY:
         object->u.array = rvm_heap_new_array(rvm);
-        break;
-    case RVM_OBJECT_TYPE_CLASS:
-        object->u.class_object = rvm_heap_new_class_object(rvm);
         break;
     default:
         // TODO: error report
@@ -2369,9 +2393,6 @@ RVM_Object* rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src) {
     switch (src->type) {
     case RVM_OBJECT_TYPE_ARRAY:
         object->u.array = rvm_deep_copy_array(rvm, src->u.array);
-        break;
-    case RVM_OBJECT_TYPE_CLASS:
-        object->u.class_object = rvm_deep_copy_class_object(rvm, src->u.class_object);
         break;
     default:
         // TODO: error report
@@ -2618,9 +2639,6 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
     switch (object->type) {
     case RVM_OBJECT_TYPE_ARRAY:
         free_size = rvm_free_array(rvm, object->u.array);
-        break;
-    case RVM_OBJECT_TYPE_CLASS:
-        free_size = rvm_free_class_object(rvm, object->u.class_object);
         break;
     default:
         break;

@@ -44,6 +44,9 @@ void gc_summary(Ring_VirtualMachine* rvm) {
         case RVM_VALUE_TYPE_STRING:
             type = "string";
             break;
+        case RVM_VALUE_TYPE_CLASS_OB:
+            type = "class";
+            break;
         case RVM_VALUE_TYPE_OBJECT:
             type = "object";
             break;
@@ -60,9 +63,6 @@ void gc_summary(Ring_VirtualMachine* rvm) {
         switch (pos->type) {
         case RVM_OBJECT_TYPE_ARRAY:
             type = "array";
-            break;
-        case RVM_OBJECT_TYPE_CLASS:
-            type = "class";
             break;
         default:
             break;

@@ -20,12 +20,14 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_POP_STATIC_BOOL, "pop_static_bool", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STATIC_INT, "pop_static_int", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STATIC_STRING, "pop_static_string", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
+    {RVM_CODE_POP_STATIC_CLASS_OB, "pop_static_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STATIC_DOUBLE, "pop_static_double", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STATIC_OBJECT, "pop_static_object", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_PUSH_STATIC_BOOL, "push_static_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STATIC_INT, "push_static_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STATIC_DOUBLE, "push_static_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STATIC_STRING, "push_static_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
+    {RVM_CODE_PUSH_STATIC_CLASS_OB, "push_static_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STATIC_OBJECT, "push_static_object", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
 
 
@@ -34,11 +36,13 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_POP_STACK_INT, "pop_stack_int", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STACK_DOUBLE, "pop_stack_double", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STACK_STRING, "pop_stack_string", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
+    {RVM_CODE_POP_STACK_CLASS_OB, "pop_stack_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STACK_OBJECT, "pop_stack_object", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_PUSH_STACK_BOOL, "push_stack_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STACK_INT, "push_stack_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STACK_DOUBLE, "push_stack_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STACK_STRING, "push_stack_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
+    {RVM_CODE_PUSH_STACK_CLASS_OB, "push_stack_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STACK_OBJECT, "push_stack_object", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
 
 

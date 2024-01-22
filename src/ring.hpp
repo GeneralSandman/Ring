@@ -132,7 +132,8 @@ typedef enum {
     RVM_VALUE_TYPE_BOOL,
     RVM_VALUE_TYPE_INT,
     RVM_VALUE_TYPE_DOUBLE,
-    RVM_VALUE_TYPE_STRING, // TODO: string object 需要重新规划一下
+    RVM_VALUE_TYPE_STRING,
+    RVM_VALUE_TYPE_CLASS_OB,
     RVM_VALUE_TYPE_OBJECT, // TODO: string object 需要重新规划一下
 
 } RVM_Value_Type;
@@ -146,11 +147,12 @@ typedef enum {
 typedef struct {
     RVM_Value_Type type;
     union {
-        RVM_Bool    bool_value;
-        int         int_value;
-        double      double_value;
-        RVM_Object* object;
-        RVM_String* string_value;
+        RVM_Bool         bool_value;
+        int              int_value;
+        double           double_value;
+        RVM_String*      string_value;
+        RVM_ClassObject* class_ob_value;
+        RVM_Object*      object;
     } u;
 
 } RVM_Value;
@@ -484,7 +486,6 @@ struct RVM_Variable {
 typedef enum {
     RVM_OBJECT_TYPE_UNKNOW,
     RVM_OBJECT_TYPE_ARRAY,
-    RVM_OBJECT_TYPE_CLASS,
 } RVM_Object_Type;
 
 typedef enum {
@@ -552,8 +553,7 @@ struct RVM_Object {
     RVM_Object*     next;
 
     union {
-        RVM_Array*       array;
-        RVM_ClassObject* class_object;
+        RVM_Array* array;
     } u;
 };
 
@@ -659,11 +659,13 @@ typedef enum {
     RVM_CODE_POP_STATIC_INT,
     RVM_CODE_POP_STATIC_DOUBLE,
     RVM_CODE_POP_STATIC_STRING,
+    RVM_CODE_POP_STATIC_CLASS_OB,
     RVM_CODE_POP_STATIC_OBJECT,
     RVM_CODE_PUSH_STATIC_BOOL,
     RVM_CODE_PUSH_STATIC_INT,
     RVM_CODE_PUSH_STATIC_DOUBLE,
     RVM_CODE_PUSH_STATIC_STRING,
+    RVM_CODE_PUSH_STATIC_CLASS_OB,
     RVM_CODE_PUSH_STATIC_OBJECT,
 
 
@@ -672,11 +674,13 @@ typedef enum {
     RVM_CODE_POP_STACK_INT,
     RVM_CODE_POP_STACK_DOUBLE,
     RVM_CODE_POP_STACK_STRING,
+    RVM_CODE_POP_STACK_CLASS_OB,
     RVM_CODE_POP_STACK_OBJECT,
     RVM_CODE_PUSH_STACK_BOOL,
     RVM_CODE_PUSH_STACK_INT,
     RVM_CODE_PUSH_STACK_DOUBLE,
     RVM_CODE_PUSH_STACK_STRING,
+    RVM_CODE_PUSH_STACK_CLASS_OB,
     RVM_CODE_PUSH_STACK_OBJECT,
 
     // array
@@ -848,17 +852,17 @@ typedef enum {
 } IdentifierType;
 
 struct RVM_CallInfo {
-    unsigned int  magic_number;
-    RVM_Function* caller_function;
-    unsigned int  caller_pc; // 调用者的返回地址
-    unsigned int  caller_stack_base;
+    unsigned int     magic_number;
+    RVM_Function*    caller_function;
+    unsigned int     caller_pc; // 调用者的返回地址
+    unsigned int     caller_stack_base;
 
-    RVM_Object*   callee_object;
-    RVM_Function* callee_function;
-    unsigned int  callee_argument_size; // 函数调用的参数数量，可变参数
+    RVM_ClassObject* callee_object;
+    RVM_Function*    callee_function;
+    unsigned int     callee_argument_size; // 函数调用的参数数量，可变参数
 
-    RVM_CallInfo* prev;
-    RVM_CallInfo* next;
+    RVM_CallInfo*    prev;
+    RVM_CallInfo*    next;
 };
 
 #define CALL_INFO_MAGIC_NUMBER (0x8421) // 33852
@@ -2176,12 +2180,12 @@ void                 ring_virtualmachine_init(Ring_VirtualMachine* rvm);
 void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 RVM_String*          new_string_object(Ring_VirtualMachine* rvm);
-RVM_Object*          new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
+RVM_ClassObject*     new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_Function**       caller_function,
-                                            RVM_Object* callee_object, RVM_Function* callee_function,
+                                            RVM_ClassObject* callee_object, RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
                                             unsigned int* caller_stack_base);
@@ -2200,7 +2204,7 @@ void                 derive_function_finish(Ring_VirtualMachine* rvm,
 void                 store_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo* call_info);
 void                 restore_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo** call_info);
 void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm,
-                                                         RVM_Object* callee_object, RVM_Function* function);
+                                                         RVM_ClassObject* callee_object, RVM_Function* function);
 
 RVM_String*          string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal);
 RVM_String*          concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b);
@@ -2225,12 +2229,15 @@ RVM_Object*          rvm_new_array_string(Ring_VirtualMachine* rvm,
                                           unsigned int*        dimension_list);
 RVM_Object*          rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int dimension);
 
-RVM_Object*          rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
+RVM_ClassObject*     rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
 RVM_Object*          rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size);
 RVM_Object*          rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size);
 RVM_Object*          rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
 RVM_Object*          rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size);
-RVM_Object*          rvm_new_class_object_literal(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition, unsigned int init_exp_size);
+
+RVM_ClassObject*     rvm_new_class_object_literal(Ring_VirtualMachine* rvm,
+                                                  RVM_ClassDefinition* class_definition, unsigned int init_exp_size);
+
 void                 rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
 void                 rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value);
 
@@ -2259,10 +2266,10 @@ ErrorCode            rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Object* 
 ErrorCode            rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_String** value);
 ErrorCode            rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_String** value);
 
-ErrorCode            rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
-ErrorCode            rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value);
-ErrorCode            rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value);
-ErrorCode            rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value);
+ErrorCode            rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_ClassObject** value);
+ErrorCode            rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_ClassObject** value);
+ErrorCode            rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_ClassObject** value);
+ErrorCode            rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_ClassObject** value);
 
 
 RVM_Object*          rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type);

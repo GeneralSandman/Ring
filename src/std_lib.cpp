@@ -183,13 +183,13 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
     case RVM_VALUE_TYPE_STRING:
         str = "string";
         break;
+    case RVM_VALUE_TYPE_CLASS_OB:
+        str = "class";
+        break;
     case RVM_VALUE_TYPE_OBJECT:
         switch (args->u.object->type) {
         case RVM_OBJECT_TYPE_ARRAY:
             str = "array";
-            break;
-        case RVM_OBJECT_TYPE_CLASS:
-            str = "class";
             break;
         default:
             str = "unknow";
@@ -390,13 +390,13 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
     case RVM_VALUE_TYPE_STRING:
         snprintf(output_buffer, length, "%p\n", args->u.string_value->data);
         break;
+    case RVM_VALUE_TYPE_CLASS_OB:
+        snprintf(output_buffer, length, "%p\n", args->u.class_ob_value->field);
+        break;
     case RVM_VALUE_TYPE_OBJECT:
         switch (args->u.object->type) {
         case RVM_OBJECT_TYPE_ARRAY:
             snprintf(output_buffer, length, "%p\n", args->u.object->u.array->u.int_array);
-            break;
-        case RVM_OBJECT_TYPE_CLASS:
-            snprintf(output_buffer, length, "%p\n", args->u.object->u.class_object->field);
             break;
         default:
             snprintf(output_buffer, length, "%p\n", (void*)0);
@@ -521,7 +521,7 @@ RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int 
             if (pos->callee_object == nullptr) {
                 printf("%s\n", format_rvm_function(pos->callee_function).c_str());
             } else {
-                printf("%s.%s\n", pos->callee_object->u.class_object->class_ref->identifier, format_rvm_function(pos->callee_function).c_str());
+                printf("%s.%s\n", pos->callee_object->class_ref->identifier, format_rvm_function(pos->callee_function).c_str());
             }
 
 
@@ -585,14 +585,15 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
     case RVM_VALUE_TYPE_STRING:
         str = "string";
         break;
+    case RVM_VALUE_TYPE_CLASS_OB:
+        str = "class";
+        break;
     case RVM_VALUE_TYPE_OBJECT:
         switch (args->u.object->type) {
         case RVM_OBJECT_TYPE_ARRAY:
             str = "array";
             break;
-        case RVM_OBJECT_TYPE_CLASS:
-            str = "class";
-            break;
+
         default:
             str = "unknow";
             break;
