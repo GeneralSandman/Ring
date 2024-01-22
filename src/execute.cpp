@@ -1883,16 +1883,16 @@ RVM_Array* rvm_new_array_string(Ring_VirtualMachine* rvm,
  * class_def_index: index of class definition in class table
  */
 RVM_Array* rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int dimension) {
-    unsigned int capacity       = ROUND_UP8(dimension);
+    unsigned int capacity   = ROUND_UP8(dimension);
 
-    RVM_Array*   array          = rvm_heap_new_array(rvm);
+    RVM_Array*   array      = rvm_heap_new_array(rvm);
 
-    array->type                 = RVM_ARRAY_CLASS_OBJECT;
-    array->length               = dimension;
-    array->capacity             = capacity;
-    array->u.class_object_array = (RVM_ClassObject*)mem_alloc(rvm->meta_pool, sizeof(RVM_ClassObject) * dimension);
+    array->type             = RVM_ARRAY_CLASS_OBJECT;
+    array->length           = dimension;
+    array->capacity         = capacity;
+    array->u.class_ob_array = (RVM_ClassObject*)mem_alloc(rvm->meta_pool, sizeof(RVM_ClassObject) * dimension);
 
-    size_t alloc_size           = sizeof(RVM_Value) * field_count;
+    size_t alloc_size       = sizeof(RVM_Value) * field_count;
 
 
     for (unsigned int i = 0; i < dimension; i++) {
@@ -1902,8 +1902,8 @@ RVM_Array* rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int fie
         // RVM_Value 的 type 没有设置
 
         // object->u.array->u.class_object_array[i].class_def   = nullptr;
-        array->u.class_object_array[i].field_count = field_count;
-        array->u.class_object_array[i].field       = field;
+        array->u.class_ob_array[i].field_count = field_count;
+        array->u.class_ob_array[i].field       = field;
     }
 
 
@@ -2266,7 +2266,7 @@ ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Array* array,
     if (index >= array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
-    RVM_ClassObject* src_class_object = &(array->u.class_object_array[index]);
+    RVM_ClassObject* src_class_object = &(array->u.class_ob_array[index]);
     RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
 
     *value                            = dst_class_object;
@@ -2278,10 +2278,10 @@ ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Array* array,
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
 
-    RVM_ClassObject* dst_class_object  = nullptr;
-    dst_class_object                   = rvm_deep_copy_class_object(rvm, *value);
+    RVM_ClassObject* dst_class_object = nullptr;
+    dst_class_object                  = rvm_deep_copy_class_object(rvm, *value);
 
-    array->u.class_object_array[index] = *dst_class_object;
+    array->u.class_ob_array[index]    = *dst_class_object;
 
     return ERROR_CODE_SUCCESS;
 }
@@ -2300,15 +2300,15 @@ ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Array* arr
             array->capacity *= 2;
         }
 
-        new_alloc_size              = array->capacity * sizeof(RVM_ClassObject);
+        new_alloc_size          = array->capacity * sizeof(RVM_ClassObject);
 
 
-        array->u.class_object_array = (RVM_ClassObject*)mem_realloc(rvm->meta_pool,
-                                                                    array->u.class_object_array,
-                                                                    old_alloc_size,
-                                                                    new_alloc_size);
+        array->u.class_ob_array = (RVM_ClassObject*)mem_realloc(rvm->meta_pool,
+                                                                array->u.class_ob_array,
+                                                                old_alloc_size,
+                                                                new_alloc_size);
     }
-    array->u.class_object_array[array->length++] = *rvm_deep_copy_class_object(rvm, *value);
+    array->u.class_ob_array[array->length++] = *rvm_deep_copy_class_object(rvm, *value);
     return ERROR_CODE_SUCCESS;
 }
 
@@ -2317,66 +2317,11 @@ ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Array* array,
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
 
-    RVM_ClassObject* src_class_object = &(array->u.class_object_array[--array->length]);
+    RVM_ClassObject* src_class_object = &(array->u.class_ob_array[--array->length]);
     RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
 
     *value                            = dst_class_object;
     return ERROR_CODE_SUCCESS;
-}
-
-
-RVM_Object* rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type) {
-    assert(rvm != nullptr);
-    assert(rvm->runtime_heap != nullptr);
-
-    RVM_Object* object = (RVM_Object*)mem_alloc(rvm->meta_pool, sizeof(RVM_Object));
-    object->type       = type;
-    object->gc_mark    = GC_MARK_COLOR_WHITE;
-    object->prev       = nullptr;
-    object->next       = nullptr;
-
-    // add to list
-    RVM_Object* head   = rvm->runtime_heap->list;
-    object->next       = head;
-    if (head != nullptr) {
-        head->prev = object;
-    }
-    rvm->runtime_heap->list = object;
-
-    switch (type) {
-    default:
-        // TODO: error report
-        break;
-    }
-
-    return object;
-}
-
-RVM_Object* rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src) {
-    assert(rvm != nullptr);
-    assert(rvm->runtime_heap != nullptr);
-
-    RVM_Object* object = (RVM_Object*)mem_alloc(rvm->meta_pool, sizeof(RVM_Object));
-    object->type       = src->type;
-    object->gc_mark    = GC_MARK_COLOR_WHITE;
-    object->prev       = nullptr;
-    object->next       = nullptr;
-
-    // add to list
-    RVM_Object* head   = rvm->runtime_heap->list;
-    object->next       = head;
-    if (head != nullptr) {
-        head->prev = object;
-    }
-    rvm->runtime_heap->list = object;
-
-    switch (src->type) {
-    default:
-        // TODO: error report
-        break;
-    }
-
-    return object;
 }
 
 
@@ -2523,16 +2468,16 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         break;
 
     case RVM_ARRAY_CLASS_OBJECT: {
-        array->u.class_object_array = (RVM_ClassObject*)mem_alloc(rvm->meta_pool,
-                                                                  sizeof(RVM_ClassObject) * array->capacity);
+        array->u.class_ob_array = (RVM_ClassObject*)mem_alloc(rvm->meta_pool,
+                                                              sizeof(RVM_ClassObject) * array->capacity);
         rvm->runtime_heap->alloc_size += 0;
 
         for (unsigned int i = 0; i < src->length; i++) {
-            RVM_ClassObject* tmp                       = rvm_deep_copy_class_object(rvm, &(src->u.class_object_array[i]));
+            RVM_ClassObject* tmp                   = rvm_deep_copy_class_object(rvm, &(src->u.class_ob_array[i]));
             // TODO: 这里的写法不太好, 还是直接 strcpy 的那种形式最好, 结果通过 指针传入
             // array->u.class_object_array[i].class_def   = tmp->class_def;
-            array->u.class_object_array[i].field_count = tmp->field_count;
-            array->u.class_object_array[i].field       = tmp->field;
+            array->u.class_ob_array[i].field_count = tmp->field_count;
+            array->u.class_ob_array[i].field       = tmp->field;
         }
 
     } break;
@@ -2613,10 +2558,7 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
     assert(object != nullptr);
 
     unsigned int free_size = 0;
-    switch (object->type) {
-    default:
-        break;
-    }
+
 
     rvm->runtime_heap->alloc_size -= free_size;
 

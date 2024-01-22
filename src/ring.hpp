@@ -530,34 +530,30 @@ struct RVM_Array {
         int*             int_array;
         double*          double_array;
         RVM_String*      string_array;
-        RVM_ClassObject* class_object_array;
+        RVM_ClassObject* class_ob_array;
         RVM_Array*       a_array; // 多维数组
     } u;
 };
 
 struct RVM_ClassObject {
-    // ClassDefinition* class_def; // 删除掉
     RVM_ClassDefinition* class_ref;
     unsigned int         field_count;
     RVM_Value*           field;
 };
 
 
-#define RVM_GC_Object_Header \
-    RVM_Object_Type type;    \
-    GC_Mark         gc_mark; \
-    RVM_Object*     prev;    \
-    RVM_Object*     next;
-
 struct RVM_Object {
     RVM_Object_Type type;
     GC_Mark         gc_mark;
     RVM_Object*     prev;
     RVM_Object*     next;
-
-    union {
-    } u;
 };
+
+#define RVM_GC_Object_Header \
+    RVM_Object_Type type;    \
+    GC_Mark         gc_mark; \
+    RVM_Object*     prev;    \
+    RVM_Object*     next;
 
 // Only used by back-end of compiler.
 struct RVM_TypeSpecifier {
@@ -2274,9 +2270,6 @@ ErrorCode            rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Ar
 ErrorCode            rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_ClassObject** value);
 ErrorCode            rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_ClassObject** value);
 
-
-RVM_Object*          rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type);
-RVM_Object*          rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src);
 
 RVM_String*          rvm_heap_new_string(Ring_VirtualMachine* rvm);
 RVM_String*          rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src);
