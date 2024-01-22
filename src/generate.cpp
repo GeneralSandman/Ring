@@ -1209,9 +1209,9 @@ void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayInde
     // push array-object to runtime_stack
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
     if (declaration->is_local) {
-        opcode = RVM_CODE_PUSH_STACK_OBJECT;
+        opcode = RVM_CODE_PUSH_STACK_ARRAY;
     } else {
-        opcode = RVM_CODE_PUSH_STATIC_OBJECT;
+        opcode = RVM_CODE_PUSH_STATIC_ARRAY;
     }
     generate_vmcode(executer, opcode_buffer, opcode, declaration->variable_index, array_index_expression->line_number);
 
@@ -1868,9 +1868,9 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
     // push array-object to runtime_stack
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
     if (declaration->is_local) {
-        opcode = RVM_CODE_PUSH_STACK_OBJECT;
+        opcode = RVM_CODE_PUSH_STACK_ARRAY;
     } else {
-        opcode = RVM_CODE_PUSH_STATIC_OBJECT;
+        opcode = RVM_CODE_PUSH_STATIC_ARRAY;
     }
     generate_vmcode(executer, opcode_buffer, opcode, declaration->variable_index, array_index_expression->line_number);
 
@@ -2123,10 +2123,10 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         return RVM_Opcode(opcode + 4);
         break;
     case RING_BASIC_TYPE_ARRAY:
-        // RVM_CODE_POP_STATIC_OBJECT
-        // RVM_CODE_PUSH_STATIC_OBJECT
-        // RVM_CODE_POP_STACK_OBJECT
-        // RVM_CODE_PUSH_STACK_OBJECT
+        // RVM_CODE_POP_STATIC_ARRAY
+        // RVM_CODE_PUSH_STATIC_ARRAY
+        // RVM_CODE_POP_STACK_ARRAY
+        // RVM_CODE_PUSH_STACK_ARRAY
         return RVM_Opcode(opcode + 5);
         break;
 

@@ -186,16 +186,10 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
     case RVM_VALUE_TYPE_CLASS_OB:
         str = "class";
         break;
-    case RVM_VALUE_TYPE_OBJECT:
-        switch (args->u.object->type) {
-        case RVM_OBJECT_TYPE_ARRAY:
-            str = "array";
-            break;
-        default:
-            str = "unknow";
-            break;
-        }
+    case RVM_VALUE_TYPE_ARRAY:
+        str = "array";
         break;
+
     default:
         break;
     }
@@ -393,15 +387,10 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
     case RVM_VALUE_TYPE_CLASS_OB:
         snprintf(output_buffer, length, "%p\n", args->u.class_ob_value->field);
         break;
+    case RVM_VALUE_TYPE_ARRAY:
+        snprintf(output_buffer, length, "%p\n", args->u.array_value->u.int_array);
+        break;
     case RVM_VALUE_TYPE_OBJECT:
-        switch (args->u.object->type) {
-        case RVM_OBJECT_TYPE_ARRAY:
-            snprintf(output_buffer, length, "%p\n", args->u.object->u.array->u.int_array);
-            break;
-        default:
-            snprintf(output_buffer, length, "%p\n", (void*)0);
-            break;
-        }
         break;
     default:
         break;
@@ -588,18 +577,11 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
     case RVM_VALUE_TYPE_CLASS_OB:
         str = "class";
         break;
-    case RVM_VALUE_TYPE_OBJECT:
-        switch (args->u.object->type) {
-        case RVM_OBJECT_TYPE_ARRAY:
-            str = "array";
-            break;
-
-        default:
-            str = "unknow";
-            break;
-        }
+    case RVM_VALUE_TYPE_ARRAY:
+        str = "array";
         break;
     default:
+        str = "unknow";
         break;
     }
 

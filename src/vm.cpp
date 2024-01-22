@@ -19,16 +19,16 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     // static
     {RVM_CODE_POP_STATIC_BOOL, "pop_static_bool", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STATIC_INT, "pop_static_int", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
+    {RVM_CODE_POP_STATIC_DOUBLE, "pop_static_double", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STATIC_STRING, "pop_static_string", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STATIC_CLASS_OB, "pop_static_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
-    {RVM_CODE_POP_STATIC_DOUBLE, "pop_static_double", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
-    {RVM_CODE_POP_STATIC_OBJECT, "pop_static_object", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
+    {RVM_CODE_POP_STATIC_ARRAY, "pop_static_array", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_PUSH_STATIC_BOOL, "push_static_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STATIC_INT, "push_static_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STATIC_DOUBLE, "push_static_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STATIC_STRING, "push_static_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STATIC_CLASS_OB, "push_static_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
-    {RVM_CODE_PUSH_STATIC_OBJECT, "push_static_object", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
+    {RVM_CODE_PUSH_STATIC_ARRAY, "push_static_array", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
 
 
     // stack
@@ -37,17 +37,18 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_POP_STACK_DOUBLE, "pop_stack_double", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STACK_STRING, "pop_stack_string", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_POP_STACK_CLASS_OB, "pop_stack_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
-    {RVM_CODE_POP_STACK_OBJECT, "pop_stack_object", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
+    {RVM_CODE_POP_STACK_ARRAY, "pop_stack_array", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", ""},
     {RVM_CODE_PUSH_STACK_BOOL, "push_stack_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STACK_INT, "push_stack_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STACK_DOUBLE, "push_stack_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STACK_STRING, "push_stack_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
     {RVM_CODE_PUSH_STACK_CLASS_OB, "push_stack_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
-    {RVM_CODE_PUSH_STACK_OBJECT, "push_stack_object", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
+    {RVM_CODE_PUSH_STACK_ARRAY, "push_stack_array", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", ""},
 
 
     // array
     {RVM_CODE_PUSH_ARRAY_A, "push_array_a", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", ""},
+
     {RVM_CODE_PUSH_ARRAY_BOOL, "push_array_bool", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", ""},
     {RVM_CODE_PUSH_ARRAY_INT, "push_array_int", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", ""},
     {RVM_CODE_PUSH_ARRAY_DOUBLE, "push_array_double", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", ""},
