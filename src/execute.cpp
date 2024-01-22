@@ -20,6 +20,9 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     ((rvm)->runtime_stack->data[(index)].u.double_value)
 #define STACK_GET_OBJECT_INDEX(rvm, index) \
     ((rvm)->runtime_stack->data[(index)].u.object)
+#define STACK_GET_STRING_INDEX(rvm, index) \
+    ((rvm)->runtime_stack->data[(index)].u.string_value)
+
 
 // 通过栈顶偏移 offset 获取 rvm->runtime_stack->data
 #define STACK_GET_BOOL_OFFSET(rvm, offset) \
@@ -30,6 +33,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     STACK_GET_DOUBLE_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 #define STACK_GET_OBJECT_OFFSET(rvm, offset) \
     STACK_GET_OBJECT_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
+#define STACK_GET_STRING_OFFSET(rvm, offset) \
+    STACK_GET_STRING_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 
 
 // 通过绝对索引 设置 rvm->runtime_stack->data
@@ -45,6 +50,10 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define STACK_SET_OBJECT_INDEX(rvm, index, value)                         \
     (rvm)->runtime_stack->data[(index)].type     = RVM_VALUE_TYPE_OBJECT; \
     (rvm)->runtime_stack->data[(index)].u.object = (value);
+#define STACK_SET_STRING_INDEX(rvm, index, value)                               \
+    (rvm)->runtime_stack->data[(index)].type           = RVM_VALUE_TYPE_STRING; \
+    (rvm)->runtime_stack->data[(index)].u.string_value = (value);
+
 
 // 通过栈顶偏移 offset 设置 rvm->runtime_stack->data
 #define STACK_SET_BOOL_OFFSET(rvm, offset, value) \
@@ -55,6 +64,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     STACK_SET_DOUBLE_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
 #define STACK_SET_OBJECT_OFFSET(rvm, offset, value) \
     STACK_SET_OBJECT_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
+#define STACK_SET_STRING_OFFSET(rvm, offset, value) \
+    STACK_SET_STRING_INDEX(rvm, (rvm)->runtime_stack->top_index + (offset), (value))
 
 
 #define STACK_COPY_INDEX(rvm, dst_index, src_index) \
@@ -189,8 +200,8 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* execut
             // 因为全局变量不支持 初始化, 只能在函数中赋值
             break;
         case RING_BASIC_TYPE_STRING:
-            runtime_static->data[i].type     = RVM_VALUE_TYPE_STRING;
-            runtime_static->data[i].u.object = new_string_object(rvm);
+            runtime_static->data[i].type           = RVM_VALUE_TYPE_STRING;
+            runtime_static->data[i].u.string_value = new_string_object(rvm);
             break;
         case RING_BASIC_TYPE_CLASS:
             // Search class-definition from variable declaration.
@@ -207,16 +218,13 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* execut
 }
 
 // 全局变量，static空间
-RVM_Object* new_string_object(Ring_VirtualMachine* rvm) {
-    RVM_Object* object         = (RVM_Object*)mem_alloc(rvm->meta_pool, sizeof(RVM_Object));
-    object->type               = RVM_OBJECT_TYPE_STRING;
-    object->u.string           = (RVM_String*)mem_alloc(rvm->meta_pool, sizeof(RVM_String));
-    object->u.string->length   = 0;
-    object->u.string->capacity = 8;
-    object->u.string->data     = (char*)mem_alloc(rvm->data_pool, 8 * sizeof(char));
-    object->gc_mark            = GC_MARK_COLOR_WHITE;
+RVM_String* new_string_object(Ring_VirtualMachine* rvm) {
+    RVM_String* string = (RVM_String*)mem_alloc(rvm->meta_pool, sizeof(RVM_String));
+    string->length     = 0;
+    string->capacity   = 8;
+    string->data       = (char*)mem_alloc(rvm->data_pool, 8 * sizeof(char));
 
-    return object;
+    return string;
 }
 
 /*
@@ -289,6 +297,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
     RVM_Function*      function               = nullptr;
     RVM_Object*        array_object           = nullptr;
+    RVM_String*        rvm_string             = nullptr;
     // TODO: class_object 这个局部变量名称是不是要改一下, class_object->u.class_object 这样的情况不太好理解
     RVM_Object* class_object                  = nullptr;
 
@@ -333,8 +342,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_STRING:
             const_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             // TOOD: 这里的写法需要优化一下
-            STACK_SET_OBJECT_OFFSET(rvm, 0,
-                                    string_literal_to_rvm_object(rvm,
+            STACK_SET_STRING_OFFSET(rvm, 0,
+                                    string_literal_to_rvm_string(rvm,
                                                                  constant_pool_list[const_index].u.string_value));
             rvm->runtime_stack->data[rvm->runtime_stack->top_index].type = RVM_VALUE_TYPE_STRING;
             runtime_stack->top_index++;
@@ -361,6 +370,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             oper_num                                   = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             index                                      = oper_num;                         //  在操作符后边获取
             runtime_static->data[index].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -1); // 找到对应的 static 变量
+            runtime_stack->top_index--;
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_POP_STATIC_STRING:
+            oper_num                                   = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            index                                      = oper_num;                         //  在操作符后边获取
+            runtime_static->data[index].u.string_value = STACK_GET_STRING_OFFSET(rvm, -1); // 找到对应的 static 变量
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
@@ -399,6 +415,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
+        case RVM_CODE_PUSH_STATIC_STRING:
+            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            index    = oper_num; //  在操作符后边获取
+            STACK_SET_STRING_OFFSET(rvm, 0, rvm->runtime_static->data[index].u.string_value);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+            break;
         case RVM_CODE_PUSH_STATIC_OBJECT:
             oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             index    = oper_num; //  在操作符后边获取
@@ -423,6 +446,12 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_STACK_DOUBLE:
             caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_DOUBLE_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            runtime_stack->top_index--;
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_POP_STACK_STRING:
+            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_STRING_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_STRING_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
@@ -461,6 +490,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             caller_stack_offset = oper_num; //  在操作符后边获取
             STACK_SET_DOUBLE_OFFSET(rvm, 0,
                                     STACK_GET_DOUBLE_INDEX(rvm, caller_stack_base + caller_stack_offset));
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_PUSH_STACK_STRING:
+            oper_num            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            caller_stack_offset = oper_num; //  在操作符后边获取
+            STACK_SET_STRING_OFFSET(rvm, 0,
+                                    STACK_GET_STRING_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
@@ -513,9 +550,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_ARRAY_STRING:
             array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
             index        = STACK_GET_INT_OFFSET(rvm, -1);
-            rvm_array_get_string(rvm, array_object, index, &object_value);
+            rvm_array_get_string(rvm, array_object, index, &rvm_string);
             runtime_stack->top_index -= 2;
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
+            STACK_SET_STRING_OFFSET(rvm, 0, rvm_string);
             runtime_stack->top_index++;
             rvm->pc += 1;
             break;
@@ -554,7 +591,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_ARRAY_STRING:
             array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
             index        = STACK_GET_INT_OFFSET(rvm, -1);
-            rvm_array_set_string(rvm, array_object, index, &STACK_GET_OBJECT_OFFSET(rvm, -3));
+            rvm_array_set_string(rvm, array_object, index, &STACK_GET_STRING_OFFSET(rvm, -3));
             runtime_stack->top_index -= 3;
             rvm->pc += 1;
             break;
@@ -590,8 +627,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_ARRAY_APPEND_STRING:
             array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
-            object_value = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            rvm_array_append_string(rvm, array_object, &object_value);
+            rvm_string   = STACK_GET_STRING_OFFSET(rvm, -1);
+            rvm_array_append_string(rvm, array_object, &rvm_string);
             runtime_stack->top_index -= 2;
             rvm->pc += 1;
             break;
@@ -633,10 +670,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_ARRAY_POP_STRING:
             array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            object_value = nullptr;
-            rvm_array_pop_string(rvm, array_object, &object_value);
+            rvm_string   = nullptr;
+            rvm_array_pop_string(rvm, array_object, &rvm_string);
             runtime_stack->top_index -= 1;
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
+            STACK_SET_STRING_OFFSET(rvm, 0, rvm_string);
             runtime_stack->top_index += 1;
             rvm->pc += 1;
             break;
@@ -792,7 +829,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_CONCAT:
-            STACK_SET_OBJECT_OFFSET(rvm, -2, concat_string(rvm, STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)));
+            STACK_SET_STRING_OFFSET(rvm, -2, concat_string(rvm, STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)));
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -843,7 +880,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_EQ_STRING:
-            STACK_GET_BOOL_OFFSET(rvm, -2) = (RVM_Bool)(rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) == 0);
+            STACK_GET_BOOL_OFFSET(rvm, -2) = (RVM_Bool)(rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) == 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -859,7 +896,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_NE_STRING:
-            STACK_GET_BOOL_OFFSET(rvm, -2) = (RVM_Bool)(rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) != 0);
+            STACK_GET_BOOL_OFFSET(rvm, -2) = (RVM_Bool)(rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) != 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -875,7 +912,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GT_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) > 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) > 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -891,7 +928,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GE_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) >= 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) >= 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -907,7 +944,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LT_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) < 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) < 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -923,7 +960,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LE_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_OBJECT_OFFSET(rvm, -2), STACK_GET_OBJECT_OFFSET(rvm, -1)) <= 0);
+            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) <= 0);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -1147,16 +1184,16 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 1;
             break;
         case RVM_CODE_PUSH_STRING_LEN:
-            array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            rvm_string_get_length(rvm, array_object, &int_value);
+            rvm_string = STACK_GET_STRING_OFFSET(rvm, -1);
+            rvm_string_get_length(rvm, rvm_string, &int_value);
             runtime_stack->top_index -= 1;
             STACK_SET_INT_OFFSET(rvm, 0, int_value);
             runtime_stack->top_index += 1;
             rvm->pc += 1;
             break;
         case RVM_CODE_PUSH_STRING_CAPACITY:
-            array_object = STACK_GET_OBJECT_OFFSET(rvm, -1);
-            rvm_string_get_capacity(rvm, array_object, &int_value);
+            rvm_string = STACK_GET_STRING_OFFSET(rvm, -1);
+            rvm_string_get_capacity(rvm, rvm_string, &int_value);
             runtime_stack->top_index -= 1;
             STACK_SET_INT_OFFSET(rvm, 0, int_value);
             runtime_stack->top_index += 1;
@@ -1233,13 +1270,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_FOR_RANGE_ARRAY_STRING: {
             array_object = STACK_GET_OBJECT_OFFSET(rvm, -2);
             index        = STACK_GET_INT_OFFSET(rvm, -1);
-            error_code   = rvm_array_get_string(rvm, array_object, index, &object_value);
+            error_code   = rvm_array_get_string(rvm, array_object, index, &rvm_string);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
                 rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
                 break;
             }
             // runtime_stack->top_index -= 2; // 与 RVM_CODE_PUSH_ARRAY_STRING 的不同点 区别
-            STACK_SET_OBJECT_OFFSET(rvm, 0, object_value);
+            STACK_SET_STRING_OFFSET(rvm, 0, rvm_string);
             runtime_stack->top_index++;
             rvm->pc += 3;
 
@@ -1274,26 +1311,25 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // convert
         case RVM_CODE_BOOL_2_STRING:
-            bool_value   = STACK_GET_BOOL_OFFSET(rvm, -1);
-            object_value = rvm_heap_new_object_from_string(rvm,
-                                                           rvm_bool_2_string(rvm, bool_value));
-            STACK_SET_OBJECT_OFFSET(rvm, -1, object_value);
+            bool_value = STACK_GET_BOOL_OFFSET(rvm, -1);
+            rvm_string = rvm_bool_2_string(rvm, bool_value);
+            STACK_SET_STRING_OFFSET(rvm, -1, rvm_string);
             // FIXME: 这里set type 需要优化一下,
             rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1].type = RVM_VALUE_TYPE_STRING;
             rvm->pc += 1;
             break;
         case RVM_CODE_INT_2_STRING:
-            int_value    = STACK_GET_INT_OFFSET(rvm, -1);
-            object_value = rvm_heap_new_object_from_string(rvm, rvm_int_2_string(rvm, int_value));
-            STACK_SET_OBJECT_OFFSET(rvm, -1, object_value);
+            int_value  = STACK_GET_INT_OFFSET(rvm, -1);
+            rvm_string = rvm_int_2_string(rvm, int_value);
+            STACK_SET_STRING_OFFSET(rvm, -1, rvm_string);
             // FIXME: 这里set type 需要优化一下,
             rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1].type = RVM_VALUE_TYPE_STRING;
             rvm->pc += 1;
             break;
         case RVM_CODE_DOUBLE_2_STRING:
             double_value = STACK_GET_DOUBLE_OFFSET(rvm, -1);
-            object_value = rvm_heap_new_object_from_string(rvm, rvm_double_2_string(rvm, double_value));
-            STACK_SET_OBJECT_OFFSET(rvm, -1, object_value);
+            rvm_string   = rvm_double_2_string(rvm, double_value);
+            STACK_SET_STRING_OFFSET(rvm, -1, rvm_string);
             // FIXME: 这里set type 需要优化一下,
             rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1].type = RVM_VALUE_TYPE_STRING;
             rvm->pc += 1;
@@ -1558,6 +1594,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
     RVM_TypeSpecifier*   type_specifier       = nullptr;
     RVM_ClassDefinition* rvm_class_definition = nullptr;
     RVM_Object*          object               = nullptr;
+    RVM_String*          string               = nullptr;
 
     // Step-3: 初始化函数中声明的局部变量
     for (unsigned int i = 0; i < function->local_variable_size; i++, local_variable_offset++) {
@@ -1576,18 +1613,11 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
         switch (type_specifier->kind) {
         case RING_BASIC_TYPE_BOOL:
         case RING_BASIC_TYPE_INT:
-            // 这里先不用处理 array int
-            // 因为局部变量 是通过 new 来初始化的
-            // array_int = new int[10];
-            break;
         case RING_BASIC_TYPE_DOUBLE:
-            // 这里先不用处理 array double
-            // 因为局部变量 是通过 new 来初始化的
-            // array_int = new int[10];
             break;
         case RING_BASIC_TYPE_STRING:
-            object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_STRING);
-            STACK_SET_OBJECT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_offset, object);
+            string = new_string_object(rvm);
+            STACK_SET_STRING_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_offset, string);
             break;
         case RING_BASIC_TYPE_CLASS:
             // Search class-definition from variable declaration.
@@ -1614,30 +1644,30 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
  *     2. return "abc";
  *
  */
-RVM_Object* string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* string_literal) {
-    RVM_Object* object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_STRING);
+RVM_String* string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal) {
+    RVM_String* string = rvm_heap_new_string(rvm);
 
     size_t      length = 0;
     if (string_literal != nullptr) {
         length = strlen(string_literal);
     }
 
-    unsigned int capacity      = ROUND_UP8(length);
-    size_t       alloc_size    = sizeof(char) * capacity;
+    unsigned int capacity   = ROUND_UP8(length);
+    size_t       alloc_size = sizeof(char) * capacity;
 
     // capacity 需要是2的倍数
-    object->u.string->length   = length;
-    object->u.string->capacity = capacity;
-    object->u.string->data     = nullptr;
+    string->length          = length;
+    string->capacity        = capacity;
+    string->data            = nullptr;
     if (capacity > 0) {
-        object->u.string->data = (char*)mem_alloc(rvm->data_pool, alloc_size);
+        string->data = (char*)mem_alloc(rvm->data_pool, alloc_size);
         rvm->runtime_heap->alloc_size += alloc_size;
     }
 
-    memset(object->u.string->data, 0, alloc_size);
-    strncpy(object->u.string->data, string_literal, length);
+    memset(string->data, 0, alloc_size);
+    strncpy(string->data, string_literal, length);
 
-    return object;
+    return string;
 }
 
 /*
@@ -1651,39 +1681,37 @@ RVM_Object* string_literal_to_rvm_object(Ring_VirtualMachine* rvm, const char* s
  *     2. return "a".."b";
  *
  */
-RVM_Object* concat_string(Ring_VirtualMachine* rvm, RVM_Object* a, RVM_Object* b) {
+RVM_String* concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b) {
     assert(a != nullptr);
     assert(b != nullptr);
-    assert(a->u.string != nullptr);
-    assert(b->u.string != nullptr);
 
-    RVM_Object* object     = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_STRING);
+    RVM_String* dst        = rvm_heap_new_string(rvm);
 
     size_t      sum_length = 0;
-    sum_length += a->u.string->length;
-    sum_length += b->u.string->length;
+    sum_length += a->length;
+    sum_length += b->length;
 
-    unsigned int capacity      = ROUND_UP8(sum_length);
-    size_t       alloc_size    = capacity * sizeof(char);
+    unsigned int capacity   = ROUND_UP8(sum_length);
+    size_t       alloc_size = capacity * sizeof(char);
 
     // capacity 需要是2的倍数
 
-    object->u.string->length   = sum_length;
-    object->u.string->capacity = capacity;
-    object->u.string->data     = nullptr;
+    dst->length             = sum_length;
+    dst->capacity           = capacity;
+    dst->data               = nullptr;
     if (alloc_size > 0) {
-        object->u.string->data = (char*)mem_alloc(rvm->data_pool, alloc_size);
+        dst->data = (char*)mem_alloc(rvm->data_pool, alloc_size);
         rvm->runtime_heap->alloc_size += alloc_size;
     }
 
-    memset(object->u.string->data, 0, alloc_size);
+    memset(dst->data, 0, alloc_size);
 
-    strncpy(object->u.string->data, a->u.string->data, a->u.string->length);
-    strncpy(object->u.string->data + a->u.string->length, b->u.string->data, b->u.string->length);
-    object->u.string->length = sum_length;
+    strncpy(dst->data, a->data, a->length);
+    strncpy(dst->data + a->length, b->data, b->length);
+    dst->length = sum_length;
 
 
-    return object;
+    return dst;
 }
 
 // dimension_index 为 2 代表分配2维数组
@@ -1943,7 +1971,8 @@ RVM_Object* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size) {
     RVM_Object* object           = rvm_new_array_string(rvm, dimension, dimension_list);
     for (int i = 0; i < size; i++) {
         // TODO: 这个写法需要重构
-        object->u.array->u.string_array[i] = *(STACK_GET_OBJECT_OFFSET(rvm, -size + i)->u.string);
+        RVM_String a                       = *(STACK_GET_STRING_OFFSET(rvm, -size + i));
+        object->u.array->u.string_array[i] = *(STACK_GET_STRING_OFFSET(rvm, -size + i));
     }
 
     free(dimension_list);
@@ -1987,14 +2016,14 @@ void rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* v
     *value = (int)object->u.array->capacity;
 }
 
-void rvm_string_get_length(Ring_VirtualMachine* rvm, RVM_Object* object, int* value) {
+void rvm_string_get_length(Ring_VirtualMachine* rvm, RVM_String* string, int* value) {
     // FIXME: 这里unsigned int -> int
-    *value = (int)object->u.string->length;
+    *value = (int)string->length;
 }
 
-void rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_Object* object, int* value) {
+void rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_String* string, int* value) {
     // FIXME: 这里unsigned int -> int
-    *value = (int)object->u.string->capacity;
+    *value = (int)string->capacity;
 }
 
 // 多位数组的中间态, 后续优化
@@ -2157,33 +2186,31 @@ ErrorCode rvm_array_pop_double(Ring_VirtualMachine* rvm, RVM_Object* object, dou
     return ERROR_CODE_SUCCESS;
 }
 
-ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value) {
+ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_String** value) {
     if (index >= object->u.array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
     RVM_String* src_string = &(object->u.array->u.string_array[index]);
-    RVM_Object* new_object = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_STRING);
 
     RVM_String* dst_string = rvm_deep_copy_string(rvm, src_string);
 
-    new_object->u.string   = dst_string; // FIXME: 这里内存泄漏了
-    *value                 = new_object;
+    *value                 = dst_string;
     return ERROR_CODE_SUCCESS;
 }
 
 // TODO: 重新考虑一下, 可能存在内存泄漏
-ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_Object** value) {
+ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Object* object, int index, RVM_String** value) {
     if (index >= object->u.array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
-    RVM_String* dst_string                 = rvm_deep_copy_string(rvm, (*value)->u.string);
+    RVM_String* dst_string                 = rvm_deep_copy_string(rvm, *value);
 
     object->u.array->u.string_array[index] = *dst_string;
 
     return ERROR_CODE_SUCCESS;
 }
 
-ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value) {
+ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_String** value) {
     size_t old_alloc_size = 0;
     size_t new_alloc_size = 0;
 
@@ -2204,17 +2231,16 @@ ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Object* object, 
                                                                    old_alloc_size,
                                                                    new_alloc_size);
     }
-    object->u.array->u.string_array[object->u.array->length++] = *rvm_deep_copy_string(rvm, (*value)->u.string);
+    object->u.array->u.string_array[object->u.array->length++] = *rvm_deep_copy_string(rvm, *value);
     return ERROR_CODE_SUCCESS;
 }
 
-ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_Object** value) {
+ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Object* object, RVM_String** value) {
     if (object->u.array->length == 0) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
-    *value                 = rvm_heap_new_object(rvm, RVM_OBJECT_TYPE_STRING);
     RVM_String* dst_string = rvm_deep_copy_string(rvm, &(object->u.array->u.string_array[--object->u.array->length]));
-    (*value)->u.string     = dst_string; // FIXME: 这里内存泄漏了
+    *value                 = dst_string; // FIXME: 这里内存泄漏了
     return ERROR_CODE_SUCCESS;
 }
 
@@ -2308,9 +2334,6 @@ RVM_Object* rvm_heap_new_object(Ring_VirtualMachine* rvm, RVM_Object_Type type) 
     rvm->runtime_heap->list = object;
 
     switch (type) {
-    case RVM_OBJECT_TYPE_STRING:
-        object->u.string = rvm_heap_new_string(rvm);
-        break;
     case RVM_OBJECT_TYPE_ARRAY:
         object->u.array = rvm_heap_new_array(rvm);
         break;
@@ -2344,9 +2367,6 @@ RVM_Object* rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src) {
     rvm->runtime_heap->list = object;
 
     switch (src->type) {
-    case RVM_OBJECT_TYPE_STRING:
-        object->u.string = rvm_deep_copy_string(rvm, src->u.string);
-        break;
     case RVM_OBJECT_TYPE_ARRAY:
         object->u.array = rvm_deep_copy_array(rvm, src->u.array);
         break;
@@ -2361,29 +2381,8 @@ RVM_Object* rvm_deep_copy_object(Ring_VirtualMachine* rvm, RVM_Object* src) {
     return object;
 }
 
-RVM_Object* rvm_heap_new_object_from_string(Ring_VirtualMachine* rvm, RVM_String* str) {
-    assert(rvm != nullptr);
-    assert(rvm->runtime_heap != nullptr);
 
-    RVM_Object* object = (RVM_Object*)mem_alloc(rvm->meta_pool, sizeof(RVM_Object));
-    object->type       = RVM_OBJECT_TYPE_STRING;
-    object->gc_mark    = GC_MARK_COLOR_WHITE;
-    object->prev       = nullptr;
-    object->next       = nullptr;
-
-    // add to list
-    RVM_Object* head   = rvm->runtime_heap->list;
-    object->next       = head;
-    if (head != nullptr) {
-        head->prev = object;
-    }
-    rvm->runtime_heap->list = object;
-
-    object->u.string        = str;
-
-    return object;
-}
-
+// TODO: 初始化 gc 链表
 RVM_String* rvm_heap_new_string(Ring_VirtualMachine* rvm) {
     RVM_String* string = (RVM_String*)mem_alloc(rvm->meta_pool, sizeof(RVM_String));
     string->length     = 0;
@@ -2579,23 +2578,19 @@ RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassO
 
 
 // TODO: 这里实现的有点过于复杂了, 后续优化
-int rvm_string_cmp(RVM_Object* object1, RVM_Object* object2) {
+int rvm_string_cmp(RVM_String* string1, RVM_String* string2) {
     char*        str1     = nullptr;
     char*        str2     = nullptr;
     unsigned int str1_len = 0;
     unsigned int str2_len = 0;
 
-    if (object1 != nullptr) {
-        if (object1->u.string != nullptr) {
-            str1     = object1->u.string->data;
-            str1_len = object1->u.string->length;
-        }
+    if (string1 != nullptr) {
+        str1     = string1->data;
+        str1_len = string1->length;
     }
-    if (object2 != nullptr) {
-        if (object2->u.string != nullptr) {
-            str2     = object2->u.string->data;
-            str2_len = object2->u.string->length;
-        }
+    if (string2 != nullptr) {
+        str2     = string2->data;
+        str2_len = string2->length;
     }
 
     if (str1_len == 0 && str2_len == 0) {
@@ -2621,9 +2616,6 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
 
     unsigned int free_size = 0;
     switch (object->type) {
-    case RVM_OBJECT_TYPE_STRING:
-        free_size = rvm_free_string(rvm, object->u.string);
-        break;
     case RVM_OBJECT_TYPE_ARRAY:
         free_size = rvm_free_array(rvm, object->u.array);
         break;

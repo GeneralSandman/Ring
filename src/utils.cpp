@@ -162,10 +162,10 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int ca
             printf("%7d | %20f | %6s | %6s\n", i, value.u.double_value, space.c_str(), pointer.c_str());
             break;
         case RVM_VALUE_TYPE_STRING:
-            if (value.u.object == nullptr || value.u.object->u.string->data == nullptr) {
+            if (value.u.object == nullptr || value.u.string_value->data == nullptr) {
                 printf("%7d | %20.*s | %6s | %6s\n", i, 20, "", space.c_str(), pointer.c_str());
             } else {
-                printf("%7d | %20.*s | %6s | %6s\n", i, 20, value.u.object->u.string->data, space.c_str(), pointer.c_str());
+                printf("%7d | %20.*s | %6s | %6s\n", i, 20, value.u.string_value->data, space.c_str(), pointer.c_str());
             }
             break;
         case RVM_VALUE_TYPE_OBJECT:

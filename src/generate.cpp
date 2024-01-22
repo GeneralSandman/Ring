@@ -2120,14 +2120,14 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STATIC_OBJECT
         // RVM_CODE_POP_STACK_OBJECT
         // RVM_CODE_PUSH_STACK_OBJECT
-        return RVM_Opcode(opcode + 3);
+        return RVM_Opcode(opcode + 4);
         break;
     case RING_BASIC_TYPE_ARRAY:
         // RVM_CODE_POP_STATIC_OBJECT
         // RVM_CODE_PUSH_STATIC_OBJECT
         // RVM_CODE_POP_STACK_OBJECT
         // RVM_CODE_PUSH_STACK_OBJECT
-        return RVM_Opcode(opcode + 3);
+        return RVM_Opcode(opcode + 4);
         break;
 
     default:

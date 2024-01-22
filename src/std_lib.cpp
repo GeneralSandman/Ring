@@ -185,9 +185,6 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
         break;
     case RVM_VALUE_TYPE_OBJECT:
         switch (args->u.object->type) {
-        case RVM_OBJECT_TYPE_STRING:
-            str = "string";
-            break;
         case RVM_OBJECT_TYPE_ARRAY:
             str = "array";
             break;
@@ -204,8 +201,8 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
     }
 
     RVM_Value ret;
-    ret.type     = RVM_VALUE_TYPE_OBJECT;
-    ret.u.object = string_literal_to_rvm_object(rvm, str.c_str());
+    ret.type           = RVM_VALUE_TYPE_STRING;
+    ret.u.string_value = string_literal_to_rvm_string(rvm, str.c_str());
 
     return ret;
 }
@@ -325,20 +322,20 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     char*        output_buffer = nullptr;
 
     if (args->u.object == nullptr
-        || args->u.object->u.string == nullptr
-        || args->u.object->u.string->data == nullptr) {
+        || args->u.string_value == nullptr
+        || args->u.string_value->data == nullptr) {
         // FIXME: shoud alloced in rvm->data_mem_pool
         output_buffer = (char*)mem_alloc(NULL_MEM_POOL, capacity * sizeof(char));
         length        = 1;
     } else {
-        unsigned int str_length = args->u.object->u.string->length;
+        unsigned int str_length = args->u.string_value->length;
         if (str_length + 1 > capacity) {
             capacity = str_length + 1;
         }
         length        = str_length + 1;
         // FIXME: shoud alloced in rvm->data_mem_pool
         output_buffer = (char*)mem_alloc(NULL_MEM_POOL, capacity * sizeof(char));
-        strncpy(output_buffer, args->u.object->u.string->data, str_length);
+        strncpy(output_buffer, args->u.string_value->data, str_length);
     }
     output_buffer[length - 1] = '\n';
 
@@ -390,11 +387,11 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
     case RVM_VALUE_TYPE_DOUBLE:
         snprintf(output_buffer, length, "%p\n", &(args->u.double_value));
         break;
+    case RVM_VALUE_TYPE_STRING:
+        snprintf(output_buffer, length, "%p\n", args->u.string_value->data);
+        break;
     case RVM_VALUE_TYPE_OBJECT:
         switch (args->u.object->type) {
-        case RVM_OBJECT_TYPE_STRING:
-            snprintf(output_buffer, length, "%p\n", args->u.object->u.string->data);
-            break;
         case RVM_OBJECT_TYPE_ARRAY:
             snprintf(output_buffer, length, "%p\n", args->u.object->u.array->u.int_array);
             break;
@@ -441,10 +438,10 @@ RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, 
     RVM_Value ret;
     ret.u.int_value = 0;
 
-    if (args->u.object == nullptr || args->u.object->u.string == nullptr || args->u.object->u.string->data == nullptr) {
+    if (args->u.object == nullptr || args->u.string_value == nullptr || args->u.string_value->data == nullptr) {
         printf("\n");
     } else {
-        printf("%s\n", args->u.object->u.string->data);
+        printf("%s\n", args->u.string_value->data);
     }
     fflush(stdout);
 
@@ -590,9 +587,6 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
         break;
     case RVM_VALUE_TYPE_OBJECT:
         switch (args->u.object->type) {
-        case RVM_OBJECT_TYPE_STRING:
-            str = "string";
-            break;
         case RVM_OBJECT_TYPE_ARRAY:
             str = "array";
             break;
@@ -609,8 +603,8 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
     }
 
     RVM_Value ret;
-    ret.type     = RVM_VALUE_TYPE_OBJECT;
-    ret.u.object = string_literal_to_rvm_object(rvm, str.c_str());
+    ret.type           = RVM_VALUE_TYPE_STRING;
+    ret.u.string_value = string_literal_to_rvm_string(rvm, str.c_str());
 
     return ret;
 }

@@ -58,9 +58,6 @@ void gc_summary(Ring_VirtualMachine* rvm) {
     for (RVM_Object* pos = rvm->runtime_heap->list; pos != nullptr; pos = pos->next) {
         std::string type;
         switch (pos->type) {
-        case RVM_OBJECT_TYPE_STRING:
-            type = "string";
-            break;
         case RVM_OBJECT_TYPE_ARRAY:
             type = "array";
             break;
