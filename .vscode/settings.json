@@ -77,7 +77,21 @@
         "__memory": "cpp",
         "bit": "cpp",
         "unordered_set": "cpp",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "__std_stream": "cpp",
+        "__tree": "cpp",
+        "cfenv": "cpp",
+        "charconv": "cpp",
+        "iomanip": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "numeric": "cpp",
+        "queue": "cpp",
+        "set": "cpp",
+        "strstream": "cpp",
+        "typeindex": "cpp",
+        "valarray": "cpp",
+        "filesystem": "cpp"
     },
     "editor.formatOnSave": true,
     "code-runner.executorMap": {
