@@ -214,13 +214,16 @@ www.runoob.com
 ## 测试集
 
 ```
-2024-01-08
+2024-01-17
 
 [Result]:
-Pass/All = 220/220
+Pass/All = 243/244
 NotTest  = 4
-Fail     = 0
-Usetime  = 11S
+Fail     = 1
+Usetime  = 12S
+
+[NotPassCase]source_code_file                                             err_nums                                                    
+./test/064-std-package-vm/std-vm-000.ring                    1      
 
 ```
 
@@ -256,6 +259,8 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 
 1. 一个 package中 有多个 class定义
 
+1. 多维数组
+2. 多维数组中 是 class
 
 -----------------------------
 
@@ -292,6 +297,13 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
    1. 没有找到标准包
    2. import重复
 
+-----------------------------
+
+## 2024-01-22周
+
+
+### A. 重构vm 中 string class-object array
+
 
 -----------------------------
 
@@ -301,19 +313,48 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 ### A. 设计支持多维数组
 
 
-1. 语法层面的设计
-2. 用户如何命名多维数组
-3. 用户如何创建多维数组
-4. 用户如何访问多维数组
-
-TypeSpecifier如何组织多维数组
-
-deep copy TypeSpecifier 如何copy多维数组
+1. 语法层面的设计  ✅ 
+2. 用户如何命名多维数组  ✅ 
+3. 用户如何创建多维数组  ✅ 
+4. 用户如何访问多维数组  ✅ 
 
 
-generate的时候需要支持多维数组
+1. TypeSpecifier如何组织多维数组
+2. deep copy TypeSpecifier 如何copy多维数组
+3. generate的时候需要支持多维数组
 
-execute的时候需要支持多维数组
+4. execute的时候需要支持多维数组
+
+测试通过:
+1. 多维数组 bool/int/double/string
+   1. 创建 ✅ 
+   2. 赋值 ✅ 
+   3. 访问 ✅ 
+   4. 通过 for 访问 ✅ 
+
+
+
+TODO: for-range引用到多维数组
+
+TODO: 从多维数组中取出一个元素进行 capacity 和 length
+
+TODO: 多维数组 literal 初始化
+
+TODO: 对数组进行 printf, 类型不正确.
+
+TODO: 函数调用是对参数的类型进行报错提示
+
+TODO: ring dump 展示是否为多维数组
+
+
+```
+    global_int_array_0 = new int[2,4];
+
+    fmt::println_int(len(global_int_array_0));
+    fmt::println_int(len(global_int_array_0[1]));
+```
+
+
 
 
 如果对于一个二维数组 a[][], a[1] 其实是个一维数组, 还需要完善一下语义检查.
