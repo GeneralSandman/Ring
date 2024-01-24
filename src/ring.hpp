@@ -381,8 +381,8 @@ struct TypeSpecifier {
         Ring_DeriveType_Array* array_type;
         Ring_DeriveType_Class* class_type;
     } u;
-    unsigned int   dimension; // 维度，用来指明next
-    TypeSpecifier* next;      // 用于嵌套类型, TODO: 这里是不是名字应该换成sub 更好, 因为没有继续往下嵌套了
+    unsigned int   dimension; // 维度，用来指明sub
+    TypeSpecifier* sub;
 };
 
 typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
@@ -564,7 +564,8 @@ struct RVM_TypeSpecifier {
         unsigned int class_def_index;
     } u;
 
-    RVM_TypeSpecifier* next;
+    unsigned int       dimension; // 维度，用来指明sub
+    RVM_TypeSpecifier* sub;
 };
 
 // 支持线性寻址
@@ -1179,10 +1180,17 @@ struct IdentifierExpression {
 };
 
 struct ArrayIndexExpression {
-    unsigned int line_number;
+    unsigned int         line_number;
 
-    Expression*  array_expression;
-    Expression*  index_expression;
+    Expression*          array_expression;
+    DimensionExpression* index_expression;
+
+    /*
+     * e.g.  students[1,2,3];
+     *
+     * array_expression: students
+     * index_expression: [1,2,3]
+     */
 };
 
 struct NewArrayExpression {
@@ -1254,15 +1262,15 @@ struct DimensionExpression {
 struct SubDimensionExpression {
     unsigned int            line_number;
     unsigned int            index;
-    unsigned int            num;
+    Expression*             num_expression;
     SubDimensionExpression* next;
 
     // field: index
     // index = 2 为二维数组
 
-    // field: num
-    // when new array, num is array size.
-    // when access array, num is index.
+    // field: num_expression
+    // when new array, num_expression is array size.
+    // when access array, num_expression is index.
 };
 
 struct DotExpression {
@@ -1845,8 +1853,9 @@ void        yyin_move_to_next_line();
     exit(1);
 
 // 以后通用的错误提示统一使用这个
-#define ring_error_report(format, ...)                                                  \
-    fprintf(stderr, "%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR); \
+#define ring_error_report(format, ...)                                          \
+    fprintf(stderr, "%s[ERROR][%s:%d]\t " format "%s\n",                        \
+            LOG_COLOR_RED, __FILE__, __LINE__, ##__VA_ARGS__, LOG_COLOR_CLEAR); \
     exit(1);
 
 /* --------------------
@@ -1918,7 +1927,7 @@ void                          add_function_definition(AttributeInfo* attribute_i
 Expression*                   expression_add_package_posit(Expression* expression, char* package_posit);
 Expression*                   create_expression_identifier(char* identifier);
 Expression*                   create_expression_identifier2(char* identifier, IdentifierExpressionType type);
-Expression*                   create_expression_identifier_with_index(Expression* array_expression, Expression* index);
+Expression*                   create_expression_identifier_with_index(Expression* array_expression, DimensionExpression* index);
 Expression*                   create_expression_from_function_call(FunctionCallExpression* function_call_expression);
 Expression*                   create_expression_from_method_call(MethodCallExpression* method_call_expression);
 Expression*                   create_expression_from_array_literal(ArrayLiteralExpression* array_literal);
@@ -1976,7 +1985,7 @@ Block*                        start_new_block();
 Block*                        finish_block(Block* block, Statement* statement_list);
 
 DimensionExpression*          create_dimension_expression(SubDimensionExpression* dimension_list);
-SubDimensionExpression*       create_sub_dimension_expression(char* literal_interface);
+SubDimensionExpression*       create_sub_dimension_expression(Expression* num_expression);
 SubDimensionExpression*       sub_dimension_expression_list_add_item(SubDimensionExpression* list, SubDimensionExpression* item);
 
 TypeSpecifier*                create_type_specifier(Ring_BasicType basic_type);
@@ -2058,8 +2067,12 @@ void                    fix_class_definition(ClassDefinition* class_definition);
 void                    fix_class_method(ClassDefinition* class_definition, MethodMember* method);
 
 
-void                    fix_array_index_expression(Expression* expression, ArrayIndexExpression* array_index_expression, Block* block, Function* func);
+void                    fix_array_index_expression(Expression*           expression,
+                                                   ArrayIndexExpression* array_index_expression,
+                                                   Block*                block,
+                                                   Function*             func);
 void                    fix_new_array_expression(Expression* expression, NewArrayExpression* new_array_expression, Block* block, Function* func);
+void                    fix_dimension_expression(DimensionExpression* dimension_expression, Block* block, Function* func);
 void                    fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func);
 
 void                    fix_class_object_literal_expression(Expression* expression, ClassObjectLiteralExpression* literal_expression, Block* block, Function* func);

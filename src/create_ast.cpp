@@ -108,7 +108,7 @@ Expression* create_expression_identifier2(char* identifier, IdentifierExpression
     return expression;
 }
 
-Expression* create_expression_identifier_with_index(Expression* array_expression, Expression* index) {
+Expression* create_expression_identifier_with_index(Expression* array_expression, DimensionExpression* index) {
     debug_log_with_yellow_coloar("\t");
 
     ArrayIndexExpression* array_index_expression = (ArrayIndexExpression*)mem_alloc(get_front_mem_pool(), sizeof(ArrayIndexExpression));
@@ -799,17 +799,12 @@ DimensionExpression* create_dimension_expression(SubDimensionExpression* dimensi
     return dim;
 }
 
-SubDimensionExpression* create_sub_dimension_expression(char* literal_interface) {
-    debug_log_with_yellow_coloar("\tdimension:%s", literal_interface);
+SubDimensionExpression* create_sub_dimension_expression(Expression* num_expression) {
     SubDimensionExpression* dim = (SubDimensionExpression*)mem_alloc(get_front_mem_pool(), sizeof(SubDimensionExpression));
     dim->line_number            = package_unit_get_line_number();
     dim->index                  = 1;
-    dim->num                    = 0;
+    dim->num_expression         = num_expression;
     dim->next                   = nullptr;
-    // TODO: 当前只能是 int_literal
-    if (literal_interface != nullptr) {
-        sscanf(literal_interface, "%ud", &(dim->num));
-    }
     return dim;
 }
 
@@ -833,7 +828,7 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
     type_specifier->line_number   = package_unit_get_line_number();
     type_specifier->kind          = basic_type;
     type_specifier->dimension     = 0;
-    type_specifier->next          = nullptr;
+    type_specifier->sub           = nullptr;
 
     return type_specifier;
 }
@@ -853,7 +848,7 @@ TypeSpecifier* create_type_specifier_array(TypeSpecifier* type, DimensionExpress
     type_specifier->kind          = RING_BASIC_TYPE_ARRAY;
     type_specifier->u.array_type  = nullptr;
     type_specifier->dimension     = dimension->dimension;
-    type_specifier->next          = type;
+    type_specifier->sub           = type;
 
     // error-report ERROR_ARRAY_DIMENSION_INVALID
     if (type_specifier->dimension > 8) {
@@ -895,7 +890,7 @@ TypeSpecifier* create_class_type_specifier(char* identifier) {
     type_specifier->u.class_type->class_identifier = identifier;
     type_specifier->u.class_type->class_definition = nullptr;
     type_specifier->dimension                      = 0;
-    type_specifier->next                           = nullptr;
+    type_specifier->sub                            = nullptr;
 
     return type_specifier;
 }

@@ -728,22 +728,20 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer, ForSta
 
     Declaration* declaration = range_statement->operand->u.identifier_expression->u.declaration;
     if (declaration == nullptr) {
-        printf("invalid range operand:%s\n", range_statement->operand->u.identifier_expression->identifier);
-        exit(1);
+        ring_error_report("invalid range operand:%s\n", range_statement->operand->u.identifier_expression->identifier);
     }
-    if (declaration->type->next->kind == RING_BASIC_TYPE_BOOL) {
+    if (declaration->type->sub->kind == RING_BASIC_TYPE_BOOL) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_BOOL, end_label, range_statement->operand->u.identifier_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_INT) {
+    } else if (declaration->type->sub->kind == RING_BASIC_TYPE_INT) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_INT, end_label, range_statement->operand->u.identifier_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_DOUBLE) {
+    } else if (declaration->type->sub->kind == RING_BASIC_TYPE_DOUBLE) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_DOUBLE, end_label, range_statement->operand->u.identifier_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
+    } else if (declaration->type->sub->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_STRING, end_label, range_statement->operand->u.identifier_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_CLASS) {
+    } else if (declaration->type->sub->kind == RING_BASIC_TYPE_CLASS) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_CLASS_OBJECT, end_label, range_statement->operand->u.identifier_expression->line_number);
     } else {
-        printf("error: range expression only support bool[] int[] double[] string[]\n");
-        exit(1);
+        ring_error_report("error: range expression only support bool[] int[] double[] string[]\n");
     }
 
 
@@ -852,8 +850,7 @@ void generate_vmcode_from_break_statement(Package_Executer* executer, Block* blo
 
 
     if (pos == nullptr) {
-        printf("generate_vmcode_from_break_statement error------------\n");
-        exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+        ring_error_report("generate vm code of `break`\n");
     }
 
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, pos->block_labels.break_label, break_statement->line_number);
@@ -878,8 +875,7 @@ void generate_vmcode_from_continue_statement(Package_Executer* executer, Block* 
 
 
     if (pos == nullptr) {
-        printf("generate_vmcode_from_continue_statement error------------\n");
-        exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+        ring_error_report("generate vm code of `continue`\n");
     }
 
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, pos->block_labels.continue_label, continue_statement->line_number);
@@ -1146,8 +1142,7 @@ void generate_pop_to_leftvalue(Package_Executer* executer, Expression* expressio
     } else if (expression->type == EXPRESSION_TYPE_ARRAY_INDEX) {
         generate_pop_to_leftvalue_array_index(executer, expression->u.array_index_expression, opcode_buffer);
     } else {
-        printf("error: not support assign to left-value\n");
-        exit(1);
+        ring_error_report("not support assign to left-value\n");
     }
 }
 
@@ -1198,12 +1193,12 @@ void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayInde
 
     Declaration* declaration = array_index_expression->array_expression->u.identifier_expression->u.declaration;
     if (declaration == nullptr) {
-        printf("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
-        exit(1);
+        ring_error_report("invalid operator[] in identifier:%s\n",
+                          array_index_expression->array_expression->u.identifier_expression->identifier);
     }
     if (declaration->type->kind != RING_BASIC_TYPE_ARRAY) {
-        printf("invalid declaration in operation[] identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
-        exit(1);
+        ring_error_report("invalid declaration in operation[] identifier:%s\n",
+                          array_index_expression->array_expression->u.identifier_expression->identifier);
     }
 
     // push array-object to runtime_stack
@@ -1219,30 +1214,29 @@ void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayInde
     // generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
 
 
-    Expression* pos_index = array_index_expression->index_expression;
+    SubDimensionExpression* pos_index = array_index_expression->index_expression->dimension_list;
     for (unsigned int i = 0; i < declaration->type->dimension - 1; i++, pos_index = pos_index->next) {
-        generate_vmcode_from_expression(executer, pos_index, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer, 0);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_A, 0, array_index_expression->line_number);
     }
 
     // 最后一个纬度
-    generate_vmcode_from_expression(executer, pos_index, opcode_buffer, 0);
+    generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer, 0);
 
 
     // assign
-    if (declaration->type->next->kind == RING_BASIC_TYPE_BOOL) {
+    if (declaration->type->sub->kind == RING_BASIC_TYPE_BOOL) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_BOOL, 0, array_index_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_INT) {
+    } else if (declaration->type->sub->kind == RING_BASIC_TYPE_INT) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_INT, 0, array_index_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_DOUBLE) {
+    } else if (declaration->type->sub->kind == RING_BASIC_TYPE_DOUBLE) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_DOUBLE, 0, array_index_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
+    } else if (declaration->type->sub->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_STRING, 0, array_index_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_CLASS) {
+    } else if (declaration->type->sub->kind == RING_BASIC_TYPE_CLASS) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_CLASS_OBJECT, 0, array_index_expression->line_number);
     } else {
-        printf("error: assign to item of array only support bool[] int[] double[] string[] class[]\n");
-        exit(1);
+        ring_error_report("error: assign to item of array only support bool[] int[] double[] string[] class[]\n");
     }
 }
 
@@ -1545,6 +1539,9 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
         } else if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_ARRAY) {
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_LEN, 0, function_call_expression->line_number);
+        } else {
+            // TODO: 应该在语义检查的过程中报错
+            ring_error_report("function `len()` argument is not string or array\n");
         }
     } else if (strcmp(function_identifier, "capacity") == 0) {
         if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
@@ -1553,6 +1550,9 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
         } else if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_ARRAY) {
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_CAPACITY, 0, function_call_expression->line_number);
+        } else {
+            // TODO: 应该在语义检查的过程中报错
+            ring_error_report("function `capacity()` argument is not string or array\n");
         }
     } else if (strcmp(function_identifier, "push") == 0) {
         pos = function_call_expression->argument_list;
@@ -1561,23 +1561,21 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
         }
 
         if (function_call_expression->argument_list->expression->convert_type->kind != RING_BASIC_TYPE_ARRAY) {
-            printf("error: push() only used to append value to array\n");
-            exit(1);
+            ring_error_report("error: push() only used to append value to array\n");
         }
 
-        if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_BOOL) {
+        if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_BOOL, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_INT) {
+        } else if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_INT) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_INT, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_DOUBLE) {
+        } else if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_DOUBLE, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_STRING) {
+        } else if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_STRING, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_CLASS) {
+        } else if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_CLASS) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_CLASS_OBJECT, 0, function_call_expression->line_number);
         } else {
-            printf("error: push() is only be used by bool[] int[] double[] string[] class[]");
-            exit(1);
+            ring_error_report("error: push() is only be used by bool[] int[] double[] string[] class[]\n");
         }
 
     } else if (strcmp(function_identifier, "pop") == 0) {
@@ -1585,23 +1583,21 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
 
         if (pos->expression->convert_type->kind != RING_BASIC_TYPE_ARRAY) {
-            printf("error: pop() only used to append value to array\n");
-            exit(1);
+            ring_error_report("error: pop() only used to append value to array\n");
         }
 
-        if (pos->expression->convert_type->next->kind == RING_BASIC_TYPE_BOOL) {
+        if (pos->expression->convert_type->sub->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_BOOL, 0, function_call_expression->line_number);
-        } else if (pos->expression->convert_type->next->kind == RING_BASIC_TYPE_INT) {
+        } else if (pos->expression->convert_type->sub->kind == RING_BASIC_TYPE_INT) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_INT, 0, function_call_expression->line_number);
-        } else if (pos->expression->convert_type->next->kind == RING_BASIC_TYPE_DOUBLE) {
+        } else if (pos->expression->convert_type->sub->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_DOUBLE, 0, function_call_expression->line_number);
-        } else if (pos->expression->convert_type->next->kind == RING_BASIC_TYPE_STRING) {
+        } else if (pos->expression->convert_type->sub->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_STRING, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->next->kind == RING_BASIC_TYPE_CLASS) {
+        } else if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_CLASS) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_CLASS_OBJECT, 0, function_call_expression->line_number);
         } else {
-            printf("error: pop() is only be used by bool[] int[] double[] string[] class[]");
-            exit(1);
+            ring_error_report("error: pop() is only be used by bool[] int[] double[] string[] class[]\n");
         }
     } else if (strcmp(function_identifier, "to_string") == 0) {
         pos = function_call_expression->argument_list;
@@ -1615,8 +1611,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
         } else if (pos->expression->convert_type->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_DOUBLE_2_STRING, 0, function_call_expression->line_number);
         } else {
-            printf("error: to_string() only be used by bool/int/double\n");
-            exit(1);
+            ring_error_report("error: to_string() only be used by bool/int/double\n");
         }
     }
 }
@@ -1750,9 +1745,10 @@ void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewAr
     // 将每个维度的size push stack
     SubDimensionExpression* pos = new_array_expression->dimension_expression->dimension_list;
     for (unsigned int i = 0; i < dimension; i++, pos = pos->next) {
-        generate_vmcode(executer, opcode_buffer,
-                        RVM_CODE_PUSH_INT_2BYTE, pos->num,
-                        new_array_expression->line_number);
+        // generate_vmcode(executer, opcode_buffer,
+        //                 RVM_CODE_PUSH_INT_2BYTE, pos->num,
+        //                 new_array_expression->line_number);
+        generate_vmcode_from_expression(executer, pos->num_expression, opcode_buffer, 0);
     }
 
     // 将维度 push stack 中
@@ -1770,8 +1766,7 @@ void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewAr
     } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_CLASS) {
         generate_vmcode_from_array_class_object(executer, new_array_expression, opcode_buffer);
     } else {
-        printf("error: new array only support bool[] int[] double[] string[] class[]\n");
-        exit(1);
+        ring_error_report("error: new array only support bool[] int[] double[] string[] class[]\n");
     }
 }
 
@@ -1800,10 +1795,14 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer* exec
 }
 
 void generate_vmcode_from_array_class_object(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer) {
-    unsigned int field_count          = 0;
-    unsigned int oper_num             = 0;
+    unsigned int field_count = 0;
+    unsigned int oper_num    = 0;
     // TODO: 目前只能支持一维数组
-    unsigned int     size             = new_array_expression->dimension_expression->dimension_list->num;
+    // unsigned int     size             = new_array_expression->dimension_expression->dimension_list->num;
+    if (new_array_expression->dimension_expression->dimension_list->num_expression->type != EXPRESSION_TYPE_LITERAL_INT) {
+        ring_error_report("only use int literal when new array");
+    }
+    unsigned int     size             = new_array_expression->dimension_expression->dimension_list->num_expression->u.int_literal;
 
 
     ClassDefinition* class_definition = new_array_expression->type_specifier->u.class_type->class_definition;
@@ -1840,8 +1839,7 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, A
     } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_STRING, size, array_literal_expression->line_number);
     } else {
-        printf("error: array literal expression only support bool[] int[] double[] string[]\n");
-        exit(1);
+        ring_error_report("error: array literal expression only support bool[] int[] double[] string[]\n");
     }
 }
 
@@ -1857,12 +1855,10 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
     // 要通过变量的类型来决定 push_array_int push_array_double push_array_object
     Declaration* declaration = array_index_expression->array_expression->u.identifier_expression->u.declaration;
     if (declaration == nullptr) {
-        printf("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
-        exit(1);
+        ring_error_report("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
     }
     if (declaration->type->kind != RING_BASIC_TYPE_ARRAY) {
-        printf("invalid declaration in operation[] identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
-        exit(1);
+        ring_error_report("invalid declaration in operation[] identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
     }
 
     // push array-object to runtime_stack
@@ -1877,29 +1873,30 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
     // push index-expression to runtime_stack
     // generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
 
-    Expression* pos_index = array_index_expression->index_expression;
-    for (unsigned int i = 0; i < declaration->type->dimension - 1; i++, pos_index = pos_index->next) {
-        generate_vmcode_from_expression(executer, pos_index, opcode_buffer, 0);
+    SubDimensionExpression* pos_index = array_index_expression->index_expression->dimension_list;
+    for (unsigned int i = 0; i < declaration->type->dimension - 1 && pos_index != nullptr; i++, pos_index = pos_index->next) {
+        generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer, 0);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_A, 0, array_index_expression->line_number);
     }
 
     // 最后一个纬度
-    generate_vmcode_from_expression(executer, pos_index, opcode_buffer, 0);
+    if (pos_index != nullptr) {
+        generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer, 0);
 
-    // access value by array-object and index-expression
-    if (declaration->type->next->kind == RING_BASIC_TYPE_BOOL) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_BOOL, 0, array_index_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_INT) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_INT, 0, array_index_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_DOUBLE) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_DOUBLE, 0, array_index_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_STRING, 0, array_index_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_CLASS) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_CLASS_OBJECT, 0, array_index_expression->line_number);
-    } else {
-        printf("error: array index expression only support bool[] int[] double[] string[] class[]\n");
-        exit(1);
+        // access value by array-object and index-expression
+        if (declaration->type->sub->kind == RING_BASIC_TYPE_BOOL) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_BOOL, 0, array_index_expression->line_number);
+        } else if (declaration->type->sub->kind == RING_BASIC_TYPE_INT) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_INT, 0, array_index_expression->line_number);
+        } else if (declaration->type->sub->kind == RING_BASIC_TYPE_DOUBLE) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_DOUBLE, 0, array_index_expression->line_number);
+        } else if (declaration->type->sub->kind == RING_BASIC_TYPE_STRING) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_STRING, 0, array_index_expression->line_number);
+        } else if (declaration->type->sub->kind == RING_BASIC_TYPE_CLASS) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_CLASS_OBJECT, 0, array_index_expression->line_number);
+        } else {
+            ring_error_report("error: array index expression only support bool[] int[] double[] string[] class[]\n");
+        }
     }
 }
 
@@ -2012,8 +2009,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
     for (unsigned int i = 0; i < opcode_buffer->code_size;) {
         RVM_Byte opcode = opcode_buffer->code_list[i];
         if (opcode <= RVM_CODE_UNKNOW || opcode >= RVM_CODES_NUM) {
-            fprintf(stderr, "generate vm code: opcode_buffer_fix_label(opcode is valid:%d)\n", opcode);
-            exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+            ring_error_report("generate vm code: opcode_buffer_fix_label(opcode is valid:%d)\n", opcode);
         }
         RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
 
@@ -2058,8 +2054,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
             break;
 
         default:
-            fprintf(stderr, "opcode_buffer_fix_label(opcode is valid:%d)\n", opcode);
-            exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+            ring_error_report("opcode_buffer_fix_label(opcode is valid:%d)\n", opcode);
             break;
         }
     }
@@ -2075,9 +2070,7 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
           || opcode == RVM_CODE_PUSH_STACK_BOOL
           || opcode == RVM_CODE_POP_FIELD_BOOL
           || opcode == RVM_CODE_PUSH_FIELD_BOOL)) {
-        fprintf(stderr, "convert_opcode_by_rvm_type error(opcode is valid:%d)\n", opcode);
-        exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
-        return RVM_CODE_UNKNOW;
+        ring_error_report("convert_opcode_by_rvm_type error(opcode is valid:%d)\n", opcode);
     }
 
     switch (type->kind) {
@@ -2131,8 +2124,7 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         break;
 
     default:
-        fprintf(stderr, "generate opcode error\n");
-        exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
+        ring_error_report("generate opcode error\n");
         break;
     }
 
@@ -2198,8 +2190,11 @@ void type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier* src) {
         dst->u.class_def_index = src->u.class_type->class_definition->class_index;
     }
 
-    if (src->kind == RING_BASIC_TYPE_ARRAY && src->next != nullptr) {
-        dst->next = (RVM_TypeSpecifier*)malloc(sizeof(RVM_TypeSpecifier));
-        type_specifier_deep_copy(dst->next, src->next);
+    if (src->kind == RING_BASIC_TYPE_ARRAY) {
+        dst->dimension = src->dimension;
+        if (src->sub != nullptr) {
+            dst->sub = (RVM_TypeSpecifier*)malloc(sizeof(RVM_TypeSpecifier));
+            type_specifier_deep_copy(dst->sub, src->sub);
+        }
     }
 }

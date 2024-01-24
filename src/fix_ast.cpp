@@ -270,7 +270,9 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
 }
 
 void fix_type_specfier(TypeSpecifier* type_specifier) {
-    assert(type_specifier != nullptr);
+    if (type_specifier == nullptr) {
+        return;
+    }
 
     // 如果这个变量是类
     // 找到类的定义
@@ -317,8 +319,9 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
     }
 
     // 递归修正数组
+    // 其实修正递归数组，只会对 class-object的数组生效
     if (type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
-        fix_type_specfier(type_specifier->next);
+        fix_type_specfier(type_specifier->sub);
     }
 }
 
@@ -611,34 +614,55 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
     }
 }
 
-void fix_array_index_expression(Expression* expression, ArrayIndexExpression* array_index_expression, Block* block, Function* func) {
+// TODO: 需要兼容多维数组
+void fix_array_index_expression(Expression*           expression,
+                                ArrayIndexExpression* array_index_expression,
+                                Block*                block,
+                                Function*             func) {
     assert(array_index_expression != nullptr);
 
-    Declaration* declaration = nullptr;
+    char*        array_identifier = array_index_expression->array_expression->u.identifier_expression->identifier;
+    Declaration* declaration      = nullptr;
 
-    declaration              = search_declaration(expression->package_posit,
-                                                  array_index_expression->array_expression->u.identifier_expression->identifier,
-                                                  block);
+    declaration                   = search_declaration(expression->package_posit,
+                                                       array_identifier,
+                                                       block);
 
     if (declaration == nullptr) {
-        printf("not found identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
-        exit(1);
+        ring_error_report("use undeclared identifier `%s`; E:%d.\n",
+                          array_identifier,
+                          ERROR_UNDEFINITE_VARIABLE);
     }
 
-    fix_expression(array_index_expression->index_expression, block, func);
+    fix_expression(array_index_expression->array_expression, block, func);
 
-    array_index_expression->array_expression->u.identifier_expression->u.declaration = declaration;
+    fix_dimension_expression(array_index_expression->index_expression, block, func);
 
+    // array_index_expression->array_expression->u.identifier_expression->u.declaration = declaration;
+
+    DimensionExpression* index_expression = array_index_expression->index_expression;
     // 修正最外层 expression 的 convert_type
-    // TODO: 这个写法太恶心了, 急需要优化
-    TypeSpecifier* type =
-        (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-    type->line_number = expression->line_number;
-    type->kind =
-        expression->u.array_index_expression->array_expression->u.identifier_expression->u.declaration->type->next->kind;
+    TypeSpecifier* type                   = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type->line_number                     = expression->line_number;
+
+    /*
+     * e.g. var int[,,,] students;
+     *
+     * students is four-dimension array.
+     * students[0] is a three-dimension array.
+     * students[0,0,0] is a int value.
+     */
+    if (index_expression->dimension < declaration->type->dimension) {
+        type->kind = declaration->type->kind;
+    } else if (index_expression->dimension == declaration->type->dimension) {
+        type->kind = declaration->type->sub->kind;
+    } else {
+        ring_error_report("array index access error; E:%d.\n", ERROR_ARRAY_DIMENSION_INVALID);
+    }
+
+
     if (type->kind == RING_BASIC_TYPE_CLASS) {
-        type->u.class_type =
-            expression->u.array_index_expression->array_expression->u.identifier_expression->u.declaration->type->next->u.class_type;
+        type->u.class_type = declaration->type->sub->u.class_type;
     }
     fix_type_specfier(type);
 
@@ -647,6 +671,13 @@ void fix_array_index_expression(Expression* expression, ArrayIndexExpression* ar
 
 void fix_new_array_expression(Expression* expression, NewArrayExpression* new_array_expression, Block* block, Function* func) {
     fix_type_specfier(new_array_expression->type_specifier);
+}
+
+void fix_dimension_expression(DimensionExpression* dimension_expression, Block* block, Function* func) {
+    SubDimensionExpression* pos = dimension_expression->dimension_list;
+    for (; pos != nullptr; pos = pos->next) {
+        fix_expression(pos->num_expression, block, func);
+    }
 }
 
 void fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func) {

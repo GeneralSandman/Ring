@@ -1050,7 +1050,12 @@ sub_dimension_expression_list
     ;
 
 sub_dimension_expression
-    : INT_LITERAL
+    : basic_value_literal_expression
+    {
+        debug_log_with_green_coloar("[RULE::sub_dimension_expression:1]");
+        $$ = create_sub_dimension_expression($1);
+    }
+    | primary_not_new_array
     {
         debug_log_with_green_coloar("[RULE::sub_dimension_expression:1]");
         $$ = create_sub_dimension_expression($1);
@@ -1068,9 +1073,9 @@ primary_not_new_array
         debug_log_with_green_coloar("[RULE::literal_term:identifier]\t ");
         $$ = create_expression_identifier($1);
     }
-    | identifier TOKEN_LB expression_list TOKEN_RB
+    | identifier dimension_expression
     {
-        $$ = create_expression_identifier_with_index(create_expression_identifier($1), $3);
+        $$ = create_expression_identifier_with_index(create_expression_identifier($1), $2);
     }
     | function_call_expression 
     {
