@@ -112,18 +112,15 @@ void dump_mem_pool(MemPool* pool) {
     printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
 
     if (free_mem_size != pool->free_mem_size) {
-        printf("mem pool status is invalid [1]: free_mem_size= %ld, pool->free_mem_size= %ld\n", free_mem_size, pool->free_mem_size);
-        exit(1);
+        ring_error_report("mem pool status is invalid [1]: free_mem_size= %ld, pool->free_mem_size= %ld\n", free_mem_size, pool->free_mem_size);
     }
 
     if (active_mem_size != pool->active_mem_size) {
-        printf("mem pool status is invalid [2]: active_mem_size= %ld, pool->active_mem_size= %ld\n", active_mem_size, pool->active_mem_size);
-        exit(1);
+        ring_error_report("mem pool status is invalid [2]: active_mem_size= %ld, pool->active_mem_size= %ld\n", active_mem_size, pool->active_mem_size);
     }
 
     if (pool->free_mem_size + pool->active_mem_size != pool->all_mem_size) {
-        printf("mem pool status is invalid [3]: all_mem_size= %ld, pool->all_mem_size= %ld\n", pool->free_mem_size + pool->active_mem_size, pool->all_mem_size);
-        exit(1);
+        ring_error_report("mem pool status is invalid [3]: all_mem_size= %ld, pool->all_mem_size= %ld\n", pool->free_mem_size + pool->active_mem_size, pool->all_mem_size);
     }
 }
 
@@ -145,8 +142,7 @@ void* mem_alloc(MemPool* pool, size_t size) {
     MemBlock* block        = nullptr;
 
     if (bucket_index > MEM_MAX_BUCKET_NUM) {
-        printf("cant't alloc large sapce\n");
-        exit(1);
+        ring_error_report("cant't alloc large sapce\n");
     }
 
     if (pool->free_buckets[bucket_index] == nullptr) {
@@ -213,8 +209,7 @@ void mem_free(MemPool* pool, void* ptr, size_t size) {
 
     auto iter = pool->active_mem_map.find(ptr);
     if (iter == pool->active_mem_map.end()) {
-        printf("ptr:%p is not allocated by memory pool", ptr);
-        exit(1);
+        ring_error_report("ptr:%p is not allocated by memory pool", ptr);
     }
 
     size                   = iter->second;
@@ -223,8 +218,7 @@ void mem_free(MemPool* pool, void* ptr, size_t size) {
     MemBlock* block        = nullptr;
 
     if (pool->active_buckets[bucket_index] == nullptr) {
-        printf("it is not allocted by memory-pool\n");
-        exit(1);
+        ring_error_report("it is not allocted by memory-pool\n");
     } else {
         block                              = pool->active_buckets[bucket_index];
         pool->active_buckets[bucket_index] = block->next;

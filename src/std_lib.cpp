@@ -208,8 +208,7 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
  */
 RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_lib_fmt_println_bool only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
+        ring_error_report("std_lib_fmt_println_bool only one arguement\n");
     }
 
     RVM_Value ret;
@@ -243,8 +242,7 @@ RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_co
  */
 RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_lib_fmt_println_int only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
+        ring_error_report("std_lib_fmt_println_int only one arguement\n");
     }
 
     RVM_Value ret;
@@ -274,8 +272,7 @@ RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
  */
 RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_lib_fmt_println_double only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
+        ring_error_report("std_lib_fmt_println_double only one arguement\n");
     }
 
     RVM_Value ret;
@@ -304,8 +301,7 @@ RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
  */
 RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_lib_fmt_println_string only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
+        ring_error_report("std_lib_fmt_println_string only one arguement\n");
     }
 
     RVM_Value ret;
@@ -354,8 +350,7 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
  */
 RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_lib_fmt_println_pointer only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
+        ring_error_report("std_lib_fmt_println_pointer only one arguement\n");
     }
 
     unsigned int length        = 20;
@@ -420,8 +415,7 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
  */
 RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_lib_fmt_println only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
+        ring_error_report("std_lib_fmt_println only one arguement\n");
     }
 
     RVM_Value ret;
@@ -445,8 +439,7 @@ RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, 
  */
 RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
-        printf("std_lib_debug_debug_assert only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
+        ring_error_report("std_lib_debug_debug_assert only one arguement\n");
     }
 
     RVM_Value ret;
@@ -483,8 +476,7 @@ RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
  */
 RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 0) {
-        printf("std_lib_debug_print_call_stack not need arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
+        ring_error_report("std_lib_debug_print_call_stack not need arguement\n");
     }
 
     // TODO:  这里最好要打印函数的原型

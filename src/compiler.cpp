@@ -274,8 +274,7 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
 
     if (g_package_unit->current_file_fp == nullptr
         || g_package_unit->file_fp_random == nullptr) {
-        fprintf(stderr, "%s not found.\n", file_name.c_str());
-        exit(1);
+        ring_error_report("%s not found.\n", file_name.c_str());
     }
 
     return g_package_unit;
@@ -420,8 +419,7 @@ std::string package_unit_get_line_content(unsigned int line_number) {
     fseek(g_package_unit->file_fp_random, line_offset, SEEK_SET);
     char buffer[500];
     if (fgets(buffer, size, g_package_unit->file_fp_random) == NULL) {
-        fprintf(stderr, "Warning: fgets line content is error.\n");
-        exit(1);
+        ring_error_report("Warning: fgets line content is error.\n");
     }
 
     return std::string(buffer);

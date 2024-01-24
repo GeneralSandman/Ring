@@ -1371,12 +1371,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         default:
-            fprintf(stderr,
-                    "execute error: pc(%d)\n"
-                    "\tinvalid opcode (%d)\n",
-                    rvm->pc,
-                    opcode);
-            exit(ERROR_CODE_RUN_VM_ERROR);
+            ring_error_report("execute error: pc(%d)\n"
+                              "\tinvalid opcode (%d)\n",
+                              rvm->pc,
+                              opcode);
             break;
         }
     }
@@ -1416,9 +1414,7 @@ void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, un
     } else if (return_list_count == 1) {
         rvm->runtime_stack->data[rvm->runtime_stack->top_index++] = ret;
     } else {
-        fprintf(stderr,
-                "native function return value count > 1");
-        exit(ERROR_CODE_RUN_VM_ERROR);
+        ring_error_report("native function return value count > 1");
     }
 }
 
@@ -2007,9 +2003,7 @@ RVM_ClassObject* rvm_new_class_object_literal(Ring_VirtualMachine* rvm,
     RVM_ClassObject* class_ob = rvm_new_class_object(rvm, class_definition);
     if (class_definition->field_size != init_exp_size) {
         // error report
-        fprintf(stderr,
-                "the number of class init expresison list must equal to the number of class field");
-        exit(ERROR_CODE_RUN_VM_ERROR);
+        ring_error_report("the number of class init expresison list must equal to the number of class field");
     }
 
     // 从 runtime_stack 中取出 已经push的, 然后依次初始化
@@ -2651,8 +2645,7 @@ void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_
     // get terminal windows size
     struct winsize terminal_size;
     if (isatty(STDOUT_FILENO) == 0 || ioctl(STDOUT_FILENO, TIOCGWINSZ, &terminal_size) < 0) {
-        runtime_err_log("ioctl TIOCGWINSZ error");
-        exit(1);
+        ring_error_report("ioctl TIOCGWINSZ error");
     }
 
     if (terminal_size.ws_row < 38 || terminal_size.ws_col < 115) {

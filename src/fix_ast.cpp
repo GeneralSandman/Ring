@@ -358,8 +358,7 @@ void fix_for_statement(ForStatement* for_statement, Block* block, Function* func
         fix_expression(for_statement->u.range_statement->left, block, func);
         fix_expression(for_statement->u.range_statement->operand, block, func);
     } else {
-        fprintf(stderr, "for statement type is invalid error\n");
-        exit(ERROR_CODE_COMPILE_ERROR);
+        ring_error_report("for statement type is invalid error\n");
     }
 
 
@@ -552,15 +551,13 @@ void fix_method_call_expression(MethodCallExpression* method_call_expression, Bl
     // 1. find class definition by object.
     class_definition = object_expression->convert_type->u.class_type->class_definition;
     if (class_definition == nullptr) {
-        fprintf(stderr, "fix_method_call_expression error\n");
-        exit(ERROR_CODE_COMPILE_ERROR);
+        ring_error_report("fix_method_call_expression error\n");
     }
 
     // 2. find member declaration by member identifier.
     member_declaration = search_class_member(class_definition, member_identifier);
     if (member_declaration == nullptr) {
-        fprintf(stderr, "fix_member_expression error\n");
-        exit(ERROR_CODE_COMPILE_ERROR);
+        ring_error_report("fix_member_expression error\n");
     }
     method_call_expression->member_declaration = member_declaration;
 
@@ -719,16 +716,14 @@ void fix_member_expression(Expression* expression, MemberExpression* member_expr
     // 1. find class definition by object.
     class_definition = object_expression->convert_type->u.class_type->class_definition;
     if (class_definition == nullptr) {
-        fprintf(stderr, "fix_member_expression error\n");
-        exit(ERROR_CODE_COMPILE_ERROR);
+        ring_error_report("fix_member_expression error\n");
     }
 
 
     // 2. find member declaration by member identifier.
     member_declaration = search_class_member(class_definition, member_identifier);
     if (member_declaration == nullptr) {
-        fprintf(stderr, "fix_member_expression error\n");
-        exit(ERROR_CODE_COMPILE_ERROR);
+        ring_error_report("fix_member_expression error\n");
     }
     member_expression->member_declaration = member_declaration;
 

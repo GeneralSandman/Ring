@@ -21,8 +21,7 @@ void finish_global_block(Statement* global_statement_list) {
             add_declaration(statement->u.declaration_statement, nullptr, nullptr);
             break;
         default:
-            fprintf(stderr, "error statement->type:%d in global statement list\n", statement->type);
-            exit(1);
+            ring_error_report("error statement->type:%d in global statement list\n", statement->type);
             break;
         }
     }
