@@ -219,6 +219,17 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* execut
             runtime_static->data[i].u.class_ob_value = new_class_object(rvm, rvm_class_definition);
             break;
 
+        case RING_BASIC_TYPE_ARRAY:
+            runtime_static->data[i].type                     = RVM_VALUE_TYPE_ARRAY;
+            runtime_static->data[i].u.array_value            = rvm_heap_new_empty_array(rvm);
+            runtime_static->data[i].u.array_value->type      = RVM_Array_Type(type_specifier->sub->kind); // 这里强制转化一下
+            runtime_static->data[i].u.array_value->dimension = type_specifier->dimension;
+            runtime_static->data[i].u.array_value->length    = 0;
+            runtime_static->data[i].u.array_value->capacity  = 0;
+
+
+            break;
+
         default:
             break;
         }
@@ -1754,10 +1765,11 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
     if (dimension_index == 0) {
         return nullptr;
     }
-    RVM_Array* array = rvm_heap_new_array(rvm);
+    RVM_Array* array = rvm_heap_new_empty_array(rvm);
 
     // printf("dimension-dimension_index:%d  dimension_index:%d\n", dimension - dimension_index, dimension_index);
     array->type      = array_type;
+    array->dimension = dimension_index;
     array->length    = dimension_list[dimension - dimension_index];
     array->capacity  = dimension_list[dimension - dimension_index];
 
@@ -1881,7 +1893,7 @@ RVM_Array* rvm_new_array_string(Ring_VirtualMachine* rvm,
 RVM_Array* rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int dimension) {
     unsigned int capacity   = ROUND_UP8(dimension);
 
-    RVM_Array*   array      = rvm_heap_new_array(rvm);
+    RVM_Array*   array      = rvm_heap_new_empty_array(rvm);
 
     array->type             = RVM_ARRAY_CLASS_OBJECT;
     array->length           = dimension;
@@ -2402,19 +2414,20 @@ RVM_String* rvm_double_2_string(Ring_VirtualMachine* rvm, double value) {
 }
 
 
-RVM_Array* rvm_heap_new_array(Ring_VirtualMachine* rvm) {
-    RVM_Array* array      = (RVM_Array*)mem_alloc(rvm->meta_pool, sizeof(RVM_Array));
-    array->type           = RVM_ARRAY_UNKNOW;
-    array->length         = 0;
-    array->capacity       = 0;
-    array->u.int_array    = nullptr;
-    array->u.double_array = nullptr;
+RVM_Array* rvm_heap_new_empty_array(Ring_VirtualMachine* rvm) {
+    RVM_Array* array    = (RVM_Array*)mem_alloc(rvm->meta_pool, sizeof(RVM_Array));
+    array->type         = RVM_ARRAY_UNKNOW;
+    array->dimension    = 0;
+    array->length       = 0;
+    array->capacity     = 0;
+    array->u.bool_array = nullptr;
     return array;
 }
 
 RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
     RVM_Array* array  = (RVM_Array*)mem_alloc(rvm->meta_pool, sizeof(RVM_Array));
     array->type       = src->type;
+    array->dimension  = src->dimension;
     array->length     = src->length;
     array->capacity   = src->capacity;
 

@@ -567,10 +567,23 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
         str = "string";
         break;
     case RVM_VALUE_TYPE_CLASS_OB:
-        str = "class";
+        if (args->u.class_ob_value->class_ref == nullptr) {
+            str = "class";
+        } else {
+            str = std::string(args->u.class_ob_value->class_ref->identifier);
+        }
         break;
     case RVM_VALUE_TYPE_ARRAY:
-        str = "array";
+        switch (args->u.array_value->type) {
+        case RVM_ARRAY_BOOL: str = "bool"; break;
+        case RVM_ARRAY_INT: str = "int"; break;
+        case RVM_ARRAY_DOUBLE: str = "double"; break;
+        case RVM_ARRAY_STRING: str = "string"; break;
+        case RVM_ARRAY_CLASS_OBJECT: str = "class"; break;
+        default: str = "unknow"; break;
+        }
+
+        str = str + "[" + std::string(args->u.array_value->dimension - 1, ',') + "]";
         break;
     default:
         str = "unknow";

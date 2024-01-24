@@ -340,15 +340,15 @@ struct PackageUnit {
 typedef enum {
     RING_BASIC_TYPE_UNKNOW,
 
-    RING_BASIC_TYPE_ANY,
-
     RING_BASIC_TYPE_BOOL,
     RING_BASIC_TYPE_INT,
     RING_BASIC_TYPE_DOUBLE,
     RING_BASIC_TYPE_STRING,
-
     RING_BASIC_TYPE_CLASS,
     RING_BASIC_TYPE_ARRAY,
+
+    RING_BASIC_TYPE_ANY,
+
     RING_BASIC_TYPE_NULL,
 } Ring_BasicType;
 // TODO: 这里重新规划一下 还要考虑类型的嵌套
@@ -518,11 +518,12 @@ typedef enum {
     RVM_ARRAY_DOUBLE,       // double 数组
     RVM_ARRAY_STRING,       // string 数组
     RVM_ARRAY_CLASS_OBJECT, // 类 数组
-    RVM_ARRAY_A,            // 多维数组
+    RVM_ARRAY_A,            // 多维数组的中间态， 感觉有必要删除
 } RVM_Array_Type;
 
 struct RVM_Array {
     RVM_Array_Type type;
+    unsigned char  dimension;
     unsigned int   length;
     unsigned int   capacity;
     union {
@@ -2291,7 +2292,7 @@ RVM_String*          rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value);
 RVM_String*          rvm_int_2_string(Ring_VirtualMachine* rvm, int value);
 RVM_String*          rvm_double_2_string(Ring_VirtualMachine* rvm, double value);
 
-RVM_Array*           rvm_heap_new_array(Ring_VirtualMachine* rvm);
+RVM_Array*           rvm_heap_new_empty_array(Ring_VirtualMachine* rvm);
 RVM_Array*           rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src);
 RVM_ClassObject*     rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
 RVM_ClassObject*     rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
