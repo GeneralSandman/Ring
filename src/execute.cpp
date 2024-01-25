@@ -143,7 +143,9 @@ Ring_VirtualMachine* ring_virtualmachine_create() {
  * 3. Init class list
  *
  */
-void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry) {
+void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm,
+                                       ExecuterEntry*       executer_entry) {
+
     rvm->executer       = executer_entry->main_package_executer;
     rvm->executer_entry = executer_entry;
 
@@ -159,7 +161,9 @@ void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* 
 /*
  * 将 package 中 所有的 全局变量添加到 runtime_static中
  */
-void rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
+void rvm_add_static_variable(Package_Executer*  executer,
+                             RVM_RuntimeStatic* runtime_static) {
+
     debug_log_with_white_coloar("\t");
 
     unsigned int size    = executer->global_variable_size;
@@ -189,7 +193,10 @@ void ring_virtualmachine_init(Ring_VirtualMachine* rvm) {
  * 2. 通过默认值初始化
  *
  */
-void rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static) {
+void rvm_init_static_variable(Ring_VirtualMachine* rvm,
+                              Package_Executer*    executer,
+                              RVM_RuntimeStatic*   runtime_static) {
+
     debug_log_with_white_coloar("\t");
 
     unsigned int         size                 = executer->global_variable_size;
@@ -252,7 +259,9 @@ RVM_String* new_string_object(Ring_VirtualMachine* rvm) {
  * 使用到了 class_definition ,  和编译器前端没有做到完全解耦
  * TODO: 解耦
  */
-RVM_ClassObject* new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition) {
+RVM_ClassObject* new_class_object(Ring_VirtualMachine* rvm,
+                                  RVM_ClassDefinition* class_definition) {
+
     assert(class_definition != nullptr);
 
     // Search field-member's size and detail from class-definition.
@@ -1399,7 +1408,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 }
 
 
-void invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size) {
+void invoke_native_function(Ring_VirtualMachine* rvm,
+                            RVM_Function*        function,
+                            unsigned int         argument_list_size) {
+
     debug_log_with_white_coloar("\t");
 
     RVM_Value           ret;
@@ -1608,7 +1620,9 @@ void restore_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo** call_info) {
  * FIXME: 如果局部变量是个数组
  */
 void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
-                                         RVM_ClassObject* callee_object, RVM_Function* function) {
+                                         RVM_ClassObject*     callee_object,
+                                         RVM_Function*        function) {
+
     debug_log_with_white_coloar("\t");
 
     unsigned int arguement_list_size   = function->parameter_size;
@@ -1890,7 +1904,10 @@ RVM_Array* rvm_new_array_string(Ring_VirtualMachine* rvm,
  * dimension: size of array
  * class_def_index: index of class definition in class table
  */
-RVM_Array* rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int dimension) {
+RVM_Array* rvm_new_array_class_object(Ring_VirtualMachine* rvm,
+                                      unsigned int         field_count,
+                                      unsigned int         dimension) {
+
     unsigned int capacity   = ROUND_UP8(dimension);
 
     RVM_Array*   array      = rvm_heap_new_empty_array(rvm);
@@ -1928,7 +1945,9 @@ RVM_Array* rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int fie
  * TODO: support field is string or array
  *
  */
-RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition) {
+RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm,
+                                      RVM_ClassDefinition* class_definition) {
+
     RVM_ClassObject* class_ob   = rvm_heap_new_class_object(rvm);
 
     size_t           alloc_size = class_definition->field_size * sizeof(RVM_Value);
@@ -2010,7 +2029,9 @@ RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size) {
 }
 
 RVM_ClassObject* rvm_new_class_object_literal(Ring_VirtualMachine* rvm,
-                                              RVM_ClassDefinition* class_definition, unsigned int init_exp_size) {
+                                              RVM_ClassDefinition* class_definition,
+                                              unsigned int         init_exp_size) {
+
     // rvm_new_class_object 这个需要重写一下
     RVM_ClassObject* class_ob = rvm_new_class_object(rvm, class_definition);
     if (class_definition->field_size != init_exp_size) {
@@ -2268,7 +2289,11 @@ ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_S
     return ERROR_CODE_SUCCESS;
 }
 
-ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_ClassObject** value) {
+ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm,
+                                     RVM_Array*           array,
+                                     int                  index,
+                                     RVM_ClassObject**    value) {
+
     if (index >= array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
@@ -2279,7 +2304,11 @@ ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm, RVM_Array* array,
     return ERROR_CODE_SUCCESS;
 }
 
-ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_ClassObject** value) {
+ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm,
+                                     RVM_Array*           array,
+                                     int                  index,
+                                     RVM_ClassObject**    value) {
+
     if (index >= array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
@@ -2293,7 +2322,10 @@ ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Array* array,
 }
 
 
-ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_ClassObject** value) {
+ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm,
+                                        RVM_Array*           array,
+                                        RVM_ClassObject**    value) {
+
     size_t old_alloc_size = 0;
     size_t new_alloc_size = 0;
 
@@ -2318,7 +2350,10 @@ ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Array* arr
     return ERROR_CODE_SUCCESS;
 }
 
-ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_ClassObject** value) {
+ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm,
+                                     RVM_Array*           array,
+                                     RVM_ClassObject**    value) {
+
     if (array->length == 0) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
@@ -2647,7 +2682,13 @@ int rvm_heap_size(Ring_VirtualMachine* rvm) {
     return rvm->runtime_heap->alloc_size;
 }
 
-void debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base) {
+void debug_rvm(Ring_VirtualMachine* rvm,
+               RVM_Function*        function,
+               RVM_Byte*            code_list,
+               unsigned int         code_size,
+               unsigned int         pc,
+               unsigned int         caller_stack_base) {
+
     debug_log_with_white_coloar("\t");
 
     if (rvm->debug_config == nullptr) {

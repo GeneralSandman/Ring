@@ -60,7 +60,11 @@ void ring_vm_constantpool_dump(Package_Executer* executer) {
 /*
  * dump function detail
  */
-void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col) {
+void ring_vm_code_dump(RVM_Function* function,
+                       RVM_Byte* code_list, unsigned int code_size,
+                       unsigned int pc,
+                       unsigned int screen_row, unsigned int screen_col) {
+
     MOVE_CURSOR(screen_row++, screen_col);
     std::string func_name = "top_level";
     if (function) {
@@ -127,7 +131,10 @@ void ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int
 
 
 // TODO: caller_stack_base 是不是可以放在 RVM_RuntimeStack 中，考虑
-void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col) {
+void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack,
+                                unsigned int      caller_stack_base,
+                                unsigned int screen_row, unsigned int screen_col) {
+
     MOVE_CURSOR(screen_row++, screen_col);
     printf("**************** runtime_stack *****************\n");
 

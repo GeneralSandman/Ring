@@ -101,7 +101,10 @@ void executer_entry_dump(ExecuterEntry* executer_entry) {
 }
 
 // create package from a package's dir which contains multi files
-Package* package_create(CompilerEntry* compiler_entry, char* package_name, char* package_path) {
+Package* package_create(CompilerEntry* compiler_entry,
+                        char*          package_name,
+                        char*          package_path) {
+
     assert(compiler_entry != nullptr);
     debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 
@@ -132,7 +135,10 @@ Package* package_create(CompilerEntry* compiler_entry, char* package_name, char*
 }
 
 // create package from only source file
-Package* package_create_input_file(CompilerEntry* compiler_entry, char* package_name, char* input_main_file) {
+Package* package_create_input_file(CompilerEntry* compiler_entry,
+                                   char*          package_name,
+                                   char*          input_main_file) {
+
     assert(compiler_entry != nullptr);
     debug_log_with_yellow_coloar("\t package[%s] create", package_name);
 

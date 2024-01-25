@@ -142,7 +142,7 @@ IndentWidth: 4
 IndentWrappedFunctionNames: false
 
 # 保留在块开始处的空行
-KeepEmptyLinesAtTheStartOfBlocks: false
+KeepEmptyLinesAtTheStartOfBlocks: true
 
 # 连续空行的最大数量
 MaxEmptyLinesToKeep: 2

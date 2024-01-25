@@ -9,7 +9,9 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 
 // init Package-Executer
-Package_Executer* package_executer_create(ExecuterEntry* executer_entry, char* package_name) {
+Package_Executer* package_executer_create(ExecuterEntry* executer_entry,
+                                          char*          package_name) {
+
     Package_Executer* executer                = (Package_Executer*)mem_alloc(NULL_MEM_POOL, sizeof(Package_Executer));
     executer->executer_entry                  = executer_entry;
     executer->package_index                   = -1;
@@ -96,7 +98,9 @@ void ring_generate_vm_code(Package* package, Package_Executer* package_executer)
 }
 
 // 只生成主包的vm code
-void ring_generate_vm_code(CompilerEntry* compiler_entry, ExecuterEntry* executer_entry) {
+void ring_generate_vm_code(CompilerEntry* compiler_entry,
+                           ExecuterEntry* executer_entry) {
+
     debug_log_with_darkgreen_coloar("\t");
 
     Package*          main_package     = compiler_entry->main_package;
@@ -201,7 +205,9 @@ void add_classes(Package* package, Package_Executer* executer) {
  *
  * TODO: field not deep copy
  */
-void class_def_deep_copy(Package_Executer* executer, RVM_ClassDefinition* dst, ClassDefinition* src) {
+void class_def_deep_copy(Package_Executer*    executer,
+                         RVM_ClassDefinition* dst,
+                         ClassDefinition*     src) {
     debug_log_with_darkgreen_coloar("\t");
 
     dst->source_file            = src->source_file;
@@ -442,7 +448,9 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
     }
 }
 
-void generate_code_from_function_definition(Package_Executer* executer, RVM_Function* dst, Function* src) {
+void generate_code_from_function_definition(Package_Executer* executer,
+                                            RVM_Function* dst, Function* src) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (src->block == nullptr) {
         return;
@@ -467,7 +475,9 @@ void generate_code_from_function_definition(Package_Executer* executer, RVM_Func
 #endif
 }
 
-void generate_code_from_method_definition(Package_Executer* executer, RVM_Method* dst, MethodMember* src) {
+void generate_code_from_method_definition(Package_Executer* executer,
+                                          RVM_Method* dst, MethodMember* src) {
+
     debug_log_with_darkgreen_coloar("\t");
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
@@ -506,7 +516,10 @@ RVM_OpcodeBuffer* new_opcode_buffer() {
     return buffer;
 }
 
-void generate_vmcode_from_block(Package_Executer* executer, Block* block, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_block(Package_Executer* executer,
+                                Block*            block,
+                                RVM_OpcodeBuffer* opcode_buffer) {
+
     if (block == nullptr) {
         return;
     }
@@ -514,7 +527,11 @@ void generate_vmcode_from_block(Package_Executer* executer, Block* block, RVM_Op
     generate_vmcode_from_statement_list(executer, block, block->statement_list, opcode_buffer);
 }
 
-void generate_vmcode_from_statement_list(Package_Executer* executer, Block* block, Statement* statement_list, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_statement_list(Package_Executer* executer,
+                                         Block*            block,
+                                         Statement*        statement_list,
+                                         RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     for (Statement* statement = statement_list; statement != nullptr; statement = statement->next) {
         switch (statement->type) {
@@ -563,7 +580,10 @@ void generate_vmcode_from_statement_list(Package_Executer* executer, Block* bloc
     }
 }
 
-void generate_vmcode_from_if_statement(Package_Executer* executer, IfStatement* if_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_if_statement(Package_Executer* executer,
+                                       IfStatement*      if_statement,
+                                       RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (if_statement == nullptr) {
         return;
@@ -611,7 +631,10 @@ void generate_vmcode_from_if_statement(Package_Executer* executer, IfStatement* 
     opcode_buffer_set_label(opcode_buffer, if_end_label, opcode_buffer->code_size);
 }
 
-void generate_vmcode_from_for_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_for_statement(Package_Executer* executer,
+                                        ForStatement*     for_statement,
+                                        RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (for_statement == nullptr) {
         return;
@@ -627,7 +650,10 @@ void generate_vmcode_from_for_statement(Package_Executer* executer, ForStatement
 }
 
 // TODO: 暂时不支持 break continue
-void generate_vmcode_from_for_ternary_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
+                                                ForStatement*     for_statement,
+                                                RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     assert(for_statement != nullptr);
     assert(for_statement->type == FOR_STATEMENT_TYPE_TERNARY);
@@ -679,7 +705,10 @@ void generate_vmcode_from_for_ternary_statement(Package_Executer* executer, ForS
     opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
 }
 
-void generate_vmcode_from_for_range_statement(Package_Executer* executer, ForStatement* for_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_for_range_statement(Package_Executer* executer,
+                                              ForStatement*     for_statement,
+                                              RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     assert(for_statement != nullptr);
     assert(for_statement->type == FOR_STATEMENT_TYPE_RANGE);
@@ -774,7 +803,10 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer, ForSta
 
 
 // TODO: 暂时不支持 break continue
-void generate_vmcode_from_dofor_statement(Package_Executer* executer, DoForStatement* dofor_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_dofor_statement(Package_Executer* executer,
+                                          DoForStatement*   dofor_statement,
+                                          RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (dofor_statement == nullptr) {
         return;
@@ -825,7 +857,11 @@ void generate_vmcode_from_dofor_statement(Package_Executer* executer, DoForState
     opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
 }
 
-void generate_vmcode_from_break_statement(Package_Executer* executer, Block* block, BreakStatement* break_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_break_statement(Package_Executer* executer,
+                                          Block*            block,
+                                          BreakStatement*   break_statement,
+                                          RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (break_statement == nullptr) {
         return;
@@ -856,7 +892,11 @@ void generate_vmcode_from_break_statement(Package_Executer* executer, Block* blo
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, pos->block_labels.break_label, break_statement->line_number);
 }
 
-void generate_vmcode_from_continue_statement(Package_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_continue_statement(Package_Executer*  executer,
+                                             Block*             block,
+                                             ContinueStatement* continue_statement,
+                                             RVM_OpcodeBuffer*  opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (continue_statement == nullptr) {
         return;
@@ -881,7 +921,11 @@ void generate_vmcode_from_continue_statement(Package_Executer* executer, Block* 
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, pos->block_labels.continue_label, continue_statement->line_number);
 }
 
-void generate_vmcode_from_return_statement(Package_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_return_statement(Package_Executer* executer,
+                                           Block*            block,
+                                           ReturnStatement*  return_statement,
+                                           RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (return_statement == nullptr) {
         return;
@@ -897,7 +941,11 @@ void generate_vmcode_from_return_statement(Package_Executer* executer, Block* bl
     generate_vmcode(executer, opcode_buffer, RVM_CODE_RETURN, return_statement->return_list_size, return_statement->line_number);
 }
 
-void generate_vmcode_from_initializer(Package_Executer* executer, Block* block, Declaration* declaration, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_initializer(Package_Executer* executer,
+                                      Block*            block,
+                                      Declaration*      declaration,
+                                      RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (declaration == nullptr) {
         return;
@@ -927,7 +975,11 @@ void generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* 
     }
 }
 
-void generate_vmcode_from_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {
+void generate_vmcode_from_expression(Package_Executer* executer,
+                                     Expression*       expression,
+                                     RVM_OpcodeBuffer* opcode_buffer,
+                                     int               need_duplicate) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (expression == nullptr) {
         return;
@@ -1056,7 +1108,10 @@ void generate_vmcode_from_expression(Package_Executer* executer, Expression* exp
     }
 }
 
-void generate_vmcode_from_assign_expression(Package_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_assign_expression(Package_Executer* executer,
+                                            AssignExpression* expression,
+                                            RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     assert(expression != nullptr);
 
@@ -1123,7 +1178,10 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer, AssignEx
 }
 
 // TODO: FIXME:
-void generate_pop_to_leftvalue_reverse(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_pop_to_leftvalue_reverse(Package_Executer* executer,
+                                       Expression*       expression,
+                                       RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (expression == nullptr) {
         return;
@@ -1134,7 +1192,10 @@ void generate_pop_to_leftvalue_reverse(Package_Executer* executer, Expression* e
 }
 
 // TODO:  处理 赋值给 标识符、array[index]、成员变量 a.b
-void generate_pop_to_leftvalue(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_pop_to_leftvalue(Package_Executer* executer,
+                               Expression*       expression,
+                               RVM_OpcodeBuffer* opcode_buffer) {
+
     if (expression->type == EXPRESSION_TYPE_IDENTIFIER) {
         generate_pop_to_leftvalue_identifier(executer, expression->u.identifier_expression, opcode_buffer);
     } else if (expression->type == EXPRESSION_TYPE_MEMBER) {
@@ -1149,7 +1210,10 @@ void generate_pop_to_leftvalue(Package_Executer* executer, Expression* expressio
 /*
  * 给变量赋值
  */
-void generate_pop_to_leftvalue_identifier(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_pop_to_leftvalue_identifier(Package_Executer*     executer,
+                                          IdentifierExpression* identifier_expression,
+                                          RVM_OpcodeBuffer*     opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     assert(identifier_expression != nullptr);
 
@@ -1168,7 +1232,10 @@ void generate_pop_to_leftvalue_identifier(Package_Executer* executer, Identifier
 /*
  * 用于给成员变量赋值
  */
-void generate_pop_to_leftvalue_member(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_pop_to_leftvalue_member(Package_Executer* executer,
+                                      MemberExpression* member_expression,
+                                      RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (member_expression == nullptr) {
         return;
@@ -1185,7 +1252,10 @@ void generate_pop_to_leftvalue_member(Package_Executer* executer, MemberExpressi
 /*
  * 给数组元素赋值
  */
-void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
+                                           ArrayIndexExpression* array_index_expression,
+                                           RVM_OpcodeBuffer*     opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     assert(array_index_expression != nullptr);
     assert(array_index_expression->array_expression != nullptr);
@@ -1240,7 +1310,11 @@ void generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayInde
     }
 }
 
-void generate_vmcode_from_logical_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+void generate_vmcode_from_logical_expression(Package_Executer* executer,
+                                             BinaryExpression* expression,
+                                             RVM_OpcodeBuffer* opcode_buffer,
+                                             RVM_Opcode        opcode) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (expression == nullptr) {
         return;
@@ -1275,7 +1349,11 @@ void generate_vmcode_from_logical_expression(Package_Executer* executer, BinaryE
     opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
 }
 
-void generate_vmcode_from_binary_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+void generate_vmcode_from_binary_expression(Package_Executer* executer,
+                                            BinaryExpression* expression,
+                                            RVM_OpcodeBuffer* opcode_buffer,
+                                            RVM_Opcode        opcode) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (expression == nullptr) {
         return;
@@ -1312,7 +1390,11 @@ END:
     generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
 }
 
-void generate_vmcode_from_increase_decrease_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate) {
+void generate_vmcode_from_increase_decrease_expression(Package_Executer* executer,
+                                                       Expression*       expression,
+                                                       RVM_OpcodeBuffer* opcode_buffer,
+                                                       int               need_duplicate) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (expression == nullptr) {
         return;
@@ -1354,7 +1436,11 @@ void generate_vmcode_from_increase_decrease_expression(Package_Executer* execute
     generate_pop_to_leftvalue(executer, unitary_expression, opcode_buffer);
 }
 
-void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer,
+                                                   Expression*       expression,
+                                                   RVM_OpcodeBuffer* opcode_buffer,
+                                                   RVM_Opcode        opcode) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (expression == nullptr) {
         return;
@@ -1405,7 +1491,11 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, E
     generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
 }
 
-void generate_vmcode_from_unitary_not_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode) {
+void generate_vmcode_from_unitary_not_expression(Package_Executer* executer,
+                                                 Expression*       expression,
+                                                 RVM_OpcodeBuffer* opcode_buffer,
+                                                 RVM_Opcode        opcode) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (expression == nullptr) {
         return;
@@ -1416,7 +1506,10 @@ void generate_vmcode_from_unitary_not_expression(Package_Executer* executer, Exp
     generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
 }
 
-void generate_vmcode_from_identifier_expression(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
+                                                IdentifierExpression* identifier_expression,
+                                                RVM_OpcodeBuffer*     opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (identifier_expression == nullptr) {
         return;
@@ -1449,7 +1542,10 @@ void generate_vmcode_from_identifier_expression(Package_Executer* executer, Iden
     }
 }
 
-void generate_vmcode_from_bool_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_bool_expression(Package_Executer* executer,
+                                          Expression*       expression,
+                                          RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (expression == nullptr) {
         return;
@@ -1461,7 +1557,10 @@ void generate_vmcode_from_bool_expression(Package_Executer* executer, Expression
     }
 }
 
-void generate_vmcode_from_int_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_int_expression(Package_Executer* executer,
+                                         Expression*       expression,
+                                         RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (expression == nullptr) {
         return;
@@ -1478,7 +1577,10 @@ void generate_vmcode_from_int_expression(Package_Executer* executer, Expression*
     }
 }
 
-void generate_vmcode_from_double_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_double_expression(Package_Executer* executer,
+                                            Expression*       expression,
+                                            RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (expression == nullptr) {
         return;
@@ -1489,7 +1591,10 @@ void generate_vmcode_from_double_expression(Package_Executer* executer, Expressi
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_DOUBLE, constant_index, expression->line_number);
 }
 
-void generate_vmcode_from_string_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_string_expression(Package_Executer* executer,
+                                            Expression*       expression,
+                                            RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     // 都放在常量区
     assert(expression->type == EXPRESSION_TYPE_LITERAL_STRING);
@@ -1497,7 +1602,10 @@ void generate_vmcode_from_string_expression(Package_Executer* executer, Expressi
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING, constant_index, expression->line_number);
 }
 
-void generate_vmcode_from_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_function_call_expression(Package_Executer*       executer,
+                                                   FunctionCallExpression* function_call_expression,
+                                                   RVM_OpcodeBuffer*       opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (function_call_expression == nullptr) {
         return;
@@ -1527,7 +1635,10 @@ void generate_vmcode_from_function_call_expression(Package_Executer* executer, F
 // native function 这个函数名起的 不太好
 // 容易跟 std-package 混淆
 // TODO: 这里需要重新设计一下 跟 is_native_function_identifier
-void generate_vmcode_from_native_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_native_function_call_expression(Package_Executer*       executer,
+                                                          FunctionCallExpression* function_call_expression,
+                                                          RVM_OpcodeBuffer*       opcode_buffer) {
+
     ArgumentList* pos                     = nullptr;
     Expression*   function_identifier_exp = function_call_expression->function_identifier_expression;
     char*         function_identifier     = function_identifier_exp->u.identifier_expression->identifier;
@@ -1616,7 +1727,10 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer* exec
     }
 }
 
-void generate_vmcode_from_method_call_expression(Package_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_method_call_expression(Package_Executer*     executer,
+                                                 MethodCallExpression* method_call_expression,
+                                                 RVM_OpcodeBuffer*     opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (method_call_expression == nullptr) {
         return;
@@ -1641,7 +1755,10 @@ void generate_vmcode_from_method_call_expression(Package_Executer* executer, Met
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_METHOD, 0, method_call_expression->line_number);
 }
 
-void generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_cast_expression(Package_Executer* executer,
+                                          CastExpression*   cast_expression,
+                                          RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (cast_expression == nullptr) {
         return;
@@ -1691,7 +1808,10 @@ void generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpres
 /*
  * 用于访问成员变量
  */
-void generate_vmcode_from_member_expression(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_member_expression(Package_Executer* executer,
+                                            MemberExpression* member_expression,
+                                            RVM_OpcodeBuffer* opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (member_expression == nullptr) {
         return;
@@ -1707,7 +1827,10 @@ void generate_vmcode_from_member_expression(Package_Executer* executer, MemberEx
     generate_vmcode(executer, opcode_buffer, opcode, member_field_index, member_expression->line_number);
 }
 
-void generate_vmcode_from_ternary_condition_expression(Package_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_ternary_condition_expression(Package_Executer*  executer,
+                                                       TernaryExpression* ternary_expression,
+                                                       RVM_OpcodeBuffer*  opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     assert(ternary_expression != nullptr);
 
@@ -1733,7 +1856,10 @@ void generate_vmcode_from_ternary_condition_expression(Package_Executer* execute
     opcode_buffer_set_label(opcode_buffer, if_end_label, opcode_buffer->code_size);
 }
 
-void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
+                                               NewArrayExpression* new_array_expression,
+                                               RVM_OpcodeBuffer*   opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     assert(new_array_expression != nullptr);
     assert(new_array_expression->dimension_expression != nullptr);
@@ -1770,7 +1896,10 @@ void generate_vmcode_from_new_array_expression(Package_Executer* executer, NewAr
     }
 }
 
-void generate_vmcode_from_class_object_literal_expreesion(Package_Executer* executer, ClassObjectLiteralExpression* literal_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_class_object_literal_expreesion(Package_Executer*             executer,
+                                                          ClassObjectLiteralExpression* literal_expression,
+                                                          RVM_OpcodeBuffer*             opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     assert(literal_expression != nullptr);
     assert(literal_expression->type_specifier != nullptr);
@@ -1794,7 +1923,10 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer* exec
     generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLASS_OBJECT_LITERAL, oper_num, literal_expression->line_number);
 }
 
-void generate_vmcode_from_array_class_object(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_array_class_object(Package_Executer*   executer,
+                                             NewArrayExpression* new_array_expression,
+                                             RVM_OpcodeBuffer*   opcode_buffer) {
+
     unsigned int field_count = 0;
     unsigned int oper_num    = 0;
     // TODO: 目前只能支持一维数组
@@ -1818,7 +1950,10 @@ void generate_vmcode_from_array_class_object(Package_Executer* executer, NewArra
     generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_CLASS_OBJECT, oper_num, new_array_expression->line_number);
 }
 
-void generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, ArrayLiteralExpression* array_literal_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_array_literal_expreesion(Package_Executer*       executer,
+                                                   ArrayLiteralExpression* array_literal_expression,
+                                                   RVM_OpcodeBuffer*       opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     assert(array_literal_expression != nullptr);
     assert(array_literal_expression->expression_list != nullptr);
@@ -1843,7 +1978,10 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, A
     }
 }
 
-void generate_vmcode_from_array_index_expression(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer) {
+void generate_vmcode_from_array_index_expression(Package_Executer*     executer,
+                                                 ArrayIndexExpression* array_index_expression,
+                                                 RVM_OpcodeBuffer*     opcode_buffer) {
+
     debug_log_with_darkgreen_coloar("\t");
     assert(array_index_expression != nullptr);
     assert(array_index_expression->array_expression != nullptr);
@@ -1900,7 +2038,12 @@ void generate_vmcode_from_array_index_expression(Package_Executer* executer, Arr
     }
 }
 
-void generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int oper_num, unsigned int line_number) {
+void generate_vmcode(Package_Executer* executer,
+                     RVM_OpcodeBuffer* opcode_buffer,
+                     RVM_Opcode        opcode,
+                     unsigned int      oper_num,
+                     unsigned int      line_number) {
+
     debug_log_with_darkgreen_coloar("\t");
     if (opcode_buffer->code_capacity == opcode_buffer->code_size) {
         size_t old_alloc_size = opcode_buffer->code_capacity * sizeof(RVM_Byte);
@@ -1995,7 +2138,10 @@ unsigned int opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer) {
     return old_index;
 }
 
-void opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address) {
+void opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer,
+                             unsigned int      label,
+                             unsigned int      label_address) {
+
     debug_log_with_darkgreen_coloar("\t");
     opcode_buffer->lable_list[label].label_address = label_address;
 }

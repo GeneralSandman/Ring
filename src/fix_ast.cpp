@@ -519,7 +519,10 @@ void fix_binary_expression(Expression* expression, Block* block, Function* func)
     }
 }
 
-void fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func) {
+void fix_function_call_expression(FunctionCallExpression* function_call_expression,
+                                  Block*                  block,
+                                  Function*               func) {
+
     if (function_call_expression == nullptr) {
         return;
     }
@@ -666,18 +669,29 @@ void fix_array_index_expression(Expression*           expression,
     expression->convert_type = type;
 }
 
-void fix_new_array_expression(Expression* expression, NewArrayExpression* new_array_expression, Block* block, Function* func) {
+void fix_new_array_expression(Expression*         expression,
+                              NewArrayExpression* new_array_expression,
+                              Block*              block,
+                              Function*           func) {
+
     fix_type_specfier(new_array_expression->type_specifier);
 }
 
-void fix_dimension_expression(DimensionExpression* dimension_expression, Block* block, Function* func) {
+void fix_dimension_expression(DimensionExpression* dimension_expression,
+                              Block*               block,
+                              Function*            func) {
+
     SubDimensionExpression* pos = dimension_expression->dimension_list;
     for (; pos != nullptr; pos = pos->next) {
         fix_expression(pos->num_expression, block, func);
     }
 }
 
-void fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func) {
+void fix_array_literal_expression(Expression*             expression,
+                                  ArrayLiteralExpression* array_literal_expression,
+                                  Block*                  block,
+                                  Function*               func) {
+
     assert(array_literal_expression != nullptr);
     Expression* pos = array_literal_expression->expression_list;
     for (; pos != nullptr; pos = pos->next) {
@@ -685,7 +699,11 @@ void fix_array_literal_expression(Expression* expression, ArrayLiteralExpression
     }
 }
 
-void fix_class_object_literal_expression(Expression* expression, ClassObjectLiteralExpression* literal_expression, Block* block, Function* func) {
+void fix_class_object_literal_expression(Expression*                   expression,
+                                         ClassObjectLiteralExpression* literal_expression,
+                                         Block*                        block,
+                                         Function*                     func) {
+
     assert(literal_expression != nullptr);
 
     fix_type_specfier(literal_expression->type_specifier);
@@ -701,7 +719,11 @@ void fix_class_object_literal_expression(Expression* expression, ClassObjectLite
 
 // TODO:
 // 暂时只支持field-member
-void fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func) {
+void fix_member_expression(Expression*       expression,
+                           MemberExpression* member_expression,
+                           Block*            block,
+                           Function*         func) {
+
     assert(member_expression != nullptr);
 
     char*                   member_identifier  = member_expression->member_identifier;
@@ -733,14 +755,21 @@ void fix_member_expression(Expression* expression, MemberExpression* member_expr
     fix_class_member_expression(member_expression, member_expression->object_expression, member_expression->member_identifier);
 }
 
-void fix_dot_expression(Expression* expression, DotExpression* dot_expression, Block* block, Function* func) {
+void fix_dot_expression(Expression*    expression,
+                        DotExpression* dot_expression,
+                        Block*         block,
+                        Function*      func) {
+
     assert(dot_expression != nullptr);
 
     // 1. prefix is a package name
     // 2. suffix is a object name
 }
 
-void fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier) {
+void fix_class_member_expression(MemberExpression* member_expression,
+                                 Expression*       object_expression,
+                                 char*             member_identifier) {
+
     // member_expression->member_declaration = ;
 }
 

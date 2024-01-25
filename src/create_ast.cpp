@@ -107,7 +107,9 @@ Expression* create_expression_identifier2(char* identifier, IdentifierExpression
     return expression;
 }
 
-Expression* create_expression_identifier_with_index(Expression* array_expression, DimensionExpression* index) {
+Expression* create_expression_identifier_with_index(Expression*          array_expression,
+                                                    DimensionExpression* index) {
+
     debug_log_with_yellow_coloar("\t");
 
     ArrayIndexExpression* array_index_expression = (ArrayIndexExpression*)mem_alloc(get_front_mem_pool(), sizeof(ArrayIndexExpression));
@@ -179,7 +181,10 @@ Expression* create_expression_assign(AssignExpression* assign_expression) {
     return expression;
 }
 
-Expression* create_expression_ternary(Expression* condition, Expression* true_expression, Expression* false_expression) {
+Expression* create_expression_ternary(Expression* condition,
+                                      Expression* true_expression,
+                                      Expression* false_expression) {
+
     Expression* expression                                 = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                                = package_unit_get_line_number();
     expression->convert_type                               = nullptr; // fix in fix_ast
@@ -223,7 +228,9 @@ Expression* create_expression_unitary(ExpressionType type, Expression* unitary_e
 // ring.bison.y 中 第一个参数是 VariableType
 // 该定义       中 第一个参数是 BasicValueType
 // TODO: 这里以后统一
-Expression* create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression* expression) {
+Expression* create_expression_unitary_with_convert_type(BasicValueType convert_type,
+                                                        Expression*    expression) {
+
     debug_log_with_yellow_coloar("convert_type:%d", convert_type);
 
     assert(expression != nullptr);
@@ -320,7 +327,9 @@ Expression* create_dot_expression(Expression* prefix_expression, Expression* suf
  *
  * TODO: 支持多维数组的
  */
-Expression* create_new_array_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression) {
+Expression* create_new_array_expression(TypeSpecifier*       type_specifier,
+                                        DimensionExpression* dimension_expression) {
+
     Expression* expression                                   = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                                  = package_unit_get_line_number();
     expression->convert_type                                 = nullptr; // fix in fix_ast
@@ -333,7 +342,9 @@ Expression* create_new_array_expression(TypeSpecifier* type_specifier, Dimension
     return expression;
 }
 
-FieldInitExpression* create_field_init_expression(char* field_identifier, Expression* init_expression) {
+FieldInitExpression* create_field_init_expression(char*       field_identifier,
+                                                  Expression* init_expression) {
+
     FieldInitExpression* expression = (FieldInitExpression*)mem_alloc(get_front_mem_pool(), sizeof(FieldInitExpression));
     expression->line_number         = package_unit_get_line_number();
     expression->field_identifier    = field_identifier;
@@ -342,7 +353,9 @@ FieldInitExpression* create_field_init_expression(char* field_identifier, Expres
     return expression;
 }
 
-FieldInitExpression* field_init_list_add_item(FieldInitExpression* list, FieldInitExpression* item) {
+FieldInitExpression* field_init_list_add_item(FieldInitExpression* list,
+                                              FieldInitExpression* item) {
+
     FieldInitExpression* pos = list;
     for (; pos->next != nullptr; pos = pos->next)
         ;
@@ -350,7 +363,10 @@ FieldInitExpression* field_init_list_add_item(FieldInitExpression* list, FieldIn
     return list;
 }
 
-AssignExpression* create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand) {
+AssignExpression* create_assign_expression(AssignExpressionType type,
+                                           Expression*          left,
+                                           Expression*          operand) {
+
     AssignExpression* assing_expression = (AssignExpression*)mem_alloc(get_front_mem_pool(), sizeof(AssignExpression));
 
     assing_expression->line_number      = package_unit_get_line_number();
@@ -360,7 +376,10 @@ AssignExpression* create_assign_expression(AssignExpressionType type, Expression
     return assing_expression;
 }
 
-AssignExpression* create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* operand) {
+AssignExpression* create_multi_assign_expression(char*       first_identifier,
+                                                 Identifier* identifier_list,
+                                                 Expression* operand) {
+
     // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
     debug_log_with_yellow_coloar("");
 
@@ -382,7 +401,9 @@ AssignExpression* create_multi_assign_expression(char* first_identifier, Identif
     return assing_expression;
 }
 
-FunctionCallExpression* create_function_call_expression(char* identifier, ArgumentList* argument_list) {
+FunctionCallExpression* create_function_call_expression(char*         identifier,
+                                                        ArgumentList* argument_list) {
+
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
     Expression*             function_identifier_expression   = create_expression_identifier2(identifier, IDENTIFIER_EXPRESSION_TYPE_FUNCTION);
@@ -394,7 +415,10 @@ FunctionCallExpression* create_function_call_expression(char* identifier, Argume
     return function_call_expression;
 }
 
-MethodCallExpression* create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list) {
+MethodCallExpression* create_method_call_expression(Expression*   object_expression,
+                                                    char*         member_identifier,
+                                                    ArgumentList* argument_list) {
+
     MethodCallExpression* method_call_expression = (MethodCallExpression*)mem_alloc(get_front_mem_pool(), sizeof(MethodCallExpression));
     method_call_expression->line_number          = package_unit_get_line_number();
     method_call_expression->object_expression    = object_expression;
@@ -403,7 +427,10 @@ MethodCallExpression* create_method_call_expression(Expression* object_expressio
     return method_call_expression;
 }
 
-ArrayLiteralExpression* create_array_literal_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression, Expression* expression_list) {
+ArrayLiteralExpression* create_array_literal_expression(TypeSpecifier*       type_specifier,
+                                                        DimensionExpression* dimension_expression,
+                                                        Expression*          expression_list) {
+
     ArrayLiteralExpression* array_literal = (ArrayLiteralExpression*)mem_alloc(get_front_mem_pool(), sizeof(ArrayLiteralExpression));
     array_literal->line_number            = package_unit_get_line_number();
     array_literal->type_specifier         = type_specifier;
@@ -412,7 +439,9 @@ ArrayLiteralExpression* create_array_literal_expression(TypeSpecifier* type_spec
     return array_literal;
 }
 
-ClassObjectLiteralExpression* create_class_object_literal_expression(TypeSpecifier* type_specifier, FieldInitExpression* field_init_expression_list) {
+ClassObjectLiteralExpression* create_class_object_literal_expression(TypeSpecifier*       type_specifier,
+                                                                     FieldInitExpression* field_init_expression_list) {
+
     ClassObjectLiteralExpression* object_literal = (ClassObjectLiteralExpression*)mem_alloc(get_front_mem_pool(), sizeof(ClassObjectLiteralExpression));
     object_literal->line_number                  = package_unit_get_line_number();
     object_literal->type_specifier               = type_specifier;
@@ -479,7 +508,9 @@ FunctionReturnList* create_function_return_list(VariableType variable_type) {
     return return_list;
 }
 
-FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type) {
+FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_list,
+                                                  VariableType        variable_type) {
+
     FunctionReturnList* pos = return_list;
     for (; pos->next != nullptr; pos = pos->next)
         ;
@@ -487,7 +518,12 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
     return return_list;
 }
 
-Function* new_function_definition(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
+Function* new_function_definition(FunctionType        type,
+                                  Identifier*         identifier,
+                                  Parameter*          parameter_list,
+                                  FunctionReturnList* return_list,
+                                  Block*              block) {
+
     debug_log_with_yellow_coloar("functionType:%d, identifier:%s", type, identifier->identifier_name);
 
     unsigned int parameter_list_size = 0;
@@ -527,7 +563,11 @@ Statement* create_statement_from_if(IfStatement* if_statement) {
     return statement;
 }
 
-IfStatement* create_if_statement(Expression* expression, Block* if_block, ElseIfStatement* elseif_statement_list, Block* else_block) {
+IfStatement* create_if_statement(Expression*      expression,
+                                 Block*           if_block,
+                                 ElseIfStatement* elseif_statement_list,
+                                 Block*           else_block) {
+
     debug_log_with_yellow_coloar("\t");
 
     IfStatement* if_statement          = (IfStatement*)mem_alloc(get_front_mem_pool(), sizeof(IfStatement));
@@ -563,7 +603,9 @@ ElseIfStatement* create_elseif_statement(Expression* expression, Block* elseif_b
     return elseif_statement;
 }
 
-ElseIfStatement* elseif_statement_add_item(ElseIfStatement* list, ElseIfStatement* elseif_statement) {
+ElseIfStatement* elseif_statement_add_item(ElseIfStatement* list,
+                                           ElseIfStatement* elseif_statement) {
+
     debug_log_with_yellow_coloar("\t");
 
     assert(list != nullptr);
@@ -589,7 +631,11 @@ Statement* create_statement_from_for(ForStatement* for_statement) {
     return statement;
 }
 
-ForStatement* create_for_ternary_statement(Expression* init_expression, Expression* condition_expression, Expression* post_expression, Block* block) {
+ForStatement* create_for_ternary_statement(Expression* init_expression,
+                                           Expression* condition_expression,
+                                           Expression* post_expression,
+                                           Block*      block) {
+
     debug_log_with_yellow_coloar("\t");
 
     ForStatement* for_statement                              = (ForStatement*)mem_alloc(get_front_mem_pool(), sizeof(ForStatement));
@@ -608,7 +654,10 @@ ForStatement* create_for_ternary_statement(Expression* init_expression, Expressi
     return for_statement;
 }
 
-ForStatement* create_for_range_statement(Expression* left, Expression* operand, Block* block) {
+ForStatement* create_for_range_statement(Expression* left,
+                                         Expression* operand,
+                                         Block*      block) {
+
     debug_log_with_yellow_coloar("\t");
 
     ForStatement* for_statement               = (ForStatement*)mem_alloc(get_front_mem_pool(), sizeof(ForStatement));
@@ -638,7 +687,11 @@ Statement* create_statement_from_dofor(DoForStatement* dofor_statement) {
     return statement;
 }
 
-DoForStatement* create_dofor_statement(Expression* init_expression, Block* block, Expression* condition_expression, Expression* post_expression) {
+DoForStatement* create_dofor_statement(Expression* init_expression,
+                                       Block*      block,
+                                       Expression* condition_expression,
+                                       Expression* post_expression) {
+
     debug_log_with_yellow_coloar("\t");
 
     DoForStatement* dofor_statement       = (DoForStatement*)mem_alloc(get_front_mem_pool(), sizeof(DoForStatement));
@@ -807,7 +860,9 @@ SubDimensionExpression* create_sub_dimension_expression(Expression* num_expressi
     return dim;
 }
 
-SubDimensionExpression* sub_dimension_expression_list_add_item(SubDimensionExpression* list, SubDimensionExpression* item) {
+SubDimensionExpression* sub_dimension_expression_list_add_item(SubDimensionExpression* list,
+                                                               SubDimensionExpression* item) {
+
     if (list == nullptr) {
         return item;
     }
@@ -921,7 +976,10 @@ Declaration* declaration_list_add_item(Declaration* head, Declaration* declarati
     return head;
 }
 
-Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Identifier* identifier_list, Expression* initializer_list) {
+Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier,
+                                              Identifier*    identifier_list,
+                                              Expression*    initializer_list) {
+
     Declaration* head     = nullptr;
     Identifier*  pos_ider = identifier_list;
     Expression*  pos_init = initializer_list;
@@ -973,7 +1031,10 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier, Ide
     return statement;
 }
 
-Statement* create_declaration_statement(TypeSpecifier* type, char* identifier, Expression* initializer) {
+Statement* create_declaration_statement(TypeSpecifier* type,
+                                        char*          identifier,
+                                        Expression*    initializer) {
+
     debug_log_with_yellow_coloar("identifier:%s", identifier);
 
     Statement* statement               = (Statement*)mem_alloc(get_front_mem_pool(), sizeof(Statement));
@@ -1083,7 +1144,8 @@ ClassDefinition* start_class_definition(char* class_identifier) {
     return class_def;
 }
 
-ClassDefinition* finish_class_definition(ClassDefinition* class_def, ClassMemberDeclaration* class_member_declar) {
+ClassDefinition* finish_class_definition(ClassDefinition*        class_def,
+                                         ClassMemberDeclaration* class_member_declar) {
     debug_log_with_yellow_coloar("\t");
 
     assert(class_def != nullptr);
@@ -1094,7 +1156,9 @@ ClassDefinition* finish_class_definition(ClassDefinition* class_def, ClassMember
     return class_def;
 }
 
-ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclaration* list, ClassMemberDeclaration* decl) {
+ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclaration* list,
+                                                               ClassMemberDeclaration* decl) {
+
     assert(decl != nullptr);
 
     if (list == nullptr) {
@@ -1110,7 +1174,9 @@ ClassMemberDeclaration* class_member_declaration_list_add_item(ClassMemberDeclar
     return list;
 }
 
-ClassMemberDeclaration* create_class_member_field_declaration(Attribute attribute, FieldMember* field_member) {
+ClassMemberDeclaration* create_class_member_field_declaration(Attribute    attribute,
+                                                              FieldMember* field_member) {
+
     assert(field_member != nullptr);
 
     ClassMemberDeclaration* class_member_declar = (ClassMemberDeclaration*)mem_alloc(get_front_mem_pool(), sizeof(ClassMemberDeclaration));
@@ -1123,7 +1189,9 @@ ClassMemberDeclaration* create_class_member_field_declaration(Attribute attribut
     return class_member_declar;
 }
 
-ClassMemberDeclaration* create_class_member_method_declaration(Attribute attribute, MethodMember* method_member) {
+ClassMemberDeclaration* create_class_member_method_declaration(Attribute     attribute,
+                                                               MethodMember* method_member) {
+
     assert(method_member != nullptr);
 
     ClassMemberDeclaration* class_member_declar = (ClassMemberDeclaration*)mem_alloc(get_front_mem_pool(), sizeof(ClassMemberDeclaration));
@@ -1136,7 +1204,9 @@ ClassMemberDeclaration* create_class_member_method_declaration(Attribute attribu
     return class_member_declar;
 }
 
-FieldMember* create_class_member_field(TypeSpecifier* type_specifier, Identifier* identifier_list) {
+FieldMember* create_class_member_field(TypeSpecifier* type_specifier,
+                                       Identifier*    identifier_list) {
+
     debug_log_with_yellow_coloar("\t");
 
     // 当前field 的类型只能是 bool int double string
@@ -1176,7 +1246,12 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier, Identifier
     return field_member;
 }
 
-MethodMember* create_class_member_method(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block) {
+MethodMember* create_class_member_method(FunctionType        type,
+                                         Identifier*         identifier,
+                                         Parameter*          parameter_list,
+                                         FunctionReturnList* return_list,
+                                         Block*              block) {
+
     debug_log_with_yellow_coloar("\t");
 
     MethodMember* method_member        = (MethodMember*)mem_alloc(get_front_mem_pool(), sizeof(MethodMember));

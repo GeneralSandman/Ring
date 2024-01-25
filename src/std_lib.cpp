@@ -125,7 +125,12 @@ void compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entr
     }
 }
 
-void register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count, int return_list_count) {
+void register_lib(Package_Executer*   package_executer,
+                  char*               func_name,
+                  RVM_NativeFuncProc* func_proc,
+                  int                 arg_count,
+                  int                 return_list_count) {
+
     for (unsigned int i = 0; i < package_executer->function_size; i++) {
         RVM_Function* function = &package_executer->function_list[i];
         if (function->type == RVM_FUNCTION_TYPE_NATIVE && 0 == strcmp(function->func_name, func_name)) {
@@ -206,7 +211,10 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
  * Function: println_bool
  * Type: @native
  */
-RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm,
+                                   unsigned int         arg_count,
+                                   RVM_Value*           args) {
+
     if (arg_count != 1) {
         ring_error_report("std_lib_fmt_println_bool only one arguement\n");
     }
