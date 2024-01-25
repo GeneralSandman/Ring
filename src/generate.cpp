@@ -2339,7 +2339,7 @@ void type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier* src) {
     if (src->kind == RING_BASIC_TYPE_ARRAY) {
         dst->dimension = src->dimension;
         if (src->sub != nullptr) {
-            dst->sub = (RVM_TypeSpecifier*)malloc(sizeof(RVM_TypeSpecifier));
+            dst->sub = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_TypeSpecifier));
             type_specifier_deep_copy(dst->sub, src->sub);
         }
     }

@@ -674,6 +674,7 @@ void fix_new_array_expression(Expression*         expression,
                               Block*              block,
                               Function*           func) {
 
+    fix_dimension_expression(new_array_expression->dimension_expression, block, func);
     fix_type_specfier(new_array_expression->type_specifier);
 }
 
