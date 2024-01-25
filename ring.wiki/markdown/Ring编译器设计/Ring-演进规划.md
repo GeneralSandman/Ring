@@ -297,12 +297,100 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
    1. 没有找到标准包
    2. import重复
 
+7. 变量
+   1. 全局变量的数量
+   2. 局部变量的数量
+
+-----------------------------
+
+
+## 类
+
+1. field类型
+   1. bool ✅ 
+   2. int ✅ 
+   3. double ✅ 
+   4. string ✅ 
+   5. array
+
+
+## 数组
+
+1. 数组 new 支持动态，e.g.  `array = new int[a,b,c];`
+
+bool  ✅ 
+int  ✅ 
+double  ✅ 
+string  ✅ 
+class-object  未测试⭕️
+
+
 -----------------------------
 
 ## 2024-01-22周
 
 
-### A. 重构vm 中 string class-object array
+### *A. 重构vm 中 string class-object array* ✅ 
+
+
+TODO: 重构之后，heap_size要重新验证， gc要重新验证
+
+
+### B. class 中支持存放array
+
+
+### C. 所有的没有处理的错误报错，都要添加上 ring_error_report ✅ 
+
+
+### D. 如果一个数组是三维，可以访问第二维，第二维其实是个数组 ✅ 
+
+```
+    global_bool_array_0 = new bool[a,b,c,d,e,f,g,h];
+
+    fmt::println_int(len(global_bool_array_0));
+    fmt::println_int(len(global_bool_array_0[0]));
+    fmt::println_int(len(global_bool_array_0[0,0]));
+	fmt::println_int(len(global_bool_array_0[0,0,0]));
+	fmt::println_int(len(global_bool_array_0[0,0,0,0]));
+	fmt::println_int(len(global_bool_array_0[0,0,0,0,0]));
+	fmt::println_int(len(global_bool_array_0[0,0,0,0,0,0]));
+	fmt::println_int(len(global_bool_array_0[0,0,0,0,0,0,0]));
+```
+
+
+### E. 要在语义检查中强制检查变量的类型
+
+变量的定义
+变量的赋值
+变量的使用
+
+函数参数的定义
+函数参数的传递
+
+函数返回值的定义
+函数返回值的return
+函数返回值的接收
+函数返回值的数量
+
+
+
+如何比对两个变量是否一致， TypeSpecifier, 递归比对。涉及到
+- 递归比对
+- field的比对
+- array中value的比对
+- 函数形参/实参的比对
+
+
+### F. 多维数组 的 typeof 和 ring dump
+
+1. typeof(多维数组)
+
+多维数组 为 bool/int/double/string的时候，没有问题 ✅ 
+
+FIXME: 当class-object的多维数组的时候，就有点问题了。
+
+
+2. ring dump 多维数组
 
 
 -----------------------------
@@ -331,7 +419,7 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
    2. 赋值 ✅ 
    3. 访问 ✅ 
    4. 通过 for 访问 ✅ 
-
+2. 多维数组 支持 class-object
 
 
 TODO: for-range引用到多维数组
