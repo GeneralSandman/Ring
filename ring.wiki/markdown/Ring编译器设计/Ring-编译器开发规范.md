@@ -30,7 +30,36 @@ Anyway, here goes:
 By following these guidelines, you can create a consistent and easily understandable codebase. Remember to communicate these conventions to your team members and enforce them during code reviews to maintain uniformity.
 
 
-### 1.4 Commenting
+### 1.4 Function Definition:
+
+When the function signature is too long, you need flod it.
+In this case, you need add a empty line at the beginning of block.
+This style is beautiful.
+e.g. The thired line is must empty.
+
+```
+void rvm_add_static_variable(Package_Executer*  executer,
+                             RVM_RuntimeStatic* runtime_static) {
+
+    debug_log_with_white_coloar("\t");
+
+    unsigned int size    = executer->global_variable_size;
+    runtime_static->size = size;
+    runtime_static->data = (RVM_Value*)mem_alloc(NULL_MEM_POOL, size * sizeof(RVM_Value));
+}
+```
+
+
+If you not flod function signature, not need add a empty line.
+
+```
+void ring_bytecode_dump(Package_Executer* executer, FILE* output) {
+    debug_log_with_darkgreen_coloar("\t");
+}
+```
+
+
+### 1.5 Commenting
 
 
 Comments are good, but there is also a danger of over-commenting. **NEVER** try to explain **HOW** your code works in a comment: it's much better to write the code so that the working is obvious, and it's a waste of time to explain badly written code.
@@ -55,7 +84,7 @@ It's also important to comment data, whether they are basic types or derived typ
 https://www.kernel.org/doc/html/latest/process/coding-style.html
 
 
-### 1.5 Using C++17 
+### 1.6 Using C++17 
 
 https://en.cppreference.com/w/cpp/17
 
