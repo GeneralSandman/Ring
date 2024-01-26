@@ -591,7 +591,7 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
         default: str = "unknow"; break;
         }
 
-        str = str + "[" + std::string(args->u.array_value->dimension - 1, ',') + "]";
+        str = str + "[!" + std::to_string(args->u.array_value->dimension) + "]";
         break;
     default:
         str = "unknow";

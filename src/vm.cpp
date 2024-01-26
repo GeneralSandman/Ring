@@ -239,25 +239,44 @@ std::string format_rvm_function(RVM_Function* function) {
 std::string format_rvm_type_specifier(RVM_TypeSpecifier* type_specifier) {
     assert(type_specifier != nullptr);
 
+    std::string str = "";
+
     switch (type_specifier->kind) {
     case RING_BASIC_TYPE_BOOL:
-        return "var bool";
+        str = "bool";
+        break;
     case RING_BASIC_TYPE_INT:
-        return "var int";
+        str = "int";
+        break;
     case RING_BASIC_TYPE_DOUBLE:
-        return "var double";
+        str = "double";
+        break;
     case RING_BASIC_TYPE_STRING:
-        return "var string";
+        str = "string";
+        break;
     case RING_BASIC_TYPE_ARRAY:
         // TODO: 目前还不支持多维数组, 所以说这样写是没有问题的
-        return format_rvm_type_specifier(type_specifier->sub) + "[]";
+        switch (type_specifier->sub->kind) {
+        case RING_BASIC_TYPE_BOOL: str = "bool"; break;
+        case RING_BASIC_TYPE_INT: str = "int"; break;
+        case RING_BASIC_TYPE_DOUBLE: str = "double"; break;
+        case RING_BASIC_TYPE_STRING: str = "string"; break;
+        case RING_BASIC_TYPE_CLASS: str = "class"; break;
+        default: str = "unknow"; break;
+        }
+        str = str + "[!" + std::to_string(type_specifier->dimension) + "]";
+        break;
     case RING_BASIC_TYPE_CLASS:
         // TODO: 这里要获取类的真实名称
-        return "var class";
+        str = "class";
+        break;
     default:
         // TODO:  后续还要处理 数组
-        return "var .unknow";
+        str = ".unknow";
         break;
     }
-    return "";
+
+    str = "var " + str;
+
+    return str;
 }
