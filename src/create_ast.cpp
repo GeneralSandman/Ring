@@ -280,14 +280,14 @@ Expression* create_expression_bool_literal(ExpressionType type, Ring_Bool value)
 }
 
 Expression* create_cast_expression(TypeSpecifier* cast_type, Expression* operand) {
-    Expression* expression                     = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
-    expression->line_number                    = package_unit_get_line_number();
-    expression->convert_type                   = nullptr; // fix in fix_ast
-    expression->type                           = EXPRESSION_TYPE_CAST;
-    expression->u.cast_expression              = (CastExpression*)mem_alloc(get_front_mem_pool(), sizeof(CastExpression));
-    expression->u.cast_expression->line_number = package_unit_get_line_number();
-    expression->u.cast_expression->type        = cast_type;
-    expression->u.cast_expression->operand     = operand;
+    Expression* expression                        = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
+    expression->line_number                       = package_unit_get_line_number();
+    expression->convert_type                      = nullptr; // fix in fix_ast
+    expression->type                              = EXPRESSION_TYPE_CAST;
+    expression->u.cast_expression                 = (CastExpression*)mem_alloc(get_front_mem_pool(), sizeof(CastExpression));
+    expression->u.cast_expression->line_number    = package_unit_get_line_number();
+    expression->u.cast_expression->type_specifier = cast_type;
+    expression->u.cast_expression->operand        = operand;
 
     return expression;
 }
@@ -963,7 +963,7 @@ Declaration* create_declaration(TypeSpecifier* type, char* identifier, Expressio
 
     Declaration* declaration    = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
     declaration->line_number    = package_unit_get_line_number();
-    declaration->type           = type;
+    declaration->type_specifier = type;
     declaration->identifier     = identifier;
     declaration->initializer    = initializer;
     declaration->is_const       = 0;
@@ -1056,12 +1056,12 @@ Statement* create_declaration_statement(TypeSpecifier* type,
 }
 
 Parameter* create_parameter(TypeSpecifier* type, char* identifier, bool is_variadic) {
-    Parameter* parameter   = (Parameter*)mem_alloc(get_front_mem_pool(), sizeof(Parameter));
-    parameter->line_number = package_unit_get_line_number();
-    parameter->type        = type;
-    parameter->is_variadic = is_variadic;
-    parameter->identifier  = identifier;
-    parameter->next        = nullptr;
+    Parameter* parameter      = (Parameter*)mem_alloc(get_front_mem_pool(), sizeof(Parameter));
+    parameter->line_number    = package_unit_get_line_number();
+    parameter->type_specifier = type;
+    parameter->is_variadic    = is_variadic;
+    parameter->identifier     = identifier;
+    parameter->next           = nullptr;
 
     return parameter;
 }
@@ -1223,11 +1223,12 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier,
     if (type_specifier->kind != RING_BASIC_TYPE_BOOL
         && type_specifier->kind != RING_BASIC_TYPE_INT
         && type_specifier->kind != RING_BASIC_TYPE_DOUBLE
-        && type_specifier->kind != RING_BASIC_TYPE_STRING) {
+        && type_specifier->kind != RING_BASIC_TYPE_STRING
+        && type_specifier->kind != RING_BASIC_TYPE_CLASS) {
         DEFINE_ERROR_REPORT_STR;
 
         snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "class field's type only support bool/int/double/string; E:%d.",
+                 "class field's type only support bool/int/double/string/class; E:%d.",
                  ERROR_INVALID_FIELD_IN_CLASS);
 
         ErrorReportContext context = {
@@ -1248,7 +1249,7 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier,
 
     FieldMember* field_member    = (FieldMember*)mem_alloc(get_front_mem_pool(), sizeof(FieldMember));
     field_member->line_number    = package_unit_get_line_number();
-    field_member->type           = type_specifier;
+    field_member->type_specifier = type_specifier;
     field_member->identifier     = identifier_list->identifier_name;
     field_member->index_of_class = 0;
 

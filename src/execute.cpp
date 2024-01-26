@@ -205,7 +205,7 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
     RVM_ClassDefinition* rvm_class_definition = nullptr;
 
     for (unsigned int i = 0; i < size; i++) {
-        type_specifier = global_variable_list[i].type;
+        type_specifier = global_variable_list[i].type_specifier;
 
         switch (type_specifier->kind) {
         case RING_BASIC_TYPE_BOOL:
@@ -801,6 +801,12 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_SET_STRING_OFFSET(rvm, -1, class_ob_value->field[oper_num].u.string_value);
             rvm->pc += 3;
             break;
+        case RVM_CODE_PUSH_FIELD_CLASS_OB:
+            class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            oper_num       = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_CLASS_OB_OFFSET(rvm, -1, class_ob_value->field[oper_num].u.class_ob_value);
+            rvm->pc += 3;
+            break;
 
         // arithmetic
         case RVM_CODE_ADD_INT:
@@ -1389,10 +1395,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         default:
-            ring_error_report("execute error: pc(%d)\n"
-                              "\tinvalid opcode (%d)\n",
-                              rvm->pc,
-                              opcode);
+            ring_error_report("execute error:invalid opcode(%d), pc(%d)\n",
+                              opcode, rvm->pc);
             break;
         }
     }

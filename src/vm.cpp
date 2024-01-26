@@ -83,7 +83,8 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_FIELD_INT, "push_field_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[int]"},
     {RVM_CODE_PUSH_FIELD_DOUBLE, "push_field_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[double]"},
     {RVM_CODE_PUSH_FIELD_STRING, "push_field_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[string]"},
-
+    {RVM_CODE_PUSH_FIELD_CLASS_OB, "push_field_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[string]"},
+    {RVM_CODE_PUSH_FIELD_ARRAY, "push_field_array", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[string]"},
 
     // arithmetic
     {RVM_CODE_ADD_INT, "add_int", OPCODE_OPERAND_TYPE_0BYTE, -1, 1, "", "[int,int]->[int]"},

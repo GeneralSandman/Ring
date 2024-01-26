@@ -223,7 +223,7 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
         pos->next = nullptr;
 
         // fix type specifier
-        fix_type_specfier(pos->type);
+        fix_type_specfier(pos->type_specifier);
 
 
         if (block != nullptr) {
@@ -429,7 +429,7 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
             ring_compile_error_report(&context);
         }
         expression->u.declaration = declaration;
-        return declaration->type;
+        return declaration->type_specifier;
         break;
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
@@ -580,11 +580,16 @@ void fix_class_definition(ClassDefinition* class_definition) {
     for (ClassMemberDeclaration* pos = class_definition->member; pos != nullptr; pos = pos->next) {
         if (pos->type == MEMBER_FIELD) {
             pos->u.field->index_of_class = field_index++;
+            fix_class_field(class_definition, pos->u.field);
         } else if (pos->type == MEMBER_METHOD) {
             pos->u.method->index_of_class = method_index++;
             fix_class_method(class_definition, pos->u.method);
         }
     }
+}
+
+void fix_class_field(ClassDefinition* class_definition, FieldMember* field) {
+    fix_type_specfier(field->type_specifier);
 }
 
 void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
@@ -597,7 +602,7 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
 
     Declaration*   self_declaration  = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
     self_declaration->line_number    = method->start_line_number;
-    self_declaration->type           = type_specifier;
+    self_declaration->type_specifier = type_specifier;
     self_declaration->identifier     = (char*)"self";
     self_declaration->initializer    = nullptr;
     self_declaration->is_const       = false;
@@ -652,17 +657,17 @@ void fix_array_index_expression(Expression*           expression,
      * students[0] is a three-dimension array.
      * students[0,0,0] is a int value.
      */
-    if (index_expression->dimension < declaration->type->dimension) {
-        type->kind = declaration->type->kind;
-    } else if (index_expression->dimension == declaration->type->dimension) {
-        type->kind = declaration->type->sub->kind;
+    if (index_expression->dimension < declaration->type_specifier->dimension) {
+        type->kind = declaration->type_specifier->kind;
+    } else if (index_expression->dimension == declaration->type_specifier->dimension) {
+        type->kind = declaration->type_specifier->sub->kind;
     } else {
         ring_error_report("array index access error; E:%d.\n", ERROR_ARRAY_DIMENSION_INVALID);
     }
 
 
     if (type->kind == RING_BASIC_TYPE_CLASS) {
-        type->u.class_type = declaration->type->sub->u.class_type;
+        type->u.class_type = declaration->type_specifier->sub->u.class_type;
     }
     fix_type_specfier(type);
 
@@ -739,20 +744,21 @@ void fix_member_expression(Expression*       expression,
     // 1. find class definition by object.
     class_definition = object_expression->convert_type->u.class_type->class_definition;
     if (class_definition == nullptr) {
-        ring_error_report("fix_member_expression error\n");
+        ring_error_report("fix_member_expression error, class_definition is null\n");
     }
 
 
     // 2. find member declaration by member identifier.
     member_declaration = search_class_member(class_definition, member_identifier);
     if (member_declaration == nullptr) {
-        ring_error_report("fix_member_expression error\n");
+        ring_error_report("fix_member_expression error, member_declaration is null, member_identifier:%s\n",
+                          member_identifier);
     }
     member_expression->member_declaration = member_declaration;
 
 
     // expression 最终的类型取决于field-member 的类型
-    expression->convert_type              = member_declaration->u.field->type;
+    expression->convert_type              = member_declaration->u.field->type_specifier;
     fix_class_member_expression(member_expression, member_expression->object_expression, member_expression->member_identifier);
 }
 
@@ -822,7 +828,7 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
     for (; pos; pos = pos->next) {
         Declaration* declaration    = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
         declaration->line_number    = pos->line_number;
-        declaration->type           = pos->type;
+        declaration->type_specifier = pos->type_specifier;
         declaration->identifier     = pos->identifier;
         declaration->initializer    = nullptr;
         declaration->is_const       = 0;

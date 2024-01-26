@@ -1122,6 +1122,10 @@ member_expression
 
         $$ = create_expression_from_method_call(create_method_call_expression($1, $3, $5));
     }
+    | member_expression TOKEN_DOT identifier
+    {
+        $$ = create_member_expression($1, $3);
+    }
     ;
 
 basic_value_literal_expression

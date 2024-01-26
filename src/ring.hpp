@@ -1,3 +1,4 @@
+
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
@@ -483,7 +484,7 @@ struct RVM_ConstantPool {
 
 struct RVM_Variable {
     char*              identifier;
-    RVM_TypeSpecifier* type;
+    RVM_TypeSpecifier* type_specifier;
 };
 
 
@@ -719,6 +720,8 @@ typedef enum {
     RVM_CODE_PUSH_FIELD_INT,
     RVM_CODE_PUSH_FIELD_DOUBLE,
     RVM_CODE_PUSH_FIELD_STRING,
+    RVM_CODE_PUSH_FIELD_CLASS_OB,
+    RVM_CODE_PUSH_FIELD_ARRAY,
 
     // arithmetic
     RVM_CODE_ADD_INT,
@@ -1069,7 +1072,7 @@ struct FieldMember {
     unsigned int   line_number;
 
     unsigned int   index_of_class; // fix it in fix_ast
-    TypeSpecifier* type;
+    TypeSpecifier* type_specifier;
     char*          identifier;
 };
 
@@ -1230,7 +1233,7 @@ typedef enum {
 struct CastExpression {
     unsigned int   line_number;
 
-    TypeSpecifier* type;
+    TypeSpecifier* type_specifier;
     Expression*    operand;
 };
 
@@ -1267,7 +1270,7 @@ struct MemberExpression {
  *
  * [1,2,3] 只能用这种形式new数组
  *
- * 要在语义分析的层面做细致的检测
+ * TODO: 要在语义分析的层面做细致的检测
  */
 struct DimensionExpression {
     unsigned int            line_number;
@@ -1379,7 +1382,7 @@ struct ArgumentList {
 struct Parameter {
     unsigned int   line_number;
 
-    TypeSpecifier* type;
+    TypeSpecifier* type_specifier;
     bool           is_variadic; // variadic parameter function can be called with any number of trailing arguments.
     char*          identifier;
     Parameter*     next;
@@ -1388,7 +1391,7 @@ struct Parameter {
 struct Declaration {
     unsigned int   line_number;
 
-    TypeSpecifier* type;
+    TypeSpecifier* type_specifier;
     char*          identifier;
     Expression*    initializer;
     int            is_const;
@@ -2081,6 +2084,7 @@ void                    fix_binary_expression(Expression* expression, Block* blo
 void                    fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
 void                    fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func);
 void                    fix_class_definition(ClassDefinition* class_definition);
+void                    fix_class_field(ClassDefinition* class_definition, FieldMember* field);
 void                    fix_class_method(ClassDefinition* class_definition, MethodMember* method);
 
 
