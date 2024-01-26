@@ -6,7 +6,7 @@ import {
 }
 
 global {
-    var int[,,,,,,,] global_int_array_0;
+    var int[!8] global_int_array_0;
 }
 
 @main
