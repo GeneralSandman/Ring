@@ -1,12 +1,19 @@
 #!/bin/bash
 
-# 需要向下兼容，测试之前的所有测试用例
-#
+
+# 测试的轮数, 用于多次执行
+TEST_LOOP_NUM=1
+
+not_test_num=0
+succ_num=0
+fail_num=0
+all_num=0
+
+
 
 # 测试的可执行文件
 TEST_RING_BIN="./bin/ring"
-
-# 通过第1个参数指定 TEST_RING_BIN
+# 可通过第1个参数指定 TEST_RING_BIN
 if [[ "$1" != "" ]]; then
     TEST_RING_BIN="$1"
 fi
@@ -68,22 +75,25 @@ NOT_TEST_FILES=(
 # 测试的结果文件, 主要用于存放本次测试的失败结果
 TEST_RESULT="./automated-testing.sh.result"
 
+
+
 # 输出ring-测试用例表
 # 是否输出测试用例表: 0/1
-IS_EXPORT_TEST_DETAIL_SUMMARY=0 
+IS_EXPORT_TEST_DETAIL_SUMMARY=0
 # 输出测试用例表文件
 TEST_DETAIL_SUMMARY="./test/ring-测试用例表.md"
+# 在测试文件中，可以单独写几行用于描述测试的细节
+# 用`// TestDetail:` 开始的行表示
+TEST_DETAIL_PREFIX="^// TestDetail:"
 
-# 测试的轮数, 用于多次执行
-TEST_LOOP_NUM=1
 
-not_test_num=0
-succ_num=0
-fail_num=0
-all_num=0
+
 
 # 去除颜色控制字符
 STRIP_COLOR=sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g'
+
+
+
 
 isNotTestFile(){
     for i in ${NOT_TEST_FILES[@]} ; do
