@@ -2300,9 +2300,10 @@ ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm,
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
     RVM_ClassObject* src_class_object = &(array->u.class_ob_array[index]);
-    RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
+    // RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
 
-    *value                            = dst_class_object;
+    // TIP: this is shallow copy of class-object.
+    *value                            = src_class_object;
     return ERROR_CODE_SUCCESS;
 }
 
