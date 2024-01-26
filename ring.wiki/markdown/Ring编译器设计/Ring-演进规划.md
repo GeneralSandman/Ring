@@ -214,16 +214,17 @@ www.runoob.com
 ## 测试集
 
 ```
-2024-01-17
+2024-01-25
 
 [Result]:
-Pass/All = 243/244
+Pass/All = 251/253
 NotTest  = 4
-Fail     = 1
-Usetime  = 12S
+Fail     = 2
+Usetime  = 15S
 
 [NotPassCase]source_code_file                                             err_nums                                                    
-./test/064-std-package-vm/std-vm-000.ring                    1      
+./test/064-std-package-vm/std-vm-000.ring                    1                                                           
+./test/062-std-package-reflect/reflect-000.ring              1   
 
 ```
 
@@ -311,7 +312,7 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
    2. int ✅ 
    3. double ✅ 
    4. string ✅ 
-   5. array
+   5. class (class的嵌套定义与引用)
 
 
 ## 数组
@@ -322,8 +323,16 @@ bool  ✅
 int  ✅ 
 double  ✅ 
 string  ✅ 
-class-object  未测试⭕️
+class-object  未测试 ⭕️
 
+2. 多维数组的语法糖 var int[!8]; 表示八维数组 ✅ 
+   1. 创建多维数组的时候，不允许 !8
+
+
+3. FIXME: jobs[0].Running = false;  ✅ 
+   这里有一个隐喻，就是jobs[0] 取出来应该得是个指针，
+   不能是深度copy
+   不然继续访问 jobs[0].Running 还是老的Value。
 
 -----------------------------
 
@@ -391,6 +400,15 @@ FIXME: 当class-object的多维数组的时候，就有点问题了。
 
 
 2. ring dump 多维数组
+
+
+### G. class的嵌套定义与引用
+
+在语法上要支持 job_0.Runner.Valid 多个member的调用
+
+1. 支持递归访问field `job_0.Runner.Valid` ✅
+2. 支持递归访问method `job_0.Runner.Doit()`  代测试⭕️
+3. 如何检测class的递归定义（所以得引入指针的概念）
 
 
 -----------------------------
