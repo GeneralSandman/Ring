@@ -851,6 +851,15 @@ DimensionExpression* create_dimension_expression(SubDimensionExpression* dimensi
     return dim;
 }
 
+DimensionExpression* create_dimension_expression_with_exclam(char* dimension_literal) {
+    DimensionExpression* dim = (DimensionExpression*)mem_alloc(get_front_mem_pool(), sizeof(DimensionExpression));
+    dim->line_number         = package_unit_get_line_number();
+    dim->dimension           = atoi(dimension_literal);
+    dim->dimension_list      = nullptr;
+
+    return dim;
+}
+
 SubDimensionExpression* create_sub_dimension_expression(Expression* num_expression) {
     SubDimensionExpression* dim = (SubDimensionExpression*)mem_alloc(get_front_mem_pool(), sizeof(SubDimensionExpression));
     dim->line_number            = package_unit_get_line_number();

@@ -1254,15 +1254,30 @@ struct MemberExpression {
  */
 
 
+/*
+ * DimensionExpression
+ *
+ * Dimension是有语法糖的，
+ *
+ * [,,] 是一个三维数组, 可以用来指示变量的类型
+ * [!3] 是一个三维数组, 可以用来指示变量的类型
+ *
+ * [,,] [!3] 不能用来 new 数组
+ *
+ *
+ * [1,2,3] 只能用这种形式new数组
+ *
+ * 要在语义分析的层面做细致的检测
+ */
 struct DimensionExpression {
-    unsigned int line_number;
-    // TODO: 这里想要加一个语法糖, [,,,] 是一个三维数组  [!3]应该也是一个三维数组
-    unsigned int            dimension;
+    unsigned int            line_number;
+
+    unsigned char           dimension;
     SubDimensionExpression* dimension_list;
 };
 struct SubDimensionExpression {
     unsigned int            line_number;
-    unsigned int            index;
+    unsigned char           index;
     Expression*             num_expression;
     SubDimensionExpression* next;
 
@@ -1986,6 +2001,7 @@ Block*                        start_new_block();
 Block*                        finish_block(Block* block, Statement* statement_list);
 
 DimensionExpression*          create_dimension_expression(SubDimensionExpression* dimension_list);
+DimensionExpression*          create_dimension_expression_with_exclam(char* dimension_literal);
 SubDimensionExpression*       create_sub_dimension_expression(Expression* num_expression);
 SubDimensionExpression*       sub_dimension_expression_list_add_item(SubDimensionExpression* list, SubDimensionExpression* item);
 

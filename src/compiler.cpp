@@ -658,6 +658,7 @@ std::string trans_flex_token_to_human_char(std::string str) {
         {"`::`", "TOKEN_2COLON"},
         {"`;`", "TOKEN_SEMICOLON"},
         {"`?`", "TOKEN_QUESTION_MARK"},
+        {"`!`", "TOKEN_EXCLAM_MARK"},
         {"`=`", "TOKEN_ASSIGN"},
         {"`#`", "TOKEN_NUM_SIGN"},
     };

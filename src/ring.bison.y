@@ -157,6 +157,7 @@ int yylex();
 %token TOKEN_2COLON
 %token TOKEN_SEMICOLON 
 %token TOKEN_QUESTION_MARK
+%token TOKEN_EXCLAM_MARK
 %token TOKEN_ASSIGN
 %token TOKEN_NUM_SIGN
 
@@ -1036,6 +1037,10 @@ dimension_expression
     {
         debug_log_with_green_coloar("[RULE::dimension_expression]");
         $$ = create_dimension_expression($2);
+    }
+    | TOKEN_LB TOKEN_EXCLAM_MARK INT_LITERAL TOKEN_RB
+    {
+        $$ = create_dimension_expression_with_exclam($3);
     }
     ;
 

@@ -106,6 +106,7 @@ extern "C" int yywrap(){
 <INITIAL>"::"           { package_unit_update_line_content(yytext); return TOKEN_2COLON;         }
 <INITIAL>";"            { package_unit_update_line_content(yytext); return TOKEN_SEMICOLON;      }
 <INITIAL>"?"            { package_unit_update_line_content(yytext); return TOKEN_QUESTION_MARK;  }
+<INITIAL>"!"            { package_unit_update_line_content(yytext); return TOKEN_EXCLAM_MARK;    }
 <INITIAL>"="            { package_unit_update_line_content(yytext); return TOKEN_ASSIGN;         }
 <INITIAL>"#"            { package_unit_update_line_content(yytext); return TOKEN_NUM_SIGN;       }
 
