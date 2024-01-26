@@ -1,0 +1,73 @@
+test cast 1 ------------------------
+false
+0
+0.000000
+
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+false
+0
+0.000000
+
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+false
+0
+0.000000
+
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+false
+0
+0.000000
+
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+false
+0
+0.000000
+
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test cast 2 ------------------------
+
+test cast global_job_array_0[0] ------------------------
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test cast global_job_array_0[1] ------------------------
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test cast global_job_array_0[2] ------------------------
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test cast global_job_array_0[3] ------------------------
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test cast global_job_array_0[4] ------------------------
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
