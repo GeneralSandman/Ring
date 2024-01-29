@@ -914,7 +914,7 @@ TypeSpecifier* create_type_specifier_array(TypeSpecifier* type, DimensionExpress
     type_specifier->sub           = type;
 
     // error-report ERROR_ARRAY_DIMENSION_INVALID
-    if (type_specifier->dimension > 8) {
+    if (type_specifier->dimension > MAX_DIMENSION_NUM) {
         DEFINE_ERROR_REPORT_STR;
 
         snprintf(compile_err_buf, sizeof(compile_err_buf),

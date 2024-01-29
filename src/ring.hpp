@@ -1698,6 +1698,8 @@ struct SyntaxInfo {
 struct BinaryChunk {
 };
 
+#define MAX_DIMENSION_NUM (8)
+
 /*
  * 默认初始化 64个 bucket
  * 每个bucket 有 1000 个 block
