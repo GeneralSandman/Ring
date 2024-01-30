@@ -148,7 +148,7 @@ void register_lib(Package_Executer*   package_executer,
  * Type: @native
  */
 RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_log_with_white_coloar("\t");
+    debug_exec_info_with_white("\t");
 
     RVM_Value ret;
 

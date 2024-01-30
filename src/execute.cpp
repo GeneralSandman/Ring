@@ -185,7 +185,7 @@ void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm,
 void rvm_add_static_variable(Package_Executer*  executer,
                              RVM_RuntimeStatic* runtime_static) {
 
-    debug_log_with_white_coloar("\t");
+    debug_exec_info_with_white("\t");
 
     unsigned int size    = executer->global_variable_size;
     runtime_static->size = size;
@@ -218,7 +218,7 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
                               Package_Executer*    executer,
                               RVM_RuntimeStatic*   runtime_static) {
 
-    debug_log_with_white_coloar("\t");
+    debug_exec_info_with_white("\t");
 
     unsigned int         size                 = executer->global_variable_size;
     RVM_Variable*        global_variable_list = executer->global_variable_list;
@@ -318,7 +318,7 @@ RVM_ClassObject* new_class_object(Ring_VirtualMachine* rvm,
  *
  */
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
-    debug_log_with_white_coloar("\t");
+    debug_exec_info_with_white("\t");
 
     RVM_Byte*            code_list              = rvm->executer->code_list;
     unsigned int         code_size              = rvm->executer->code_size;
@@ -1395,7 +1395,7 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
                             RVM_Function*        function,
                             unsigned int         argument_list_size) {
 
-    debug_log_with_white_coloar("\t");
+    debug_exec_info_with_white("\t");
 
     RVM_Value           ret;
 
@@ -1455,7 +1455,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
                             RVM_Byte** code_list, unsigned int* code_size,
                             unsigned int* pc,
                             unsigned int* caller_stack_base) {
-    debug_log_with_white_coloar("\t");
+    debug_exec_info_with_white("\t");
 
     // FIXME:
     /* unsigned int arguement_count = 0; */
@@ -1494,7 +1494,7 @@ void derive_function_return(Ring_VirtualMachine* rvm,
                             unsigned int* pc,
                             unsigned int* caller_stack_base,
                             unsigned int  return_list_size) {
-    debug_log_with_white_coloar("\t");
+    debug_exec_info_with_white("\t");
 }
 
 /*
@@ -1512,7 +1512,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
                             unsigned int* pc,
                             unsigned int* caller_stack_base,
                             unsigned int  return_value_list_size) {
-    debug_log_with_white_coloar("\t");
+    debug_exec_info_with_white("\t");
 
     unsigned int old_return_value_list_index;
 
@@ -1606,7 +1606,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                          RVM_ClassObject*     callee_object,
                                          RVM_Function*        function) {
 
-    debug_log_with_white_coloar("\t");
+    debug_exec_info_with_white("\t");
 
     unsigned int arguement_list_size   = function->parameter_size;
     unsigned int arguement_list_index  = rvm->runtime_stack->top_index - CALL_INFO_SIZE_V2 - arguement_list_size;
@@ -2673,7 +2673,7 @@ void debug_rvm(Ring_VirtualMachine* rvm,
                unsigned int         pc,
                unsigned int         caller_stack_base) {
 
-    debug_log_with_white_coloar("\t");
+    debug_exec_info_with_white("\t");
 
     if (rvm->debug_config == nullptr) {
         rvm->debug_config             = (RVM_DebugConfig*)mem_alloc(rvm->meta_pool, sizeof(RVM_DebugConfig));

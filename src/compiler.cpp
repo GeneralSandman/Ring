@@ -106,7 +106,7 @@ Package* package_create(CompilerEntry* compiler_entry,
                         char*          package_path) {
 
     assert(compiler_entry != nullptr);
-    debug_log_with_yellow_coloar("\t package[%s] create", package_name);
+    debug_ast_info_with_yellow("\t package[%s] create", package_name);
 
     Package* package                 = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
 
@@ -140,7 +140,7 @@ Package* package_create_input_file(CompilerEntry* compiler_entry,
                                    char*          input_main_file) {
 
     assert(compiler_entry != nullptr);
-    debug_log_with_yellow_coloar("\t package[%s] create", package_name);
+    debug_ast_info_with_yellow("\t package[%s] create", package_name);
 
     Package* package                 = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
 
@@ -175,10 +175,10 @@ void package_compile(Package* package) {
     CompilerEntry* compiler_entry = package->compiler_entry;
 
     if (nullptr != search_package(compiler_entry, package->package_name)) {
-        debug_log_with_yellow_coloar("\t package[%s] already compiled", package->package_name);
+        debug_ast_info_with_yellow("\t package[%s] already compiled", package->package_name);
         return;
     }
-    debug_log_with_yellow_coloar("\t package[%s] start compile...", package->package_name);
+    debug_ast_info_with_yellow("\t package[%s] start compile...", package->package_name);
 
     package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
     compiler_entry->package_list.push_back(package);
@@ -313,7 +313,7 @@ void package_unit_compile(PackageUnit* package_unit) {
     }
 #endif
 
-    debug_log_with_yellow_coloar("\t package_unit COMPLIE SUCCESS\n\n");
+    debug_ast_info_with_yellow("\t package_unit COMPLIE SUCCESS\n\n");
 }
 
 void package_unit_dump(PackageUnit* package_unit) {

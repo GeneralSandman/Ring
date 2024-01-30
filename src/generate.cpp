@@ -85,7 +85,7 @@ void package_executer_dump(Package_Executer* package_executer) {
 
 // 生成 RVM 虚拟机代码
 void ring_generate_vm_code(Package* package, Package_Executer* package_executer) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 
     add_global_variable(package, package_executer);
     add_functions(package, package_executer);
@@ -101,7 +101,7 @@ void ring_generate_vm_code(Package* package, Package_Executer* package_executer)
 void ring_generate_vm_code(CompilerEntry* compiler_entry,
                            ExecuterEntry* executer_entry) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 
     Package*          main_package     = compiler_entry->main_package;
     Package_Executer* package_executer = executer_entry->main_package_executer;
@@ -113,7 +113,7 @@ void ring_generate_vm_code(CompilerEntry* compiler_entry,
     //     // FIXME: find duplicate
     //     for (Package_Executer* package_executer : executer_entry->package_executer_list) {
     //         if (0 == strcmp(package_executer->package_name, package->package_name)) {
-    //             debug_log_with_darkgreen_coloar("\tpackage executer[%s] already register", package->package_name);
+    //             debug_generate_info_with_darkgreen("\tpackage executer[%s] already register", package->package_name);
 
     //             continue;
     //         }
@@ -135,7 +135,7 @@ void ring_generate_vm_code(CompilerEntry* compiler_entry,
  * 2. executer->global_variable_list   is array.
  */
 void add_global_variable(Package* package, Package_Executer* executer) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     // FIXME: 在 Compiler 中大部分是链表：因为在编译的时候不确定存储空间
     // 在 Executer 中 大部分是数组，因为编译完成，存储空间的数量都已经确认了。
     if (package->global_declaration_list.empty()) {
@@ -161,7 +161,7 @@ void add_global_variable(Package* package, Package_Executer* executer) {
 
 // 添加函数定义
 void add_functions(Package* package, Package_Executer* executer) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 
     executer->function_size = package->function_list.size();
     executer->function_list = (RVM_Function*)mem_alloc(NULL_MEM_POOL,
@@ -182,7 +182,7 @@ void add_functions(Package* package, Package_Executer* executer) {
 }
 
 void add_classes(Package* package, Package_Executer* executer) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 
     executer->class_size = package->class_definition_list.size();
     executer->class_list = (RVM_ClassDefinition*)mem_alloc(NULL_MEM_POOL,
@@ -208,7 +208,7 @@ void add_classes(Package* package, Package_Executer* executer) {
 void class_def_deep_copy(Package_Executer*    executer,
                          RVM_ClassDefinition* dst,
                          ClassDefinition*     src) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 
     dst->source_file            = src->source_file;
     dst->start_line_number      = src->start_line_number;
@@ -302,7 +302,7 @@ void class_def_deep_copy(Package_Executer*    executer,
 }
 
 void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 
     dst->source_file       = src->source_file;
     dst->start_line_number = src->start_line_number;
@@ -358,7 +358,7 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
 
 
 void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 
     dst->identifier                        = src->identifier;
     dst->rvm_function                      = (RVM_Function*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_Function));
@@ -415,7 +415,7 @@ void copy_field(Package_Executer* executer, RVM_Field* dst, FieldMember* src) {
 }
 
 void add_top_level_code(Package* package, Package_Executer* executer) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 
     // FIXME: executer->main_func_index is unsigned int
     if (executer->main_func_index != -1) {
@@ -451,7 +451,7 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
 void generate_code_from_function_definition(Package_Executer* executer,
                                             RVM_Function* dst, Function* src) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (src->block == nullptr) {
         return;
     }
@@ -478,7 +478,7 @@ void generate_code_from_function_definition(Package_Executer* executer,
 void generate_code_from_method_definition(Package_Executer* executer,
                                           RVM_Method* dst, MethodMember* src) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
     generate_vmcode_from_statement_list(executer,
@@ -496,14 +496,14 @@ void generate_code_from_method_definition(Package_Executer* executer,
 }
 
 void vm_executer_dump(Package_Executer* executer) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     // CLEAR_SCREEN;
     ring_vm_constantpool_dump(executer);
     ring_vm_code_dump(nullptr, executer->code_list, executer->code_size, 0, 60, 1);
 }
 
 RVM_OpcodeBuffer* new_opcode_buffer() {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     RVM_OpcodeBuffer* buffer = (RVM_OpcodeBuffer*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_OpcodeBuffer));
 
     buffer->code_list        = nullptr;
@@ -523,7 +523,7 @@ void generate_vmcode_from_block(Package_Executer* executer,
     if (block == nullptr) {
         return;
     }
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     generate_vmcode_from_statement_list(executer, block, block->statement_list, opcode_buffer);
 }
 
@@ -532,7 +532,7 @@ void generate_vmcode_from_statement_list(Package_Executer* executer,
                                          Statement*        statement_list,
                                          RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     for (Statement* statement = statement_list; statement != nullptr; statement = statement->next) {
         switch (statement->type) {
         case STATEMENT_TYPE_EXPRESSION:
@@ -584,7 +584,7 @@ void generate_vmcode_from_if_statement(Package_Executer* executer,
                                        IfStatement*      if_statement,
                                        RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (if_statement == nullptr) {
         return;
     }
@@ -635,7 +635,7 @@ void generate_vmcode_from_for_statement(Package_Executer* executer,
                                         ForStatement*     for_statement,
                                         RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (for_statement == nullptr) {
         return;
     }
@@ -654,7 +654,7 @@ void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
                                                 ForStatement*     for_statement,
                                                 RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     assert(for_statement != nullptr);
     assert(for_statement->type == FOR_STATEMENT_TYPE_TERNARY);
     assert(for_statement->u.ternary_statement != nullptr);
@@ -709,7 +709,7 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
                                               ForStatement*     for_statement,
                                               RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     assert(for_statement != nullptr);
     assert(for_statement->type == FOR_STATEMENT_TYPE_RANGE);
     assert(for_statement->u.range_statement != nullptr);
@@ -807,7 +807,7 @@ void generate_vmcode_from_dofor_statement(Package_Executer* executer,
                                           DoForStatement*   dofor_statement,
                                           RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (dofor_statement == nullptr) {
         return;
     }
@@ -862,7 +862,7 @@ void generate_vmcode_from_break_statement(Package_Executer* executer,
                                           BreakStatement*   break_statement,
                                           RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (break_statement == nullptr) {
         return;
     }
@@ -897,7 +897,7 @@ void generate_vmcode_from_continue_statement(Package_Executer*  executer,
                                              ContinueStatement* continue_statement,
                                              RVM_OpcodeBuffer*  opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (continue_statement == nullptr) {
         return;
     }
@@ -926,7 +926,7 @@ void generate_vmcode_from_return_statement(Package_Executer* executer,
                                            ReturnStatement*  return_statement,
                                            RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (return_statement == nullptr) {
         return;
     }
@@ -946,7 +946,7 @@ void generate_vmcode_from_initializer(Package_Executer* executer,
                                       Declaration*      declaration,
                                       RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (declaration == nullptr) {
         return;
     }
@@ -969,7 +969,7 @@ void generate_vmcode_from_initializer(Package_Executer* executer,
 }
 
 void generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* block, JumpTagStatement* jump_tag_statement, RVM_OpcodeBuffer* opcode_buffer) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (jump_tag_statement == nullptr) {
         return;
     }
@@ -980,7 +980,7 @@ void generate_vmcode_from_expression(Package_Executer* executer,
                                      RVM_OpcodeBuffer* opcode_buffer,
                                      int               need_duplicate) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
         return;
     }
@@ -1112,7 +1112,7 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer,
                                             AssignExpression* expression,
                                             RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     assert(expression != nullptr);
 
     // TODO:
@@ -1182,7 +1182,7 @@ void generate_pop_to_leftvalue_reverse(Package_Executer* executer,
                                        Expression*       expression,
                                        RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
         return;
     }
@@ -1214,7 +1214,7 @@ void generate_pop_to_leftvalue_identifier(Package_Executer*     executer,
                                           IdentifierExpression* identifier_expression,
                                           RVM_OpcodeBuffer*     opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     assert(identifier_expression != nullptr);
 
     Declaration* declaration    = identifier_expression->u.declaration;
@@ -1236,7 +1236,7 @@ void generate_pop_to_leftvalue_member(Package_Executer* executer,
                                       MemberExpression* member_expression,
                                       RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (member_expression == nullptr) {
         return;
     }
@@ -1256,7 +1256,7 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
                                            ArrayIndexExpression* array_index_expression,
                                            RVM_OpcodeBuffer*     opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     assert(array_index_expression != nullptr);
     assert(array_index_expression->array_expression != nullptr);
     assert(array_index_expression->index_expression != nullptr);
@@ -1315,7 +1315,7 @@ void generate_vmcode_from_logical_expression(Package_Executer* executer,
                                              RVM_OpcodeBuffer* opcode_buffer,
                                              RVM_Opcode        opcode) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
         return;
     }
@@ -1354,7 +1354,7 @@ void generate_vmcode_from_binary_expression(Package_Executer* executer,
                                             RVM_OpcodeBuffer* opcode_buffer,
                                             RVM_Opcode        opcode) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
         return;
     }
@@ -1395,7 +1395,7 @@ void generate_vmcode_from_increase_decrease_expression(Package_Executer* execute
                                                        RVM_OpcodeBuffer* opcode_buffer,
                                                        int               need_duplicate) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
         return;
     }
@@ -1441,7 +1441,7 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer,
                                                    RVM_OpcodeBuffer* opcode_buffer,
                                                    RVM_Opcode        opcode) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
         return;
     }
@@ -1496,7 +1496,7 @@ void generate_vmcode_from_unitary_not_expression(Package_Executer* executer,
                                                  RVM_OpcodeBuffer* opcode_buffer,
                                                  RVM_Opcode        opcode) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
         return;
     }
@@ -1510,7 +1510,7 @@ void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
                                                 IdentifierExpression* identifier_expression,
                                                 RVM_OpcodeBuffer*     opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (identifier_expression == nullptr) {
         return;
     }
@@ -1546,7 +1546,7 @@ void generate_vmcode_from_bool_expression(Package_Executer* executer,
                                           Expression*       expression,
                                           RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
         return;
     }
@@ -1561,7 +1561,7 @@ void generate_vmcode_from_int_expression(Package_Executer* executer,
                                          Expression*       expression,
                                          RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
         return;
     }
@@ -1581,7 +1581,7 @@ void generate_vmcode_from_double_expression(Package_Executer* executer,
                                             Expression*       expression,
                                             RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
         return;
     }
@@ -1595,7 +1595,7 @@ void generate_vmcode_from_string_expression(Package_Executer* executer,
                                             Expression*       expression,
                                             RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     // 都放在常量区
     assert(expression->type == EXPRESSION_TYPE_LITERAL_STRING);
     int constant_index = constant_pool_add_string(executer, expression->u.string_literal);
@@ -1606,7 +1606,7 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
                                                    FunctionCallExpression* function_call_expression,
                                                    RVM_OpcodeBuffer*       opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (function_call_expression == nullptr) {
         return;
     }
@@ -1731,7 +1731,7 @@ void generate_vmcode_from_method_call_expression(Package_Executer*     executer,
                                                  MethodCallExpression* method_call_expression,
                                                  RVM_OpcodeBuffer*     opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (method_call_expression == nullptr) {
         return;
     }
@@ -1759,7 +1759,7 @@ void generate_vmcode_from_cast_expression(Package_Executer* executer,
                                           CastExpression*   cast_expression,
                                           RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (cast_expression == nullptr) {
         return;
     }
@@ -1812,7 +1812,7 @@ void generate_vmcode_from_member_expression(Package_Executer* executer,
                                             MemberExpression* member_expression,
                                             RVM_OpcodeBuffer* opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (member_expression == nullptr) {
         return;
     }
@@ -1831,7 +1831,7 @@ void generate_vmcode_from_ternary_condition_expression(Package_Executer*  execut
                                                        TernaryExpression* ternary_expression,
                                                        RVM_OpcodeBuffer*  opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     assert(ternary_expression != nullptr);
 
     unsigned int if_false_jump_label = 0;
@@ -1860,7 +1860,7 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
                                                NewArrayExpression* new_array_expression,
                                                RVM_OpcodeBuffer*   opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     assert(new_array_expression != nullptr);
     assert(new_array_expression->dimension_expression != nullptr);
 
@@ -1900,7 +1900,7 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer*     
                                                           ClassObjectLiteralExpression* literal_expression,
                                                           RVM_OpcodeBuffer*             opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     assert(literal_expression != nullptr);
     assert(literal_expression->type_specifier != nullptr);
     assert(literal_expression->field_init_expression_list != nullptr);
@@ -1954,7 +1954,7 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
                                                    ArrayLiteralExpression* array_literal_expression,
                                                    RVM_OpcodeBuffer*       opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     assert(array_literal_expression != nullptr);
     assert(array_literal_expression->expression_list != nullptr);
 
@@ -1982,7 +1982,7 @@ void generate_vmcode_from_array_index_expression(Package_Executer*     executer,
                                                  ArrayIndexExpression* array_index_expression,
                                                  RVM_OpcodeBuffer*     opcode_buffer) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     assert(array_index_expression != nullptr);
     assert(array_index_expression->array_expression != nullptr);
     assert(array_index_expression->index_expression != nullptr);
@@ -2044,7 +2044,7 @@ void generate_vmcode(Package_Executer* executer,
                      unsigned int      oper_num,
                      unsigned int      line_number) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     if (opcode_buffer->code_capacity == opcode_buffer->code_size) {
         size_t old_alloc_size = opcode_buffer->code_capacity * sizeof(RVM_Byte);
         opcode_buffer->code_capacity += 3000;
@@ -2085,7 +2085,7 @@ void generate_vmcode(Package_Executer* executer,
 }
 
 int constant_pool_grow(Package_Executer* executer, unsigned int growth_size) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     int    old_size       = executer->constant_pool_size;
 
     size_t old_alloc_size = executer->constant_pool_size * sizeof(RVM_ConstantPool);
@@ -2102,7 +2102,7 @@ int constant_pool_grow(Package_Executer* executer, unsigned int growth_size) {
 }
 
 int constant_pool_add_int(Package_Executer* executer, int int_literal) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     int index                                       = constant_pool_grow(executer, 1);
 
     executer->constant_pool_list[index].type        = CONSTANTPOOL_TYPE_INT;
@@ -2111,7 +2111,7 @@ int constant_pool_add_int(Package_Executer* executer, int int_literal) {
 }
 
 int constant_pool_add_double(Package_Executer* executer, double double_literal) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     int index                                          = constant_pool_grow(executer, 1);
 
     executer->constant_pool_list[index].type           = CONSTANTPOOL_TYPE_DOUBLE;
@@ -2120,7 +2120,7 @@ int constant_pool_add_double(Package_Executer* executer, double double_literal) 
 }
 
 int constant_pool_add_string(Package_Executer* executer, char* string_literal) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     int index                                          = constant_pool_grow(executer, 1);
 
     executer->constant_pool_list[index].type           = CONSTANTPOOL_TYPE_STRING;
@@ -2130,7 +2130,7 @@ int constant_pool_add_string(Package_Executer* executer, char* string_literal) {
 
 
 unsigned int opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     unsigned int old_index = opcode_buffer->lable_list.size();
 
     opcode_buffer->lable_list.push_back(RVM_LabelTable());
@@ -2142,12 +2142,12 @@ void opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer,
                              unsigned int      label,
                              unsigned int      label_address) {
 
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     opcode_buffer->lable_list[label].label_address = label_address;
 }
 
 void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 
     unsigned int label;
     unsigned int label_address;
@@ -2207,7 +2207,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
 }
 
 RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
     assert(type != nullptr);
 
     if (!(opcode == RVM_CODE_POP_STATIC_BOOL

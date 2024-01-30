@@ -2,9 +2,9 @@
 
 
 void ring_bytecode_dump(Package_Executer* executer, FILE* output) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 }
 
 void ring_bytecode_load(Package_Executer* executer, FILE* input) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 }

@@ -1744,9 +1744,6 @@ struct MemBlock {
 // move cursor to terminal (row, col) location
 #define MOVE_CURSOR(row, col) printf("%c[%d;%dH", 27, (row), (col))
 
-#define print_debug_info(format, ...) \
-    printf("[DEBUG][%s:%d][function:%s]\t " format "\n", __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
-
 #define LOG_COLOR_RED_UNDERLINE "\033[4;31m"
 #define LOG_COLOR_GREEN_UNDERLINE "\033[4;32m"
 #define LOG_COLOR_YELLOW_UNDERLINE "\033[4;33m"
@@ -1767,83 +1764,61 @@ struct MemBlock {
     printf("%s" format "%s", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 #define printf_witch_green(format, ...) \
     printf("%s" format "%s", LOG_COLOR_GREEN, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#define printf_witch_yellow(format, ...) \
+    printf("%s" format "%s", LOG_COLOR_YELLOW, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 #define printf_witch_blue(format, ...) \
     printf("%s" format "%s", LOG_COLOR_BLUE, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#define printf_witch_purple(format, ...) \
+    printf("%s" format "%s", LOG_COLOR_PURPLE, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#define printf_witch_darkgreen(format, ...) \
+    printf("%s" format "%s", LOG_COLOR_DARKGREEN, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#define printf_witch_white(format, ...) \
+    printf("%s" format "%s", LOG_COLOR_WHITE, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+
 
 #define complie_err_log(format, ...) \
     printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
 
-#ifdef DEBUG_FLEX
 // debug flex 词法分析
-#define debug_log_with_red_coloar(format, ...) \
+#ifdef DEBUG_FLEX
+#define debug_flex_info_with_red(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_RED, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 #else
-#define debug_log_with_red_coloar(format, ...)
+#define debug_flex_info_with_red(format, ...)
 #endif
 
-#ifdef DEBUG_BISON
 // debug bison 语法分析
-#define debug_log_with_green_coloar(format, ...) \
+#ifdef DEBUG_BISON
+#define debug_bison_info_with_green(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_GREEN, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 #else
-#define debug_log_with_green_coloar(format, ...)
+#define debug_bison_info_with_green(format, ...)
 #endif
 
-#ifdef DEBUG_CREATE_AST
 // debug 语法分析构建AST
-#define debug_log_with_yellow_coloar(format, ...) \
+#ifdef DEBUG_CREATE_AST
+#define debug_ast_info_with_yellow(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_YELLOW, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 #else
-#define debug_log_with_yellow_coloar(format, ...)
+#define debug_ast_info_with_yellow(format, ...)
 #endif
 
-#ifdef DEBUG_GENERATE_DETAIL
 // debug 生成 vm opcode
-#define debug_log_with_darkgreen_coloar(format, ...) \
+#ifdef DEBUG_GENERATE_DETAIL
+#define debug_generate_info_with_darkgreen(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_DARKGREEN, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 #else
-#define debug_log_with_darkgreen_coloar(format, ...)
+#define debug_generate_info_with_darkgreen(format, ...)
 #endif
 
 #ifdef DEBUG_EXEC_VM
-#define debug_log_with_white_coloar(format, ...) \
+#define debug_exec_info_with_white(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_WHITE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 #else
-#define debug_log_with_white_coloar(format, ...)
+#define debug_exec_info_with_white(format, ...)
 #endif
 
-#ifdef DEBUG
-// debug 解释执行AST
-#define debug_log_with_blue_coloar(format, ...) \
-    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_BLUE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-// debug 生成 vm opcode
-#define debug_log_with_purple_coloar(format, ...) \
-    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_PURPLE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-#else
-// 编译错误
-// 标示错误的地址
-#define debug_log_with_blue_coloar(format, ...)
-// 编译告警
-#define debug_log_with_purple_coloar(format, ...)
-#endif
-
-void        init_front_mem_pool();
-MemPool*    get_front_mem_pool();
-void        destory_front_mem_pool();
-
-void        ring_compile_error_report(ErrorReportContext* context);
-void        ring_check_exit_immediately();
-std::string trans_flex_token_to_human_char(std::string str);
-std::string str_replace_all(std::string        subject,
-                            const std::string& search,
-                            const std::string& replace);
-void        yyin_move_to_next_line();
-
-#define ring_runtime_error(code, ...)      \
-    printf("Runtime error, E:%d, ", code); \
-    printf(__VA_ARGS__);                   \
-    exit(1);
 
 // 以后通用的错误提示统一使用这个
 #define ring_error_report(format, ...)                                          \
@@ -1872,6 +1847,10 @@ char*        get_string_literal();
  * function definition
  *
  */
+void           init_front_mem_pool();
+MemPool*       get_front_mem_pool();
+void           destory_front_mem_pool();
+
 CompilerEntry* compiler_entry_create();
 CompilerEntry* get_compiler_entry();
 void           compiler_entry_dump(CompilerEntry* compiler_entry);
@@ -1903,6 +1882,14 @@ int            package_unit_add_class_definition(ClassDefinition* class_definiti
 
 void           ring_grammar_error(RING_GRAMMAR_ID grammar_id);
 int            yyerror(char const* str, ...);
+
+void           ring_compile_error_report(ErrorReportContext* context);
+void           ring_check_exit_immediately();
+std::string    trans_flex_token_to_human_char(std::string str);
+std::string    str_replace_all(std::string        subject,
+                               const std::string& search,
+                               const std::string& replace);
+void           yyin_move_to_next_line();
 // --------------------
 
 
