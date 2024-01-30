@@ -83,6 +83,27 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     STACK_COPY_INDEX((rvm), (rvm)->runtime_stack->top_index + (dst_offset), (rvm)->runtime_stack->top_index + (src_offset))
 
 
+// 通过绝对索引 设置 rvm->runtime_static->data
+#define STATIC_SET_BOOL_INDEX(rvm, index, value)                             \
+    (rvm)->runtime_static->data[(index)].type         = RVM_VALUE_TYPE_BOOL; \
+    (rvm)->runtime_static->data[(index)].u.bool_value = (value);
+#define STATIC_SET_INT_INDEX(rvm, index, value)                            \
+    (rvm)->runtime_static->data[(index)].type        = RVM_VALUE_TYPE_INT; \
+    (rvm)->runtime_static->data[(index)].u.int_value = (value);
+#define STATIC_SET_DOUBLE_INDEX(rvm, index, value)                               \
+    (rvm)->runtime_static->data[(index)].type           = RVM_VALUE_TYPE_DOUBLE; \
+    (rvm)->runtime_static->data[(index)].u.double_value = (value);
+#define STATIC_SET_STRING_INDEX(rvm, index, value)                               \
+    (rvm)->runtime_static->data[(index)].type           = RVM_VALUE_TYPE_STRING; \
+    (rvm)->runtime_static->data[(index)].u.string_value = (value);
+#define STATIC_SET_CLASS_INDEX(rvm, index, value)                                    \
+    (rvm)->runtime_static->data[(index)].type             = RVM_VALUE_TYPE_CLASS_OB; \
+    (rvm)->runtime_static->data[(index)].u.class_ob_value = (value);
+#define STATIC_SET_ARRAY_INDEX(rvm, index, value)                              \
+    (rvm)->runtime_static->data[(index)].type          = RVM_VALUE_TYPE_ARRAY; \
+    (rvm)->runtime_static->data[(index)].u.array_value = (value);
+
+
 // 从后边获取 1BYTE的操作数
 #define OPCODE_GET_1BYTE(p) \
     (((p)[0]))
@@ -306,6 +327,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_RuntimeStatic*   runtime_static         = rvm->runtime_static;
 
     unsigned int         index                  = 0;
+    unsigned int         runtime_static_index   = 0;
     unsigned int         package_index          = 0;
     unsigned int         func_index             = 0;
     unsigned int         method_index           = 0;
@@ -375,7 +397,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_SET_STRING_OFFSET(rvm, 0,
                                     string_literal_to_rvm_string(rvm,
                                                                  constant_pool_list[const_index].u.string_value));
-            rvm->runtime_stack->data[rvm->runtime_stack->top_index].type = RVM_VALUE_TYPE_STRING;
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
@@ -383,93 +404,78 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // static
         case RVM_CODE_POP_STATIC_BOOL:
-            oper_num                                 = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index                                    = oper_num;                       //  在操作符后边获取
-            runtime_static->data[index].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -1); // 找到对应的 static 变量
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STATIC_SET_BOOL_INDEX(rvm, runtime_static_index, STACK_GET_BOOL_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_STATIC_INT:
-            oper_num                                = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index                                   = oper_num;                      //  在操作符后边获取
-            runtime_static->data[index].u.int_value = STACK_GET_INT_OFFSET(rvm, -1); // 找到对应的 static 变量
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STATIC_SET_INT_INDEX(rvm, runtime_static_index, STACK_GET_INT_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_STATIC_DOUBLE:
-            oper_num                                   = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index                                      = oper_num;                         //  在操作符后边获取
-            runtime_static->data[index].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -1); // 找到对应的 static 变量
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STATIC_SET_DOUBLE_INDEX(rvm, runtime_static_index, STACK_GET_DOUBLE_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_STATIC_STRING:
-            oper_num                                   = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index                                      = oper_num;                         //  在操作符后边获取
-            runtime_static->data[index].u.string_value = STACK_GET_STRING_OFFSET(rvm, -1); // 找到对应的 static 变量
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STATIC_SET_STRING_INDEX(rvm, runtime_static_index, STACK_GET_STRING_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_STATIC_CLASS_OB:
-            oper_num                                     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index                                        = oper_num;                           //  在操作符后边获取
-            runtime_static->data[index].u.class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -1); // 找到对应的 static 变量
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STATIC_SET_CLASS_INDEX(rvm, runtime_static_index, STACK_GET_CLASS_OB_OFFSET(rvm, -1));
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_STATIC_ARRAY:
-            oper_num                                  = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index                                     = oper_num; //  在操作符后边获取
-            /*
-             * 浅copy
-             * runtime_static->data[index].u.object = STACK_GET_OBJECT_OFFSET(rvm, -1);
-             */
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            // shallow copy
+            // array_value = STACK_GET_OBJECT_OFFSET(rvm, -1);
             // deep copy
-            // runtime_static->data[index] 的设置方式需要重新写一下, 不然容易遗忘
-            runtime_static->data[index].type          = RVM_VALUE_TYPE_ARRAY;
-            runtime_static->data[index].u.array_value = rvm_deep_copy_array(rvm, STACK_GET_ARRAY_OFFSET(rvm, -1));
+            array_value          = rvm_deep_copy_array(rvm, STACK_GET_ARRAY_OFFSET(rvm, -1));
+            STATIC_SET_ARRAY_INDEX(rvm, runtime_static_index, array_value);
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STATIC_BOOL:
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index    = oper_num; //  在操作符后边获取
-            STACK_SET_BOOL_OFFSET(rvm, 0, rvm->runtime_static->data[index].u.bool_value);
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_BOOL_OFFSET(rvm, 0, rvm->runtime_static->data[runtime_static_index].u.bool_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STATIC_INT:
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index    = oper_num; //  在操作符后边获取
-            STACK_SET_INT_OFFSET(rvm, 0, rvm->runtime_static->data[index].u.int_value);
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_INT_OFFSET(rvm, 0, rvm->runtime_static->data[runtime_static_index].u.int_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STATIC_DOUBLE:
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index    = oper_num; //  在操作符后边获取
-            STACK_SET_DOUBLE_OFFSET(rvm, 0, rvm->runtime_static->data[index].u.double_value);
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_DOUBLE_OFFSET(rvm, 0, rvm->runtime_static->data[runtime_static_index].u.double_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STATIC_STRING:
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index    = oper_num; //  在操作符后边获取
-            STACK_SET_STRING_OFFSET(rvm, 0, rvm->runtime_static->data[index].u.string_value);
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_STRING_OFFSET(rvm, 0, rvm->runtime_static->data[runtime_static_index].u.string_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STATIC_CLASS_OB:
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index    = oper_num; //  在操作符后边获取
-            STACK_SET_CLASS_OB_OFFSET(rvm, 0, rvm->runtime_static->data[index].u.class_ob_value);
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_CLASS_OB_OFFSET(rvm, 0, rvm->runtime_static->data[runtime_static_index].u.class_ob_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STATIC_ARRAY:
-            oper_num = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            index    = oper_num; //  在操作符后边获取
-            STACK_SET_ARRAY_OFFSET(rvm, 0, rvm->runtime_static->data[index].u.array_value);
+            runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_ARRAY_OFFSET(rvm, 0, rvm->runtime_static->data[runtime_static_index].u.array_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
