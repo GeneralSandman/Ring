@@ -513,61 +513,51 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_POP_STACK_ARRAY:
             caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            /*
-             * 这里到底是 浅拷贝 还是 深拷贝 还真得好好斟酌一下
-             */
+            // shallow copy
+            // array_value         = STACK_GET_ARRAY_OFFSET(rvm, -1);
             // deep copy
-            STACK_SET_ARRAY_INDEX(rvm,
-                                  caller_stack_base + caller_stack_offset,
-                                  rvm_deep_copy_array(rvm, STACK_GET_ARRAY_OFFSET(rvm, -1)));
-            // 浅copy
-            // STACK_SET_OBJECT_INDEX(rvm, caller_stack_base + caller_stack_offset, STACK_GET_OBJECT_OFFSET(rvm, -1));
+            array_value         = rvm_deep_copy_array(rvm, STACK_GET_ARRAY_OFFSET(rvm, -1));
+            STACK_SET_ARRAY_INDEX(rvm, caller_stack_base + caller_stack_offset, array_value);
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STACK_BOOL:
-            oper_num            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            caller_stack_offset = oper_num; //  在操作符后边获取
+            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_BOOL_OFFSET(rvm, 0,
                                   STACK_GET_BOOL_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STACK_INT:
-            oper_num            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            caller_stack_offset = oper_num; //  在操作符后边获取
+            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_INT_OFFSET(rvm, 0,
                                  STACK_GET_INT_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STACK_DOUBLE:
-            oper_num            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            caller_stack_offset = oper_num; //  在操作符后边获取
+            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_DOUBLE_OFFSET(rvm, 0,
                                     STACK_GET_DOUBLE_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STACK_STRING:
-            oper_num            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            caller_stack_offset = oper_num; //  在操作符后边获取
+            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_STRING_OFFSET(rvm, 0,
                                     STACK_GET_STRING_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STACK_CLASS_OB:
-            oper_num            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            caller_stack_offset = oper_num; //  在操作符后边获取
+            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_CLASS_OB_OFFSET(rvm, 0,
                                       STACK_GET_CLASS_OB_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_STACK_ARRAY:
-            oper_num            = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            caller_stack_offset = oper_num; //  在操作符后边获取
+            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_ARRAY_OFFSET(rvm, 0,
                                    STACK_GET_ARRAY_INDEX(rvm, caller_stack_base + caller_stack_offset));
             runtime_stack->top_index++;
@@ -1061,22 +1051,19 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         // func
         case RVM_CODE_PUSH_FUNC:
             // 这里设计的不太好
-            oper_num   = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            func_index = oper_num;
+            func_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_INT_OFFSET(rvm, 0, func_index);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_METHOD:
-            oper_num     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            method_index = oper_num;
+            method_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_INT_OFFSET(rvm, 0, method_index);
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
         case RVM_CODE_ARGUMENT_NUM:
-            oper_num           = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
-            argument_list_size = oper_num;
+            argument_list_size = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             rvm->pc += 2;
             break;
         case RVM_CODE_INVOKE_FUNC:
