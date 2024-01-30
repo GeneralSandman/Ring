@@ -299,37 +299,39 @@ RVM_ClassObject* new_class_object(Ring_VirtualMachine* rvm,
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     debug_log_with_white_coloar("\t");
 
-    RVM_Byte*          code_list              = rvm->executer->code_list;
-    unsigned int       code_size              = rvm->executer->code_size;
-    RVM_ConstantPool*  constant_pool_list     = rvm->executer->constant_pool_list;
-    RVM_RuntimeStack*  runtime_stack          = rvm->runtime_stack;
-    RVM_RuntimeStatic* runtime_static         = rvm->runtime_static;
+    RVM_Byte*            code_list              = rvm->executer->code_list;
+    unsigned int         code_size              = rvm->executer->code_size;
+    RVM_ConstantPool*    constant_pool_list     = rvm->executer->constant_pool_list;
+    RVM_RuntimeStack*    runtime_stack          = rvm->runtime_stack;
+    RVM_RuntimeStatic*   runtime_static         = rvm->runtime_static;
 
-    unsigned int       index                  = 0;
-    unsigned int       package_index          = 0;
-    unsigned int       func_index             = 0;
-    unsigned int       method_index           = 0;
-    unsigned int       oper_num               = 0;
-    unsigned int       dimension              = 0;
-    unsigned int       const_index            = 0;
-    unsigned int       caller_stack_base      = 0;
-    unsigned int       argument_list_size     = 0;
-    unsigned int       caller_stack_offset    = 0;
-    unsigned int       return_value_list_size = 0;
+    unsigned int         index                  = 0;
+    unsigned int         package_index          = 0;
+    unsigned int         func_index             = 0;
+    unsigned int         method_index           = 0;
+    unsigned int         oper_num               = 0;
+    unsigned int         dimension              = 0;
+    unsigned int         const_index            = 0;
+    unsigned int         caller_stack_base      = 0;
+    unsigned int         argument_list_size     = 0;
+    unsigned int         caller_stack_offset    = 0;
+    unsigned int         return_value_list_size = 0;
 
-    bool               bool_value             = false;
-    int                int_value              = 0;
-    double             double_value           = 0;
-    RVM_String*        string_value           = nullptr;
-    RVM_ClassObject*   class_ob_value         = nullptr;
-    RVM_Array*         array_value            = nullptr;
-    RVM_Array*         array_c                = nullptr;
+    bool                 bool_value             = false;
+    int                  int_value              = 0;
+    double               double_value           = 0;
+    RVM_String*          string_value           = nullptr;
+    RVM_ClassObject*     class_ob_value         = nullptr;
+    RVM_Array*           array_value            = nullptr;
+    RVM_Array*           array_c                = nullptr;
 
-    RVM_Function*      function               = nullptr;
+    RVM_ClassDefinition* rvm_class_definition   = nullptr;
+    RVM_Function*        function               = nullptr;
+    RVM_Method*          method                 = nullptr;
 
-    ErrorCode          error_code             = ERROR_CODE_SUCCESS;
+    ErrorCode            error_code             = ERROR_CODE_SUCCESS;
 
-    unsigned int*      dimension_list         = (unsigned int*)calloc(1, sizeof(unsigned int) * MAX_DIMENSION_NUM);
+    unsigned int*        dimension_list         = (unsigned int*)calloc(1, sizeof(unsigned int) * MAX_DIMENSION_NUM);
 
     while (rvm->pc < code_size) {
         RVM_Byte opcode = code_list[rvm->pc];
@@ -1092,7 +1094,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                        &caller_stack_base);
             }
             break;
-        case RVM_CODE_INVOKE_METHOD: {
+        case RVM_CODE_INVOKE_METHOD:
             method_index   = STACK_GET_INT_OFFSET(rvm, -1);
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
@@ -1100,14 +1102,14 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // 但是 method 没必要单独存储, 在 class_definition 中就可以, 通过指针寻找 class_definition
             // 需要将 class_object 赋值给 self 变量
             // TODO: 但是这里, gc会释放么, 让 invoke_derive_function变得不合法
-            RVM_Method* method = &(class_ob_value->class_ref->method_list[method_index]);
+            method = &(class_ob_value->class_ref->method_list[method_index]);
             invoke_derive_function(rvm,
                                    &function,
                                    class_ob_value, method->rvm_function,
                                    &code_list, &code_size,
                                    &rvm->pc,
                                    &caller_stack_base);
-        } break;
+            break;
         case RVM_CODE_RETURN:
             return_value_list_size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             rvm->pc += 3;
@@ -1255,13 +1257,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             // class
         case RVM_CODE_NEW_CLASS_OBJECT_LITERAL: {
-            unsigned int class_index                  = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]); // field 的数量不能超过 255
-            unsigned int init_exp_size                = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]); // field 的数量不能超过 255
+            unsigned int class_index   = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]); // field 的数量不能超过 255
+            unsigned int init_exp_size = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]); // field 的数量不能超过 255
             // class_index 在 type_specifier_deep_copy 没有修正
             // TODO: 后期修正
-            RVM_ClassDefinition* rvm_class_definition = &(rvm->class_list[class_index]);
+            rvm_class_definition       = &(rvm->class_list[class_index]);
 
-            class_ob_value                            = rvm_new_class_object_literal(rvm, rvm_class_definition, init_exp_size);
+            class_ob_value             = rvm_new_class_object_literal(rvm, rvm_class_definition, init_exp_size);
             runtime_stack->top_index -= init_exp_size;
             STACK_SET_CLASS_OB_OFFSET(rvm, 0, class_ob_value);
             runtime_stack->top_index++;
@@ -1364,24 +1366,18 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             bool_value   = STACK_GET_BOOL_OFFSET(rvm, -1);
             string_value = rvm_bool_2_string(rvm, bool_value);
             STACK_SET_STRING_OFFSET(rvm, -1, string_value);
-            // FIXME: 这里set type 需要优化一下,
-            rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1].type = RVM_VALUE_TYPE_STRING;
             rvm->pc += 1;
             break;
         case RVM_CODE_INT_2_STRING:
             int_value    = STACK_GET_INT_OFFSET(rvm, -1);
             string_value = rvm_int_2_string(rvm, int_value);
             STACK_SET_STRING_OFFSET(rvm, -1, string_value);
-            // FIXME: 这里set type 需要优化一下,
-            rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1].type = RVM_VALUE_TYPE_STRING;
             rvm->pc += 1;
             break;
         case RVM_CODE_DOUBLE_2_STRING:
             double_value = STACK_GET_DOUBLE_OFFSET(rvm, -1);
             string_value = rvm_double_2_string(rvm, double_value);
             STACK_SET_STRING_OFFSET(rvm, -1, string_value);
-            // FIXME: 这里set type 需要优化一下,
-            rvm->runtime_stack->data[rvm->runtime_stack->top_index - 1].type = RVM_VALUE_TYPE_STRING;
             rvm->pc += 1;
             break;
 
@@ -1413,13 +1409,13 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
     int                 return_list_count = function->u.native_func->return_list_count;
     RVM_NativeFuncProc* native_func_proc  = function->u.native_func->func_proc;
     // unsigned int        arg_count        = function->u.native_func->arg_count;
-    RVM_Value* args; // TODO:
+    RVM_Value* args                       = nullptr; // TODO:
 
     // TODO: how to handle arg_count > 1
-    args = &rvm->runtime_stack->data[rvm->runtime_stack->top_index - argument_list_size];
+    args                                  = &rvm->runtime_stack->data[rvm->runtime_stack->top_index - argument_list_size];
 
     // TODO: how to handler return_list > 1
-    ret  = native_func_proc(rvm, argument_list_size, args);
+    ret                                   = native_func_proc(rvm, argument_list_size, args);
 
 
     // 销毁 argument
@@ -2698,8 +2694,8 @@ void debug_rvm(Ring_VirtualMachine* rvm,
     }
 
     if (terminal_size.ws_row < 38 || terminal_size.ws_col < 115) {
-        runtime_err_log("In Debug RVM Mode:");
-        runtime_err_log("    Please adjust current terminal window size: height > 38, width > 115\n");
+        ring_error_report("In Debug RVM Mode:");
+        ring_error_report("    Please adjust current terminal window size: height > 38, width > 115\n");
         // exit(1);
     }
 

@@ -156,11 +156,9 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack,
         RVM_Value value = runtime_stack->data[i];
         switch (value.type) {
         case RVM_VALUE_TYPE_BOOL:
-            if (value.u.int_value) {
-                printf("%7d | %20s | %6s | %6s\n", i, "true", space.c_str(), pointer.c_str());
-            } else {
-                printf("%7d | %20s | %6s | %6s\n", i, "false", space.c_str(), pointer.c_str());
-            }
+            printf("%7d | %20s | %6s | %6s\n",
+                   i, ((value.u.bool_value == RVM_FALSE) ? "false" : "true"),
+                   space.c_str(), pointer.c_str());
             break;
         case RVM_VALUE_TYPE_INT:
             printf("%7d | %20d | %6s | %6s\n", i, value.u.int_value, space.c_str(), pointer.c_str());
@@ -175,8 +173,13 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack,
                 printf("%7d | %20.*s | %6s | %6s\n", i, 20, value.u.string_value->data, space.c_str(), pointer.c_str());
             }
             break;
+        case RVM_VALUE_TYPE_CLASS_OB:
+            printf("%7d | %20s | %6s | %6s\n", i, "class-object", space.c_str(), pointer.c_str());
+            break;
+        case RVM_VALUE_TYPE_ARRAY:
+            printf("%7d | %20s | %6s | %6s\n", i, "array", space.c_str(), pointer.c_str());
+            break;
         case RVM_VALUE_TYPE_OBJECT:
-            printf("%7d | %20s | %6s | %6s\n", i, "object", space.c_str(), pointer.c_str());
             break;
         default:
             break;

@@ -137,7 +137,7 @@ typedef enum {
     RVM_VALUE_TYPE_CLASS_OB,
     RVM_VALUE_TYPE_ARRAY,
 
-    RVM_VALUE_TYPE_OBJECT, // TODO: string object 需要重新规划一下
+    RVM_VALUE_TYPE_OBJECT, // TODO: 删除
 
 } RVM_Value_Type;
 
@@ -157,7 +157,7 @@ typedef struct {
         RVM_ClassObject* class_ob_value;
         RVM_Array*       array_value;
 
-        RVM_Object*      object;
+        RVM_Object*      object; // TODO: 删除
     } u;
 
 } RVM_Value;
@@ -173,8 +173,8 @@ struct Ring_VirtualMachine {
 
     RVM_CallInfo*        call_info;
 
-    RVM_ClassDefinition* class_list; // TODO: 删除掉
-    unsigned int         class_size; // TODO: 删除掉
+    RVM_ClassDefinition* class_list;
+    unsigned int         class_size;
 
     MemPool*             meta_pool;
     MemPool*             data_pool;
@@ -352,9 +352,6 @@ typedef enum {
 
     RING_BASIC_TYPE_NULL,
 } Ring_BasicType;
-// TODO: 这里重新规划一下 还要考虑类型的嵌套
-// typedef
-// 考虑 函数类型
 
 
 typedef enum {
@@ -559,7 +556,6 @@ struct RVM_Object {
 
 // Only used by back-end of compiler.
 struct RVM_TypeSpecifier {
-    // TODO:
     Ring_BasicType kind;
 
     union {
@@ -1125,11 +1121,8 @@ struct Statement {
 
 struct StatementExecResult {
     StatementExecResultType type;
-    union {
-        Ring_BasicValue* return_value;
-    } u; // TODO: 这个没办法兼容多 返回值，重构的时候废弃，使用return_value_list_size & return_value_list
-    unsigned int      return_value_list_size;
-    Ring_BasicValue** return_value_list;
+    unsigned int            return_value_list_size;
+    Ring_BasicValue**       return_value_list;
 };
 
 struct Expression {
@@ -1218,17 +1211,6 @@ struct ClassObjectLiteralExpression {
     TypeSpecifier*       type_specifier;
     FieldInitExpression* field_init_expression_list;
 };
-
-// TODO: 这里应该是设计重复了 应该跟 basic type一致
-// 统一
-typedef enum {
-    CAST_TYPE_UNKNOW,
-
-    CAST_TYPE_TO_BOOL,
-    CAST_TYPE_TO_INT,
-    CAST_TYPE_TO_DOUBLE,
-    CAST_TYPE_TO_STRING,
-} CastType;
 
 struct CastExpression {
     unsigned int   line_number;
@@ -1339,7 +1321,6 @@ struct Identifier {
     Identifier*    next;
 };
 
-// TODO: 这里还要兼容 数组元素赋值
 struct AssignExpression {
     unsigned int         line_number;
 
@@ -1789,16 +1770,7 @@ struct MemBlock {
 #define printf_witch_blue(format, ...) \
     printf("%s" format "%s", LOG_COLOR_BLUE, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
-// TODO: delete
 #define complie_err_log(format, ...) \
-    printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-
-// TODO: delete
-#define complie_err_log2(format, ...) \
-    printf("%s" format "%s\n", LOG_COLOR_GREEN, ##__VA_ARGS__, LOG_COLOR_CLEAR)
-
-// TODO: delete
-#define runtime_err_log(format, ...) \
     printf("%s" format "%s\n", LOG_COLOR_RED, ##__VA_ARGS__, LOG_COLOR_CLEAR)
 
 
@@ -1841,7 +1813,7 @@ struct MemBlock {
 #define debug_log_with_white_coloar(format, ...)
 #endif
 
-#ifdef DEBUG // TODO: 这个宏需要修正一下
+#ifdef DEBUG
 // debug 解释执行AST
 #define debug_log_with_blue_coloar(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_BLUE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
