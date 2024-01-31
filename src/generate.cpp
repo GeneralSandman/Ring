@@ -112,7 +112,7 @@ void ring_generate_vm_code(CompilerEntry* compiler_entry,
     // for (Package* package : compiler_entry->package_list) {
     //     // FIXME: find duplicate
     //     for (Package_Executer* package_executer : executer_entry->package_executer_list) {
-    //         if (0 == strcmp(package_executer->package_name, package->package_name)) {
+    //         if (str_eq(package_executer->package_name, package->package_name)) {
     //             debug_generate_info_with_darkgreen("\tpackage executer[%s] already register", package->package_name);
 
     //             continue;
@@ -173,7 +173,7 @@ void add_functions(Package* package, Package_Executer* executer) {
         copy_function(executer, &(executer->function_list[i]), pos);
         // TODO: FIXME:
         // 注册main函数
-        if (0 == strcmp(pos->function_name, "main")) {
+        if (str_eq(pos->function_name, "main")) {
             // printf("find main:%d\n", i);
             executer->main_func_index = i;
         }
@@ -1643,7 +1643,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
     Expression*   function_identifier_exp = function_call_expression->function_identifier_expression;
     char*         function_identifier     = function_identifier_exp->u.identifier_expression->identifier;
 
-    if (strcmp(function_identifier, "len") == 0) {
+    if (str_eq(function_identifier, "len")) {
         if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_LEN, 0, function_call_expression->line_number);
@@ -1654,7 +1654,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
             // TODO: 应该在语义检查的过程中报错
             ring_error_report("function `len()` argument is not string or array\n");
         }
-    } else if (strcmp(function_identifier, "capacity") == 0) {
+    } else if (str_eq(function_identifier, "capacity")) {
         if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_CAPACITY, 0, function_call_expression->line_number);
@@ -1665,7 +1665,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
             // TODO: 应该在语义检查的过程中报错
             ring_error_report("function `capacity()` argument is not string or array\n");
         }
-    } else if (strcmp(function_identifier, "push") == 0) {
+    } else if (str_eq(function_identifier, "push")) {
         pos = function_call_expression->argument_list;
         for (; pos != nullptr; pos = pos->next) {
             generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
@@ -1689,7 +1689,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
             ring_error_report("error: push() is only be used by bool[] int[] double[] string[] class[]\n");
         }
 
-    } else if (strcmp(function_identifier, "pop") == 0) {
+    } else if (str_eq(function_identifier, "pop")) {
         pos = function_call_expression->argument_list;
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
 
@@ -1710,7 +1710,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
         } else {
             ring_error_report("error: pop() is only be used by bool[] int[] double[] string[] class[]\n");
         }
-    } else if (strcmp(function_identifier, "to_string") == 0) {
+    } else if (str_eq(function_identifier, "to_string")) {
         pos = function_call_expression->argument_list;
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
 
@@ -2231,7 +2231,7 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
           || opcode == RVM_CODE_PUSH_STACK_BOOL
           || opcode == RVM_CODE_POP_FIELD_BOOL
           || opcode == RVM_CODE_PUSH_FIELD_BOOL)) {
-        ring_error_report("convert_opcode_by_rvm_type error(opcode is valid:%d)\n", opcode);
+        ring_error_report("convert_opcode_by_rvm_type error:opcode is valid:%d\n", opcode);
     }
 
     switch (type->kind) {
@@ -2263,17 +2263,21 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         return RVM_Opcode(opcode + 2);
         break;
     case RING_BASIC_TYPE_STRING:
-        // RVM_CODE_POP_STATIC_OBJECT
-        // RVM_CODE_PUSH_STATIC_OBJECT
-        // RVM_CODE_POP_STACK_OBJECT
-        // RVM_CODE_PUSH_STACK_OBJECT
+        // RVM_CODE_POP_STATIC_STRING
+        // RVM_CODE_PUSH_STATIC_STRING
+        // RVM_CODE_POP_STACK_STRING
+        // RVM_CODE_PUSH_STACK_STRING
+        // RVM_CODE_POP_FIELD_STRING
+        // RVM_CODE_PUSH_FIELD_STRING
         return RVM_Opcode(opcode + 3);
         break;
     case RING_BASIC_TYPE_CLASS:
-        // RVM_CODE_POP_STATIC_OBJECT
-        // RVM_CODE_PUSH_STATIC_OBJECT
-        // RVM_CODE_POP_STACK_OBJECT
-        // RVM_CODE_PUSH_STACK_OBJECT
+        // RVM_CODE_POP_STATIC_CLASS_OB
+        // RVM_CODE_PUSH_STATIC_CLASS_OB
+        // RVM_CODE_POP_STACK_CLASS_OB
+        // RVM_CODE_PUSH_STACK_CLASS_OB
+        // RVM_CODE_POP_FIELD_CLASS_OB
+        // RVM_CODE_PUSH_FIELD_CLASS_OB
         return RVM_Opcode(opcode + 4);
         break;
     case RING_BASIC_TYPE_ARRAY:
@@ -2281,11 +2285,13 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STATIC_ARRAY
         // RVM_CODE_POP_STACK_ARRAY
         // RVM_CODE_PUSH_STACK_ARRAY
+        // RVM_CODE_POP_FIELD_ARRAY
+        // RVM_CODE_PUSH_FIELD_ARRAY
         return RVM_Opcode(opcode + 5);
         break;
 
     default:
-        ring_error_report("generate opcode error\n");
+        ring_error_report("convert_opcode_by_rvm_type error: unknow kind:%d\n", type->kind);
         break;
     }
 

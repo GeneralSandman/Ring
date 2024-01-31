@@ -93,8 +93,8 @@ void gc_summary(Ring_VirtualMachine* rvm) {
         }
 
         // 不展示目前 函数调用写死 的 20 local_variable_size
-        if (0 != strcmp(type.c_str(), "callinfo")
-            && 0 != strcmp(type.c_str(), "unknow")) {
+        if (!str_eq(type.c_str(), "callinfo")
+            && !str_eq(type.c_str(), "unknow")) {
             printf("\tRVM_Value type:%s\n", type.c_str());
         }
     }

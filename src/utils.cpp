@@ -228,7 +228,7 @@ std::vector<std::string> list_files_of_dir(char* dir) {
 
         if (S_ISDIR(sta.st_mode)) {
             // 如果为目录文件
-            if (0 == strcmp("..", st->d_name) || 0 == strcmp(".", st->d_name)) {
+            if (str_eq("..", st->d_name) || str_eq(".", st->d_name)) {
                 // 忽略当前目录和上一层目录
                 continue;
             } else {

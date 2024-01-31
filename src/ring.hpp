@@ -1741,6 +1741,9 @@ struct MemBlock {
     memset(compile_err_buf, 0, sizeof(compile_err_buf)); \
     memset(compile_adv_buf, 0, sizeof(compile_adv_buf));
 
+
+#define str_eq(str1, str2) (strcmp((str1), (str2)) == 0)
+
 // clear terminal printf
 #define CLEAR_SCREEN printf("\e[1;1H\e[2J")
 

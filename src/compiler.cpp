@@ -71,7 +71,7 @@ void compiler_entry_dump(CompilerEntry* compiler_entry) {
 
 Package* search_package(CompilerEntry* compiler_entry, char* package_name) {
     for (Package* package : compiler_entry->package_list) {
-        if (0 == strcmp(package->package_name, package_name)) {
+        if (str_eq(package->package_name, package_name)) {
             return package;
         }
     }
@@ -393,7 +393,7 @@ void package_unit_update_line_content(char* str) {
     g_package_unit->current_offset += str_len;
     g_package_unit->current_column_number += str_len;
 
-    if (strcmp(str, "\n") == 0 || strcmp(str, "\r\n") == 0) {
+    if (str_eq(str, "\n") || str_eq(str, "\r\n")) {
         // TODO: 这里 -1 没搞明白
         g_package_unit->line_offset_map[g_package_unit->current_line_number].size -= (str_len - 1);
 

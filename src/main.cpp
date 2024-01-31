@@ -37,10 +37,10 @@ Args parse_args(int argc, char** argv) {
         goto ERR_ARG;
     }
     command = argv[1];
-    if (!strcmp(command, "version")) {
+    if (str_eq(command, "version")) {
         printf("%s \n", RING_VERSION);
         exit(ERROR_CODE_SUCCESS);
-    } else if (!strcmp(command, "help")) {
+    } else if (str_eq(command, "help")) {
         printf("%s", command_help_message.c_str());
         exit(ERROR_CODE_SUCCESS);
     }
@@ -50,24 +50,24 @@ Args parse_args(int argc, char** argv) {
         goto ERR_ARG;
     }
     input_file_name = argv[2];
-    if (!strcmp(command, "run")) {
+    if (str_eq(command, "run")) {
         res = Args{
             .command_run     = true,
             .command_dump    = false,
             .input_file_name = input_file_name,
         };
         return res;
-    } else if (!strcmp(command, "build")) {
+    } else if (str_eq(command, "build")) {
         printf("ring build\n");
         exit(ERROR_CODE_SUCCESS);
-    } else if (!strcmp(command, "dump")) {
+    } else if (str_eq(command, "dump")) {
         res = Args{
             .command_run     = false,
             .command_dump    = true,
             .input_file_name = input_file_name,
         };
         return res;
-    } else if (!strcmp(command, "man")) {
+    } else if (str_eq(command, "man")) {
         keyword = input_file_name;
         ring_give_man_help(keyword);
         exit(ERROR_CODE_SUCCESS);

@@ -133,7 +133,7 @@ void register_lib(Package_Executer*   package_executer,
 
     for (unsigned int i = 0; i < package_executer->function_size; i++) {
         RVM_Function* function = &package_executer->function_list[i];
-        if (function->type == RVM_FUNCTION_TYPE_NATIVE && 0 == strcmp(function->func_name, func_name)) {
+        if (function->type == RVM_FUNCTION_TYPE_NATIVE && str_eq(function->func_name, func_name)) {
             function->u.native_func                    = (NativeFunction*)mem_alloc(NULL_MEM_POOL, sizeof(NativeFunction));
             function->u.native_func->func_proc         = func_proc;
             function->u.native_func->arg_count         = arg_count;

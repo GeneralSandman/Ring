@@ -163,17 +163,17 @@ std::string class_definite =
 
 void ring_give_man_help(char* keyword) {
     std::string res = help_list;
-    if (0 == strcmp(keyword, "var")) {
+    if (str_eq(keyword, "var")) {
         res = variable_definite;
-    } else if (0 == strcmp(keyword, "func")) {
+    } else if (str_eq(keyword, "func")) {
         res = function_definite;
-    } else if (0 == strcmp(keyword, "global_var")) {
+    } else if (str_eq(keyword, "global_var")) {
         res = global_variable_definite;
-    } else if (0 == strcmp(keyword, "import")) {
+    } else if (str_eq(keyword, "import")) {
         res = import;
-    } else if (0 == strcmp(keyword, "class")) {
+    } else if (str_eq(keyword, "class")) {
         res = class_definite;
-    } else if (0 == strcmp(keyword, "--list")) {
+    } else if (str_eq(keyword, "--list")) {
         res = help_list;
     }
     printf("%s", res.c_str());

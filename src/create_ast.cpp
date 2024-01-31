@@ -55,7 +55,7 @@ void add_function_definition(AttributeInfo* attribute_info, Function* function_d
     function_definition->attribute_info = attribute_info;
 
     for (AttributeInfo* pos = attribute_info; pos; pos = pos->next) {
-        if (0 == strcmp(pos->name, "native")) {
+        if (str_eq(pos->name, "native")) {
             function_definition->type = FUNCTION_TYPE_NATIVE;
         }
     }
@@ -995,7 +995,7 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier,
     Expression*  pos_init = initializer_list;
     for (pos_ider = identifier_list; pos_ider; pos_ider = pos_ider->next) {
         // error-report ERROR_INVALID_VARIABLE_IDENTIFIER
-        if (strcmp(pos_ider->name, "self") == 0) {
+        if (str_eq(pos_ider->name, "self")) {
             DEFINE_ERROR_REPORT_STR;
 
             snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -1094,7 +1094,7 @@ void import_package_list_add_item(char* package_name, char* rename) {
     // duplicate import package
     for (ImportPackageInfo* import_pack : get_package_unit()->import_package_list) {
         // error-report ERROR_DUPLICATE_IMPORT_PACKAGE
-        if (strcmp(import_pack->package_name, package_name) == 0) {
+        if (str_eq(import_pack->package_name, package_name)) {
             DEFINE_ERROR_REPORT_STR;
             snprintf(compile_err_buf, sizeof(compile_err_buf),
                      "duplicate import package `%s`; E:%d.",

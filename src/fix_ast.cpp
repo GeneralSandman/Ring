@@ -724,14 +724,14 @@ void fix_class_object_literal_expression(Expression*                   expressio
         FieldMember* field_member     = nullptr;
         for (ClassMemberDeclaration* decl = class_definition->member; decl != nullptr; decl = decl->next) {
             if (decl->type == MEMBER_FIELD) {
-                if (strcmp(field_identifier, decl->u.field->identifier) == 0) {
+                if (str_eq(field_identifier, decl->u.field->identifier)) {
                     field_member = decl->u.field;
                     break;
                 }
             } else if (decl->type == MEMBER_METHOD) {
 
                 // error-report ERROR_ASSIGN_TO_METHOD_OF_CLASS
-                if (strcmp(field_identifier, decl->u.method->identifier) == 0) {
+                if (str_eq(field_identifier, decl->u.method->identifier)) {
                     DEFINE_ERROR_REPORT_STR;
 
                     snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -858,7 +858,7 @@ void fix_class_member_expression(MemberExpression* member_expression,
 ClassDefinition* search_class_definition(char* class_identifier) {
     assert(class_identifier != nullptr);
     for (ClassDefinition* pos : get_package_unit()->class_definition_list) {
-        if (0 == strcmp(pos->identifier, class_identifier)) {
+        if (str_eq(pos->identifier, class_identifier)) {
             return pos;
         }
     }
@@ -873,11 +873,11 @@ ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, c
 
     for (member_declaration = class_definition->member; member_declaration != nullptr; member_declaration = member_declaration->next) {
         if (member_declaration->type == MEMBER_FIELD) {
-            if (0 == strcmp(member_declaration->u.field->identifier, member_identifier)) {
+            if (str_eq(member_declaration->u.field->identifier, member_identifier)) {
                 break;
             }
         } else if (member_declaration->type == MEMBER_METHOD) {
-            if (0 == strcmp(member_declaration->u.method->identifier, member_identifier)) {
+            if (str_eq(member_declaration->u.method->identifier, member_identifier)) {
                 break;
             }
         }
@@ -921,13 +921,13 @@ Declaration* search_declaration(char* package_posit, char* identifier, Block* bl
 
     for (; block; block = block->parent_block) {
         for (decl = block->declaration_list; decl; decl = decl->next) {
-            if (0 == strcmp(identifier, decl->identifier)) {
+            if (str_eq(identifier, decl->identifier)) {
                 return decl;
             }
         }
     }
     for (Declaration* decl : get_package_unit()->global_declaration_list) {
-        if (0 == strcmp(identifier, decl->identifier)) {
+        if (str_eq(identifier, decl->identifier)) {
             return decl;
         }
     }
@@ -945,7 +945,7 @@ Function* search_function(char* package_posit, char* identifier) {
 
         // TODO: 封装成函数
         for (auto function : package->function_list) {
-            if (0 == strcmp(function->function_name, identifier)) {
+            if (str_eq(function->function_name, identifier)) {
                 return function;
             }
         }
@@ -953,7 +953,7 @@ Function* search_function(char* package_posit, char* identifier) {
         return nullptr;
     }
     for (Function* pos : get_package_unit()->function_list) {
-        if (!strcmp(identifier, pos->function_name)) {
+        if (str_eq(identifier, pos->function_name)) {
             return pos;
         }
     }
@@ -961,15 +961,15 @@ Function* search_function(char* package_posit, char* identifier) {
 }
 
 int is_native_function_identifier(char* package_posit, char* identifier) {
-    if (strcmp(identifier, "len") == 0) {
+    if (str_eq(identifier, "len")) {
         return 1;
-    } else if (strcmp(identifier, "capacity") == 0) {
+    } else if (str_eq(identifier, "capacity")) {
         return 1;
-    } else if (strcmp(identifier, "push") == 0) {
+    } else if (str_eq(identifier, "push")) {
         return 1;
-    } else if (strcmp(identifier, "pop") == 0) {
+    } else if (str_eq(identifier, "pop")) {
         return 1;
-    } else if (strcmp(identifier, "to_string") == 0) {
+    } else if (str_eq(identifier, "to_string")) {
         return 1;
     }
     return 0;
