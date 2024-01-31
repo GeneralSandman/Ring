@@ -788,8 +788,7 @@ typedef enum {
     RVM_CODE_JUMP_IF_TRUE,
 
     // duplicate
-    RVM_CODE_DUPLICATE, // TODO: 这个扩展性较差，后续删除，使用 RVM_CODE_DUPLICATE_V2
-    RVM_CODE_DUPLICATE_V2,
+    RVM_CODE_DUPLICATE,
 
     // func
     RVM_CODE_PUSH_FUNC,

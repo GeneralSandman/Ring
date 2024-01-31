@@ -751,7 +751,7 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
 
 
     // generate_vmcode(executer, opcode_buffer,
-    //                 RVM_CODE_DUPLICATE, 0,
+    //                 RVM_CODE_DUPLICATE, (0<<8) | 1 ,
     //                 range_statement->operand->u.identifier_expression->line_number);
 
 
@@ -1327,7 +1327,7 @@ void generate_vmcode_from_logical_expression(Package_Executer* executer,
     if (opcode == RVM_CODE_LOGICAL_AND) {
         generate_vmcode_from_expression(executer, left, opcode_buffer, 1);
 
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0, expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label, expression->line_number);
 
@@ -1337,7 +1337,7 @@ void generate_vmcode_from_logical_expression(Package_Executer* executer,
     } else if (opcode == RVM_CODE_LOGICAL_OR) {
         generate_vmcode_from_expression(executer, left, opcode_buffer, 1);
 
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0, expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_TRUE, end_label, expression->line_number);
 
@@ -1407,26 +1407,26 @@ void generate_vmcode_from_increase_decrease_expression(Package_Executer* execute
     case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
         /* generate_vmcode(executer, opcode_buffer, ); */
         if (need_duplicate) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0, expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
         }
         generate_vmcode(executer, opcode_buffer, RVM_CODE_INCREASE_SUFFIX, 0, expression->line_number);
         break;
     case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
         generate_vmcode(executer, opcode_buffer, RVM_CODE_INCREASE_PREFIX, 0, expression->line_number);
         if (need_duplicate) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0, expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
         }
         break;
     case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
         if (need_duplicate) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0, expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
         }
         generate_vmcode(executer, opcode_buffer, RVM_CODE_DECREASE_SUFFIX, 0, expression->line_number);
         break;
     case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
         generate_vmcode(executer, opcode_buffer, RVM_CODE_DECREASE_PREFIX, 0, expression->line_number);
         if (need_duplicate) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, 0, expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
         }
         break;
     default: break;
@@ -1923,7 +1923,7 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer*     
         // 2. shallow duplicate class-object
         unsigned int oper_num = 0;
         oper_num              = (0 << 8) | 2;
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE_V2, oper_num, pos->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, oper_num, pos->line_number);
 
 
         char*        field_identifier = pos->field_identifier;

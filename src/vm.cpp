@@ -158,8 +158,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_JUMP_IF_TRUE, "jump_if_true", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "", ""},
 
     // duplicate
-    {RVM_CODE_DUPLICATE, "duplicate", OPCODE_OPERAND_TYPE_0BYTE, 1, "", ""},
-    {RVM_CODE_DUPLICATE_V2, "duplicate_v2", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, "", ""},
+    {RVM_CODE_DUPLICATE, "duplicate", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, "", ""},
 
 
     // func

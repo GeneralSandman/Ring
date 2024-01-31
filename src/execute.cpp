@@ -1063,12 +1063,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         // duplicate
-        case RVM_CODE_DUPLICATE:
-            STACK_COPY_OFFSET(rvm, 0, -1);
-            runtime_stack->top_index++;
-            rvm->pc++;
-            break;
-        case RVM_CODE_DUPLICATE_V2: {
+        case RVM_CODE_DUPLICATE: {
             unsigned int dst_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             unsigned int src_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]);
             STACK_COPY_OFFSET(rvm, -dst_offset, -src_offset);
