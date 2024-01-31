@@ -738,12 +738,12 @@ return_list
     : type_specifier
     {
         /* $$ = create_function_return_list($1); */
-        // FIXME:
+        // TODO:
         $$ = nullptr;
     }
     | return_list TOKEN_COMMA type_specifier
     {
-        // FIXME:
+        // TODO:
         $$ = nullptr;
         /* $$ = function_return_list_add_item($1, $3); */
     }

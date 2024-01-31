@@ -171,7 +171,6 @@ void add_functions(Package* package, Package_Executer* executer) {
     // 暂时只处理 native function
     for (Function* pos : package->function_list) {
         copy_function(executer, &(executer->function_list[i]), pos);
-        // TODO: FIXME:
         // 注册main函数
         if (str_eq(pos->function_name, "main")) {
             // printf("find main:%d\n", i);
@@ -203,7 +202,7 @@ void add_classes(Package* package, Package_Executer* executer) {
  * front-end: RVM_ClassDefinition
  * back-end:  RVM_ClassDefinition
  *
- * TODO: field not deep copy
+ * TODO: field is shallow copy
  */
 void class_def_deep_copy(Package_Executer*    executer,
                          RVM_ClassDefinition* dst,
@@ -1168,16 +1167,12 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer,
     // }
 
     if (expression->type == ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
-        // access identifier in reverse order.
-        // TODO: FIXME:
         generate_pop_to_leftvalue_reverse(executer, expression->left, opcode_buffer);
     } else {
-        // TODO: FIXME:
         generate_pop_to_leftvalue(executer, expression->left, opcode_buffer);
     }
 }
 
-// TODO: FIXME:
 void generate_pop_to_leftvalue_reverse(Package_Executer* executer,
                                        Expression*       expression,
                                        RVM_OpcodeBuffer* opcode_buffer) {
@@ -1191,7 +1186,6 @@ void generate_pop_to_leftvalue_reverse(Package_Executer* executer,
     generate_pop_to_leftvalue(executer, expression, opcode_buffer);
 }
 
-// TODO:  处理 赋值给 标识符、array[index]、成员变量 a.b
 void generate_pop_to_leftvalue(Package_Executer* executer,
                                Expression*       expression,
                                RVM_OpcodeBuffer* opcode_buffer) {
@@ -1890,7 +1884,8 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
     } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_STRING, dimension, new_array_expression->line_number);
     } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_CLASS) {
-        generate_vmcode_from_array_class_object(executer, new_array_expression, opcode_buffer);
+        ClassDefinition* class_definition = new_array_expression->type_specifier->u.class_type->class_definition;
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_CLASS_OBJECT, (dimension << 8) | (class_definition->class_index), new_array_expression->line_number);
     } else {
         ring_error_report("error: new array only support bool[] int[] double[] string[] class[]\n");
     }
@@ -1938,32 +1933,6 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer*     
     }
 }
 
-void generate_vmcode_from_array_class_object(Package_Executer*   executer,
-                                             NewArrayExpression* new_array_expression,
-                                             RVM_OpcodeBuffer*   opcode_buffer) {
-
-    unsigned int field_count = 0;
-    unsigned int oper_num    = 0;
-    // TODO: 目前只能支持一维数组
-    // unsigned int     size             = new_array_expression->dimension_expression->dimension_list->num;
-    if (new_array_expression->dimension_expression->dimension_list->num_expression->type != EXPRESSION_TYPE_LITERAL_INT) {
-        ring_error_report("only use int literal when new array");
-    }
-    unsigned int     size             = new_array_expression->dimension_expression->dimension_list->num_expression->u.int_literal;
-
-
-    ClassDefinition* class_definition = new_array_expression->type_specifier->u.class_type->class_definition;
-    // TODO: 先用笨办法 初始化
-    // TODO: field_count 后续需要在 fix_ast 就要需要算好
-    for (ClassMemberDeclaration* pos = class_definition->member; pos != nullptr; pos = pos->next) {
-        if (pos->type == MEMBER_FIELD) {
-            field_count++;
-        }
-    }
-
-    oper_num = (field_count << 16) | size;
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_CLASS_OBJECT, oper_num, new_array_expression->line_number);
-}
 
 void generate_vmcode_from_array_literal_expreesion(Package_Executer*       executer,
                                                    ArrayLiteralExpression* array_literal_expression,
@@ -2303,8 +2272,9 @@ unsigned int calc_runtime_stack_capacity(RVM_Byte* code_list, unsigned int code_
 }
 
 
-// 这里实现完成了：但是有点bug，还未测试  因为 executer 和 rvm 有点耦合，所以这里设计的有点问题，需要重新设计
-// FIXME:
+// TODO:
+// 这里实现完成了, 但是有点bug, 还未测试
+// 因为 executer 和 rvm 有点耦合, 所以这里设计的有点问题, 需要重新设计
 void add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number, unsigned int start_pc, unsigned int opcode_size) {
     if (opcode_buffer->code_line_map.empty()
         || opcode_buffer->code_line_map.rbegin()->line_number != line_number) {
@@ -2320,8 +2290,10 @@ void add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number
         opcode_buffer->code_line_map.rbegin()->opcode_size += opcode_size;
     }
 }
-// 这里实现完成了：但是有点bug，还未测试  因为 executer 和 rvm 有点耦合，所以这里设计的有点问题，需要重新设计
-// FIXME:
+
+// TODO:
+// 这里实现完成了, 但是有点bug, 还未测试
+// 因为 executer 和 rvm 有点耦合, 所以这里设计的有点问题, 需要重新设计
 void dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map) {
     printf("------------------ CodeLineMap-Dump-begin ------------------\n");
     printf("    line_number       start_pc           size\n");
@@ -2342,8 +2314,6 @@ void dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map) {
  * front-end: TypeSpecifier
  * back-end:  RVM_TypeSpecifier
  *
- * TODO: just support bool,int,double,string
- * TODO: need support array, class
  */
 void type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier* src) {
     assert(dst != nullptr);

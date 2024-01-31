@@ -948,7 +948,6 @@ typedef enum {
     EXPRESSION_TYPE_MEMBER,
     EXPRESSION_TYPE_DOT,
 
-    EXPRESSION_TYPE_FIELD_INIT, // class field 初始化表达式 : e.g. {JobID: 1} FIXME: 这个暂时没有用到, 不要删除
 } ExpressionType;
 
 typedef enum {
@@ -2141,7 +2140,6 @@ void              generate_vmcode_from_ternary_condition_expression(Package_Exec
 
 void              generate_vmcode_from_new_array_expression(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_class_object_literal_expreesion(Package_Executer* executer, ClassObjectLiteralExpression* literal_expression, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_array_class_object(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, ArrayLiteralExpression* array_literal_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_array_index_expression(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer);
 
@@ -2213,7 +2211,8 @@ RVM_Array*           rvm_new_array(Ring_VirtualMachine* rvm,
                                    unsigned int         dimension,
                                    unsigned int*        dimension_list,
                                    unsigned int         dimension_index,
-                                   RVM_Array_Type       array_type);
+                                   RVM_Array_Type       array_type,
+                                   RVM_ClassDefinition* class_definition);
 
 RVM_Array*           rvm_new_array_bool(Ring_VirtualMachine* rvm,
                                         unsigned int         dimension,
@@ -2227,7 +2226,10 @@ RVM_Array*           rvm_new_array_double(Ring_VirtualMachine* rvm,
 RVM_Array*           rvm_new_array_string(Ring_VirtualMachine* rvm,
                                           unsigned int         dimension,
                                           unsigned int*        dimension_list);
-RVM_Array*           rvm_new_array_class_object(Ring_VirtualMachine* rvm, unsigned int field_count, unsigned int dimension);
+RVM_Array*           rvm_new_array_class_object(Ring_VirtualMachine* rvm,
+                                                RVM_ClassDefinition* class_definition,
+                                                unsigned int         dimension,
+                                                unsigned int*        dimension_list);
 
 RVM_ClassObject*     rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
 RVM_Array*           rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size);

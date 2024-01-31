@@ -170,11 +170,11 @@ void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm,
     rvm->executer       = executer_entry->main_package_executer;
     rvm->executer_entry = executer_entry;
 
-    // FIXME: 只初始化main包的全局变量
+    // TODO: 目前只初始化main包的全局变量
     rvm_add_static_variable(rvm->executer, rvm->runtime_static);
 
     // add classes
-    // FIXME:
+    // TODO: 目前只初始化main包的class定义
     rvm->class_list = executer_entry->main_package_executer->class_list;
     rvm->class_size = executer_entry->main_package_executer->class_size;
 }
@@ -331,6 +331,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int         func_index             = 0;
     unsigned int         method_index           = 0;
     unsigned int         oper_num               = 0;
+    unsigned int         class_index            = 0;
     unsigned int         field_index            = 0;
     unsigned int         dimension              = 0;
     unsigned int         const_index            = 0;
@@ -1146,7 +1147,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // array
         case RVM_CODE_NEW_ARRAY_BOOL:
-            dimension = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            dimension = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
             for (unsigned int i = 0; i < dimension; i++) {
                 dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(rvm, -(i + 1));
@@ -1155,10 +1156,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value = rvm_new_array_bool(rvm, dimension, dimension_list);
             STACK_SET_ARRAY_OFFSET(rvm, 0, array_value);
             runtime_stack->top_index++;
-            rvm->pc += 3;
+            rvm->pc += 2;
             break;
         case RVM_CODE_NEW_ARRAY_INT:
-            dimension = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            dimension = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
             for (unsigned int i = 0; i < dimension; i++) {
                 dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(rvm, -(i + 1));
@@ -1167,10 +1168,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value = rvm_new_array_int(rvm, dimension, dimension_list);
             STACK_SET_ARRAY_OFFSET(rvm, 0, array_value);
             runtime_stack->top_index++;
-            rvm->pc += 3;
+            rvm->pc += 2;
             break;
         case RVM_CODE_NEW_ARRAY_DOUBLE:
-            dimension = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            dimension = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
             for (unsigned int i = 0; i < dimension; i++) {
                 dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(rvm, -(i + 1));
@@ -1179,10 +1180,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value = rvm_new_array_double(rvm, dimension, dimension_list);
             STACK_SET_ARRAY_OFFSET(rvm, 0, array_value);
             runtime_stack->top_index++;
-            rvm->pc += 3;
+            rvm->pc += 2;
             break;
         case RVM_CODE_NEW_ARRAY_STRING:
-            dimension = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            dimension = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
             for (unsigned int i = 0; i < dimension; i++) {
                 dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(rvm, -(i + 1));
@@ -1191,17 +1192,24 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value = rvm_new_array_string(rvm, dimension, dimension_list);
             STACK_SET_ARRAY_OFFSET(rvm, 0, array_value);
             runtime_stack->top_index++;
-            rvm->pc += 3;
+            rvm->pc += 2;
             break;
-        case RVM_CODE_NEW_ARRAY_CLASS_OBJECT: {
-            // FIXME:
-            unsigned int field_count = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]); // field 的数量不能超过 255
-            unsigned int oper_num    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 2]);
-            array_value              = rvm_new_array_class_object(rvm, field_count, oper_num);
+        case RVM_CODE_NEW_ARRAY_CLASS_OBJECT:
+            dimension = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
+            memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
+            for (unsigned int i = 0; i < dimension; i++) {
+                dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(rvm, -(i + 1));
+            }
+            runtime_stack->top_index -= dimension;
+
+            class_index          = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]);
+            rvm_class_definition = &(rvm->class_list[class_index]);
+
+            array_value          = rvm_new_array_class_object(rvm, rvm_class_definition, dimension, dimension_list);
             STACK_SET_ARRAY_OFFSET(rvm, 0, array_value);
             runtime_stack->top_index++;
-            rvm->pc += 4;
-        } break;
+            rvm->pc += 3;
+            break;
         case RVM_CODE_NEW_ARRAY_LITERAL_BOOL: {
             int size    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             array_value = rvm_new_array_literal_bool(rvm, size);
@@ -1272,15 +1280,15 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
             // class
-        case RVM_CODE_NEW_CLASS_OBJECT_LITERAL: {
-            unsigned int class_index = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
-            rvm_class_definition     = &(rvm->class_list[class_index]);
+        case RVM_CODE_NEW_CLASS_OBJECT_LITERAL:
+            class_index          = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
+            rvm_class_definition = &(rvm->class_list[class_index]);
 
-            class_ob_value           = rvm_new_class_object(rvm, rvm_class_definition);
+            class_ob_value       = rvm_new_class_object(rvm, rvm_class_definition);
             STACK_SET_CLASS_OB_OFFSET(rvm, 0, class_ob_value);
             runtime_stack->top_index++;
             rvm->pc += 2;
-        } break;
+            break;
 
         // range
         case RVM_CODE_FOR_RANGE_ARRAY_BOOL:
@@ -1333,7 +1341,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // iter ++
             STACK_GET_INT_OFFSET(rvm, -2) += 1;
             break;
-        case RVM_CODE_FOR_RANGE_ARRAY_STRING: {
+        case RVM_CODE_FOR_RANGE_ARRAY_STRING:
             array_value = STACK_GET_ARRAY_OFFSET(rvm, -2);
             index       = STACK_GET_INT_OFFSET(rvm, -1);
             error_code  = rvm_array_get_string(rvm, array_value, index, &string_value);
@@ -1348,8 +1356,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             // iter ++
             STACK_GET_INT_OFFSET(rvm, -2) += 1;
-        } break;
-        case RVM_CODE_FOR_RANGE_ARRAY_CLASS_OBJECT: {
+            break;
+        case RVM_CODE_FOR_RANGE_ARRAY_CLASS_OBJECT:
             array_value = STACK_GET_ARRAY_OFFSET(rvm, -2);
             index       = STACK_GET_INT_OFFSET(rvm, -1);
             error_code  = rvm_array_get_class_object(rvm, array_value, index, &class_ob_value);
@@ -1364,7 +1372,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             // iter ++
             STACK_GET_INT_OFFSET(rvm, -2) += 1;
-        } break;
+            break;
         case RVM_CODE_FOR_RANGE_STRING:
             break;
         case RVM_CODE_FOR_RANGE_FINISH:
@@ -1777,7 +1785,8 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
                          unsigned int         dimension,
                          unsigned int*        dimension_list,
                          unsigned int         dimension_index,
-                         RVM_Array_Type       array_type) {
+                         RVM_Array_Type       array_type,
+                         RVM_ClassDefinition* class_definition) {
     if (dimension_index == 0) {
         return nullptr;
     }
@@ -1816,6 +1825,11 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
             }
             break;
         case RVM_ARRAY_CLASS_OBJECT:
+            array->u.class_ob_array = (RVM_ClassObject*)mem_alloc(rvm->data_pool,
+                                                                  sizeof(RVM_ClassObject) * array->capacity);
+            for (unsigned int i = 0; i < array->length; i++) {
+                array->u.class_ob_array[i] = *rvm_new_class_object(rvm, class_definition);
+            }
             break;
         default:
             break;
@@ -1830,7 +1844,8 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
                                                  dimension,
                                                  dimension_list,
                                                  dimension_index - 1,
-                                                 array_type);
+                                                 array_type,
+                                                 class_definition);
         }
     }
 
@@ -1847,7 +1862,7 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
 RVM_Array* rvm_new_array_bool(Ring_VirtualMachine* rvm,
                               unsigned int         dimension,
                               unsigned int*        dimension_list) {
-    RVM_Array* array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL);
+    RVM_Array* array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL, nullptr);
 
     return array;
 }
@@ -1862,7 +1877,7 @@ RVM_Array* rvm_new_array_bool(Ring_VirtualMachine* rvm,
 RVM_Array* rvm_new_array_int(Ring_VirtualMachine* rvm,
                              unsigned int         dimension,
                              unsigned int*        dimension_list) {
-    RVM_Array* array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT);
+    RVM_Array* array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT, nullptr);
 
     return array;
 }
@@ -1877,7 +1892,7 @@ RVM_Array* rvm_new_array_int(Ring_VirtualMachine* rvm,
 RVM_Array* rvm_new_array_double(Ring_VirtualMachine* rvm,
                                 unsigned int         dimension,
                                 unsigned int*        dimension_list) {
-    RVM_Array* array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE);
+    RVM_Array* array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE, nullptr);
 
     return array;
 }
@@ -1892,7 +1907,7 @@ RVM_Array* rvm_new_array_double(Ring_VirtualMachine* rvm,
 RVM_Array* rvm_new_array_string(Ring_VirtualMachine* rvm,
                                 unsigned int         dimension,
                                 unsigned int*        dimension_list) {
-    RVM_Array* array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING);
+    RVM_Array* array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING, nullptr);
 
     return array;
 }
@@ -1907,35 +1922,12 @@ RVM_Array* rvm_new_array_string(Ring_VirtualMachine* rvm,
  * class_def_index: index of class definition in class table
  */
 RVM_Array* rvm_new_array_class_object(Ring_VirtualMachine* rvm,
-                                      unsigned int         field_count,
-                                      unsigned int         dimension) {
+                                      RVM_ClassDefinition* class_definition,
+                                      unsigned int         dimension,
+                                      unsigned int*        dimension_list) {
 
-    unsigned int capacity   = ROUND_UP8(dimension);
+    RVM_Array* array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLASS_OBJECT, class_definition);
 
-    RVM_Array*   array      = rvm_heap_new_empty_array(rvm);
-
-    array->type             = RVM_ARRAY_CLASS_OBJECT;
-    array->length           = dimension;
-    array->capacity         = capacity;
-    array->u.class_ob_array = (RVM_ClassObject*)mem_alloc(rvm->meta_pool, sizeof(RVM_ClassObject) * dimension);
-
-    size_t alloc_size       = sizeof(RVM_Value) * field_count;
-
-
-    for (unsigned int i = 0; i < dimension; i++) {
-        RVM_Value* field = (RVM_Value*)mem_alloc(rvm->meta_pool, alloc_size);
-        memset(field, 0, alloc_size);
-        // TODO: 有个遗留问题
-        // RVM_Value 的 type 没有设置
-
-        // object->u.array->u.class_object_array[i].class_def   = nullptr;
-        array->u.class_ob_array[i].field_count = field_count;
-        array->u.class_ob_array[i].field       = field;
-    }
-
-
-    // TODO: 这里的计算方式不对
-    // rvm->runtime_heap->alloc_size += sizeof(RVM_String) * dimension;
     return array;
 }
 
@@ -1957,7 +1949,7 @@ RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm,
     field                       = (RVM_Value*)mem_alloc(rvm->meta_pool, alloc_size);
     memset(field, 0, alloc_size);
     // TODO: 有个遗留问题
-    // RVM_Value 的 type 没有设置
+    // field RVM_Value 的 type 没有设置
 
     class_ob->class_ref   = class_definition;
     class_ob->field_count = class_definition->field_size;
