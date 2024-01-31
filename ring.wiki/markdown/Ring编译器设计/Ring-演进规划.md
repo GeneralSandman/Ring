@@ -64,6 +64,21 @@
 
 -----------------------------
 
+## Ring编译器开发内容流程细分
+
+将工作细化为以下几类工作：
+- 调研: 深度理解某项功能
+- 设计: 需求分析、规划，设计语法，设计功能，设计某项功能, 代码实现
+- 测试: 完善测试用例
+- 重构: 代码逻辑的重构
+- 优化: 优化Ring本身的不足
+
+- ⭕️ : 重点关注代办
+- ✅ : 完成
+
+
+
+
 
 ## 参考资料汇总
 
@@ -97,26 +112,25 @@ Lua源码分析
 -----------------------------
 
 
+## Lua
 
 
-## 关于研究Lua的方法论和路线图
+### 关于研究Lua的方法论和路线图
 
 1. 不能有急于求成的心态, 创建编译器是一个很大的工作量, 需要长时间的付出和规划
 2. 需要集中精力研究 Lua的源代码 和 Ring
 3. 研究的方向主要集中于
 - gc
 - 字节码格式
-- 
 
 
------------------------------
 
 
-## 关于研究Lua的哪个版本
+### 关于研究Lua的哪个版本
 
 lua 所有的版本 https://www.lua.org/versions.html
 
-### 1. lua 4.0.1  https://github.com/GeneralSandman/lua-4.0.1
+#### 1. lua 4.0.1  https://github.com/GeneralSandman/lua-4.0.1
    
 简单, stack-based virtual machine 
 可能方便
@@ -126,7 +140,7 @@ lua 所有的版本 https://www.lua.org/versions.html
 gc算法比较老旧
 没有 coroutine
 
-### 2. lua 5.4.6  https://github.com/GeneralSandman/lua-5.4.6
+#### 2. lua 5.4.6  https://github.com/GeneralSandman/lua-5.4.6
 
 可能理解起来比较复杂, 
 
@@ -134,8 +148,7 @@ gc算法比较老旧
 
 TIP: 推荐 Lua 5.4.6 版本作为研究对象.
 
-## 《自己动手实现Lua：虚拟机、编译器和标准库》
-
+### 《自己动手实现Lua：虚拟机、编译器和标准库》
 
 这个书籍有几个地方其实我不太认可, 就是在实现 virtual machine stack 的时候, 使用的golang 的 interface{} 去存储数据,
 不太认可这样的办法, 可能借用Golang的特性, 简化的虚拟机的实现方式
@@ -143,41 +156,40 @@ TIP: 推荐 Lua 5.4.6 版本作为研究对象.
 基于 Lua 5.4.4
 
 
-### 1. 第二章 ———— 二进制chunk格式详解
+#### 1. 第二章 ———— 二进制chunk格式详解
 
 了解Lua 5.4.4 版本的 bytecode的基本格式, 知道是如何解析的, 并且实现了解析 Lua Bytecode.
 header: 校验码, 如何加载
 body: proto 的基本格式
 
 
-### 2. 第三章 ———— 指令集
+#### 2. 第三章 ———— 指令集
 
 介绍Lua虚拟机指令集和指令编码格式, 对指令进行解码.
 
 TODO: 这里还没通过代码实现
 
 
-### 3. 第四章 至 第六章
+#### 3. 第四章 至 第六章
 
 主要介绍如何要实现一个stack-based virtual machine, 可以解释执行大概一半的Lua虚拟机指令.
 
 但是自己在 Ring 已经实现了 stack-based virtual machine, 其实这三章可以暂时略过.
 
 
-### 4. 第七章 至 第十二章
+#### 4. 第七章 至 第十二章
 
 介绍 表, 函数调用, Closure&Upvalue, 元编程, 迭代器, 异常和错误处理
 
 TODO: Closure&Upvalue
 
------------------------------
 
 
 
-## 想要借鉴的一些语法
+### Ring想要借鉴的一些Lua语法
 
 
-### 1. lua 索引
+#### 1. lua 索引
 ```
 索引
 对 table 的索引使用方括号 []。Lua 也提供了 . 操作。
@@ -195,23 +207,13 @@ www.runoob.com
 www.runoob.com
 ```
 
------------------------------
 
-## 工作内容流程细分
-
-将工作细化为以下几类工作：
-- 调研: 深度理解某项功能
-- 设计: 需求分析、规划，设计语法，设计功能，设计某项功能, 代码实现
-- 测试: 完善测试用例
-- 重构: 代码逻辑的重构
-- 优化: 优化Ring本身的不足
-
-- ⭕️ : 重点关注代办
-- ✅ : 完成
 
 -----------------------------
 
-## 测试集
+## 测试
+
+### 测试集
 
 ```
 2024-01-25
@@ -241,9 +243,11 @@ global value 来说，全局变量没有进行初始化。
 package_unit_update_line_content 有点bug, 文件的最后一行不能存储下来
 
 
------------------------------
 
-## 要完善的测试用例
+### 测试集 ring dump
+
+
+### 要完善的测试用例
 
 1. function return class object
 2. Pass class object as parameter to function
@@ -266,7 +270,7 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 -----------------------------
 
 
-## 需要完善的语义报错
+## 专项-语义报错
 
 1. 变量名称重复
    1. block中定义的 局部变量重复(函数没有参数)
@@ -305,7 +309,7 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 -----------------------------
 
 
-## 类
+## 专项-类
 
 1. field类型
    1. bool ✅ 
@@ -315,7 +319,10 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
    5. class (class的嵌套定义与引用)
 
 
-## 数组
+-----------------------------
+
+
+## 专项-数组
 
 1. 数组 new 支持动态，e.g.  `array = new int[a,b,c];`
 
@@ -333,6 +340,27 @@ class-object  未测试 ⭕️
    这里有一个隐喻，就是jobs[0] 取出来应该得是个指针，
    不能是深度copy
    不然继续访问 jobs[0].Running 还是老的Value。
+
+
+-----------------------------
+
+## 2024-01-29周
+
+
+### *A. Makefile检测 flex bison 的版本是否符合要求*
+
+
+### *B. 重新设计并验证gc*
+
+
+### *C. 测试 ring dump*
+
+
+### *D. 完善 class-object literal*
+
+
+1. 测试 初始化 Field 是不按照顺序的
+2. OPCODE_OPERAND_TYPE_2BYTE_AB 需要改一下
 
 -----------------------------
 
@@ -594,7 +622,7 @@ TEST_DETAIL_SUMMARY="./test/ring-测试用例表.md"
 ```
 
 
-## *G. 研究一下 bison的安装方法*
+### *G. 研究一下 bison的安装方法*
 
 ```
 ./configure
@@ -608,7 +636,7 @@ bison 安装到指定位置之后, 需要动态设置 src/Makefile $(Bison) $(Fl
 
 
 
-## *H. class 中存放string* ✅
+### *H. class 中存放string* ✅
 
 
 

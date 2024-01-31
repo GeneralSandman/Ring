@@ -41,7 +41,7 @@ e.g. The thired line is must empty.
 void rvm_add_static_variable(Package_Executer*  executer,
                              RVM_RuntimeStatic* runtime_static) {
 
-    debug_log_with_white_coloar("\t");
+    debug_exec_info_with_white("\t");
 
     unsigned int size    = executer->global_variable_size;
     runtime_static->size = size;
@@ -54,7 +54,7 @@ If you not flod function signature, not need add a empty line.
 
 ```
 void ring_bytecode_dump(Package_Executer* executer, FILE* output) {
-    debug_log_with_darkgreen_coloar("\t");
+    debug_generate_info_with_darkgreen("\t");
 }
 ```
 
