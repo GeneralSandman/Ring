@@ -213,7 +213,7 @@ void class_def_deep_copy(Package_Executer*    executer,
     dst->source_file            = src->source_file;
     dst->start_line_number      = src->start_line_number;
     dst->end_line_number        = src->end_line_number;
-    dst->identifier             = src->class_identifier;
+    dst->identifier             = src->identifier;
     dst->field_size             = 0;
     dst->field_list             = nullptr;
     dst->method_size            = 0;
@@ -1926,24 +1926,8 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer*     
         generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, oper_num, pos->line_number);
 
 
-        char*        field_identifier = pos->field_identifier;
-        FieldMember* field_member     = nullptr;
-        for (ClassMemberDeclaration* decl = class_definition->member; decl != nullptr; decl = decl->next) {
-            if (decl->type == MEMBER_FIELD) {
-                if (strcmp(field_identifier, decl->u.field->identifier) == 0) {
-                    field_member = decl->u.field;
-                    break;
-                }
-            } else if (decl->type == MEMBER_METHOD) {
-            }
-        }
-        // 应该在语义分析中报错
-        if (field_member == nullptr) {
-            // TODO:  完善报错
-            ring_error_report("`%s` is not field of class `%s`.",
-                              field_identifier,
-                              literal_expression->type_specifier->u.class_type->class_identifier);
-        }
+        FieldMember* field_member = pos->field_member;
+        assert(field_member != nullptr);
 
 
         // 3. pop_field_xxx

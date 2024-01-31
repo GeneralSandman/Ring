@@ -1021,7 +1021,7 @@ struct ClassDefinition {
     unsigned int            end_line_number;   // 源码的结束行
 
     unsigned int            class_index;
-    char*                   class_identifier;
+    char*                   identifier;
     ClassMemberDeclaration* member;
 
     ClassDefinition*        next;
@@ -1314,7 +1314,7 @@ struct Identifier {
     unsigned int   line_number;
 
     IdentifierType type;
-    char*          identifier_name;
+    char*          name;
     unsigned int   array_index;  // 供数组使用，还要考虑一下负值索引的问题
     Function*      parent_scope; // 作用域
 
@@ -1333,6 +1333,7 @@ struct FieldInitExpression {
     unsigned int         line_number;
 
     char*                field_identifier;
+    FieldMember*         field_member; // 在 fix_ast 中修正
     Expression*          init_expression;
     FieldInitExpression* next;
 };
@@ -1594,21 +1595,23 @@ typedef enum {
     ERROR_CODE_SEMANTIC_CHECH_ERROR,
 
 
-    ERROR_CODE_GRAMMAR_ERROR          = 100000, // 语法错误
+    ERROR_CODE_GRAMMAR_ERROR            = 100000, // 语法错误
 
 
-    ERROR_UNDEFINITE_VARIABLE         = 200000,
-    ERROR_REDEFINITE_GLOBAL_VARIABLE  = 200001, // 重复定义全局变量
-    ERROR_REDEFINITE_FUNCTION         = 200002, // 重复定义函数
-    ERROR_MINUS_OPER_INVALID_USE      = 200003, // - 符号 不合法使用
-    ERROR_DUPLICATE_IMPORT_PACKAGE    = 200004, // 重复 import package
-    ERROR_INVALID_VARIABLE_IDENTIFIER = 200005, // 不合法的变量标识符
-    ERROR_TOO_MANY_LOCAL_VARIABLES    = 200006, // 局部变量数量超过限制
-    ERROR_TOO_MANY_FIELDS_IN_CLASS    = 200007, // class 中 field 的数量超过限制
-    ERROR_TOO_MANY_METHODS_IN_CLASS   = 200008, // class 中 method 的数量超过限制
-    ERROR_MISS_CLASS_DEFINITION       = 200009, // 缺少 class 定义
-    ERROR_INVALID_FIELD_IN_CLASS      = 200010, // field 不合法
-    ERROR_ARRAY_DIMENSION_INVALID     = 200011, // 数组维度不合法
+    ERROR_UNDEFINITE_VARIABLE           = 200000,
+    ERROR_REDEFINITE_GLOBAL_VARIABLE    = 200001, // 重复定义全局变量
+    ERROR_REDEFINITE_FUNCTION           = 200002, // 重复定义函数
+    ERROR_MINUS_OPER_INVALID_USE        = 200003, // - 符号 不合法使用
+    ERROR_DUPLICATE_IMPORT_PACKAGE      = 200004, // 重复 import package
+    ERROR_INVALID_VARIABLE_IDENTIFIER   = 200005, // 不合法的变量标识符
+    ERROR_TOO_MANY_LOCAL_VARIABLES      = 200006, // 局部变量数量超过限制
+    ERROR_TOO_MANY_FIELDS_IN_CLASS      = 200007, // class 中 field 的数量超过限制
+    ERROR_TOO_MANY_METHODS_IN_CLASS     = 200008, // class 中 method 的数量超过限制
+    ERROR_MISS_CLASS_DEFINITION         = 200009, // 缺少 class 定义
+    ERROR_INVALID_FIELD_IN_CLASS        = 200010, // field 不合法
+    ERROR_ARRAY_DIMENSION_INVALID       = 200011, // 数组维度不合法
+    ERROR_ASSIGN_TO_METHOD_OF_CLASS     = 200012, // 不能给 class中 method赋值
+    ERROR_INVALID_NOT_FOUND_CLASS_FIELD = 200013, // 找不到 class field
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,

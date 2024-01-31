@@ -233,7 +233,7 @@ void package_dump(Package* package) {
 
     printf("|## ClassDefinition:\n");
     for (auto class_definition : package->class_definition_list) {
-        printf("|\tclass_definition identifier:%s\n", class_definition->class_identifier);
+        printf("|\tclass_definition identifier:%s\n", class_definition->identifier);
     }
 
     printf("|## Function:\n");
@@ -328,7 +328,7 @@ void package_unit_dump(PackageUnit* package_unit) {
 
     printf("|## ClassDefinition:\n");
     for (auto class_definition : package_unit->class_definition_list) {
-        printf("|\tclass_definition identifier:%s\n", class_definition->class_identifier);
+        printf("|\tclass_definition identifier:%s\n", class_definition->identifier);
     }
 
     printf("|## Function:\n");

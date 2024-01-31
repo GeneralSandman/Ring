@@ -348,6 +348,7 @@ FieldInitExpression* create_field_init_expression(char*       field_identifier,
     FieldInitExpression* expression = (FieldInitExpression*)mem_alloc(get_front_mem_pool(), sizeof(FieldInitExpression));
     expression->line_number         = package_unit_get_line_number();
     expression->field_identifier    = field_identifier;
+    expression->field_member        = nullptr; // 在 fix_ast 中修正
     expression->init_expression     = init_expression;
     expression->next                = nullptr;
     return expression;
@@ -388,7 +389,7 @@ AssignExpression* create_multi_assign_expression(char*       first_identifier,
 
     Expression* prev = left;
     for (Identifier* pos = identifier_list; pos; pos = pos->next) {
-        prev->next = create_expression_identifier(pos->identifier_name);
+        prev->next = create_expression_identifier(pos->name);
         prev       = prev->next;
     }
 
@@ -480,13 +481,13 @@ ArgumentList* create_argument_list_from_expression(Expression* expression) {
 Identifier* new_identifier(IdentifierType type, char* name) {
     debug_ast_info_with_yellow("identifier name:%s", name);
 
-    Identifier* identifier      = (Identifier*)mem_alloc(get_front_mem_pool(), sizeof(Identifier));
-    identifier->line_number     = package_unit_get_line_number();
-    identifier->type            = type;
-    identifier->identifier_name = name;
-    identifier->array_index     = 0;
-    identifier->parent_scope    = nullptr;
-    identifier->next            = nullptr;
+    Identifier* identifier   = (Identifier*)mem_alloc(get_front_mem_pool(), sizeof(Identifier));
+    identifier->line_number  = package_unit_get_line_number();
+    identifier->type         = type;
+    identifier->name         = name;
+    identifier->array_index  = 0;
+    identifier->parent_scope = nullptr;
+    identifier->next         = nullptr;
 
     return identifier;
 }
@@ -524,7 +525,7 @@ Function* new_function_definition(FunctionType        type,
                                   FunctionReturnList* return_list,
                                   Block*              block) {
 
-    debug_ast_info_with_yellow("functionType:%d, identifier:%s", type, identifier->identifier_name);
+    debug_ast_info_with_yellow("functionType:%d, identifier:%s", type, identifier->name);
 
     unsigned int parameter_list_size = 0;
     // 把函数参数的变量添加到 variable_list 中
@@ -541,7 +542,7 @@ Function* new_function_definition(FunctionType        type,
     function->attribute_info      = nullptr;
     function->func_index          = get_package_unit()->function_list.size();
     function->type                = type;
-    function->function_name       = identifier->identifier_name;
+    function->function_name       = identifier->name;
     function->parameter_list_size = parameter_list_size;
     function->parameter_list      = parameter_list;
     function->block               = block;
@@ -994,7 +995,7 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier,
     Expression*  pos_init = initializer_list;
     for (pos_ider = identifier_list; pos_ider; pos_ider = pos_ider->next) {
         // error-report ERROR_INVALID_VARIABLE_IDENTIFIER
-        if (strcmp(pos_ider->identifier_name, "self") == 0) {
+        if (strcmp(pos_ider->name, "self") == 0) {
             DEFINE_ERROR_REPORT_STR;
 
             snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -1021,7 +1022,7 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier,
         }
 
 
-        Declaration* decl = create_declaration(type_specifier, pos_ider->identifier_name, pos_init);
+        Declaration* decl = create_declaration(type_specifier, pos_ider->name, pos_init);
         if (pos_init) {
             decl->initializer       = pos_init;
             pos_init                = pos_init->next;
@@ -1143,7 +1144,7 @@ ClassDefinition* start_class_definition(char* class_identifier) {
     class_def->source_file       = package_unit_get_file_name();
     class_def->start_line_number = package_unit_get_line_number();
     class_def->end_line_number   = package_unit_get_line_number();
-    class_def->class_identifier  = class_identifier;
+    class_def->identifier        = class_identifier;
     class_def->member            = nullptr;
     class_def->next              = nullptr;
 
@@ -1250,7 +1251,7 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier,
     FieldMember* field_member    = (FieldMember*)mem_alloc(get_front_mem_pool(), sizeof(FieldMember));
     field_member->line_number    = package_unit_get_line_number();
     field_member->type_specifier = type_specifier;
-    field_member->identifier     = identifier_list->identifier_name;
+    field_member->identifier     = identifier_list->name;
     field_member->index_of_class = 0;
 
     return field_member;
@@ -1276,7 +1277,7 @@ MethodMember* create_class_member_method(FunctionType        type,
 
     method_member->index_of_class      = -1;
 
-    method_member->identifier          = identifier->identifier_name;
+    method_member->identifier          = identifier->name;
 
     method_member->parameter_list_size = 0;
     method_member->parameter_list      = parameter_list;

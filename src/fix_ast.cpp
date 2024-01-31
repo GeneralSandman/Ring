@@ -598,7 +598,7 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
 
 
     // self
-    TypeSpecifier* type_specifier    = create_class_type_specifier(class_definition->class_identifier);
+    TypeSpecifier* type_specifier    = create_class_type_specifier(class_definition->identifier);
 
     Declaration*   self_declaration  = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
     self_declaration->line_number    = method->start_line_number;
@@ -714,11 +714,86 @@ void fix_class_object_literal_expression(Expression*                   expressio
 
     fix_type_specfier(literal_expression->type_specifier);
 
+    ClassDefinition*     class_definition = literal_expression->type_specifier->u.class_type->class_definition;
 
-    FieldInitExpression* pos = literal_expression->field_init_expression_list;
+
+    FieldInitExpression* pos              = literal_expression->field_init_expression_list;
     for (; pos != nullptr; pos = pos->next) {
-        // 这里只修正 init_expression
-        // TODO: 修正 identifier 和 class field 的index关系
+
+        char*        field_identifier = pos->field_identifier;
+        FieldMember* field_member     = nullptr;
+        for (ClassMemberDeclaration* decl = class_definition->member; decl != nullptr; decl = decl->next) {
+            if (decl->type == MEMBER_FIELD) {
+                if (strcmp(field_identifier, decl->u.field->identifier) == 0) {
+                    field_member = decl->u.field;
+                    break;
+                }
+            } else if (decl->type == MEMBER_METHOD) {
+
+                // error-report ERROR_ASSIGN_TO_METHOD_OF_CLASS
+                if (strcmp(field_identifier, decl->u.method->identifier) == 0) {
+                    DEFINE_ERROR_REPORT_STR;
+
+                    snprintf(compile_err_buf, sizeof(compile_err_buf),
+                             "`%s` is method of class `%s`, cant't assign value to method; E:%d.",
+                             field_identifier,
+                             class_definition->identifier,
+                             ERROR_ASSIGN_TO_METHOD_OF_CLASS);
+
+
+                    ErrorReportContext context = {
+                        .package                 = nullptr,
+                        .package_unit            = get_package_unit(),
+                        .source_file_name        = get_package_unit()->current_file_name,
+                        .line_content            = package_unit_get_line_content(pos->line_number),
+                        .line_number             = pos->line_number,
+                        .column_number           = package_unit_get_column_number(),
+                        .error_message           = std::string(compile_err_buf),
+                        .advice                  = std::string(compile_adv_buf),
+                        .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                        .ring_compiler_file      = (char*)__FILE__,
+                        .ring_compiler_file_line = __LINE__,
+                    };
+                    ring_compile_error_report(&context);
+                    break;
+                }
+            }
+        }
+
+        // error-report ERROR_INVALID_NOT_FOUND_CLASS_FIELD
+        if (field_member == nullptr) {
+            DEFINE_ERROR_REPORT_STR;
+
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "ths class `%s` has not field `%s`; E:%d.",
+                     class_definition->identifier,
+                     field_identifier,
+                     ERROR_ASSIGN_TO_METHOD_OF_CLASS);
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                     "the class `%s` definition in %s:%d.",
+                     class_definition->identifier,
+                     class_definition->source_file.c_str(), class_definition->start_line_number);
+
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(pos->line_number),
+                .line_number             = pos->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+
+        pos->field_member = field_member;
+
+        // fix init_expression
         fix_expression(pos->init_expression, block, func);
     }
 }
@@ -783,7 +858,7 @@ void fix_class_member_expression(MemberExpression* member_expression,
 ClassDefinition* search_class_definition(char* class_identifier) {
     assert(class_identifier != nullptr);
     for (ClassDefinition* pos : get_package_unit()->class_definition_list) {
-        if (0 == strcmp(pos->class_identifier, class_identifier)) {
+        if (0 == strcmp(pos->identifier, class_identifier)) {
             return pos;
         }
     }
