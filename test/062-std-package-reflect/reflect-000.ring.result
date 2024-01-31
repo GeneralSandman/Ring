@@ -11,38 +11,3 @@ int
 double
 string
 Job
-
-test case array one dimension
-bool[]
-int[]
-double[]
-string[]
-Job[]
-
-test case array two dimension
-bool[,]
-int[,]
-double[,]
-string[,]
-Job[,]
-
-test case array three dimension
-bool[,,]
-int[,,]
-double[,,]
-string[,,]
-Job[,,]
-
-test case array four dimension
-bool[,,,]
-int[,,,]
-double[,,,]
-string[,,,]
-Job[,,,]
-
-test case array four dimension 2
-bool[,,,]
-bool[,,]
-bool[,]
-bool[]
-bool

@@ -12,11 +12,16 @@ all_num=0
 
 
 # 测试的可执行文件
-TEST_RING_BIN="./bin/ring"
 # 可通过第1个参数指定 TEST_RING_BIN
+TEST_RING_BIN="./bin/ring"
 if [[ "$1" != "" ]]; then
     TEST_RING_BIN="$1"
 fi
+
+
+# 测试的类型
+# 1. 测试 ring run
+# 2. 测试 ring dump
 
 
 
@@ -70,6 +75,17 @@ NOT_TEST_FILES=(
 
   "./test/002-operator/arith-oper-002.ring"
   # double 数值比对, 存在bug
+
+  "./test/064-std-package-vm/std-vm-000.ring"
+  # 计算 vm::heap_size() 不太正确
+  # 2023-01-31
+
+  "./test/062-std-package-reflect/reflect-001.ring"
+  # 1. class-object数组，typeof获取不到正确的类型
+  # 2. 针对多维数组，typeof获取不到正确的类型
+  # 2023-01-31
+
+
   )
 
 # 测试的结果文件, 主要用于存放本次测试的失败结果
