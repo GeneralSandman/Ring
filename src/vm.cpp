@@ -79,6 +79,8 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_POP_FIELD_INT, "pop_field_int", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", "[int,object]->[]"},
     {RVM_CODE_POP_FIELD_DOUBLE, "pop_field_double", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", "[double,object]->[]"},
     {RVM_CODE_POP_FIELD_STRING, "pop_field_string", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", "[string,object]->[]"},
+    {RVM_CODE_POP_FIELD_CLASS_OB, "pop_field_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", "[object,object]->[]"},
+    {RVM_CODE_POP_FIELD_ARRAY, "pop_field_array", OPCODE_OPERAND_TYPE_2BYTE_As, -1, 3, "", "[array,object]->[]"},
     {RVM_CODE_PUSH_FIELD_BOOL, "push_field_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[bool]"},
     {RVM_CODE_PUSH_FIELD_INT, "push_field_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[int]"},
     {RVM_CODE_PUSH_FIELD_DOUBLE, "push_field_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "", "[object]->[double]"},
@@ -157,6 +159,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
     // duplicate
     {RVM_CODE_DUPLICATE, "duplicate", OPCODE_OPERAND_TYPE_0BYTE, 1, 1, "", ""},
+    {RVM_CODE_DUPLICATE_V2, "duplicate_v2", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, 3, "", ""},
 
 
     // func
@@ -188,7 +191,8 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_STRING_CAPACITY, "push_string_capacity", OPCODE_OPERAND_TYPE_0BYTE, 0, 1, "", ""},
 
     // class
-    {RVM_CODE_NEW_CLASS_OBJECT_LITERAL, "new_class_object_literal", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, 3, "", ""},
+    // OPCODE_OPERAND_TYPE_2BYTE_AB 需要改一下
+    {RVM_CODE_NEW_CLASS_OBJECT_LITERAL, "new_class_object_literal", OPCODE_OPERAND_TYPE_1BYTE, 1, 2, "", ""},
 
     // range
     {RVM_CODE_FOR_RANGE_ARRAY_BOOL, "range_array_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, 3, "range bool value for array", ""},

@@ -324,7 +324,6 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int         code_size              = rvm->executer->code_size;
     RVM_ConstantPool*    constant_pool_list     = rvm->executer->constant_pool_list;
     RVM_RuntimeStack*    runtime_stack          = rvm->runtime_stack;
-    RVM_RuntimeStatic*   runtime_static         = rvm->runtime_static;
 
     unsigned int         index                  = 0;
     unsigned int         runtime_static_index   = 0;
@@ -332,6 +331,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int         func_index             = 0;
     unsigned int         method_index           = 0;
     unsigned int         oper_num               = 0;
+    unsigned int         field_index            = 0;
     unsigned int         dimension              = 0;
     unsigned int         const_index            = 0;
     unsigned int         caller_stack_base      = 0;
@@ -750,61 +750,82 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
              * 这里是不是反过来写更好理解
              *
              */
-            class_ob_value                               = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
-            oper_num                                     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            class_ob_value->field[oper_num].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
+            class_ob_value                                  = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            field_index                                     = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_ob_value->field[field_index].type         = RVM_VALUE_TYPE_BOOL;
+            class_ob_value->field[field_index].u.bool_value = STACK_GET_BOOL_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_INT:
-            class_ob_value                              = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
-            oper_num                                    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            class_ob_value->field[oper_num].u.int_value = STACK_GET_INT_OFFSET(rvm, -2);
+            class_ob_value                                 = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            field_index                                    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_ob_value->field[field_index].type        = RVM_VALUE_TYPE_INT;
+            class_ob_value->field[field_index].u.int_value = STACK_GET_INT_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_DOUBLE:
-            class_ob_value                                 = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
-            oper_num                                       = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            class_ob_value->field[oper_num].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -2);
+            class_ob_value                                    = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            field_index                                       = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_ob_value->field[field_index].type           = RVM_VALUE_TYPE_DOUBLE;
+            class_ob_value->field[field_index].u.double_value = STACK_GET_DOUBLE_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
         case RVM_CODE_POP_FIELD_STRING:
-            class_ob_value                                 = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
-            oper_num                                       = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            class_ob_value->field[oper_num].u.string_value = STACK_GET_STRING_OFFSET(rvm, -2);
+            class_ob_value                                    = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            field_index                                       = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_ob_value->field[field_index].type           = RVM_VALUE_TYPE_STRING;
+            class_ob_value->field[field_index].u.string_value = STACK_GET_STRING_OFFSET(rvm, -2);
             runtime_stack->top_index -= 2;
             rvm->pc += 3;
             break;
+        case RVM_CODE_POP_FIELD_CLASS_OB:
+            class_ob_value                                      = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            field_index                                         = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_ob_value->field[field_index].type             = RVM_VALUE_TYPE_CLASS_OB;
+            class_ob_value->field[field_index].u.class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -2);
+            runtime_stack->top_index -= 2;
+            rvm->pc += 3;
+            break;
+        case RVM_CODE_POP_FIELD_ARRAY:
+            class_ob_value                                   = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            field_index                                      = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            class_ob_value->field[field_index].type          = RVM_VALUE_TYPE_ARRAY;
+            class_ob_value->field[field_index].u.array_value = STACK_GET_ARRAY_OFFSET(rvm, -2);
+            runtime_stack->top_index -= 2;
+            rvm->pc += 3;
+            break;
+
         case RVM_CODE_PUSH_FIELD_BOOL:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
-            oper_num       = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_BOOL_OFFSET(rvm, -1, class_ob_value->field[oper_num].u.bool_value);
+            field_index    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_BOOL_OFFSET(rvm, -1, class_ob_value->field[field_index].u.bool_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_INT:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
-            oper_num       = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_INT_OFFSET(rvm, -1, class_ob_value->field[oper_num].u.int_value);
+            field_index    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_INT_OFFSET(rvm, -1, class_ob_value->field[field_index].u.int_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_DOUBLE:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
-            oper_num       = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_DOUBLE_OFFSET(rvm, -1, class_ob_value->field[oper_num].u.double_value);
+            field_index    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_DOUBLE_OFFSET(rvm, -1, class_ob_value->field[field_index].u.double_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_STRING:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
-            oper_num       = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_STRING_OFFSET(rvm, -1, class_ob_value->field[oper_num].u.string_value);
+            field_index    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_STRING_OFFSET(rvm, -1, class_ob_value->field[field_index].u.string_value);
             rvm->pc += 3;
             break;
         case RVM_CODE_PUSH_FIELD_CLASS_OB:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
-            oper_num       = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            STACK_SET_CLASS_OB_OFFSET(rvm, -1, class_ob_value->field[oper_num].u.class_ob_value);
+            field_index    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_CLASS_OB_OFFSET(rvm, -1, class_ob_value->field[field_index].u.class_ob_value);
             rvm->pc += 3;
             break;
 
@@ -1047,6 +1068,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc++;
             break;
+        case RVM_CODE_DUPLICATE_V2: {
+            unsigned int dst_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
+            unsigned int src_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]);
+            STACK_COPY_OFFSET(rvm, -dst_offset, -src_offset);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+        } break;
 
         // func
         case RVM_CODE_PUSH_FUNC:
@@ -1250,17 +1278,13 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             // class
         case RVM_CODE_NEW_CLASS_OBJECT_LITERAL: {
-            unsigned int class_index   = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]); // field 的数量不能超过 255
-            unsigned int init_exp_size = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]); // field 的数量不能超过 255
-            // class_index 在 type_specifier_deep_copy 没有修正
-            // TODO: 后期修正
-            rvm_class_definition       = &(rvm->class_list[class_index]);
+            unsigned int class_index = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
+            rvm_class_definition     = &(rvm->class_list[class_index]);
 
-            class_ob_value             = rvm_new_class_object_literal(rvm, rvm_class_definition, init_exp_size);
-            runtime_stack->top_index -= init_exp_size;
+            class_ob_value           = rvm_new_class_object(rvm, rvm_class_definition);
             STACK_SET_CLASS_OB_OFFSET(rvm, 0, class_ob_value);
             runtime_stack->top_index++;
-            rvm->pc += 3;
+            rvm->pc += 2;
         } break;
 
         // range
@@ -2011,24 +2035,6 @@ RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size) {
     return array;
 }
 
-RVM_ClassObject* rvm_new_class_object_literal(Ring_VirtualMachine* rvm,
-                                              RVM_ClassDefinition* class_definition,
-                                              unsigned int         init_exp_size) {
-
-    // rvm_new_class_object 这个需要重写一下
-    RVM_ClassObject* class_ob = rvm_new_class_object(rvm, class_definition);
-    if (class_definition->field_size != init_exp_size) {
-        // error report
-        ring_error_report("the number of class init expresison list must equal to the number of class field");
-    }
-
-    // 从 runtime_stack 中取出 已经push的, 然后依次初始化
-    unsigned init_exp_of_stack_index = rvm->runtime_stack->top_index - init_exp_size;
-    for (unsigned int i = 0; i < init_exp_size; i++) {
-        class_ob->field[i] = rvm->runtime_stack->data[init_exp_of_stack_index + i];
-    }
-    return class_ob;
-}
 
 void rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Array* array, int* value) {
     // FIXME: 这里unsigned int -> int

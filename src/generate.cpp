@@ -1905,22 +1905,53 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer*     
     assert(literal_expression->type_specifier != nullptr);
     assert(literal_expression->field_init_expression_list != nullptr);
 
-    unsigned int         init_exp_size = 0;
-    unsigned int         oper_num      = 0;
 
-    FieldInitExpression* pos           = literal_expression->field_init_expression_list;
-    for (; pos != nullptr; pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->init_expression, opcode_buffer, 0);
-        init_exp_size++;
-    }
-
-    // FIXME: 这里要做强制检查
+    // TODO: 这里要做强制检查
     ClassDefinition* class_definition = literal_expression->type_specifier->u.class_type->class_definition;
 
-    // 需要知道初始化list中表达式的数量
-    // 需要知道 class object 占多大的空间
-    oper_num                          = (class_definition->class_index << 8) | init_exp_size;
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLASS_OBJECT_LITERAL, oper_num, literal_expression->line_number);
+    // 0. new class-object
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLASS_OBJECT_LITERAL, class_definition->class_index, literal_expression->line_number);
+
+
+    FieldInitExpression* pos = literal_expression->field_init_expression_list;
+    for (; pos != nullptr; pos = pos->next) {
+
+        // 1. push init-expression
+        generate_vmcode_from_expression(executer, pos->init_expression, opcode_buffer, 0);
+
+
+        // 2. shallow duplicate class-object
+        unsigned int oper_num = 0;
+        oper_num              = (0 << 8) | 2;
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE_V2, oper_num, pos->line_number);
+
+
+        char*        field_identifier = pos->field_identifier;
+        FieldMember* field_member     = nullptr;
+        for (ClassMemberDeclaration* decl = class_definition->member; decl != nullptr; decl = decl->next) {
+            if (decl->type == MEMBER_FIELD) {
+                if (strcmp(field_identifier, decl->u.field->identifier) == 0) {
+                    field_member = decl->u.field;
+                    break;
+                }
+            } else if (decl->type == MEMBER_METHOD) {
+            }
+        }
+        // 应该在语义分析中报错
+        if (field_member == nullptr) {
+            // TODO:  完善报错
+            ring_error_report("`%s` is not field of class `%s`.",
+                              field_identifier,
+                              literal_expression->type_specifier->u.class_type->class_identifier);
+        }
+
+
+        // 3. pop_field_xxx
+        RVM_Opcode opcode = RVM_CODE_UNKNOW;
+        opcode            = convert_opcode_by_rvm_type(RVM_CODE_POP_FIELD_BOOL, field_member->type_specifier);
+
+        generate_vmcode(executer, opcode_buffer, opcode, field_member->index_of_class, pos->line_number);
+    }
 }
 
 void generate_vmcode_from_array_class_object(Package_Executer*   executer,

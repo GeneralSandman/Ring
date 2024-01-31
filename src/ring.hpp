@@ -627,7 +627,7 @@ struct RVM_Opcode_Info {
     std::string       name;                    // 字节码字符串
     OpcodeOperandType operand_type;            // 字节码后边的操作数所占字节数量
     int               runtime_stack_increment; // 对运行时栈空间的增长 可为负值
-    int               pc_increment;            // 读取完本字节码，程序计数器的增长，用于读取下一字节码, 这个跟 operand_type 含义重复了, 后续优化
+    int               pc_increment;            // 读取完本字节码，程序计数器的增长，用于读取下一字节码, TODO: 这个跟 operand_type 含义重复了, 后续优化
 
 
     /*
@@ -712,6 +712,8 @@ typedef enum {
     RVM_CODE_POP_FIELD_INT,
     RVM_CODE_POP_FIELD_DOUBLE,
     RVM_CODE_POP_FIELD_STRING,
+    RVM_CODE_POP_FIELD_CLASS_OB,
+    RVM_CODE_POP_FIELD_ARRAY,
     RVM_CODE_PUSH_FIELD_BOOL,
     RVM_CODE_PUSH_FIELD_INT,
     RVM_CODE_PUSH_FIELD_DOUBLE,
@@ -788,7 +790,8 @@ typedef enum {
     RVM_CODE_JUMP_IF_TRUE,
 
     // duplicate
-    RVM_CODE_DUPLICATE,
+    RVM_CODE_DUPLICATE, // TODO: 这个扩展性较差，后续删除，使用 RVM_CODE_DUPLICATE_V2
+    RVM_CODE_DUPLICATE_V2,
 
     // func
     RVM_CODE_PUSH_FUNC,
@@ -2229,8 +2232,6 @@ RVM_Array*           rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int siz
 RVM_Array*           rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
 RVM_Array*           rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size);
 
-RVM_ClassObject*     rvm_new_class_object_literal(Ring_VirtualMachine* rvm,
-                                                  RVM_ClassDefinition* class_definition, unsigned int init_exp_size);
 
 void                 rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Array* array, int* value);
 void                 rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Array* array, int* value);
