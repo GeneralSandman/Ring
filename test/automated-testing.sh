@@ -97,7 +97,7 @@ TEST_RESULT="./automated-testing.sh.result"
 # 是否输出测试用例表: 0/1
 IS_EXPORT_TEST_DETAIL_SUMMARY=0
 # 输出测试用例表文件
-TEST_DETAIL_SUMMARY="./test/ring-测试用例表.md"
+TEST_DETAIL_SUMMARY="./test/ring-测试用例表.md.raw"
 # 在测试文件中，可以单独写几行用于描述测试的细节
 # 用`// TestDetail:` 开始的行表示
 TEST_DETAIL_PREFIX="^// TestDetail:"
