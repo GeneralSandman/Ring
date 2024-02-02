@@ -20,13 +20,22 @@ OBJS   = \
 	gc.o\
 	main.o
 
-# bison 可执行文件
+# bison 可执行文件路径
 # bison >= 3.8.2
-Bison  = /usr/local/Cellar/bison/3.8.2/bin/bison
+BisonBin     =  /usr/local/Cellar/bison/3.8.2/bin/bison
+BisonRequire = 3.8.2
+BisonVersion =  $(shell $(BisonBin) --version | grep 'bison' | awk '{print $$4}')
 
-# flex 可执行文件
+# flex 可执行文件路径
 # flex >= 2.6.4
-Flex = flex
+FlexBin      = flex
+FlexRequire  = 2.6.4
+FlexVersion  =  $(shell $(FlexBin) --version | grep 'flex' | awk '{print $$2}')
+
+# echo 宏
+SuccMsg = ""\033[32m[+]]:\033[0m""
+ErrMsg  = ""\033[31mERR:\033[0m""
+TipMsg  = ""\033[33mTIP:\033[0m""
 
 
 TOOL_GEN_VMCODE_DOC_TARGET= tool_gen_vmcode_doc
@@ -77,11 +86,6 @@ BIN = ../bin
 INCLUDES = \
 
 
-PLATS= linux macosx windows Darwim
-
-UNAME= uname
-
-
 .SUFFIXES: .cpp .c
 .cpp.o:
 	$(CC) $(CFLAGS) $<
@@ -95,19 +99,51 @@ $(TOOL_GEN_VMCODE_DOC_TARGET):$(TOOL_GEN_VMCODE_DOC_OBJS); $(shell if [ ! -e $(B
 	@echo "\033[32mBuild Tool Generate Vmcode Doc SUCCESS:" $(BIN)/$@ "\033[0m"
 
 
+
+# 验证编译工具链是否符合要求
+# linux macos : command -v 
+# windows : where
+check:
+	@command -v $(BisonBin) > /dev/null || { \
+		echo "$(ErrMsg) Not found '$(BisonBin)', please install 'bison'."; \
+		echo "$(TipMsg) Specify the path to the 'bison' executable use src/Makefile:25 @BisonBin" ; \
+		exit 1; \
+	}
+	@command -v $(FlexBin) > /dev/null || { \
+		echo "$(ErrMsg) Not found '$(FlexBin)', please install 'flex'."; \
+		echo "$(TipMsg) Specify the path to the 'flex' executable use src/Makefile:31 @FlexBin" ; \
+		exit 1; \
+	}
+
+	@echo "[+]bison version= \033[32m$(BisonVersion)\033[0m"
+	@echo "[+]flex  version= \033[32m$(FlexVersion)\033[0m"
+
+
+
+echo:
+	@echo "[+]bison path       = \033[32m$(BisonBin)\033[0m"
+	@echo "[+]bison version    = \033[32m$(BisonVersion)\033[0m"
+
+	@echo "[+]flex  path       = \033[32m$(FlexBin)\033[0m"
+	@echo "[+]flex  version    = \033[32m$(FlexVersion)\033[0m"
+
+	@echo "[+]ring  version    = \033[32m$(VERSION)\033[0m"
+
+
 clean:
 	rm -f *.o lex.yy.cpp y.tab.cpp y.tab.hpp y.output *~
 	@echo "\033[32mClean SUCCESS\033[0m"
+
 
 # 输出 y.output y.tab.cpp y.tab.hpp
 # -t : 诊断模式
 # -Wcounterexamples : generate conflict counterexamples
 y.tab.hpp y.tab.cpp : ring.bison.y
-	$(Bison) -o y.tab.cpp -dv -Wcounterexamples ring.bison.y  
+	$(BisonBin) -o y.tab.cpp -dv -Wcounterexamples ring.bison.y  
 
 # 输出 lex.yy.cpp
 lex.yy.cpp : ring.flex.l ring.bison.y y.tab.hpp
-	$(Flex) -o lex.yy.cpp ring.flex.l
+	$(FlexBin) -o lex.yy.cpp ring.flex.l
 
 
 lex.yy.o: lex.yy.cpp ring.hpp

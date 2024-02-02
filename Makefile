@@ -3,7 +3,6 @@ TOOL_GEN_VMCODE_DOC_TARGET=tool_gen_vmcode_doc
 
 INSTALL_TOP= /usr/local
 INSTALL_BIN= $(INSTALL_TOP)/bin
-INSTALL_PACK= $(INSTALL_TOP)/lib/ring
 INSTALL_PACK_STD = $(INSTALL_TOP)/lib/ring/std
 
 CMD_INSTALL= install -p
@@ -16,6 +15,10 @@ CMD_RM= rm -rf
 T_STD_PACKS= os io debug fmt vm math strings reflect
 
 
+PLATS= linux macosx windows Darwim
+
+UNAME= uname
+
 # 编译工具要求
 # bison >= 3.8.2
 # flex >= 2.6.4
@@ -25,7 +28,7 @@ T_STD_PACKS= os io debug fmt vm math strings reflect
 # 最后在 src/Makefile
 # -j10 10进程并发编译
 all:
-	@cd src && $(MAKE) $(TARGET) -j20
+	@cd src && $(MAKE) check && $(MAKE) $(TARGET) -j20
 
 # 生成一个脚本用于 将 Ring 虚拟机指令集生成一个 markdown表格
 # Usage:
@@ -33,7 +36,7 @@ all:
 $(TOOL_GEN_VMCODE_DOC_TARGET):
 	@cd src && $(MAKE) $@
 
-clean:
+clean check:
 	@cd src && $(MAKE) $@
 
 testall:
@@ -56,14 +59,15 @@ uninstall:
 	$(call uninstall_package_std)
 
 echo:
-	@echo "[Echo Build Info]"
-	@echo "[+]g++ Version= \033[32m`g++ --version`\033[0m" # >= 2.6.4
-	@echo "[+]Flex Version= \033[32m`flex --version`\033[0m" # >= 2.6.4
-	@echo "[+]Bison Version= \033[32m`bison --version`\033[0m" # >= 2.3
-	@echo "[+]PLATS= \033[32m$(PLATS)\033[0m"
-	@echo "[+]PLAT=" "\033[32m" `$(UNAME)` "\033[0m"
-	@echo "[+]VERSION= \033[32m$(VERSION)\033[0m"
-	@echo "[+]T_STD_PACKS= \033[32m$(T_STD_PACKS)\033[0m"
+	@echo "[Build Info]"
+	@echo "[+]Support plats    = \033[32m$(PLATS)\033[0m"
+	@echo "[+]Plat             = \033[32m"`$(UNAME)` "\033[0m"
+	@echo "\n"
+	@echo "[+]Std package path = \033[32m$(INSTALL_BIN)\033[0m"
+	@echo "[+]Bin install path = \033[32m$(INSTALL_PACK_STD)\033[0m"
+	@echo "[+]Std package      = \033[32m$(T_STD_PACKS)\033[0m"
+	@echo "\n"
+	@cd src && $(MAKE) $@
 
 # 构建 compile_commands.json 供 vim-lsp
 compile_commands.json: .git
