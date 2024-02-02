@@ -863,6 +863,10 @@ expression
         debug_bison_info_with_green("[RULE::expression:case expression] \t ");
          $$ = create_cast_expression($2, $4); 
     }
+    | primary_new_creation
+    {
+
+    }
     ;
 
 logical_expression_or
@@ -1017,7 +1021,6 @@ postfix_expression
 primary_expression
     : basic_value_literal_expression
     | primary_not_new_array
-    | primary_new_creation
     | member_expression
     ;
 
@@ -1055,12 +1058,7 @@ sub_dimension_expression_list
     ;
 
 sub_dimension_expression
-    : basic_value_literal_expression
-    {
-        debug_bison_info_with_green("[RULE::sub_dimension_expression:1]");
-        $$ = create_sub_dimension_expression($1);
-    }
-    | primary_not_new_array
+    : expression_arithmetic_operation_additive
     {
         debug_bison_info_with_green("[RULE::sub_dimension_expression:1]");
         $$ = create_sub_dimension_expression($1);
