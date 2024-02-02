@@ -99,10 +99,13 @@ clean:
 	rm -f *.o lex.yy.cpp y.tab.cpp y.tab.hpp y.output *~
 	@echo "\033[32mClean SUCCESS\033[0m"
 
-y.tab.hpp : ring.bison.y
-	$(Bison) -o y.tab.cpp -dv ring.bison.y
-y.tab.cpp : ring.bison.y
-	$(Bison) -o y.tab.cpp -dv ring.bison.y  # -t 诊断模式
+# 输出 y.output y.tab.cpp y.tab.hpp
+# -t : 诊断模式
+# -Wcounterexamples : generate conflict counterexamples
+y.tab.hpp y.tab.cpp : ring.bison.y
+	$(Bison) -o y.tab.cpp -dv -Wcounterexamples ring.bison.y  
+
+# 输出 lex.yy.cpp
 lex.yy.cpp : ring.flex.l ring.bison.y y.tab.hpp
 	$(Flex) -o lex.yy.cpp ring.flex.l
 

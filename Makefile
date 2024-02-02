@@ -25,7 +25,7 @@ T_STD_PACKS= os io debug fmt vm math strings reflect
 # 最后在 src/Makefile
 # -j10 10进程并发编译
 all:
-	@cd src && $(MAKE) $(TARGET) -j10
+	@cd src && $(MAKE) $(TARGET) -j20
 
 # 生成一个脚本用于 将 Ring 虚拟机指令集生成一个 markdown表格
 # Usage:
