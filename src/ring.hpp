@@ -2232,10 +2232,10 @@ RVM_Array*           rvm_new_array_class_object(Ring_VirtualMachine* rvm,
                                                 unsigned int*        dimension_list);
 
 RVM_ClassObject*     rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
-RVM_Array*           rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size);
-RVM_Array*           rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size);
-RVM_Array*           rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size);
-RVM_Array*           rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size);
+RVM_Array*           rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsigned int size);
+RVM_Array*           rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size);
+RVM_Array*           rvm_new_array_literal_double(Ring_VirtualMachine* rvm, unsigned int size);
+RVM_Array*           rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int size);
 
 
 void                 rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Array* array, int* value);

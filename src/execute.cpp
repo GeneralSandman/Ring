@@ -254,8 +254,6 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
             runtime_static->data[i].u.array_value->dimension = type_specifier->dimension;
             runtime_static->data[i].u.array_value->length    = 0;
             runtime_static->data[i].u.array_value->capacity  = 0;
-
-
             break;
 
         default:
@@ -339,6 +337,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int         argument_list_size     = 0;
     unsigned int         caller_stack_offset    = 0;
     unsigned int         return_value_list_size = 0;
+    unsigned int         array_size             = 0;
 
     bool                 bool_value             = false;
     int                  int_value              = 0;
@@ -1210,38 +1209,38 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
-        case RVM_CODE_NEW_ARRAY_LITERAL_BOOL: {
-            int size    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            array_value = rvm_new_array_literal_bool(rvm, size);
-            runtime_stack->top_index -= size;
+        case RVM_CODE_NEW_ARRAY_LITERAL_BOOL:
+            array_size  = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_value = rvm_new_array_literal_bool(rvm, array_size);
+            runtime_stack->top_index -= array_size;
             STACK_SET_ARRAY_OFFSET(rvm, 0, array_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
-        } break;
-        case RVM_CODE_NEW_ARRAY_LITERAL_INT: {
-            int size    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            array_value = rvm_new_array_literal_int(rvm, size);
-            runtime_stack->top_index -= size;
+            break;
+        case RVM_CODE_NEW_ARRAY_LITERAL_INT:
+            array_size  = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_value = rvm_new_array_literal_int(rvm, array_size);
+            runtime_stack->top_index -= array_size;
             STACK_SET_ARRAY_OFFSET(rvm, 0, array_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
-        } break;
-        case RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE: {
-            int size    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            array_value = rvm_new_array_literal_double(rvm, size);
-            runtime_stack->top_index -= size;
+            break;
+        case RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE:
+            array_size  = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_value = rvm_new_array_literal_double(rvm, array_size);
+            runtime_stack->top_index -= array_size;
             STACK_SET_ARRAY_OFFSET(rvm, 0, array_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
-        } break;
-        case RVM_CODE_NEW_ARRAY_LITERAL_STRING: {
-            int size    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
-            array_value = rvm_new_array_literal_string(rvm, size);
-            runtime_stack->top_index -= size;
+            break;
+        case RVM_CODE_NEW_ARRAY_LITERAL_STRING:
+            array_size  = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            array_value = rvm_new_array_literal_string(rvm, array_size);
+            runtime_stack->top_index -= array_size;
             STACK_SET_ARRAY_OFFSET(rvm, 0, array_value);
             runtime_stack->top_index++;
             rvm->pc += 3;
-        } break;
+            break;
         case RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OBJECT:
             rvm->pc += 3;
             break;
@@ -1961,7 +1960,7 @@ RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm,
     return class_ob;
 }
 
-RVM_Array* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size) {
+RVM_Array* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsigned int size) {
     // TODO: 这里暂时只支持一维数组
     unsigned int  dimension      = 1;
     unsigned int* dimension_list = (unsigned int*)calloc(1, sizeof(unsigned int) * dimension);
@@ -1976,7 +1975,7 @@ RVM_Array* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, int size) {
     return array;
 }
 
-RVM_Array* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size) {
+RVM_Array* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size) {
     // TODO: 这里暂时只支持一维数组
     unsigned int  dimension      = 1;
     unsigned int* dimension_list = (unsigned int*)calloc(1, sizeof(unsigned int) * dimension);
@@ -1991,7 +1990,7 @@ RVM_Array* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, int size) {
     return array;
 }
 
-RVM_Array* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size) {
+RVM_Array* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, unsigned int size) {
     // TODO: 这里暂时只支持一维数组
     unsigned int  dimension      = 1;
     unsigned int* dimension_list = (unsigned int*)calloc(1, sizeof(unsigned int) * dimension);
@@ -2006,7 +2005,7 @@ RVM_Array* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, int size) {
     return array;
 }
 
-RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, int size) {
+RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int size) {
     // TODO: 这里暂时只支持一维数组
     unsigned int  dimension      = 1;
     unsigned int* dimension_list = (unsigned int*)calloc(1, sizeof(unsigned int) * dimension);
