@@ -216,17 +216,15 @@ www.runoob.com
 ### 测试集
 
 ```
-2024-01-25
+2024-02-01
+
 
 [Result]:
-Pass/All = 251/253
-NotTest  = 4
-Fail     = 2
-Usetime  = 15S
+Pass/All = 256/256
+NotTest  = 6
+Fail     = 0
+Usetime  = 16S
 
-[NotPassCase]source_code_file                                             err_nums                                                    
-./test/064-std-package-vm/std-vm-000.ring                    1                                                           
-./test/062-std-package-reflect/reflect-000.ring              1   
 
 ```
 
@@ -359,8 +357,40 @@ class-object  未测试 ⭕️
 ### *D. 完善 class-object literal*
 
 
-1. 测试 初始化 Field 是不按照顺序的
-2. OPCODE_OPERAND_TYPE_2BYTE_AB 需要改一下
+1. new class-object literal的时候，Field的初始化顺序无需跟Class中定义的顺序一致
+   
+```
+job_0 = Job{
+        Runner: global_runner_value_0,
+        Name: "1.1",
+        Score: 1.1,
+        JobID: 1, 
+        Running: false
+    };
+```
+
+### *E. 支持  class-object 多维数组*
+
+开发完成, 单未测试 ⭕️
+
+
+### F. 测试: 传递 string class-object array 到底是 值传递还是传递指针
+
+
+### TODO: 多赋值 支持 array 或者是 member.field
+
+./test/021-array-int/sort.ring 编译不过去, 
+```
+    for(i=0; i+1 < len(global_int_array_0); i+=2) {
+        global_int_array_0[i], global_int_array_0[i+1] = global_int_array_0[i+1], global_int_array_0[i];
+    }
+```
+
+
+#### TODO: 通过index访问array, index可以是个复杂表达式
+
+更新 bison语法, 测试通过  ✅ 
+ ./test/021-array-int/sort-2.ring 
 
 -----------------------------
 
