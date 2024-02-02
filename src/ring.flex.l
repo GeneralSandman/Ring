@@ -169,7 +169,7 @@ extern "C" int yywrap(){
     package_unit_reset_line_content();
     package_unit_increa_line_number();
 
-    strncpy(linebuf, yytext+1, sizeof(linebuf));
+    memcpy(linebuf, yytext+1, sizeof(linebuf));
     yyless(1);
 }
 <INITIAL>\r\n.* {
@@ -181,7 +181,7 @@ extern "C" int yywrap(){
     package_unit_reset_line_content();
     package_unit_increa_line_number();
 
-    strncpy(linebuf, yytext+1, sizeof(linebuf));
+    memcpy(linebuf, yytext+1, sizeof(linebuf));
     yyless(2);
 }
 <INITIAL>"//" {

@@ -459,9 +459,9 @@ RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
     memset(output_buffer, '\0', length);
 
     if (args->u.int_value) {
-        strncpy(output_buffer, "debug_assert PASS\n", length);
+        strcpy(output_buffer, "debug_assert PASS\n");
     } else {
-        strncpy(output_buffer, "debug_assert FAILED\n", length);
+        strcpy(output_buffer, "debug_assert FAILED\n");
     }
 
     printf("%s", output_buffer);
