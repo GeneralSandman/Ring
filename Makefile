@@ -30,6 +30,18 @@ UNAME= uname
 all:
 	@cd src && $(MAKE) check && $(MAKE) $(TARGET) -j20
 
+
+help:
+	@echo "Help"
+	@echo "make                      : build ring"
+	@echo "make clean                : clean object"
+	@echo "make testall              : run automated-testing.sh"
+	@echo "make install              : install ring bin and package"
+	@echo "make uninstall            : uninstall ring bin and package"
+	@echo "make echo                 : print build info"
+	@echo "make check                : check build dependencies"
+	@echo "make compile_commands     : update compile_commands.json"
+
 # 生成一个脚本用于 将 Ring 虚拟机指令集生成一个 markdown表格
 # Usage:
 # 	  make tool_gen_vmcode_doc && ./bin/tool_gen_vmcode_doc
@@ -70,7 +82,7 @@ echo:
 	@cd src && $(MAKE) $@
 
 # 构建 compile_commands.json 供 vim-lsp
-compile_commands.json: .git
+compile_commands: .git
 	compiledb -n make
 
 
