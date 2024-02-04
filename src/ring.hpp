@@ -2178,7 +2178,6 @@ void                 ring_virtualmachine_init(Ring_VirtualMachine* rvm);
 void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 RVM_String*          new_string_object(Ring_VirtualMachine* rvm);
-RVM_ClassObject*     new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
