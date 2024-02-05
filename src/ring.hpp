@@ -929,9 +929,7 @@ typedef enum {
     EXPRESSION_TYPE_LOGICAL_OR,
     EXPRESSION_TYPE_LOGICAL_UNITARY_NOT,     // 一元操作符 逻辑 非 not
     EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX, // 一元操作符 i++
-    EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX, // 一元操作符 ++i
     EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX, // 一元操作符 i--
-    EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX, // 一元操作符 --i
     EXPRESSION_TYPE_RELATIONAL_EQ,
     EXPRESSION_TYPE_RELATIONAL_NE,
     EXPRESSION_TYPE_RELATIONAL_GT,
@@ -1932,9 +1930,9 @@ Expression*                   create_new_array_expression(TypeSpecifier* type_sp
 FieldInitExpression*          create_field_init_expression(char* field_identifier, Expression* init_expression);
 FieldInitExpression*          field_init_list_add_item(FieldInitExpression* list, FieldInitExpression* item);
 AssignExpression*             create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
-AssignExpression* create_multi_assign_expression(Expression* first_left_value_exp,
-                                                 Expression* left_value_exp_list,
-                                                 Expression* operand);
+AssignExpression*             create_multi_assign_expression(Expression* first_left_value_exp,
+                                                             Expression* left_value_exp_list,
+                                                             Expression* operand);
 FunctionCallExpression*       create_function_call_expression(char* identifier, ArgumentList* argument_list);
 MethodCallExpression*         create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list);
 ArrayLiteralExpression*       create_array_literal_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression, Expression* expression_list);

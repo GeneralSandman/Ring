@@ -1038,9 +1038,7 @@ void generate_vmcode_from_expression(Package_Executer* executer,
         break;
 
     case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
-    case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
     case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
-    case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
         generate_vmcode_from_increase_decrease_expression(executer, expression, opcode_buffer, need_duplicate);
         break;
 
@@ -1405,24 +1403,14 @@ void generate_vmcode_from_increase_decrease_expression(Package_Executer* execute
         }
         generate_vmcode(executer, opcode_buffer, RVM_CODE_INCREASE_SUFFIX, 0, expression->line_number);
         break;
-    case EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX:
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_INCREASE_PREFIX, 0, expression->line_number);
-        if (need_duplicate) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
-        }
-        break;
+
     case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
         if (need_duplicate) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
         }
         generate_vmcode(executer, opcode_buffer, RVM_CODE_DECREASE_SUFFIX, 0, expression->line_number);
         break;
-    case EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX:
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_DECREASE_PREFIX, 0, expression->line_number);
-        if (need_duplicate) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
-        }
-        break;
+
     default: break;
     }
 

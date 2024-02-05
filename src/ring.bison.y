@@ -1037,16 +1037,6 @@ unitary_expression
         debug_bison_info_with_green("[RULE::unitary_expression:TOKEN_SUB]\t ");
         $$ = create_expression_unitary(EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS, $2);
     }
-    | TOKEN_INCREASE unitary_expression
-    {
-        debug_bison_info_with_green("[RULE::unitary_expression:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_PREFIX, $2);
-    }
-    | TOKEN_DECREASE unitary_expression
-    {
-        debug_bison_info_with_green("[RULE::unitary_expression:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_PREFIX, $2);
-    }
     | postfix_expression
     ;
 
