@@ -1,0 +1,40 @@
+
+test case 1
+false
+0
+0.000000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 2
+false
+1
+0.000000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 3
+false
+2
+0.000000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 4
+false
+1
+0.000000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 5
+false
+0
+0.000000
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS

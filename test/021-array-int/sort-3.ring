@@ -19,13 +19,14 @@ function main() {
 
     for(i = 0; i < len(global_int_array_0); i++) {
         for(j = i; j < len(global_int_array_0); j++) {
-            global_int_array_0[j] = global_int_array_0[j] + 1;
             global_int_array_0[j]++;
         }
     }
 
     // printf
+    var int num = 1;
     for(i = 0; i < len(global_int_array_0); i++) {
-        fmt::println_int(global_int_array_0[i]);
+        debug::debug_assert(global_int_array_0[i] == num);
+        num++;
     }
 }
