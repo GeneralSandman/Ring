@@ -18,7 +18,7 @@ function main() {
 
     do(int_value = 2){
         fmt::println_int(int_value);
-    }for(int_value < 10; ++int_value);
+    }for(int_value < 10; int_value++);
 
 
 
@@ -42,7 +42,7 @@ function main() {
         }
         count++;
         fmt::println_int(int_value);
-    }for(int_value < 10; ++int_value);
+    }for(int_value < 10; int_value++);
 
 
 
@@ -71,7 +71,7 @@ function main() {
             continue;
         }
         count++;
-    }for(int_value < 20; ++int_value);
+    }for(int_value < 20; int_value++);
 
 
 
@@ -99,7 +99,7 @@ function main() {
             continue;
         }
         count++;
-    }for(int_value < 100; ++int_value);
+    }for(int_value < 100; int_value++);
 
 
 
@@ -123,11 +123,11 @@ function main() {
 
     do(int_value = 0) {
         if(int_value % 5 == 0) {
-            count = ++count;
+            count++;
         } else {
             continue;
         }
-    }for(int_value < 100; ++int_value);
+    }for(int_value < 100; int_value++);
 
 
 

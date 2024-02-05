@@ -16,7 +16,7 @@ function main() {
 
     fmt::println_string("[test case 1]");
 
-    for(int_value = 0; int_value < 10; ++int_value) {
+    for(int_value = 0; int_value < 10; int_value++) {
         fmt::println_int(int_value);
     }
 
@@ -37,7 +37,7 @@ function main() {
 
     count = 0;
 
-    for(int_value = 0; int_value < 10; ++int_value) {
+    for(int_value = 0; int_value < 10; int_value++) {
         if(int_value > 5) {
             continue;
         }
@@ -64,7 +64,7 @@ function main() {
     fmt::println_string("\n[test case 3]");
 
     count = 0;
-    for(int_value = 0; int_value < 10; ++int_value) {
+    for(int_value = 0; int_value < 10; int_value++) {
         if(int_value > 5) {
             break;
             continue;
