@@ -535,7 +535,7 @@ void generate_vmcode_from_statement_list(Package_Executer* executer,
     for (Statement* statement = statement_list; statement != nullptr; statement = statement->next) {
         switch (statement->type) {
         case STATEMENT_TYPE_EXPRESSION:
-            generate_vmcode_from_expression(executer, statement->u.expression, opcode_buffer, 0);
+            generate_vmcode_from_expression(executer, statement->u.expression, opcode_buffer);
             break;
 
         case STATEMENT_TYPE_IF:
@@ -591,7 +591,7 @@ void generate_vmcode_from_if_statement(Package_Executer* executer,
     unsigned int if_false_jump_label = 0;
     unsigned int if_end_label        = 0;
 
-    generate_vmcode_from_expression(executer, if_statement->condition_expression, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, if_statement->condition_expression, opcode_buffer);
 
     if_false_jump_label = opcode_buffer_get_label(opcode_buffer);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, if_false_jump_label, if_statement->line_number);
@@ -607,7 +607,7 @@ void generate_vmcode_from_if_statement(Package_Executer* executer,
     // handle elseif list
     ElseIfStatement* pos = if_statement->elseif_list;
     for (; pos; pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->condition_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, pos->condition_expression, opcode_buffer);
 
         unsigned int elseif_false_jump_label = 0;
         elseif_false_jump_label              = opcode_buffer_get_label(opcode_buffer);
@@ -666,7 +666,7 @@ void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
 
     // Step-1:
     if (ternary_statement->init_expression) {
-        generate_vmcode_from_expression(executer, ternary_statement->init_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, ternary_statement->init_expression, opcode_buffer);
     }
     loop_label = opcode_buffer_get_label(opcode_buffer);
     opcode_buffer_set_label(opcode_buffer, loop_label, opcode_buffer->code_size);
@@ -674,7 +674,7 @@ void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
     // Step-2:
     end_label = opcode_buffer_get_label(opcode_buffer);
     if (ternary_statement->condition_expression) {
-        generate_vmcode_from_expression(executer, ternary_statement->condition_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, ternary_statement->condition_expression, opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label, ternary_statement->condition_expression->line_number);
     }
 
@@ -692,7 +692,7 @@ void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
 
     // Step-4:
     if (ternary_statement->post_expression) {
-        generate_vmcode_from_expression(executer, ternary_statement->post_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, ternary_statement->post_expression, opcode_buffer);
     }
 
     // Step-5:
@@ -817,7 +817,7 @@ void generate_vmcode_from_dofor_statement(Package_Executer* executer,
 
     // Step-1:
     if (dofor_statement->init_expression) {
-        generate_vmcode_from_expression(executer, dofor_statement->init_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, dofor_statement->init_expression, opcode_buffer);
     }
     loop_label = opcode_buffer_get_label(opcode_buffer);
     opcode_buffer_set_label(opcode_buffer, loop_label, opcode_buffer->code_size);
@@ -839,14 +839,14 @@ void generate_vmcode_from_dofor_statement(Package_Executer* executer,
 
     // Step-3:
     if (dofor_statement->condition_expression) {
-        generate_vmcode_from_expression(executer, dofor_statement->condition_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, dofor_statement->condition_expression, opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label, dofor_statement->condition_expression->line_number);
     }
 
 
     // Step-4:
     if (dofor_statement->post_expression) {
-        generate_vmcode_from_expression(executer, dofor_statement->post_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, dofor_statement->post_expression, opcode_buffer);
     }
 
     // Step-5;
@@ -933,7 +933,7 @@ void generate_vmcode_from_return_statement(Package_Executer* executer,
 
     Expression* pos;
     for (pos = return_statement->return_list; pos; pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos, opcode_buffer, 1);
+        generate_vmcode_from_expression(executer, pos, opcode_buffer);
     }
 
 
@@ -953,7 +953,7 @@ void generate_vmcode_from_initializer(Package_Executer* executer,
     Declaration* pos = declaration;
     for (; pos; pos = pos->next) {
         if (pos->initializer) {
-            generate_vmcode_from_expression(executer, pos->initializer, opcode_buffer, 1);
+            generate_vmcode_from_expression(executer, pos->initializer, opcode_buffer);
             RVM_Opcode opcode = RVM_CODE_UNKNOW;
             if (pos->is_local) {
                 // 局部变量
@@ -976,8 +976,7 @@ void generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* 
 
 void generate_vmcode_from_expression(Package_Executer* executer,
                                      Expression*       expression,
-                                     RVM_OpcodeBuffer* opcode_buffer,
-                                     int               need_duplicate) {
+                                     RVM_OpcodeBuffer* opcode_buffer) {
 
     debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
@@ -1037,9 +1036,9 @@ void generate_vmcode_from_expression(Package_Executer* executer,
         generate_vmcode_from_unitary_not_expression(executer, expression->u.unitary_expression, opcode_buffer, RVM_CODE_LOGICAL_NOT);
         break;
 
-    case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
-    case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
-        generate_vmcode_from_increase_decrease_expression(executer, expression, opcode_buffer, need_duplicate);
+    case EXPRESSION_TYPE_UNITARY_INCREASE:
+    case EXPRESSION_TYPE_UNITARY_DECREASE:
+        generate_vmcode_from_increase_decrease_expression(executer, expression, opcode_buffer);
         break;
 
     case EXPRESSION_TYPE_RELATIONAL_EQ:
@@ -1115,16 +1114,16 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer,
     // TODO:
     if (expression->type != ASSIGN_EXPRESSION_TYPE_ASSIGN && expression->type != ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
         // += -= *= /=
-        generate_vmcode_from_expression(executer, expression->left, opcode_buffer, 1);
+        generate_vmcode_from_expression(executer, expression->left, opcode_buffer);
     }
 
     if (expression->type == ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
         Expression* pos;
         for (pos = expression->operand; pos; pos = pos->next) {
-            generate_vmcode_from_expression(executer, pos, opcode_buffer, 1);
+            generate_vmcode_from_expression(executer, pos, opcode_buffer);
         }
     } else {
-        generate_vmcode_from_expression(executer, expression->operand, opcode_buffer, 1);
+        generate_vmcode_from_expression(executer, expression->operand, opcode_buffer);
     }
 
     unsigned int opcode_offset = 0;
@@ -1237,7 +1236,7 @@ void generate_pop_to_leftvalue_member(Package_Executer* executer,
     opcode                   = convert_opcode_by_rvm_type(RVM_CODE_POP_FIELD_BOOL, member_expression->member_declaration->u.field->type_specifier);
     unsigned int field_index = member_expression->member_declaration->u.field->index_of_class;
 
-    generate_vmcode_from_expression(executer, member_expression->object_expression, opcode_buffer, 0);
+    generate_vmcode_from_expression(executer, member_expression->object_expression, opcode_buffer);
     generate_vmcode(executer, opcode_buffer, opcode, field_index, member_expression->line_number);
 }
 
@@ -1278,12 +1277,12 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
 
     SubDimensionExpression* pos_index = array_index_expression->index_expression->dimension_list;
     for (unsigned int i = 0; i < declaration->type_specifier->dimension - 1; i++, pos_index = pos_index->next) {
-        generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_A, 0, array_index_expression->line_number);
     }
 
     // 最后一个纬度
-    generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer, 0);
+    generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer);
 
 
     // assign
@@ -1317,23 +1316,23 @@ void generate_vmcode_from_logical_expression(Package_Executer* executer,
     unsigned int end_label = 0;
 
     if (opcode == RVM_CODE_LOGICAL_AND) {
-        generate_vmcode_from_expression(executer, left, opcode_buffer, 1);
+        generate_vmcode_from_expression(executer, left, opcode_buffer);
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label, expression->line_number);
 
-        generate_vmcode_from_expression(executer, right, opcode_buffer, 1);
+        generate_vmcode_from_expression(executer, right, opcode_buffer);
 
         generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
     } else if (opcode == RVM_CODE_LOGICAL_OR) {
-        generate_vmcode_from_expression(executer, left, opcode_buffer, 1);
+        generate_vmcode_from_expression(executer, left, opcode_buffer);
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_TRUE, end_label, expression->line_number);
 
-        generate_vmcode_from_expression(executer, right, opcode_buffer, 1);
+        generate_vmcode_from_expression(executer, right, opcode_buffer);
 
         generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
     }
@@ -1376,16 +1375,15 @@ void generate_vmcode_from_binary_expression(Package_Executer* executer,
     }
 
 END:
-    generate_vmcode_from_expression(executer, left, opcode_buffer, 1);
-    generate_vmcode_from_expression(executer, right, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, left, opcode_buffer);
+    generate_vmcode_from_expression(executer, right, opcode_buffer);
 
     generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
 }
 
 void generate_vmcode_from_increase_decrease_expression(Package_Executer* executer,
                                                        Expression*       expression,
-                                                       RVM_OpcodeBuffer* opcode_buffer,
-                                                       int               need_duplicate) {
+                                                       RVM_OpcodeBuffer* opcode_buffer) {
 
     debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
@@ -1393,22 +1391,15 @@ void generate_vmcode_from_increase_decrease_expression(Package_Executer* execute
     }
 
     Expression* unitary_expression = expression->u.unitary_expression;
-    generate_vmcode_from_expression(executer, unitary_expression, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, unitary_expression, opcode_buffer);
 
     switch (expression->type) {
-    case EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX:
-        /* generate_vmcode(executer, opcode_buffer, ); */
-        if (need_duplicate) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
-        }
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_INCREASE_SUFFIX, 0, expression->line_number);
+    case EXPRESSION_TYPE_UNITARY_INCREASE:
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_SELF_INCREASE, 0, expression->line_number);
         break;
 
-    case EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX:
-        if (need_duplicate) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
-        }
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_DECREASE_SUFFIX, 0, expression->line_number);
+    case EXPRESSION_TYPE_UNITARY_DECREASE:
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_SELF_DECREASE, 0, expression->line_number);
         break;
 
     default: break;
@@ -1428,7 +1419,7 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer,
         return;
     }
 
-    generate_vmcode_from_expression(executer, expression, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, expression, opcode_buffer);
 
     switch (expression->type) {
     case EXPRESSION_TYPE_LITERAL_INT:
@@ -1483,7 +1474,7 @@ void generate_vmcode_from_unitary_not_expression(Package_Executer* executer,
         return;
     }
 
-    generate_vmcode_from_expression(executer, expression, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, expression, opcode_buffer);
 
     generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
 }
@@ -1604,13 +1595,13 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
     ArgumentList* pos                = function_call_expression->argument_list;
     unsigned int  argument_list_size = 0;
     for (; pos != nullptr; pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
         argument_list_size++;
     }
 
     generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, function_call_expression->line_number);
 
-    generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, function_call_expression->line_number);
 }
 
@@ -1627,10 +1618,10 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
 
     if (str_eq(function_identifier, "len")) {
         if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
-            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
+            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_LEN, 0, function_call_expression->line_number);
         } else if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_ARRAY) {
-            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
+            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_LEN, 0, function_call_expression->line_number);
         } else {
             // TODO: 应该在语义检查的过程中报错
@@ -1638,10 +1629,10 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
         }
     } else if (str_eq(function_identifier, "capacity")) {
         if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
-            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
+            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_CAPACITY, 0, function_call_expression->line_number);
         } else if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_ARRAY) {
-            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer, 1);
+            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_CAPACITY, 0, function_call_expression->line_number);
         } else {
             // TODO: 应该在语义检查的过程中报错
@@ -1650,7 +1641,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
     } else if (str_eq(function_identifier, "push")) {
         pos = function_call_expression->argument_list;
         for (; pos != nullptr; pos = pos->next) {
-            generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
+            generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
         }
 
         if (function_call_expression->argument_list->expression->convert_type->kind != RING_BASIC_TYPE_ARRAY) {
@@ -1673,7 +1664,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
 
     } else if (str_eq(function_identifier, "pop")) {
         pos = function_call_expression->argument_list;
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
 
         if (pos->expression->convert_type->kind != RING_BASIC_TYPE_ARRAY) {
             ring_error_report("error: pop() only used to append value to array\n");
@@ -1694,7 +1685,7 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
         }
     } else if (str_eq(function_identifier, "to_string")) {
         pos = function_call_expression->argument_list;
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
 
 
         if (pos->expression->convert_type->kind == RING_BASIC_TYPE_BOOL) {
@@ -1720,7 +1711,7 @@ void generate_vmcode_from_method_call_expression(Package_Executer*     executer,
     ArgumentList* pos                = method_call_expression->argument_list;
     unsigned int  argument_list_size = 0;
     for (; pos != nullptr; pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer, 1);
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
         argument_list_size++;
     }
 
@@ -1728,7 +1719,7 @@ void generate_vmcode_from_method_call_expression(Package_Executer*     executer,
     generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, method_call_expression->line_number);
 
     // object
-    generate_vmcode_from_expression(executer, method_call_expression->object_expression, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, method_call_expression->object_expression, opcode_buffer);
 
     // generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer, 1);
     ClassMemberDeclaration* member_declaration  = method_call_expression->member_declaration;
@@ -1746,7 +1737,7 @@ void generate_vmcode_from_cast_expression(Package_Executer* executer,
         return;
     }
 
-    generate_vmcode_from_expression(executer, cast_expression->operand, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, cast_expression->operand, opcode_buffer);
     // RVM_Opcode opcode = RVM_CODE_UNKNOW;
 
     // FIXME: derive type
@@ -1800,7 +1791,7 @@ void generate_vmcode_from_member_expression(Package_Executer* executer,
     }
 
     // object
-    generate_vmcode_from_expression(executer, member_expression->object_expression, opcode_buffer, 0);
+    generate_vmcode_from_expression(executer, member_expression->object_expression, opcode_buffer);
 
     // member
     ClassMemberDeclaration* member_declaration = member_expression->member_declaration;
@@ -1819,12 +1810,12 @@ void generate_vmcode_from_ternary_condition_expression(Package_Executer*  execut
     unsigned int if_false_jump_label = 0;
     unsigned int if_end_label        = 0;
 
-    generate_vmcode_from_expression(executer, ternary_expression->condition_expression, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, ternary_expression->condition_expression, opcode_buffer);
 
     if_false_jump_label = opcode_buffer_get_label(opcode_buffer);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, if_false_jump_label, ternary_expression->line_number);
 
-    generate_vmcode_from_expression(executer, ternary_expression->true_expression, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, ternary_expression->true_expression, opcode_buffer);
 
     if_end_label = opcode_buffer_get_label(opcode_buffer);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label, ternary_expression->line_number);
@@ -1832,7 +1823,7 @@ void generate_vmcode_from_ternary_condition_expression(Package_Executer*  execut
 
     opcode_buffer_set_label(opcode_buffer, if_false_jump_label, opcode_buffer->code_size);
 
-    generate_vmcode_from_expression(executer, ternary_expression->false_expression, opcode_buffer, 1);
+    generate_vmcode_from_expression(executer, ternary_expression->false_expression, opcode_buffer);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label, ternary_expression->line_number);
 
     opcode_buffer_set_label(opcode_buffer, if_end_label, opcode_buffer->code_size);
@@ -1856,7 +1847,7 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
         // generate_vmcode(executer, opcode_buffer,
         //                 RVM_CODE_PUSH_INT_2BYTE, pos->num,
         //                 new_array_expression->line_number);
-        generate_vmcode_from_expression(executer, pos->num_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, pos->num_expression, opcode_buffer);
     }
 
     // 将维度 push stack 中
@@ -1900,7 +1891,7 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer*     
     for (; pos != nullptr; pos = pos->next) {
 
         // 1. push init-expression
-        generate_vmcode_from_expression(executer, pos->init_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, pos->init_expression, opcode_buffer);
 
 
         // 2. shallow duplicate class-object
@@ -1933,7 +1924,7 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
     int         size = 0;
     Expression* pos  = array_literal_expression->expression_list;
     for (; pos != nullptr; pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, pos, opcode_buffer);
         size++;
     }
 
@@ -1985,13 +1976,13 @@ void generate_vmcode_from_array_index_expression(Package_Executer*     executer,
 
     SubDimensionExpression* pos_index = array_index_expression->index_expression->dimension_list;
     for (unsigned int i = 0; i < declaration->type_specifier->dimension - 1 && pos_index != nullptr; i++, pos_index = pos_index->next) {
-        generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_A, 0, array_index_expression->line_number);
     }
 
     // 最后一个纬度
     if (pos_index != nullptr) {
-        generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer, 0);
+        generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer);
 
         // access value by array-object and index-expression
         if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_BOOL) {

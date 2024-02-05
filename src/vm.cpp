@@ -107,10 +107,8 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_MINUS_INT, "minus_int", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "[int,int]->[int]"},
     {RVM_CODE_MINUS_DOUBLE, "minus_double", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "[double,double]->[double]"},
 
-    {RVM_CODE_INCREASE_SUFFIX, "increase_suffix", OPCODE_OPERAND_TYPE_0BYTE, 0, "", ""},
-    {RVM_CODE_INCREASE_PREFIX, "increase_prefix", OPCODE_OPERAND_TYPE_0BYTE, 0, "", ""},
-    {RVM_CODE_DECREASE_SUFFIX, "decrease_suffix", OPCODE_OPERAND_TYPE_0BYTE, 0, "", ""},
-    {RVM_CODE_DECREASE_PREFIX, "decrease_prefix", OPCODE_OPERAND_TYPE_0BYTE, 0, "", ""},
+    {RVM_CODE_SELF_INCREASE, "self_increase", OPCODE_OPERAND_TYPE_0BYTE, 0, "", ""},
+    {RVM_CODE_SELF_DECREASE, "self_decrease", OPCODE_OPERAND_TYPE_0BYTE, 0, "", ""},
 
     {RVM_CODE_CONCAT, "concat", OPCODE_OPERAND_TYPE_0BYTE, -1, "", ""},
 

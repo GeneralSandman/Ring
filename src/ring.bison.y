@@ -850,7 +850,6 @@ expression_list
         $$ = expression_list_add_item($1, $3);
     }
     ;
-
 // TODO: 这里有个expression需要删除掉
 expression
     : right_value_expression
@@ -1044,12 +1043,12 @@ postfix_expression
     : identifier TOKEN_INCREASE
     {
         debug_bison_info_with_green("[RULE::postfix_expression:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX, create_expression_identifier($1));
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE, create_expression_identifier($1));
     }
     | identifier TOKEN_DECREASE
     {
         debug_bison_info_with_green("[RULE::postfix_expression:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX, create_expression_identifier($1));
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE, create_expression_identifier($1));
     }
     | primary_expression
     ;

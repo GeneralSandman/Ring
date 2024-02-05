@@ -738,10 +738,8 @@ typedef enum {
     RVM_CODE_MINUS_INT,
     RVM_CODE_MINUS_DOUBLE,
 
-    RVM_CODE_INCREASE_SUFFIX,
-    RVM_CODE_INCREASE_PREFIX,
-    RVM_CODE_DECREASE_SUFFIX,
-    RVM_CODE_DECREASE_PREFIX,
+    RVM_CODE_SELF_INCREASE,
+    RVM_CODE_SELF_DECREASE,
 
     RVM_CODE_CONCAT,
 
@@ -927,9 +925,9 @@ typedef enum {
     EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS, // 一元操作符 负号
     EXPRESSION_TYPE_LOGICAL_AND,
     EXPRESSION_TYPE_LOGICAL_OR,
-    EXPRESSION_TYPE_LOGICAL_UNITARY_NOT,     // 一元操作符 逻辑 非 not
-    EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX, // 一元操作符 i++
-    EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX, // 一元操作符 i--
+    EXPRESSION_TYPE_LOGICAL_UNITARY_NOT, // 一元操作符 逻辑 非 not
+    EXPRESSION_TYPE_UNITARY_INCREASE,    // 一元操作符 i++
+    EXPRESSION_TYPE_UNITARY_DECREASE,    // 一元操作符 i--
     EXPRESSION_TYPE_RELATIONAL_EQ,
     EXPRESSION_TYPE_RELATIONAL_NE,
     EXPRESSION_TYPE_RELATIONAL_GT,
@@ -2114,7 +2112,7 @@ void              generate_vmcode_from_continue_statement(Package_Executer* exec
 void              generate_vmcode_from_return_statement(Package_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_initializer(Package_Executer* executer, Block* block, Declaration* declaration, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* block, JumpTagStatement* jump_tag_statement, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
+void              generate_vmcode_from_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_assign_expression(Package_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
 void              generate_pop_to_leftvalue_reverse(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_pop_to_leftvalue(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
@@ -2125,7 +2123,7 @@ void              generate_vmcode_from_logical_expression(Package_Executer* exec
 void              generate_vmcode_from_binary_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_unitary_not_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
-void              generate_vmcode_from_increase_decrease_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, int need_duplicate);
+void              generate_vmcode_from_increase_decrease_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_identifier_expression(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_bool_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_int_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
