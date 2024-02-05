@@ -69,6 +69,8 @@ int yylex();
     TypeSpecifier*                      m_type_specifier;
     Ring_BasicType                      m_basic_type_specifier;
     AttributeType                       m_attribute;
+
+    ExpressionType                      m_expression_type;
 }
 
 %token TOKEN_TYPEDEF
@@ -180,6 +182,7 @@ int yylex();
 %type <m_expression> primary_not_new_array
 %type <m_expression> primary_new_creation
 %type <m_expression> member_expression
+%type <m_expression> method_call_expression
 %type <m_expression> basic_value_literal_expression
 %type <m_expression> derive_value_literal_expression
 %type <m_expression> primary_expression
@@ -229,6 +232,8 @@ int yylex();
 %type <m_type_specifier>        type_specifier class_type_specifier
 %type <m_basic_type_specifier>  basic_type_specifier 
 %type <m_attribute> attribute attribute_list
+
+%type <m_expression_type>      self_incr_decr_token
 
 
 // %type <m_method_call_expression> method_call_expression
@@ -1040,17 +1045,31 @@ unitary_expression
     ;
 
 postfix_expression
-    : identifier TOKEN_INCREASE
+    : identifier self_incr_decr_token
     {
-        debug_bison_info_with_green("[RULE::postfix_expression:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE, create_expression_identifier($1));
+        $$ = create_expression_unitary($2, create_expression_identifier($1));
     }
-    | identifier TOKEN_DECREASE
+    | identifier dimension_expression self_incr_decr_token
     {
-        debug_bison_info_with_green("[RULE::postfix_expression:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE, create_expression_identifier($1));
+        $$ = create_expression_unitary($3, 
+                                        create_expression_identifier_with_index(create_expression_identifier($1), $2));
+    }
+    | member_expression self_incr_decr_token
+    {
+        $$ = create_expression_unitary($2, $1);
     }
     | primary_expression
+    ;
+
+self_incr_decr_token
+    : TOKEN_INCREASE
+    {
+        $$ = EXPRESSION_TYPE_UNITARY_INCREASE;
+    }
+    | TOKEN_DECREASE
+    {
+        $$ = EXPRESSION_TYPE_UNITARY_DECREASE;
+    }
     ;
 
 primary_expression
@@ -1131,26 +1150,25 @@ primary_not_new_array
 member_expression
     : primary_not_new_array TOKEN_DOT identifier
     {
-        debug_bison_info_with_green("[RULE::literal_term:member_expression]\t ");
         $$ = create_member_expression($1, $3);
-    }
-    | primary_not_new_array TOKEN_DOT identifier TOKEN_LP TOKEN_RP
-    {
-        debug_bison_info_with_green("[RULE::function_call_expression:1]\t ");
-
-        $$ = create_expression_from_method_call(create_method_call_expression($1, $3, nullptr));
-    }
-    | primary_not_new_array TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
-    {
-        debug_bison_info_with_green("[RULE::function_call_expression:2]\t ");
-
-        $$ = create_expression_from_method_call(create_method_call_expression($1, $3, $5));
     }
     | member_expression TOKEN_DOT identifier
     {
         $$ = create_member_expression($1, $3);
     }
+    | method_call_expression
     ;
+
+method_call_expression
+    : primary_not_new_array TOKEN_DOT identifier TOKEN_LP TOKEN_RP
+    {
+        $$ = create_expression_from_method_call(create_method_call_expression($1, $3, nullptr));
+    }
+    | primary_not_new_array TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
+    {
+        $$ = create_expression_from_method_call(create_method_call_expression($1, $3, $5));
+    }
+    ; 
 
 basic_value_literal_expression
     : INT_LITERAL
