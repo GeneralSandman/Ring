@@ -176,10 +176,12 @@ int yylex();
 %type <m_expression> expression expression_list
 %type <m_expression> postfix_expression
 %type <m_expression> unitary_expression
+%type <m_expression> ternary_expression
 %type <m_expression> primary_not_new_array
 %type <m_expression> primary_new_creation
 %type <m_expression> member_expression
 %type <m_expression> basic_value_literal_expression
+%type <m_expression> derive_value_literal_expression
 %type <m_expression> primary_expression
 %type <m_expression> expression_arithmetic_operation_additive 
 %type <m_expression> expression_arithmetic_operation_multiplicative 
@@ -188,6 +190,10 @@ int yylex();
 %type <m_expression> relational_expression
 %type <m_expression> equality_expression
 %type <m_expression> maybe_empty_expression
+%type <m_expression> left_value_expression_list
+%type <m_expression> left_value_expression
+%type <m_expression> right_value_expression_list
+%type <m_expression> right_value_expression
 %type <m_assign_expression> assign_expression
 %type <m_function_call_expression> function_call_expression
 %type <m_array_literal_expression> array_literal_expression
@@ -662,29 +668,25 @@ function_definition
     : TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
-
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, nullptr, $5);
-
     }
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
-
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, nullptr, nullptr);
-
     }
+
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
-
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, $6);
-
     }
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, nullptr);
     }
+
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
@@ -695,6 +697,7 @@ function_definition
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, $7, nullptr);
     }
+
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
@@ -708,18 +711,6 @@ function_definition
     ;
 
 
-parameter
-    : TOKEN_VAR type_specifier IDENTIFIER
-    {
-        debug_bison_info_with_green("[RULE::parameter]\t ");
-        $$ = create_parameter($2, $3, false);
-    }
-    | TOKEN_VAR type_specifier TOKEN_3DOT IDENTIFIER
-    {
-        debug_bison_info_with_green("[RULE::parameter:TOKEN_3DOT]\t ");
-        $$ = create_parameter($2, $4, true);
-    }
-    ;
 
 parameter_list
     : parameter
@@ -730,6 +721,19 @@ parameter_list
     {
         debug_bison_info_with_green("[RULE::parameter_list]\t ");
         $$ = parameter_list_add_statement($1, $3);
+    }
+    ;
+
+parameter
+    : TOKEN_VAR type_specifier IDENTIFIER
+    {
+        debug_bison_info_with_green("[RULE::parameter]\t ");
+        $$ = create_parameter($2, $3, false);
+    }
+    | TOKEN_VAR type_specifier TOKEN_3DOT IDENTIFIER
+    {
+        debug_bison_info_with_green("[RULE::parameter:TOKEN_3DOT]\t ");
+        $$ = create_parameter($2, $4, true);
     }
     ;
 
@@ -847,37 +851,79 @@ expression_list
     }
     ;
 
+// TODO: 这里有个expression需要删除掉
 expression
-    : logical_expression_or
-    {
-        debug_bison_info_with_green("[RULE::expression:logical_expression]\t ");
+    : right_value_expression
+    ;
 
-    }
-    | logical_expression_or TOKEN_QUESTION_MARK expression_arithmetic_operation_additive TOKEN_COLON expression_arithmetic_operation_additive
+ternary_expression
+    : logical_expression_or TOKEN_QUESTION_MARK expression_arithmetic_operation_additive TOKEN_COLON expression_arithmetic_operation_additive
     {
         debug_bison_info_with_green("[RULE::expression:condition ternary expression]\t ");
         $$ = create_expression_ternary($1, $3, $5);
     }
-    | TOKEN_LT type_specifier TOKEN_GT expression
-    {
-        debug_bison_info_with_green("[RULE::expression:case expression] \t ");
-         $$ = create_cast_expression($2, $4); 
-    }
-    | primary_new_creation
-    {
+    ;
 
+// left_value_expression 是 right_value_expression的子集
+left_value_expression_list
+    : left_value_expression
+    {
+        debug_bison_info_with_green("[RULE::left_value_expression_list]\t ");
+    }
+    | left_value_expression_list TOKEN_COMMA left_value_expression
+    {
+        debug_bison_info_with_green("[RULE::left_value_expression_list]\t ");
+        $$ = expression_list_add_item($1, $3);
     }
     ;
+left_value_expression
+    : primary_not_new_array
+    {
+        debug_bison_info_with_green("[RULE::left_value_expression:primary_not_new_array]\t ");
+    }
+    | member_expression
+    {
+        debug_bison_info_with_green("[RULE::left_value_expression:member_expression]\t ");
+    }
+    ;
+
+
+right_value_expression_list
+    : right_value_expression
+    {
+        debug_bison_info_with_green("[RULE::right_value_expression_list]\t ");
+    }
+    | right_value_expression_list TOKEN_COMMA right_value_expression
+    {
+        debug_bison_info_with_green("[RULE::right_value_expression_list]\t ");
+        $$ = expression_list_add_item($1, $3);
+    }
+    ;
+right_value_expression
+    : derive_value_literal_expression
+    {
+        debug_bison_info_with_green("[RULE::right_value_expression:derive_value_literal_expression]\t ");
+    }
+    | logical_expression_or
+    {
+        debug_bison_info_with_green("[RULE::right_value_expression:logical_expression_or]\t ");
+    }
+    | ternary_expression
+    {
+        debug_bison_info_with_green("[RULE::right_value_expression:ternary_expression]\t ");
+    }
+    ;
+
 
 logical_expression_or
     : logical_expression_and
     {
-        debug_bison_info_with_green("[RULE::logical_expression_or]\t ");
+        debug_bison_info_with_green("[RULE::logical_expression_or:1]\t ");
         // $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_AND, $1, $3);
     }
     | logical_expression_or TOKEN_OR logical_expression_and
     {
-        debug_bison_info_with_green("[RULE::logical_expression_or]\t ");
+        debug_bison_info_with_green("[RULE::logical_expression_or:2]\t ");
         $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_OR, $1, $3);
     }
     ;
@@ -1005,23 +1051,24 @@ unitary_expression
     ;
 
 postfix_expression
-    : primary_expression TOKEN_INCREASE
+    : identifier TOKEN_INCREASE
     {
         debug_bison_info_with_green("[RULE::postfix_expression:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX, $1);
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_INCREASE_SUFFIX, create_expression_identifier($1));
     }
-    | primary_expression TOKEN_DECREASE
+    | identifier TOKEN_DECREASE
     {
         debug_bison_info_with_green("[RULE::postfix_expression:TOKEN_INCREASE]\t ");
-        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX, $1);
+        $$ = create_expression_unitary(EXPRESSION_TYPE_UNITARY_DECREASE_SUFFIX, create_expression_identifier($1));
     }
     | primary_expression
     ;
 
 primary_expression
-    : basic_value_literal_expression
-    | primary_not_new_array
+    : primary_not_new_array
     | member_expression
+    | basic_value_literal_expression
+    | primary_new_creation
     ;
 
 primary_new_creation
@@ -1085,16 +1132,6 @@ primary_not_new_array
         debug_bison_info_with_green("[RULE::literal_term:function_call_expression]\t ");
         $$ = create_expression_from_function_call($1);
     }
-    | array_literal_expression
-    {
-        debug_bison_info_with_green("[RULE::literal_term:array_literal_expression]\t ");
-        $$ = create_expression_from_array_literal($1);
-    }
-    | class_object_literal_expression
-    {
-        debug_bison_info_with_green("[RULE::literal_term:class_object_literal_expression]\t ");
-        $$ = create_expression_from_class_object_literal($1);
-    }
     | identifier TOKEN_2COLON primary_not_new_array
     {
         $$ = expression_add_package_posit($3, $1);
@@ -1154,6 +1191,19 @@ basic_value_literal_expression
     }
     ;
 
+derive_value_literal_expression
+    : array_literal_expression
+    {
+        debug_bison_info_with_green("[RULE::literal_term:array_literal_expression]\t ");
+        $$ = create_expression_from_array_literal($1);
+    }
+    | class_object_literal_expression
+    {
+        debug_bison_info_with_green("[RULE::literal_term:class_object_literal_expression]\t ");
+        $$ = create_expression_from_class_object_literal($1);
+    }
+    ;
+
 function_call_expression
     : identifier TOKEN_LP argument_list TOKEN_RP
     {
@@ -1185,37 +1235,37 @@ class_object_literal_expression
     ;
 
 assign_expression
-    : primary_expression TOKEN_ASSIGN expression
+    : left_value_expression TOKEN_ASSIGN right_value_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ASSIGN, $1, $3);
     }
-    | identifier TOKEN_ADD_ASSIGN expression
+    | identifier TOKEN_ADD_ASSIGN right_value_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN, create_expression_identifier($1), $3);
     }
-    | identifier TOKEN_SUB_ASSIGN expression
+    | identifier TOKEN_SUB_ASSIGN right_value_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN, create_expression_identifier($1), $3);
     }
-    | identifier TOKEN_MUL_ASSIGN expression
+    | identifier TOKEN_MUL_ASSIGN right_value_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN, create_expression_identifier($1), $3);
     }
-    | identifier TOKEN_DIV_ASSIGN expression
+    | identifier TOKEN_DIV_ASSIGN right_value_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN, create_expression_identifier($1), $3);
     }
-    | identifier TOKEN_MOD_ASSIGN expression
+    | identifier TOKEN_MOD_ASSIGN right_value_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN, create_expression_identifier($1), $3);
     }
-    | identifier TOKEN_COMMA identifier_list TOKEN_ASSIGN expression_list
+    | left_value_expression TOKEN_COMMA left_value_expression_list  TOKEN_ASSIGN right_value_expression_list
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_multi_assign_expression($1, $3, $5);
@@ -1260,10 +1310,8 @@ argument_list
         $$ = argument_list_add_item($1, $3);
     }
     ;
-
-
 argument
-    : expression
+    : right_value_expression
     {
         debug_bison_info_with_green("[RULE::argument_list:expression]\t ");
         $$ = create_argument_list_from_expression($1);

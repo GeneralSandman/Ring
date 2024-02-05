@@ -1932,7 +1932,9 @@ Expression*                   create_new_array_expression(TypeSpecifier* type_sp
 FieldInitExpression*          create_field_init_expression(char* field_identifier, Expression* init_expression);
 FieldInitExpression*          field_init_list_add_item(FieldInitExpression* list, FieldInitExpression* item);
 AssignExpression*             create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
-AssignExpression*             create_multi_assign_expression(char* first_identifier, Identifier* identifier_list, Expression* operand);
+AssignExpression* create_multi_assign_expression(Expression* first_left_value_exp,
+                                                 Expression* left_value_exp_list,
+                                                 Expression* operand);
 FunctionCallExpression*       create_function_call_expression(char* identifier, ArgumentList* argument_list);
 MethodCallExpression*         create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list);
 ArrayLiteralExpression*       create_array_literal_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression, Expression* expression_list);

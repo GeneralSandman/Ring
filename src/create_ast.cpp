@@ -377,21 +377,14 @@ AssignExpression* create_assign_expression(AssignExpressionType type,
     return assing_expression;
 }
 
-AssignExpression* create_multi_assign_expression(char*       first_identifier,
-                                                 Identifier* identifier_list,
+AssignExpression* create_multi_assign_expression(Expression* first_left_value_exp,
+                                                 Expression* left_value_exp_list,
                                                  Expression* operand) {
 
     // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
     debug_ast_info_with_yellow("");
 
-    Expression* left = nullptr;
-    left             = create_expression_identifier(first_identifier);
-
-    Expression* prev = left;
-    for (Identifier* pos = identifier_list; pos; pos = pos->next) {
-        prev->next = create_expression_identifier(pos->name);
-        prev       = prev->next;
-    }
+    Expression*       left              = expression_list_add_item(first_left_value_exp, left_value_exp_list);
 
     AssignExpression* assing_expression = (AssignExpression*)mem_alloc(get_front_mem_pool(), sizeof(AssignExpression));
 
