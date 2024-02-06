@@ -342,11 +342,19 @@ class-object  未测试 ⭕️
 
 -----------------------------
 
-## 2024-01-29周
+## 2024-02-05周 
 
 
-### *A. Makefile检测 flex bison 的版本是否符合要求*
+### A. 类中field为class的情况下要初始化默认值
 
+## 2024-01-29周 
+
+
+### *A. Makefile检测 flex bison 的版本是否符合要求*  ✅ 
+
+make echo  ✅ 
+make help  ✅ 
+make check: 检查源代码编译依赖  ✅ 
 
 ### *B. 重新设计并验证gc*
 
@@ -354,7 +362,7 @@ class-object  未测试 ⭕️
 ### *C. 测试 ring dump*
 
 
-### *D. 完善 class-object literal*
+### *D. 完善 class-object literal*  ✅ 
 
 
 1. new class-object literal的时候，Field的初始化顺序无需跟Class中定义的顺序一致
@@ -369,15 +377,14 @@ job_0 = Job{
     };
 ```
 
-### *E. 支持  class-object 多维数组*
-
-开发完成, 单未测试 ⭕️
+### *E. 支持  class-object 多维数组*  ✅ 
 
 
-### F. 测试: 传递 string class-object array 到底是 值传递还是传递指针
+
+### *F. 测试: 传递 string class-object array 到底是 值传递还是传递指针*
 
 
-### TODO: 多赋值 支持 array 或者是 member.field
+#### 多赋值 支持 array 或者是 member.field  ✅ 
 
 ./test/021-array-int/sort.ring 编译不过去, 
 ```
@@ -387,10 +394,87 @@ job_0 = Job{
 ```
 
 
-#### TODO: 通过index访问array, index可以是个复杂表达式
+#### 通过index访问array, index可以是个复杂表达式  ✅ 
 
 更新 bison语法, 测试通过  ✅ 
  ./test/021-array-int/sort-2.ring 
+
+
+#### TODO: 
+
+./test/021-array-int/sort-3.ring:23:36: 
+
+global_int_array_0[j]++;
+
+这个是编译不过去的
+
+
+支持  job_value.ID++;
+
+
+
+### *G. 区分左值和右值*  ✅ 
+
+
+```
+左值（L-value）是指可以放在赋值运算符左边的表达式，它代表一个具体的内存位置。左值可以被取地址、被修改、被引用，可以作为函数的参数或返回值。例如，变量、数组元素、对象成员、表达式的结果等都是左值。
+
+右值（R-value）是指不能放在赋值运算符左边的表达式，它代表一个临时的值或表达式的结果。右值不能被取地址、不能被修改，可以被移动（move）或复制（copy）。例如，常量、字面量、临时变量、表达式的结果等都是右值。
+
+```
+
+这是不合法的：
+```
+func return_array() TreeNode {
+	return TreeNode{}
+}
+
+func main() {
+	return_array().Val++
+}
+```
+
+这是合法的：
+
+```
+func return_array() *TreeNode {
+	return &TreeNode{}
+}
+
+func main() {
+	return_array().Val++
+}
+```
+
+
+这是合法的：
+
+```
+func return_array() []TreeNode {
+	return []TreeNode{}
+}
+
+func main() {
+	return_array()[0].Val++
+}
+```
+
+
+说白了，左值和右值，还得通过语义来判断
+
+
+### *H. 自增自减运算符*
+
+1. 没有支持前缀自增自减的运算语句，也就是不允许 ++a。
+2. 运算符 ++ 和 -- 只能作为一个语句来使用，不可以作为表达式被赋值给其它的变量使用。
+
+可以删除 generate中的 need_duplicate ✅ 
+
+
+1. 自增自减运算符 运用到array上 ✅ 
+
+2. 自增自减运算符 运用到class-field上 ✅ 
+
 
 -----------------------------
 
@@ -403,7 +487,21 @@ job_0 = Job{
 TODO: 重构之后，heap_size要重新验证， gc要重新验证
 
 
-### B. class 中支持存放array
+### B. class 中支持存放array ✅ 
+
+class中的field支持：
+bool
+int
+double
+string
+class[]
+bool[]
+int[]
+double[]
+string[]
+class[]
+
+TODO: field支持多维数组
 
 
 ### C. 所有的没有处理的错误报错，都要添加上 ring_error_report ✅ 
