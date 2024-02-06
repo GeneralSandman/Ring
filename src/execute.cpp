@@ -804,6 +804,12 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_SET_CLASS_OB_OFFSET(rvm, -1, class_ob_value->field[field_index].u.class_ob_value);
             rvm->pc += 3;
             break;
+        case RVM_CODE_PUSH_FIELD_ARRAY:
+            class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
+            field_index    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_ARRAY_OFFSET(rvm, -1, class_ob_value->field[field_index].u.array_value);
+            rvm->pc += 3;
+            break;
 
         // arithmetic
         case RVM_CODE_ADD_INT:
@@ -1913,15 +1919,27 @@ RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm,
 
     RVM_ClassObject* class_ob   = rvm_heap_new_class_object(rvm);
 
-    size_t           alloc_size = class_definition->field_size * sizeof(RVM_Value);
+    unsigned int     field_size = class_definition->field_size;
+    size_t           alloc_size = field_size * sizeof(RVM_Value);
     RVM_Value*       field      = nullptr;
+
     field                       = (RVM_Value*)mem_alloc(rvm->meta_pool, alloc_size);
     memset(field, 0, alloc_size);
-    // TODO: 有个遗留问题
-    // field RVM_Value 的 type 没有设置
+
+    for (unsigned int field_index = 0; field_index < field_size; field_index++) {
+        RVM_TypeSpecifier* type_specifier = class_definition->field_list[field_index].type_specifier;
+
+        // field为class， 嵌套出实话
+        if (type_specifier->kind == RING_BASIC_TYPE_CLASS) {
+            RVM_ClassDefinition* rvm_class_definition = &(rvm->class_list[type_specifier->u.class_def_index]);
+
+            field[field_index].type                   = RVM_VALUE_TYPE_CLASS_OB;
+            field[field_index].u.class_ob_value       = rvm_new_class_object(rvm, rvm_class_definition);
+        }
+    }
 
     class_ob->class_ref   = class_definition;
-    class_ob->field_count = class_definition->field_size;
+    class_ob->field_count = field_size;
     class_ob->field       = field;
 
 

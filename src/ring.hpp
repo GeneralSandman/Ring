@@ -350,7 +350,6 @@ typedef enum {
 
     RING_BASIC_TYPE_ANY,
 
-    RING_BASIC_TYPE_NULL,
 } Ring_BasicType;
 
 

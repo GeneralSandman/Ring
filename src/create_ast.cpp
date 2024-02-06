@@ -1214,15 +1214,15 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier,
 
     // 当前field 的类型只能是 bool int double string
     // error-report
-    if (type_specifier->kind != RING_BASIC_TYPE_BOOL
-        && type_specifier->kind != RING_BASIC_TYPE_INT
-        && type_specifier->kind != RING_BASIC_TYPE_DOUBLE
-        && type_specifier->kind != RING_BASIC_TYPE_STRING
-        && type_specifier->kind != RING_BASIC_TYPE_CLASS) {
+    if (type_specifier->kind == RING_BASIC_TYPE_ANY
+        || type_specifier->kind == RING_BASIC_TYPE_UNKNOW
+        || (type_specifier->kind == RING_BASIC_TYPE_ARRAY
+            && (type_specifier->sub->kind == RING_BASIC_TYPE_ANY
+                || type_specifier->sub->kind == RING_BASIC_TYPE_UNKNOW))) {
         DEFINE_ERROR_REPORT_STR;
 
         snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "class field's type only support bool/int/double/string/class; E:%d.",
+                 "class field's type only support bool/int/double/string/class bool[]/int[]/double[]/string[]/class[]; E:%d.",
                  ERROR_INVALID_FIELD_IN_CLASS);
 
         ErrorReportContext context = {
