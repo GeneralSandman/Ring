@@ -156,7 +156,7 @@ autoTestAction(){
     if [[ "$?" -eq 1 ]];then
         result="NOTTEST"
         let not_test_num++
-        printf "%-4s *%-20s %-80s %-80s \033[33m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
+        printf "%-4s %-25s %-80s %-80s \033[33m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
         return
     fi
 
@@ -167,7 +167,7 @@ autoTestAction(){
     if [[ "$?" -ne 0 ]];then
         result="FAILED"
         echo $source_code_file >> $TEST_RESULT
-        printf "%-4s *%-20s %-80s %-80s \033[31m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
+        printf "%-4s %-25s %-80s %-80s \033[31m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
         return
     fi
     
@@ -176,12 +176,12 @@ autoTestAction(){
     if [[ "$?" -eq 0 ]];then
         result="PASS"
         let succ_num++
-        printf "%-4s *%-20s %-80s %-80s \033[32m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
+        printf "%-4s %-25s %-80s %-80s \033[32m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
     else
         result="FAILED"
         let fail_num++
         echo $source_code_file >> $TEST_RESULT
-        printf "%-4s *%-20s %-80s %-80s \033[31m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
+        printf "%-4s %-25s %-80s %-80s \033[31m[%s]\033[0m\n" $all_num $model $source_code_file $run_result_file $result
     fi
     rm $run_result_file_tmp
 
@@ -203,7 +203,7 @@ printNotPassCase(){
 
 
 start_time=`date +%s`
-printf "%-4s *%-20s %-80s %-80s %s\n" num model source_code_file run_result_file result
+printf "%-4s %-25s %-80s %-80s %s\n" Num Model SourceCodeFile ResultFile Result
 
 for((test_loop=1;test_loop<=$TEST_LOOP_NUM;test_loop++)); do {
 
@@ -216,7 +216,7 @@ for((test_loop=1;test_loop<=$TEST_LOOP_NUM;test_loop++)); do {
             autoTestAction $model $source_file_path $file
             fi
         done
-        printf "\n"
+        # printf "\n"
     done
 
 }
