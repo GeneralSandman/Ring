@@ -15,51 +15,84 @@
 
 ## 总规划
 
-1. 通读 diksam_v0.4 
-   - https://github.com/GeneralSandman/diksam_v0.4
-   - 里边还是有很多值得借鉴的地方
-2. 通读 Lua 5.x版本
-   1. 好好掌握 Lua的语法用法
-   2. 力求完全掌握设计逻辑、包括协程、table
-   3. 重新读那本 《自己动手实现Lua：虚拟机、编译器和标准库》
-3. 完善Ring的基本功能  争取 2024-12-31之前发布第一个release版本
-   1. 完善栈式虚拟机 ✅
-   2. 面向对象 Class (field, method)
-   3. 数组 Array ✅
-   4. 多维数组
-   5. 字符串 String ✅
-   6. 数组+对象+字符串 各种嵌套定义
-   7. 多维数组
-   8. 完善语义分析 报错机制
-   9. Any类型  ✅
-   10. 实现可变参数   ✅
-   11. 完善内置 printf 函数  很重要  可变参数 format
-   12. switch case 实现
-   13. package 源代码的组织形式 import/package ✅
-   14. 生成字节码 到二进制文件 解析字节码 Dump ByteCode (需要拆分出 编译前 和 加载虚拟机代码)
-   15. linux man手册
-   16. 支持 `ring dump`
-   17. 完善Ring的数据类型 int double 是远远不够的 ✅
-4. 完善Ring的高级功能
-   1.  类型的强制转换 与 隐式转换
-   2.  垃圾回收 Grabage Collection ✅
-   3.  闭包 Closure
-   4.  实现反射 获取变量的类型 参考 go ✅
-   5.  优化内置 native-lib ✅
-   6.  调试器 Debuger
-   7.  交互式编程 
-   8.  lsp
-   9.  优化控制语句中  break continue return ✅
-5. 实现相对完善的官方标准库 fmt sys math debug strings ✅
-6. 实现一键安装release版本.
-7. 将 栈式虚拟机 转为 寄存式虚拟机
-8. 支持Ring Eval 
-   1. e.g.  ./bin/lua eval "fmt::println_string("hello world");"
-9. chatgpt + 智能终端 + ring -> 交互式入门ring
-10. 学习函数式编程
-11. 学习 Ocaml
-12. 学习 V8
-13. 中间代码优化, 死代码消除, 常量折叠.
+
+完善Ring的基本功能 争取 2024-12-31之前发布第一个release版本
+
+
+### 数据类型
+
+1. 基本数据类型: bool int double string
+2. 派生数据类型: array class
+3. array: 多维数组
+4. class: field(各种数据类型的嵌套组合, 循环定义), method
+5. 用法: 可见范围(全局变量、局部变量)、定义、初始化、赋值、copy、函数传递、gc、heap_size计算、类型转化、(是否要支持auto推断类型)
+6. Any类型
+7. 类型的强制转换 与 隐式转换
+
+### 运算符
+
+1. 运算符: + - * / % += -= *= /= %= ++ -- 
+2. 运算符: == != > < >= <=
+3. 运算符: and or not
+4. 运算符: a?b:c
+5. 用法: 运算符的优先级、操作数的数据类型
+
+
+### 控制语句
+
+1. 语句: if else for do-for break continue return 
+2. 语句: switch-case
+
+
+### function & method
+
+1. 函数调用
+2. 参数、局部变量、返回值、self关键字
+3. 可变参数+any类型
+
+
+### 语义分析
+
+1. 完善语义分析 报错机制
+
+
+### GC
+
+1. 实现了最简单的STW Mark&Sweep GC算法
+
+### 项目组织
+
+1. package 源代码的组织形式 import/package
+
+### 工具链
+
+1. linux man手册
+2. `ring man` 支持快速查看语法
+3. `ring dump` 查看字节码详情
+4. 实现一键安装ring release版本
+5. 能够生成字节码, 加载字节码
+6. 调试器 Debuger
+7. 交互式编程
+8. LSP
+
+### 标准库
+
+
+1. 更加优化的方式实现 native-lib, ring方便调用c库
+2. 实现相对完善的官方标准库 fmt sys math debug strings reflect
+3. fmt: 完善内置 printf 函数, 支持可变参数, 参考format函数
+4. reflect: 实现反射, 获取变量的类型
+
+
+### 不成熟的想法
+
+1. 支持Ring Eval, e.g.  ./bin/lua eval "fmt::println_string("hello world")";
+2. Closure
+3. 函数式编程
+4. 中间代码优化, 死代码消除, 常量折叠
+
+
+
 
 
 -----------------------------
@@ -108,6 +141,15 @@ Lua源码分析
     https://zhuanlan.zhihu.com/p/102415312
 
 
+1. 通读 diksam_v0.4 
+   - https://github.com/GeneralSandman/diksam_v0.4
+   - 里边还是有很多值得借鉴的地方
+2. 通读 Lua 5.x版本
+   1. 好好掌握 Lua的语法用法
+   2. 力求完全掌握设计逻辑、包括协程、table
+   3. 重新读那本 《自己动手实现Lua：虚拟机、编译器和标准库》
+3. 学习 Ocaml
+4. 学习 V8
 
 -----------------------------
 
@@ -345,7 +387,156 @@ class-object  未测试 ⭕️
 ## 2024-02-05周 
 
 
-### A. 类中field为class的情况下要初始化默认值
+### A. 类中field为class的情况下要初始化默认值   ✅ 
+
+### B. 函数调用中，局部变量的数量写死为20，如何处理一下
+
+1. function 测试通过   ✅ 
+2. method 未测试 ✅ 
+
+
+### C. 数组常量
+
+目前已经支持了 一维数组常量 
+
+```
+int[]{1,2,3};
+```
+
+
+需要支持二维数组常量 
+
+```
+int[,]{
+    {1,2,3},
+    {1,2,3},
+    {1,2,3}
+};
+```
+
+
+三维数组常量 
+
+```
+int[,,]{
+    {
+        {1,2,3},
+        {1,2,3},
+        {1,2,3}
+    },
+    {
+        {1,2,3},
+        {1,2,3},
+        {1,2,3}
+    },
+    {
+        {1,2,3},
+        {1,2,3},
+        {1,2,3}
+    }
+}
+```
+
+
+
+多维数组常量
+
+
+当然这个也可以是个嵌套的，所以说通过单纯的语法分析是远远不够的，还需要语义分析
+
+```
+array_0 = int[]{1,2,3}
+
+int[,]{
+    array_0,
+    array_0,
+}
+```
+
+
+### D. class-object  常量
+
+已经支持了 class-object常量
+
+```
+Job {
+    Bool: true,
+    Int:  1,
+    Double: 1.1
+}
+```
+
+
+一维数组 class-object常量
+
+```
+Job[] {
+    Job{
+        Bool: true,
+        Int:  1,
+        Double: 1.1
+    },
+    Job{
+        Bool: true,
+        Int:  1,
+        Double: 1.1
+    },
+    Job{
+        Bool: true,
+        Int:  1,
+        Double: 1.1
+    }
+}
+```
+
+
+
+二维数组 class-object常量
+
+```
+Job[,] {
+    {
+        Job{
+            Bool: true,
+            Int:  1,
+            Double: 1.1
+        },
+        Job{
+            Bool: true,
+            Int:  1,
+            Double: 1.1
+        }
+    },
+    {
+        Job{
+            Bool: true,
+            Int:  1,
+            Double: 1.1
+        }
+    }
+}
+```
+
+当然，这个也可以是个嵌套的，也可以这样，所以说通过单纯的语法分析是远远不够的，还需要语义分析
+
+```
+job_value = Job{
+    Bool: true,
+    Int:  1,
+    Double: 1.1
+}
+
+Job[,] {
+    {job_value, job_value},
+    {job_value, job_value}
+}
+```
+
+
+
+
+
+### E. 在定义数组常量和class-object常量时，最后一个元素后边可以有引号
 
 ## 2024-01-29周 
 
