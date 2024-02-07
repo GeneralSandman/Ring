@@ -137,7 +137,7 @@ typedef enum {
     RVM_VALUE_TYPE_CLASS_OB,
     RVM_VALUE_TYPE_ARRAY,
 
-    RVM_VALUE_TYPE_OBJECT, // TODO: 删除
+    RVM_VALUE_TYPE_OBJECT, // TODO: 删除, 目前不能删除是因为在
 
 } RVM_Value_Type;
 

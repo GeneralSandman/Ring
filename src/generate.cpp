@@ -1504,7 +1504,7 @@ void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
         // find package & function index
-        package_offset = identifier_expression->u.function->package->package_index; // FIXME:
+        package_offset = identifier_expression->u.function->package->package_index;
         offset         = identifier_expression->u.function->func_index;
         operand        = (package_offset << 8) | offset;
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, identifier_expression->line_number);

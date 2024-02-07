@@ -111,7 +111,7 @@ Package* package_create(CompilerEntry* compiler_entry,
     Package* package                 = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
 
     package->compiler_entry          = compiler_entry;
-    package->package_index           = -1; // TODO: 这个应该在 fix的时候 设置
+    package->package_index           = -1; // after: 这个应该在 fix的时候 设置
     package->package_name            = package_name;
     package->package_path            = package_path;
 
@@ -145,7 +145,7 @@ Package* package_create_input_file(CompilerEntry* compiler_entry,
     Package* package                 = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
 
     package->compiler_entry          = compiler_entry;
-    package->package_index           = -1; // TODO: 这个应该在 fix的时候 设置
+    package->package_index           = -1; // after: 这个应该在 fix的时候 设置
     package->package_name            = package_name;
     package->package_path            = nullptr;
 
@@ -180,7 +180,7 @@ void package_compile(Package* package) {
     }
     debug_ast_info_with_yellow("\t package[%s] start compile...", package->package_name);
 
-    package->package_index = compiler_entry->package_list.size(); // TODO: 这个应该在 fix的时候 设置
+    package->package_index = compiler_entry->package_list.size(); // after: 这个应该在 fix的时候 设置
     compiler_entry->package_list.push_back(package);
 
     for (std::string source_file : package->source_file_list) {
@@ -563,7 +563,9 @@ void ring_compile_error_report(ErrorReportContext* context) {
     }
 
     context->package_unit->compile_error_num += 1;
-    if (context->package_unit->compile_error_num >= 7) {
+    // TODO: 目前对于错误的积累，设计的还不是特别完善
+    // compile_error_num 应该是全局的
+    if (context->package_unit->compile_error_num >= 1) {
         fprintf(stderr, "%d errors generated, exit.\n", context->package_unit->compile_error_num);
         fflush(stderr);
         exit(1);

@@ -1400,10 +1400,8 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
     RVM_NativeFuncProc* native_func_proc  = function->u.native_func->func_proc;
     RVM_Value*          args              = nullptr;
 
-    // TODO: how to handle arg_count > 1
     args                                  = &rvm->runtime_stack->data[rvm->runtime_stack->top_index - argument_list_size];
 
-    // TODO: how to handler return_list > 1
     ret                                   = native_func_proc(rvm, argument_list_size, args);
 
 
@@ -1821,7 +1819,6 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
  * create array in heap
  *
  * support create one-dimensional array only.
- * TODO: support multi-dimensional array
  *
  */
 RVM_Array* rvm_new_array_bool(Ring_VirtualMachine* rvm,
@@ -1837,7 +1834,6 @@ RVM_Array* rvm_new_array_bool(Ring_VirtualMachine* rvm,
  * create array in heap
  *
  * support create one-dimensional array only.
- * TODO: support multi-dimensional array
  *
  */
 RVM_Array* rvm_new_array_int(Ring_VirtualMachine* rvm,
@@ -1853,7 +1849,6 @@ RVM_Array* rvm_new_array_int(Ring_VirtualMachine* rvm,
  * create array in heap
  *
  * support create one-dimensional array only.
- * TODO: support multi-dimensional array
  *
  */
 RVM_Array* rvm_new_array_double(Ring_VirtualMachine* rvm,
@@ -1869,7 +1864,6 @@ RVM_Array* rvm_new_array_double(Ring_VirtualMachine* rvm,
  * create array in heap
  *
  * support create one-dimensional array only.
- * TODO: support multi-dimensional array
  *
  */
 RVM_Array* rvm_new_array_string(Ring_VirtualMachine* rvm,
@@ -1885,7 +1879,6 @@ RVM_Array* rvm_new_array_string(Ring_VirtualMachine* rvm,
  * create array in heap
  *
  * support create one-dimensional array only.
- * TODO: support multi-dimensional array
  *
  * dimension: size of array
  * class_def_index: index of class definition in class table
@@ -1904,8 +1897,6 @@ RVM_Array* rvm_new_array_class_object(Ring_VirtualMachine* rvm,
  * create array in heap
  *
  * support create one-dimensional array only.
- * TODO: support multi-dimensional array
- * TODO: support field is string or array
  *
  */
 RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm,
@@ -1997,7 +1988,6 @@ RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int s
 
     RVM_Array* array             = rvm_new_array_string(rvm, dimension, dimension_list);
     for (int i = 0; i < size; i++) {
-        // TODO: 这个写法需要重构
         array->u.string_array[i] = *(STACK_GET_STRING_OFFSET(rvm, -size + i));
     }
 

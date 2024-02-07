@@ -325,7 +325,6 @@ Expression* create_dot_expression(Expression* prefix_expression, Expression* suf
  * 在这里, type_specifier 是没有嵌套的
  * 也就是说 type_specifier 是 booll int double string class
  *
- * TODO: 支持多维数组的
  */
 Expression* create_new_array_expression(TypeSpecifier*       type_specifier,
                                         DimensionExpression* dimension_expression) {
@@ -722,7 +721,6 @@ BreakStatement* create_break_statement(char* literal_interface) {
         break_loop_num = 1;
     } else {
         break_loop_num = atoi(literal_interface);
-        // TODO: check break_loop_num valid
     }
 
     BreakStatement* break_statement = (BreakStatement*)mem_alloc(get_front_mem_pool(), sizeof(BreakStatement));
@@ -1080,7 +1078,6 @@ Package* create_package_info(char* package_name) {
     return package;
 }
 
-// TODO:
 void import_package_list_add_item(char* package_name, char* rename) {
     debug_ast_info_with_yellow("import package name:%s, rename:%s\n", package_name, rename);
 
