@@ -1453,9 +1453,6 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
                             unsigned int* caller_stack_base) {
     debug_exec_info_with_white("\t");
 
-    // FIXME:
-    /* unsigned int arguement_count = 0; */
-
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->magic_number         = CALL_INFO_MAGIC_NUMBER;
     callinfo->caller_function      = *caller_function;
@@ -1463,7 +1460,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     callinfo->caller_stack_base    = *caller_stack_base;
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
-    callinfo->callee_argument_size = callee_function->parameter_size; // FIXME: 支持可变参数
+    callinfo->callee_argument_size = callee_function->parameter_size;
     callinfo->prev                 = nullptr;
     callinfo->next                 = nullptr;
     store_callinfo(rvm, callinfo);
@@ -1473,14 +1470,12 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     *code_list         = callee_function->u.derive_func->code_list;
     *code_size         = callee_function->u.derive_func->code_size;
     *pc                = 0;
-    *caller_stack_base = rvm->runtime_stack->top_index; // FIXME:
+    *caller_stack_base = rvm->runtime_stack->top_index;
 
 
     init_derive_function_local_variable(rvm, callee_object, callee_function);
 
-    // FIXME:a local_variable_size
-    // 暂时先写死为20
-    unsigned int local_variable_size = 20;
+    unsigned int local_variable_size = callee_function->local_variable_size;
     rvm->runtime_stack->top_index += local_variable_size;
 }
 
@@ -1513,12 +1508,11 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     unsigned int old_return_value_list_index;
 
     rvm->runtime_stack->top_index -= return_value_list_size;
-    old_return_value_list_index      = rvm->runtime_stack->top_index;
+    old_return_value_list_index       = rvm->runtime_stack->top_index;
 
 
-    RVM_CallInfo* callinfo           = nullptr;
-    // FIXME: local_variable_size
-    unsigned int local_variable_size = 20;
+    RVM_CallInfo* callinfo            = nullptr;
+    unsigned int  local_variable_size = (*caller_function)->local_variable_size;
     rvm->runtime_stack->top_index -= local_variable_size;
 
     restore_callinfo(rvm, &callinfo);
