@@ -63,6 +63,8 @@
 ### 项目组织
 
 1. package 源代码的组织形式 import/package
+2. 第三方package的安装和下载
+3. 项目编译过程中并发编译
 
 ### 工具链
 
@@ -116,29 +118,42 @@
 ## 参考资料汇总
 
 
-1. Lua设计与实现 基于lua源码对其设计与具体实现进行剖析 https://www.zhihu.com/column/c_1097089416010567680
-2. 《自己动手实现Lua：虚拟机、编译器和标准库》代码 https://github.com/GeneralSandman/luago-book
-3. https://github.com/GeneralSandman/zhenhuli-lua-learn-node
-4. 实现自己的编程语言 https://github.com/codecrafters-io/build-your-own-x#build-your-own-programming-language
 
-1. 垃圾回收机制 https://journal.stuffwithstuff.com/2013/12/08/babys-first-garbage-collector/
+### Lua源码分析
+1. Lua的LG结构lua_State和global_State  
+    https://zhuanlan.zhihu.com/p/102415312
+2. Lua设计与实现 基于lua源码对其设计与具体实现进行剖析
+   https://www.zhihu.com/column/c_1097089416010567680
+3. 《自己动手实现Lua：虚拟机、编译器和标准库》代码 
+   https://github.com/GeneralSandman/luago-book
+4. 李振虎的lua学习笔记
+    https://github.com/GeneralSandman/zhenhuli-lua-learn-node
 
-1. 比较喜欢他的网站 https://maplant.com/ 特别喜欢那种特别老式的网站布局，人只会聚焦与内容
 
-Bison Official Document
-https://www.gnu.org/software/bison/manual/html_node/index.html#SEC_Contents
-
-Bison Error Handling
-https://docs.oracle.com/cd/E19504-01/802-5880/6i9k05dh4/index.html
-
-书籍
+#### 书籍
 1. 《Lua设计与实现》https://github.com/lichuang/Lua-Source-Internal
 2. 《自己动手实现Lua：虚拟机、编译器和标准库》
 
 
-Lua源码分析
-1. Lua的LG结构lua_State和global_State  
-    https://zhuanlan.zhihu.com/p/102415312
+
+1. 实现自己的编程语言 
+   https://github.com/codecrafters-io/build-your-own-x#build-your-own-programming-language
+
+2. 垃圾回收机制 
+   https://journal.stuffwithstuff.com/2013/12/08/babys-first-garbage-collector/
+
+3. https://maplant.com/ 
+   比较喜欢他的网站 特别喜欢那种特别老式的网站布局，人只会聚焦与内容
+
+
+### 其他相关工具链
+
+1. Bison Official Document
+https://www.gnu.org/software/bison/manual/html_node/index.html#SEC_Contents
+
+2.Bison Error Handling
+https://docs.oracle.com/cd/E19504-01/802-5880/6i9k05dh4/index.html
+
 
 
 1. 通读 diksam_v0.4 
@@ -370,7 +385,7 @@ bool  ✅
 int  ✅ 
 double  ✅ 
 string  ✅ 
-class-object  未测试 ⭕️
+class-object  ✅ 
 
 2. 多维数组的语法糖 var int[!8]; 表示八维数组 ✅ 
    1. 创建多维数组的时候，不允许 !8
@@ -383,6 +398,34 @@ class-object  未测试 ⭕️
 
 
 -----------------------------
+
+## 2024-02-20周 
+
+### A. class method
+
+method 调用 method , 
+method 调用 function
+
+
+
+### B. 如何实现多行字符串
+
+golang中多行字符串中是不支持转义`字符的
+
+TODO: 这里如何设计一下
+
+
+
+### C. 支持括号运算符
+
+通过括号运算符可以明确运算的优先级
+
+
+
+-----------------------------
+
+
+
 
 ## 2024-02-05周 
 
@@ -536,7 +579,7 @@ Job[,] {
 
 
 
-### E. 在定义数组常量和class-object常量时，最后一个元素后边可以有引号
+### E. 在定义数组常量和class-object常量时，最后一个元素后边必须有逗号
 
 ## 2024-01-29周 
 
@@ -591,7 +634,10 @@ job_0 = Job{
  ./test/021-array-int/sort-2.ring 
 
 
-#### TODO: 
+#### 数组元素的自增运算 ✅ 
+
+自增  ✅ 
+自减  未测试 ⭕️ 
 
 ./test/021-array-int/sort-3.ring:23:36: 
 
@@ -651,7 +697,7 @@ func main() {
 ```
 
 
-说白了，左值和右值，还得通过语义来判断
+说白了，左值和右值，还得通过语义分析来判断
 
 
 ### *H. 自增自减运算符*
@@ -838,7 +884,7 @@ a[1,2,4] 访问的时候, 可以放非int常量
  TODO: array literal 暂时只支持一维数组 
 
 
- ### 应该把 RVM_String 放在基础类型里边
+### 应该把 RVM_String 放在基础类型里边
 
 -----------------------------
 
