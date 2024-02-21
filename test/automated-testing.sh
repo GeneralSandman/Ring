@@ -66,8 +66,12 @@ TEST_MODELS=(
 
 # 跳过测试的case
 NOT_TEST_FILES=(
-  "./test/004-derive-function/function-021.ring" # 函数传递 var int... int_value_list
-  "./test/013-gc/gc-000.ring" # 数组的地址  如何进行 自动化测试
+  "./test/004-derive-function/function-021.ring" 
+  # 函数传递 var int... int_value_list
+
+
+  "./test/013-gc/gc-000.ring" 
+  # 数组的地址  如何进行 自动化测试
 
 
   "./test/024-array-class/for-access-000.ring" 
