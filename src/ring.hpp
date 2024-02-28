@@ -1606,6 +1606,7 @@ typedef enum {
     ERROR_ARRAY_DIMENSION_INVALID       = 200011, // 数组维度不合法
     ERROR_ASSIGN_TO_METHOD_OF_CLASS     = 200012, // 不能给 class中 method赋值
     ERROR_INVALID_NOT_FOUND_CLASS_FIELD = 200013, // 找不到 class field
+    ERROR_UNCLOSED_STRING_LITERAL       = 200014, // 未关闭的字符串常量
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,

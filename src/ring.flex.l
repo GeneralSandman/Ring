@@ -12,7 +12,7 @@ extern "C" int yywrap(){
 }
 
 %}
-%start LINE_COMMENT BLOCK_COMMENT STRING_LITERAL_STATE
+%start LINE_COMMENT     BLOCK_COMMENT    LINE_STRING_LITERAL_STATE    BLOCK_STRING_LITERAL_STATE
 
 %option yylineno
 
@@ -117,17 +117,13 @@ extern "C" int yywrap(){
         yytext);
 
     package_unit_update_line_content(yytext);
-
     init_string_literal_buffer();
-
     int i = 0;
     for (i=0;i<strlen(yytext);i++) {
         string_literal_add_char(yytext[i]);
     }
-
     yylval.m_identifier = get_string_literal();
     reset_string_literal_buffer();
-
     
     return IDENTIFIER;
 }
@@ -156,9 +152,13 @@ extern "C" int yywrap(){
 
 <INITIAL>\" {
     package_unit_update_line_content(yytext);
-
     init_string_literal_buffer();
-    BEGIN STRING_LITERAL_STATE;
+    BEGIN LINE_STRING_LITERAL_STATE;
+}
+<INITIAL>"`" {
+    package_unit_update_line_content(yytext);
+    init_string_literal_buffer();
+    BEGIN BLOCK_STRING_LITERAL_STATE;
 }
 <INITIAL>\n.* {
     debug_flex_info_with_red("[STATUS:INITIAL]\t new line(LF) line_number(%d)\n\n", package_unit_get_line_number());
@@ -197,6 +197,130 @@ extern "C" int yywrap(){
 }
 
 
+
+
+<BLOCK_STRING_LITERAL_STATE>\` {
+    package_unit_update_line_content(yytext);
+    yylval.m_literal_interface = get_string_literal();
+    BEGIN INITIAL;
+    return STRING_LITERAL;
+}
+<BLOCK_STRING_LITERAL_STATE>"\\`" {
+    package_unit_update_line_content(yytext);
+    string_literal_add_char('`');
+    BEGIN BLOCK_STRING_LITERAL_STATE;
+}
+<BLOCK_STRING_LITERAL_STATE>. {
+    package_unit_update_line_content(yytext);
+    string_literal_add_char(yytext[0]);
+    BEGIN BLOCK_STRING_LITERAL_STATE;
+}
+<BLOCK_STRING_LITERAL_STATE>\n {
+    package_unit_update_line_content(yytext);
+    string_literal_add_char('\n');
+    BEGIN BLOCK_STRING_LITERAL_STATE;
+}
+
+
+
+<LINE_STRING_LITERAL_STATE>\" {
+    package_unit_update_line_content(yytext);
+    yylval.m_literal_interface = get_string_literal();
+    BEGIN INITIAL;
+    return STRING_LITERAL;
+}
+<LINE_STRING_LITERAL_STATE>\\n {
+    package_unit_update_line_content(yytext);
+    string_literal_add_char('\n');
+    BEGIN LINE_STRING_LITERAL_STATE;
+}
+<LINE_STRING_LITERAL_STATE>\\r {
+    package_unit_update_line_content(yytext);
+    string_literal_add_char('\r');
+    BEGIN LINE_STRING_LITERAL_STATE;
+}
+<LINE_STRING_LITERAL_STATE>\\t {
+    package_unit_update_line_content(yytext);
+    string_literal_add_char('\t');
+    BEGIN LINE_STRING_LITERAL_STATE;
+}
+<LINE_STRING_LITERAL_STATE>\n {
+    // error-report unclosed string literal
+    if(true) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "unclosed string literal, match `\\n` in string literal; E:%d.",
+                 ERROR_UNCLOSED_STRING_LITERAL);
+        snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                " \"<string-literal>\" only use to definite line string, `<string-literal>` can definite block string.");
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(package_unit_get_line_number()),
+            .line_number             = package_unit_get_line_number(),
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+        
+
+    yyless(1);
+    BEGIN LINE_STRING_LITERAL_STATE;
+}
+<LINE_STRING_LITERAL_STATE>\r\n {
+    // error-report unclosed string literal
+    if(true) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "unclosed string literal, match `\\r\\n` in string literal; E:%d.",
+                 ERROR_UNCLOSED_STRING_LITERAL);
+        snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                " \"<string-literal>\" only use to definite line string, `<string-literal>` can definite block string.");
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(package_unit_get_line_number()),
+            .line_number             = package_unit_get_line_number(),
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+
+    yyless(2);
+    BEGIN LINE_STRING_LITERAL_STATE;
+}
+<LINE_STRING_LITERAL_STATE>"\\\"" {
+    package_unit_update_line_content(yytext);
+    string_literal_add_char('"');
+    BEGIN LINE_STRING_LITERAL_STATE;
+}
+<LINE_STRING_LITERAL_STATE>. {
+    package_unit_update_line_content(yytext);
+    string_literal_add_char(yytext[0]);
+    BEGIN LINE_STRING_LITERAL_STATE;
+}
+
+
+
+
+
 <LINE_COMMENT>\n {
     package_unit_update_line_content(yytext);
     yylval.m_comment_value = get_string_literal();
@@ -223,6 +347,7 @@ extern "C" int yywrap(){
     package_unit_update_line_content(yytext);
     string_literal_add_char(yytext[0]);
 }
+
 
 
 <BLOCK_COMMENT>\n {
@@ -252,44 +377,6 @@ extern "C" int yywrap(){
     BEGIN INITIAL;
 }
 
-
-<STRING_LITERAL_STATE>\" {
-    package_unit_update_line_content(yytext);
-
-    yylval.m_literal_interface = get_string_literal();
-
-
-    BEGIN INITIAL;
-    return STRING_LITERAL;
-}
-<STRING_LITERAL_STATE>\\n {
-    package_unit_update_line_content(yytext);
-
-    string_literal_add_char('\n');
-
-    BEGIN STRING_LITERAL_STATE;
-}
-<STRING_LITERAL_STATE>\\r {
-    package_unit_update_line_content(yytext);
-
-    string_literal_add_char('\r');
-
-    BEGIN STRING_LITERAL_STATE;
-}
-<STRING_LITERAL_STATE>\\t {
-    package_unit_update_line_content(yytext);
-
-    string_literal_add_char('\t');
-
-    BEGIN STRING_LITERAL_STATE;
-}
-<STRING_LITERAL_STATE>. {
-    package_unit_update_line_content(yytext);
-
-    string_literal_add_char(yytext[0]);
-
-    BEGIN STRING_LITERAL_STATE;
-}
 
 %%
 
