@@ -1,0 +1,32 @@
+1234567890
+
+test case 1-----------------------------
+1234567890
+10
+debug_assert PASS
+
+test case 2-----------------------------
+12	34567890
+11
+debug_assert PASS
+
+test case 3-----------------------------
+12
+34567890
+11
+debug_assert PASS
+
+test case 4-----------------------------
+1234567890
+11
+debug_assert PASS
+
+test case 5-----------------------------
+12\s34567890
+12
+debug_assert PASS
+
+test case 5-----------------------------
+123456"7890
+11
+debug_assert PASS
