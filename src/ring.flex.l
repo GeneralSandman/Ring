@@ -198,7 +198,7 @@ extern "C" int yywrap(){
 
 
 
-
+ /* BLOCK_STRING_LITERAL_STATE */
 <BLOCK_STRING_LITERAL_STATE>\` {
     package_unit_update_line_content(yytext);
     yylval.m_literal_interface = get_string_literal();
@@ -220,9 +220,11 @@ extern "C" int yywrap(){
     string_literal_add_char('\n');
     BEGIN BLOCK_STRING_LITERAL_STATE;
 }
+ /* BLOCK_STRING_LITERAL_STATE */
 
 
 
+ /* LINE_STRING_LITERAL_STATE */
 <LINE_STRING_LITERAL_STATE>\" {
     package_unit_update_line_content(yytext);
     yylval.m_literal_interface = get_string_literal();
@@ -316,11 +318,12 @@ extern "C" int yywrap(){
     string_literal_add_char(yytext[0]);
     BEGIN LINE_STRING_LITERAL_STATE;
 }
+ /* LINE_STRING_LITERAL_STATE */
 
 
 
 
-
+ /* LINE_COMMENT */
 <LINE_COMMENT>\n {
     package_unit_update_line_content(yytext);
     yylval.m_comment_value = get_string_literal();
@@ -347,9 +350,11 @@ extern "C" int yywrap(){
     package_unit_update_line_content(yytext);
     string_literal_add_char(yytext[0]);
 }
+ /* LINE_COMMENT */
 
 
 
+ /* BLOCK_COMMENT */
 <BLOCK_COMMENT>\n {
     package_unit_update_line_content(yytext);
     yylval.m_comment_value = get_string_literal();
@@ -376,6 +381,7 @@ extern "C" int yywrap(){
     reset_string_literal_buffer();
     BEGIN INITIAL;
 }
+ /* BLOCK_COMMENT */
 
 
 %%

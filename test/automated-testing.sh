@@ -1,5 +1,24 @@
 #!/bin/bash
 
+# Action:
+# 对 ./test 所有的测试用例进行自动化测试,
+# 执行 ring run xxx.ring 命令 运行, 得到输出结果 xxx.ring.result.tmp, 
+# 与预期结果 xxx.ring.result 进行比对
+# 会输出 测试的详情和测试数量汇总
+
+# Usage:
+# 1. 触发全部自动化测试
+#    make testall
+#    或者 bash ./test/automated-testing.sh
+# 2. 测试的轮数
+#    默认1轮, 可调整 TEST_LOOP_NUM
+# 3. 控制测试的模块: 
+#    调整 TEST_MODELS 
+# 4. 控制不测试的case: 
+#    调整 NOT_TEST_FILES 
+# 5. 是否输出测试用例表: 
+#    调整 IS_EXPORT_TEST_DETAIL_SUMMARY
+#    测试描述会从测试文件中导出, 匹配前缀 // TestDetail:
 
 # 测试的轮数, 用于多次执行
 TEST_LOOP_NUM=1
