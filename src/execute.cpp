@@ -1215,6 +1215,15 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OBJECT:
             rvm->pc += 3;
             break;
+        case RVM_CODE_NEW_ARRAY_LITERAL_A:
+            dimension   = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
+            array_size  = OPCODE_GET_2BYTE(&code_list[rvm->pc + 2]);
+            array_value = rvm_new_array_literal_a(rvm, dimension, array_size);
+            runtime_stack->top_index -= array_size;
+            STACK_SET_ARRAY_OFFSET(rvm, 0, array_value);
+            runtime_stack->top_index++;
+            rvm->pc += 4;
+            break;
 
         case RVM_CODE_PUSH_ARRAY_LEN:
             array_value = STACK_GET_ARRAY_OFFSET(rvm, -1);
@@ -1935,7 +1944,9 @@ RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm,
     return class_ob;
 }
 
-// TODO: 这里暂时只支持一维数组
+/*
+ * 只用户初始化一维数组常量
+ */
 RVM_Array* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsigned int size) {
     unsigned int  dimension      = 1;
     unsigned int* dimension_list = (unsigned int*)calloc(1, sizeof(unsigned int) * dimension);
@@ -1950,7 +1961,9 @@ RVM_Array* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsigned int siz
     return array;
 }
 
-// TODO: 这里暂时只支持一维数组
+/*
+ * 只用户初始化一维数组常量
+ */
 RVM_Array* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size) {
     unsigned int  dimension      = 1;
     unsigned int* dimension_list = (unsigned int*)calloc(1, sizeof(unsigned int) * dimension);
@@ -1965,7 +1978,9 @@ RVM_Array* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size
     return array;
 }
 
-// TODO: 这里暂时只支持一维数组
+/*
+ * 只用户初始化一维数组常量
+ */
 RVM_Array* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, unsigned int size) {
     unsigned int  dimension      = 1;
     unsigned int* dimension_list = (unsigned int*)calloc(1, sizeof(unsigned int) * dimension);
@@ -1980,7 +1995,9 @@ RVM_Array* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, unsigned int s
     return array;
 }
 
-// TODO: 这里暂时只支持一维数组
+/*
+ * 只用户初始化一维数组常量
+ */
 RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int size) {
     unsigned int  dimension      = 1;
     unsigned int* dimension_list = (unsigned int*)calloc(1, sizeof(unsigned int) * dimension);
@@ -1992,6 +2009,30 @@ RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int s
     }
 
     free(dimension_list);
+    return array;
+}
+
+/*
+ * 初始化多维数组常量
+ */
+RVM_Array* rvm_new_array_literal_a(Ring_VirtualMachine* rvm,
+                                   unsigned int         dimension,
+                                   unsigned int         size) {
+
+    RVM_Array* array = rvm_heap_new_empty_array(rvm);
+    array->type      = RVM_ARRAY_A;
+    array->dimension = dimension;
+    array->length    = size;
+    array->capacity  = size;
+
+    array->u.a_array = (RVM_Array*)mem_alloc(rvm->meta_pool,
+                                             sizeof(RVM_Array) * array->capacity);
+
+    for (unsigned int i = 0; i < size; i++) {
+        // this is shallow copy
+        array->u.a_array[i] = *(STACK_GET_ARRAY_OFFSET(rvm, -size + i));
+    }
+
     return array;
 }
 

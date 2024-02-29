@@ -555,22 +555,22 @@ statement
 
 
 if_statement
-    : TOKEN_IF TOKEN_LP expression TOKEN_RP block // if () {}
+    : TOKEN_IF TOKEN_LP right_value_expression TOKEN_RP block // if () {}
     {
         debug_bison_info_with_green("[RULE::if_statement]\t ");
         $$ = create_if_statement($3, $5, nullptr, nullptr);
     }
-    | TOKEN_IF TOKEN_LP expression TOKEN_RP block TOKEN_ELSE block // if () {} else {}
+    | TOKEN_IF TOKEN_LP right_value_expression TOKEN_RP block TOKEN_ELSE block // if () {} else {}
     {
         debug_bison_info_with_green("[RULE::if_statement]\t ");
         $$ = create_if_statement($3, $5, nullptr, $7);
     }
-    | TOKEN_IF TOKEN_LP expression TOKEN_RP block elseif_statement_list // if () {} elseif() {} elseif {}
+    | TOKEN_IF TOKEN_LP right_value_expression TOKEN_RP block elseif_statement_list // if () {} elseif() {} elseif {}
     {
         debug_bison_info_with_green("[RULE::if_statement]\t ");
         $$ = create_if_statement($3, $5, $6, nullptr);
     }
-    | TOKEN_IF TOKEN_LP expression TOKEN_RP block elseif_statement_list TOKEN_ELSE block // if () {} elseif() {} elseif {} else {}
+    | TOKEN_IF TOKEN_LP right_value_expression TOKEN_RP block elseif_statement_list TOKEN_ELSE block // if () {} elseif() {} elseif {} else {}
     {
         debug_bison_info_with_green("[RULE::if_statement]\t ");
         $$ = create_if_statement($3, $5, $6, $8);

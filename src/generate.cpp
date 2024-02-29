@@ -1928,16 +1928,23 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
         size++;
     }
 
-    if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_BOOL) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_BOOL, size, array_literal_expression->line_number);
-    } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_INT) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_INT, size, array_literal_expression->line_number);
-    } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_DOUBLE) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE, size, array_literal_expression->line_number);
-    } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_STRING) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_STRING, size, array_literal_expression->line_number);
+    unsigned int oper_num = 0;
+
+    if (array_literal_expression->dimension_expression->dimension == 1) {
+        if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_BOOL) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_BOOL, size, array_literal_expression->line_number);
+        } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_INT) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_INT, size, array_literal_expression->line_number);
+        } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_DOUBLE) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE, size, array_literal_expression->line_number);
+        } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_STRING) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_STRING, size, array_literal_expression->line_number);
+        } else {
+            ring_error_report("error: array literal expression only support bool[] int[] double[] string[]\n");
+        }
     } else {
-        ring_error_report("error: array literal expression only support bool[] int[] double[] string[]\n");
+        oper_num = (array_literal_expression->dimension_expression->dimension << 16) | size;
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_A, oper_num, array_literal_expression->line_number);
     }
 }
 

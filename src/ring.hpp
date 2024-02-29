@@ -804,11 +804,15 @@ typedef enum {
     RVM_CODE_NEW_ARRAY_DOUBLE,
     RVM_CODE_NEW_ARRAY_STRING,
     RVM_CODE_NEW_ARRAY_CLASS_OBJECT,
+
     RVM_CODE_NEW_ARRAY_LITERAL_BOOL,
     RVM_CODE_NEW_ARRAY_LITERAL_INT,
     RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE,
     RVM_CODE_NEW_ARRAY_LITERAL_STRING,
     RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OBJECT,
+
+    RVM_CODE_NEW_ARRAY_LITERAL_A,
+
 
     RVM_CODE_PUSH_ARRAY_LEN,
     RVM_CODE_PUSH_ARRAY_CAPACITY,
@@ -2233,7 +2237,9 @@ RVM_Array*           rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsign
 RVM_Array*           rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size);
 RVM_Array*           rvm_new_array_literal_double(Ring_VirtualMachine* rvm, unsigned int size);
 RVM_Array*           rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int size);
-
+RVM_Array*           rvm_new_array_literal_a(Ring_VirtualMachine* rvm,
+                                             unsigned int         dimension,
+                                             unsigned int         size);
 
 void                 rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Array* array, int* value);
 void                 rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Array* array, int* value);
