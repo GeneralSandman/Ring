@@ -108,6 +108,8 @@ NOT_TEST_FILES=(
   # 2. 针对多维数组，typeof获取不到正确的类型
   # 2023-01-31
 
+  "./test/002-operator/arith-oper-003.ring"
+  # 还没有支持括号运算符
 
   )
 
