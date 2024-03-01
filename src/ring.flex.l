@@ -118,7 +118,7 @@ extern "C" int yywrap(){
 
     package_unit_update_line_content(yytext);
     init_string_literal_buffer();
-    int i = 0;
+    unsigned int i = 0;
     for (i=0;i<strlen(yytext);i++) {
         string_literal_add_char(yytext[i]);
     }
@@ -218,6 +218,9 @@ extern "C" int yywrap(){
 <BLOCK_STRING_LITERAL_STATE>\n {
     package_unit_update_line_content(yytext);
     string_literal_add_char('\n');
+    package_unit_reset_column_number();
+    package_unit_reset_line_content();
+    package_unit_increa_line_number();
     BEGIN BLOCK_STRING_LITERAL_STATE;
 }
  /* BLOCK_STRING_LITERAL_STATE */
@@ -326,7 +329,6 @@ extern "C" int yywrap(){
  /* LINE_COMMENT */
 <LINE_COMMENT>\n {
     package_unit_update_line_content(yytext);
-    yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
 
     package_unit_reset_column_number();
@@ -337,7 +339,6 @@ extern "C" int yywrap(){
 }
 <LINE_COMMENT>\r\n {
     package_unit_update_line_content(yytext);
-    yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
 
     package_unit_reset_column_number();
@@ -357,7 +358,6 @@ extern "C" int yywrap(){
  /* BLOCK_COMMENT */
 <BLOCK_COMMENT>\n {
     package_unit_update_line_content(yytext);
-    yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
     package_unit_reset_column_number();
     package_unit_reset_line_content();
@@ -365,7 +365,6 @@ extern "C" int yywrap(){
 }
 <BLOCK_COMMENT>\r\n {
     package_unit_update_line_content(yytext);
-    yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
     package_unit_reset_column_number();
     package_unit_reset_line_content();
@@ -377,7 +376,6 @@ extern "C" int yywrap(){
 }
 <BLOCK_COMMENT>"*/" {
     package_unit_update_line_content(yytext);
-    yylval.m_comment_value = get_string_literal();
     reset_string_literal_buffer();
     BEGIN INITIAL;
 }

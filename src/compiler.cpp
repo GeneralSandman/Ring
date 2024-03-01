@@ -309,7 +309,7 @@ void package_unit_compile(PackageUnit* package_unit) {
     // check package_unit->line_offset_map is valid
     printf("File:%s\n", package_unit->current_file_name.c_str());
     for (int i = 1; i < package_unit->line_offset_map.size(); i++) {
-        printf("Line:%5d:%s\n", i, package_unit_get_line_content(i).c_str());
+        printf("[@Line:%5d]%s\n", i, package_unit_get_line_content(i).c_str());
     }
 #endif
 
