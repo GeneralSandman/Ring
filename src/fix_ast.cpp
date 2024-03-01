@@ -697,6 +697,9 @@ void fix_array_literal_expression(Expression*             expression,
                                   Function*               func) {
 
     assert(array_literal_expression != nullptr);
+
+    fix_type_specfier(array_literal_expression->type_specifier);
+
     Expression* pos = array_literal_expression->expression_list;
     for (; pos != nullptr; pos = pos->next) {
         fix_expression(pos, block, func);

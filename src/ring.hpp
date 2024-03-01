@@ -2237,6 +2237,9 @@ RVM_Array*           rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsign
 RVM_Array*           rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size);
 RVM_Array*           rvm_new_array_literal_double(Ring_VirtualMachine* rvm, unsigned int size);
 RVM_Array*           rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int size);
+RVM_Array*           rvm_new_array_literal_class_object(Ring_VirtualMachine* rvm,
+                                                        unsigned int         size,
+                                                        RVM_ClassDefinition* class_definition);
 RVM_Array*           rvm_new_array_literal_a(Ring_VirtualMachine* rvm,
                                              unsigned int         dimension,
                                              unsigned int         size);

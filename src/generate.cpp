@@ -1939,8 +1939,12 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
             generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE, size, array_literal_expression->line_number);
         } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_STRING, size, array_literal_expression->line_number);
+        } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_CLASS) {
+            ClassDefinition* class_definition = array_literal_expression->type_specifier->u.class_type->class_definition;
+            oper_num                          = (class_definition->class_index << 16) | size;
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OBJECT, oper_num, array_literal_expression->line_number);
         } else {
-            ring_error_report("error: array literal expression only support bool[] int[] double[] string[]\n");
+            ring_error_report("error: array literal expression not support bool[] int[] double[] string[] <class>[]\n");
         }
     } else {
         oper_num = (array_literal_expression->dimension_expression->dimension << 16) | size;

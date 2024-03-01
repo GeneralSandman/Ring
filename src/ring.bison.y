@@ -9,10 +9,13 @@ int yylex();
 %}
 
 
-%locations
+%locations                       // 开启locations
 %glr-parser                      // 使用 GLR 解析
 %expect    0                     // legitimate 0 shift/reduce conflicts
-%expect-rr 0                     // legitimate 0 reduce/reduce conflicts
+%expect-rr 1                     // legitimate 0 reduce/reduce conflicts
+
+// 在 array_literal_expression 的 class_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_RC
+// 存在 reduce/reduce conflicts, 需要使用 %code_completion 进行处理
 
 %define parse.error detailed     // 调用 yyerror时, 可以传递更多的细节进去
 
@@ -1201,12 +1204,12 @@ basic_value_literal_expression
 derive_value_literal_expression
     : array_literal_expression
     {
-        debug_bison_info_with_green("[RULE::literal_term:array_literal_expression]\t ");
+        debug_bison_info_with_green("[RULE::derive_value_literal_expression:array_literal_expression]\t ");
         $$ = create_expression_from_array_literal($1);
     }
     | class_object_literal_expression
     {
-        debug_bison_info_with_green("[RULE::literal_term:class_object_literal_expression]\t ");
+        debug_bison_info_with_green("[RULE::derive_value_literal_expression:class_object_literal_expression]\t ");
         $$ = create_expression_from_class_object_literal($1);
     }
     ;
@@ -1228,8 +1231,14 @@ function_call_expression
 array_literal_expression
     : basic_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_RC
     {
-        debug_bison_info_with_green("[RULE::array_literal_expression]\t ");
+        debug_bison_info_with_green("[RULE::array_literal_expression:basic]\t ");
         $$ = create_array_literal_expression(create_type_specifier($1), $2, $4);
+    }
+    | class_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_RC
+    {
+        // FIXME: 这里会产生一个 reduce/reduce conflict
+        debug_bison_info_with_green("[RULE::array_literal_expression:class]\t ");
+        $$ = create_array_literal_expression($1, $2, $4);
     }
     ;
 
