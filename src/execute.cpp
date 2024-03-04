@@ -1655,8 +1655,13 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
 
         switch (type_specifier->kind) {
         case RING_BASIC_TYPE_BOOL:
+            STACK_SET_BOOL_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_offset, RVM_FALSE);
+            break;
         case RING_BASIC_TYPE_INT:
+            STACK_SET_INT_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_offset, 0);
+            break;
         case RING_BASIC_TYPE_DOUBLE:
+            STACK_SET_DOUBLE_INDEX(rvm, rvm->runtime_stack->top_index + local_variable_offset, 0.0);
             break;
         case RING_BASIC_TYPE_STRING:
             string = new_string_object(rvm);
