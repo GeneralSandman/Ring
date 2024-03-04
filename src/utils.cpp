@@ -257,15 +257,18 @@ std::vector<std::string> list_files_of_dir(char* dir) {
  * class_definition == nullptr: 打印 非 method的细节
  * class_definition != nullptr: 是打印 method的细节
  */
-void dump_vm_function(RVM_ClassDefinition* class_definition, RVM_Function* function) {
+void dump_vm_function(Package_Executer*    package_executer,
+                      RVM_ClassDefinition* class_definition,
+                      RVM_Function*        function) {
+
     assert(function != nullptr);
 
     // TODO: 这里想个更好的办法, 减少代码重复
     // 1. function name
     if (class_definition == nullptr) {
-        printf("$%s    ", format_rvm_function(function).c_str());
+        printf("$%s    ", format_rvm_function(package_executer, function).c_str());
     } else {
-        printf("$%s.%s    ", class_definition->identifier, format_rvm_function(function).c_str());
+        printf("$%s.%s    ", class_definition->identifier, format_rvm_function(package_executer, function).c_str());
     }
     printf("<%s:%d,%d>\n",
            function->source_file.c_str(),
@@ -275,7 +278,7 @@ void dump_vm_function(RVM_ClassDefinition* class_definition, RVM_Function* funct
     printf("+Parameter:   %d\n", function->parameter_size);
     for (unsigned int i = 0; i < function->parameter_size; i++) {
         printf(" ├──%-20s %-20s\n",
-               format_rvm_type_specifier(function->parameter_list[i].type_specifier).c_str(),
+               format_rvm_type_specifier(package_executer, function->parameter_list[i].type_specifier).c_str(),
                function->parameter_list[i].identifier);
     }
 
@@ -284,7 +287,7 @@ void dump_vm_function(RVM_ClassDefinition* class_definition, RVM_Function* funct
     printf("+Local:       %d\n", function->local_variable_size);
     for (unsigned int i = 0; i < function->local_variable_size; i++) {
         printf(" ├──%-20s %-20s\n",
-               format_rvm_type_specifier(function->local_variable_list[i].type_specifier).c_str(),
+               format_rvm_type_specifier(package_executer, function->local_variable_list[i].type_specifier).c_str(),
                function->local_variable_list[i].identifier);
     }
 
@@ -358,7 +361,9 @@ void dump_vm_function(RVM_ClassDefinition* class_definition, RVM_Function* funct
     printf("\n");
 }
 
-void dump_vm_class(RVM_ClassDefinition* class_definition) {
+void dump_vm_class(Package_Executer*    package_executer,
+                   RVM_ClassDefinition* class_definition) {
+
     assert(class_definition != nullptr);
 
     printf("%%%s    <%s:%d,%d>\n",
@@ -369,7 +374,7 @@ void dump_vm_class(RVM_ClassDefinition* class_definition) {
     printf("+Field:     %d\n", class_definition->field_size);
     for (unsigned int i = 0; i < class_definition->field_size; i++) {
         printf(" ├──%-30s %-20s\n",
-               format_rvm_type_specifier(class_definition->field_list[i].type_specifier).c_str(),
+               format_rvm_type_specifier(package_executer, class_definition->field_list[i].type_specifier).c_str(),
                class_definition->field_list[i].identifier);
     }
 
@@ -382,7 +387,7 @@ void dump_vm_class(RVM_ClassDefinition* class_definition) {
 
 
     for (unsigned int i = 0; i < class_definition->method_size; i++) {
-        dump_vm_function(class_definition, class_definition->method_list[i].rvm_function);
+        dump_vm_function(package_executer, class_definition, class_definition->method_list[i].rvm_function);
     }
     printf("\n");
 }

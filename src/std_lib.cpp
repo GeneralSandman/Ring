@@ -508,9 +508,9 @@ RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int 
             printf("%04d$ring!", offset);
             // TODO: 这里想个更好的办法, 减少代码重复
             if (pos->callee_object == nullptr) {
-                printf("%s\n", format_rvm_function(pos->callee_function).c_str());
+                printf("%s\n", format_rvm_function(rvm->executer, pos->callee_function).c_str());
             } else {
-                printf("%s.%s\n", pos->callee_object->class_ref->identifier, format_rvm_function(pos->callee_function).c_str());
+                printf("%s.%s\n", pos->callee_object->class_ref->identifier, format_rvm_function(rvm->executer, pos->callee_function).c_str());
             }
 
 

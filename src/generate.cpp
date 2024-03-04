@@ -67,19 +67,21 @@ void package_executer_dump(Package_Executer* package_executer) {
     printf("#Globals:       %d\n", package_executer->global_variable_size);
     for (unsigned int i = 0; i < package_executer->global_variable_size; i++) {
         printf(" ├──%-20s %-20s\n",
-               format_rvm_type_specifier(package_executer->global_variable_list[i].type_specifier).c_str(),
+               format_rvm_type_specifier(package_executer,
+                                         package_executer->global_variable_list[i].type_specifier)
+                   .c_str(),
                package_executer->global_variable_list[i].identifier);
     }
     printf("\n");
 
     // 3. dump functions
     for (unsigned int i = 0; i < package_executer->function_size; i++) {
-        dump_vm_function(nullptr, &(package_executer->function_list[i]));
+        dump_vm_function(package_executer, nullptr, &(package_executer->function_list[i]));
     }
 
     // 4. dump classes
     for (unsigned int i = 0; i < package_executer->class_size; i++) {
-        dump_vm_class(&(package_executer->class_list[i]));
+        dump_vm_class(package_executer, &(package_executer->class_list[i]));
     }
 }
 

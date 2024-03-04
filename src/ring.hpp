@@ -2348,8 +2348,10 @@ RVM_Value std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * function definition
  *
  */
-std::string format_rvm_function(RVM_Function* function);
-std::string format_rvm_type_specifier(RVM_TypeSpecifier* type_specifier);
+std::string format_rvm_function(Package_Executer* package_executer,
+                                RVM_Function*     function);
+std::string format_rvm_type_specifier(Package_Executer*  package_executer,
+                                      RVM_TypeSpecifier* type_specifier);
 // --------------------
 
 /* --------------------
@@ -2364,8 +2366,11 @@ void                     ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_st
 void                     ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm);
 std::vector<std::string> list_files_of_dir(char* dir);
 
-void                     dump_vm_function(RVM_ClassDefinition* class_definition, RVM_Function* function);
-void                     dump_vm_class(RVM_ClassDefinition* class_definition);
+void                     dump_vm_function(Package_Executer*    package_executer,
+                                          RVM_ClassDefinition* class_definition,
+                                          RVM_Function*        function);
+void                     dump_vm_class(Package_Executer*    package_executer,
+                                       RVM_ClassDefinition* class_definition);
 std::string              dump_vm_constant(RVM_ConstantPool* constant);
 
 unsigned int             get_source_line_number_by_pc(RVM_Function* function, unsigned int pc);
