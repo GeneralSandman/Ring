@@ -6,11 +6,12 @@
 
 #define STRING_LITERAL_CAPACITY (1024)
 
-static char* string_literal_buffer          = nullptr;
-static int   string_literal_buffer_size     = 0;
-static int   string_literal_buffer_capacity = 0;
+static char*        string_literal_buffer          = nullptr;
+static unsigned int string_literal_buffer_size     = 0;
+static unsigned int string_literal_buffer_capacity = 0;
 
 
+// new_ring_string
 Ring_String* new_ring_string() {
     Ring_String* string = (Ring_String*)mem_alloc(NULL_MEM_POOL, sizeof(Ring_String));
 
