@@ -1234,7 +1234,18 @@ array_literal_expression
         debug_bison_info_with_green("[RULE::array_literal_expression:basic]\t ");
         $$ = create_array_literal_expression(create_type_specifier($1), $2, $4);
     }
+    | basic_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_COMMA TOKEN_RC
+    {
+        debug_bison_info_with_green("[RULE::array_literal_expression:basic]\t ");
+        $$ = create_array_literal_expression(create_type_specifier($1), $2, $4);
+    }
     | class_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_RC
+    {
+        // FIXME: 这里会产生一个 reduce/reduce conflict
+        debug_bison_info_with_green("[RULE::array_literal_expression:class]\t ");
+        $$ = create_array_literal_expression($1, $2, $4);
+    }
+    | class_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_COMMA TOKEN_RC
     {
         // FIXME: 这里会产生一个 reduce/reduce conflict
         debug_bison_info_with_green("[RULE::array_literal_expression:class]\t ");
