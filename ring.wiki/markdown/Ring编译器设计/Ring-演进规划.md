@@ -128,7 +128,8 @@
    https://github.com/GeneralSandman/luago-book
 4. 李振虎的lua学习笔记
     https://github.com/GeneralSandman/zhenhuli-lua-learn-node
-
+5. 构建Lua解释器
+   https://manistein.github.io/blog/tags/let-us-build-a-lua-interpreter/
 
 #### 书籍
 1. 《Lua设计与实现》https://github.com/lichuang/Lua-Source-Internal
@@ -139,10 +140,13 @@
 1. 实现自己的编程语言 
    https://github.com/codecrafters-io/build-your-own-x#build-your-own-programming-language
 
-2. 垃圾回收机制 
+2. Mark-Sweep垃圾回收机制 
    https://journal.stuffwithstuff.com/2013/12/08/babys-first-garbage-collector/
 
-3. https://maplant.com/ 
+3. Lua GC 算法介绍
+   https://manistein.github.io/blog/post/program/let-us-build-a-lua-interpreter/%E6%9E%84%E5%BB%BAlua%E8%A7%A3%E9%87%8A%E5%99%A8part2/
+
+4. https://maplant.com/ 
    比较喜欢他的网站 特别喜欢那种特别老式的网站布局，人只会聚焦与内容
 
 
@@ -317,7 +321,7 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 11. Test array string(global/local/argument/return)  ✅ 
 12. Test array class object(global/local/argument/return)
 
-1. 一个 package中 有多个 class定义
+1. 一个 package中 有多个 class定义, 超过255个
 
 1. 多维数组
 2. 多维数组中 是 class
@@ -391,12 +395,54 @@ class-object  ✅
    1. 创建多维数组的时候，不允许 !8
 
 
-3. FIXME: jobs[0].Running = false;  ✅ 
+3. jobs[0].Running = false;  ✅ 
    这里有一个隐喻，就是jobs[0] 取出来应该得是个指针，
    不能是深度copy
    不然继续访问 jobs[0].Running 还是老的Value。
 
 
+
+-----------------------------
+
+## 2024-03-04周 
+
+
+### A. BUG: ring dump  ✅ 
+
+如何变量是 class Job, dump的时候显示`Job`, 而不是显示`class`
+
+
+### B. TEST: 类 通过函数传递, 通过函数返回
+
+bool array
+int array
+double array
+string array
+class-object array  ✅ 
+
+
+### C. TEST: 类数组 通过函数传递, 通过函数返回
+
+bool array
+int array
+double array
+string array
+class-object array  ✅ 
+
+
+### D. TEST: for-range 测试多维数组
+
+bool array
+int array
+double array
+string array
+class-object array  ✅ 
+
+
+### E. 局部变量初始化 ✅ 
+
+
+### F. 多维数组的 push pop
 
 -----------------------------
 
@@ -489,6 +535,19 @@ if(global_string_array_0[i,j] != to_string(num)){
 
 ```
 
+
+### G. 引入多行字符串之后, 源代码的函数可能不太正确 ✅ 
+
+
+测试源代码中包含:
+1. block comment
+2. block string
+
+源代码的行数是否正确.
+
+
+### H. 测试字符串常量的长度 超过 1024 ✅ 
+
 -----------------------------
 
 ## 2024-02-20周 
@@ -497,14 +556,6 @@ if(global_string_array_0[i,j] != to_string(num)){
 
 method 调用 method , 
 method 调用 function
-
-
-
-### B. 如何实现多行字符串
-
-golang中多行字符串中是不支持转义`字符的
-
-TODO: 这里如何设计一下
 
 
 
@@ -589,11 +640,11 @@ int[,]{
 ```
 
 
-### D. class-object  常量
+### D. 关于多维数组通过 composite literal 赋值, 数组中的元素为 class object
 
-已经支持了 class-object常量
+1. 已经支持了 class-object 的 composite literal
 
-```
+```ring
 Job {
     Bool: true,
     Int:  1,
@@ -602,68 +653,74 @@ Job {
 ```
 
 
-一维数组 class-object常量
+1. 需要支持 一维数组通过 class-object 的 composite literal 进行赋值  ✅ 
 
-```
+```ring
 Job[] {
-    Job{
-        Bool: true,
-        Int:  1,
-        Double: 1.1
-    },
-    Job{
-        Bool: true,
-        Int:  1,
-        Double: 1.1
-    },
-    Job{
-        Bool: true,
-        Int:  1,
-        Double: 1.1
-    }
+    Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+    Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+    Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"}
 }
 ```
 
 
 
-二维数组 class-object常量
+2. 需要支持 二维数组通过 class-object 的 composite literal 进行赋值  ✅ 
 
 ```
 Job[,] {
-    {
-        Job{
-            Bool: true,
-            Int:  1,
-            Double: 1.1
+    Job[] {
+        Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+        Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+        Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"}
+    },
+    Job[] {
+        Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+        Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+        Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"}
+    }
+}
+```
+
+3. 需要支持 三维数组通过 class-object 的 composite literal 进行赋值  ✅ 
+
+```
+Job[,,]{
+    Job[,] {
+        Job[] {
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"}
         },
-        Job{
-            Bool: true,
-            Int:  1,
-            Double: 1.1
+        Job[] {
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"}
         }
     },
-    {
-        Job{
-            Bool: true,
-            Int:  1,
-            Double: 1.1
+    Job[,] {
+        Job[] {
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"}
+        },
+        Job[] {
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},
+            Job{Bool: true,  Int: 0, Double: 0.0, String: "0.0"}
         }
     }
 }
-```
-
-当然，这个也可以是个嵌套的，也可以这样，所以说通过单纯的语法分析是远远不够的，还需要语义分析
 
 ```
-job_value = Job{
-    Bool: true,
-    Int:  1,
-    Double: 1.1
-}
+
+4. TODO: 当然，这个也可以是个嵌套的，也可以这样，所以说通过单纯的语法分析是远远不够的，还需要语义分析
+
+```ring
 
 Job[,] {
-    {job_value, job_value},
-    {job_value, job_value}
+    Job[]{job_value, job_value},
+    Job[]{job_value, job_value}
 }
 ```
 
@@ -671,7 +728,9 @@ Job[,] {
 
 
 
-### E. 在定义数组常量和class-object常量时，最后一个元素后边必须有逗号
+### E. 在定义数组常量和class-object常量时，最后一个元素后边有没有逗号都可以  ✅
+
+
 
 ## 2024-01-29周 
 
@@ -1008,7 +1067,7 @@ constant 常量 ✅
 数组变量 ✅ 
 
 
-TODO: bug: 如何变量是 class Job, dump的时候显示`class``, 而不是显示`Job`
+
 
 ### *B. 类 method*
 
