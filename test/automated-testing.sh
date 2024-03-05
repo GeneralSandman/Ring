@@ -131,7 +131,7 @@ TEST_DETAIL_PREFIX="^// TestDetail:"
 
 
 # 去除颜色控制字符
-STRIP_COLOR=sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g'
+STRIP_COLOR="sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g'"
 
 
 

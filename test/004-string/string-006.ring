@@ -10,7 +10,7 @@ package main
 import {
 	fmt;
 	debug;
-  vm;
+    vm;
 }
 
 // TestDetail: 测试多行字符串
