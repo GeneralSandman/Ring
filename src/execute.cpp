@@ -231,10 +231,13 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
 
         switch (type_specifier->kind) {
         case RING_BASIC_TYPE_BOOL:
+            STACK_SET_BOOL_INDEX(rvm, i, RVM_FALSE);
+            break;
         case RING_BASIC_TYPE_INT:
+            STACK_SET_INT_INDEX(rvm, i, 0);
+            break;
         case RING_BASIC_TYPE_DOUBLE:
-            // 这里先不用处理 array
-            // 因为全局变量不支持 初始化, 只能在函数中赋值
+            STACK_SET_DOUBLE_INDEX(rvm, i, 0.0);
             break;
         case RING_BASIC_TYPE_STRING:
             STATIC_SET_STRING_INDEX(rvm, i, new_string_object(rvm));
@@ -266,6 +269,8 @@ RVM_String* new_string_object(Ring_VirtualMachine* rvm) {
     string->length     = 0;
     string->capacity   = 8;
     string->data       = (char*)mem_alloc(rvm->data_pool, 8 * sizeof(char));
+
+    rvm->runtime_heap->alloc_size += 8 * sizeof(char);
 
     return string;
 }
