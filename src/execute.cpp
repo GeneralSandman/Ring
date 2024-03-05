@@ -265,12 +265,14 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
 
 // 全局变量，static空间
 RVM_String* new_string_object(Ring_VirtualMachine* rvm) {
-    RVM_String* string = (RVM_String*)mem_alloc(rvm->meta_pool, sizeof(RVM_String));
+    RVM_String* string = rvm_heap_new_string(rvm);
     string->length     = 0;
     string->capacity   = 8;
     string->data       = (char*)mem_alloc(rvm->data_pool, 8 * sizeof(char));
 
+
     rvm->runtime_heap->alloc_size += 8 * sizeof(char);
+
 
     return string;
 }
@@ -1698,24 +1700,28 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
  *
  */
 RVM_String* string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal) {
-    RVM_String* string = rvm_heap_new_string(rvm);
+    RVM_String*  string     = rvm_heap_new_string(rvm);
 
-    size_t      length = 0;
+    size_t       length     = 0;
+    unsigned int capacity   = 0;
+    size_t       alloc_size = 0;
+
     if (string_literal != nullptr) {
         length = strlen(string_literal);
     }
-
-    unsigned int capacity   = ROUND_UP8(length);
-    size_t       alloc_size = sizeof(char) * capacity;
+    capacity         = ROUND_UP8(length);
+    alloc_size       = capacity * sizeof(char);
 
     // capacity 需要是2的倍数
-    string->length          = length;
-    string->capacity        = capacity;
-    string->data            = nullptr;
+    string->length   = length;
+    string->capacity = capacity;
+    string->data     = nullptr;
     if (capacity > 0) {
         string->data = (char*)mem_alloc(rvm->data_pool, alloc_size);
-        rvm->runtime_heap->alloc_size += alloc_size;
     }
+
+    rvm->runtime_heap->alloc_size += alloc_size;
+
 
     memset(string->data, 0, alloc_size);
     strncpy(string->data, string_literal, length);
@@ -2317,9 +2323,13 @@ ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm,
 
 RVM_String* rvm_heap_new_string(Ring_VirtualMachine* rvm) {
     RVM_String* string = (RVM_String*)mem_alloc(rvm->meta_pool, sizeof(RVM_String));
+    string->type       = RVM_GC_OBJECT_TYPE_STRING;
     string->length     = 0;
     string->capacity   = 0;
     string->data       = nullptr;
+
+    rvm_heap_list_add_object(rvm, (RVM_Object*)string);
+
     return string;
 }
 
@@ -2527,6 +2537,17 @@ int rvm_string_cmp(RVM_String* string1, RVM_String* string2) {
 // 这里下边统一放 heap 分配内存相关
 // 上边内存分配的都要 delete
 
+void rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
+    assert(object != nullptr);
+
+    object->next = rvm->runtime_heap->list;
+    if (rvm->runtime_heap->list != nullptr) {
+        rvm->runtime_heap->list->prev = object;
+    }
+
+    rvm->runtime_heap->list = object;
+}
+
 /*
  * 释放 object 的内存空间，
  * 但是不会删除 heap list.
@@ -2535,6 +2556,15 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
     assert(object != nullptr);
 
     unsigned int free_size = 0;
+
+    switch (object->type) {
+        // TODO:
+    case RVM_GC_OBJECT_TYPE_STRING:
+        free_size = ((RVM_String*)object)->capacity * sizeof(char);
+        break;
+    default:
+        break;
+    }
 
 
     rvm->runtime_heap->alloc_size -= free_size;

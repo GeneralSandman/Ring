@@ -11,7 +11,7 @@
 
 void gc(Ring_VirtualMachine* rvm) {
 #ifdef DEBUG_RVM_GC_DETAIL
-    printf("============Debug RVM GC Detail============\n");
+    printf("============Debug RVM GC Detail(Begin)============\n");
     gc_summary(rvm);
 #endif
 
@@ -21,7 +21,7 @@ void gc(Ring_VirtualMachine* rvm) {
 #ifdef DEBUG_RVM_GC_DETAIL
     printf("%s-----------------GC Action-----------------%s\n", LOG_COLOR_YELLOW, LOG_COLOR_CLEAR);
     gc_summary(rvm);
-    printf("============Debug RVM GC Detail============\n\n");
+    printf("============Debug RVM GC Detail(End)============\n\n");
 #endif
 }
 
@@ -59,12 +59,19 @@ void gc_summary(Ring_VirtualMachine* rvm) {
 
     printf("%sHeap:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
     for (RVM_Object* pos = rvm->runtime_heap->list; pos != nullptr; pos = pos->next) {
-        std::string type;
         switch (pos->type) {
+        case RVM_GC_OBJECT_TYPE_STRING:
+            printf("\tRVM_GC_Object: string\n");
+            break;
+        case RVM_GC_OBJECT_TYPE_CLASS_OB:
+            printf("\tRVM_GC_Object: class-object\n");
+            break;
+        case RVM_GC_OBJECT_TYPE_ARRAY:
+            printf("\tRVM_GC_Object: array\n");
+            break;
         default:
             break;
         }
-        printf("\tRVM_Object: %s\n", type.c_str());
     }
 
     printf("%sStack:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
@@ -113,7 +120,8 @@ void gc_mark(Ring_VirtualMachine* rvm) {
     // 1. static 变量指向的位置 需要标记
     for (unsigned int i = 0; i < rvm->runtime_static->size; i++) {
         RVM_Value* value = &(rvm->runtime_static->data[i]);
-        if (value->type == RVM_VALUE_TYPE_OBJECT) {
+        // TODO:
+        if (value->type == RVM_VALUE_TYPE_STRING) {
             value->u.object->gc_mark = GC_MARK_COLOR_BLACK;
         }
     }
@@ -121,7 +129,8 @@ void gc_mark(Ring_VirtualMachine* rvm) {
     //  2. runtime stack 变量 指向的位置 需要标记
     for (unsigned int stack_index = 0; stack_index < rvm->runtime_stack->top_index; stack_index++) {
         RVM_Value* value = &(rvm->runtime_stack->data[stack_index]);
-        if (value->type == RVM_VALUE_TYPE_OBJECT) {
+        // TODO:
+        if (value->type == RVM_VALUE_TYPE_STRING) {
             value->u.object->gc_mark = GC_MARK_COLOR_BLACK;
         }
     }
@@ -135,7 +144,7 @@ void gc_sweep(Ring_VirtualMachine* rvm) {
 
         if (head->gc_mark == GC_MARK_COLOR_BLACK) {
             head->gc_mark = GC_MARK_COLOR_WHITE;
-            // 不需要被清除
+            // not need to clean
             continue;
         }
         rvm_free_object(rvm, head);

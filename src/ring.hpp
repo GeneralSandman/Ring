@@ -146,7 +146,6 @@ typedef enum {
     RVM_TRUE,
 } RVM_Bool;
 
-// TODO: 修改一下
 typedef struct {
     RVM_Value_Type type;
     union {
@@ -486,7 +485,10 @@ struct RVM_Variable {
 
 typedef enum {
     RVM_OBJECT_TYPE_UNKNOW,
-} RVM_Object_Type;
+    RVM_GC_OBJECT_TYPE_STRING,
+    RVM_GC_OBJECT_TYPE_CLASS_OB,
+    RVM_GC_OBJECT_TYPE_ARRAY,
+} RVM_GC_Object_Type;
 
 typedef enum {
     GC_MARK_COLOR_UNKNOW,
@@ -494,18 +496,31 @@ typedef enum {
     GC_MARK_COLOR_BLACK, // 不需要被回收
 } GC_Mark;
 
+struct RVM_Object {
+    RVM_GC_Object_Type type;
+    GC_Mark            gc_mark;
+    RVM_Object*        prev;
+    RVM_Object*        next;
+};
+
+// TODO:
+#define RVM_GC_Object_Header    \
+    RVM_GC_Object_Type type;    \
+    GC_Mark            gc_mark; \
+    RVM_Object*        prev;    \
+    RVM_Object*        next;
+
+
 /*
  * RVM 中 string 运行时表示, 专用
  */
+// TODO:
 struct RVM_String {
-    RVM_Object_Type type;
-    GC_Mark         gc_mark;
-    RVM_Object*     prev;
-    RVM_Object*     next;
+    RVM_GC_Object_Header;
 
-    char*           data;
-    unsigned int    length;
-    unsigned int    capacity;
+    char*        data;
+    unsigned int length;
+    unsigned int capacity;
 };
 
 typedef enum {
@@ -518,6 +533,7 @@ typedef enum {
     RVM_ARRAY_A,            // 多维数组的中间态， 感觉有必要删除
 } RVM_Array_Type;
 
+// TODO:
 struct RVM_Array {
     RVM_Array_Type type;
     unsigned char  dimension;
@@ -533,25 +549,13 @@ struct RVM_Array {
     } u;
 };
 
+// TODO:
 struct RVM_ClassObject {
     RVM_ClassDefinition* class_ref;
     unsigned int         field_count;
     RVM_Value*           field;
 };
 
-
-struct RVM_Object {
-    RVM_Object_Type type;
-    GC_Mark         gc_mark;
-    RVM_Object*     prev;
-    RVM_Object*     next;
-};
-
-#define RVM_GC_Object_Header \
-    RVM_Object_Type type;    \
-    GC_Mark         gc_mark; \
-    RVM_Object*     prev;    \
-    RVM_Object*     next;
 
 // Only used by back-end of compiler.
 struct RVM_TypeSpecifier {
@@ -2274,6 +2278,7 @@ RVM_ClassObject*     rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
 RVM_ClassObject*     rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
 int                  rvm_string_cmp(RVM_String* string1, RVM_String* string2);
 
+void                 rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_Object* object);
 void                 rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object);
 unsigned int         rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
 unsigned int         rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array);
