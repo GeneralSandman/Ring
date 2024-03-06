@@ -58,7 +58,7 @@ void gc_summary(Ring_VirtualMachine* rvm) {
     }
 
     printf("%sHeap:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
-    for (RVM_Object* pos = rvm->runtime_heap->list; pos != nullptr; pos = pos->next) {
+    for (RVM_GC_Object* pos = rvm->runtime_heap->list; pos != nullptr; pos = pos->next) {
         switch (pos->gc_type) {
         case RVM_GC_OBJECT_TYPE_STRING:
             printf("\tRVM_GC_Object: string\n");
@@ -122,7 +122,7 @@ void gc_mark(Ring_VirtualMachine* rvm) {
         RVM_Value* value = &(rvm->runtime_static->data[i]);
         // TODO:
         if (value->type == RVM_VALUE_TYPE_STRING) {
-            value->u.object->gc_mark = GC_MARK_COLOR_BLACK;
+            value->u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
         }
     }
 
@@ -131,14 +131,14 @@ void gc_mark(Ring_VirtualMachine* rvm) {
         RVM_Value* value = &(rvm->runtime_stack->data[stack_index]);
         // TODO:
         if (value->type == RVM_VALUE_TYPE_STRING) {
-            value->u.object->gc_mark = GC_MARK_COLOR_BLACK;
+            value->u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
         }
     }
 }
 
 void gc_sweep(Ring_VirtualMachine* rvm) {
-    RVM_Object* head = rvm->runtime_heap->list;
-    RVM_Object* next = nullptr;
+    RVM_GC_Object* head = rvm->runtime_heap->list;
+    RVM_GC_Object* next = nullptr;
     for (; head != nullptr; head = next) {
         next = head->next;
 

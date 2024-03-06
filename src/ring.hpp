@@ -92,7 +92,7 @@ typedef struct RVM_ConstantPool             RVM_ConstantPool;
 typedef struct RVM_String                   RVM_String;
 typedef struct RVM_Array                    RVM_Array;
 typedef struct RVM_ClassObject              RVM_ClassObject;
-typedef struct RVM_Object                   RVM_Object;
+typedef struct RVM_GC_Object                RVM_GC_Object;
 typedef struct RVM_BasicTypeSpecifier       RVM_BasicTypeSpecifier;
 typedef struct RVM_TypeSpecifier            RVM_TypeSpecifier;
 
@@ -155,8 +155,6 @@ typedef struct {
         RVM_String*      string_value;
         RVM_ClassObject* class_ob_value;
         RVM_Array*       array_value;
-
-        RVM_Object*      object; // TODO: 删除
     } u;
 
 } RVM_Value;
@@ -496,19 +494,19 @@ typedef enum {
     GC_MARK_COLOR_BLACK, // 不需要被回收
 } GC_Mark;
 
-struct RVM_Object {
+struct RVM_GC_Object {
     RVM_GC_Object_Type gc_type;
     GC_Mark            gc_mark;
-    RVM_Object*        prev;
-    RVM_Object*        next;
+    RVM_GC_Object*     prev;
+    RVM_GC_Object*     next;
 };
 
 // TODO:
 #define RVM_GC_Object_Header    \
     RVM_GC_Object_Type gc_type; \
     GC_Mark            gc_mark; \
-    RVM_Object*        prev;    \
-    RVM_Object*        next;
+    RVM_GC_Object*     prev;    \
+    RVM_GC_Object*     next;
 
 
 /*
@@ -535,7 +533,7 @@ typedef enum {
 
 
 struct RVM_Array {
-    // RVM_GC_Object_Header; // TODO:
+    RVM_GC_Object_Header;
 
     RVM_Array_Type type;
     unsigned char  dimension;
@@ -553,7 +551,7 @@ struct RVM_Array {
 
 
 struct RVM_ClassObject {
-    // RVM_GC_Object_Header;// TODO:
+    RVM_GC_Object_Header;
 
     RVM_ClassDefinition* class_ref;
     unsigned int         field_count;
@@ -588,9 +586,9 @@ struct RVM_RuntimeStatic {
 };
 
 struct RVM_RuntimeHeap {
-    unsigned int alloc_size;
-    unsigned int threshold;
-    RVM_Object*  list;
+    unsigned int   alloc_size;
+    unsigned int   threshold;
+    RVM_GC_Object* list;
     // RVM_MemoryPoll
     // TODO: 是否需要使用内存池
 };
@@ -2282,8 +2280,8 @@ RVM_ClassObject*     rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
 RVM_ClassObject*     rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
 int                  rvm_string_cmp(RVM_String* string1, RVM_String* string2);
 
-void                 rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_Object* object);
-void                 rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object);
+void                 rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
+void                 rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
 unsigned int         rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
 unsigned int         rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array);
 unsigned int         rvm_free_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* class_object);

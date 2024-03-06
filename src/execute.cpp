@@ -2300,11 +2300,14 @@ ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm,
 RVM_String* rvm_heap_new_string(Ring_VirtualMachine* rvm) {
     RVM_String* string = (RVM_String*)mem_alloc(rvm->meta_pool, sizeof(RVM_String));
     string->gc_type    = RVM_GC_OBJECT_TYPE_STRING;
+    string->gc_mark    = GC_MARK_COLOR_WHITE;
+    string->prev       = nullptr;
+    string->next       = nullptr;
     string->length     = 0;
     string->capacity   = 0;
     string->data       = nullptr;
 
-    rvm_heap_list_add_object(rvm, (RVM_Object*)string);
+    rvm_heap_list_add_object(rvm, (RVM_GC_Object*)string);
 
     return string;
 }
@@ -2386,6 +2389,10 @@ RVM_String* rvm_double_2_string(Ring_VirtualMachine* rvm, double value) {
 
 RVM_Array* rvm_heap_new_empty_array(Ring_VirtualMachine* rvm) {
     RVM_Array* array    = (RVM_Array*)mem_alloc(rvm->meta_pool, sizeof(RVM_Array));
+    array->gc_type      = RVM_GC_OBJECT_TYPE_ARRAY;
+    array->gc_mark      = GC_MARK_COLOR_WHITE;
+    array->prev         = nullptr;
+    array->next         = nullptr;
     array->type         = RVM_ARRAY_UNKNOW;
     array->dimension    = 0;
     array->length       = 0;
@@ -2396,6 +2403,10 @@ RVM_Array* rvm_heap_new_empty_array(Ring_VirtualMachine* rvm) {
 
 RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
     RVM_Array* array  = (RVM_Array*)mem_alloc(rvm->meta_pool, sizeof(RVM_Array));
+    array->gc_type    = RVM_GC_OBJECT_TYPE_ARRAY;
+    array->gc_mark    = GC_MARK_COLOR_WHITE;
+    array->prev       = nullptr;
+    array->next       = nullptr;
     array->type       = src->type;
     array->dimension  = src->dimension;
     array->length     = src->length;
@@ -2518,7 +2529,7 @@ int rvm_string_cmp(RVM_String* string1, RVM_String* string2) {
 // 这里下边统一放 heap 分配内存相关
 // 上边内存分配的都要 delete
 
-void rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
+void rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
     assert(object != nullptr);
 
     object->next = rvm->runtime_heap->list;
@@ -2534,16 +2545,17 @@ void rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
  * 但是不会删除 heap list.
  */
 // TODO:
-void rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
+void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
     assert(object != nullptr);
 
-    unsigned int free_size = 0;
+    size_t free_size = 0;
 
     switch (object->gc_type) {
         // TODO:
     case RVM_GC_OBJECT_TYPE_STRING:
         free_size = ((RVM_String*)object)->capacity * sizeof(char);
-        // free();
+        debug_exec_info_with_white("\t string::free_size:%ld", free_size);
+        rvm->runtime_heap->alloc_size -= free_size;
         break;
 
     case RVM_GC_OBJECT_TYPE_CLASS_OB:
@@ -2565,8 +2577,6 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
         break;
     }
 
-
-    rvm->runtime_heap->alloc_size -= free_size;
 
     if (object->prev != nullptr) {
         object->prev->next = object->next;

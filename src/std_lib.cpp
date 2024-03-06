@@ -319,8 +319,7 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     unsigned int capacity      = 8;
     char*        output_buffer = nullptr;
 
-    if (args->u.object == nullptr
-        || args->u.string_value == nullptr
+    if (args->u.string_value == nullptr
         || args->u.string_value->data == nullptr) {
         // FIXME: shoud alloced in rvm->data_mem_pool
         output_buffer = (char*)mem_alloc(NULL_MEM_POOL, capacity * sizeof(char));
@@ -429,7 +428,7 @@ RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, 
     RVM_Value ret;
     ret.u.int_value = 0;
 
-    if (args->u.object == nullptr || args->u.string_value == nullptr || args->u.string_value->data == nullptr) {
+    if (args->u.string_value == nullptr || args->u.string_value->data == nullptr) {
         printf("\n");
     } else {
         printf("%s\n", args->u.string_value->data);
