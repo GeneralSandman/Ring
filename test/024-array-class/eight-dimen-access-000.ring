@@ -20,7 +20,7 @@ global {
 
 @main
 function main() {
-    global_job_array_0 = new string[1,2,3,4,5,6,7,8];
+    global_job_array_0 = new Job[1,2,3,4,5,6,7,8];
 
     fmt::println_string("test cast 1 ------------------------");
     debug::debug_assert(len(global_job_array_0) == 1);
