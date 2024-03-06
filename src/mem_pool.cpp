@@ -142,7 +142,7 @@ void* mem_alloc(MemPool* pool, size_t size) {
     MemBlock* block        = nullptr;
 
     if (bucket_index > MEM_MAX_BUCKET_NUM) {
-        ring_error_report("cant't alloc large sapce\n");
+        ring_error_report("cant't alloc large sapce, size:%ld\n", size);
     }
 
     if (pool->free_buckets[bucket_index] == nullptr) {

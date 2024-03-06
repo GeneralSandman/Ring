@@ -59,7 +59,7 @@ void gc_summary(Ring_VirtualMachine* rvm) {
 
     printf("%sHeap:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
     for (RVM_Object* pos = rvm->runtime_heap->list; pos != nullptr; pos = pos->next) {
-        switch (pos->type) {
+        switch (pos->gc_type) {
         case RVM_GC_OBJECT_TYPE_STRING:
             printf("\tRVM_GC_Object: string\n");
             break;

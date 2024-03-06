@@ -185,8 +185,6 @@ void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm,
 void rvm_add_static_variable(Package_Executer*  executer,
                              RVM_RuntimeStatic* runtime_static) {
 
-    debug_exec_info_with_white("\t");
-
     unsigned int size    = executer->global_variable_size;
     runtime_static->size = size;
     runtime_static->data = (RVM_Value*)mem_alloc(NULL_MEM_POOL, size * sizeof(RVM_Value));
@@ -217,8 +215,6 @@ void ring_virtualmachine_init(Ring_VirtualMachine* rvm) {
 void rvm_init_static_variable(Ring_VirtualMachine* rvm,
                               Package_Executer*    executer,
                               RVM_RuntimeStatic*   runtime_static) {
-
-    debug_exec_info_with_white("\t");
 
     unsigned int         size                 = executer->global_variable_size;
     RVM_Variable*        global_variable_list = executer->global_variable_list;
@@ -265,14 +261,17 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
 
 // 全局变量，static空间
 RVM_String* new_string_object(Ring_VirtualMachine* rvm) {
-    RVM_String* string = rvm_heap_new_string(rvm);
-    string->length     = 0;
-    string->capacity   = 8;
-    string->data       = (char*)mem_alloc(rvm->data_pool, 8 * sizeof(char));
+    size_t      alloc_size = 0;
+    RVM_String* string     = rvm_heap_new_string(rvm);
 
+    alloc_size             = 8 * sizeof(char);
 
-    rvm->runtime_heap->alloc_size += 8 * sizeof(char);
+    string->length         = 0;
+    string->capacity       = 8;
+    string->data           = (char*)calloc(1, alloc_size);
 
+    debug_exec_info_with_white("\t string::alloc_size:%ld", alloc_size);
+    rvm->runtime_heap->alloc_size += alloc_size;
 
     return string;
 }
@@ -287,7 +286,6 @@ RVM_String* new_string_object(Ring_VirtualMachine* rvm) {
  *
  */
 void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
-    debug_exec_info_with_white("\t");
 
     RVM_Byte*            code_list              = rvm->executer->code_list;
     unsigned int         code_size              = rvm->executer->code_size;
@@ -1415,8 +1413,6 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
                             RVM_Function*        function,
                             unsigned int         argument_list_size) {
 
-    debug_exec_info_with_white("\t");
-
     RVM_Value           ret;
 
     int                 return_list_count = function->u.native_func->return_list_count;
@@ -1472,7 +1468,6 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
                             RVM_Byte** code_list, unsigned int* code_size,
                             unsigned int* pc,
                             unsigned int* caller_stack_base) {
-    debug_exec_info_with_white("\t");
 
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->magic_number         = CALL_INFO_MAGIC_NUMBER;
@@ -1524,7 +1519,6 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
                             unsigned int* pc,
                             unsigned int* caller_stack_base,
                             unsigned int  return_value_list_size) {
-    debug_exec_info_with_white("\t");
 
     unsigned int old_return_value_list_index;
 
@@ -1617,8 +1611,6 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                          RVM_ClassObject*     callee_object,
                                          RVM_Function*        function) {
 
-    debug_exec_info_with_white("\t");
-
     unsigned int arguement_list_size   = function->parameter_size;
     unsigned int arguement_list_index  = rvm->runtime_stack->top_index - CALL_INFO_SIZE_V2 - arguement_list_size;
     // TODO: 这里有点兼容逻辑, 需要把 CALL_INFO_SIZE_V2 去掉
@@ -1700,26 +1692,20 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
  *
  */
 RVM_String* string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal) {
-    RVM_String*  string     = rvm_heap_new_string(rvm);
-
     size_t       length     = 0;
     unsigned int capacity   = 0;
     size_t       alloc_size = 0;
+    RVM_String*  string     = rvm_heap_new_string(rvm);
 
-    if (string_literal != nullptr) {
-        length = strlen(string_literal);
-    }
-    capacity         = ROUND_UP8(length);
-    alloc_size       = capacity * sizeof(char);
+    length                  = (string_literal != nullptr) ? strlen(string_literal) : 0;
+    capacity                = ROUND_UP8(length);
+    alloc_size              = capacity * sizeof(char);
 
-    // capacity 需要是2的倍数
-    string->length   = length;
-    string->capacity = capacity;
-    string->data     = nullptr;
-    if (capacity > 0) {
-        string->data = (char*)mem_alloc(rvm->data_pool, alloc_size);
-    }
+    string->length          = length;
+    string->capacity        = capacity;
+    string->data            = (char*)calloc(1, alloc_size);
 
+    debug_exec_info_with_white("\t string::alloc_size:%ld", alloc_size);
     rvm->runtime_heap->alloc_size += alloc_size;
 
 
@@ -1744,33 +1730,23 @@ RVM_String* concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b
     assert(a != nullptr);
     assert(b != nullptr);
 
-    RVM_String* dst        = rvm_heap_new_string(rvm);
+    size_t      alloc_size = 0;
+    RVM_String* string     = rvm_heap_new_string(rvm);
 
-    size_t      sum_length = 0;
-    sum_length += a->length;
-    sum_length += b->length;
+    alloc_size             = ROUND_UP8(a->length + b->length) * sizeof(char);
 
-    unsigned int capacity   = ROUND_UP8(sum_length);
-    size_t       alloc_size = capacity * sizeof(char);
+    string->length         = a->length + b->length;
+    string->capacity       = ROUND_UP8(a->length + b->length);
+    string->data           = (char*)calloc(1, alloc_size);
 
-    // capacity 需要是2的倍数
+    debug_exec_info_with_white("\t string::alloc_size:%ld", alloc_size);
+    rvm->runtime_heap->alloc_size += alloc_size;
 
-    dst->length             = sum_length;
-    dst->capacity           = capacity;
-    dst->data               = nullptr;
-    if (alloc_size > 0) {
-        dst->data = (char*)mem_alloc(rvm->data_pool, alloc_size);
-        rvm->runtime_heap->alloc_size += alloc_size;
-    }
+    memset(string->data, 0, alloc_size);
+    strncpy(string->data, a->data, a->length);
+    strncpy(string->data + a->length, b->data, b->length);
 
-    memset(dst->data, 0, alloc_size);
-
-    strncpy(dst->data, a->data, a->length);
-    strncpy(dst->data + a->length, b->data, b->length);
-    dst->length = sum_length;
-
-
-    return dst;
+    return string;
 }
 
 // dimension_index 为 2 代表分配2维数组
@@ -2323,7 +2299,7 @@ ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm,
 
 RVM_String* rvm_heap_new_string(Ring_VirtualMachine* rvm) {
     RVM_String* string = (RVM_String*)mem_alloc(rvm->meta_pool, sizeof(RVM_String));
-    string->type       = RVM_GC_OBJECT_TYPE_STRING;
+    string->gc_type    = RVM_GC_OBJECT_TYPE_STRING;
     string->length     = 0;
     string->capacity   = 0;
     string->data       = nullptr;
@@ -2334,14 +2310,19 @@ RVM_String* rvm_heap_new_string(Ring_VirtualMachine* rvm) {
 }
 
 RVM_String* rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src) {
-    RVM_String* string     = (RVM_String*)mem_alloc(rvm->meta_pool, sizeof(RVM_String));
-    size_t      alloc_size = sizeof(char) * src->capacity;
+    size_t      alloc_size = 0;
+    RVM_String* string     = rvm_heap_new_string(rvm);
+
+    alloc_size             = sizeof(char) * src->capacity;
     string->length         = src->length;
     string->capacity       = src->capacity;
-    string->data           = (char*)mem_alloc(rvm->data_pool, alloc_size);
+    string->data           = (char*)calloc(1, alloc_size);
+
     memcpy(string->data, src->data, alloc_size);
 
-    rvm->runtime_heap->alloc_size += sizeof(char) * src->capacity;
+
+    debug_exec_info_with_white("\t string::alloc_size:%ld", alloc_size);
+    rvm->runtime_heap->alloc_size += alloc_size;
 
     return string;
 }
@@ -2552,16 +2533,34 @@ void rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
  * 释放 object 的内存空间，
  * 但是不会删除 heap list.
  */
+// TODO:
 void rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
     assert(object != nullptr);
 
     unsigned int free_size = 0;
 
-    switch (object->type) {
+    switch (object->gc_type) {
         // TODO:
     case RVM_GC_OBJECT_TYPE_STRING:
         free_size = ((RVM_String*)object)->capacity * sizeof(char);
+        // free();
         break;
+
+    case RVM_GC_OBJECT_TYPE_CLASS_OB:
+        break;
+
+    case RVM_GC_OBJECT_TYPE_ARRAY:
+        switch (((RVM_Array*)object)->type) {
+        case RVM_ARRAY_BOOL: break;
+        case RVM_ARRAY_INT: break;
+        case RVM_ARRAY_DOUBLE: break;
+        case RVM_ARRAY_STRING: break;
+        case RVM_ARRAY_CLASS_OBJECT: break;
+        case RVM_ARRAY_A: break;
+        default: break;
+        }
+        break;
+
     default:
         break;
     }
@@ -2580,7 +2579,7 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_Object* object) {
         rvm->runtime_heap->list = object->next;
     }
 
-    mem_free(rvm->meta_pool, object, sizeof(RVM_Object));
+    // mem_free(rvm->meta_pool, object, sizeof(RVM_Object));
 }
 
 unsigned int rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string) {

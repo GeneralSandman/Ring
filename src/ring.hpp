@@ -497,7 +497,7 @@ typedef enum {
 } GC_Mark;
 
 struct RVM_Object {
-    RVM_GC_Object_Type type;
+    RVM_GC_Object_Type gc_type;
     GC_Mark            gc_mark;
     RVM_Object*        prev;
     RVM_Object*        next;
@@ -505,7 +505,7 @@ struct RVM_Object {
 
 // TODO:
 #define RVM_GC_Object_Header    \
-    RVM_GC_Object_Type type;    \
+    RVM_GC_Object_Type gc_type; \
     GC_Mark            gc_mark; \
     RVM_Object*        prev;    \
     RVM_Object*        next;
@@ -533,8 +533,10 @@ typedef enum {
     RVM_ARRAY_A,            // 多维数组的中间态， 感觉有必要删除
 } RVM_Array_Type;
 
-// TODO:
+
 struct RVM_Array {
+    // RVM_GC_Object_Header; // TODO:
+
     RVM_Array_Type type;
     unsigned char  dimension;
     unsigned int   length;
@@ -549,8 +551,10 @@ struct RVM_Array {
     } u;
 };
 
-// TODO:
+
 struct RVM_ClassObject {
+    // RVM_GC_Object_Header;// TODO:
+
     RVM_ClassDefinition* class_ref;
     unsigned int         field_count;
     RVM_Value*           field;
@@ -1691,7 +1695,7 @@ struct BinaryChunk {
  * 默认初始化 64个 bucket
  * 每个bucket 有 1000 个 block
  */
-#define MEM_MAX_BUCKET_NUM 2048
+#define MEM_MAX_BUCKET_NUM 4096
 #define MEM_INIT_BUCKET_NUM 512
 
 #define MEM_BLOCK_NUM 8
