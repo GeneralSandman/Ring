@@ -497,16 +497,16 @@ typedef enum {
 struct RVM_GC_Object {
     RVM_GC_Object_Type gc_type;
     GC_Mark            gc_mark;
-    RVM_GC_Object*     prev;
-    RVM_GC_Object*     next;
+    RVM_GC_Object*     gc_prev;
+    RVM_GC_Object*     gc_next;
 };
 
 // TODO:
 #define RVM_GC_Object_Header    \
     RVM_GC_Object_Type gc_type; \
     GC_Mark            gc_mark; \
-    RVM_GC_Object*     prev;    \
-    RVM_GC_Object*     next;
+    RVM_GC_Object*     gc_prev; \
+    RVM_GC_Object*     gc_next;
 
 
 /*
@@ -2399,6 +2399,8 @@ void gc(Ring_VirtualMachine* rvm);
 void gc_summary(Ring_VirtualMachine* rvm);
 void gc_mark(Ring_VirtualMachine* rvm);
 void gc_sweep(Ring_VirtualMachine* rvm);
+
+void gc_mark_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob);
 // --------------------
 
 

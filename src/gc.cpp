@@ -58,7 +58,7 @@ void gc_summary(Ring_VirtualMachine* rvm) {
     }
 
     printf("%sHeap:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
-    for (RVM_GC_Object* pos = rvm->runtime_heap->list; pos != nullptr; pos = pos->next) {
+    for (RVM_GC_Object* pos = rvm->runtime_heap->list; pos != nullptr; pos = pos->gc_next) {
         switch (pos->gc_type) {
         case RVM_GC_OBJECT_TYPE_STRING:
             printf("\tRVM_GC_Object: string\n");
@@ -121,8 +121,16 @@ void gc_mark(Ring_VirtualMachine* rvm) {
     for (unsigned int i = 0; i < rvm->runtime_static->size; i++) {
         RVM_Value* value = &(rvm->runtime_static->data[i]);
         // TODO:
-        if (value->type == RVM_VALUE_TYPE_STRING) {
+        switch (value->type) {
+        case RVM_VALUE_TYPE_STRING:
             value->u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
+            break;
+        case RVM_VALUE_TYPE_CLASS_OB:
+            value->u.class_ob_value->gc_mark = GC_MARK_COLOR_BLACK;
+            gc_mark_class_ob(rvm, value->u.class_ob_value);
+            break;
+        default:
+            break;
         }
     }
 
@@ -130,8 +138,16 @@ void gc_mark(Ring_VirtualMachine* rvm) {
     for (unsigned int stack_index = 0; stack_index < rvm->runtime_stack->top_index; stack_index++) {
         RVM_Value* value = &(rvm->runtime_stack->data[stack_index]);
         // TODO:
-        if (value->type == RVM_VALUE_TYPE_STRING) {
+        switch (value->type) {
+        case RVM_VALUE_TYPE_STRING:
             value->u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
+            break;
+        case RVM_VALUE_TYPE_CLASS_OB:
+            value->u.class_ob_value->gc_mark = GC_MARK_COLOR_BLACK;
+            gc_mark_class_ob(rvm, value->u.class_ob_value);
+            break;
+        default:
+            break;
         }
     }
 }
@@ -140,7 +156,7 @@ void gc_sweep(Ring_VirtualMachine* rvm) {
     RVM_GC_Object* head = rvm->runtime_heap->list;
     RVM_GC_Object* next = nullptr;
     for (; head != nullptr; head = next) {
-        next = head->next;
+        next = head->gc_next;
 
         if (head->gc_mark == GC_MARK_COLOR_BLACK) {
             head->gc_mark = GC_MARK_COLOR_WHITE;
@@ -148,5 +164,17 @@ void gc_sweep(Ring_VirtualMachine* rvm) {
             continue;
         }
         rvm_free_object(rvm, head);
+    }
+}
+
+void gc_mark_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob) {
+    for (unsigned int field_index = 0; field_index < class_ob->field_count; field_index++) {
+        switch (class_ob->field[field_index].type) {
+        case RVM_VALUE_TYPE_STRING:
+            class_ob->field[field_index].u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
+            break;
+        default:
+            break;
+        }
     }
 }
