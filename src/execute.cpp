@@ -2521,6 +2521,9 @@ RVM_ClassObject* rvm_heap_new_class_object(Ring_VirtualMachine* rvm) {
     class_object->class_ref       = nullptr;
     class_object->field_count     = 0;
     class_object->field           = nullptr;
+
+    rvm_heap_list_add_object(rvm, (RVM_GC_Object*)class_object);
+
     return class_object;
 }
 
@@ -2589,15 +2592,33 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
     size_t free_size = 0;
 
     switch (object->gc_type) {
-        // TODO:
     case RVM_GC_OBJECT_TYPE_STRING:
         free_size = ((RVM_String*)object)->capacity * sizeof(char);
         debug_exec_info_with_white("\t string::free_size:%ld", free_size);
-        rvm->runtime_heap->alloc_size -= free_size;
         break;
 
-    case RVM_GC_OBJECT_TYPE_CLASS_OB:
-        break;
+    case RVM_GC_OBJECT_TYPE_CLASS_OB: {
+        RVM_ClassObject* class_ob = (RVM_ClassObject*)object;
+        for (unsigned int field_index = 0; field_index < class_ob->field_count; field_index++) {
+            switch (class_ob->field[field_index].type) {
+            case RVM_VALUE_TYPE_BOOL:
+                free_size += 1;
+                break;
+            case RVM_VALUE_TYPE_INT:
+                free_size += 4;
+                break;
+            case RVM_VALUE_TYPE_DOUBLE:
+                free_size += 8;
+                break;
+            case RVM_VALUE_TYPE_STRING:
+                // FIXME:这里存在一个问题, 重复释放了
+                // free_size += rvm_free_string(rvm, class_ob->field[field_index].u.string_value);
+                break;
+            default: break;
+            }
+        }
+        debug_exec_info_with_white("\t class-object::free_size:%ld", free_size);
+    } break;
 
     case RVM_GC_OBJECT_TYPE_ARRAY:
         switch (((RVM_Array*)object)->type) {
@@ -2614,6 +2635,8 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
     default:
         break;
     }
+
+    rvm->runtime_heap->alloc_size -= free_size;
 
 
     if (object->gc_prev != nullptr) {
@@ -2634,10 +2657,12 @@ unsigned int rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string) {
     assert(string != nullptr);
 
     if (string->data != nullptr) {
-        mem_free(rvm->data_pool, string->data, string->capacity * sizeof(char));
+        free(string->data);
     }
     unsigned int free_size = string->capacity * sizeof(char);
+
     mem_free(rvm->meta_pool, string, sizeof(RVM_String));
+
     return free_size;
 }
 

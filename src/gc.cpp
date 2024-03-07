@@ -168,10 +168,15 @@ void gc_sweep(Ring_VirtualMachine* rvm) {
 }
 
 void gc_mark_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob) {
+    debug_exec_info_with_white("\t mark:class-object %p", class_ob);
+
     for (unsigned int field_index = 0; field_index < class_ob->field_count; field_index++) {
         switch (class_ob->field[field_index].type) {
         case RVM_VALUE_TYPE_STRING:
             class_ob->field[field_index].u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
+            break;
+        case RVM_VALUE_TYPE_ARRAY:
+            // TODO:
             break;
         default:
             break;
