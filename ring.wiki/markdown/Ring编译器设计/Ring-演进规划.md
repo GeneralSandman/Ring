@@ -444,6 +444,31 @@ class-object array  ✅
 
 ### F. 多维数组的 push pop
 
+
+### G. 重新设计并验证gc
+
+gc 对于 String
+gc 对于 class-object
+gc 对于 array 
+
+
+heap_size 的算法
+gc的正确性
+
+
+
+### H. 重新 设计 fmt::println函数
+
+
+rust的格式化输出 https://course.rs/basic/formatted-output.html
+
+看这个测试用例:
+test/061-std-package-fmt/fmt-005.ring
+
+通过 {} 作为占位符，来格式化输出
+
+
+
 -----------------------------
 
 ## 2024-02-26周 
@@ -554,6 +579,7 @@ if(global_string_array_0[i,j] != to_string(num)){
 
 ### A. class method
 
+测试
 method 调用 method , 
 method 调用 function
 
