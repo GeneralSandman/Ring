@@ -28,3 +28,6 @@ function println_pointer(var any any_value);
 
 @native
 function println(var any... any_value);
+
+@native
+function printf(var string format, var any... any_value);
