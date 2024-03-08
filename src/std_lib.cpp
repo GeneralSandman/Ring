@@ -423,19 +423,43 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
  */
 // TODO:
 RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        ring_error_report("std_lib_fmt_println only one arguement\n");
+    std::string result;
+
+    for (unsigned int args_index = 0; args_index < arg_count; args_index++) {
+        if (args_index != 0) {
+            result += " ";
+        }
+
+        switch (args[args_index].type) {
+            // TODO: 这里重复了, 如何重写
+        case RVM_VALUE_TYPE_BOOL:
+            if (args[args_index].u.bool_value == RVM_FALSE) {
+                result += std::string("false");
+            } else {
+                result += std::string("true");
+            }
+            break;
+        case RVM_VALUE_TYPE_INT:
+            result += std::to_string(args[args_index].u.int_value);
+            break;
+        case RVM_VALUE_TYPE_DOUBLE:
+            result += std::to_string(args[args_index].u.double_value);
+            break;
+        case RVM_VALUE_TYPE_STRING:
+            result += args[args_index].u.string_value->data;
+            break;
+        default:
+            break;
+        }
     }
+    result += "\n";
+
+
+    printf("%s", result.c_str());
+    fflush(stdout);
 
     RVM_Value ret;
     ret.u.int_value = 0;
-
-    if (args->u.string_value == nullptr || args->u.string_value->data == nullptr) {
-        printf("\n");
-    } else {
-        printf("%s\n", args->u.string_value->data);
-    }
-    fflush(stdout);
 
     return ret;
 }
@@ -479,6 +503,7 @@ RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, R
                     ring_error_report("std_lib_fmt_printf arguement error\n");
                 }
                 switch (args[args_index].type) {
+                    // TODO: 这里重复了, 如何重写
                 case RVM_VALUE_TYPE_BOOL:
                     if (args[args_index].u.bool_value == RVM_FALSE) {
                         result += std::string("false");
