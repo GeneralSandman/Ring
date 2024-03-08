@@ -48,11 +48,16 @@ function main() {
 
 
     fmt::println_int(vm::heap_size());
-    debug::debug_assert(vm::heap_size() == 58); // 21*2 + 16
+    debug::debug_assert(vm::heap_size() == 58); // (1+4+8+8)*2 + 16
     vm::garbage_collect();
     fmt::println_int(vm::heap_size());
     debug::debug_assert(vm::heap_size() == 29); //  1+4+8+16
 
+
+    debug::debug_assert(job_value_0.Running == true);
+    debug::debug_assert(job_value_0.JobID == 1);
+    debug::debug_assert(job_value_0.Score == 1.0);
+    debug::debug_assert(job_value_0.Name == "123456789_123456");
 
 
 }
