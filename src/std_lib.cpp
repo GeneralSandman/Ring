@@ -62,6 +62,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
             {(char*)"println_string", std_lib_fmt_println_string, 1, 0},
             {(char*)"println_pointer", std_lib_fmt_println_pointer, 1, 0},
             {(char*)"println", std_lib_fmt_println, 1, 0},
+            {(char*)"printf", std_lib_fmt_printf, 1, 0},
         },
     },
 
@@ -420,6 +421,7 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
  * Function: println
  * Type: @native
  */
+// TODO:
 RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     if (arg_count != 1) {
         ring_error_report("std_lib_fmt_println only one arguement\n");
@@ -435,6 +437,85 @@ RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, 
     }
     fflush(stdout);
 
+    return ret;
+}
+
+/*
+ * Package: fmt
+ * Function: printf
+ * Type: @native
+ */
+RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count < 1) {
+        ring_error_report("std_lib_fmt_printf arguement num less 1\n");
+    }
+    if (args[0].type != RVM_VALUE_TYPE_STRING) {
+        ring_error_report("std_lib_fmt_printf arguement type error, first argument is string\n");
+    }
+
+    // FIXME: 这里先留一个坑吧, 先使用 std::string
+    // 不太合规, 后续统一优化
+    std::string  result;
+
+
+    unsigned int format_index  = 0;
+    unsigned int format_length = args[0].u.string_value->length;
+    unsigned int args_index    = 1;
+    while (format_index < format_length) {
+
+        if (args[0].u.string_value->data[format_index] == '\\') {
+            if (format_index + 1 < args[0].u.string_value->length
+                && (args[0].u.string_value->data[format_index + 1] == '{'
+                    || args[0].u.string_value->data[format_index + 1] == '}')) {
+                result += args[0].u.string_value->data[format_index + 1];
+                format_index += 2;
+            } else {
+                result += '\\';
+                format_index++;
+            }
+        } else if (args[0].u.string_value->data[format_index] == '{') {
+            if (args[0].u.string_value->data[format_index + 1] == '}') {
+                if (args_index >= arg_count) {
+                    ring_error_report("std_lib_fmt_printf arguement error\n");
+                }
+                switch (args[args_index].type) {
+                case RVM_VALUE_TYPE_BOOL:
+                    if (args[args_index].u.bool_value == RVM_FALSE) {
+                        result += std::string("false");
+                    } else {
+                        result += std::string("true");
+                    }
+                    break;
+                case RVM_VALUE_TYPE_INT:
+                    result += std::to_string(args[args_index].u.int_value);
+                    break;
+                case RVM_VALUE_TYPE_DOUBLE:
+                    result += std::to_string(args[args_index].u.double_value);
+                    break;
+                case RVM_VALUE_TYPE_STRING:
+                    result += args[args_index].u.string_value->data;
+                    break;
+                default:
+                    break;
+                }
+                args_index++;
+                format_index += 2;
+            } else {
+                result += args[0].u.string_value->data[format_index];
+                format_index++;
+            }
+
+        } else {
+            result += args[0].u.string_value->data[format_index];
+            format_index++;
+        }
+    }
+
+    printf("%s", result.c_str());
+    fflush(stdout);
+
+    RVM_Value ret;
+    ret.u.int_value = 0;
     return ret;
 }
 

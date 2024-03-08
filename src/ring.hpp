@@ -2324,6 +2324,7 @@ RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
 RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
