@@ -2,3 +2,5 @@ true 1 1.100000 hello
 {} true 1 1.100000
 {} true 1 1.100000
 {} true 1 1.100000
+Bool:false Int:0 Double:0.000000 String:
+Bool:true Int:1 Double:1.100000 String:global_job1_value_0
