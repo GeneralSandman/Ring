@@ -589,8 +589,6 @@ struct RVM_RuntimeHeap {
     unsigned int   alloc_size;
     unsigned int   threshold;
     RVM_GC_Object* list;
-    // RVM_MemoryPoll
-    // TODO: 是否需要使用内存池
 };
 
 struct RVM_LabelTable {
@@ -2267,6 +2265,8 @@ ErrorCode            rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM
 ErrorCode            rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_ClassObject** value);
 
 
+RVM_String*          new_string(Ring_VirtualMachine* rvm);
+unsigned int         init_string(Ring_VirtualMachine* rvm, RVM_String* string);
 RVM_String*          rvm_heap_new_string(Ring_VirtualMachine* rvm);
 RVM_String*          rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src);
 
@@ -2280,7 +2280,11 @@ RVM_ClassObject*     rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
 RVM_ClassObject*     rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
 int                  rvm_string_cmp(RVM_String* string1, RVM_String* string2);
 
+void                 rvm_heap_alloc_size_incr(Ring_VirtualMachine* rvm, unsigned int size);
+void                 rvm_heap_alloc_size_decr(Ring_VirtualMachine* rvm, unsigned int size);
 void                 rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
+void                 rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
+
 void                 rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
 unsigned int         rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
 unsigned int         rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array);
