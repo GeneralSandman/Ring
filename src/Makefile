@@ -18,6 +18,7 @@ OBJS   = \
 	std_lib.o\
 	mem_pool.o\
 	gc.o\
+	../deps/linenoise/linenoise.o\
 	main.o
 
 # bison 可执行文件路径
@@ -82,8 +83,19 @@ CFLAGS = -c -static -O2 -std=c++17 \
 				 -DDEBUG_RVM_INTERACTIVE1 \
 				 -DDEBUG_RVM_MEM_POOL_DETAIL1 \
 				 -DDEBUG_RVM_GC_DETAIL1
+
+CFLAGS+= -I../deps/linenoise
 BIN = ../bin
 INCLUDES = \
+
+
+DEPENDENCY_TARGETS=linenoise
+
+persist-settings: distclean
+	-(cd ../deps && $(MAKE) $(DEPENDENCY_TARGETS))
+
+.PHONY: persist-settings
+
 
 
 .SUFFIXES: .cpp .c
@@ -133,6 +145,13 @@ echo:
 clean:
 	rm -f *.o lex.yy.cpp y.tab.cpp y.tab.hpp y.output *~
 	@echo "\033[32mClean SUCCESS\033[0m"
+
+.PHONY: clean
+
+distclean: clean
+	-(cd ../deps && $(MAKE) distclean)
+
+.PHONY: distclean
 
 
 # 输出 y.output y.tab.cpp y.tab.hpp

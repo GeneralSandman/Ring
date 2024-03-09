@@ -48,7 +48,7 @@ help:
 $(TOOL_GEN_VMCODE_DOC_TARGET):
 	@cd src && $(MAKE) $@
 
-clean check:
+clean check distclean:
 	@cd src && $(MAKE) $@
 
 testall:
