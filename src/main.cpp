@@ -1,8 +1,13 @@
+#include "linenoise.h"
 #include "ring.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/select.h>
 
 
 std::string command_help_message =
@@ -15,6 +20,9 @@ std::string command_help_message =
     "        run    <filename>                              :compile and run Ring program\n"
     "        build  <filename>                              :compile and generate bytecode\n"
     "        dump   <filename>                              :dump bytecode detail after compile\n"
+    "        rdb    <filename>                              :debug interactive\n"
+    "        repl                                           :start interactive program\n"
+    "        \n"
     "        man    <keyword>                               :get prompt of ring by keyword\n"
     "        version                                        :get Ring version\n"
     "        help                                           :get Ring version\n"
@@ -37,7 +45,10 @@ Args parse_args(int argc, char** argv) {
         goto ERR_ARG;
     }
     command = argv[1];
-    if (str_eq(command, "version")) {
+    if (str_eq(command, "repl")) {
+        ring_repl();
+        exit(ERROR_CODE_SUCCESS);
+    } else if (str_eq(command, "version")) {
         printf("%s \n", RING_VERSION);
         exit(ERROR_CODE_SUCCESS);
     } else if (str_eq(command, "help")) {
@@ -67,6 +78,8 @@ Args parse_args(int argc, char** argv) {
             .input_file_name = input_file_name,
         };
         return res;
+    } else if (str_eq(command, "rdb")) {
+        exit(ERROR_CODE_SUCCESS);
     } else if (str_eq(command, "man")) {
         keyword = input_file_name;
         ring_give_man_help(keyword);
@@ -146,4 +159,67 @@ int main(int argc, char** argv) {
     ring_execute_vm_code(ring_vm);
 
     return 0;
+}
+
+
+#define REPL_PREFIX "> "
+#define REPL_HISTORY_FILE "ring.repl.history.txt"
+
+int ring_repl() {
+    printf("%s\n", RING_VERSION);
+    printf("Start Ring REPL...\n\n");
+
+    char* line;
+
+    linenoiseSetMultiLine(1);
+    linenoiseSetCompletionCallback(ring_repl_completion);
+    linenoiseSetHintsCallback(ring_repl_hints);
+    linenoiseHistoryLoad(REPL_HISTORY_FILE); /* Load the history at startup */
+
+    while (1) {
+
+        line = linenoise(REPL_PREFIX);
+        if (line == NULL)
+            break;
+
+
+        /* Do something with the string. */
+        if (line[0] != '\0' && line[0] != '/') {
+            // printf("echo: '%s'\n", line);
+            linenoiseHistoryAdd(line);               /* Add to the history. */
+            linenoiseHistorySave(REPL_HISTORY_FILE); /* Save the history on disk. */
+        } else if (!strncmp(line, "/historylen", 11)) {
+            /* The "/historylen" command will change the history len. */
+            int len = atoi(line + 11);
+            linenoiseHistorySetMaxLen(len);
+        } else if (line[0] == '/') {
+            printf("Unreconized command: %s\n", line);
+        }
+
+        free(line);
+    }
+    return 0;
+}
+
+void ring_repl_completion(const char* buf, linenoiseCompletions* lc) {
+    // if (buf[0] == 'h') {
+    //     linenoiseAddCompletion(lc, "hello");
+    //     linenoiseAddCompletion(lc, "hello 1");
+    //     linenoiseAddCompletion(lc, "hello 2");
+    // }
+}
+
+char* ring_repl_hints(const char* buf, int* color, int* bold) {
+    *color = 35;
+    *bold  = 0;
+
+    if (str_eq(buf, "hello")) {
+        return (char*)" World";
+    } else if (str_eq(buf, "var") || str_eq(buf, "var ")) {
+        return (char*)" bool/int/double/string/class identifier";
+    } else if (str_eq(buf, "function") || str_eq(buf, "function ")) {
+        return (char*)" identifier(arguments) { block }";
+    }
+
+    return nullptr;
 }

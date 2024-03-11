@@ -2,6 +2,7 @@
 #ifndef RING_INCLUDE_H
 #define RING_INCLUDE_H
 
+#include "linenoise.h"
 #include <cstdio>
 #include <string>
 #include <unordered_map>
@@ -1834,6 +1835,12 @@ struct MemBlock {
     fprintf(stderr, "%s[ERROR][%s:%d]\t " format "%s\n",                        \
             LOG_COLOR_RED, __FILE__, __LINE__, ##__VA_ARGS__, LOG_COLOR_CLEAR); \
     exit(1);
+
+
+int   ring_repl();
+void  ring_repl_completion(const char* buf, linenoiseCompletions* lc);
+char* ring_repl_hints(const char* buf, int* color, int* bold);
+
 
 /* --------------------
  * string.cpp
