@@ -93,9 +93,6 @@ NOT_TEST_FILES=(
   # 数组的地址  如何进行 自动化测试
 
 
-  "./test/024-array-class/for-access-000.ring" 
-  # global_job_array_0[index].Running = true; 不支持给数组中元素的成员变量进行赋值
-
   "./test/002-operator/arith-oper-002.ring"
   # double 数值比对, 存在bug
 
