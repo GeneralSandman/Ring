@@ -35,4 +35,11 @@ function main() {
   heap_size = vm::heap_size();
   fmt::println_int(heap_size);
   debug::debug_assert(heap_size == 256);
+
+
+  // after gc
+  vm::garbage_collect();
+  heap_size = vm::heap_size();
+  fmt::println_int(heap_size);
+  debug::debug_assert(heap_size == 64);
 }

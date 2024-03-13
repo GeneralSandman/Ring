@@ -4,3 +4,5 @@ debug_assert PASS
 debug_assert PASS
 256
 debug_assert PASS
+64
+debug_assert PASS
