@@ -544,7 +544,7 @@ struct RVM_Array {
         bool*            bool_array;
         int*             int_array;
         double*          double_array;
-        RVM_String*      string_array;
+        RVM_String**     string_array;
         RVM_ClassObject* class_ob_array;
         RVM_Array*       a_array; // 多维数组
     } u;
@@ -2190,7 +2190,6 @@ void                 rvm_add_static_variable(Package_Executer* executer, RVM_Run
 void                 ring_virtualmachine_init(Ring_VirtualMachine* rvm);
 void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
-RVM_String*          new_string_object(Ring_VirtualMachine* rvm);
 void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
@@ -2274,7 +2273,6 @@ ErrorCode            rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Ar
 
 RVM_String*          new_string(Ring_VirtualMachine* rvm);
 unsigned int         init_string(Ring_VirtualMachine* rvm, RVM_String* string);
-RVM_String*          rvm_heap_new_string(Ring_VirtualMachine* rvm);
 RVM_String*          rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src);
 
 RVM_String*          rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value);
@@ -2413,6 +2411,7 @@ void gc_mark(Ring_VirtualMachine* rvm);
 void gc_sweep(Ring_VirtualMachine* rvm);
 
 void gc_mark_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob);
+void gc_mark_array(Ring_VirtualMachine* rvm, RVM_Array* array);
 // --------------------
 
 

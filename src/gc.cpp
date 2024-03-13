@@ -129,7 +129,12 @@ void gc_mark(Ring_VirtualMachine* rvm) {
             value->u.class_ob_value->gc_mark = GC_MARK_COLOR_BLACK;
             gc_mark_class_ob(rvm, value->u.class_ob_value);
             break;
+        case RVM_VALUE_TYPE_ARRAY:
+            value->u.array_value->gc_mark = GC_MARK_COLOR_BLACK;
+            gc_mark_array(rvm, value->u.array_value);
+            break;
         default:
+            ring_error_report("mark static error, type:%d", value->type);
             break;
         }
     }
@@ -146,7 +151,12 @@ void gc_mark(Ring_VirtualMachine* rvm) {
             value->u.class_ob_value->gc_mark = GC_MARK_COLOR_BLACK;
             gc_mark_class_ob(rvm, value->u.class_ob_value);
             break;
+        case RVM_VALUE_TYPE_ARRAY:
+            value->u.array_value->gc_mark = GC_MARK_COLOR_BLACK;
+            gc_mark_array(rvm, value->u.array_value);
+            break;
         default:
+            // ring_error_report("mark stack error, type:%d", value->type);
             break;
         }
     }
@@ -176,7 +186,30 @@ void gc_mark_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob) {
             class_ob->field[field_index].u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
             break;
         case RVM_VALUE_TYPE_ARRAY:
-            // TODO:
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+void gc_mark_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
+
+    for (unsigned int i = 0; i < array->length; i++) {
+        switch (array->type) {
+        case RVM_ARRAY_BOOL:
+            break;
+        case RVM_ARRAY_INT:
+            break;
+        case RVM_ARRAY_DOUBLE:
+            break;
+        case RVM_ARRAY_STRING:
+            array->u.string_array[i]->gc_mark = GC_MARK_COLOR_BLACK;
+            break;
+        case RVM_ARRAY_CLASS_OBJECT:
+            array->u.class_ob_array[i].gc_mark = GC_MARK_COLOR_BLACK;
+            break;
+        case RVM_ARRAY_A:
             break;
         default:
             break;
