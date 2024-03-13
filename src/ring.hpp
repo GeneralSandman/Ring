@@ -2218,14 +2218,7 @@ void                 init_derive_function_local_variable(Ring_VirtualMachine* rv
 RVM_String*          string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal);
 RVM_String*          concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b);
 
-RVM_Array*           rvm_new_array(Ring_VirtualMachine* rvm,
-                                   unsigned int         dimension,
-                                   unsigned int*        dimension_list,
-                                   unsigned int         dimension_index,
-                                   RVM_Array_Type       array_type,
-                                   RVM_ClassDefinition* class_definition);
 
-RVM_ClassObject*     rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
 RVM_Array*           rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsigned int size);
 RVM_Array*           rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size);
 RVM_Array*           rvm_new_array_literal_double(Ring_VirtualMachine* rvm, unsigned int size);
@@ -2271,29 +2264,16 @@ ErrorCode            rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM
 ErrorCode            rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_ClassObject** value);
 
 
-RVM_String*          new_string(Ring_VirtualMachine* rvm);
-unsigned int         init_string(Ring_VirtualMachine* rvm, RVM_String* string);
-RVM_String*          rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src);
-
 RVM_String*          rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value);
 RVM_String*          rvm_int_2_string(Ring_VirtualMachine* rvm, int value);
 RVM_String*          rvm_double_2_string(Ring_VirtualMachine* rvm, double value);
 
-RVM_Array*           rvm_heap_new_empty_array(Ring_VirtualMachine* rvm);
-RVM_Array*           rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src);
-RVM_ClassObject*     rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
-RVM_ClassObject*     rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
 int                  rvm_string_cmp(RVM_String* string1, RVM_String* string2);
 
 void                 rvm_heap_alloc_size_incr(Ring_VirtualMachine* rvm, unsigned int size);
 void                 rvm_heap_alloc_size_decr(Ring_VirtualMachine* rvm, unsigned int size);
 void                 rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
 void                 rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
-
-void                 rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
-unsigned int         rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
-unsigned int         rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array);
-unsigned int         rvm_free_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* class_object);
 
 
 int                  rvm_heap_size(Ring_VirtualMachine* rvm);
@@ -2405,13 +2385,37 @@ void     test_mem_pool();
  * function definition
  *
  */
-void gc(Ring_VirtualMachine* rvm);
-void gc_summary(Ring_VirtualMachine* rvm);
-void gc_mark(Ring_VirtualMachine* rvm);
-void gc_sweep(Ring_VirtualMachine* rvm);
+void             gc(Ring_VirtualMachine* rvm);
+void             gc_summary(Ring_VirtualMachine* rvm);
+void             gc_mark(Ring_VirtualMachine* rvm);
+void             gc_sweep(Ring_VirtualMachine* rvm);
 
-void gc_mark_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob);
-void gc_mark_array(Ring_VirtualMachine* rvm, RVM_Array* array);
+void             gc_mark_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob);
+void             gc_mark_array(Ring_VirtualMachine* rvm, RVM_Array* array);
+
+
+RVM_String*      new_string(Ring_VirtualMachine* rvm);
+unsigned int     init_string(Ring_VirtualMachine* rvm, RVM_String* string, unsigned int capacity);
+RVM_String*      rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src);
+
+RVM_Array*       new_array(Ring_VirtualMachine* rvm);
+RVM_Array*       rvm_new_array(Ring_VirtualMachine* rvm,
+                               unsigned int         dimension,
+                               unsigned int*        dimension_list,
+                               unsigned int         dimension_index,
+                               RVM_Array_Type       array_type,
+                               RVM_ClassDefinition* class_definition);
+RVM_Array*       rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src);
+
+
+void             rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
+unsigned int     rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
+unsigned int     rvm_free_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* class_object);
+
+RVM_ClassObject* rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
+RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
+RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
+
 // --------------------
 
 
