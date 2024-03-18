@@ -96,10 +96,6 @@ NOT_TEST_FILES=(
   "./test/002-operator/arith-oper-002.ring"
   # double 数值比对, 存在bug
 
-  "./test/064-std-package-vm/std-vm-000.ring"
-  # 计算 vm::heap_size() 不太正确
-  # 2023-01-31
-
   "./test/062-std-package-reflect/reflect-001.ring"
   # 1. class-object数组，typeof获取不到正确的类型
   # 2. 针对多维数组，typeof获取不到正确的类型
@@ -107,6 +103,11 @@ NOT_TEST_FILES=(
 
   "./test/002-operator/arith-oper-003.ring"
   # 还没有支持括号运算符
+
+
+
+  "./test/060-std-package-debug/debug-000.ring"
+  # 只用来测试 ring rdb
 
   )
 

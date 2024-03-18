@@ -35,3 +35,6 @@ ring.wiki/publish.sh
 
 
 test/ring-测试用例表.md
+
+ring-repl-history.txt
+ring-rdb-history-command.txt
