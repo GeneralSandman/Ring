@@ -84,6 +84,7 @@ typedef struct StdPackageNativeFunction     StdPackageNativeFunction;
 
 typedef struct StdPackageInfo               StdPackageInfo;
 typedef struct RVM_DebugConfig              RVM_DebugConfig;
+typedef struct RVM_Frame                    RVM_Frame;
 typedef struct ErrorMessageInfo             ErrorMessageInfo;
 typedef struct ErrorReportContext           ErrorReportContext;
 
@@ -159,6 +160,8 @@ typedef struct {
     } u;
 
 } RVM_Value;
+
+typedef int (*TraceDispacth)(RVM_Frame* frame, const char* event, const char* arg);
 
 struct Ring_VirtualMachine {
     Package_Executer*    executer;
@@ -1582,7 +1585,19 @@ typedef enum {
 } RVM_DebugMode;
 
 struct RVM_DebugConfig {
-    RVM_DebugMode debug_mode;
+    bool          enable;
+    TraceDispacth trace_dispatch;
+    // RVM_DebugMode debug_mode;
+};
+
+struct RVM_Frame {
+    RVM_CallInfo*                                   call_info;
+    const char*                                     callee_func;
+    const char*                                     next_opcode;
+    unsigned int                                    source_line_number;
+
+    std::vector<std::pair<std::string, RVM_Value*>> globals;
+    std::vector<std::pair<std::string, RVM_Value*>> locals;
 };
 
 typedef enum {
@@ -1840,6 +1855,7 @@ struct MemBlock {
 int   ring_repl();
 void  ring_repl_completion(const char* buf, linenoiseCompletions* lc);
 char* ring_repl_hints(const char* buf, int* color, int* bold);
+int   register_debugger(Ring_VirtualMachine* rvm);
 
 
 /* --------------------
@@ -2416,6 +2432,20 @@ RVM_ClassObject* rvm_heap_new_class_object(Ring_VirtualMachine* rvm);
 RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm, RVM_ClassDefinition* class_definition);
 RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
 
+// --------------------
+
+
+/* --------------------
+ * gc.cpp
+ * function definition
+ *
+ */
+
+int   debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg);
+int   dispath_line(RVM_Frame* frame, const char* event, const char* arg);
+int   dispath_call(RVM_Frame* frame, const char* event, const char* arg);
+void  ring_rdb_completion(const char* buf, linenoiseCompletions* lc);
+char* ring_rdb_hints(const char* buf, int* color, int* bold);
 // --------------------
 
 

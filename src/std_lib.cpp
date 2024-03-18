@@ -330,7 +330,7 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
         if (str_length + 1 > capacity) {
             capacity = str_length + 1;
         }
-        length        = str_length + 1;
+        length = str_length + 1;
         // FIXME: shoud alloced in rvm->data_mem_pool
         output_buffer = (char*)mem_alloc(NULL_MEM_POOL, capacity * sizeof(char));
         strncpy(output_buffer, args->u.string_value->data, str_length);
@@ -602,13 +602,6 @@ RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int 
             unsigned int source_line_number = 0;
             std::string  source_file        = pos->callee_function->source_file;
 
-            if (offset == 0) {
-                // 当前正在执行的函数
-                source_line_number = get_source_line_number_by_pc(pos->callee_function, rvm->pc);
-            } else {
-                // 调用栈内的函数
-                source_line_number = get_source_line_number_by_pc(pos->callee_function, pos->caller_pc);
-            }
 
             printf("%04d$ring!", offset);
             // TODO: 这里想个更好的办法, 减少代码重复
@@ -619,6 +612,13 @@ RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int 
             }
 
 
+            if (offset == 0) {
+                // 当前正在执行的函数
+                source_line_number = get_source_line_number_by_pc(pos->callee_function, rvm->pc);
+            } else {
+                // 调用栈内的函数
+                source_line_number = get_source_line_number_by_pc(pos->callee_function, pos->caller_pc);
+            }
             printf("    %s:%d\n", source_file.c_str(), source_line_number);
         }
     }

@@ -18,6 +18,7 @@ OBJS   = \
 	std_lib.o\
 	mem_pool.o\
 	gc.o\
+	debug.o\
 	../deps/linenoise/linenoise.o\
 	main.o
 
@@ -182,6 +183,7 @@ man_help.o: man_help.cpp ring.hpp
 std_lib.o: std_lib.cpp ring.hpp
 mem_pool.o: mem_pool.cpp ring.hpp
 gc.o: gc.cpp ring.hpp
+debug.o: debug.cpp ring.hpp
 thread_pool.o: thread_pool.c ring.hpp
 main.o: main.cpp ring.hpp
 tool_gen_vmcode_doc.o: tool_gen_vmcode_doc.cpp ring.hpp

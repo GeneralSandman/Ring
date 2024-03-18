@@ -310,9 +310,12 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Function*        function               = nullptr;
     RVM_Method*          method                 = nullptr;
 
-    ErrorCode            error_code             = ERROR_CODE_SUCCESS;
 
-    unsigned int*        dimension_list         = (unsigned int*)calloc(1, sizeof(unsigned int) * MAX_DIMENSION_NUM);
+    ErrorCode            error_code             = ERROR_CODE_SUCCESS;
+    RVM_Frame            frame;
+    unsigned int         prev_code_line_number = 0;
+
+    unsigned int*        dimension_list        = (unsigned int*)calloc(1, sizeof(unsigned int) * MAX_DIMENSION_NUM);
 
     while (rvm->pc < code_size) {
         RVM_Byte opcode = code_list[rvm->pc];
@@ -320,6 +323,91 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 #ifdef DEBUG_RVM_INTERACTIVE
         debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
 #endif
+
+        if (rvm->debug_config != nullptr && rvm->debug_config->enable) {
+            assert(rvm->debug_config->trace_dispatch != nullptr);
+
+            RVM_Opcode_Info opcode_info;
+            opcode_info = RVM_Opcode_Infos[opcode];
+
+            std::vector<std::pair<std::string, RVM_Value*>> globals;
+            std::vector<std::pair<std::string, RVM_Value*>> locals;
+
+            // 1
+            std::string function_name;
+            function_name = "$ring!start()";
+            if (rvm->call_info != nullptr
+                && rvm->call_info->callee_function != nullptr) {
+                function_name = std::string(rvm->call_info->callee_function->func_name) + "()";
+            }
+            // 2. build globals
+            for (int i = 0; i < rvm->executer->global_variable_size; i++) {
+                std::pair<std::string, RVM_Value*> global = {
+                    std::string(rvm->executer->global_variable_list[i].identifier),
+                    nullptr,
+                };
+                globals.push_back(global);
+            }
+
+            // 3. build locals
+            if (rvm->call_info != nullptr
+                && rvm->call_info->callee_function != nullptr) {
+                for (unsigned int i = 0; i < rvm->call_info->callee_function->local_variable_size; i++) {
+                    std::pair<std::string, RVM_Value*> local = {
+                        std::string(rvm->call_info->callee_function->local_variable_list[i].identifier),
+                        nullptr,
+                    };
+                    locals.push_back(local);
+                }
+            }
+
+            // 4.
+            std::string event;
+            if (opcode == RVM_CODE_INVOKE_FUNC || opcode == RVM_CODE_INVOKE_METHOD) {
+                event = "call";
+            } else if (opcode == RVM_CODE_FUNCTION_FINISH) {
+                event = "return";
+            } else {
+                event = "opcode";
+            }
+
+            // if (rvm->call_info != nullptr
+            //     && rvm->call_info->callee_function != nullptr
+            //     && rvm->call_info->callee_function->type == RVM_FUNCTION_TYPE_DERIVE) {
+            //     std::vector<RVM_SourceCodeLineMap> code_line_map;
+            //     code_line_map = rvm->call_info->callee_function->u.derive_func->code_line_map;
+
+            //     if (rvm->pc == code_line_map[code_line_map_index].opcode_begin_index) {
+            //         source_code_line_number = code_line_map[code_line_map_index].line_number;
+            //         code_line_map_index++;
+
+            //         event = "line";
+            //     }
+            // }
+
+            unsigned int source_code_line_number = 0;
+            if (rvm->call_info != nullptr
+                && rvm->call_info->callee_function != nullptr) {
+                source_code_line_number = get_source_line_number_by_pc(rvm->call_info->callee_function, rvm->pc);
+            }
+
+            if (source_code_line_number != 0 && source_code_line_number != prev_code_line_number) {
+                if (event != "return")
+                    event = "line";
+                prev_code_line_number = source_code_line_number;
+            }
+
+            //
+            frame = RVM_Frame{
+                .call_info          = rvm->call_info,
+                .callee_func        = function_name.c_str(),
+                .next_opcode        = opcode_info.name.c_str(),
+                .source_line_number = source_code_line_number,
+                .globals            = globals,
+                .locals             = locals,
+            };
+            rvm->debug_config->trace_dispatch(&frame, event.c_str(), "");
+        }
 
         switch (opcode) {
         // int double string const
@@ -395,7 +483,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // shallow copy
             // array_value = STACK_GET_OBJECT_OFFSET(rvm, -1);
             // deep copy
-            array_value          = rvm_deep_copy_array(rvm, STACK_GET_ARRAY_OFFSET(rvm, -1));
+            array_value = rvm_deep_copy_array(rvm, STACK_GET_ARRAY_OFFSET(rvm, -1));
             STATIC_SET_ARRAY_INDEX(rvm, runtime_static_index, array_value);
             runtime_stack->top_index--;
             rvm->pc += 3;
@@ -483,7 +571,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // shallow copy
             // array_value         = STACK_GET_ARRAY_OFFSET(rvm, -1);
             // deep copy
-            array_value         = rvm_deep_copy_array(rvm, STACK_GET_ARRAY_OFFSET(rvm, -1));
+            array_value = rvm_deep_copy_array(rvm, STACK_GET_ARRAY_OFFSET(rvm, -1));
             STACK_SET_ARRAY_INDEX(rvm, caller_stack_base + caller_stack_offset, array_value);
             runtime_stack->top_index--;
             rvm->pc += 3;
@@ -1049,7 +1137,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 2;
             break;
         case RVM_CODE_INVOKE_FUNC:
-            oper_num      = STACK_GET_INT_OFFSET(rvm, -1);
+            oper_num = STACK_GET_INT_OFFSET(rvm, -1);
             // TODO: 这里是不是直接放在字节码里比较好, 不放在 runtime_stack中
             package_index = oper_num >> 8;
             func_index    = oper_num & 0XFF;
@@ -1594,8 +1682,8 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                          RVM_ClassObject*     callee_object,
                                          RVM_Function*        function) {
 
-    unsigned int arguement_list_size   = function->parameter_size;
-    unsigned int arguement_list_index  = rvm->runtime_stack->top_index - CALL_INFO_SIZE_V2 - arguement_list_size;
+    unsigned int arguement_list_size  = function->parameter_size;
+    unsigned int arguement_list_index = rvm->runtime_stack->top_index - CALL_INFO_SIZE_V2 - arguement_list_size;
     // TODO: 这里有点兼容逻辑, 需要把 CALL_INFO_SIZE_V2 去掉
 
     unsigned int local_variable_offset = 0;
@@ -2095,7 +2183,7 @@ ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm,
     // RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
 
     // TIP: this is shallow copy of class-object.
-    *value                            = src_class_object;
+    *value = src_class_object;
     return ERROR_CODE_SUCCESS;
 }
 
@@ -2187,12 +2275,12 @@ RVM_String* rvm_int_2_string(Ring_VirtualMachine* rvm, int value) {
     unsigned int alloc_size = 0;
 
     // TODO:这里直接用的 cpp的函数, 是否需要自己实现?
-    std::string tmp         = std::to_string(value);
+    std::string tmp = std::to_string(value);
 
-    string                  = new_string(rvm);
-    alloc_size              = init_string(rvm, string, ROUND_UP8(tmp.size()));
+    string          = new_string(rvm);
+    alloc_size      = init_string(rvm, string, ROUND_UP8(tmp.size()));
 
-    string->length          = tmp.size();
+    string->length  = tmp.size();
     strncpy(string->data, tmp.c_str(), tmp.size());
 
     rvm_heap_list_add_object(rvm, (RVM_GC_Object*)string);
@@ -2206,12 +2294,12 @@ RVM_String* rvm_double_2_string(Ring_VirtualMachine* rvm, double value) {
     unsigned int alloc_size = 0;
 
     // TODO:这里直接用的 cpp的函数, 是否需要自己实现?
-    std::string tmp         = std::to_string(value);
+    std::string tmp = std::to_string(value);
 
-    string                  = new_string(rvm);
-    alloc_size              = init_string(rvm, string, ROUND_UP8(tmp.size()));
+    string          = new_string(rvm);
+    alloc_size      = init_string(rvm, string, ROUND_UP8(tmp.size()));
 
-    string->length          = tmp.size();
+    string->length  = tmp.size();
     strncpy(string->data, tmp.c_str(), tmp.size());
 
     rvm_heap_list_add_object(rvm, (RVM_GC_Object*)string);
@@ -2309,11 +2397,6 @@ void debug_rvm(Ring_VirtualMachine* rvm,
 
     debug_exec_info_with_white("\t");
 
-    if (rvm->debug_config == nullptr) {
-        rvm->debug_config             = (RVM_DebugConfig*)mem_alloc(rvm->meta_pool, sizeof(RVM_DebugConfig));
-        rvm->debug_config->debug_mode = RVM_DEBUG_MODE_UNKNOW;
-    }
-
     // get terminal windows size
     struct winsize terminal_size;
     if (isatty(STDOUT_FILENO) == 0 || ioctl(STDOUT_FILENO, TIOCGWINSZ, &terminal_size) < 0) {
@@ -2359,13 +2442,7 @@ void debug_rvm(Ring_VirtualMachine* rvm,
     printf("---------------------------\n");
 
     char ch = getchar();
-    if (ch == 'i') {
-        rvm->debug_config->debug_mode = RVM_DEBUG_MODE_STEPINTO;
-    } else if (ch == 'v') {
-        rvm->debug_config->debug_mode = RVM_DEBUG_MODE_STEPOVER;
-    } else if (ch == 'o') {
-        rvm->debug_config->debug_mode = RVM_DEBUG_MODE_STEPOUT;
-    } else if (ch == 'q') {
+    if (ch == 'q') {
         exit(1);
     }
 }

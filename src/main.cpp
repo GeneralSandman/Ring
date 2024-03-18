@@ -31,6 +31,7 @@ std::string command_help_message =
 typedef struct {
     bool  command_run;
     bool  command_dump;
+    bool  command_debug;
 
     char* input_file_name;
 } Args;
@@ -65,6 +66,7 @@ Args parse_args(int argc, char** argv) {
         res = Args{
             .command_run     = true,
             .command_dump    = false,
+            .command_debug   = false,
             .input_file_name = input_file_name,
         };
         return res;
@@ -75,11 +77,18 @@ Args parse_args(int argc, char** argv) {
         res = Args{
             .command_run     = false,
             .command_dump    = true,
+            .command_debug   = false,
             .input_file_name = input_file_name,
         };
         return res;
     } else if (str_eq(command, "rdb")) {
-        exit(ERROR_CODE_SUCCESS);
+        res = Args{
+            .command_run     = false,
+            .command_dump    = false,
+            .command_debug   = true,
+            .input_file_name = input_file_name,
+        };
+        return res;
     } else if (str_eq(command, "man")) {
         keyword = input_file_name;
         ring_give_man_help(keyword);
@@ -107,13 +116,13 @@ int main(int argc, char** argv) {
     /*
      * 初始化语法处理节点相关的struct
      */
-    CompilerEntry* compiler_entry           = compiler_entry_create();
+    CompilerEntry* compiler_entry = compiler_entry_create();
     // FIX: 目前main package 只能有一个源文件
     // main package 源文件即为 ring run 指定的输入文件
-    Package* main_package                   = package_create_input_file(compiler_entry,
-                                                                        (char*)"main",
-                                                                        args.input_file_name);
-    compiler_entry->main_package            = main_package; // TODO: optimize the method of set main_package;
+    Package* main_package        = package_create_input_file(compiler_entry,
+                                                             (char*)"main",
+                                                             args.input_file_name);
+    compiler_entry->main_package = main_package; // TODO: optimize the method of set main_package;
 
     /*
      * 初始化代码生成阶段相关的struct
@@ -125,7 +134,7 @@ int main(int argc, char** argv) {
     /*
      * 初始化虚拟机相关的struct
      */
-    Ring_VirtualMachine* ring_vm            = ring_virtualmachine_create();
+    Ring_VirtualMachine* ring_vm = ring_virtualmachine_create();
 
 
     // Step-0: 预编译官方std包, 并生成vmcode
@@ -149,6 +158,10 @@ int main(int argc, char** argv) {
         return 0;
     }
 
+    if (args.command_debug) {
+        register_debugger(ring_vm);
+    }
+
     // Step-6: 加载虚拟机
     ring_virtualmachine_load_executer(ring_vm, executer_entry);
 
@@ -163,7 +176,7 @@ int main(int argc, char** argv) {
 
 
 #define REPL_PREFIX "> "
-#define REPL_HISTORY_FILE "ring.repl.history.txt"
+#define REPL_HISTORY_FILE "ring-repl-history.txt"
 
 int ring_repl() {
     printf("%s\n", RING_VERSION);
@@ -174,7 +187,7 @@ int ring_repl() {
     linenoiseSetMultiLine(1);
     linenoiseSetCompletionCallback(ring_repl_completion);
     linenoiseSetHintsCallback(ring_repl_hints);
-    linenoiseHistoryLoad(REPL_HISTORY_FILE); /* Load the history at startup */
+    linenoiseHistoryLoad(REPL_HISTORY_FILE);
 
     while (1) {
 
@@ -222,4 +235,14 @@ char* ring_repl_hints(const char* buf, int* color, int* bold) {
     }
 
     return nullptr;
+}
+
+
+int register_debugger(Ring_VirtualMachine* rvm) {
+    RVM_DebugConfig* debug_config = (RVM_DebugConfig*)malloc(sizeof(RVM_DebugConfig));
+    debug_config->enable          = true;
+    debug_config->trace_dispatch  = debug_trace_dispatch;
+    rvm->debug_config             = debug_config;
+
+    return 0;
 }
