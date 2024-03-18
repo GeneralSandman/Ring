@@ -15,7 +15,7 @@
 static volatile int threads_keepalive;
 static volatile int threads_on_hold;
 
-int pthread_setname_np(const char*);
+int                 pthread_setname_np(const char*);
 
 /* ========================== STRUCTURES ============================ */
 
@@ -61,10 +61,10 @@ typedef struct thpool_ {
 
 /* ========================== PROTOTYPES ============================ */
 
-static int   thread_init(thpool_* thpool_p, struct thread** thread_p, int id);
-static void* thread_do(struct thread* thread_p);
-static void  thread_hold(int sig_id);
-static void  thread_destroy(struct thread* thread_p);
+static int         thread_init(thpool_* thpool_p, struct thread** thread_p, int id);
+static void*       thread_do(struct thread* thread_p);
+static void        thread_hold(int sig_id);
+static void        thread_destroy(struct thread* thread_p);
 
 static int         jobqueue_init(jobqueue* jobqueue_p);
 static void        jobqueue_clear(jobqueue* jobqueue_p);
@@ -72,11 +72,11 @@ static void        jobqueue_push(jobqueue* jobqueue_p, struct job* newjob_p);
 static struct job* jobqueue_pull(jobqueue* jobqueue_p);
 static void        jobqueue_destroy(jobqueue* jobqueue_p);
 
-static void bsem_init(struct bsem* bsem_p, int value);
-static void bsem_reset(struct bsem* bsem_p);
-static void bsem_post(struct bsem* bsem_p);
-static void bsem_post_all(struct bsem* bsem_p);
-static void bsem_wait(struct bsem* bsem_p);
+static void        bsem_init(struct bsem* bsem_p, int value);
+static void        bsem_reset(struct bsem* bsem_p);
+static void        bsem_post(struct bsem* bsem_p);
+static void        bsem_post_all(struct bsem* bsem_p);
+static void        bsem_wait(struct bsem* bsem_p);
 
 /* ========================== THREADPOOL ============================ */
 
@@ -167,7 +167,8 @@ void thpool_wait(thpool_* thpool_p) {
 /* Destroy the threadpool */
 void thpool_destroy(thpool_* thpool_p) {
     /* No need to destory if it's nullptr */
-    if (thpool_p == nullptr) return;
+    if (thpool_p == nullptr)
+        return;
 
     volatile int threads_total = thpool_p->num_threads_alive;
 
@@ -340,9 +341,9 @@ static void thread_destroy(thread* thread_p) {
 
 /* Initialize queue */
 static int jobqueue_init(jobqueue* jobqueue_p) {
-    jobqueue_p->len   = 0;
-    jobqueue_p->front = nullptr;
-    jobqueue_p->rear  = nullptr;
+    jobqueue_p->len      = 0;
+    jobqueue_p->front    = nullptr;
+    jobqueue_p->rear     = nullptr;
 
     jobqueue_p->has_jobs = (struct bsem*)malloc(sizeof(struct bsem));
     if (jobqueue_p->has_jobs == nullptr) {

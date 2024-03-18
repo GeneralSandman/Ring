@@ -9,7 +9,7 @@ AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 
 # 连续赋值时，对齐所有等号
-AlignConsecutiveAssignments: AcrossEmptyLinesAndComments
+AlignConsecutiveAssignments: AcrossEmptyLines
 
 # 连续声明时，对齐所有声明的变量名
 AlignConsecutiveDeclarations: AcrossEmptyLines

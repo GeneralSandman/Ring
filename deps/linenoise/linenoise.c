@@ -911,7 +911,7 @@ int linenoiseEditStart(struct linenoiseState* l, int stdin_fd, int stdout_fd, ch
     l->history_index = 0;
 
     /* Buffer starts empty. */
-    l->buf[0]        = '\0';
+    l->buf[0] = '\0';
     l->buflen--; /* Make sure there is always space for the nulterm */
 
     /* If stdin is not a tty, stop here with the initialization. We

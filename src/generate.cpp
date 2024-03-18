@@ -329,8 +329,8 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
         dst->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
 
         // deep copy function parameters
-        unsigned int i           = 0;
-        Parameter*   param       = src->parameter_list;
+        unsigned int i     = 0;
+        Parameter*   param = src->parameter_list;
         for (; param != nullptr; param = param->next, i++) {
             dst->parameter_list[i].identifier     = param->identifier;
             dst->parameter_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
@@ -381,8 +381,8 @@ void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src)
     dst->rvm_function->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
 
     // deep copy method parameters
-    unsigned int i                         = 0;
-    Parameter*   param                     = src->parameter_list;
+    unsigned int i     = 0;
+    Parameter*   param = src->parameter_list;
     for (; param != nullptr; param = param->next, i++) {
         dst->rvm_function->parameter_list[i].identifier     = param->identifier;
         dst->rvm_function->parameter_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
@@ -745,7 +745,7 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
     //       [RVM_CODE_FOR_RANGE_INIT]: add array-iter
     //       pop -> index & value
 
-    end_label                = opcode_buffer_get_label(opcode_buffer);
+    end_label = opcode_buffer_get_label(opcode_buffer);
     // generate_vmcode(executer, opcode_buffer,
     //                 RVM_CODE_FOR_RANGE_INIT, end_label,
     //                 range_statement->operand->u.identifier_expression->line_number);
@@ -1841,7 +1841,7 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
 
     // TODO: 继续支持多维数组
     // dimension 当前只能是1
-    unsigned int dimension      = new_array_expression->dimension_expression->dimension;
+    unsigned int dimension = new_array_expression->dimension_expression->dimension;
 
     // 将每个维度的size push stack
     SubDimensionExpression* pos = new_array_expression->dimension_expression->dimension_list;

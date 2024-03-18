@@ -407,7 +407,7 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         rvm_heap_alloc_size_incr(rvm, 0);
 
         for (unsigned int i = 0; i < src->length; i++) {
-            RVM_ClassObject* tmp                   = rvm_deep_copy_class_object(rvm, &(src->u.class_ob_array[i]));
+            RVM_ClassObject* tmp = rvm_deep_copy_class_object(rvm, &(src->u.class_ob_array[i]));
             // TODO: 这里的写法不太好, 还是直接 strcpy 的那种形式最好, 结果通过 指针传入
             // array->u.class_object_array[i].class_def   = tmp->class_def;
             array->u.class_ob_array[i].field_count = tmp->field_count;
@@ -589,8 +589,8 @@ RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm,
         case RING_BASIC_TYPE_STRING: {
             unsigned alloc_size = 0;
             // 在这里: string 的控制权不在 class-object的手上
-            string              = new_string(rvm);
-            alloc_size          = init_string(rvm, string, ROUND_UP8(1));
+            string     = new_string(rvm);
+            alloc_size = init_string(rvm, string, ROUND_UP8(1));
             rvm_heap_list_add_object(rvm, (RVM_GC_Object*)string);
             rvm_heap_alloc_size_incr(rvm, alloc_size);
 
@@ -627,8 +627,8 @@ RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassO
     class_object->field_count     = src->field_count;
 
     // FIXME: 这里还要继续完善深度copy
-    RVM_Value* field              = nullptr;
-    field                         = (RVM_Value*)mem_alloc(rvm->meta_pool, src->field_count * sizeof(RVM_Value));
+    RVM_Value* field = nullptr;
+    field            = (RVM_Value*)mem_alloc(rvm->meta_pool, src->field_count * sizeof(RVM_Value));
     memcpy(field, src->field, src->field_count * sizeof(RVM_Value));
     class_object->field = field;
     return class_object;

@@ -15,7 +15,7 @@ static CompilerEntry*    g_compiler_entry = nullptr;
 
 // 编译阶段使用的 Memory Pool
 // 这里暂时使用全局变量
-MemPool* front_mem_pool                   = nullptr;
+MemPool* front_mem_pool = nullptr;
 
 
 // 初始化一次

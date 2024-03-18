@@ -814,7 +814,7 @@ Block* start_new_block() {
 
     /* printf("[start] parent:%p, current:%p\n", block->parent_block, block); */
 
-    get_package_unit()->current_block  = block;
+    get_package_unit()->current_block = block;
 
     return block;
 }

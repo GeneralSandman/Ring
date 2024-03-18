@@ -563,7 +563,7 @@ void fix_method_call_expression(MethodCallExpression* method_call_expression, Bl
     method_call_expression->member_declaration = member_declaration;
 
     // 4. fix argument list
-    ArgumentList* pos                          = method_call_expression->argument_list;
+    ArgumentList* pos = method_call_expression->argument_list;
     for (; pos != nullptr; pos = pos->next) {
         fix_expression(pos->expression, block, func);
     }
@@ -592,7 +592,7 @@ void fix_class_field(ClassDefinition* class_definition, FieldMember* field) {
 
 void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
     // add self declaration
-    Block* block                     = method->block;
+    Block* block = method->block;
 
 
     // self
@@ -645,8 +645,8 @@ void fix_array_index_expression(Expression*           expression,
 
     DimensionExpression* index_expression = array_index_expression->index_expression;
     // 修正最外层 expression 的 convert_type
-    TypeSpecifier* type                   = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-    type->line_number                     = expression->line_number;
+    TypeSpecifier* type = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type->line_number   = expression->line_number;
 
     /*
      * e.g. var int[,,,] students;
@@ -834,7 +834,7 @@ void fix_member_expression(Expression*       expression,
 
 
     // expression 最终的类型取决于field-member 的类型
-    expression->convert_type              = member_declaration->u.field->type_specifier;
+    expression->convert_type = member_declaration->u.field->type_specifier;
     fix_class_member_expression(member_expression, member_expression->object_expression, member_expression->member_identifier);
 }
 
