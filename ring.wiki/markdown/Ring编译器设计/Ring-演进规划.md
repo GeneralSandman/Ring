@@ -92,10 +92,13 @@
 2. Closure
 3. 函数式编程
 4. 中间代码优化, 死代码消除, 常量折叠
-
-
-
-
+5. 搭建一个 Ring在线 Playground
+   参考资料:https://studygolang.com/articles/8880
+    启动一个docker去运行 https://github.com/xiam/go-playground
+    通过 Jupyter配置后端编译器内核来实现 https://zhuanlan.zhihu.com/p/431298076
+6. 实现 ring eval函数
+7. 实现交互式编程, 第一种是类似于python lua, 第二种是能够输入一行代码, 能够实时的输出翻译之后的字节码
+8. 实现一个类似于 gdb python-pdb 的交互式调试的工具
 
 -----------------------------
 
@@ -404,6 +407,141 @@ class-object  ✅
 
 -----------------------------
 
+
+
+## 2024-03-18周
+
+
+### A. 设计Ring命令行交互式编程
+
+
+设计: 
+1. `ring rdb <filename>` 使用交互式调试功能
+2. 进入交互式编程之后, 会在main函数的入口处停止, 等待输入和调试
+
+locals: 打印局部变量
+local <variable>: 打印局部变量
+
+globals: 打印全局变量
+global <variable>: 打印全局变量
+
+
+cont/c: 继续执行
+quit/q: 退出
+
+break set   <line_number>: 放置断点
+break clear <line_number>: 清除断点
+breaks             : 列出断点
+breaks clear       : 清除所有断点
+
+
+当然: 多个命令可以同时进行操作, 如: break set 10 && cont && locals
+
+
+
+
+
+
+-----------------------------
+
+
+
+
+## 2024-03-11周
+
+### A. 调研交互式编程
+
+1. 类似于 python lua的交互式编程, 通过每一行的输入, 并执行, 同时得出执行结果, 这个相对复杂
+2. ringc的交互式编程, 没输入一行内容, 就实时翻译编译后的字节码, 这个相对简单一点
+
+
+调研 lua的交互式编程的实现.
+
+repl: real-eval-print loop  https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop
+
+
+使用 linenoise读入一行, 编译, 执行, 然后输出结果
+
+
+设计:
+1. ring repl
+2. 进入之后, 打印 ring的版本号, 提示开始交互式编程
+3. 前缀为 > 
+4. 能够根据输入的关键字自动提示
+5. 能够记录历史
+6. 能够存储到本地目录
+7. 定义默认导入的package
+6. 快捷键: ctrl+c 退出, enter 下一行, shift+enter 开启新的block, 并自动开始运行
+
+
+
+### B. 调研交互式调试工具
+
+调研一下 python-debugger 和 lua-debugger
+
+1. lua
+
+debug.debug()    进入交互式的debug
+debug.getlocal() 获取局部变量
+debug.setlocal() 设置局部变量
+
+test1.lua
+```
+
+function foo()
+    print("function foo\n")
+    local a = 10
+    local b = 20
+    local c = a + b
+    local d = "hello world"
+    local e
+    printLocalVariables()
+    initLocalVariables()
+    printLocalVariables()
+end
+
+function printLocalVariables()
+    local level = 2
+    local localVarIndex = 1
+    local name, value
+
+    print("printLocalVariables--------------------")
+    while true do
+        name, value = debug.getlocal(level, localVarIndex)
+        if not name then break end
+        print("identifier:", name, "value:", value)
+        localVarIndex = localVarIndex + 1
+    end
+end
+
+function initLocalVariables()
+    local level = 2
+    local localVarIndex = 1
+    local name, value
+
+    print("initLocalVariables--------------------")
+    while true do
+        name = debug.setlocal(level, localVarIndex,
+                              "local variable " .. tostring(localVarIndex))
+        if not name then break end
+        localVarIndex = localVarIndex + 1
+    end
+end
+
+-- 通过 debug.getlocal() 获取局部变量, debug.setlocal() 设置局部变量
+foo()
+
+
+```
+
+
+2. python的 python -m pdb test.py, 调用一个交互式的debugger
+
+
+
+
+-----------------------------
+
 ## 2024-03-04周 
 
 
@@ -443,6 +581,38 @@ class-object array  ✅
 
 
 ### F. 多维数组的 push pop
+
+
+### G. 重新设计并验证gc
+
+1. gc 对于 String
+    string 全局变量, 局部变量, 变量返回值, 变量函数的传递
+    to_string() 操作
+    string_literal
+    
+2. gc 对于 class-object
+3. gc 对于 array 
+
+
+heap_size 的算法
+gc的正确性
+
+
+
+### H. 重新 设计 fmt::printf函数 ✅ 
+
+
+rust的格式化输出 https://course.rs/basic/formatted-output.html
+
+看这个测试用例:
+test/061-std-package-fmt/fmt-005.ring
+
+通过 {} 作为占位符，来格式化输出
+
+
+### I. 设计 fmt::println 函数 ✅ 
+
+
 
 -----------------------------
 
@@ -554,6 +724,7 @@ if(global_string_array_0[i,j] != to_string(num)){
 
 ### A. class method
 
+测试
 method 调用 method , 
 method 调用 function
 
