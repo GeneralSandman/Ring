@@ -26,15 +26,21 @@ function main() {
 
 	test();
 	
-	debug::debug_assert(true);
-	debug::debug_assert(true);
-	debug::debug_assert(true);
+	fmt::println("main::1");
+	fmt::println("main::2");
+	fmt::println("main::3");
+	fmt::println("main::4");
+
+	local_bool_value = true;
+	local_int_value = 12;
+	local_double_value = 34.56;
+	local_string_value = "hello world";
 }
 
 function test() {
-	debug::debug_assert(true);
-	debug::debug_assert(true);
-	debug::debug_assert(true);
-	debug::debug_assert(true);
-	debug::debug_assert(true);
+	fmt::println("main::5");
+	fmt::println("main::6");
+	fmt::println("main::7");
+	fmt::println("main::8");
+
 }
