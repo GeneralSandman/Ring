@@ -434,7 +434,7 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
                         ((package->compiler_entry->package_list.size() - 1) << 8) | executer->main_func_index, 0);
         generate_vmcode(executer, opcode_buffer,
                         RVM_CODE_INVOKE_FUNC, 0, 0);
-        // generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
 
         executer->code_list = opcode_buffer->code_list;
         executer->code_size = opcode_buffer->code_size;

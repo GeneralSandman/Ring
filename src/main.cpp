@@ -28,13 +28,6 @@ std::string command_help_message =
     "        help                                           :get Ring version\n"
     "\n";
 
-typedef struct {
-    bool  command_run;
-    bool  command_dump;
-    bool  command_debug;
-
-    char* input_file_name;
-} Args;
 
 Args parse_args(int argc, char** argv) {
     char* command;
@@ -159,7 +152,7 @@ int main(int argc, char** argv) {
     }
 
     if (args.command_debug) {
-        register_debugger(ring_vm);
+        register_debugger(ring_vm, args);
     }
 
     // Step-6: 加载虚拟机
@@ -238,11 +231,16 @@ char* ring_repl_hints(const char* buf, int* color, int* bold) {
 }
 
 
-int register_debugger(Ring_VirtualMachine* rvm) {
+int register_debugger(Ring_VirtualMachine* rvm, Args args) {
     RVM_DebugConfig* debug_config = (RVM_DebugConfig*)malloc(sizeof(RVM_DebugConfig));
     debug_config->enable          = true;
     debug_config->trace_dispatch  = debug_trace_dispatch;
     rvm->debug_config             = debug_config;
+
+    printf("%s\n", RING_VERSION);
+    printf("Start Ring Debugger...\n");
+    printf("\n");
+    printf("Input file:%s\n", args.input_file_name);
 
     return 0;
 }

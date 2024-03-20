@@ -12,6 +12,7 @@
 #define RING_VERSION "ring-v0.2.13-beta Copyright (C) 2021-2023 ring.wiki, ZhenhuLi"
 
 
+typedef struct Args                         Args;
 typedef struct Ring_VirtualMachine          Ring_VirtualMachine;
 typedef struct ImportPackageInfo            ImportPackageInfo;
 typedef struct CompilerEntry                CompilerEntry;
@@ -115,6 +116,15 @@ typedef struct MemPool                      MemPool;
 typedef struct MemBlock                     MemBlock;
 
 typedef struct Ring_Grammar_Info            Ring_Grammar_Info;
+
+
+struct Args {
+    bool  command_run;
+    bool  command_dump;
+    bool  command_debug;
+
+    char* input_file_name;
+};
 
 typedef enum {
     GRAMMAR_UNKNOW = 0,
@@ -1855,7 +1865,7 @@ struct MemBlock {
 int   ring_repl();
 void  ring_repl_completion(const char* buf, linenoiseCompletions* lc);
 char* ring_repl_hints(const char* buf, int* color, int* bold);
-int   register_debugger(Ring_VirtualMachine* rvm);
+int   register_debugger(Ring_VirtualMachine* rvm, Args args);
 
 
 /* --------------------
@@ -2441,11 +2451,17 @@ RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassO
  *
  */
 
-int   debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg);
-int   dispath_line(RVM_Frame* frame, const char* event, const char* arg);
-int   dispath_call(RVM_Frame* frame, const char* event, const char* arg);
-void  ring_rdb_completion(const char* buf, linenoiseCompletions* lc);
-char* ring_rdb_hints(const char* buf, int* color, int* bold);
+int                      debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg);
+int                      dispath_line(RVM_Frame* frame, const char* event, const char* arg);
+int                      dispath_call(RVM_Frame* frame, const char* event, const char* arg);
+int                      dispath_exit(RVM_Frame* frame, const char* event, const char* arg);
+int                      dispath_opcode(RVM_Frame* frame, const char* event, const char* arg);
+
+void                     ring_rdb_completion(const char* buf, linenoiseCompletions* lc);
+char*                    ring_rdb_hints(const char* buf, int* color, int* bold);
+
+std::vector<std::string> splitargs(const char* line);
+static int               hex_digit_to_int(char c);
 // --------------------
 
 

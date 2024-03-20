@@ -48,55 +48,84 @@ int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
         dispath_line(frame, event, arg);
     } else if (str_eq(event, "call")) {
         dispath_call(frame, event, arg);
+    } else if (str_eq(event, "exit")) {
+        dispath_exit(frame, event, arg);
+    } else if (str_eq(event, "opcode")) {
+        dispath_opcode(frame, event, arg);
     }
 
     return 0;
 }
 
-#define RDB_PREFIX LOG_COLOR_BLUE "rdb> " LOG_COLOR_CLEAR
+#define RDB_PREFIX "rdb>>> "
 #define RDB_HISTORY_FILE "ring-rdb-history-command.txt"
 
 int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
+
+    printf("line-number:%d\n", frame->source_line_number);
+
     char* line;
 
     linenoiseSetMultiLine(1);
     linenoiseSetCompletionCallback(ring_rdb_completion);
     linenoiseSetHintsCallback(ring_rdb_hints);
     linenoiseHistoryLoad(RDB_HISTORY_FILE);
+    linenoiseHistorySetMaxLen(1024);
 
     while (1) {
+        bool is_break = false;
+
+        printf("\n");
         line = linenoise(RDB_PREFIX);
         if (line == NULL)
             break;
 
-        linenoiseHistoryAdd(line);              /* Add to the history. */
-        linenoiseHistorySave(RDB_HISTORY_FILE); /* Save the history on disk. */
-
+        linenoiseHistoryAdd(line);
+        linenoiseHistorySave(RDB_HISTORY_FILE);
         printf(LOG_COLOR_GREEN);
 
-        if (str_eq(line, "globals")) {
+        if (str_eq(line, "globals") || str_eq(line, "g")) {
+
             printf("[+]globals:\n");
             for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
                 printf("    %20s: %p\n", global.first.c_str(), global.second);
             }
 
-        } else if (str_eq(line, "locals")) {
+        } else if (str_eq(line, "locals") || str_eq(line, "l")) {
 
             printf("[+]locals:\n");
             for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
                 printf("    %20s: %p\n", local.first.c_str(), local.second);
             }
 
-        } else if (str_eq(line, "cont")) {
-            break;
+        } else if (str_eq(line, "locals") || str_eq(line, "l")) {
+
+            printf("[+]locals:\n");
+            for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
+                printf("    %20s: %p\n", local.first.c_str(), local.second);
+            }
+
+        } else if (str_eq(line, "cont") || str_eq(line, "c")) {
+            printf("Continuing...\n");
+            is_break = true;
+        } else if (str_eq(line, "break") || str_eq(line, "b")) {
+            printf("Breakpoint 1 at\n");
+            is_break = true;
+        } else if (str_eq(line, "bt")) {
         } else if (str_eq(line, "q")) {
+            printf("Exit Ring Debugger...\n");
             exit(0);
         } else if (str_eq(line, "help")) {
-            printf("globals:     list global variable\n");
-            printf("locals:      list local  variable\n");
         }
 
+
         printf(LOG_COLOR_CLEAR);
+        fflush(stdout);
+        free(line);
+
+        if (is_break) {
+            break;
+        }
     }
     return 0;
 }
@@ -105,19 +134,174 @@ int dispath_call(RVM_Frame* frame, const char* event, const char* arg) {
     return 0;
 }
 
+int dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
+    printf("Process exited, code:%d\n", 0);
+    return 0;
+}
+
+int dispath_opcode(RVM_Frame* frame, const char* event, const char* arg) {
+    return 0;
+}
+
 
 void ring_rdb_completion(const char* buf, linenoiseCompletions* lc) {
-    // if (buf[0] == 'h') {
-    //     linenoiseAddCompletion(lc, "hello");
-    //     linenoiseAddCompletion(lc, "hello 1");
-    //     linenoiseAddCompletion(lc, "hello 2");
-    // }
+    if (buf[0] == 'h') {
+        linenoiseAddCompletion(lc, "hello");
+        linenoiseAddCompletion(lc, "hello 1");
+        linenoiseAddCompletion(lc, "hello 2");
+    }
 }
 
 char* ring_rdb_hints(const char* buf, int* color, int* bold) {
     *color = 35;
     *bold  = 0;
 
+    if (str_eq(buf, "hello")) {
+        return (char*)" World";
+    } else if (str_eq(buf, "var") || str_eq(buf, "var ")) {
+        return (char*)" bool/int/double/string/class identifier";
+    } else if (str_eq(buf, "function") || str_eq(buf, "function ")) {
+        return (char*)" identifier(arguments) { block }";
+    }
 
     return nullptr;
+}
+
+/* Split a line into arguments, where every argument can be in the
+ * following programming-language REPL-alike form:
+ *
+ * foo bar "newline are supported\n" and "\xff\x00otherstuff"
+ *
+ * The function returns the allocated tokens on success, even when the
+ * input string is empty, or NULL if the input contains unbalanced
+ * quotes or closed quotes followed by non space characters
+ * as in: "foo"bar or "foo'
+ */
+std::vector<std::string> splitargs(const char* line) {
+    const char*              p = line;
+
+    std::string              current;
+    std::vector<std::string> args;
+
+    while (1) {
+        // skip blanks
+        while (*p && isspace((int)*p)) p++;
+
+        if (*p) {
+            /* get a token */
+            int inq  = 0; /* set to 1 if we are in "quotes" */
+            int insq = 0; /* set to 1 if we are in 'single quotes' */
+            int done = 0;
+
+            while (!done) {
+                if (inq) {
+                    if (*p == '\\' && *(p + 1) == 'x' && isxdigit((int)*(p + 2)) && isxdigit((int)*(p + 3))) {
+                        unsigned char byte;
+
+                        byte = (hex_digit_to_int(*(p + 2)) * 16) + hex_digit_to_int(*(p + 3));
+                        current += char(byte);
+                        p += 3;
+                    } else if (*p == '\\' && *(p + 1)) {
+                        char c;
+
+                        p++;
+                        switch (*p) {
+                        case 'n': c = '\n'; break;
+                        case 'r': c = '\r'; break;
+                        case 't': c = '\t'; break;
+                        case 'b': c = '\b'; break;
+                        case 'a': c = '\a'; break;
+                        default: c = *p; break;
+                        }
+                        current += std::to_string(c);
+                    } else if (*p == '"') {
+                        /* closing quote must be followed by a space or
+                         * nothing at all. */
+                        if (*(p + 1) && !isspace((int)*(p + 1)))
+                            goto err;
+                        done = 1;
+                    } else if (!*p) {
+                        /* unterminated quotes */
+                        goto err;
+                    } else {
+                        current += *p;
+                    }
+                } else if (insq) {
+                    if (*p == '\\' && *(p + 1) == '\'') {
+                        p++;
+                        current += "'";
+                    } else if (*p == '\'') {
+                        /* closing quote must be followed by a space or
+                         * nothing at all. */
+                        if (*(p + 1) && !isspace((int)*(p + 1)))
+                            goto err;
+                        done = 1;
+                    } else if (!*p) {
+                        /* unterminated quotes */
+                        goto err;
+                    } else {
+                        current += *p;
+                    }
+                } else {
+                    switch (*p) {
+                    case ' ':
+                    case '\n':
+                    case '\r':
+                    case '\t':
+                    case '\0':
+                        done = 1;
+                        break;
+                    case '"':
+                        inq = 1;
+                        break;
+                    case '\'':
+                        insq = 1;
+                        break;
+                    default:
+                        current += *p;
+                        break;
+                    }
+                }
+                if (*p)
+                    p++;
+            }
+
+            args.push_back(current);
+            current = "";
+        } else {
+            return args;
+        }
+    }
+
+err:
+    return args;
+}
+
+
+static int hex_digit_to_int(char c) {
+    switch (c) {
+    case '0': return 0;
+    case '1': return 1;
+    case '2': return 2;
+    case '3': return 3;
+    case '4': return 4;
+    case '5': return 5;
+    case '6': return 6;
+    case '7': return 7;
+    case '8': return 8;
+    case '9': return 9;
+    case 'a':
+    case 'A': return 10;
+    case 'b':
+    case 'B': return 11;
+    case 'c':
+    case 'C': return 12;
+    case 'd':
+    case 'D': return 13;
+    case 'e':
+    case 'E': return 14;
+    case 'f':
+    case 'F': return 15;
+    default: return 0;
+    }
 }

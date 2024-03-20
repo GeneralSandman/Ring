@@ -367,6 +367,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 event = "call";
             } else if (opcode == RVM_CODE_FUNCTION_FINISH) {
                 event = "return";
+            } else if (opcode == RVM_CODE_EXIT) {
+                event = "exit";
             } else {
                 event = "opcode";
             }
