@@ -232,15 +232,21 @@ char* ring_repl_hints(const char* buf, int* color, int* bold) {
 
 
 int register_debugger(Ring_VirtualMachine* rvm, Args args) {
-    RVM_DebugConfig* debug_config = (RVM_DebugConfig*)malloc(sizeof(RVM_DebugConfig));
-    debug_config->enable          = true;
-    debug_config->trace_dispatch  = debug_trace_dispatch;
-    rvm->debug_config             = debug_config;
+    RVM_DebugConfig* debug_config    = (RVM_DebugConfig*)malloc(sizeof(RVM_DebugConfig));
+    debug_config->enable             = true;
+    debug_config->trace_dispatch     = debug_trace_dispatch;
+    debug_config->stop_at_entry      = true;
+    debug_config->display_globals    = true;
+    debug_config->display_locals     = true;
+    debug_config->display_call_stack = true;
+    rvm->debug_config                = debug_config;
 
+    printf(LOG_COLOR_YELLOW);
     printf("%s\n", RING_VERSION);
     printf("Start Ring Debugger...\n");
     printf("\n");
     printf("Input file:%s\n", args.input_file_name);
+    printf(LOG_COLOR_CLEAR);
 
     return 0;
 }

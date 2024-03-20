@@ -229,13 +229,13 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
 
         switch (type_specifier->kind) {
         case RING_BASIC_TYPE_BOOL:
-            STACK_SET_BOOL_INDEX(rvm, i, RVM_FALSE);
+            STATIC_SET_BOOL_INDEX(rvm, i, RVM_FALSE);
             break;
         case RING_BASIC_TYPE_INT:
-            STACK_SET_INT_INDEX(rvm, i, 0);
+            STATIC_SET_INT_INDEX(rvm, i, 0);
             break;
         case RING_BASIC_TYPE_DOUBLE:
-            STACK_SET_DOUBLE_INDEX(rvm, i, 0.0);
+            STATIC_SET_DOUBLE_INDEX(rvm, i, 0.0);
             break;
         case RING_BASIC_TYPE_STRING:
             string     = new_string(rvm);
@@ -344,7 +344,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             for (int i = 0; i < rvm->executer->global_variable_size; i++) {
                 std::pair<std::string, RVM_Value*> global = {
                     std::string(rvm->executer->global_variable_list[i].identifier),
-                    nullptr,
+                    &(rvm->runtime_static->data[i]),
                 };
                 globals.push_back(global);
             }
@@ -355,7 +355,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 for (unsigned int i = 0; i < rvm->call_info->callee_function->local_variable_size; i++) {
                     std::pair<std::string, RVM_Value*> local = {
                         std::string(rvm->call_info->callee_function->local_variable_list[i].identifier),
-                        nullptr,
+                        &(rvm->runtime_stack->data[caller_stack_base + i]),
                     };
                     locals.push_back(local);
                 }

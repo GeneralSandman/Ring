@@ -62,7 +62,7 @@ int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
 
 int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
-    printf("line-number:%d\n", frame->source_line_number);
+    printf("stop at line:%d\n", frame->source_line_number);
 
     char* line;
 
@@ -83,6 +83,24 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
         linenoiseHistoryAdd(line);
         linenoiseHistorySave(RDB_HISTORY_FILE);
         printf(LOG_COLOR_GREEN);
+
+
+        // debug
+        printf("[+]globals:\n");
+        for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
+            std::string type  = format_rvm_type(global.second);
+            std::string value = format_rvm_value(global.second);
+            printf("    %20s: %s %s\n", global.first.c_str(), type.c_str(), value.c_str());
+        }
+
+        printf("[+]locals:\n");
+        for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
+            std::string type  = format_rvm_type(local.second);
+            std::string value = format_rvm_value(local.second);
+            printf("    %20s: %s %s\n", local.first.c_str(), type.c_str(), value.c_str());
+        }
+        // debug
+
 
         if (str_eq(line, "globals") || str_eq(line, "g")) {
 
@@ -115,7 +133,13 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
         } else if (str_eq(line, "q")) {
             printf("Exit Ring Debugger...\n");
             exit(0);
+        } else if (str_eq(line, "clear")) {
+            CLEAR_SCREEN;
         } else if (str_eq(line, "help")) {
+        } else {
+            printf(LOG_COLOR_RED);
+            printf("Unknow command `%s`, use `help` find tip.\n", line);
+            printf(LOG_COLOR_CLEAR);
         }
 
 
@@ -135,7 +159,10 @@ int dispath_call(RVM_Frame* frame, const char* event, const char* arg) {
 }
 
 int dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
-    printf("Process exited, code:%d\n", 0);
+    printf(LOG_COLOR_GREEN);
+    printf("[Process exited, code:%d]\n", 0);
+    printf(LOG_COLOR_CLEAR);
+
     return 0;
 }
 

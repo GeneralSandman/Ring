@@ -1597,6 +1597,11 @@ typedef enum {
 struct RVM_DebugConfig {
     bool          enable;
     TraceDispacth trace_dispatch;
+
+    bool          stop_at_entry;
+    bool          display_globals;
+    bool          display_locals;
+    bool          display_call_stack;
     // RVM_DebugMode debug_mode;
 };
 
@@ -2380,6 +2385,9 @@ void                     dump_vm_class(Package_Executer*    package_executer,
 std::string              dump_vm_constant(RVM_ConstantPool* constant);
 
 unsigned int             get_source_line_number_by_pc(RVM_Function* function, unsigned int pc);
+
+std::string              format_rvm_type(RVM_Value* value);
+std::string              format_rvm_value(RVM_Value* value);
 // --------------------
 
 

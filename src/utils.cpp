@@ -444,3 +444,78 @@ unsigned int get_source_line_number_by_pc(RVM_Function* function, unsigned int p
 
     return derive_function->code_line_map[left].line_number;
 }
+
+std::string format_rvm_type(RVM_Value* value) {
+    std::string type_s = "";
+
+    // TODO: 这里写和 std_lib.cpp::std_lib_reflect_typeof 重复了
+    // 后期需要降低重复度
+    switch (value->type) {
+    case RVM_VALUE_TYPE_BOOL:
+        type_s = "bool";
+        break;
+    case RVM_VALUE_TYPE_INT:
+        type_s = "int";
+        break;
+    case RVM_VALUE_TYPE_DOUBLE:
+        type_s = "double";
+        break;
+    case RVM_VALUE_TYPE_STRING:
+        type_s = "string";
+        break;
+    case RVM_VALUE_TYPE_CLASS_OB:
+        if (value->u.class_ob_value->class_ref == nullptr) {
+            type_s = "class";
+        } else {
+            type_s = std::string(value->u.class_ob_value->class_ref->identifier);
+        }
+        break;
+    case RVM_VALUE_TYPE_ARRAY:
+        switch (value->u.array_value->type) {
+        case RVM_ARRAY_BOOL: type_s = "bool"; break;
+        case RVM_ARRAY_INT: type_s = "int"; break;
+        case RVM_ARRAY_DOUBLE: type_s = "double"; break;
+        case RVM_ARRAY_STRING: type_s = "string"; break;
+        case RVM_ARRAY_CLASS_OBJECT: type_s = "class"; break;
+        default: type_s = "unknow"; break;
+        }
+
+        type_s = type_s + "[!" + std::to_string(value->u.array_value->dimension) + "]";
+        break;
+    default:
+        type_s = "unknow";
+        break;
+    }
+
+    return type_s;
+}
+
+std::string format_rvm_value(RVM_Value* value) {
+    std::string result;
+
+    // std_lib.cpp:std_lib_fmt_printf 代码重复
+    // TODO: 需要后期优化
+    switch (value->type) {
+        // TODO: 这里重复了, 如何重写
+    case RVM_VALUE_TYPE_BOOL:
+        if (value->u.bool_value == RVM_FALSE) {
+            result += std::string("false");
+        } else {
+            result += std::string("true");
+        }
+        break;
+    case RVM_VALUE_TYPE_INT:
+        result += std::to_string(value->u.int_value);
+        break;
+    case RVM_VALUE_TYPE_DOUBLE:
+        result += std::to_string(value->u.double_value);
+        break;
+    case RVM_VALUE_TYPE_STRING:
+        result += value->u.string_value->data;
+        break;
+    default:
+        break;
+    }
+
+    return result;
+}
