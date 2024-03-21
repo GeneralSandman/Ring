@@ -1606,8 +1606,9 @@ struct RVM_DebugConfig {
 };
 
 struct RVM_Frame {
-    RVM_CallInfo*                                   call_info;
+    Ring_VirtualMachine*                            rvm;
     const char*                                     callee_func;
+    unsigned int                                    next_pc;
     const char*                                     next_opcode;
     unsigned int                                    source_line_number;
 
@@ -2388,6 +2389,7 @@ unsigned int             get_source_line_number_by_pc(RVM_Function* function, un
 
 std::string              format_rvm_type(RVM_Value* value);
 std::string              format_rvm_value(RVM_Value* value);
+std::string              format_rvm_call_stack(Ring_VirtualMachine* rvm);
 // --------------------
 
 

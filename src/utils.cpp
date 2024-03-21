@@ -519,3 +519,43 @@ std::string format_rvm_value(RVM_Value* value) {
 
     return result;
 }
+
+
+std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
+
+    unsigned int  offset = 0;
+    RVM_CallInfo* pos    = rvm->call_info;
+
+    std::string   result;
+
+
+    for (; pos != nullptr; pos = pos->next, offset++) {
+        if (pos->callee_function == nullptr) {
+            result += "#" + std::to_string(offset) + " $ring!start()\n";
+        } else {
+            unsigned int source_line_number = 0;
+            std::string  source_file        = pos->callee_function->source_file;
+
+
+            result += "#" + std::to_string(offset) + " $ring!";
+            // TODO: 这里想个更好的办法, 减少代码重复
+            if (pos->callee_object == nullptr) {
+                result += format_rvm_function(rvm->executer, pos->callee_function) + "\n";
+            } else {
+                result += std::string(pos->callee_object->class_ref->identifier) + "." + format_rvm_function(rvm->executer, pos->callee_function) + "\n";
+            }
+
+
+            if (offset == 0) {
+                // 当前正在执行的函数
+                source_line_number = get_source_line_number_by_pc(pos->callee_function, rvm->pc);
+            } else {
+                // 调用栈内的函数
+                source_line_number = get_source_line_number_by_pc(pos->callee_function, pos->caller_pc);
+            }
+            result += "    " + source_file + ":" + std::to_string(source_line_number) + "\n";
+        }
+    }
+
+    return result;
+}

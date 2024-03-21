@@ -401,8 +401,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             //
             frame = RVM_Frame{
-                .call_info          = rvm->call_info,
+                .rvm                = rvm,
                 .callee_func        = function_name.c_str(),
+                .next_pc            = rvm->pc,
                 .next_opcode        = opcode_info.name.c_str(),
                 .source_line_number = source_code_line_number,
                 .globals            = globals,

@@ -65,9 +65,12 @@ int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
 
 int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
-    printf("stop at line:%d\n", frame->source_line_number);
+    printf(LOG_COLOR_GREEN);
+    printf("[+]stop at line:%d\n", frame->source_line_number);
+    printf(LOG_COLOR_CLEAR);
 
-    char* line;
+    char*       line;
+    std::string call_stack;
 
     linenoiseSetMultiLine(1);
     linenoiseSetCompletionCallback(ring_rdb_completion);
@@ -78,19 +81,32 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
     printf(LOG_COLOR_GREEN);
     // debug
-    printf("[+]globals:\n");
-    for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
-        std::string type  = format_rvm_type(global.second);
-        std::string value = format_rvm_value(global.second);
-        printf("    %20s: %10s %s\n", global.first.c_str(), type.c_str(), value.c_str());
+
+    if (frame->rvm->debug_config->display_globals) {
+        printf("[+]globals: %lu\n", frame->globals.size());
+        for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
+            std::string type  = format_rvm_type(global.second);
+            std::string value = format_rvm_value(global.second);
+            printf("    %20s: %10s %s\n", global.first.c_str(), type.c_str(), value.c_str());
+        }
     }
 
-    printf("[+]locals:\n");
-    for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
-        std::string type  = format_rvm_type(local.second);
-        std::string value = format_rvm_value(local.second);
-        printf("    %20s: %10s %s\n", local.first.c_str(), type.c_str(), value.c_str());
+
+    if (frame->rvm->debug_config->display_locals) {
+        printf("[+]locals: %lu\n", frame->locals.size());
+        for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
+            std::string type  = format_rvm_type(local.second);
+            std::string value = format_rvm_value(local.second);
+            printf("    %20s: %10s %s\n", local.first.c_str(), type.c_str(), value.c_str());
+        }
     }
+
+    if (frame->rvm->debug_config->display_call_stack) {
+        call_stack = format_rvm_call_stack(frame->rvm);
+        printf("[+]call stack:\n");
+        printf("%s", call_stack.c_str());
+    }
+
     // debug
     printf(LOG_COLOR_CLEAR);
 
@@ -100,8 +116,11 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
         printf("\n");
         line = linenoise(RDB_PREFIX);
-        if (line == NULL)
-            break;
+        if (line == NULL) {
+            printf("Exit Ring Debugger...\n");
+            exit(0);
+        }
+
 
         linenoiseHistoryAdd(line);
         linenoiseHistorySave(RDB_HISTORY_FILE);
@@ -140,6 +159,9 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
             printf("Breakpoint 1 at\n");
             is_break = true;
         } else if (str_eq(line, "bt")) {
+            call_stack = format_rvm_call_stack(frame->rvm);
+            printf("[+]call stack:\n");
+            printf("%s", call_stack.c_str());
         } else if (str_eq(line, "q")) {
             printf("Exit Ring Debugger...\n");
             exit(0);
