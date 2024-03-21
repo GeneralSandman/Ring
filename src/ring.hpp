@@ -1594,6 +1594,14 @@ typedef enum {
 
 } RVM_DebugMode;
 
+
+#define TRACE_EVENT_LINE "line"
+#define TRACE_EVENT_CALL "call"
+#define TRACE_EVENT_SAE "stop-at-entry"
+#define TRACE_EVENT_EXIT "exit"
+#define TRACE_EVENT_OPCODE "opcode"
+#define TRACE_EVENT_RETURN "return"
+
 struct RVM_DebugConfig {
     bool          enable;
     TraceDispacth trace_dispatch;

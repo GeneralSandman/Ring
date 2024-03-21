@@ -362,15 +362,15 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             }
 
             // 4.
-            std::string event;
+            const char* event;
             if (opcode == RVM_CODE_INVOKE_FUNC || opcode == RVM_CODE_INVOKE_METHOD) {
-                event = "call";
+                event = TRACE_EVENT_CALL;
             } else if (opcode == RVM_CODE_FUNCTION_FINISH) {
-                event = "return";
+                event = TRACE_EVENT_RETURN;
             } else if (opcode == RVM_CODE_EXIT) {
-                event = "exit";
+                event = TRACE_EVENT_EXIT;
             } else {
-                event = "opcode";
+                event = TRACE_EVENT_OPCODE;
             }
 
             // if (rvm->call_info != nullptr
@@ -394,8 +394,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             }
 
             if (source_code_line_number != 0 && source_code_line_number != prev_code_line_number) {
-                if (event != "return")
-                    event = "line";
+                if (!str_eq(event, TRACE_EVENT_RETURN))
+                    event = TRACE_EVENT_LINE;
                 prev_code_line_number = source_code_line_number;
             }
 
@@ -409,7 +409,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 .globals            = globals,
                 .locals             = locals,
             };
-            rvm->debug_config->trace_dispatch(&frame, event.c_str(), "");
+            rvm->debug_config->trace_dispatch(&frame, event, "");
         }
 
         switch (opcode) {

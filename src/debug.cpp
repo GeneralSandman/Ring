@@ -37,23 +37,27 @@ int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
 
 #ifdef DEBUG_RDB_TRACE_DISPATH
     printf("---debug_trace_dispatch[%u]---\n", trace_count++);
-    printf("[+]event:            %s\n", event);
+    printf("|[+]event:            %s\n", event);
     // printf("[+]arg:              %s\n", arg);
-    printf("[+]current_function: %s\n", frame->callee_func);
-    printf("[+]next_opcode:      %s\n", frame->next_opcode);
-    printf("[+]source_line_num:  %u\n", frame->source_line_number);
+    printf("|[+]current_function: %s\n", frame->callee_func);
+    printf("|[+]next_opcode:      %s\n", frame->next_opcode);
+    printf("|[+]source_line_num:  %u\n", frame->source_line_number);
     printf("---debug_trace_dispatch---\n");
     printf("\n\n");
 #endif
 
 
-    if (str_eq(event, "line")) {
+    if (str_eq(event, TRACE_EVENT_LINE)) {
         dispath_line(frame, event, arg);
-    } else if (str_eq(event, "call")) {
-        dispath_call(frame, event, arg);
-    } else if (str_eq(event, "exit")) {
+    } else if (str_eq(event, TRACE_EVENT_CALL)) {
+        if (str_eq(frame->callee_func, "$ring!start()") && frame->rvm->debug_config->stop_at_entry) {
+            dispath_line(frame, TRACE_EVENT_SAE, arg);
+        } else {
+            dispath_call(frame, event, arg);
+        }
+    } else if (str_eq(event, TRACE_EVENT_EXIT)) {
         dispath_exit(frame, event, arg);
-    } else if (str_eq(event, "opcode")) {
+    } else if (str_eq(event, TRACE_EVENT_OPCODE)) {
         dispath_opcode(frame, event, arg);
     }
 
@@ -66,8 +70,13 @@ int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
 int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
     printf(LOG_COLOR_GREEN);
-    printf("[+]stop at line:%d\n", frame->source_line_number);
+    if (str_eq(event, TRACE_EVENT_SAE)) {
+        printf("[+]stop at entry");
+    } else {
+        printf("[+]stop at line:%d\n", frame->source_line_number);
+    }
     printf(LOG_COLOR_CLEAR);
+
 
     char*                    line;
     std::string              call_stack;
@@ -175,7 +184,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
                 unsigned int break_line = atoi(args[2].c_str());
 
-                printf("Breakpoint %d at %d\n",
+                printf("Breakpoint %lu at %d\n",
                        frame->rvm->debug_config->break_points.size(),
                        break_line);
                 frame->rvm->debug_config->break_points.push_back(break_line);

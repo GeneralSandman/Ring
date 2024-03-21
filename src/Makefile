@@ -70,7 +70,7 @@ CFLAGS = -c -static -O2 -std=c++17 \
 				-Wno-sign-compare \
 				-Wno-unused-parameter \
 				-Wno-unused-function \
-				# -g \
+				 # -g \
 				 -DDEBUG \
 				 -DDEBUG_FLEX1 \
 				 -DDEBUG_BISON1 \
@@ -85,7 +85,7 @@ CFLAGS = -c -static -O2 -std=c++17 \
 				 -DDEBUG_RVM_INTERACTIVE1 \
 				 -DDEBUG_RVM_MEM_POOL_DETAIL1 \
 				 -DDEBUG_RVM_GC_DETAIL1 \
-				 -DDEBUG_RDB_TRACE_DISPATH
+				 -DDEBUG_RDB_TRACE_DISPATH1
 
 CFLAGS+= -I../deps/linenoise
 BIN = ../bin
