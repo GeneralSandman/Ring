@@ -30,18 +30,21 @@ print 打印: 这个比较复杂
 
 */
 
-// static unsigned int trace_count = 0;
+static unsigned int trace_count = 0;
 
 //
 int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
-    // printf("---debug_trace_dispatch[%u]---\n", trace_count++);
-    // printf("[+]event:            %s\n", event);
-    // // printf("[+]arg:              %s\n", arg);
-    // printf("[+]current_function: %s\n", frame->callee_func);
-    // printf("[+]next_opcode:      %s\n", frame->next_opcode);
-    // printf("[+]source_line_num:  %u\n", frame->source_line_number);
-    // printf("---debug_trace_dispatch---\n");
-    // printf("\n\n");
+
+#ifdef DEBUG_RDB_TRACE_DISPATH
+    printf("---debug_trace_dispatch[%u]---\n", trace_count++);
+    printf("[+]event:            %s\n", event);
+    // printf("[+]arg:              %s\n", arg);
+    printf("[+]current_function: %s\n", frame->callee_func);
+    printf("[+]next_opcode:      %s\n", frame->next_opcode);
+    printf("[+]source_line_num:  %u\n", frame->source_line_number);
+    printf("---debug_trace_dispatch---\n");
+    printf("\n\n");
+#endif
 
 
     if (str_eq(event, "line")) {
@@ -72,6 +75,26 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
     linenoiseHistoryLoad(RDB_HISTORY_FILE);
     linenoiseHistorySetMaxLen(1024);
 
+
+    printf(LOG_COLOR_GREEN);
+    // debug
+    printf("[+]globals:\n");
+    for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
+        std::string type  = format_rvm_type(global.second);
+        std::string value = format_rvm_value(global.second);
+        printf("    %20s: %10s %s\n", global.first.c_str(), type.c_str(), value.c_str());
+    }
+
+    printf("[+]locals:\n");
+    for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
+        std::string type  = format_rvm_type(local.second);
+        std::string value = format_rvm_value(local.second);
+        printf("    %20s: %10s %s\n", local.first.c_str(), type.c_str(), value.c_str());
+    }
+    // debug
+    printf(LOG_COLOR_CLEAR);
+
+
     while (1) {
         bool is_break = false;
 
@@ -85,35 +108,22 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
         printf(LOG_COLOR_GREEN);
 
 
-        // debug
-        printf("[+]globals:\n");
-        for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
-            std::string type  = format_rvm_type(global.second);
-            std::string value = format_rvm_value(global.second);
-            printf("    %20s: %s %s\n", global.first.c_str(), type.c_str(), value.c_str());
-        }
-
-        printf("[+]locals:\n");
-        for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
-            std::string type  = format_rvm_type(local.second);
-            std::string value = format_rvm_value(local.second);
-            printf("    %20s: %s %s\n", local.first.c_str(), type.c_str(), value.c_str());
-        }
-        // debug
-
-
         if (str_eq(line, "globals") || str_eq(line, "g")) {
 
             printf("[+]globals:\n");
             for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
-                printf("    %20s: %p\n", global.first.c_str(), global.second);
+                std::string type  = format_rvm_type(global.second);
+                std::string value = format_rvm_value(global.second);
+                printf("    %20s: %10s %s\n", global.first.c_str(), type.c_str(), value.c_str());
             }
 
         } else if (str_eq(line, "locals") || str_eq(line, "l")) {
 
             printf("[+]locals:\n");
             for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
-                printf("    %20s: %p\n", local.first.c_str(), local.second);
+                std::string type  = format_rvm_type(local.second);
+                std::string value = format_rvm_value(local.second);
+                printf("    %20s: %10s %s\n", local.first.c_str(), type.c_str(), value.c_str());
             }
 
         } else if (str_eq(line, "locals") || str_eq(line, "l")) {
