@@ -232,13 +232,14 @@ char* ring_repl_hints(const char* buf, int* color, int* bold) {
 
 
 int register_debugger(Ring_VirtualMachine* rvm, Args args) {
-    RVM_DebugConfig* debug_config    = (RVM_DebugConfig*)malloc(sizeof(RVM_DebugConfig));
+    RVM_DebugConfig* debug_config    = (RVM_DebugConfig*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_DebugConfig));
     debug_config->enable             = true;
     debug_config->trace_dispatch     = debug_trace_dispatch;
     debug_config->stop_at_entry      = true;
-    debug_config->display_globals    = true;
-    debug_config->display_locals     = true;
-    debug_config->display_call_stack = true;
+    debug_config->display_globals    = false;
+    debug_config->display_locals     = false;
+    debug_config->display_call_stack = false;
+    debug_config->break_points       = std::vector<unsigned int>{};
     rvm->debug_config                = debug_config;
 
     printf(LOG_COLOR_YELLOW);

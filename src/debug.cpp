@@ -69,8 +69,9 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
     printf("[+]stop at line:%d\n", frame->source_line_number);
     printf(LOG_COLOR_CLEAR);
 
-    char*       line;
-    std::string call_stack;
+    char*                    line;
+    std::string              call_stack;
+    std::vector<std::string> args;
 
     linenoiseSetMultiLine(1);
     linenoiseSetCompletionCallback(ring_rdb_completion);
@@ -121,13 +122,15 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
             exit(0);
         }
 
+        args = splitargs(line);
+
 
         linenoiseHistoryAdd(line);
         linenoiseHistorySave(RDB_HISTORY_FILE);
         printf(LOG_COLOR_GREEN);
 
 
-        if (str_eq(line, "globals") || str_eq(line, "g")) {
+        if (str_eq(args[0].c_str(), "globals") || str_eq(args[0].c_str(), "g")) {
 
             printf("[+]globals:\n");
             for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
@@ -136,7 +139,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
                 printf("    %20s: %10s %s\n", global.first.c_str(), type.c_str(), value.c_str());
             }
 
-        } else if (str_eq(line, "locals") || str_eq(line, "l")) {
+        } else if (str_eq(args[0].c_str(), "locals") || str_eq(args[0].c_str(), "l")) {
 
             printf("[+]locals:\n");
             for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
@@ -145,32 +148,67 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
                 printf("    %20s: %10s %s\n", local.first.c_str(), type.c_str(), value.c_str());
             }
 
-        } else if (str_eq(line, "locals") || str_eq(line, "l")) {
+        } else if (str_eq(args[0].c_str(), "locals") || str_eq(args[0].c_str(), "l")) {
 
             printf("[+]locals:\n");
             for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
                 printf("    %20s: %p\n", local.first.c_str(), local.second);
             }
 
-        } else if (str_eq(line, "cont") || str_eq(line, "c")) {
+        } else if (str_eq(args[0].c_str(), "cont") || str_eq(args[0].c_str(), "c")) {
+
             printf("Continuing...\n");
             is_break = true;
-        } else if (str_eq(line, "break") || str_eq(line, "b")) {
-            printf("Breakpoint 1 at\n");
-            is_break = true;
-        } else if (str_eq(line, "bt")) {
+
+        } else if (str_eq(args[0].c_str(), "break") || str_eq(args[0].c_str(), "b")) {
+            if (args.size() < 2) {
+                printf("Usage: break set <line>\n");
+                printf("       break list\n");
+                continue;
+            }
+
+            if (str_eq(args[1].c_str(), "set")) {
+                if (args.size() != 3) {
+                    printf("Usage: break set <line>\n");
+                    continue;
+                }
+
+                unsigned int break_line = atoi(args[2].c_str());
+
+                printf("Breakpoint %d at %d\n",
+                       frame->rvm->debug_config->break_points.size(),
+                       break_line);
+                frame->rvm->debug_config->break_points.push_back(break_line);
+
+            } else if (str_eq(args[1].c_str(), "list")) {
+                printf("Breakpoints:\n");
+                printf("Num   Where\n");
+                for (int i = 0; i < frame->rvm->debug_config->break_points.size(); i++) {
+                    printf("%4d %4d\n", i, frame->rvm->debug_config->break_points[i]);
+                }
+            }
+
+
+        } else if (str_eq(args[0].c_str(), "bt")) {
+
             call_stack = format_rvm_call_stack(frame->rvm);
             printf("[+]call stack:\n");
             printf("%s", call_stack.c_str());
-        } else if (str_eq(line, "q")) {
+
+        } else if (str_eq(args[0].c_str(), "q")) {
+
             printf("Exit Ring Debugger...\n");
             exit(0);
-        } else if (str_eq(line, "clear")) {
+
+        } else if (str_eq(args[0].c_str(), "clear")) {
+
             CLEAR_SCREEN;
-        } else if (str_eq(line, "help")) {
+
+        } else if (str_eq(args[0].c_str(), "help")) {
         } else {
+
             printf(LOG_COLOR_RED);
-            printf("Unknow command `%s`, use `help` find tip.\n", line);
+            printf("Unknow command `%s`, use `help` find tip.\n", args[0].c_str());
             printf(LOG_COLOR_CLEAR);
         }
 

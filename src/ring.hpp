@@ -1602,6 +1602,9 @@ struct RVM_DebugConfig {
     bool          display_globals;
     bool          display_locals;
     bool          display_call_stack;
+
+    // break_points 先简单实现, 只能在 main package 中设置断点
+    std::vector<unsigned int> break_points;
     // RVM_DebugMode debug_mode;
 };
 
