@@ -592,36 +592,8 @@ RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int 
         ring_error_report("std_lib_debug_print_call_stack not need arguement\n");
     }
 
-    // TODO:  这里最好要打印函数的原型
-    unsigned int  offset = 0;
-    RVM_CallInfo* pos    = rvm->call_info;
-    for (; pos != nullptr; pos = pos->next, offset++) {
-        if (pos->callee_function == nullptr) {
-            printf("%04d$ring!start()\n", offset);
-        } else {
-            unsigned int source_line_number = 0;
-            std::string  source_file        = pos->callee_function->source_file;
-
-
-            printf("%04d$ring!", offset);
-            // TODO: 这里想个更好的办法, 减少代码重复
-            if (pos->callee_object == nullptr) {
-                printf("%s\n", format_rvm_function(rvm->executer, pos->callee_function).c_str());
-            } else {
-                printf("%s.%s\n", pos->callee_object->class_ref->identifier, format_rvm_function(rvm->executer, pos->callee_function).c_str());
-            }
-
-
-            if (offset == 0) {
-                // 当前正在执行的函数
-                source_line_number = get_source_line_number_by_pc(pos->callee_function, rvm->pc);
-            } else {
-                // 调用栈内的函数
-                source_line_number = get_source_line_number_by_pc(pos->callee_function, pos->caller_pc);
-            }
-            printf("    %s:%d\n", source_file.c_str(), source_line_number);
-        }
-    }
+    std::string call_stack = format_rvm_call_stack(rvm);
+    printf("%s", call_stack.c_str());
 
     fflush(stdout);
 
