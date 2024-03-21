@@ -1,12 +1,12 @@
-0000$ring!test4(var string)
+#0 $ring!test4(var string)
     ./test/060-std-package-debug/debug-stack-003.ring:35
-0001$ring!test3(var double)
+#1 $ring!test3(var double)
     ./test/060-std-package-debug/debug-stack-003.ring:31
-0002$ring!test2(var int)
+#2 $ring!test2(var int)
     ./test/060-std-package-debug/debug-stack-003.ring:27
-0003$ring!test1(var bool)
+#3 $ring!test1(var bool)
     ./test/060-std-package-debug/debug-stack-003.ring:23
-0004$ring!test0()
+#4 $ring!test0()
     ./test/060-std-package-debug/debug-stack-003.ring:19
-0005$ring!main()
+#5 $ring!main()
     ./test/060-std-package-debug/debug-stack-003.ring:15

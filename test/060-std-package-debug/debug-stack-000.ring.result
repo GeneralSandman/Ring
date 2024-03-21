@@ -1,4 +1,4 @@
-0000$ring!test1(var bool)
+#0 $ring!test1(var bool)
     ./test/060-std-package-debug/debug-stack-000.ring:19
-0001$ring!main()
+#1 $ring!main()
     ./test/060-std-package-debug/debug-stack-000.ring:15
