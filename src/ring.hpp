@@ -84,6 +84,7 @@ typedef struct TypeSpecifier                TypeSpecifier;
 typedef struct StdPackageNativeFunction     StdPackageNativeFunction;
 
 typedef struct StdPackageInfo               StdPackageInfo;
+typedef struct RDB_Command                  RDB_Command;
 typedef struct RVM_DebugConfig              RVM_DebugConfig;
 typedef struct RVM_Frame                    RVM_Frame;
 typedef struct ErrorMessageInfo             ErrorMessageInfo;
@@ -1595,6 +1596,13 @@ typedef enum {
 } RVM_DebugMode;
 
 
+struct RDB_Command {
+    char* command;
+    char* short_command;
+    char* discription;
+};
+
+
 #define TRACE_EVENT_LINE "line"
 #define TRACE_EVENT_CALL "call"
 #define TRACE_EVENT_SAE "stop-at-entry"
@@ -1789,6 +1797,7 @@ struct MemBlock {
 
 
 #define str_eq(str1, str2) (strcmp((str1), (str2)) == 0)
+#define str_eq_n(str1, str2, len) (strncmp((str1), (str2), (len)) == 0)
 
 // clear terminal printf
 #define CLEAR_SCREEN printf("\e[1;1H\e[2J")

@@ -1,4 +1,5 @@
 #include "ring.hpp"
+#include <algorithm>
 
 // TODO: 在这里设计 debug callback相关的操作, 能够实现一个简单的 交互式 debugger
 /*
@@ -37,18 +38,22 @@ std::string rdb_command_help_message =
     "\n"
     "All Commands:\n"
     "    \n"
-    "        globals,   g        :list global variables\n"
-    "        locals,    l        :list local variables\n"
-    "        cont,      c        :continue running\n"
-    "        bt                  :show call stack\n"
-    "        clear               :clear screen\n"
-    "        quit,      q        :quit rdb\n"
-    "        help                :get help message\n"
+    "        globals                             :list global variables\n"
+    "        locals                              :list local variables\n"
+    "        cont, c                             :continue running\n"
+    "        bt                                  :show call stack\n"
+    "        clear                               :clear screen\n"
+    "        quit, q                             :quit rdb\n"
+    "        break <command> [argumens]          :breakpoints commands\n"
     "\n"
     "Breakpoints Commands:\n"
-    "        break set <line-number>      :set break point at line-number\n"
-    "        breaks                       :list all break points\n"
-    "        break list                   :list all break points\n"
+    "        break set   <line-number>           :set    break point at line-number\n"
+    "        break unset <line-number>           :unset  break point at line-number\n"
+    "        break list                          :list   all break points\n"
+    "        break clear                         :delete all break points\n"
+    "\n"
+    "Help Commands:\n"
+    "        help                                :get help message\n"
     "\n";
 
 static unsigned int trace_count = 0;
@@ -57,7 +62,7 @@ static unsigned int trace_count = 0;
 int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
 
 #ifdef DEBUG_RDB_TRACE_DISPATH
-    printf("---debug_trace_dispatch[%u]---\n", trace_count++);
+    printf("---debug_trace_dispatch[%u]---\n", trace_count);
     printf("|[+]event:            %s\n", event);
     // printf("[+]arg:              %s\n", arg);
     printf("|[+]current_function: %s\n", frame->callee_func);
@@ -66,6 +71,8 @@ int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
     printf("---debug_trace_dispatch---\n");
     printf("\n\n");
 #endif
+
+    trace_count++;
 
 
     if (str_eq(event, TRACE_EVENT_LINE)) {
@@ -88,11 +95,18 @@ int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
 #define RDB_PREFIX "rdb>>> "
 #define RDB_HISTORY_FILE "ring-rdb-history-command.txt"
 
+#define RDB_UNKNOW_COMMAND                                        \
+    printf(LOG_COLOR_RED);                                        \
+    printf("Unknow command `%s`, type `help` find tip.\n", line); \
+    printf(LOG_COLOR_CLEAR);
+
 int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
-    char*                    line;
-    std::string              call_stack;
-    std::vector<std::string> args;
+    char*                      line;
+    std::string                call_stack;
+    std::vector<std::string>   args;
+    unsigned int               breakpoint_line;
+    std::vector<unsigned int>& break_points = frame->rvm->debug_config->break_points;
 
     // 1. check trace event
     printf(LOG_COLOR_GREEN);
@@ -101,8 +115,8 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
     } else {
         int hit_breakpoint_num = -1;
 
-        for (int i = 0; i < frame->rvm->debug_config->break_points.size(); i++) {
-            if (frame->rvm->debug_config->break_points[i] == frame->source_line_number) {
+        for (int i = 0; i < break_points.size(); i++) {
+            if (break_points[i] == frame->source_line_number) {
                 hit_breakpoint_num = i;
                 break;
             }
@@ -160,6 +174,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
         printf("\n");
         line = linenoise(RDB_PREFIX);
         if (line == NULL) {
+            // ctrl-c ctrl-d
             printf("Exit Ring Debugger...\n");
             exit(0);
         }
@@ -167,13 +182,12 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
         if (strlen(line) == 0 || args.empty()) {
             continue;
         }
-        linenoiseHistoryAdd(line);
-        linenoiseHistorySave(RDB_HISTORY_FILE);
-
 
         // exec command
         printf(LOG_COLOR_GREEN);
-        if (str_eq(args[0].c_str(), "globals") || str_eq(args[0].c_str(), "g")) {
+        if (args.size() == 1
+            && (str_eq(args[0].c_str(), "globals")
+                || str_eq(args[0].c_str(), "g"))) {
 
             printf("[+]globals:\n");
             for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
@@ -182,7 +196,9 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
                 printf("    %20s: %10s %s\n", global.first.c_str(), type.c_str(), value.c_str());
             }
 
-        } else if (str_eq(args[0].c_str(), "locals") || str_eq(args[0].c_str(), "l")) {
+        } else if (args.size() == 1
+                   && (str_eq(args[0].c_str(), "locals")
+                       || str_eq(args[0].c_str(), "l"))) {
 
             printf("[+]locals:\n");
             for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
@@ -191,46 +207,78 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
                 printf("    %20s: %10s %s\n", local.first.c_str(), type.c_str(), value.c_str());
             }
 
-        } else if (str_eq(args[0].c_str(), "cont") || str_eq(args[0].c_str(), "c")) {
+        } else if (args.size() == 1
+                   && (str_eq(args[0].c_str(), "cont")
+                       || str_eq(args[0].c_str(), "c"))) {
 
             printf("Continuing...\n");
             is_break = true;
 
-        } else if (str_eq(args[0].c_str(), "break") || str_eq(args[0].c_str(), "b")) {
+        } else if (str_eq(args[0].c_str(), "break")
+                   || str_eq(args[0].c_str(), "b")) {
             if (args.size() < 2) {
                 printf("Usage: break set <line>\n");
                 printf("       break list\n");
-                continue;
+                goto END_GET_LINE;
             }
 
             if (str_eq(args[1].c_str(), "set")) {
                 if (args.size() != 3) {
                     printf("Usage: break set <line>\n");
-                    continue;
+                    goto END_GET_LINE;
                 }
 
-                unsigned int break_line = atoi(args[2].c_str());
+                breakpoint_line = atoi(args[2].c_str());
+                printf("Breakpoint %lu set at %d\n",
+                       break_points.size(),
+                       breakpoint_line);
+                break_points.push_back(breakpoint_line);
 
-                printf("Breakpoint %lu at %d\n",
-                       frame->rvm->debug_config->break_points.size(),
-                       break_line);
-                frame->rvm->debug_config->break_points.push_back(break_line);
+            } else if (str_eq(args[1].c_str(), "unset")) {
+                if (args.size() != 3) {
+                    printf("Usage: break unset <line>\n");
+                    goto END_GET_LINE;
+                }
+
+                breakpoint_line = atoi(args[2].c_str());
+                printf("Breakpoint %lu unset at %d\n",
+                       break_points.size(),
+                       breakpoint_line);
+
+
+                break_points.erase(std::remove(break_points.begin(),
+                                               break_points.end(),
+                                               breakpoint_line),
+                                   break_points.end());
 
             } else if (str_eq(args[1].c_str(), "list")) {
                 printf("Breakpoints:\n");
                 printf("Num   Where\n");
-                for (int i = 0; i < frame->rvm->debug_config->break_points.size(); i++) {
-                    printf("%4d %4d\n", i, frame->rvm->debug_config->break_points[i]);
+                for (int i = 0; i < break_points.size(); i++) {
+                    printf("%4d %4d\n", i, break_points[i]);
                 }
+            } else if (str_eq(args[1].c_str(), "clear")) {
+                if (args.size() != 2) {
+                    printf("Usage: break unset <line>\n");
+                    goto END_GET_LINE;
+                }
+
+                printf("Clear all breakpoint \n");
+                break_points.clear();
+            } else {
+                RDB_UNKNOW_COMMAND;
             }
 
-        } else if (str_eq(args[0].c_str(), "bt")) {
+        } else if (args.size() == 1
+                   && str_eq(args[0].c_str(), "bt")) {
 
             call_stack = format_rvm_call_stack(frame->rvm);
             printf("[+]call stack:\n");
             printf("%s", call_stack.c_str());
 
-        } else if (str_eq(args[0].c_str(), "quit") || str_eq(args[0].c_str(), "q")) {
+        } else if (args.size() == 1
+                   && (str_eq(args[0].c_str(), "quit")
+                       || str_eq(args[0].c_str(), "q"))) {
 
             printf("Exit Ring Debugger...\n");
             exit(0);
@@ -242,13 +290,14 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
         } else if (str_eq(args[0].c_str(), "help")) {
             printf("%s", rdb_command_help_message.c_str());
         } else {
-
-            printf(LOG_COLOR_RED);
-            printf("Unknow command `%s`, use `help` find tip.\n", args[0].c_str());
-            printf(LOG_COLOR_CLEAR);
+            RDB_UNKNOW_COMMAND;
         }
 
 
+        linenoiseHistoryAdd(line);
+        linenoiseHistorySave(RDB_HISTORY_FILE);
+
+    END_GET_LINE:
         printf(LOG_COLOR_CLEAR);
         fflush(stdout);
         free(line);
@@ -280,17 +329,72 @@ int dispath_opcode(RVM_Frame* frame, const char* event, const char* arg) {
 }
 
 
+std::vector<RDB_Command> rdb_commands = {
+    {
+        .command     = (char*)"globals",
+        .discription = (char*)"list global variables",
+    },
+    {
+        .command     = (char*)"locals",
+        .discription = (char*)"list local variables",
+    },
+    {
+        .command     = (char*)"cont",
+        .discription = (char*)"continue running",
+    },
+    {
+        .command     = (char*)"bt",
+        .discription = (char*)"show call stack",
+    },
+    {
+        .command     = (char*)"clear",
+        .discription = (char*)"clear screen",
+    },
+    {
+        .command     = (char*)"quit",
+        .discription = (char*)"quit rdb",
+    },
+    {
+        .command     = (char*)"break",
+        .discription = (char*)"breakpoints commands",
+    },
+    {
+        .command     = (char*)"help",
+        .discription = (char*)"get help message",
+    },
+};
+
 void ring_rdb_completion(const char* buf, linenoiseCompletions* lc) {
-    if (buf[0] == 'h') {
-        linenoiseAddCompletion(lc, "hello");
-        linenoiseAddCompletion(lc, "hello 1");
-        linenoiseAddCompletion(lc, "hello 2");
+
+    for (RDB_Command& cmd : rdb_commands) {
+        if (str_eq_n(buf, cmd.command, strlen(buf))) {
+            linenoiseAddCompletion(lc, cmd.command);
+        }
     }
 }
 
 char* ring_rdb_hints(const char* buf, int* color, int* bold) {
-    *color = 35;
-    *bold  = 0;
+    *color                                     = 35;
+    *bold                                      = 0;
+
+    std::vector<std::string> args              = splitargs(buf);
+    bool                     end_with_space    = strlen(buf) && isspace(buf[strlen(buf) - 1]);
+    int                      match_argc        = end_with_space ? args.size() : args.size() - 1;
+
+
+    std::vector<std::string> break_command_hit = {
+        "break",
+        "command",
+    };
+
+
+    for (int i = 0; i < match_argc; i++) {
+    }
+
+    if (str_eq(buf, "break")) {
+        return (char*)" command [arguments]";
+    }
+    return nullptr;
 
     if (str_eq(buf, "hello")) {
         return (char*)" World";
