@@ -91,7 +91,8 @@
         "strstream": "cpp",
         "typeindex": "cpp",
         "valarray": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "csignal": "cpp"
     },
     "editor.formatOnSave": true,
     "code-runner.executorMap": {

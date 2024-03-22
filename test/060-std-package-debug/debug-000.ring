@@ -35,6 +35,12 @@ function main() {
 	local_int_value = 12;
 	local_double_value = 34.56;
 	local_string_value = "hello world";
+
+	var int i = 0;
+
+	for(i=0; i<10; i++) {
+		fmt::printf("i={}\n", i);
+	}
 }
 
 function test() {

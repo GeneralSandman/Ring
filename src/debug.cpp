@@ -333,34 +333,42 @@ std::vector<RDB_Command> rdb_commands = {
     {
         .command     = (char*)"globals",
         .discription = (char*)"list global variables",
+        .argc        = 1,
     },
     {
         .command     = (char*)"locals",
         .discription = (char*)"list local variables",
+        .argc        = 1,
     },
     {
         .command     = (char*)"cont",
         .discription = (char*)"continue running",
+        .argc        = 1,
     },
     {
         .command     = (char*)"bt",
         .discription = (char*)"show call stack",
+        .argc        = 1,
     },
     {
         .command     = (char*)"clear",
         .discription = (char*)"clear screen",
+        .argc        = 1,
     },
     {
         .command     = (char*)"quit",
         .discription = (char*)"quit rdb",
+        .argc        = 1,
     },
     {
         .command     = (char*)"break",
         .discription = (char*)"breakpoints commands",
+        .argc        = 2,
     },
     {
         .command     = (char*)"help",
         .discription = (char*)"get help message",
+        .argc        = 1,
     },
 };
 

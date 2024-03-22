@@ -1600,6 +1600,9 @@ struct RDB_Command {
     char* command;
     char* short_command;
     char* discription;
+    int   argc;
+
+    std::vector < std
 };
 
 
