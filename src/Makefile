@@ -88,6 +88,7 @@ CFLAGS = -c -static -O2 -std=c++17 \
 				 -DDEBUG_RDB_TRACE_DISPATH1
 
 CFLAGS+= -I../deps/linenoise
+CFLAGS+= -I../deps/clipp
 BIN = ../bin
 INCLUDES = \
 

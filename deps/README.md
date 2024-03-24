@@ -20,3 +20,11 @@ following:
 4. Compile and try to delete commpile warning.
    - 1. `new` is a keyword in cpp, not used to identifier.
    - 2. The type of return value from `malloc()` `realloc()` is `void*`, need to convert by `(char*)malloc()`.
+
+
+
+
+Clipp
+---
+
+https://github.com/muellan/clip

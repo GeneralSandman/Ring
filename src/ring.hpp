@@ -1596,6 +1596,23 @@ typedef enum {
 } RVM_DebugMode;
 
 
+enum RDB_COMMAND_TYPE {
+    RDB_COMMAND_UNKNOW,
+    RDB_COMMAND_GLOBAL,
+    RDB_COMMAND_LOCAL,
+    RDB_COMMAND_CONT,
+    RDB_COMMAND_BT,
+    RDB_COMMAND_CLEAR,
+    RDB_COMMAND_QUIT,
+    RDB_COMMAND_HELP,
+
+    RDB_COMMAND_BREAK,
+    RDB_COMMAND_BREAK_SET,
+    RDB_COMMAND_BREAK_UNSET,
+    RDB_COMMAND_BREAK_LIST,
+    RDB_COMMAND_BREAK_CLEAR,
+};
+
 struct RDB_Command {
     char* command;
     char* short_command;

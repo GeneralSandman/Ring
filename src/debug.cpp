@@ -1,5 +1,7 @@
+#include "clipp.h"
 #include "ring.hpp"
 #include <algorithm>
+#include <iostream>
 
 // TODO: 在这里设计 debug callback相关的操作, 能够实现一个简单的 交互式 debugger
 /*
@@ -168,7 +170,9 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
     // 3. read ring debugger command
     while (1) {
-        bool is_break = false;
+        bool             is_break = false;
+        RDB_COMMAND_TYPE command;
+        std::string      argument;
 
         // read and parse command
         printf("\n");
@@ -183,114 +187,85 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
             continue;
         }
 
+
+        // break points
+        auto break_cli =
+            ((clipp::command("set").set(command, RDB_COMMAND_BREAK_SET), clipp::value("argument", argument))
+             | (clipp::command("unset").set(command, RDB_COMMAND_BREAK_UNSET), clipp::value("argument", argument))
+             | (clipp::command("list").set(command, RDB_COMMAND_BREAK_LIST))
+             | (clipp::command("clear").set(command, RDB_COMMAND_BREAK_CLEAR)));
+        auto rdb_cli =
+            ((clipp::command("break").set(command, RDB_COMMAND_BREAK), break_cli)
+             | clipp::command("global").set(command, RDB_COMMAND_GLOBAL)
+             | clipp::command("local").set(command, RDB_COMMAND_LOCAL)
+             | clipp::command("cont").set(command, RDB_COMMAND_CONT)
+             | clipp::command("bt").set(command, RDB_COMMAND_BT)
+             | clipp::command("clear").set(command, RDB_COMMAND_CLEAR)
+             | clipp::command("quit").set(command, RDB_COMMAND_QUIT)
+             | clipp::command("help").set(command, RDB_COMMAND_HELP));
+
+        if (!clipp::parse(args, rdb_cli)) {
+            RDB_UNKNOW_COMMAND;
+            std::cout << clipp::make_man_page(rdb_cli, "");
+            goto END_GET_LINE;
+        }
+
         // exec command
         printf(LOG_COLOR_GREEN);
-        if (args.size() == 1
-            && (str_eq(args[0].c_str(), "globals")
-                || str_eq(args[0].c_str(), "g"))) {
-
+        if (command == RDB_COMMAND_GLOBAL) {
             printf("[+]globals:\n");
             for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
                 std::string type  = format_rvm_type(global.second);
                 std::string value = format_rvm_value(global.second);
                 printf("    %20s: %10s %s\n", global.first.c_str(), type.c_str(), value.c_str());
             }
-
-        } else if (args.size() == 1
-                   && (str_eq(args[0].c_str(), "locals")
-                       || str_eq(args[0].c_str(), "l"))) {
-
+        } else if (command == RDB_COMMAND_LOCAL) {
             printf("[+]locals:\n");
             for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
                 std::string type  = format_rvm_type(local.second);
                 std::string value = format_rvm_value(local.second);
                 printf("    %20s: %10s %s\n", local.first.c_str(), type.c_str(), value.c_str());
             }
-
-        } else if (args.size() == 1
-                   && (str_eq(args[0].c_str(), "cont")
-                       || str_eq(args[0].c_str(), "c"))) {
-
+        } else if (command == RDB_COMMAND_CONT) {
             printf("Continuing...\n");
             is_break = true;
-
-        } else if (str_eq(args[0].c_str(), "break")
-                   || str_eq(args[0].c_str(), "b")) {
-            if (args.size() < 2) {
-                printf("Usage: break set <line>\n");
-                printf("       break list\n");
-                goto END_GET_LINE;
-            }
-
-            if (str_eq(args[1].c_str(), "set")) {
-                if (args.size() != 3) {
-                    printf("Usage: break set <line>\n");
-                    goto END_GET_LINE;
-                }
-
-                breakpoint_line = atoi(args[2].c_str());
+        } else if (command == RDB_COMMAND_BT) {
+            call_stack = format_rvm_call_stack(frame->rvm);
+            printf("[+]call stack:\n");
+            printf("%s", call_stack.c_str());
+        } else if (command == RDB_COMMAND_CLEAR) {
+            CLEAR_SCREEN;
+        } else if (command == RDB_COMMAND_QUIT) {
+            printf("Exit Ring Debugger...\n");
+            exit(0);
+        } else if (command == RDB_COMMAND_HELP) {
+            printf("%s", rdb_command_help_message.c_str());
+        } else if (RDB_COMMAND_BREAK_SET <= command && command <= RDB_COMMAND_BREAK_CLEAR) {
+            if (command == RDB_COMMAND_BREAK_SET) {
+                breakpoint_line = atoi(argument.c_str());
                 printf("Breakpoint %lu set at %d\n",
                        break_points.size(),
                        breakpoint_line);
                 break_points.push_back(breakpoint_line);
-
-            } else if (str_eq(args[1].c_str(), "unset")) {
-                if (args.size() != 3) {
-                    printf("Usage: break unset <line>\n");
-                    goto END_GET_LINE;
-                }
-
-                breakpoint_line = atoi(args[2].c_str());
+            } else if (command == RDB_COMMAND_BREAK_UNSET) {
+                breakpoint_line = atoi(argument.c_str());
                 printf("Breakpoint %lu unset at %d\n",
                        break_points.size(),
                        breakpoint_line);
-
-
                 break_points.erase(std::remove(break_points.begin(),
                                                break_points.end(),
                                                breakpoint_line),
                                    break_points.end());
-
-            } else if (str_eq(args[1].c_str(), "list")) {
+            } else if (command == RDB_COMMAND_BREAK_LIST) {
                 printf("Breakpoints:\n");
                 printf("Num   Where\n");
                 for (int i = 0; i < break_points.size(); i++) {
                     printf("%4d %4d\n", i, break_points[i]);
                 }
-            } else if (str_eq(args[1].c_str(), "clear")) {
-                if (args.size() != 2) {
-                    printf("Usage: break unset <line>\n");
-                    goto END_GET_LINE;
-                }
-
+            } else if (command == RDB_COMMAND_BREAK_CLEAR) {
                 printf("Clear all breakpoint \n");
                 break_points.clear();
-            } else {
-                RDB_UNKNOW_COMMAND;
             }
-
-        } else if (args.size() == 1
-                   && str_eq(args[0].c_str(), "bt")) {
-
-            call_stack = format_rvm_call_stack(frame->rvm);
-            printf("[+]call stack:\n");
-            printf("%s", call_stack.c_str());
-
-        } else if (args.size() == 1
-                   && (str_eq(args[0].c_str(), "quit")
-                       || str_eq(args[0].c_str(), "q"))) {
-
-            printf("Exit Ring Debugger...\n");
-            exit(0);
-
-        } else if (str_eq(args[0].c_str(), "clear")) {
-
-            CLEAR_SCREEN;
-
-        } else if (str_eq(args[0].c_str(), "help")) {
-            printf("%s", rdb_command_help_message.c_str());
-        } else {
-            RDB_UNKNOW_COMMAND;
         }
 
 
@@ -301,7 +276,6 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
         printf(LOG_COLOR_CLEAR);
         fflush(stdout);
         free(line);
-
         if (is_break) {
             break;
         }
