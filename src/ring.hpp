@@ -1604,9 +1604,14 @@ enum RDB_COMMAND_TYPE {
     RDB_COMMAND_BT,
     RDB_COMMAND_CLEAR,
     RDB_COMMAND_QUIT,
-    RDB_COMMAND_HELP,
 
     RDB_COMMAND_BREAK,
+
+    RDB_COMMAND_HELP,
+};
+
+enum RDB_COMMAND_BREAK_TYPE {
+    RDB_COMMAND_BREAK_UNKNOW,
     RDB_COMMAND_BREAK_SET,
     RDB_COMMAND_BREAK_UNSET,
     RDB_COMMAND_BREAK_LIST,
@@ -1614,9 +1619,21 @@ enum RDB_COMMAND_TYPE {
 };
 
 struct RDB_Command {
-    char* command;
-    char* short_command;
-    char* discription;
+    std::string command;
+    std::string short_command;
+    std::string rule;
+    std::string description;
+
+    //
+    std::vector<RDB_Command> sub_command;
+};
+
+
+struct RDB_Arg {
+    RDB_COMMAND_TYPE       command;
+    RDB_COMMAND_BREAK_TYPE command_break;
+
+    std::string            argument;
 };
 
 
@@ -2503,6 +2520,8 @@ int                      dispath_line(RVM_Frame* frame, const char* event, const
 int                      dispath_call(RVM_Frame* frame, const char* event, const char* arg);
 int                      dispath_exit(RVM_Frame* frame, const char* event, const char* arg);
 int                      dispath_opcode(RVM_Frame* frame, const char* event, const char* arg);
+
+RDB_Arg                  rdb_parse_command(const char* line);
 
 void                     ring_rdb_completion(const char* buf, linenoiseCompletions* lc);
 char*                    ring_rdb_hints(const char* buf, int* color, int* bold);
