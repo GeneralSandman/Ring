@@ -280,15 +280,14 @@ www.runoob.com
 ### 测试集
 
 ```
-2024-02-01
+2024-03-21
 
 
 [Result]:
-Pass/All = 256/256
+Pass/All = 286/286
 NotTest  = 6
 Fail     = 0
-Usetime  = 16S
-
+Usetime  = 13S
 
 ```
 
@@ -417,7 +416,8 @@ class-object  ✅
 
 设计: 
 1. `ring rdb <filename>` 使用交互式调试功能
-2. 进入交互式编程之后, 会在main函数的入口处停止, 等待输入和调试
+2. 在交互式中, 使用 clipp 解析命令行参数, 以后 ring命令行也是用 clipp解析
+3. 进入交互式debugger之后, 会在main函数的入口处停止, 等待输入和调试
 
 locals: 打印局部变量
 local <variable>: 打印局部变量
@@ -426,11 +426,15 @@ globals: 打印全局变量
 global <variable>: 打印全局变量
 
 
-cont/c: 继续执行
-quit/q: 退出
+bt: 打印堆栈
 
-break set   <line_number>: 放置断点
-break clear <line_number>: 清除断点
+cont/c: 继续执行, 直到遇到一个端点
+n: 一步一步的执行
+quit/q: 退出
+ctrl-c: 退出
+
+break set   <line_number>  放置断点, 会获得一个breakpointID
+break clear <line_number>  清除断点
 breaks             : 列出断点
 breaks clear       : 清除所有断点
 
@@ -439,6 +443,69 @@ breaks clear       : 清除所有断点
 
 
 
+最后显示: 
+```
+The program '/Users/bytedance/Desktop/Ring/bin/ring' has exited with code 0 (0x00000000).
+```
+
+
+
+```
+treminal> ./bin/ring rdb ./test/test.ring
+ring-v0.2.13-beta Copyright (C) 2021-2023 ring.wiki, ZhenhuLi
+Start Ring Debugger...
+
+Input file: ./test/test.ring
+
+rdb> break 8
+Breakpoint 1 at: file test.ring:8
+
+rdb> break 9
+Breakpoint 1 at: file test.ring:9
+
+rdb> break 10
+Breakpoint 1 at: file test.ring:10
+
+rdb> info break
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep y   0x00005555555551b1 in main() at test.ring:8
+2       breakpoint     keep y   0x00005555555551dc in main() at test.ring:9
+3       breakpoint     keep y   0x0000555555555207 in main() at test.ring:10
+
+
+rdb> cont
+Continuing.
+Breakpoint 1, main () at test.cpp:8
+8           std::cout << "1" << std::endl;
+
+
+rdb> cont
+Continuing.
+1
+
+Breakpoint 2, main () at test.cpp:9
+9           std::cout << "2" << std::endl;
+
+rdb> c
+Continuing.
+2
+
+Breakpoint 3, main () at test.cpp:10
+10          std::cout << "3" << std::endl;
+
+
+
+
+
+
+
+rdb> bt
+#0  test4 () at test.cpp:9
+#1  0x00005555555551da in test3 () at test.cpp:13
+#2  0x00005555555551ea in test2 () at test.cpp:17
+#3  0x00005555555551fa in test1 () at test.cpp:22
+#4  0x00005555555552e1 in main () at test.cpp:31
+```
 
 
 
