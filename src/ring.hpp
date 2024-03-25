@@ -1596,6 +1596,20 @@ typedef enum {
 } RVM_DebugMode;
 
 
+#define RDB_C_GLOBAL "global"
+#define RDB_C_LOCAL "local"
+#define RDB_C_CONT "cont"
+#define RDB_C_BT "bt"
+#define RDB_C_CLEAR "clear"
+#define RDB_C_QUIT "quit"
+#define RDB_C_HELP "help"
+#define RDB_C_BREAK "break"
+#define RDB_C_BREAK_SET "set"
+#define RDB_C_BREAK_UNSET "unset"
+#define RDB_C_BREAK_LIST "list"
+#define RDB_C_BREAK_CLEAR "clear"
+
+
 enum RDB_COMMAND_TYPE {
     RDB_COMMAND_UNKNOW,
     RDB_COMMAND_GLOBAL,
@@ -1619,10 +1633,10 @@ enum RDB_COMMAND_BREAK_TYPE {
 };
 
 struct RDB_Command {
-    std::string command;
-    std::string short_command;
-    std::string rule;
-    std::string description;
+    std::string              command;
+    std::string              short_command;
+    std::vector<std::string> rule;
+    std::string              description;
 
     //
     std::vector<RDB_Command> sub_command;
