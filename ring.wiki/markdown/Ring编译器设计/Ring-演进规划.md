@@ -403,6 +403,21 @@ class-object  ✅
    不然继续访问 jobs[0].Running 还是老的Value。
 
 
+-----------------------------
+
+
+
+## 2024-03-25周
+
+
+### A. 记录源代码 BUG
+
+package_unit->line_offset_map 记录不了文件的最后一行的内容
+
+package_unit 中记录了源代码文件, rdb在获取源代码内容的时候, 不太容易实现,
+在这里, 要进行解耦合, 将记录源代码内容的数据结构, 从 PackageUnit中剥离出来, 
+这样也能在 rdb 中获取源代码实现.
+
 
 -----------------------------
 
@@ -419,28 +434,23 @@ class-object  ✅
 2. 在交互式中, 使用 clipp 解析命令行参数, 以后 ring命令行也是用 clipp解析
 3. 进入交互式debugger之后, 会在main函数的入口处停止, 等待输入和调试
 
-locals: 打印局部变量
-local <variable>: 打印局部变量
+rdb命令:
 
-globals: 打印全局变量
-global <variable>: 打印全局变量
+1. global: 打印全局变量
+2. global <variable>: 打印全局变量 //TODO: 后续支持, 
+3. local: 打印局部变量
+4. local <variable>: 打印局部变量 //TODO: 后续支持, 
+5. cont/c: 继续执行, 直到遇到一个break-points
+6. bt: 打印堆栈
+7. clear: 清屏
+8. quit/q: 退出 ctrl-c
+9. code list: 打印当前行代码, 当前位置前后12行代码 //TODO: 后续支持, 这个还挺难实现的
 
-
-bt: 打印堆栈
-
-cont/c: 继续执行, 直到遇到一个端点
-n: 一步一步的执行
-quit/q: 退出
-ctrl-c: 退出
-
-break set   <line_number>  放置断点, 会获得一个breakpointID
-break clear <line_number>  清除断点
-breaks             : 列出断点
-breaks clear       : 清除所有断点
-
-
-当然: 多个命令可以同时进行操作, 如: break set 10 && cont && locals
-
+断点命令相关:
+1. break set   <line_number>  放置断点, 会获得一个breakpointID
+2. break clear <line_number>  清除断点
+3. break list                 列出断点
+4. breaks clear               清除所有断点
 
 
 最后显示: 
