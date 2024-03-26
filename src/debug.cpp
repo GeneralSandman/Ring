@@ -33,6 +33,16 @@ print 打印: 这个比较复杂
 
 */
 
+
+#define RDB_PREFIX "rdb>>> "
+#define RDB_HISTORY_FILE "ring-rdb-history-command.txt"
+
+#define RDB_UNKNOW_COMMAND                                        \
+    printf(LOG_COLOR_RED);                                        \
+    printf("Unknow command `%s`, type `help` find tip.\n", line); \
+    printf(LOG_COLOR_CLEAR);
+
+
 std::string rdb_command_help_message =
     "Ring Debugger Usage: \n"
     "\n"
@@ -57,6 +67,95 @@ std::string rdb_command_help_message =
     "Help Commands:\n"
     "        help                                :get help message\n"
     "\n";
+
+
+std::vector<RDB_Command> rdb_commands = {
+    {
+        .token       = "-",
+        .description = "-",
+    },
+
+    {
+        .token       = RDB_CMD_T_HELP,
+        .description = "get help message",
+    },
+    {
+        .token       = RDB_CMD_T_CLEAR,
+        .description = "clear screen",
+    },
+    {
+        .token       = RDB_CMD_T_QUIT,
+        .description = "quit rdb",
+    },
+
+    {
+        .token       = RDB_CMD_T_GLOBAL,
+        .description = "list global variables",
+    },
+    {
+        .token       = RDB_CMD_T_LOCAL,
+        .description = "list local variables",
+    },
+    {
+        .token       = RDB_CMD_T_CONT,
+        .description = "continue running",
+    },
+    {
+        .token       = RDB_CMD_T_BT,
+        .description = "show call stack",
+    },
+    {
+        .token       = RDB_CMD_T_STEP,
+        .description = "step", // TODO:
+    },
+    {
+        .token       = RDB_CMD_T_NEXT,
+        .description = "next", // TODO:
+    },
+    {
+        .token       = RDB_CMD_T_UNTIL,
+        .description = "until", // TODO:
+    },
+
+    {
+        .token       = RDB_CMD_T_BREAK,
+        .rule        = std::vector<std::string>{"break", "{set|unset|list|clear}", "[arguments]"},
+
+        .description = "breakpoints commands",
+        .sub_command = std::vector<RDB_Command>{
+            {
+                .token       = "-",
+                .description = "-",
+            },
+            {
+                .token       = RDB_CMD_T_BREAK_SET,
+                .rule        = std::vector<std::string>{"break", "set", "<line-number>"},
+                .description = "set break-point at line-number",
+            },
+            {
+                .token       = RDB_CMD_T_BREAK_UNSET,
+                .rule        = std::vector<std::string>{"break", "unset", "<line-number>"},
+                .description = "unset break-point at line-number",
+            },
+            {
+                .token       = RDB_CMD_T_BREAK_LIST,
+                .rule        = std::vector<std::string>{"break", "list"},
+                .description = "list all break-point",
+            },
+            {
+                .token       = RDB_CMD_T_BREAK_CLEAR,
+                .rule        = std::vector<std::string>{"break", "clear"},
+                .description = "clear all break-point",
+            },
+        },
+    },
+
+    {
+        .token       = RDB_CMD_T_CODE,
+        .description = "list source file code",
+    },
+
+};
 
 static unsigned int trace_count = 0;
 
@@ -94,13 +193,6 @@ int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
     return 0;
 }
 
-#define RDB_PREFIX "rdb>>> "
-#define RDB_HISTORY_FILE "ring-rdb-history-command.txt"
-
-#define RDB_UNKNOW_COMMAND                                        \
-    printf(LOG_COLOR_RED);                                        \
-    printf("Unknow command `%s`, type `help` find tip.\n", line); \
-    printf(LOG_COLOR_CLEAR);
 
 int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
@@ -134,8 +226,8 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
     // 2. config linenoise
     linenoiseSetMultiLine(1);
-    linenoiseSetCompletionCallback(ring_rdb_completion);
-    linenoiseSetHintsCallback(ring_rdb_hints);
+    linenoiseSetCompletionCallback(rdb_input_completion);
+    linenoiseSetHintsCallback(rdb_input_hints);
     linenoiseHistoryLoad(RDB_HISTORY_FILE);
     linenoiseHistorySetMaxLen(1024);
 
@@ -185,7 +277,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
         }
 
         rdb_arg = rdb_parse_command(line);
-        if (rdb_arg.command == RDB_COMMAND_UNKNOW) {
+        if (rdb_arg.cmd == RDB_COMMAND_UNKNOW) {
             RDB_UNKNOW_COMMAND;
             goto END_GET_LINE;
         }
@@ -193,42 +285,40 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
         // exec command
         printf(LOG_COLOR_GREEN);
-        if (rdb_arg.command == RDB_COMMAND_GLOBAL) {
+        if (rdb_arg.cmd == RDB_COMMAND_GLOBAL) {
             printf("[+]globals:\n");
             for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
                 std::string type  = format_rvm_type(global.second);
                 std::string value = format_rvm_value(global.second);
                 printf("    %20s: %10s %s\n", global.first.c_str(), type.c_str(), value.c_str());
             }
-        } else if (rdb_arg.command == RDB_COMMAND_LOCAL) {
+        } else if (rdb_arg.cmd == RDB_COMMAND_LOCAL) {
             printf("[+]locals:\n");
             for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
                 std::string type  = format_rvm_type(local.second);
                 std::string value = format_rvm_value(local.second);
                 printf("    %20s: %10s %s\n", local.first.c_str(), type.c_str(), value.c_str());
             }
-        } else if (rdb_arg.command == RDB_COMMAND_CONT) {
+        } else if (rdb_arg.cmd == RDB_COMMAND_CONT) {
             printf("Continuing...\n");
             is_break = true;
-        } else if (rdb_arg.command == RDB_COMMAND_BT) {
+        } else if (rdb_arg.cmd == RDB_COMMAND_BT) {
             call_stack = format_rvm_call_stack(frame->rvm);
             printf("[+]call stack:\n");
             printf("%s", call_stack.c_str());
-        } else if (rdb_arg.command == RDB_COMMAND_CLEAR) {
+        } else if (rdb_arg.cmd == RDB_COMMAND_CLEAR) {
             CLEAR_SCREEN;
-        } else if (rdb_arg.command == RDB_COMMAND_QUIT) {
+        } else if (rdb_arg.cmd == RDB_COMMAND_QUIT) {
             printf("Exit Ring Debugger...\n");
             exit(0);
-        } else if (rdb_arg.command == RDB_COMMAND_HELP) {
-            printf("%s", rdb_command_help_message.c_str());
-        } else if (rdb_arg.command == RDB_COMMAND_BREAK) {
-            if (rdb_arg.command_break == RDB_COMMAND_BREAK_SET) {
+        } else if (rdb_arg.cmd == RDB_COMMAND_BREAK) {
+            if (rdb_arg.cmd_break == RDB_COMMAND_BREAK_SET) {
                 breakpoint_line = atoi(rdb_arg.argument.c_str());
                 printf("Breakpoint %lu set at %d\n",
                        break_points.size(),
                        breakpoint_line);
                 break_points.push_back(breakpoint_line);
-            } else if (rdb_arg.command_break == RDB_COMMAND_BREAK_UNSET) {
+            } else if (rdb_arg.cmd_break == RDB_COMMAND_BREAK_UNSET) {
                 breakpoint_line = atoi(rdb_arg.argument.c_str());
                 printf("Breakpoint %lu unset at %d\n",
                        break_points.size(),
@@ -237,16 +327,18 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
                                                break_points.end(),
                                                breakpoint_line),
                                    break_points.end());
-            } else if (rdb_arg.command_break == RDB_COMMAND_BREAK_LIST) {
+            } else if (rdb_arg.cmd_break == RDB_COMMAND_BREAK_LIST) {
                 printf("Breakpoints:\n");
                 printf("Num   Where\n");
                 for (int i = 0; i < break_points.size(); i++) {
                     printf("%4d %4d\n", i, break_points[i]);
                 }
-            } else if (rdb_arg.command_break == RDB_COMMAND_BREAK_CLEAR) {
+            } else if (rdb_arg.cmd_break == RDB_COMMAND_BREAK_CLEAR) {
                 printf("Clear all breakpoint \n");
                 break_points.clear();
             }
+        } else if (rdb_arg.cmd == RDB_COMMAND_HELP) {
+            printf("%s", rdb_command_help_message.c_str());
         }
 
 
@@ -285,8 +377,8 @@ int dispath_opcode(RVM_Frame* frame, const char* event, const char* arg) {
 
 RDB_Arg rdb_parse_command(const char* line) {
     std::vector<std::string> argv;
-    RDB_COMMAND_TYPE         command       = RDB_COMMAND_UNKNOW;
-    RDB_COMMAND_BREAK_TYPE   command_break = RDB_COMMAND_BREAK_UNKNOW;
+    RDB_COMMAND_TYPE         cmd       = RDB_COMMAND_UNKNOW;
+    RDB_COMMAND_BREAK_TYPE   cmd_break = RDB_COMMAND_BREAK_UNKNOW;
     std::string              argument;
 
 
@@ -294,106 +386,42 @@ RDB_Arg rdb_parse_command(const char* line) {
     argv = splitargs(line);
 
     // break points
-    auto break_cli =
-        ((clipp::command(RDB_C_BREAK_SET).set(command_break, RDB_COMMAND_BREAK_SET), clipp::value("line-number", argument))
-         | (clipp::command(RDB_C_BREAK_UNSET).set(command_break, RDB_COMMAND_BREAK_UNSET), clipp::value("line-number", argument))
-         | (clipp::command(RDB_C_BREAK_LIST).set(command_break, RDB_COMMAND_BREAK_LIST))
-         | (clipp::command(RDB_C_BREAK_CLEAR).set(command_break, RDB_COMMAND_BREAK_CLEAR)));
-    auto rdb_cli =
-        ((clipp::command(RDB_C_BREAK).set(command, RDB_COMMAND_BREAK), break_cli)
-         | clipp::command(RDB_C_GLOBAL).set(command, RDB_COMMAND_GLOBAL)
-         | clipp::command(RDB_C_LOCAL).set(command, RDB_COMMAND_LOCAL)
-         | clipp::command(RDB_C_CONT).set(command, RDB_COMMAND_CONT) | clipp::command("c").set(command, RDB_COMMAND_CONT)
-         | clipp::command(RDB_C_BT).set(command, RDB_COMMAND_BT)
-         | clipp::command(RDB_C_CLEAR).set(command, RDB_COMMAND_CLEAR)
-         | clipp::command(RDB_C_QUIT).set(command, RDB_COMMAND_QUIT) | clipp::command("q").set(command, RDB_COMMAND_QUIT)
-         | clipp::command(RDB_C_HELP).set(command, RDB_COMMAND_HELP));
+    auto break_rule =
+        ((clipp::command(RDB_CMD_T_BREAK_SET).set(cmd_break, RDB_COMMAND_BREAK_SET), clipp::value("line-number", argument))
+         | (clipp::command(RDB_CMD_T_BREAK_UNSET).set(cmd_break, RDB_COMMAND_BREAK_UNSET), clipp::value("line-number", argument))
+         | (clipp::command(RDB_CMD_T_BREAK_LIST).set(cmd_break, RDB_COMMAND_BREAK_LIST))
+         | (clipp::command(RDB_CMD_T_BREAK_CLEAR).set(cmd_break, RDB_COMMAND_BREAK_CLEAR)));
+    auto until_rule =
+        (clipp::command(RDB_CMD_T_UNTIL).set(cmd, RDB_COMMAND_UNTIL), clipp::value("line-number", argument));
+    auto rdb_command_rule =
+        ((clipp::command(RDB_CMD_T_BREAK).set(cmd, RDB_COMMAND_BREAK), break_rule)
+         | (clipp::command(RDB_CMD_T_UNTIL).set(cmd, RDB_COMMAND_UNTIL), until_rule)
+         | clipp::command(RDB_CMD_T_GLOBAL).set(cmd, RDB_COMMAND_GLOBAL)
+         | clipp::command(RDB_CMD_T_LOCAL).set(cmd, RDB_COMMAND_LOCAL)
+         | clipp::command(RDB_CMD_T_CONT).set(cmd, RDB_COMMAND_CONT) | clipp::command("c").set(cmd, RDB_COMMAND_CONT)
+         | clipp::command(RDB_CMD_T_BT).set(cmd, RDB_COMMAND_BT)
+         | clipp::command(RDB_CMD_T_CLEAR).set(cmd, RDB_COMMAND_CLEAR)
+         | clipp::command(RDB_CMD_T_QUIT).set(cmd, RDB_COMMAND_QUIT) | clipp::command("q").set(cmd, RDB_COMMAND_QUIT)
+         | clipp::command(RDB_CMD_T_STEP).set(cmd, RDB_COMMAND_STEP)
+         | clipp::command(RDB_CMD_T_NEXT).set(cmd, RDB_COMMAND_NEXT)
+         | clipp::command(RDB_CMD_T_HELP).set(cmd, RDB_COMMAND_HELP));
 
 
-    clipp::parse(argv, rdb_cli);
+    clipp::parse(argv, rdb_command_rule);
 
     return RDB_Arg{
-        .command       = command,
-        .command_break = command_break,
-        .argument      = argument,
+        .cmd       = cmd,
+        .cmd_break = cmd_break,
+        .argument  = argument,
     };
 }
 
 
-std::vector<RDB_Command> rdb_commands = {
-    {
-        .command     = "-",
-        .description = "-",
-    },
-    {
-        .command     = RDB_C_GLOBAL,
-        .description = "list global variables",
-    },
-    {
-        .command     = RDB_C_LOCAL,
-        .description = "list local variables",
-    },
-    {
-        .command       = RDB_C_CONT,
-        .short_command = "c",
-        .description   = "continue running",
-    },
-    {
-        .command     = RDB_C_BT,
-        .description = "show call stack",
-    },
-    {
-        .command     = RDB_C_CLEAR,
-        .description = "clear screen",
-    },
-    {
-        .command       = RDB_C_QUIT,
-        .short_command = "q",
-        .description   = "quit rdb",
-    },
-    {
-        .command     = RDB_C_BREAK,
-        .rule        = std::vector<std::string>{"break", "{set|unset|list|clear}", "[arguments]"},
-
-        .description = "breakpoints commands",
-        .sub_command = std::vector<RDB_Command>{
-            {
-                .command     = "-",
-                .description = "-",
-            },
-            {
-                .command     = RDB_C_BREAK_SET,
-                .rule        = std::vector<std::string>{"break", "set", "<line-number>"},
-                .description = "set break-point at line-number",
-            },
-            {
-                .command     = RDB_C_BREAK_UNSET,
-                .rule        = std::vector<std::string>{"break", "unset", "<line-number>"},
-                .description = "unset break-point at line-number",
-            },
-            {
-                .command     = RDB_C_BREAK_LIST,
-                .rule        = std::vector<std::string>{"break", "list"},
-                .description = "list all break-point",
-            },
-            {
-                .command     = RDB_C_BREAK_CLEAR,
-                .rule        = std::vector<std::string>{"break", "clear"},
-                .description = "clear all break-point",
-            },
-        },
-    },
-    {
-        .command     = RDB_C_HELP,
-        .description = "get help message",
-    },
-};
-
-void ring_rdb_completion(const char* buf, linenoiseCompletions* lc) {
+void rdb_input_completion(const char* buf, linenoiseCompletions* lc) {
 
     for (RDB_Command& cmd : rdb_commands) {
-        if (str_eq_n(buf, cmd.command.c_str(), strlen(buf))) {
-            linenoiseAddCompletion(lc, cmd.command.c_str());
+        if (str_eq_n(buf, cmd.token.c_str(), strlen(buf))) {
+            linenoiseAddCompletion(lc, cmd.token.c_str());
         }
 
         // for (std::vector<std::string>& subs : cmd.sub_command) {
@@ -409,7 +437,7 @@ void ring_rdb_completion(const char* buf, linenoiseCompletions* lc) {
 static std::string hit_str;
 
 //
-char* ring_rdb_hints(const char* buf, int* color, int* bold) {
+char* rdb_input_hints(const char* buf, int* color, int* bold) {
     hit_str                                 = "";
 
     *color                                  = 35;
@@ -424,187 +452,50 @@ char* ring_rdb_hints(const char* buf, int* color, int* bold) {
     }
 
     RDB_Arg rdb_arg = rdb_parse_command(buf);
-    if (rdb_arg.command == RDB_COMMAND_UNKNOW) {
+    if (rdb_arg.cmd == RDB_COMMAND_UNKNOW) {
         return nullptr;
     }
 
 
-    if (rdb_arg.command == RDB_COMMAND_GLOBAL
-        || rdb_arg.command == RDB_COMMAND_LOCAL
-        || rdb_arg.command == RDB_COMMAND_CONT
-        || rdb_arg.command == RDB_COMMAND_BT
-        || rdb_arg.command == RDB_COMMAND_CLEAR
-        || rdb_arg.command == RDB_COMMAND_QUIT
-        || rdb_arg.command == RDB_COMMAND_HELP) {
+    if (rdb_arg.cmd == RDB_COMMAND_HELP
+        || rdb_arg.cmd == RDB_COMMAND_CLEAR
+        || rdb_arg.cmd == RDB_COMMAND_QUIT
+        || rdb_arg.cmd == RDB_COMMAND_GLOBAL
+        || rdb_arg.cmd == RDB_COMMAND_LOCAL
+        || rdb_arg.cmd == RDB_COMMAND_CONT
+        || rdb_arg.cmd == RDB_COMMAND_BT
+        || rdb_arg.cmd == RDB_COMMAND_STEP
+        || rdb_arg.cmd == RDB_COMMAND_NEXT) {
 
-        hit_str = std::string("    // ") + rdb_commands[rdb_arg.command].description;
+        hit_str = std::string("    // ") + rdb_commands[rdb_arg.cmd].description;
 
-    } else if (rdb_arg.command == RDB_COMMAND_BREAK) {
+    } else if (rdb_arg.cmd == RDB_COMMAND_BREAK) {
         if (args.size() == 1 || match_argc == 1) {
             return (char*)" {set|unset|list|clear} [arguments]  // break-point";
         } else if (match_argc == 2) {
 
-            if (rdb_arg.command_break == RDB_COMMAND_BREAK_UNKNOW) {
+            if (rdb_arg.cmd_break == RDB_COMMAND_BREAK_UNKNOW) {
                 return nullptr;
             }
 
-            if (rdb_arg.command_break == RDB_COMMAND_BREAK_SET) {
+            if (rdb_arg.cmd_break == RDB_COMMAND_BREAK_SET) {
                 return (char*)" <line-number>    // set break-point at line-number";
-            } else if (rdb_arg.command_break == RDB_COMMAND_BREAK_UNSET) {
+            } else if (rdb_arg.cmd_break == RDB_COMMAND_BREAK_UNSET) {
                 return (char*)" <line-number>    // unset break-point at line-number";
-            } else if (rdb_arg.command_break == RDB_COMMAND_BREAK_LIST) {
+            } else if (rdb_arg.cmd_break == RDB_COMMAND_BREAK_LIST) {
                 return (char*)"    // list all break-point";
-            } else if (rdb_arg.command_break == RDB_COMMAND_BREAK_CLEAR) {
+            } else if (rdb_arg.cmd_break == RDB_COMMAND_BREAK_CLEAR) {
                 return (char*)"    // clear all break-point";
             }
         } else if (match_argc == 3) {
-            if (rdb_arg.command_break == RDB_COMMAND_BREAK_UNKNOW) {
+            if (rdb_arg.cmd_break == RDB_COMMAND_BREAK_UNKNOW) {
                 return nullptr;
             }
 
-            hit_str = std::string("    // ") + rdb_commands[RDB_COMMAND_BREAK].sub_command[rdb_arg.command_break].description;
+            hit_str = std::string("    // ") + rdb_commands[RDB_COMMAND_BREAK].sub_command[rdb_arg.cmd_break].description;
         }
     }
 
 
     return (char*)hit_str.c_str();
-}
-
-/* Split a line into arguments, where every argument can be in the
- * following programming-language REPL-alike form:
- *
- * foo bar "newline are supported\n" and "\xff\x00otherstuff"
- *
- * The function returns the allocated tokens on success, even when the
- * input string is empty, or NULL if the input contains unbalanced
- * quotes or closed quotes followed by non space characters
- * as in: "foo"bar or "foo'
- */
-std::vector<std::string> splitargs(const char* line) {
-    const char*              p = line;
-
-    std::string              current;
-    std::vector<std::string> args;
-
-    while (1) {
-        // skip blanks
-        while (*p && isspace((int)*p)) p++;
-
-        if (*p) {
-            /* get a token */
-            int inq  = 0; /* set to 1 if we are in "quotes" */
-            int insq = 0; /* set to 1 if we are in 'single quotes' */
-            int done = 0;
-
-            while (!done) {
-                if (inq) {
-                    if (*p == '\\' && *(p + 1) == 'x' && isxdigit((int)*(p + 2)) && isxdigit((int)*(p + 3))) {
-                        unsigned char byte;
-
-                        byte = (hex_digit_to_int(*(p + 2)) * 16) + hex_digit_to_int(*(p + 3));
-                        current += char(byte);
-                        p += 3;
-                    } else if (*p == '\\' && *(p + 1)) {
-                        char c;
-
-                        p++;
-                        switch (*p) {
-                        case 'n': c = '\n'; break;
-                        case 'r': c = '\r'; break;
-                        case 't': c = '\t'; break;
-                        case 'b': c = '\b'; break;
-                        case 'a': c = '\a'; break;
-                        default: c = *p; break;
-                        }
-                        current += std::to_string(c);
-                    } else if (*p == '"') {
-                        /* closing quote must be followed by a space or
-                         * nothing at all. */
-                        if (*(p + 1) && !isspace((int)*(p + 1)))
-                            goto err;
-                        done = 1;
-                    } else if (!*p) {
-                        /* unterminated quotes */
-                        goto err;
-                    } else {
-                        current += *p;
-                    }
-                } else if (insq) {
-                    if (*p == '\\' && *(p + 1) == '\'') {
-                        p++;
-                        current += "'";
-                    } else if (*p == '\'') {
-                        /* closing quote must be followed by a space or
-                         * nothing at all. */
-                        if (*(p + 1) && !isspace((int)*(p + 1)))
-                            goto err;
-                        done = 1;
-                    } else if (!*p) {
-                        /* unterminated quotes */
-                        goto err;
-                    } else {
-                        current += *p;
-                    }
-                } else {
-                    switch (*p) {
-                    case ' ':
-                    case '\n':
-                    case '\r':
-                    case '\t':
-                    case '\0':
-                        done = 1;
-                        break;
-                    case '"':
-                        inq = 1;
-                        break;
-                    case '\'':
-                        insq = 1;
-                        break;
-                    default:
-                        current += *p;
-                        break;
-                    }
-                }
-                if (*p)
-                    p++;
-            }
-
-            args.push_back(current);
-            current = "";
-        } else {
-            return args;
-        }
-    }
-
-err:
-    return args;
-}
-
-
-static int hex_digit_to_int(char c) {
-    switch (c) {
-    case '0': return 0;
-    case '1': return 1;
-    case '2': return 2;
-    case '3': return 3;
-    case '4': return 4;
-    case '5': return 5;
-    case '6': return 6;
-    case '7': return 7;
-    case '8': return 8;
-    case '9': return 9;
-    case 'a':
-    case 'A': return 10;
-    case 'b':
-    case 'B': return 11;
-    case 'c':
-    case 'C': return 12;
-    case 'd':
-    case 'D': return 13;
-    case 'e':
-    case 'E': return 14;
-    case 'f':
-    case 'F': return 15;
-    default: return 0;
-    }
 }

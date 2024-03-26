@@ -1596,32 +1596,48 @@ typedef enum {
 } RVM_DebugMode;
 
 
-#define RDB_C_GLOBAL "global"
-#define RDB_C_LOCAL "local"
-#define RDB_C_CONT "cont"
-#define RDB_C_BT "bt"
-#define RDB_C_CLEAR "clear"
-#define RDB_C_QUIT "quit"
-#define RDB_C_HELP "help"
-#define RDB_C_BREAK "break"
-#define RDB_C_BREAK_SET "set"
-#define RDB_C_BREAK_UNSET "unset"
-#define RDB_C_BREAK_LIST "list"
-#define RDB_C_BREAK_CLEAR "clear"
+// rdb cmd token
+#define RDB_CMD_T_HELP "help"
+#define RDB_CMD_T_CLEAR "clear"
+#define RDB_CMD_T_QUIT "quit"
+
+#define RDB_CMD_T_GLOBAL "global"
+#define RDB_CMD_T_LOCAL "local"
+#define RDB_CMD_T_CONT "cont"
+#define RDB_CMD_T_BT "bt"
+#define RDB_CMD_T_STEP "step"
+#define RDB_CMD_T_NEXT "next"
+#define RDB_CMD_T_UNTIL "until"
+
+#define RDB_CMD_T_BREAK "break"
+#define RDB_CMD_T_BREAK_SET "set"
+#define RDB_CMD_T_BREAK_UNSET "unset"
+#define RDB_CMD_T_BREAK_LIST "list"
+#define RDB_CMD_T_BREAK_CLEAR "clear"
+
+#define RDB_CMD_T_CODE "code"
+#define RDB_CMD_T_CODE_LIST "list"
 
 
 enum RDB_COMMAND_TYPE {
     RDB_COMMAND_UNKNOW,
+
+    RDB_COMMAND_HELP,
+    RDB_COMMAND_CLEAR,
+    RDB_COMMAND_QUIT,
+
     RDB_COMMAND_GLOBAL,
     RDB_COMMAND_LOCAL,
     RDB_COMMAND_CONT,
     RDB_COMMAND_BT,
-    RDB_COMMAND_CLEAR,
-    RDB_COMMAND_QUIT,
+    RDB_COMMAND_STEP,
+    RDB_COMMAND_NEXT,
+    RDB_COMMAND_UNTIL,
 
     RDB_COMMAND_BREAK,
 
-    RDB_COMMAND_HELP,
+    RDB_COMMAND_CODE,
+
 };
 
 enum RDB_COMMAND_BREAK_TYPE {
@@ -1633,19 +1649,17 @@ enum RDB_COMMAND_BREAK_TYPE {
 };
 
 struct RDB_Command {
-    std::string              command;
-    std::string              short_command;
+    std::string              token;
     std::vector<std::string> rule;
     std::string              description;
 
-    //
     std::vector<RDB_Command> sub_command;
 };
 
 
 struct RDB_Arg {
-    RDB_COMMAND_TYPE       command;
-    RDB_COMMAND_BREAK_TYPE command_break;
+    RDB_COMMAND_TYPE       cmd;
+    RDB_COMMAND_BREAK_TYPE cmd_break;
 
     std::string            argument;
 };
@@ -2458,6 +2472,9 @@ unsigned int             get_source_line_number_by_pc(RVM_Function* function, un
 std::string              format_rvm_type(RVM_Value* value);
 std::string              format_rvm_value(RVM_Value* value);
 std::string              format_rvm_call_stack(Ring_VirtualMachine* rvm);
+
+std::vector<std::string> splitargs(const char* line);
+static int               hex_digit_to_int(char c);
 // --------------------
 
 
@@ -2529,19 +2546,17 @@ RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassO
  *
  */
 
-int                      debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg);
-int                      dispath_line(RVM_Frame* frame, const char* event, const char* arg);
-int                      dispath_call(RVM_Frame* frame, const char* event, const char* arg);
-int                      dispath_exit(RVM_Frame* frame, const char* event, const char* arg);
-int                      dispath_opcode(RVM_Frame* frame, const char* event, const char* arg);
+int     debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg);
+int     dispath_line(RVM_Frame* frame, const char* event, const char* arg);
+int     dispath_call(RVM_Frame* frame, const char* event, const char* arg);
+int     dispath_exit(RVM_Frame* frame, const char* event, const char* arg);
+int     dispath_opcode(RVM_Frame* frame, const char* event, const char* arg);
 
-RDB_Arg                  rdb_parse_command(const char* line);
+RDB_Arg rdb_parse_command(const char* line);
 
-void                     ring_rdb_completion(const char* buf, linenoiseCompletions* lc);
-char*                    ring_rdb_hints(const char* buf, int* color, int* bold);
+void    rdb_input_completion(const char* buf, linenoiseCompletions* lc);
+char*   rdb_input_hints(const char* buf, int* color, int* bold);
 
-std::vector<std::string> splitargs(const char* line);
-static int               hex_digit_to_int(char c);
 // --------------------
 
 
