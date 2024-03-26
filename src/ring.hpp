@@ -9,7 +9,7 @@
 #include <unordered_set>
 #include <vector>
 
-#define RING_VERSION "ring-v0.2.13-beta Copyright (C) 2021-2023 ring.wiki, ZhenhuLi"
+#define RING_VERSION "ring-v0.2.14-beta Copyright (C) 2021-2023 ring.wiki, ZhenhuLi"
 
 
 typedef struct Args                         Args;

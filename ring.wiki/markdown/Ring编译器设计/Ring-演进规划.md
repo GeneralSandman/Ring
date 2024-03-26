@@ -445,12 +445,16 @@ rdb命令:
 7. clear: 清屏
 8. quit/q: 退出 ctrl-c
 9. code list: 打印当前行代码, 当前位置前后12行代码 //TODO: 后续支持, 这个还挺难实现的
+10. step/s: 单步执行, 会进入函数体 //TODO: 后续支持, 
+11. next/n: 单步执行, 不会进入函数体 //TODO: 后续支持, 
+12. until <line-number>: 则继续执行直至行号大于或等于 line-number
+13. step opcode: 一次执行一个ring虚拟机字节码 //TODO: 后续支持,
 
 断点命令相关:
-1. break set   <line_number>  放置断点, 会获得一个breakpointID
-2. break clear <line_number>  清除断点
+1. break set   <line-number>  放置断点, 会获得一个breakpointID
+2. break clear <line-number>  清除断点
 3. break list                 列出断点
-4. breaks clear               清除所有断点
+4. break clear               清除所有断点
 
 
 最后显示: 
@@ -462,7 +466,7 @@ The program '/Users/bytedance/Desktop/Ring/bin/ring' has exited with code 0 (0x0
 
 ```
 treminal> ./bin/ring rdb ./test/test.ring
-ring-v0.2.13-beta Copyright (C) 2021-2023 ring.wiki, ZhenhuLi
+ring-v0.2.14-beta Copyright (C) 2021-2023 ring.wiki, ZhenhuLi
 Start Ring Debugger...
 
 Input file: ./test/test.ring

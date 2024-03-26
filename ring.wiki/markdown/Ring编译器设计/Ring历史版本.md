@@ -26,6 +26,43 @@
 >
 > 
 
+
+---------------------
+
+
+## v0.2.14
+
+> Date: 2024-03-26
+
+### Features
+
+1. 多维数组
+   1. 语法上支持多维数组, 定义一个二维数组`var int[,] array;`, 或者`var int[!2] array;`
+   2. 新建二维数组, `array = new int[2,3];` 2*3的数组
+   3. 对数组进行访问, `array[1,2] = 1;`
+   4. 可对数组的不同维度取 length capacity
+   5. 可以通过for-range 访问多维数组
+   6. 数组中的元素可以是  bool,int,double,string,class
+   7. 同时可以支持多维数组常量
+2. 类
+   1. 类中的field 可以是 bool,int,double,string,class,数组
+3. 删除 `++a` 前置自增操作符
+4. bison中引入 左值和右值的概念
+5. 继续优化了GC逻辑, 针对于 string, array, 但是 真对于array-class-object还是有点问题
+6. 引入两个 源码依赖
+   clipp: 解析命令行参数
+   linenoise: 交互式命令行输入,提示,补全
+7.  fmt package 添加函数 `fmt::printf()` 和 `fmt::println()`
+8. reflect package 中 typeof() 操作多维数组时, 进行了优化
+9. ring dump 可以支持多维数组和类
+10. 实现了一个简单 debugger
+    1.  设置/清除/列出 断点
+    2.  实时打印栈
+    3.  打印全局变量, 局部变量
+    4.  stop-at-entry, 继续执行
+    5.  单行执行
+
+
 ---------------------
 
 
