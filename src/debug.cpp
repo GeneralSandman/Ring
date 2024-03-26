@@ -72,87 +72,116 @@ std::string rdb_command_help_message =
 std::vector<RDB_Command> rdb_commands = {
     {
         .token       = "-",
+        .rule        = {},
         .description = "-",
+        .sub_command = std::vector<RDB_Command>{},
     },
 
     {
         .token       = RDB_CMD_T_HELP,
+        .rule        = {},
         .description = "get help message",
+        .sub_command = std::vector<RDB_Command>{},
     },
     {
         .token       = RDB_CMD_T_CLEAR,
+        .rule        = {},
         .description = "clear screen",
+        .sub_command = std::vector<RDB_Command>{},
     },
     {
         .token       = RDB_CMD_T_QUIT,
+        .rule        = {},
         .description = "quit rdb",
+        .sub_command = std::vector<RDB_Command>{},
     },
 
     {
         .token       = RDB_CMD_T_GLOBAL,
+        .rule        = {},
         .description = "list global variables",
+        .sub_command = std::vector<RDB_Command>{},
     },
     {
         .token       = RDB_CMD_T_LOCAL,
+        .rule        = {},
         .description = "list local variables",
+        .sub_command = std::vector<RDB_Command>{},
     },
     {
         .token       = RDB_CMD_T_CONT,
+        .rule        = {},
         .description = "continue running",
+        .sub_command = std::vector<RDB_Command>{},
     },
     {
         .token       = RDB_CMD_T_BT,
+        .rule        = {},
         .description = "show call stack",
+        .sub_command = std::vector<RDB_Command>{},
     },
     {
         .token       = RDB_CMD_T_STEP,
+        .rule        = {},
         .description = "step", // TODO:
+        .sub_command = std::vector<RDB_Command>{},
     },
     {
         .token       = RDB_CMD_T_NEXT,
+        .rule        = {},
         .description = "next", // TODO:
+        .sub_command = std::vector<RDB_Command>{},
     },
     {
         .token       = RDB_CMD_T_UNTIL,
+        .rule        = {},
         .description = "until", // TODO:
+        .sub_command = std::vector<RDB_Command>{},
     },
 
     {
         .token       = RDB_CMD_T_BREAK,
         .rule        = std::vector<std::string>{"break", "{set|unset|list|clear}", "[arguments]"},
-
         .description = "breakpoints commands",
         .sub_command = std::vector<RDB_Command>{
             {
                 .token       = "-",
+                .rule        = {},
                 .description = "-",
+                .sub_command = std::vector<RDB_Command>{},
             },
             {
                 .token       = RDB_CMD_T_BREAK_SET,
                 .rule        = std::vector<std::string>{"break", "set", "<line-number>"},
                 .description = "set break-point at line-number",
+                .sub_command = std::vector<RDB_Command>{},
             },
             {
                 .token       = RDB_CMD_T_BREAK_UNSET,
                 .rule        = std::vector<std::string>{"break", "unset", "<line-number>"},
                 .description = "unset break-point at line-number",
+                .sub_command = std::vector<RDB_Command>{},
             },
             {
                 .token       = RDB_CMD_T_BREAK_LIST,
                 .rule        = std::vector<std::string>{"break", "list"},
                 .description = "list all break-point",
+                .sub_command = std::vector<RDB_Command>{},
             },
             {
                 .token       = RDB_CMD_T_BREAK_CLEAR,
                 .rule        = std::vector<std::string>{"break", "clear"},
                 .description = "clear all break-point",
+                .sub_command = std::vector<RDB_Command>{},
             },
         },
     },
 
     {
         .token       = RDB_CMD_T_CODE,
+        .rule        = {},
         .description = "list source file code",
+        .sub_command = std::vector<RDB_Command>{},
     },
 
 };

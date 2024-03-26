@@ -22,10 +22,10 @@ default:
 	@touch $@
 
 
-distclean:
+cleandeps:
 	-(cd linenoise && $(MAKE) clean) > /dev/null || true
 
-.PHONY: distclean
+.PHONY: cleandeps
 
 
 ifneq (,$(filter $(BUILD_TLS),yes module))

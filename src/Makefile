@@ -95,7 +95,7 @@ INCLUDES = \
 
 DEPENDENCY_TARGETS=linenoise
 
-persist-settings: distclean
+persist-settings: cleandeps
 	-(cd ../deps && $(MAKE) $(DEPENDENCY_TARGETS))
 
 .PHONY: persist-settings
@@ -152,10 +152,10 @@ clean:
 
 .PHONY: clean
 
-distclean: clean
-	-(cd ../deps && $(MAKE) distclean)
+cleandeps: clean
+	-(cd ../deps && $(MAKE) cleandeps)
 
-.PHONY: distclean
+.PHONY: cleandeps
 
 
 # 输出 y.output y.tab.cpp y.tab.hpp

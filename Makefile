@@ -35,6 +35,7 @@ help:
 	@echo "Help"
 	@echo "make                      : build ring"
 	@echo "make clean                : clean object"
+	@echo "make cleandeps            : clean deps object"
 	@echo "make testall              : run automated-testing.sh"
 	@echo "make install              : install ring bin and package"
 	@echo "make uninstall            : uninstall ring bin and package"
@@ -48,7 +49,7 @@ help:
 $(TOOL_GEN_VMCODE_DOC_TARGET):
 	@cd src && $(MAKE) $@
 
-clean check distclean:
+clean check cleandeps:
 	@cd src && $(MAKE) $@
 
 testall:

@@ -1,4 +1,5 @@
 #include "ring.hpp"
+#include <assert.h>
 #include <cstring>
 
 
