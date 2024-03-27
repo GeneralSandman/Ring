@@ -1229,7 +1229,7 @@ function_call_expression
 
 
 array_literal_expression
-    : basic_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_RC
+    : basic_type_specifier dimension_expression TOKEN_LC expression_list             TOKEN_RC
     {
         debug_bison_info_with_green("[RULE::array_literal_expression:basic]\t ");
         $$ = create_array_literal_expression(create_type_specifier($1), $2, $4);
@@ -1239,7 +1239,7 @@ array_literal_expression
         debug_bison_info_with_green("[RULE::array_literal_expression:basic]\t ");
         $$ = create_array_literal_expression(create_type_specifier($1), $2, $4);
     }
-    | class_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_RC
+    | class_type_specifier dimension_expression TOKEN_LC expression_list             TOKEN_RC
     {
         // FIXME: 这里会产生一个 reduce/reduce conflict
         debug_bison_info_with_green("[RULE::array_literal_expression:class]\t ");
@@ -1254,7 +1254,12 @@ array_literal_expression
     ;
 
 class_object_literal_expression
-    : class_type_specifier TOKEN_LC class_field_init_element_list TOKEN_RC
+    : class_type_specifier TOKEN_LC class_field_init_element_list             TOKEN_RC
+    {
+        debug_bison_info_with_green("[RULE::class_object_literal_expression]\t ");
+        $$ = create_class_object_literal_expression($1, $3);
+    }
+    | class_type_specifier TOKEN_LC class_field_init_element_list TOKEN_COMMA TOKEN_RC
     {
         debug_bison_info_with_green("[RULE::class_object_literal_expression]\t ");
         $$ = create_class_object_literal_expression($1, $3);
