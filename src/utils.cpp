@@ -65,82 +65,102 @@ void ring_vm_code_dump(RVM_Function* function,
                        unsigned int pc,
                        unsigned int screen_row, unsigned int screen_col) {
 
-    MOVE_CURSOR(screen_row++, screen_col);
     std::string func_name = "top_level";
     if (function) {
         func_name = std::string(function->func_name);
     }
-    printf("************  rvm opcode  --[function %s]\n", func_name.c_str());
 
-    MOVE_CURSOR(screen_row++, screen_col);
-    // width: 54
-    printf("%10s | %20s | %10s | %5s\n", "index", "opcode", "oper num", "pc");
-    for (unsigned int i = 0; i < code_size;) {
+    STDERR_MOVE_CURSOR(screen_row++, screen_col);
+    fprintf(stderr, "---------------------------  rvm opcode [function:%s] ---------------------------\n",
+            func_name.c_str());
+
+    STDERR_MOVE_CURSOR(screen_row++, screen_col);
+    fprintf(stderr, "%-8s | %-30s | %-20s | %5s | %-11s\n",
+            "*Num", "*Instruction", "*Operand", "*PC", "*CodeLineNo");
+
+    unsigned int             code_num_index = 0; // 多个 RVM_Byte 组成一个 有效的字节码, 不定长字节码
+
+    std::vector<std::string> lines;
+    int                      pc_lines_index = 0; // 当前pc 所在的 lines 的 index
+    // 取当前pc 所在的 前后20 行进行展示
+
+    for (unsigned int i = 0; i < code_size; code_num_index++) {
         std::string pointer = "";
         if (i == pc) {
-            pointer = "<--";
+            pointer        = "<--";
+            pc_lines_index = lines.size();
         }
 
-        unsigned int    index       = i;
         RVM_Byte        opcode      = code_list[i++];
         RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
         std::string     opcode_name = opcode_info.name;
-        std::string     oper_num    = "";
-        int             tmp         = 0;
-        int             tmp1        = 0;
-        int             tmp2        = 0;
+        std::string     operand_str = "";
+        int             operand1    = 0;
+        int             operand2    = 0;
 
         switch (opcode_info.operand_type) {
         case OPCODE_OPERAND_TYPE_0BYTE:
             break;
 
         case OPCODE_OPERAND_TYPE_1BYTE:
-            oper_num = std::to_string(code_list[i++]);
+            operand_str = std::to_string(code_list[i++]);
             break;
 
         case OPCODE_OPERAND_TYPE_2BYTE_As:
-            tmp = code_list[i++] << 8;
-            tmp += code_list[i++];
-            oper_num = std::to_string(tmp);
+            operand1 = code_list[i++] << 8;
+            operand1 += code_list[i++];
+            operand_str = std::to_string(operand1);
             break;
 
         case OPCODE_OPERAND_TYPE_2BYTE_AB:
-            tmp1     = code_list[i++];
-            tmp2     = code_list[i++];
-            oper_num = std::to_string(tmp1) + " " + std::to_string(tmp2);
+            operand1    = code_list[i++];
+            operand2    = code_list[i++];
+            operand_str = std::to_string(operand1) + ", " + std::to_string(operand2);
             break;
 
         case OPCODE_OPERAND_TYPE_3BYTE_ABs:
-            tmp1 = code_list[i++];
-            tmp2 = code_list[i++] << 8;
-            tmp2 += code_list[i++];
-            oper_num = std::to_string(tmp1) + " " + std::to_string(tmp2);
+            operand1 = code_list[i++];
+            operand2 = code_list[i++] << 8;
+            operand2 += code_list[i++];
+            operand_str = std::to_string(operand1) + ", " + std::to_string(operand2);
             break;
 
         default: break;
         }
 
-        MOVE_CURSOR(screen_row++, screen_col);
-        printf("%10d | %20s | %10s | %5s\n",
-               index,
-               opcode_name.c_str(),
-               oper_num.c_str(),
-               pointer.c_str());
+        char line[90];
+        snprintf(line, sizeof(line),
+                 "%-8d | %-30s | %20s | %5s | %-11s\n",
+                 code_num_index,
+                 opcode_name.c_str(),
+                 operand_str.c_str(),
+                 pointer.c_str(),
+                 ""); // TODO: display sourceLineNo
+        lines.push_back(std::string(line));
+    }
+
+    for (int i = 0; i < lines.size(); i++) {
+        // 取当前pc 所在的 前后20 行进行展示
+        if (pc_lines_index - 20 <= i && i <= pc_lines_index + 20) {
+            STDERR_MOVE_CURSOR(screen_row++, screen_col);
+            fprintf(stderr, "%s", lines[i].c_str());
+        }
     }
 }
 
 
 // TODO: caller_stack_base 是不是可以放在 RVM_RuntimeStack 中，考虑
+// TODO:
 void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack,
                                 unsigned int      caller_stack_base,
                                 unsigned int screen_row, unsigned int screen_col) {
 
-    MOVE_CURSOR(screen_row++, screen_col);
-    printf("**************** runtime_stack *****************\n");
+    STDERR_MOVE_CURSOR(screen_row++, screen_col);
+    fprintf(stderr, "******************** runtime_stack *********************\n");
 
-    MOVE_CURSOR(screen_row++, screen_col);
+    STDERR_MOVE_CURSOR(screen_row++, screen_col);
     // width 49
-    printf("%7s | %20s | %6s | %6s\n", "index", "oper_num", "space", "pointer");
+    fprintf(stderr, "%7s | %20s | %10s | %10s\n", "*Index", "*Value", "*CallSpace", "*StackTop");
     for (unsigned int i = 0; i < runtime_stack->top_index; i++) {
         std::string space   = "";
         std::string pointer = "";
@@ -151,39 +171,16 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack,
             pointer = "<--";
         }
 
-        MOVE_CURSOR(screen_row++, screen_col);
+        STDERR_MOVE_CURSOR(screen_row++, screen_col);
 
-        RVM_Value value = runtime_stack->data[i];
-        switch (value.type) {
-        case RVM_VALUE_TYPE_BOOL:
-            printf("%7d | %20s | %6s | %6s\n",
-                   i, ((value.u.bool_value == RVM_FALSE) ? "false" : "true"),
-                   space.c_str(), pointer.c_str());
-            break;
-        case RVM_VALUE_TYPE_INT:
-            printf("%7d | %20d | %6s | %6s\n", i, value.u.int_value, space.c_str(), pointer.c_str());
-            break;
-        case RVM_VALUE_TYPE_DOUBLE:
-            printf("%7d | %20f | %6s | %6s\n", i, value.u.double_value, space.c_str(), pointer.c_str());
-            break;
-        case RVM_VALUE_TYPE_STRING:
-            if (value.u.string_value == nullptr || value.u.string_value->data == nullptr) {
-                printf("%7d | %20.*s | %6s | %6s\n", i, 20, "", space.c_str(), pointer.c_str());
-            } else {
-                printf("%7d | %20.*s | %6s | %6s\n", i, 20, value.u.string_value->data, space.c_str(), pointer.c_str());
-            }
-            break;
-        case RVM_VALUE_TYPE_CLASS_OB:
-            printf("%7d | %20s | %6s | %6s\n", i, "class-object", space.c_str(), pointer.c_str());
-            break;
-        case RVM_VALUE_TYPE_ARRAY:
-            printf("%7d | %20s | %6s | %6s\n", i, "array", space.c_str(), pointer.c_str());
-            break;
-        case RVM_VALUE_TYPE_OBJECT:
-            break;
-        default:
-            break;
-        }
+        RVM_Value   value     = runtime_stack->data[i];
+        std::string type_str  = format_rvm_type(&value);
+        std::string value_str = format_rvm_value(&value);
+        std::string format    = type_str + "(" + value_str + ")";
+
+        fprintf(stderr, "%7d | %20s | %10s | %10s\n",
+                i, format.c_str(),
+                space.c_str(), pointer.c_str());
     }
 }
 
@@ -305,46 +302,45 @@ void dump_vm_function(Package_Executer*    package_executer,
         code_size                                              = function->u.derive_func->code_size;
         code_line_map                                          = function->u.derive_func->code_line_map;
 
-        for (unsigned int pc = 0; pc < code_size; code_num_index++) {
+        for (unsigned int i = 0; i < code_size; code_num_index++) {
             std::string source_code_line_number;
-            if (pc == code_line_map[code_line_map_index].opcode_begin_index) {
+            if (i == code_line_map[code_line_map_index].opcode_begin_index) {
                 source_code_line_number = std::to_string(code_line_map[code_line_map_index].line_number);
                 code_line_map_index++;
             }
 
-            RVM_Byte        opcode      = code_list[pc++];
+            RVM_Byte        opcode      = code_list[i++];
             RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
             std::string     opcode_name = opcode_info.name;
-            std::string     oper_num    = "";
-            int             tmp         = 0;
-            int             tmp1        = 0;
-            int             tmp2        = 0;
+            std::string     operand_str = "";
+            int             operand1    = 0;
+            int             operand2    = 0;
 
             switch (opcode_info.operand_type) {
             case OPCODE_OPERAND_TYPE_0BYTE:
                 break;
 
             case OPCODE_OPERAND_TYPE_1BYTE:
-                oper_num = std::to_string(code_list[pc++]);
+                operand_str = std::to_string(code_list[i++]);
                 break;
 
             case OPCODE_OPERAND_TYPE_2BYTE_As:
-                tmp = code_list[pc++] << 8;
-                tmp += code_list[pc++];
-                oper_num = std::to_string(tmp);
+                operand1 = code_list[i++] << 8;
+                operand1 += code_list[i++];
+                operand_str = std::to_string(operand1);
                 break;
 
             case OPCODE_OPERAND_TYPE_2BYTE_AB:
-                tmp1     = code_list[pc++];
-                tmp2     = code_list[pc++];
-                oper_num = std::to_string(tmp1) + " " + std::to_string(tmp2);
+                operand1    = code_list[i++];
+                operand2    = code_list[i++];
+                operand_str = std::to_string(operand1) + ", " + std::to_string(operand2);
                 break;
 
             case OPCODE_OPERAND_TYPE_3BYTE_ABs:
-                tmp1 = code_list[pc++];
-                tmp2 = code_list[pc++] << 8;
-                tmp2 += code_list[pc++];
-                oper_num = std::to_string(tmp1) + " " + std::to_string(tmp2);
+                operand1 = code_list[i++];
+                operand2 = code_list[i++] << 8;
+                operand2 += code_list[i++];
+                operand_str = std::to_string(operand1) + ", " + std::to_string(operand2);
                 break;
 
             default: break;
@@ -353,7 +349,7 @@ void dump_vm_function(Package_Executer*    package_executer,
             printf(" ├──%-8d%-30s%-20s%-18s\n",
                    code_num_index,
                    opcode_name.c_str(),
-                   oper_num.c_str(),
+                   operand_str.c_str(),
                    source_code_line_number.c_str());
         }
     }
@@ -464,11 +460,7 @@ std::string format_rvm_type(RVM_Value* value) {
         type_s = "string";
         break;
     case RVM_VALUE_TYPE_CLASS_OB:
-        if (value->u.class_ob_value->class_ref == nullptr) {
-            type_s = "class";
-        } else {
-            type_s = std::string(value->u.class_ob_value->class_ref->identifier);
-        }
+        type_s = "class";
         break;
     case RVM_VALUE_TYPE_ARRAY:
         switch (value->u.array_value->type) {
@@ -492,6 +484,7 @@ std::string format_rvm_type(RVM_Value* value) {
 
 std::string format_rvm_value(RVM_Value* value) {
     std::string result;
+    std::string str_data;
 
     // std_lib.cpp:std_lib_fmt_printf 代码重复
     // TODO: 需要后期优化
@@ -499,19 +492,29 @@ std::string format_rvm_value(RVM_Value* value) {
         // TODO: 这里重复了, 如何重写
     case RVM_VALUE_TYPE_BOOL:
         if (value->u.bool_value == RVM_FALSE) {
-            result += std::string("false");
+            result = std::string("false");
         } else {
-            result += std::string("true");
+            result = std::string("true");
         }
         break;
     case RVM_VALUE_TYPE_INT:
-        result += std::to_string(value->u.int_value);
+        result = std::to_string(value->u.int_value);
         break;
     case RVM_VALUE_TYPE_DOUBLE:
-        result += std::to_string(value->u.double_value);
+        result = std::to_string(value->u.double_value);
         break;
     case RVM_VALUE_TYPE_STRING:
-        result += value->u.string_value->data;
+        str_data = value->u.string_value->data;
+        // 最多取 8 个字符, 方便显示
+        result = "l:" + std::to_string(value->u.string_value->length) + ","
+            + "d:\"" + str_data.substr(0, 8) + "\"";
+        break;
+    case RVM_VALUE_TYPE_CLASS_OB:
+        result = std::string("class-ob"); // TODO:
+        break;
+    case RVM_VALUE_TYPE_ARRAY:
+        result = "l:" + std::to_string(value->u.array_value->length) + ","
+            + "c:" + std::to_string(value->u.array_value->capacity);
         break;
     default:
         break;

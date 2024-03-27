@@ -275,7 +275,7 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
  *    编译时打开 DEBUG_RVM_INTERACTIVE, Makefile
  *
  */
-void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
+int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
     RVM_Byte*            code_list              = rvm->executer->code_list;
     unsigned int         code_size              = rvm->executer->code_size;
@@ -312,6 +312,8 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
 
     ErrorCode            error_code             = ERROR_CODE_SUCCESS;
+    int                  exit_code              = 0;
+    int                  debug_rvm_res          = 0;
     RVM_Frame            frame;
     unsigned int         prev_code_line_number = 0;
 
@@ -321,7 +323,10 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         RVM_Byte opcode = code_list[rvm->pc];
 
 #ifdef DEBUG_RVM_INTERACTIVE
-        debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
+        debug_rvm_res = debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
+        if (debug_rvm_res != 0) {
+            goto EXIT;
+        }
 #endif
 
         if (rvm->debug_config != nullptr && rvm->debug_config->enable) {
@@ -668,7 +673,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 1;
             break;
-        case RVM_CODE_PUSH_ARRAY_CLASS_OBJECT:
+        case RVM_CODE_PUSH_ARRAY_CLASS_OB:
             array_value = STACK_GET_ARRAY_OFFSET(rvm, -2);
             index       = STACK_GET_INT_OFFSET(rvm, -1);
             rvm_array_get_class_object(rvm, array_value, index, &class_ob_value);
@@ -707,7 +712,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index -= 3;
             rvm->pc += 1;
             break;
-        case RVM_CODE_POP_ARRAY_CLASS_OBJECT:
+        case RVM_CODE_POP_ARRAY_CLASS_OB:
             array_value = STACK_GET_ARRAY_OFFSET(rvm, -2);
             index       = STACK_GET_INT_OFFSET(rvm, -1);
             rvm_array_set_class_object(rvm, array_value, index, &STACK_GET_CLASS_OB_OFFSET(rvm, -3));
@@ -744,7 +749,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index -= 2;
             rvm->pc += 1;
             break;
-        case RVM_CODE_ARRAY_APPEND_CLASS_OBJECT:
+        case RVM_CODE_ARRAY_APPEND_CLASS_OB:
             array_value    = STACK_GET_ARRAY_OFFSET(rvm, -2);
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
             rvm_array_append_class_object(rvm, array_value, &class_ob_value);
@@ -789,7 +794,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index += 1;
             rvm->pc += 1;
             break;
-        case RVM_CODE_ARRAY_POP_CLASS_OBJECT:
+        case RVM_CODE_ARRAY_POP_CLASS_OB:
             array_value = STACK_GET_ARRAY_OFFSET(rvm, -1);
             rvm_array_pop_class_object(rvm, array_value, &class_ob_value);
             runtime_stack->top_index -= 1;
@@ -1191,7 +1196,9 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         case RVM_CODE_EXIT:
             oper_num = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
-            exit(oper_num);
+            // exit(oper_num);
+            exit_code = 0;
+            goto EXIT;
             break;
 
         // array
@@ -1243,7 +1250,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 2;
             break;
-        case RVM_CODE_NEW_ARRAY_CLASS_OBJECT:
+        case RVM_CODE_NEW_ARRAY_CLASS_OB:
             dimension = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
             for (unsigned int i = 0; i < dimension; i++) {
@@ -1291,7 +1298,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
-        case RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OBJECT:
+        case RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB:
             class_index          = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             rvm_class_definition = &(rvm->class_list[class_index]);
             array_size           = OPCODE_GET_2BYTE(&code_list[rvm->pc + 2]);
@@ -1345,7 +1352,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
             // class
-        case RVM_CODE_NEW_CLASS_OBJECT_LITERAL:
+        case RVM_CODE_NEW_CLASS_OB_LITERAL:
             class_index          = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             rvm_class_definition = &(rvm->class_list[class_index]);
 
@@ -1422,7 +1429,7 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // iter ++
             STACK_GET_INT_OFFSET(rvm, -2) += 1;
             break;
-        case RVM_CODE_FOR_RANGE_ARRAY_CLASS_OBJECT:
+        case RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB:
             array_value = STACK_GET_ARRAY_OFFSET(rvm, -2);
             index       = STACK_GET_INT_OFFSET(rvm, -1);
             error_code  = rvm_array_get_class_object(rvm, array_value, index, &class_ob_value);
@@ -1473,13 +1480,22 @@ void ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         }
     }
 
+
 #ifdef DEBUG_RVM_INTERACTIVE
-    debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
+    debug_rvm_res = debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
+    if (debug_rvm_res != 0) {
+        goto EXIT;
+    }
 #endif
+
+
+EXIT:
 
     destory_mem_pool(rvm->meta_pool);
     destory_mem_pool(rvm->data_pool);
     free(dimension_list);
+
+    return exit_code;
 }
 
 
@@ -2391,61 +2407,47 @@ int rvm_heap_size(Ring_VirtualMachine* rvm) {
     return rvm->runtime_heap->alloc_size;
 }
 
-void debug_rvm(Ring_VirtualMachine* rvm,
-               RVM_Function*        function,
-               RVM_Byte*            code_list,
-               unsigned int         code_size,
-               unsigned int         pc,
-               unsigned int         caller_stack_base) {
+int debug_rvm(Ring_VirtualMachine* rvm,
+              RVM_Function*        function,
+              RVM_Byte*            code_list,
+              unsigned int         code_size,
+              unsigned int         pc,
+              unsigned int         caller_stack_base) {
 
     debug_exec_info_with_white("\t");
 
     // get terminal windows size
     struct winsize terminal_size;
-    if (isatty(STDOUT_FILENO) == 0 || ioctl(STDOUT_FILENO, TIOCGWINSZ, &terminal_size) < 0) {
+    if (isatty(STDERR_FILENO) == 0 || ioctl(STDERR_FILENO, TIOCGWINSZ, &terminal_size) < 0) {
         ring_error_report("ioctl TIOCGWINSZ error");
     }
 
-    if (terminal_size.ws_row < 38 || terminal_size.ws_col < 115) {
-        ring_error_report("In Debug RVM Mode:");
-        ring_error_report("    Please adjust current terminal window size: height > 38, width > 115\n");
-        // exit(1);
+    if (terminal_size.ws_row < 41 || terminal_size.ws_col < 154) {
+        ring_error_report("In DEBUG_RVM_INTERACTIVE Mode:\n"
+                          "Current terminal window size: height:%d, width:%d\n"
+                          "Please adjust terminal window size: height > 41, width > 154\n",
+                          terminal_size.ws_row, terminal_size.ws_col);
     }
 
-    CLEAR_SCREEN;
+    STDERR_CLEAR_SCREEN;
     ring_vm_dump_runtime_stack(rvm->runtime_stack, caller_stack_base, 1, 0);
     ring_vm_code_dump(function, code_list, code_size, pc, 1, 60);
 
-#ifdef DEBUG_RVM_INTERACTIVE
-    // 输出框的大小
-    MOVE_CURSOR(terminal_size.ws_row - 17, 120);
-    printf("--------------------- Output ---------------------\n");
+    STDERR_MOVE_CURSOR(terminal_size.ws_row - 4, 0);
+    fprintf(stderr, "----------Operation--------\n");
+    fprintf(stderr, "|press   enter: step into.|\n");
+    // fprintf(stderr, "|        'i'  : step into.|\n");
+    // fprintf(stderr, "|        'v'  : step over.|\n");
+    // fprintf(stderr, "|        'o'  : step out. |\n");
+    fprintf(stderr, "|        'q'  : quit.     |\n");
+    fprintf(stderr, "---------------------------\n");
+    fprintf(stderr, "stdout redirect to: %s\n", DEBUG_RVM_INTERACTIVE_STDOUT_FILE);
 
-    int row = terminal_size.ws_row - 1;
-    for (int i = rvm->stdout_logs.size() - 1; i >= 0 && row > terminal_size.ws_row - 17; i--, row--) {
-        MOVE_CURSOR(row, 120);
-        printf("|[%d]\"%s\"\n", i, rvm->stdout_logs[i].c_str());
-    }
-    for (; row > terminal_size.ws_row - 17; row--) {
-        MOVE_CURSOR(row, 120);
-        printf("|\n");
-    }
-
-    MOVE_CURSOR(terminal_size.ws_row - 1, 120);
-    printf("--------------------------------------------------\n");
-#endif
-
-    MOVE_CURSOR(terminal_size.ws_row - 7, 0);
-    printf("----------Operation--------\n");
-    printf("|press   enter: step into.|\n");
-    printf("|        'i'  : step into.|\n");
-    printf("|        'v'  : step over.|\n");
-    printf("|        'o'  : step out. |\n");
-    printf("|        'q'  : quit.     |\n");
-    printf("---------------------------\n");
 
     char ch = getchar();
     if (ch == 'q') {
-        exit(1);
+        return 1;
     }
+
+    return 0;
 }

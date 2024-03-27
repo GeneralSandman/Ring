@@ -150,8 +150,6 @@ typedef enum {
     RVM_VALUE_TYPE_CLASS_OB,
     RVM_VALUE_TYPE_ARRAY,
 
-    RVM_VALUE_TYPE_OBJECT, // TODO: 删除, 目前不能删除是因为在
-
 } RVM_Value_Type;
 
 typedef enum {
@@ -192,10 +190,6 @@ struct Ring_VirtualMachine {
     MemPool*             data_pool;
 
     RVM_DebugConfig*     debug_config;
-
-#ifdef DEBUG_RVM_INTERACTIVE
-    std::vector<std::string> stdout_logs;
-#endif
 };
 
 struct ImportPackageInfo {
@@ -703,25 +697,25 @@ typedef enum {
     RVM_CODE_PUSH_ARRAY_INT,
     RVM_CODE_PUSH_ARRAY_DOUBLE,
     RVM_CODE_PUSH_ARRAY_STRING,
-    RVM_CODE_PUSH_ARRAY_CLASS_OBJECT,
+    RVM_CODE_PUSH_ARRAY_CLASS_OB,
     RVM_CODE_POP_ARRAY_BOOL,
     RVM_CODE_POP_ARRAY_INT,
     RVM_CODE_POP_ARRAY_DOUBLE,
     RVM_CODE_POP_ARRAY_STRING,
-    RVM_CODE_POP_ARRAY_CLASS_OBJECT,
+    RVM_CODE_POP_ARRAY_CLASS_OB,
 
     // array append
     RVM_CODE_ARRAY_APPEND_BOOL,
     RVM_CODE_ARRAY_APPEND_INT,
     RVM_CODE_ARRAY_APPEND_DOUBLE,
     RVM_CODE_ARRAY_APPEND_STRING,
-    RVM_CODE_ARRAY_APPEND_CLASS_OBJECT,
+    RVM_CODE_ARRAY_APPEND_CLASS_OB,
     // array pop
     RVM_CODE_ARRAY_POP_BOOL,
     RVM_CODE_ARRAY_POP_INT,
     RVM_CODE_ARRAY_POP_DOUBLE,
     RVM_CODE_ARRAY_POP_STRING,
-    RVM_CODE_ARRAY_POP_CLASS_OBJECT,
+    RVM_CODE_ARRAY_POP_CLASS_OB,
 
     // class
     RVM_CODE_POP_FIELD_BOOL,
@@ -822,13 +816,13 @@ typedef enum {
     RVM_CODE_NEW_ARRAY_INT,
     RVM_CODE_NEW_ARRAY_DOUBLE,
     RVM_CODE_NEW_ARRAY_STRING,
-    RVM_CODE_NEW_ARRAY_CLASS_OBJECT,
+    RVM_CODE_NEW_ARRAY_CLASS_OB,
 
     RVM_CODE_NEW_ARRAY_LITERAL_BOOL,
     RVM_CODE_NEW_ARRAY_LITERAL_INT,
     RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE,
     RVM_CODE_NEW_ARRAY_LITERAL_STRING,
-    RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OBJECT,
+    RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB,
 
     RVM_CODE_NEW_ARRAY_LITERAL_A,
 
@@ -839,14 +833,14 @@ typedef enum {
     RVM_CODE_PUSH_STRING_CAPACITY,
 
     // class
-    RVM_CODE_NEW_CLASS_OBJECT_LITERAL,
+    RVM_CODE_NEW_CLASS_OB_LITERAL,
 
     // range
     RVM_CODE_FOR_RANGE_ARRAY_BOOL,
     RVM_CODE_FOR_RANGE_ARRAY_INT,
     RVM_CODE_FOR_RANGE_ARRAY_DOUBLE,
     RVM_CODE_FOR_RANGE_ARRAY_STRING,
-    RVM_CODE_FOR_RANGE_ARRAY_CLASS_OBJECT,
+    RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB,
     RVM_CODE_FOR_RANGE_STRING,
     RVM_CODE_FOR_RANGE_FINISH,
 
@@ -1862,10 +1856,12 @@ struct MemBlock {
 #define str_eq_n(str1, str2, len) (strncmp((str1), (str2), (len)) == 0)
 
 // clear terminal printf
-#define CLEAR_SCREEN printf("\e[1;1H\e[2J")
+#define STDOUT_CLEAR_SCREEN fprintf(stdout, "\e[1;1H\e[2J")
+#define STDERR_CLEAR_SCREEN fprintf(stderr, "\e[1;1H\e[2J")
 
 // move cursor to terminal (row, col) location
-#define MOVE_CURSOR(row, col) printf("%c[%d;%dH", 27, (row), (col))
+#define STDOUT_MOVE_CURSOR(row, col) fprintf(stdout, "%c[%d;%dH", 27, (row), (col))
+#define STDERR_MOVE_CURSOR(row, col) fprintf(stderr, "%c[%d;%dH", 27, (row), (col))
 
 #define LOG_COLOR_RED_UNDERLINE "\033[4;31m"
 #define LOG_COLOR_GREEN_UNDERLINE "\033[4;32m"
@@ -1949,6 +1945,8 @@ struct MemBlock {
             LOG_COLOR_RED, __FILE__, __LINE__, ##__VA_ARGS__, LOG_COLOR_CLEAR); \
     exit(1);
 
+
+#define DEBUG_RVM_INTERACTIVE_STDOUT_FILE "/tmp/ring-debug-vm.stdout.log"
 
 int   ring_repl();
 void  ring_repl_completion(const char* buf, linenoiseCompletions* lc);
@@ -2304,7 +2302,7 @@ void                 rvm_add_static_variable(Package_Executer* executer, RVM_Run
 void                 ring_virtualmachine_init(Ring_VirtualMachine* rvm);
 void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
-void                 ring_execute_vm_code(Ring_VirtualMachine* rvm);
+int                  ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_Function**       caller_function,
@@ -2392,7 +2390,7 @@ void                 rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_G
 
 int                  rvm_heap_size(Ring_VirtualMachine* rvm);
 
-void                 debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base);
+int                  debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base);
 // --------------------
 
 

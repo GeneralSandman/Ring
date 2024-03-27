@@ -94,8 +94,37 @@ ERR_ARG:
 }
 
 int main(int argc, char** argv) {
+
+#ifdef DEBUG_RVM_INTERACTIVE
+
+    FILE*     fp;
+    time_t    t  = time(NULL);
+    struct tm tm = *localtime(&t);
+
+
+    fp           = freopen(DEBUG_RVM_INTERACTIVE_STDOUT_FILE, "a", stdout);
+    if (fp == nullptr) {
+        ring_error_report("reopen stdout failed\n");
+    }
+
+
+    fprintf(stdout, LOG_COLOR_YELLOW);
+    fprintf(stdout, "\n\n"
+                    "@Start debug ring virtual machine in interactive mode...\n"
+                    "@Date: %d-%02d-%02d %02d:%02d:%02d\n"
+                    "@stdout redirect to: %s\n"
+                    "@Stdout<<<\n",
+            tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec,
+            DEBUG_RVM_INTERACTIVE_STDOUT_FILE);
+    fprintf(stdout, LOG_COLOR_CLEAR);
+
+    fflush(stdout);
+#endif
+
     Args args;
-    args = parse_args(argc, argv);
+    args          = parse_args(argc, argv);
+
+    int exit_code = 0;
 
     /*
      *初始化编译阶段的 Memory Pool
@@ -162,9 +191,18 @@ int main(int argc, char** argv) {
     ring_virtualmachine_init(ring_vm);
 
     // Step-8: 运行虚拟机
-    ring_execute_vm_code(ring_vm);
+    exit_code = ring_execute_vm_code(ring_vm);
 
-    return 0;
+
+#ifdef DEBUG_RVM_INTERACTIVE
+    fprintf(stdout, LOG_COLOR_YELLOW);
+    fprintf(stdout, "@End interactive session.\n"
+                    "\n\n");
+    fprintf(stdout, LOG_COLOR_CLEAR);
+    fclose(stdout);
+#endif
+
+    return exit_code;
 }
 
 

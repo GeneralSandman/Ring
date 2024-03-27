@@ -48,9 +48,6 @@ void gc_summary(Ring_VirtualMachine* rvm) {
         case RVM_VALUE_TYPE_CLASS_OB:
             type = "class";
             break;
-        case RVM_VALUE_TYPE_OBJECT:
-            type = "object";
-            break;
         default:
             type = "unknow";
             break;
@@ -91,9 +88,6 @@ void gc_summary(Ring_VirtualMachine* rvm) {
             break;
         case RVM_VALUE_TYPE_STRING:
             type = "string";
-            break;
-        case RVM_VALUE_TYPE_OBJECT:
-            type = "object";
             break;
         default:
             type = "unknow";
@@ -408,9 +402,9 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         rvm_heap_alloc_size_incr(rvm, 0);
 
         for (unsigned int i = 0; i < src->length; i++) {
-            RVM_ClassObject* tmp = rvm_deep_copy_class_object(rvm, &(src->u.class_ob_array[i]));
             // TODO: 这里的写法不太好, 还是直接 strcpy 的那种形式最好, 结果通过 指针传入
-            // array->u.class_object_array[i].class_def   = tmp->class_def;
+            RVM_ClassObject* tmp                   = rvm_deep_copy_class_object(rvm, &(src->u.class_ob_array[i]));
+            array->u.class_ob_array[i].class_ref   = tmp->class_ref;
             array->u.class_ob_array[i].field_count = tmp->field_count;
             array->u.class_ob_array[i].field       = tmp->field;
         }

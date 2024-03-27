@@ -237,10 +237,6 @@ RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm,
     mem_free(NULL_MEM_POOL, (void*)output_buffer, 6 * sizeof(char));
 
 
-#ifdef DEBUG_RVM_INTERACTIVE
-    rvm->stdout_logs.push_back(output_buffer);
-#endif
-
     return ret;
 }
 
@@ -267,9 +263,6 @@ RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
 
     mem_free(NULL_MEM_POOL, (void*)output_buffer, 12 * sizeof(char));
 
-#ifdef DEBUG_RVM_INTERACTIVE
-    rvm->stdout_logs.push_back(output_buffer);
-#endif
 
     return ret;
 }
@@ -296,9 +289,6 @@ RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
 
     mem_free(NULL_MEM_POOL, (void*)output_buffer, 1024 * sizeof(char));
 
-#ifdef DEBUG_RVM_INTERACTIVE
-    rvm->stdout_logs.push_back(output_buffer);
-#endif
 
     return ret;
 }
@@ -342,9 +332,6 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
 
     mem_free(NULL_MEM_POOL, (void*)output_buffer, capacity * sizeof(char));
 
-#ifdef DEBUG_RVM_INTERACTIVE
-    rvm->stdout_logs.push_back(output_buffer);
-#endif
 
     return ret;
 }
@@ -393,8 +380,6 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
     case RVM_VALUE_TYPE_ARRAY:
         snprintf(output_buffer, length, "%p\n", args->u.array_value->u.int_array);
         break;
-    case RVM_VALUE_TYPE_OBJECT:
-        break;
     default:
         break;
     }
@@ -406,10 +391,6 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
     fflush(stdout);
 
     mem_free(NULL_MEM_POOL, (void*)output_buffer, length * sizeof(char));
-
-#ifdef DEBUG_RVM_INTERACTIVE
-    rvm->stdout_logs.push_back(output_buffer);
-#endif
 
     RVM_Value ret;
     ret.u.int_value = 0;
@@ -574,10 +555,6 @@ RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
 
     mem_free(NULL_MEM_POOL, (void*)output_buffer, length * sizeof(char));
 
-
-#ifdef DEBUG_RVM_INTERACTIVE
-    rvm->stdout_logs.push_back(output_buffer);
-#endif
 
     return ret;
 }

@@ -336,7 +336,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
             printf("[+]call stack:\n");
             printf("%s", call_stack.c_str());
         } else if (rdb_arg.cmd == RDB_COMMAND_CLEAR) {
-            CLEAR_SCREEN;
+            STDOUT_CLEAR_SCREEN;
         } else if (rdb_arg.cmd == RDB_COMMAND_QUIT) {
             printf("Exit Ring Debugger...\n");
             exit(0);
