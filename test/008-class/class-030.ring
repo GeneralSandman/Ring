@@ -24,7 +24,12 @@ global {
 }
 
 // TestDetail: 数组的元素为 class-obect
-// TestDetail: 通过for-range访问数组元素并直接调用method
+// TestDetail: Usage: 将数组内的所有的对象顺序反转
+// TestDetail: Code:
+// TestDetail: `global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];`
+// TestDetail: `for(i = 0; i<5; i++) {
+// TestDetail: `    global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];
+// TestDetail: `}
 @main
 function main() {
     global_job_array_0 = Job[]{
@@ -90,12 +95,35 @@ function main() {
         }
     };
 
-    fmt::println_string("test case 1-------");
-
     var Job local_job_value;
+
+
+
+    fmt::println_string("test case 1-------");
     for(local_job_value in range global_job_array_0) {
         local_job_value.printInfo();
     }
+
+
+    fmt::println_string("\ntest case 2-------");
+    var int i;
+    for(i = 0; i<5; i++) {
+        global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];
+    }
+    for(local_job_value in range global_job_array_0) {
+        local_job_value.printInfo();
+    }
+
+
+
+
+
+    fmt::println_string("\ntest case 3-------");
+    for(i = 0; i<10; i++) {
+        global_job_array_0[i].printInfo();
+    }
+
+
 
 
 

@@ -1,0 +1,11 @@
+test case 1
+Job(true, 0, 0.000000, job-0)
+Job(false, 1, 1.000000, job-1)
+Job(true, 2, 2.000000, job-2)
+Job(false, 3, 3.000000, job-3)
+
+test case 2
+Job(true, 1, 0.000000, job-0-test)
+Job(false, 2, 1.000000, job-1-test)
+Job(true, 3, 2.000000, job-2-test)
+Job(false, 4, 3.000000, job-3-test)

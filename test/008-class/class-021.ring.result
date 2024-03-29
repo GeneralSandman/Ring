@@ -1,0 +1,23 @@
+test case 1-------
+Job(true, 0, 0.000000, 0)
+Job(false, 1, 1.000000, 1)
+Job(true, 2, 2.000000, 2)
+Job(false, 3, 3.000000, 3)
+Job(true, 4, 4.000000, 4)
+Job(false, 5, 5.000000, 5)
+Job(true, 6, 6.000000, 6)
+Job(false, 7, 7.000000, 7)
+Job(true, 8, 8.000000, 8)
+Job(false, 9, 9.000000, 9)
+
+test case 2-------
+Job(false, 1, 1.000000, 1)
+Job(true, 0, 0.000000, 0)
+Job(false, 3, 3.000000, 3)
+Job(true, 2, 2.000000, 2)
+Job(false, 5, 5.000000, 5)
+Job(true, 4, 4.000000, 4)
+Job(false, 7, 7.000000, 7)
+Job(true, 6, 6.000000, 6)
+Job(false, 9, 9.000000, 9)
+Job(true, 8, 8.000000, 8)
