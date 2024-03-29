@@ -8,8 +8,8 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
 
     // init double string const
-    {RVM_CODE_PUSH_BOOL, "push_bool", OPCODE_OPERAND_TYPE_1BYTE, 1, "push constant bool value to stack", "[]-->[int]"},
-    {RVM_CODE_PUSH_INT_1BYTE, "push_int_1byte", OPCODE_OPERAND_TYPE_1BYTE, 1, "push 1byte int constant value to stack", "[]-->[int]"},    // 后边紧跟 int 常量 1 type
+    {RVM_CODE_PUSH_BOOL, "push_bool", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "push constant bool value to stack", "[]-->[int]"},
+    {RVM_CODE_PUSH_INT_1BYTE, "push_int_1byte", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "push 1byte int constant value to stack", "[]-->[int]"},  // 后边紧跟 int 常量 1 type
     {RVM_CODE_PUSH_INT_2BYTE, "push_int_2byte", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push 2byte int constant value to stack", "[]-->[int]"}, // 后边紧跟 int 常量 2 type
     {RVM_CODE_PUSH_INT, "push_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant int value to stack", "[]-->[int]"},                   // 后边紧跟 int 常量 2 的索引 这里的还要 改一下 OPCODE_OPERAND_TYPE_2BYTE
     {RVM_CODE_PUSH_DOUBLE, "push_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant double value to stack", "[]-->[double]"},       // 后边紧跟 double 常量
@@ -163,19 +163,19 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     // func
     {RVM_CODE_PUSH_FUNC, "push_func", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", ""},
     {RVM_CODE_PUSH_METHOD, "push_method", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", ""},
-    {RVM_CODE_ARGUMENT_NUM, "argument_num", OPCODE_OPERAND_TYPE_1BYTE, 0, "", ""},
+    {RVM_CODE_ARGUMENT_NUM, "argument_num", OPCODE_OPERAND_TYPE_1BYTE_A, 0, "", ""},
     {RVM_CODE_INVOKE_FUNC, "invoke_func", OPCODE_OPERAND_TYPE_0BYTE, -1, "", ""},
     {RVM_CODE_INVOKE_METHOD, "invoke_method", OPCODE_OPERAND_TYPE_0BYTE, -2, "", ""},
     {RVM_CODE_RETURN, "return", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", ""},
     {RVM_CODE_FUNCTION_FINISH, "function_finish", OPCODE_OPERAND_TYPE_0BYTE, 0, "", ""},
 
-    {RVM_CODE_EXIT, "exit", OPCODE_OPERAND_TYPE_1BYTE, 0, "", ""},
+    {RVM_CODE_EXIT, "exit", OPCODE_OPERAND_TYPE_1BYTE_A, 0, "", ""},
 
     // new heap memory
-    {RVM_CODE_NEW_ARRAY_BOOL, "new_array_bool", OPCODE_OPERAND_TYPE_1BYTE, 1, "", ""},
-    {RVM_CODE_NEW_ARRAY_INT, "new_array_int", OPCODE_OPERAND_TYPE_1BYTE, 1, "", ""},
-    {RVM_CODE_NEW_ARRAY_DOUBLE, "new_array_double", OPCODE_OPERAND_TYPE_1BYTE, 1, "", ""},
-    {RVM_CODE_NEW_ARRAY_STRING, "new_array_string", OPCODE_OPERAND_TYPE_1BYTE, 1, "", ""},
+    {RVM_CODE_NEW_ARRAY_BOOL, "new_array_bool", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "", ""},
+    {RVM_CODE_NEW_ARRAY_INT, "new_array_int", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "", ""},
+    {RVM_CODE_NEW_ARRAY_DOUBLE, "new_array_double", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "", ""},
+    {RVM_CODE_NEW_ARRAY_STRING, "new_array_string", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "", ""},
     {RVM_CODE_NEW_ARRAY_CLASS_OB, "new_array_class_ob", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_BOOL, "new_array_literal_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_INT, "new_array_literal_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", ""},
@@ -190,7 +190,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_STRING_CAPACITY, "push_string_capacity", OPCODE_OPERAND_TYPE_0BYTE, 0, "", ""},
 
     // class
-    {RVM_CODE_NEW_CLASS_OB_LITERAL, "new_class_ob_literal", OPCODE_OPERAND_TYPE_1BYTE, 1, "", ""},
+    {RVM_CODE_NEW_CLASS_OB_LITERAL, "new_class_ob_literal", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "", ""},
 
     // range
     {RVM_CODE_FOR_RANGE_ARRAY_BOOL, "range_array_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "range bool value for array", ""},
@@ -207,7 +207,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_DOUBLE_2_STRING, "double_2_string", OPCODE_OPERAND_TYPE_0BYTE, 0, "convert double to string", "[double]->[string]"},
 
 
-    {RVM_CODES_NUM, "", OPCODE_OPERAND_TYPE_0BYTE, 0, "", ""},
+    {RVM_CODES_NUM, "num", OPCODE_OPERAND_TYPE_0BYTE, 0, "", ""},
 };
 
 // TODO: 这里直接使用Cpp::string, 后续需要改成 Ring_String

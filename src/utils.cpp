@@ -71,7 +71,7 @@ void ring_vm_code_dump(RVM_Function* function,
     }
 
     STDERR_MOVE_CURSOR(screen_row++, screen_col);
-    fprintf(stderr, "---------------------------  rvm opcode [function:%s] ---------------------------\n",
+    fprintf(stderr, "-----------------------------  rvm opcode [function:%s] -----------------------------\n",
             func_name.c_str());
 
     STDERR_MOVE_CURSOR(screen_row++, screen_col);
@@ -102,7 +102,7 @@ void ring_vm_code_dump(RVM_Function* function,
         case OPCODE_OPERAND_TYPE_0BYTE:
             break;
 
-        case OPCODE_OPERAND_TYPE_1BYTE:
+        case OPCODE_OPERAND_TYPE_1BYTE_A:
             operand_str = std::to_string(code_list[i++]);
             break;
 
@@ -320,7 +320,7 @@ void dump_vm_function(Package_Executer*    package_executer,
             case OPCODE_OPERAND_TYPE_0BYTE:
                 break;
 
-            case OPCODE_OPERAND_TYPE_1BYTE:
+            case OPCODE_OPERAND_TYPE_1BYTE_A:
                 operand_str = std::to_string(code_list[i++]);
                 break;
 

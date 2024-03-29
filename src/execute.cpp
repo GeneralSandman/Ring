@@ -317,7 +317,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
     ErrorCode            error_code             = ERROR_CODE_SUCCESS;
     int                  exit_code              = 0;
-    int                  debug_rvm_res          = 0;
     RVM_Frame            frame;
     unsigned int         prev_code_line_number = 0;
 
@@ -327,7 +326,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         RVM_Byte opcode = code_list[rvm->pc];
 
 #ifdef DEBUG_RVM_INTERACTIVE
-        debug_rvm_res = debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
+        int debug_rvm_res = 0;
+        debug_rvm_res     = debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
         if (debug_rvm_res != 0) {
             goto EXIT;
         }
@@ -1506,12 +1506,12 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     }
 
 
-#ifdef DEBUG_RVM_INTERACTIVE
-    debug_rvm_res = debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
-    if (debug_rvm_res != 0) {
-        goto EXIT;
-    }
-#endif
+    // #ifdef DEBUG_RVM_INTERACTIVE
+    //     debug_rvm_res = debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
+    //     if (debug_rvm_res != 0) {
+    //         goto EXIT;
+    //     }
+    // #endif
 
 
 EXIT:
@@ -2465,9 +2465,9 @@ int debug_rvm(Ring_VirtualMachine* rvm,
 
     STDERR_CLEAR_SCREEN;
     ring_vm_dump_runtime_stack(rvm->runtime_stack, caller_stack_base, 1, 0);
-    ring_vm_code_dump(function, code_list, code_size, pc, 1, 60);
+    ring_vm_code_dump(function, code_list, code_size, pc, 1, 70);
 
-    STDERR_MOVE_CURSOR(terminal_size.ws_row - 4, 0);
+    STDERR_MOVE_CURSOR(terminal_size.ws_row - 6, 0);
     fprintf(stderr, "----------Operation--------\n");
     fprintf(stderr, "|press   enter: step into.|\n");
     // fprintf(stderr, "|        'i'  : step into.|\n");

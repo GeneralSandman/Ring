@@ -1161,11 +1161,13 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer,
 
 
     // dp
-    for (unsigned int i = 0; i < operand_num; i++) {
-        unsigned int offset  = i + 1;
-        unsigned int operand = (offset << 8) | offset;
-        // printf("-RVM_CODE_DEEP_COPY: i:%d offset: %d, dst_offset: %d, src_offset: %d, operand: %d, operand: %X\n", i, offset, offset, offset, operand, operand);
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_DEEP_COPY, operand, expression->line_number);
+    if (expression->type == ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
+        for (unsigned int i = 0; i < operand_num; i++) {
+            unsigned int offset  = i + 1;
+            unsigned int operand = (offset << 8) | offset;
+            // printf("-RVM_CODE_DEEP_COPY: i:%d offset: %d, dst_offset: %d, src_offset: %d, operand: %d, operand: %X\n", i, offset, offset, offset, operand, operand);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_DEEP_COPY, operand, expression->line_number);
+        }
     }
 
 
@@ -2042,7 +2044,7 @@ void generate_vmcode(Package_Executer* executer,
     case OPCODE_OPERAND_TYPE_0BYTE:
         break;
 
-    case OPCODE_OPERAND_TYPE_1BYTE:
+    case OPCODE_OPERAND_TYPE_1BYTE_A:
         opcode_buffer->code_list[opcode_buffer->code_size++] = operand;
         break;
 
@@ -2167,7 +2169,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
             i++;
             break;
 
-        case OPCODE_OPERAND_TYPE_1BYTE:
+        case OPCODE_OPERAND_TYPE_1BYTE_A:
             i += 2;
             break;
 

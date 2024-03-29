@@ -628,7 +628,7 @@ struct RVM_OpcodeBuffer {
 
 typedef enum {
     OPCODE_OPERAND_TYPE_0BYTE,     // 后边没有操作数, pc+1
-    OPCODE_OPERAND_TYPE_1BYTE,     // 后边1BYTE操作数, pc+2
+    OPCODE_OPERAND_TYPE_1BYTE_A,   // 后边1BYTE操作数, pc+2
     OPCODE_OPERAND_TYPE_2BYTE_As,  // 后边2BYTE操作数 两个字节组合成一个操作数, pc+3
     OPCODE_OPERAND_TYPE_2BYTE_AB,  // 后边2BYTE操作数 两个字节分别为两个不同的操作数, pc+3
     OPCODE_OPERAND_TYPE_3BYTE_ABs, // 后边3BYTE操作数 第1个字节为一个操作数, 第2,3个字节为一个操作数, pc+4

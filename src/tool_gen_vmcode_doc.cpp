@@ -14,26 +14,44 @@ int main() {
     printf("%s\n\n", title.c_str());
 
 
-    printf("|            指令               | 操作数占用字节数 | 栈顶值变化                  | 栈高度 | 含义                               |\n");
-    printf("| ---------------------------- | -------- | ---------------------------- | ---------------------------- | ------------------------------------------------ |\n");
+    printf("| Num    |            指令               | 操作数类型 | 栈顶值变化                  | 栈高度 | 含义                               |\n");
+    printf("| ------ | ---------------------------- | -------- | ---------------------------- | ---------------------------- | ------------------------------------------------ |\n");
 
     for (RVM_Byte vmcode = RVM_CODE_PUSH_BOOL; vmcode <= RVM_CODES_NUM; vmcode++) {
-        RVM_Opcode_Info opcode_info                 = RVM_Opcode_Infos[vmcode];
+        RVM_Opcode_Info opcode_info  = RVM_Opcode_Infos[vmcode];
 
-        std::string     vmcode_name                 = opcode_info.name;
-        int             operand_type                = int(opcode_info.operand_type);
+        std::string     vmcode_name  = opcode_info.name;
+        std::string     operand_type = "";
+        switch (opcode_info.operand_type) {
+        case OPCODE_OPERAND_TYPE_0BYTE: operand_type = "0Byte"; break;
+        case OPCODE_OPERAND_TYPE_1BYTE_A: operand_type = "1Byte_A"; break;
+        case OPCODE_OPERAND_TYPE_2BYTE_As: operand_type = "2Byte_As"; break;
+        case OPCODE_OPERAND_TYPE_2BYTE_AB: operand_type = "2Byte_AB"; break;
+        case OPCODE_OPERAND_TYPE_3BYTE_ABs: operand_type = "3Byte_ABs"; break;
+        }
 
-        std::string     runtime_stack_increment_str = std::to_string(opcode_info.runtime_stack_increment);
+
+        std::string runtime_stack_increment_str = std::to_string(opcode_info.runtime_stack_increment);
         if (opcode_info.runtime_stack_increment > 0) {
             runtime_stack_increment_str = "+" + std::to_string(opcode_info.runtime_stack_increment);
         }
 
-        printf("|%30s|%10d|%30s|%30s|%50s|\n", vmcode_name.c_str(),
-               operand_type,
+        printf("|%5d|%30s|%10s|%30s|%30s|%50s|\n",
+               int(vmcode),
+               vmcode_name.c_str(),
+               operand_type.c_str(),
                opcode_info.stack_top_change.c_str(),
                runtime_stack_increment_str.c_str(),
                opcode_info.usage_comment.c_str());
     }
+
+
+    printf("### 操作数类型说明\n\n");
+    printf("0Byte: 无操作数\n\n");
+    printf("1Byte_A: 1字节操作数A\n\n");
+    printf("2Byte_As: 2字节操作数A\n\n");
+    printf("2Byte_AB: 1字节操作数A和1字节操作数B\n\n");
+    printf("3Byte_ABs: 1字节操作数A和2字节操作数B\n\n");
 
     return 0;
 }
