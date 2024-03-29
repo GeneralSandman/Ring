@@ -1291,7 +1291,9 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
     }
 
     // 最后一个纬度
-    generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer);
+    if (pos_index != nullptr) {
+        generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer);
+    }
 
 
     // assign

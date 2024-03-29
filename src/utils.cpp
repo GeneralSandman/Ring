@@ -78,13 +78,13 @@ void ring_vm_code_dump(RVM_Function* function,
     fprintf(stderr, "%-8s | %-30s | %-20s | %5s | %-11s\n",
             "*Num", "*Instruction", "*Operand", "*PC", "*CodeLineNo");
 
-    unsigned int             code_num_index = 0; // 多个 RVM_Byte 组成一个 有效的字节码, 不定长字节码
+    unsigned int             opcode_num = 0; // 多个 RVM_Byte 组成一个 有效的字节码, 不定长字节码
 
     std::vector<std::string> lines;
     int                      pc_lines_index = 0; // 当前pc 所在的 lines 的 index
     // 取当前pc 所在的 前后20 行进行展示
 
-    for (unsigned int i = 0; i < code_size; code_num_index++) {
+    for (unsigned int i = 0; i < code_size; opcode_num++) {
         std::string pointer = "";
         if (i == pc) {
             pointer        = "<--";
@@ -131,7 +131,7 @@ void ring_vm_code_dump(RVM_Function* function,
         char line[90];
         snprintf(line, sizeof(line),
                  "%-8d | %-30s | %20s | %5s | %-11s\n",
-                 code_num_index,
+                 opcode_num,
                  opcode_name.c_str(),
                  operand_str.c_str(),
                  pointer.c_str(),
@@ -292,9 +292,9 @@ void dump_vm_function(Package_Executer*    package_executer,
     printf(" ├──%-8s%-30s%-20s%-18s\n",
            "*Num", "*Instruction", "*Operand", "*SourceLineNum");
     if (function->type == RVM_FUNCTION_TYPE_DERIVE) {
-        RVM_Byte*                          code_list      = nullptr;
-        unsigned int                       code_size      = 0;
-        unsigned int                       code_num_index = 0; // 多个 RVM_Byte 组成一个 有效的字节码, 不定长字节码
+        RVM_Byte*                          code_list  = nullptr;
+        unsigned int                       code_size  = 0;
+        unsigned int                       opcode_num = 0; // 多个 RVM_Byte 组成一个 有效的字节码, 不定长字节码
         std::vector<RVM_SourceCodeLineMap> code_line_map;
         unsigned int                       code_line_map_index = 0;
 
@@ -302,7 +302,7 @@ void dump_vm_function(Package_Executer*    package_executer,
         code_size                                              = function->u.derive_func->code_size;
         code_line_map                                          = function->u.derive_func->code_line_map;
 
-        for (unsigned int i = 0; i < code_size; code_num_index++) {
+        for (unsigned int i = 0; i < code_size; opcode_num++) {
             std::string source_code_line_number;
             if (i == code_line_map[code_line_map_index].opcode_begin_index) {
                 source_code_line_number = std::to_string(code_line_map[code_line_map_index].line_number);
@@ -347,7 +347,7 @@ void dump_vm_function(Package_Executer*    package_executer,
             }
 
             printf(" ├──%-8d%-30s%-20s%-18s\n",
-                   code_num_index,
+                   opcode_num,
                    opcode_name.c_str(),
                    operand_str.c_str(),
                    source_code_line_number.c_str());
