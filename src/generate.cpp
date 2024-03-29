@@ -1113,33 +1113,32 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer,
     debug_generate_info_with_darkgreen("\t");
     assert(expression != nullptr);
 
-    // TODO:
-    if (expression->type != ASSIGN_EXPRESSION_TYPE_ASSIGN && expression->type != ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
-        // += -= *= /=
+
+    // += -= *= /= %= .=
+    if (expression->type == ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN
+        || expression->type == ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN
+        || expression->type == ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN
+        || expression->type == ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN
+        || expression->type == ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN
+        || expression->type == ASSIGN_EXPRESSION_TYPE_CONCAT_ASSIGN) {
         generate_vmcode_from_expression(executer, expression->left, opcode_buffer);
     }
 
-    if (expression->type == ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
-        Expression* pos;
-        for (pos = expression->operand; pos; pos = pos->next) {
-            generate_vmcode_from_expression(executer, pos, opcode_buffer);
-        }
-    } else {
-        generate_vmcode_from_expression(executer, expression->operand, opcode_buffer);
+
+    // operand
+    unsigned int operand_num = 0;
+    Expression*  pos         = nullptr;
+    for (pos = expression->operand; pos; pos = pos->next, operand_num++) {
+        generate_vmcode_from_expression(executer, pos, opcode_buffer);
     }
 
+
+    // += -= *= /= %= .=
     unsigned int opcode_offset = 0;
     if (expression->operand->convert_type != nullptr && expression->operand->convert_type->kind == RING_BASIC_TYPE_DOUBLE) {
         opcode_offset += 1;
     }
-
     switch (expression->type) {
-    case ASSIGN_EXPRESSION_TYPE_ASSIGN:
-        /* code */
-        break;
-    case ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN:
-        break;
-
     case ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN:
         generate_vmcode(executer, opcode_buffer, RVM_Opcode(RVM_CODE_ADD_INT + opcode_offset), 0, expression->line_number);
         break;
@@ -1160,11 +1159,17 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer,
         break;
     }
 
-    // if (expression->left->type != EXPRESSION_TYPE_IDENTIFIER) {
-    //     fprintf(stderr, "generate opcode error1\n");
-    //     exit(ERROR_CODE_GENERATE_OPCODE_ERROR);
-    // }
 
+    // dp
+    for (unsigned int i = 0; i < operand_num; i++) {
+        unsigned int offset  = i + 1;
+        unsigned int operand = (offset << 8) | offset;
+        // printf("-RVM_CODE_DEEP_COPY: i:%d offset: %d, dst_offset: %d, src_offset: %d, operand: %d, operand: %X\n", i, offset, offset, offset, operand, operand);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_DEEP_COPY, operand, expression->line_number);
+    }
+
+
+    // assign
     if (expression->type == ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
         generate_pop_to_leftvalue_reverse(executer, expression->left, opcode_buffer);
     } else {
@@ -2017,7 +2022,7 @@ void generate_vmcode_from_array_index_expression(Package_Executer*     executer,
 void generate_vmcode(Package_Executer* executer,
                      RVM_OpcodeBuffer* opcode_buffer,
                      RVM_Opcode        opcode,
-                     unsigned int      oper_num,
+                     unsigned int      operand,
                      unsigned int      line_number) {
 
     debug_generate_info_with_darkgreen("\t");
@@ -2038,19 +2043,19 @@ void generate_vmcode(Package_Executer* executer,
         break;
 
     case OPCODE_OPERAND_TYPE_1BYTE:
-        opcode_buffer->code_list[opcode_buffer->code_size++] = oper_num;
+        opcode_buffer->code_list[opcode_buffer->code_size++] = operand;
         break;
 
     case OPCODE_OPERAND_TYPE_2BYTE_As:
     case OPCODE_OPERAND_TYPE_2BYTE_AB:
-        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((oper_num >> 8) & 0XFF);
-        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(oper_num & 0XFF);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((operand >> 8) & 0XFF);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(operand & 0XFF);
         break;
 
     case OPCODE_OPERAND_TYPE_3BYTE_ABs:
-        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((oper_num >> 16) & 0XFF);
-        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((oper_num >> 8) & 0XFF);
-        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(oper_num & 0XFF);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((operand >> 16) & 0XFF);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((operand >> 8) & 0XFF);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(operand & 0XFF);
         break;
 
     default: break;

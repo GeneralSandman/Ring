@@ -12,6 +12,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 
 // 通过绝对索引 获取 rvm->runtime_stack->data
+#define STACK_GET_TYPE_INDEX(rvm, index) \
+    ((rvm)->runtime_stack->data[(index)].type)
 #define STACK_GET_BOOL_INDEX(rvm, index) \
     ((rvm)->runtime_stack->data[(index)].u.bool_value)
 #define STACK_GET_INT_INDEX(rvm, index) \
@@ -26,6 +28,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     ((rvm)->runtime_stack->data[(index)].u.array_value)
 
 // 通过栈顶偏移 offset 获取 rvm->runtime_stack->data
+#define STACK_GET_TYPE_OFFSET(rvm, offset) \
+    STACK_GET_TYPE_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 #define STACK_GET_BOOL_OFFSET(rvm, offset) \
     STACK_GET_BOOL_INDEX((rvm), (rvm)->runtime_stack->top_index + (offset))
 #define STACK_GET_INT_OFFSET(rvm, offset) \
@@ -1122,7 +1126,28 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             unsigned int dst_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             unsigned int src_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]);
             STACK_COPY_OFFSET(rvm, -dst_offset, -src_offset);
-            runtime_stack->top_index++;
+            if (dst_offset == 0)
+                runtime_stack->top_index++;
+            rvm->pc += 3;
+        } break;
+        case RVM_CODE_DEEP_COPY: {
+            // TODO: 这里有个不足
+            // 就是 deep_copy 没有区分数据的类型,
+            // 所以说需要进入函数内部进行选择处理 deep_copy, 后续需要进行优化
+            unsigned int dst_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
+            unsigned int src_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]);
+
+            if (STACK_GET_TYPE_OFFSET(rvm, -src_offset) == RVM_VALUE_TYPE_CLASS_OB) {
+                RVM_ClassObject* src_class_object = STACK_GET_CLASS_OB_OFFSET(rvm, -src_offset);
+                RVM_ClassObject* dst_class_object = nullptr;
+                dst_class_object                  = rvm_deep_copy_class_object(rvm, src_class_object);
+                STACK_SET_CLASS_OB_OFFSET(rvm, -dst_offset, dst_class_object);
+            } else {
+                // TODO:
+            }
+
+            if (dst_offset == 0)
+                runtime_stack->top_index++;
             rvm->pc += 3;
         } break;
 
@@ -1974,7 +1999,11 @@ void rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_String* string, int* 
     *value = (int)string->capacity;
 }
 
-// 多位数组的中间态, 后续优化
+//
+/*
+ * 多位数组的中间态, 后续优化
+ * shallow copy
+ */
 ErrorCode rvm_array_get_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array** value) {
     if (index >= array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
@@ -2190,6 +2219,9 @@ ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_S
     return ERROR_CODE_SUCCESS;
 }
 
+/*
+ * shallow copy
+ */
 ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm,
                                      RVM_Array*           array,
                                      int                  index,
@@ -2199,10 +2231,12 @@ ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm,
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
     RVM_ClassObject* src_class_object = &(array->u.class_ob_array[index]);
-    // RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
+    RVM_ClassObject* dst_class_object = nullptr;
 
-    // TIP: this is shallow copy of class-object.
-    *value = src_class_object;
+    // dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
+    dst_class_object = src_class_object;
+
+    *value           = dst_class_object;
     return ERROR_CODE_SUCCESS;
 }
 

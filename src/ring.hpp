@@ -46,10 +46,12 @@ typedef struct NewArrayExpression           NewArrayExpression;
 typedef struct ArrayLiteralExpression       ArrayLiteralExpression;
 typedef struct ClassObjectLiteralExpression ClassObjectLiteralExpression;
 typedef struct CastExpression               CastExpression;
+typedef struct KeyExpression                KeyExpression;
+typedef struct ElementAccessExpression      ElementAccessExpression;
 typedef struct MemberExpression             MemberExpression;
+typedef struct MemberExpressionV2           MemberExpressionV2;
 typedef struct DimensionExpression          DimensionExpression;
 typedef struct SubDimensionExpression       SubDimensionExpression;
-typedef struct DotExpression                DotExpression;
 typedef struct BinaryExpression             BinaryExpression;
 typedef struct TernaryExpression            TernaryExpression;
 typedef struct FunctionCallExpression       FunctionCallExpression;
@@ -799,6 +801,7 @@ typedef enum {
 
     // duplicate
     RVM_CODE_DUPLICATE,
+    RVM_CODE_DEEP_COPY,
 
     // func
     RVM_CODE_PUSH_FUNC,
@@ -938,12 +941,8 @@ typedef enum {
     EXPRESSION_TYPE_ARITHMETIC_MUL,
     EXPRESSION_TYPE_ARITHMETIC_DIV,
     EXPRESSION_TYPE_ARITHMETIC_MOD,
-    EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS, // 一元操作符 负号
     EXPRESSION_TYPE_LOGICAL_AND,
     EXPRESSION_TYPE_LOGICAL_OR,
-    EXPRESSION_TYPE_LOGICAL_UNITARY_NOT, // 一元操作符 逻辑 非 not
-    EXPRESSION_TYPE_UNITARY_INCREASE,    // 一元操作符 i++
-    EXPRESSION_TYPE_UNITARY_DECREASE,    // 一元操作符 i--
     EXPRESSION_TYPE_RELATIONAL_EQ,
     EXPRESSION_TYPE_RELATIONAL_NE,
     EXPRESSION_TYPE_RELATIONAL_GT,
@@ -951,14 +950,21 @@ typedef enum {
     EXPRESSION_TYPE_RELATIONAL_LT,
     EXPRESSION_TYPE_RELATIONAL_LE,
 
-    EXPRESSION_TYPE_ARRAY_INDEX,
+    EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS, // 一元操作符 负号
+    EXPRESSION_TYPE_LOGICAL_UNITARY_NOT,      // 一元操作符 逻辑 非 not
+    EXPRESSION_TYPE_UNITARY_INCREASE,         // 一元操作符 i++
+    EXPRESSION_TYPE_UNITARY_DECREASE,         // 一元操作符 i--
+
     EXPRESSION_TYPE_NEW_ARRAY,
     EXPRESSION_TYPE_ARRAY_LITERAL,
     EXPRESSION_TYPE_CLASS_OBJECT_LITERAL,
 
-    EXPRESSION_TYPE_CAST,
+    EXPRESSION_TYPE_ARRAY_INDEX,
     EXPRESSION_TYPE_MEMBER,
-    EXPRESSION_TYPE_DOT,
+    EXPRESSION_TYPE_ELEMENT_ACCESS,
+
+    EXPRESSION_TYPE_CAST,
+
 
 } ExpressionType;
 
@@ -1160,7 +1166,6 @@ struct Expression {
         ClassObjectLiteralExpression* class_object_literal_expression;
         CastExpression*               cast_expression;
         MemberExpression*             member_expression;
-        DotExpression*                dot_expression;
         FieldInitExpression*          field_init_expression;
     } u;
 
@@ -1187,19 +1192,65 @@ struct IdentifierExpression {
     } u;
 };
 
+
+typedef enum {
+    UNKNOW_COPY,
+    SHALLOW_COPY,
+    DEEP_COPY,
+} RVM_Value_Copy_Type;
+
+
+struct ElementAccessExpression {
+    unsigned int   line_number;
+
+    Expression*    target_expression;
+    KeyExpression* key_expression;
+};
+
+
+typedef enum {
+    KEY_EXPRESSION_TYPE_UNKNOW = 0,
+    KEY_EXPRESSION_TYPE_INDEX,
+    KEY_EXPRESSION_TYPE_MEMBER,
+} KeyExpressionType;
+
+struct KeyExpression {
+    unsigned int        line_number;
+
+    RVM_Value_Copy_Type copy_type;
+
+    KeyExpressionType   type;
+    union {
+        DimensionExpression* index_expression;
+        MemberExpressionV2*  member_expression;
+    } u;
+    KeyExpression* next;
+};
+
+// TODO: 准备废弃, 使用 KeyExpression
 struct ArrayIndexExpression {
     unsigned int         line_number;
 
     Expression*          array_expression;
     DimensionExpression* index_expression;
-
-    /*
-     * e.g.  students[1,2,3];
-     *
-     * array_expression: students
-     * index_expression: [1,2,3]
-     */
 };
+
+// TODO: 准备废弃, 使用 KeyExpression
+struct MemberExpression {
+    unsigned int            line_number;
+
+    Expression*             object_expression;
+    char*                   member_identifier;
+    ClassMemberDeclaration* member_declaration; // FIX_AST_UPDATE
+};
+
+struct MemberExpressionV2 {
+    unsigned int            line_number;
+
+    char*                   member_identifier;
+    ClassMemberDeclaration* member_declaration; // FIX_AST_UPDATE
+};
+
 
 struct NewArrayExpression {
     unsigned int         line_number;
@@ -1229,25 +1280,6 @@ struct CastExpression {
     TypeSpecifier* type_specifier;
     Expression*    operand;
 };
-
-struct MemberExpression {
-    unsigned int            line_number;
-
-    Expression*             object_expression;
-    char*                   member_identifier;
-    ClassMemberDeclaration* member_declaration; // FIX_AST_UPDATE
-};
-/*
- * NOTE FOR MemberExpression
- *
- * e.g.
- * var Job job1;
- * job1.JobID;
- *
- * job1 : object_expression
- * JobID : member_identifier
- * JobID : member_declaration
- */
 
 
 /*
@@ -1284,23 +1316,6 @@ struct SubDimensionExpression {
     // when new array, num_expression is array size.
     // when access array, num_expression is index.
 };
-
-struct DotExpression {
-    unsigned int line_number;
-
-    Expression*  prefix_expression;
-    Expression*  suffix_expression;
-};
-/*
- * NOTE FOR DotExpression
- *
- * e.g.
- * object.member
- * object.member()
- *
- * object -> prefix_expression
- * member -> suffix_expression
- */
 
 
 struct FunctionCallExpression {
@@ -2036,6 +2051,7 @@ Expression*                   expression_add_package_posit(Expression* expressio
 Expression*                   create_expression_identifier(char* identifier);
 Expression*                   create_expression_identifier2(char* identifier, IdentifierExpressionType type);
 Expression*                   create_expression_identifier_with_index(Expression* array_expression, DimensionExpression* index);
+Expression*                   create_member_expression(Expression* object_expression, char* member_identifier);
 Expression*                   create_expression_from_function_call(FunctionCallExpression* function_call_expression);
 Expression*                   create_expression_from_method_call(MethodCallExpression* method_call_expression);
 Expression*                   create_expression_from_array_literal(ArrayLiteralExpression* array_literal);
@@ -2048,8 +2064,6 @@ Expression*                   create_expression_unitary_with_convert_type(BasicV
 Expression*                   create_expression_literal(ExpressionType type, char* literal_interface);
 Expression*                   create_expression_bool_literal(ExpressionType type, Ring_Bool value);
 Expression*                   create_cast_expression(TypeSpecifier* cast_type, Expression* operand);
-Expression*                   create_member_expression(Expression* object_expression, char* member_identifier);
-Expression*                   create_dot_expression(Expression* prefix_expression, Expression* suffix_expression);
 Expression*                   create_new_array_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression);
 
 FieldInitExpression*          create_field_init_expression(char* field_identifier, Expression* init_expression);
@@ -2171,7 +2185,7 @@ void                    fix_dofor_statement(DoForStatement* dofor_statement, Blo
 void                    fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
 TypeSpecifier*          fix_identifier_expression(IdentifierExpression* expression, Block* block);
 void                    fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
-void                    fix_binary_expression(Expression* expression, Block* block, Function* func);
+void                    fix_binary_expression(Expression* expression, BinaryExpression* binary_expression, Block* block, Function* func);
 void                    fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
 void                    fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func);
 void                    fix_class_definition(ClassDefinition* class_definition);
@@ -2189,7 +2203,6 @@ void                    fix_array_literal_expression(Expression* expression, Arr
 
 void                    fix_class_object_literal_expression(Expression* expression, ClassObjectLiteralExpression* literal_expression, Block* block, Function* func);
 void                    fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func);
-void                    fix_dot_expression(Expression* expression, DotExpression* dot_expression, Block* block, Function* func);
 void                    fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
 ClassDefinition*        search_class_definition(char* class_identifier);
 ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, char* member_identifier);
@@ -2268,7 +2281,7 @@ void              generate_vmcode_from_class_object_literal_expreesion(Package_E
 void              generate_vmcode_from_array_literal_expreesion(Package_Executer* executer, ArrayLiteralExpression* array_literal_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_array_index_expression(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer);
 
-void              generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int int_literal, unsigned int line_number);
+void              generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode, unsigned int operand, unsigned int line_number);
 
 int               constant_pool_grow(Package_Executer* executer, unsigned int growth_size);
 int               constant_pool_add_int(Package_Executer* executer, int int_literal);

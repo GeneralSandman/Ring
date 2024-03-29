@@ -126,6 +126,23 @@ Expression* create_expression_identifier_with_index(Expression*          array_e
     return expression;
 }
 
+Expression* create_member_expression(Expression* object_expression, char* member_identifier) {
+
+    MemberExpression* member_expression   = (MemberExpression*)mem_alloc(get_front_mem_pool(), sizeof(MemberExpression));
+    member_expression->line_number        = package_unit_get_line_number();
+    member_expression->object_expression  = object_expression;
+    member_expression->member_identifier  = member_identifier;
+    member_expression->member_declaration = nullptr;
+
+    Expression* expression                = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
+    expression->line_number               = package_unit_get_line_number();
+    expression->convert_type              = nullptr; // fix in fix_ast
+    expression->type                      = EXPRESSION_TYPE_MEMBER;
+    expression->u.member_expression       = member_expression;
+
+    return expression;
+}
+
 Expression* create_expression_from_function_call(FunctionCallExpression* function_call_expression) {
     debug_ast_info_with_yellow("function_call_expression->name:");
 
@@ -292,32 +309,6 @@ Expression* create_cast_expression(TypeSpecifier* cast_type, Expression* operand
     return expression;
 }
 
-Expression* create_member_expression(Expression* object_expression, char* member_identifier) {
-    Expression* expression                              = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
-    expression->line_number                             = package_unit_get_line_number();
-    expression->convert_type                            = nullptr; // fix in fix_ast
-    expression->type                                    = EXPRESSION_TYPE_MEMBER;
-    expression->u.member_expression                     = (MemberExpression*)mem_alloc(get_front_mem_pool(), sizeof(MemberExpression));
-    expression->u.member_expression->line_number        = package_unit_get_line_number();
-    expression->u.member_expression->object_expression  = object_expression;
-    expression->u.member_expression->member_identifier  = member_identifier;
-    expression->u.member_expression->member_declaration = nullptr;
-
-    return expression;
-}
-
-Expression* create_dot_expression(Expression* prefix_expression, Expression* suffix_expression) {
-    Expression* expression                          = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
-    expression->line_number                         = package_unit_get_line_number();
-    expression->convert_type                        = nullptr; // fix in fix_ast
-    expression->type                                = EXPRESSION_TYPE_DOT;
-    expression->u.dot_expression                    = (DotExpression*)mem_alloc(get_front_mem_pool(), sizeof(DotExpression));
-    expression->u.dot_expression->line_number       = package_unit_get_line_number();
-    expression->u.dot_expression->prefix_expression = prefix_expression;
-    expression->u.dot_expression->suffix_expression = suffix_expression;
-
-    return expression;
-}
 
 /*
  * new 关键字  创建数组

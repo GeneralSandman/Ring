@@ -101,21 +101,12 @@ void fix_statement(Statement* statement, Block* block, Function* func) {
 }
 
 void fix_expression(Expression* expression, Block* block, Function* func) {
+
 BEGIN:
     if (expression == nullptr) {
         return;
     }
     switch (expression->type) {
-    case EXPRESSION_TYPE_IDENTIFIER:
-        // TODO: 这里需要优化一下
-        // 没有必要赋值 package_posit
-        expression->u.identifier_expression->package_posit = expression->package_posit;
-        expression->convert_type                           = fix_identifier_expression(expression->u.identifier_expression, block);
-        break;
-
-    case EXPRESSION_TYPE_ASSIGN:
-        fix_assign_expression(expression->u.assign_expression, block, func);
-        break;
 
     case EXPRESSION_TYPE_LITERAL_BOOL:
         expression->convert_type              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
@@ -138,23 +129,14 @@ BEGIN:
         expression->convert_type->kind        = RING_BASIC_TYPE_STRING;
         break;
 
-    case EXPRESSION_TYPE_CONCAT:
-    case EXPRESSION_TYPE_ARITHMETIC_ADD:
-    case EXPRESSION_TYPE_ARITHMETIC_SUB:
-    case EXPRESSION_TYPE_ARITHMETIC_MUL:
-    case EXPRESSION_TYPE_ARITHMETIC_DIV:
-    case EXPRESSION_TYPE_ARITHMETIC_MOD:
-        fix_binary_expression(expression, block, func);
+    case EXPRESSION_TYPE_VARIABLE:
         break;
-    case EXPRESSION_TYPE_LOGICAL_AND:
-    case EXPRESSION_TYPE_LOGICAL_OR:
-    case EXPRESSION_TYPE_RELATIONAL_EQ:
-    case EXPRESSION_TYPE_RELATIONAL_NE:
-    case EXPRESSION_TYPE_RELATIONAL_GT:
-    case EXPRESSION_TYPE_RELATIONAL_GE:
-    case EXPRESSION_TYPE_RELATIONAL_LT:
-    case EXPRESSION_TYPE_RELATIONAL_LE:
-        fix_binary_expression(expression, block, func);
+
+    case EXPRESSION_TYPE_IDENTIFIER:
+        // TODO: 这里需要优化一下
+        // 没有必要赋值 package_posit
+        expression->u.identifier_expression->package_posit = expression->package_posit;
+        expression->convert_type                           = fix_identifier_expression(expression->u.identifier_expression, block);
         break;
 
     case EXPRESSION_TYPE_FUNCTION_CALL:
@@ -163,9 +145,37 @@ BEGIN:
         expression->u.function_call_expression->package_posit = expression->package_posit;
         fix_function_call_expression(expression->u.function_call_expression, block, func);
         break;
+
     case EXPRESSION_TYPE_METHOD_CALL:
         fix_method_call_expression(expression->u.method_call_expression, block, func);
         break;
+
+    case EXPRESSION_TYPE_ASSIGN:
+        fix_assign_expression(expression->u.assign_expression, block, func);
+        break;
+
+    case EXPRESSION_TYPE_TERNARY:
+        fix_ternary_condition_expression(expression->u.ternary_expression, block, func);
+        break;
+
+
+    case EXPRESSION_TYPE_CONCAT:
+    case EXPRESSION_TYPE_ARITHMETIC_ADD:
+    case EXPRESSION_TYPE_ARITHMETIC_SUB:
+    case EXPRESSION_TYPE_ARITHMETIC_MUL:
+    case EXPRESSION_TYPE_ARITHMETIC_DIV:
+    case EXPRESSION_TYPE_ARITHMETIC_MOD:
+    case EXPRESSION_TYPE_LOGICAL_AND:
+    case EXPRESSION_TYPE_LOGICAL_OR:
+    case EXPRESSION_TYPE_RELATIONAL_EQ:
+    case EXPRESSION_TYPE_RELATIONAL_NE:
+    case EXPRESSION_TYPE_RELATIONAL_GT:
+    case EXPRESSION_TYPE_RELATIONAL_GE:
+    case EXPRESSION_TYPE_RELATIONAL_LT:
+    case EXPRESSION_TYPE_RELATIONAL_LE:
+        fix_binary_expression(expression, expression->u.binary_expression, block, func);
+        break;
+
 
     case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
@@ -174,34 +184,33 @@ BEGIN:
         fix_expression(expression->u.unitary_expression, block, func);
         break;
 
-    case EXPRESSION_TYPE_CAST:
-        fix_expression(expression->u.cast_expression->operand, block, func);
-        break;
-
-    case EXPRESSION_TYPE_MEMBER:
-        fix_member_expression(expression, expression->u.member_expression, block, func);
-        break;
-    case EXPRESSION_TYPE_DOT:
-        fix_dot_expression(expression, expression->u.dot_expression, block, func);
-        break;
-
-    case EXPRESSION_TYPE_TERNARY:
-        fix_ternary_condition_expression(expression->u.ternary_expression, block, func);
-        break;
-
-    case EXPRESSION_TYPE_ARRAY_INDEX:
-        fix_array_index_expression(expression, expression->u.array_index_expression, block, func);
-        break;
 
     case EXPRESSION_TYPE_NEW_ARRAY:
         fix_new_array_expression(expression, expression->u.new_array_expression, block, func);
         break;
-
     case EXPRESSION_TYPE_ARRAY_LITERAL:
         fix_array_literal_expression(expression, expression->u.array_literal_expression, block, func);
         break;
     case EXPRESSION_TYPE_CLASS_OBJECT_LITERAL:
         fix_class_object_literal_expression(expression, expression->u.class_object_literal_expression, block, func);
+        break;
+
+
+    case EXPRESSION_TYPE_ARRAY_INDEX:
+        // TODO: 后续废弃 使用 EXPRESSION_TYPE_ELEMENT_ACCESS
+        fix_array_index_expression(expression, expression->u.array_index_expression, block, func);
+        break;
+    case EXPRESSION_TYPE_MEMBER:
+        // TODO: 后续废弃 使用 EXPRESSION_TYPE_ELEMENT_ACCESS
+        fix_member_expression(expression, expression->u.member_expression, block, func);
+        break;
+
+    case EXPRESSION_TYPE_ELEMENT_ACCESS:
+        ring_error_report("not implemented");
+        break;
+
+    case EXPRESSION_TYPE_CAST:
+        fix_expression(expression->u.cast_expression->operand, block, func);
         break;
 
     default: break;
@@ -485,13 +494,13 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
     }
 }
 
-void fix_binary_expression(Expression* expression, Block* block, Function* func) {
-    if (expression == nullptr || expression->u.binary_expression == nullptr) {
+void fix_binary_expression(Expression* expression, BinaryExpression* binary_expression, Block* block, Function* func) {
+    if (expression == nullptr || binary_expression == nullptr) {
         return;
     }
 
-    Expression* left_expression  = expression->u.binary_expression->left_expression;
-    Expression* right_expression = expression->u.binary_expression->right_expression;
+    Expression* left_expression  = binary_expression->left_expression;
+    Expression* right_expression = binary_expression->right_expression;
 
     fix_expression(left_expression, block, func);
     fix_expression(right_expression, block, func);
@@ -835,19 +844,9 @@ void fix_member_expression(Expression*       expression,
 
     // expression 最终的类型取决于field-member 的类型
     expression->convert_type = member_declaration->u.field->type_specifier;
-    fix_class_member_expression(member_expression, member_expression->object_expression, member_expression->member_identifier);
+    fix_class_member_expression(member_expression, object_expression, member_identifier);
 }
 
-void fix_dot_expression(Expression*    expression,
-                        DotExpression* dot_expression,
-                        Block*         block,
-                        Function*      func) {
-
-    assert(dot_expression != nullptr);
-
-    // 1. prefix is a package name
-    // 2. suffix is a object name
-}
 
 void fix_class_member_expression(MemberExpression* member_expression,
                                  Expression*       object_expression,
