@@ -24,12 +24,11 @@ global {
 }
 
 // TestDetail: 数组的元素为 class-obect, 数组为二维数组
-// TestDetail: 直接通过索引 直接交换数组元素
+// TestDetail: 直接通过索引交换元素, 只不过是一次交换一整列
 @main
 function main() {
 
     global_job_array_0 = new Job[2,2];
-
     global_job_array_0[0,0] = Job{
         Bool:   true,
         Int:    0,
@@ -48,7 +47,6 @@ function main() {
         Double: 2.0,
         String: "job-2",
     };
-
     global_job_array_0[1,1] = Job{
         Bool:   false,
         Int:    3,
@@ -64,8 +62,28 @@ function main() {
     global_job_array_0[1,1].printInfo();
 
 
+
+    // var Job[] local_job_array_0;
+    global_job_array_0[0,0], global_job_array_0[0,1], global_job_array_0[1,0], global_job_array_0[1,1] = global_job_array_0[1,0], global_job_array_0[1,1], global_job_array_0[0,0], global_job_array_0[0,1];
     fmt::println_string("\ntest case 2");
+    global_job_array_0[0,0].printInfo();
+    global_job_array_0[0,1].printInfo();
+    global_job_array_0[1,0].printInfo();
+    global_job_array_0[1,1].printInfo();
+
+
     global_job_array_0[0], global_job_array_0[1] = global_job_array_0[1], global_job_array_0[0];
+    fmt::println_string("\ntest case 3");
+    global_job_array_0[0,0].printInfo();
+    global_job_array_0[0,1].printInfo();
+    global_job_array_0[1,0].printInfo();
+    global_job_array_0[1,1].printInfo();
+
+    var Job[] local_job_array_0;
+    local_job_array_0 = global_job_array_0[0];
+    global_job_array_0[0] = global_job_array_0[1];
+    global_job_array_0[1] = local_job_array_0;
+    fmt::println_string("\ntest case 4");
     global_job_array_0[0,0].printInfo();
     global_job_array_0[0,1].printInfo();
     global_job_array_0[1,0].printInfo();
