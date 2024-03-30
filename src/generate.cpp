@@ -1280,35 +1280,42 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
     }
     generate_vmcode(executer, opcode_buffer, opcode, declaration->variable_index, array_index_expression->line_number);
 
+
     // push index-expression to runtime_stack
     // generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
-
-
     SubDimensionExpression* pos_index = array_index_expression->index_expression->dimension_list;
-    for (unsigned int i = 0; i < declaration->type_specifier->dimension - 1; i++, pos_index = pos_index->next) {
+    for (unsigned int i = 0;
+         pos_index != nullptr;
+         i++, pos_index = pos_index->next) {
+
         generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer);
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_A, 0, array_index_expression->line_number);
-    }
 
-    // 最后一个纬度
-    if (pos_index != nullptr) {
-        generate_vmcode_from_expression(executer, pos_index->num_expression, opcode_buffer);
-    }
+        if (pos_index->next == nullptr) {
+            // 最后一个 dimension
 
+            if (i != declaration->type_specifier->dimension - 1) {
+                // 是给一个多维中间态赋值
+                generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_A, 0, array_index_expression->line_number);
+            } else {
+                // 是给多维数组的最终元素赋值
+                if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_BOOL) {
+                    generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_BOOL, 0, array_index_expression->line_number);
+                } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_INT) {
+                    generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_INT, 0, array_index_expression->line_number);
+                } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_DOUBLE) {
+                    generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_DOUBLE, 0, array_index_expression->line_number);
+                } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_STRING) {
+                    generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_STRING, 0, array_index_expression->line_number);
+                } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_CLASS) {
+                    generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_CLASS_OB, 0, array_index_expression->line_number);
+                } else {
+                    ring_error_report("error: assign to item of array only support bool[] int[] double[] string[] class[]\n");
+                }
+            }
 
-    // assign
-    if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_BOOL) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_BOOL, 0, array_index_expression->line_number);
-    } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_INT) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_INT, 0, array_index_expression->line_number);
-    } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_DOUBLE) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_DOUBLE, 0, array_index_expression->line_number);
-    } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_STRING) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_STRING, 0, array_index_expression->line_number);
-    } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_CLASS) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_ARRAY_CLASS_OB, 0, array_index_expression->line_number);
-    } else {
-        ring_error_report("error: assign to item of array only support bool[] int[] double[] string[] class[]\n");
+        } else {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_A, 0, array_index_expression->line_number);
+        }
     }
 }
 

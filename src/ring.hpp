@@ -694,12 +694,13 @@ typedef enum {
 
     // array
     RVM_CODE_PUSH_ARRAY_A,
-
     RVM_CODE_PUSH_ARRAY_BOOL,
     RVM_CODE_PUSH_ARRAY_INT,
     RVM_CODE_PUSH_ARRAY_DOUBLE,
     RVM_CODE_PUSH_ARRAY_STRING,
     RVM_CODE_PUSH_ARRAY_CLASS_OB,
+
+    RVM_CODE_POP_ARRAY_A,
     RVM_CODE_POP_ARRAY_BOOL,
     RVM_CODE_POP_ARRAY_INT,
     RVM_CODE_POP_ARRAY_DOUBLE,
@@ -2362,6 +2363,7 @@ void                 rvm_string_get_length(Ring_VirtualMachine* rvm, RVM_String*
 void                 rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_String* string, int* value);
 
 ErrorCode            rvm_array_get_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array** value);
+ErrorCode            rvm_array_set_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array* value);
 
 ErrorCode            rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Array* array, int index, bool* value);
 ErrorCode            rvm_array_set_bool(Ring_VirtualMachine* rvm, RVM_Array* array, int index, bool* value);

@@ -48,12 +48,13 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
     // array
     {RVM_CODE_PUSH_ARRAY_A, "push_array_a", OPCODE_OPERAND_TYPE_0BYTE, -1, "", ""},
-
     {RVM_CODE_PUSH_ARRAY_BOOL, "push_array_bool", OPCODE_OPERAND_TYPE_0BYTE, -1, "", ""},
     {RVM_CODE_PUSH_ARRAY_INT, "push_array_int", OPCODE_OPERAND_TYPE_0BYTE, -1, "", ""},
     {RVM_CODE_PUSH_ARRAY_DOUBLE, "push_array_double", OPCODE_OPERAND_TYPE_0BYTE, -1, "", ""},
     {RVM_CODE_PUSH_ARRAY_STRING, "push_array_string", OPCODE_OPERAND_TYPE_0BYTE, -1, "", ""},
     {RVM_CODE_PUSH_ARRAY_CLASS_OB, "push_array_class_ob", OPCODE_OPERAND_TYPE_0BYTE, -1, "", ""},
+
+    {RVM_CODE_POP_ARRAY_A, "pop_array_a", OPCODE_OPERAND_TYPE_0BYTE, -3, "", ""},
     {RVM_CODE_POP_ARRAY_BOOL, "pop_array_bool", OPCODE_OPERAND_TYPE_0BYTE, -3, "assign to bool array by index", "[int,object,int]->[]"},
     {RVM_CODE_POP_ARRAY_INT, "pop_array_int", OPCODE_OPERAND_TYPE_0BYTE, -3, "assign to int array by index", "[int,object,int]->[]"},
     {RVM_CODE_POP_ARRAY_DOUBLE, "pop_array_double", OPCODE_OPERAND_TYPE_0BYTE, -3, "assign to double array by index", "[int,object,int]->[]"},

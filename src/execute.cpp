@@ -687,6 +687,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 1;
             break;
 
+        case RVM_CODE_POP_ARRAY_A:
+            array_c     = STACK_GET_ARRAY_OFFSET(rvm, -2);
+            index       = STACK_GET_INT_OFFSET(rvm, -1);
+            array_value = STACK_GET_ARRAY_OFFSET(rvm, -3);
+            rvm_array_set_array(rvm, array_c, index, array_value);
+            runtime_stack->top_index -= 3;
+            rvm->pc += 1;
+            break;
         case RVM_CODE_POP_ARRAY_BOOL:
             array_value = STACK_GET_ARRAY_OFFSET(rvm, -2);
             index       = STACK_GET_INT_OFFSET(rvm, -1);
@@ -1142,8 +1150,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 RVM_ClassObject* dst_class_object = nullptr;
                 dst_class_object                  = rvm_deep_copy_class_object(rvm, src_class_object);
                 STACK_SET_CLASS_OB_OFFSET(rvm, -dst_offset, dst_class_object);
-            } else {
-                // TODO:
+            } else if (STACK_GET_TYPE_OFFSET(rvm, -src_offset) == RVM_VALUE_TYPE_ARRAY) {
+                RVM_Array* src_array = STACK_GET_ARRAY_OFFSET(rvm, -src_offset);
+                RVM_Array* dst_array = nullptr;
+                dst_array            = rvm_deep_copy_array(rvm, src_array);
+                STACK_SET_ARRAY_OFFSET(rvm, -dst_offset, dst_array);
             }
 
             if (dst_offset == 0)
@@ -2010,6 +2021,17 @@ ErrorCode rvm_array_get_array(Ring_VirtualMachine* rvm, RVM_Array* array, int in
     }
 
     *value = &(array->u.a_array[index]);
+
+    return ERROR_CODE_SUCCESS;
+}
+
+ErrorCode rvm_array_set_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array* value) {
+    if (index >= array->length) {
+        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
+    }
+
+    // *value = &(array->u.a_array[index]);
+    array->u.a_array[index] = *value;
 
     return ERROR_CODE_SUCCESS;
 }
