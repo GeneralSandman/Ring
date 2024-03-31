@@ -73,9 +73,10 @@
 3. `ring dump` 查看字节码详情
 4. 实现一键安装ring release版本
 5. 能够生成字节码, 加载字节码
-6. 调试器 Debuger
-7. 交互式编程
+6. 命令行终端调试器 RDB
+7. 交互式编程 REPL
 8. LSP
+9. 开发Ring编译器工具: 命令行交互式调试虚拟机工具
 
 ### 标准库
 
@@ -280,20 +281,23 @@ www.runoob.com
 ### 测试集
 
 ```
-2024-03-21
+2024-03-30
 
 
 [Result]:
-Pass/All = 286/286
+Pass/All = 297/297
 NotTest  = 6
 Fail     = 0
-Usetime  = 13S
+Usetime  = 12S
 
 ```
 
 1. bug
 debug::debug_assert(reflect::typeof(bool_value) == "bool");
 这样判断会失败。
+
+字符串的比较没有做好
+
 
 2. bug
 global value 来说，全局变量没有进行初始化。
@@ -406,6 +410,36 @@ class-object  ✅
 -----------------------------
 
 
+## 2024-04-01周
+
+
+### A. 函数中 return了之后, 没有对返回值进行接收, 
+
+或者一个 语句 `"bool"`; 栈空间会不太正确.
+
+
+### B. 测试多种成员相互交织
+
+
+ClassMemberDeclaration 中 return_list 为空, 需要修正
+
+test/008-class/class-050.ring
+test/008-class/class-051.ring
+
+```
+    job_1.printInfo();
+    job_1.Job2.printInfo();
+    job_1.Job2.Job3.printInfo();
+    job_1.Job2.Job3.Job4.printInfo();
+```
+
+
+```
+    job_1.returnSelf().Job2.Job3.returnSelf().Job4.printInfo();
+```
+
+-----------------------------
+
 
 ## 2024-03-25周
 
@@ -417,6 +451,78 @@ package_unit->line_offset_map 记录不了文件的最后一行的内容
 package_unit 中记录了源代码文件, rdb在获取源代码内容的时候, 不太容易实现,
 在这里, 要进行解耦合, 将记录源代码内容的数据结构, 从 PackageUnit中剥离出来, 
 这样也能在 rdb 中获取源代码实现.
+
+
+### B. fmt::sprintf(var string format, var any... any_value) -> string
+
+
+
+### C. BUG: 返回值
+
+
+```
+method printInfo() {
+    return fmt::printf("Job({}, {}, {}, {})\n", self.Bool, self.Int, self.Double, self.String);
+}
+```
+
+FIXME: 这样写是会崩溃的, 因为本来没返回值, 这里却返回了, 需要强制检查返回值.
+
+
+### D. BUG: 多赋值 和 array
+
+test/008-class/class-030.ring
+
+```
+for(i = 0; i<5; i++) {
+    // FIXME: 这样写是有bug, 
+    global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];
+}
+```
+
+不能正确交换, 值发生了覆盖, 需要单独处理
+
+rvm_array_get_class_object 在某些时候需要浅copy, 某些时候需要深度copy, 如何区分这个
+
+arr[1].tmp = 1;
+
+
+
+
+### E. BUG: 
+
+RVM_CODE_DEEP_COPY 真对于多维数组的赋值
+
+a[2,2];
+
+a[0,0] = a[1,1]; // FIXME: 这里好像是浅copy, 需要优化
+
+
+
+### F. 参见 测试用例补充一下完善的功能
+
+test/008-class/class-014.ring
+test/008-class/class-015.ring
+
+
+test/008-class/class-020.ring
+test/008-class/class-021.ring
+test/008-class/class-022.ring
+test/008-class/class-023.ring
+
+test/008-class/class-030.ring
+
+test/008-class/class-040.ring
+
+
+
+### G. 命令行交互式调试虚拟机工具
+
+Enter 一步一步
+step:
+next:
+until:
+
 
 
 -----------------------------
