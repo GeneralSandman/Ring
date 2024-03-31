@@ -1167,7 +1167,15 @@ method_call_expression
     {
         $$ = create_expression_from_method_call(create_method_call_expression($1, $3, nullptr));
     }
+    | member_expression     TOKEN_DOT identifier TOKEN_LP TOKEN_RP
+    {
+        $$ = create_expression_from_method_call(create_method_call_expression($1, $3, nullptr));
+    }
     | primary_not_new_array TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
+    {
+        $$ = create_expression_from_method_call(create_method_call_expression($1, $3, $5));
+    }
+    | member_expression     TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
     {
         $$ = create_expression_from_method_call(create_method_call_expression($1, $3, $5));
     }

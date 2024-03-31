@@ -576,6 +576,10 @@ void fix_method_call_expression(MethodCallExpression* method_call_expression, Bl
     for (; pos != nullptr; pos = pos->next) {
         fix_expression(pos->expression, block, func);
     }
+
+    // TODO:
+    // expression 的类型取决于 method返回值的类型
+    // expression->convert_type =
 }
 
 void fix_class_definition(ClassDefinition* class_definition) {
