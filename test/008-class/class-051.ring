@@ -75,8 +75,7 @@ global {
 }
 
 // TestDetail: class有4级嵌套
-// TestDetail: 测试对象嵌套的初始化
-// TestDetail: 测试嵌套访问method
+// TestDetail: 测试方法链式调用
 
 @main
 function main() {
@@ -161,9 +160,28 @@ function main() {
 
 
 
-    fmt::println_string("\ntest case 4-------");
-    job_1.returnSelf().Job2.Job3.returnSelf().Job4.printInfo();
+    fmt::println_string("\ntest case 4-1-------");
+    job_1.printInfo();
+    job_1.returnSelf().printInfo();
+    job_1.returnSelf().returnSelf().printInfo();
+    job_1.returnSelf().returnSelf().returnSelf().printInfo();
+
+    fmt::println_string("\ntest case 4-2-------");
+    job_1.Job2.printInfo();
+    job_1.returnSelf().Job2.printInfo();
+    job_1.Job2.returnSelf().printInfo();
+    job_1.returnSelf().Job2.returnSelf().printInfo();
+
+    fmt::println_string("\ntest case 4-3-------");
+    job_1.Job2.Job3.printInfo();
+    job_1.returnSelf().Job2.Job3.printInfo();
+    job_1.Job2.returnSelf().Job3.printInfo();
+    job_1.Job2.Job3.returnSelf().printInfo();
+    job_1.returnSelf().Job2.returnSelf().Job3.returnSelf().printInfo();
 
 
+    fmt::println_string("\ntest case 4-4-------");
+    job_1.Job2.Job3.Job4.printInfo();
+    job_1.returnSelf().returnSelf().Job2.returnSelf().returnSelf().Job3.returnSelf().returnSelf().Job4.returnSelf().returnSelf().printInfo();
 
 }

@@ -1,0 +1,64 @@
+test case 1-------
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 2-------
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+
+test case 3-------
+Job1(false, 1, 1.100000, 1.1)
+Job2(true, 2, 2.200000, 2.2)
+Job3(false, 3, 3.300000, 3.3)
+Job4(true, 4, 4.400000, 4.4)
+
+test case 4-1-------
+Job1(false, 1, 1.100000, 1.1)
+Job1(false, 1, 1.100000, 1.1)
+Job1(false, 1, 1.100000, 1.1)
+Job1(false, 1, 1.100000, 1.1)
+
+test case 4-2-------
+Job2(true, 2, 2.200000, 2.2)
+Job2(true, 2, 2.200000, 2.2)
+Job2(true, 2, 2.200000, 2.2)
+Job2(true, 2, 2.200000, 2.2)
+
+test case 4-3-------
+Job3(false, 3, 3.300000, 3.3)
+Job3(false, 3, 3.300000, 3.3)
+Job3(false, 3, 3.300000, 3.3)
+Job3(false, 3, 3.300000, 3.3)
+Job3(false, 3, 3.300000, 3.3)
+
+test case 4-4-------
+Job4(true, 4, 4.400000, 4.4)
+Job4(true, 4, 4.400000, 4.4)

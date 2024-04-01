@@ -17,7 +17,7 @@ global {
 }
 
 
-function test_func(var Job1[,] local_job1_array_0) -> (Job[,]) {
+function test_func(var Job1[,] local_job1_array_0) -> (Job1[,]) {
 	var Job1[,] local_job1_array_0;
 
 	local_job1_array_0 = Job1[,]{
