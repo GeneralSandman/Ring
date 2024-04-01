@@ -483,22 +483,22 @@ Identifier* identifier_list_add_item(Identifier* identifier_list, Identifier* id
     return identifier_list;
 }
 
-FunctionReturnList* create_function_return_list(VariableType variable_type) {
+FunctionReturnList* create_function_return_list(TypeSpecifier* type_specifier) {
     FunctionReturnList* return_list = (FunctionReturnList*)mem_alloc(get_front_mem_pool(), sizeof(FunctionReturnList));
-
-    return_list->variable_type      = variable_type;
+    return_list->line_number        = package_unit_get_line_number();
+    return_list->type_specifier     = type_specifier;
     return_list->next               = nullptr;
 
     return return_list;
 }
 
 FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_list,
-                                                  VariableType        variable_type) {
+                                                  TypeSpecifier*      type_specifier) {
 
     FunctionReturnList* pos = return_list;
     for (; pos->next != nullptr; pos = pos->next)
         ;
-    pos->next = create_function_return_list(variable_type);
+    pos->next = create_function_return_list(type_specifier);
     return return_list;
 }
 

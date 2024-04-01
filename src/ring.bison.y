@@ -749,15 +749,11 @@ parameter
 return_list
     : type_specifier
     {
-        /* $$ = create_function_return_list($1); */
-        // TODO:
-        $$ = nullptr;
+        $$ = create_function_return_list($1);
     }
     | return_list TOKEN_COMMA type_specifier
     {
-        // TODO:
-        $$ = nullptr;
-        /* $$ = function_return_list_add_item($1, $3); */
+        $$ = function_return_list_add_item($1, $3);
     }
     ;
 

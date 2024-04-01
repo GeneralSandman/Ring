@@ -1465,7 +1465,9 @@ struct Function {
 };
 
 struct FunctionReturnList {
-    VariableType        variable_type;
+    unsigned int        line_number;
+
+    TypeSpecifier*      type_specifier;
     FunctionReturnList* next;
 };
 
@@ -1720,24 +1722,25 @@ typedef enum {
     ERROR_CODE_SEMANTIC_CHECH_ERROR,
 
 
-    ERROR_CODE_GRAMMAR_ERROR            = 100000, // 语法错误
+    ERROR_CODE_GRAMMAR_ERROR             = 100000, // 语法错误
 
 
-    ERROR_UNDEFINITE_VARIABLE           = 200000,
-    ERROR_REDEFINITE_GLOBAL_VARIABLE    = 200001, // 重复定义全局变量
-    ERROR_REDEFINITE_FUNCTION           = 200002, // 重复定义函数
-    ERROR_MINUS_OPER_INVALID_USE        = 200003, // - 符号 不合法使用
-    ERROR_DUPLICATE_IMPORT_PACKAGE      = 200004, // 重复 import package
-    ERROR_INVALID_VARIABLE_IDENTIFIER   = 200005, // 不合法的变量标识符
-    ERROR_TOO_MANY_LOCAL_VARIABLES      = 200006, // 局部变量数量超过限制
-    ERROR_TOO_MANY_FIELDS_IN_CLASS      = 200007, // class 中 field 的数量超过限制
-    ERROR_TOO_MANY_METHODS_IN_CLASS     = 200008, // class 中 method 的数量超过限制
-    ERROR_MISS_CLASS_DEFINITION         = 200009, // 缺少 class 定义
-    ERROR_INVALID_FIELD_IN_CLASS        = 200010, // field 不合法
-    ERROR_ARRAY_DIMENSION_INVALID       = 200011, // 数组维度不合法
-    ERROR_ASSIGN_TO_METHOD_OF_CLASS     = 200012, // 不能给 class中 method赋值
-    ERROR_INVALID_NOT_FOUND_CLASS_FIELD = 200013, // 找不到 class field
-    ERROR_UNCLOSED_STRING_LITERAL       = 200014, // 未关闭的字符串常量
+    ERROR_UNDEFINITE_VARIABLE            = 200000,
+    ERROR_REDEFINITE_GLOBAL_VARIABLE     = 200001, // 重复定义全局变量
+    ERROR_REDEFINITE_FUNCTION            = 200002, // 重复定义函数
+    ERROR_MINUS_OPER_INVALID_USE         = 200003, // - 符号 不合法使用
+    ERROR_DUPLICATE_IMPORT_PACKAGE       = 200004, // 重复 import package
+    ERROR_INVALID_VARIABLE_IDENTIFIER    = 200005, // 不合法的变量标识符
+    ERROR_TOO_MANY_LOCAL_VARIABLES       = 200006, // 局部变量数量超过限制
+    ERROR_TOO_MANY_FIELDS_IN_CLASS       = 200007, // class 中 field 的数量超过限制
+    ERROR_TOO_MANY_METHODS_IN_CLASS      = 200008, // class 中 method 的数量超过限制
+    ERROR_MISS_CLASS_DEFINITION          = 200009, // 缺少 class 定义
+    ERROR_INVALID_FIELD_IN_CLASS         = 200010, // field 不合法
+    ERROR_ARRAY_DIMENSION_INVALID        = 200011, // 数组维度不合法
+    ERROR_ASSIGN_TO_METHOD_OF_CLASS      = 200012, // 不能给 class中 method赋值
+    ERROR_INVALID_NOT_FOUND_CLASS_FIELD  = 200013, // 找不到 class field
+    ERROR_INVALID_NOT_FOUND_CLASS_METHOD = 200014, // 找不到 class field
+    ERROR_UNCLOSED_STRING_LITERAL        = 200015, // 未关闭的字符串常量
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -2082,8 +2085,9 @@ ArgumentList*                 argument_list_add_item(ArgumentList* argument_list
 ArgumentList*                 create_argument_list_from_expression(Expression* expression);
 Identifier*                   new_identifier(IdentifierType type, char* name);
 Identifier*                   identifier_list_add_item(Identifier* identifier_list, Identifier* identifier);
-FunctionReturnList*           create_function_return_list(VariableType variable_type);
-FunctionReturnList*           function_return_list_add_item(FunctionReturnList* return_list, VariableType variable_type);
+FunctionReturnList*           create_function_return_list(TypeSpecifier* type_specifier);
+FunctionReturnList*           function_return_list_add_item(FunctionReturnList* return_list,
+                                                            TypeSpecifier*      type_specifier);
 Function*                     new_function_definition(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
 
 Statement*                    create_statement_from_if(IfStatement* if_statement);
@@ -2188,7 +2192,10 @@ TypeSpecifier*          fix_identifier_expression(IdentifierExpression* expressi
 void                    fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
 void                    fix_binary_expression(Expression* expression, BinaryExpression* binary_expression, Block* block, Function* func);
 void                    fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
-void                    fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func);
+void                    fix_method_call_expression(Expression*           expression,
+                                                   MethodCallExpression* method_call_expression,
+                                                   Block*                block,
+                                                   Function*             func);
 void                    fix_class_definition(ClassDefinition* class_definition);
 void                    fix_class_field(ClassDefinition* class_definition, FieldMember* field);
 void                    fix_class_method(ClassDefinition* class_definition, MethodMember* method);

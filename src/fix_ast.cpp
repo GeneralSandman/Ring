@@ -33,6 +33,11 @@ void ring_compiler_fix_ast(Package* package) {
             add_parameter_to_declaration(pos->parameter_list, pos->block);
             fix_statement_list(pos->block->statement_list, pos->block, pos);
         }
+
+        FunctionReturnList* return_list = pos->return_list;
+        for (; return_list != nullptr; return_list = return_list->next) {
+            fix_type_specfier(return_list->type_specifier);
+        }
     }
 }
 
@@ -147,7 +152,7 @@ BEGIN:
         break;
 
     case EXPRESSION_TYPE_METHOD_CALL:
-        fix_method_call_expression(expression->u.method_call_expression, block, func);
+        fix_method_call_expression(expression, expression->u.method_call_expression, block, func);
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
@@ -545,7 +550,11 @@ void fix_function_call_expression(FunctionCallExpression* function_call_expressi
     }
 }
 
-void fix_method_call_expression(MethodCallExpression* method_call_expression, Block* block, Function* func) {
+void fix_method_call_expression(Expression*           expression,
+                                MethodCallExpression* method_call_expression,
+                                Block*                block,
+                                Function*             func) {
+
     if (method_call_expression == nullptr) {
         return;
     }
@@ -569,6 +578,30 @@ void fix_method_call_expression(MethodCallExpression* method_call_expression, Bl
     if (member_declaration == nullptr) {
         ring_error_report("fix_member_expression error\n");
     }
+    if (member_declaration->type != MEMBER_METHOD) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "`%s` is a field, not a method; E:%d.",
+                 member_identifier,
+                 ERROR_INVALID_NOT_FOUND_CLASS_METHOD);
+
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(method_call_expression->line_number),
+            .line_number             = method_call_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
     method_call_expression->member_declaration = member_declaration;
 
     // 4. fix argument list
@@ -577,9 +610,11 @@ void fix_method_call_expression(MethodCallExpression* method_call_expression, Bl
         fix_expression(pos->expression, block, func);
     }
 
-    // TODO:
-    // expression 的类型取决于 method返回值的类型
-    // expression->convert_type =
+    // method_call_expression 的类型取决于 method返回值的类型
+    // TODO: 但是当前只能取 return_list 的第一个值
+    if (member_declaration->u.method->return_list_size) {
+        expression->convert_type = member_declaration->u.method->return_list->type_specifier;
+    }
 }
 
 void fix_class_definition(ClassDefinition* class_definition) {
@@ -627,6 +662,11 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
     if (block != nullptr) {
         add_parameter_to_declaration(method->parameter_list, block);
         fix_statement_list(block->statement_list, block, nullptr);
+    }
+
+    FunctionReturnList* return_list = method->return_list;
+    for (; return_list != nullptr; return_list = return_list->next) {
+        fix_type_specfier(return_list->type_specifier);
     }
 }
 
@@ -842,6 +882,30 @@ void fix_member_expression(Expression*       expression,
     if (member_declaration == nullptr) {
         ring_error_report("fix_member_expression error, member_declaration is null, member_identifier:%s\n",
                           member_identifier);
+    }
+    if (member_declaration->type != MEMBER_FIELD) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "`%s` is a method, not a field; E:%d.",
+                 member_identifier,
+                 ERROR_INVALID_NOT_FOUND_CLASS_FIELD);
+
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(member_expression->line_number),
+            .line_number             = member_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
     member_expression->member_declaration = member_declaration;
 
