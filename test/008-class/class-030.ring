@@ -26,10 +26,12 @@ global {
 // TestDetail: 数组的元素为 class-obect
 // TestDetail: Usage: 将数组内的所有的对象顺序反转
 // TestDetail: Code:
-// TestDetail: `global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];`
-// TestDetail: `for(i = 0; i<5; i++) {
-// TestDetail: `    global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];
-// TestDetail: `}
+// TestDetail: ```
+// TestDetail: global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];
+// TestDetail: for(i = 0; i<5; i++) {
+// TestDetail:     global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];
+// TestDetail: }
+// TestDetail: ```
 @main
 function main() {
     global_job_array_0 = Job[]{

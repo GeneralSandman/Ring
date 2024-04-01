@@ -25,6 +25,10 @@ global {
 
 // TestDetail: 数组的元素为 class-obect, 数组为二维数组
 // TestDetail: 直接通过索引交换元素, 只不过是一次交换一整列
+// TestDetail: ```
+// TestDetail: global_job_array_0 = new Job[2,2];
+// TestDetail: global_job_array_0[0], global_job_array_0[1] = global_job_array_0[1], global_job_array_0[0];
+// TestDetail: ```
 @main
 function main() {
 

@@ -125,6 +125,17 @@ TEST_DETAIL_SUMMARY="./test/ring-测试用例表.md.raw"
 # 用`// TestDetail:` 开始的行表示
 TEST_DETAIL_PREFIX="^// TestDetail:"
 
+# 如何在测试用例中描述测试的细节
+# 用`// TestDetail:` 开始的行表示, 可以多行表示
+# 示例: 
+# // TestDetail: 测试描述1
+# // TestDetail: 测试描述2
+# // TestDetail: 测试对象嵌套的初始化
+# // TestDetail: 测试嵌套访问method
+# // TestDetail: ```
+# // TestDetail:     测试用例核心代码
+# // TestDetail: ```
+
 
 
 

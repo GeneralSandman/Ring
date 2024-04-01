@@ -65,7 +65,12 @@ global {
 // TestDetail: class有4级嵌套
 // TestDetail: 测试对象嵌套的初始化
 // TestDetail: 测试嵌套访问method
-
+// TestDetail: ```
+// TestDetail:     job_1.printInfo();
+// TestDetail:     job_1.Job2.printInfo();
+// TestDetail:     job_1.Job2.Job3.printInfo();
+// TestDetail:     job_1.Job2.Job3.Job4.printInfo();
+// TestDetail: ```
 @main
 function main() {
 

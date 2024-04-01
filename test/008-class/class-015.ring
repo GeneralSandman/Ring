@@ -23,8 +23,13 @@ global {
     var Job[] global_job_array_0;
 }
 
-// TestDetail: 数组的元素为 class-obect
+// TestDetail: 数组元素为 class-obect
 // TestDetail: 通过for-range访问数组元素并直接调用method
+// TestDetail: ```
+// TestDetail: for(local_job_value in range global_job_array_0) {
+// TestDetail:     local_job_value.printInfo();
+// TestDetail: }
+// TestDetail: ```
 @main
 function main() {
     global_job_array_0 = Job[]{
