@@ -1505,10 +1505,8 @@ void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
     if (identifier_expression == nullptr) {
         return;
     }
-    RVM_Opcode   opcode         = RVM_CODE_UNKNOW;
-    unsigned int package_offset = 0;
-    unsigned int offset         = 0;
-    unsigned int operand        = 0;
+    RVM_Opcode   opcode = RVM_CODE_UNKNOW;
+    unsigned int offset = 0;
     switch (identifier_expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
         if (identifier_expression->u.declaration->is_local) {
@@ -1520,13 +1518,6 @@ void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
         generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
         break;
 
-    case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
-        // find package & function index
-        package_offset = identifier_expression->u.function->package->package_index;
-        offset         = identifier_expression->u.function->func_index;
-        operand        = (package_offset << 8) | offset;
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, identifier_expression->line_number);
-        break;
 
     default:
         break;
@@ -1602,12 +1593,9 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
         return;
     }
 
-    Expression* function_identifier = function_call_expression->function_identifier_expression;
-    if (function_identifier->type == EXPRESSION_TYPE_IDENTIFIER) {
-        if (is_native_function_identifier(function_identifier->u.identifier_expression->package_posit, function_identifier->u.identifier_expression->identifier)) {
-            generate_vmcode_from_native_function_call_expression(executer, function_call_expression, opcode_buffer);
-            return;
-        }
+    if (is_native_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
+        generate_vmcode_from_native_function_call_expression(executer, function_call_expression, opcode_buffer);
+        return;
     }
 
     ArgumentList* pos                = function_call_expression->argument_list;
@@ -1619,7 +1607,17 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
 
     generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, function_call_expression->line_number);
 
-    generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer);
+
+    unsigned int package_offset = 0;
+    unsigned int offset         = 0;
+    unsigned int operand        = 0;
+
+    package_offset              = function_call_expression->function->package->package_index;
+    offset                      = function_call_expression->function->func_index;
+    operand                     = (package_offset << 8) | offset;
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, function_call_expression->line_number);
+
+
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, function_call_expression->line_number);
 }
 
@@ -1630,9 +1628,8 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
                                                           FunctionCallExpression* function_call_expression,
                                                           RVM_OpcodeBuffer*       opcode_buffer) {
 
-    ArgumentList* pos                     = nullptr;
-    Expression*   function_identifier_exp = function_call_expression->function_identifier_expression;
-    char*         function_identifier     = function_identifier_exp->u.identifier_expression->identifier;
+    ArgumentList* pos                 = nullptr;
+    char*         function_identifier = function_call_expression->func_identifier;
 
     if (str_eq(function_identifier, "len")) {
         if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {

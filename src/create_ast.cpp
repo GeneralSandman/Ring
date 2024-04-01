@@ -65,7 +65,19 @@ void add_function_definition(AttributeInfo* attribute_info, Function* function_d
 
 Expression* expression_add_package_posit(Expression* expression, char* package_posit) {
     assert(expression != nullptr);
-    expression->package_posit = package_posit;
+
+    // 将 package_posit 注入到最底层的 Expression
+    switch (expression->type) {
+    case EXPRESSION_TYPE_IDENTIFIER:
+        expression->u.identifier_expression->package_posit = package_posit;
+        break;
+    case EXPRESSION_TYPE_FUNCTION_CALL:
+        expression->u.function_call_expression->package_posit = package_posit;
+        break;
+    default:
+        break;
+    }
+
     return expression;
 }
 
@@ -74,6 +86,7 @@ Expression* create_expression_identifier(char* identifier) {
 
     IdentifierExpression* identifier_expression = (IdentifierExpression*)mem_alloc(get_front_mem_pool(), sizeof(IdentifierExpression));
     identifier_expression->line_number          = package_unit_get_line_number();
+    identifier_expression->package_posit        = nullptr;
     identifier_expression->type                 = IDENTIFIER_EXPRESSION_TYPE_VARIABLE;
     identifier_expression->identifier           = identifier;
     identifier_expression->u.declaration        = nullptr;
@@ -84,25 +97,6 @@ Expression* create_expression_identifier(char* identifier) {
     expression->type                            = EXPRESSION_TYPE_IDENTIFIER;
     expression->u.identifier_expression         = identifier_expression;
     expression->next                            = nullptr;
-
-    return expression;
-}
-
-// TODO: 后续合并为一个，目的是在 fix_ast 中 去确定 identifier 的 类型
-Expression* create_expression_identifier2(char* identifier, IdentifierExpressionType type) {
-    debug_ast_info_with_yellow("identifier:%s", identifier);
-
-    IdentifierExpression* identifier_expression = (IdentifierExpression*)mem_alloc(get_front_mem_pool(), sizeof(IdentifierExpression));
-    identifier_expression->line_number          = package_unit_get_line_number();
-    identifier_expression->type                 = type;
-    identifier_expression->identifier           = identifier;
-    identifier_expression->u.declaration        = nullptr;
-
-    Expression* expression                      = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
-    expression->line_number                     = package_unit_get_line_number();
-    expression->convert_type                    = nullptr; // fix in fix_ast
-    expression->type                            = EXPRESSION_TYPE_IDENTIFIER;
-    expression->u.identifier_expression         = identifier_expression;
 
     return expression;
 }
@@ -255,8 +249,7 @@ Expression* create_expression_unitary_with_convert_type(BasicValueType convert_t
     return expression;
 }
 
-Expression*
-create_expression_literal(ExpressionType type, char* literal_interface) {
+Expression* create_expression_literal(ExpressionType type, char* literal_interface) {
     debug_ast_info_with_yellow("type:%d", type);
 
     assert(literal_interface != nullptr);
@@ -385,17 +378,16 @@ AssignExpression* create_multi_assign_expression(Expression* first_left_value_ex
     return assing_expression;
 }
 
-FunctionCallExpression* create_function_call_expression(char*         identifier,
+FunctionCallExpression* create_function_call_expression(char*         func_identifier,
                                                         ArgumentList* argument_list) {
 
     debug_ast_info_with_yellow("identifier:%s", identifier);
 
-    Expression*             function_identifier_expression   = create_expression_identifier2(identifier, IDENTIFIER_EXPRESSION_TYPE_FUNCTION);
-
-    FunctionCallExpression* function_call_expression         = (FunctionCallExpression*)mem_alloc(get_front_mem_pool(), sizeof(FunctionCallExpression));
-    function_call_expression->line_number                    = package_unit_get_line_number();
-    function_call_expression->function_identifier_expression = function_identifier_expression;
-    function_call_expression->argument_list                  = argument_list;
+    FunctionCallExpression* function_call_expression = (FunctionCallExpression*)mem_alloc(get_front_mem_pool(), sizeof(FunctionCallExpression));
+    function_call_expression->line_number            = package_unit_get_line_number();
+    function_call_expression->package_posit          = nullptr;
+    function_call_expression->func_identifier        = func_identifier;
+    function_call_expression->argument_list          = argument_list;
     return function_call_expression;
 }
 
@@ -510,13 +502,6 @@ Function* new_function_definition(FunctionType        type,
 
     debug_ast_info_with_yellow("functionType:%d, identifier:%s", type, identifier->name);
 
-    unsigned int parameter_list_size = 0;
-    // 把函数参数的变量添加到 variable_list 中
-    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
-        parameter_list_size++;
-    }
-
-
     Function* function            = (Function*)mem_alloc(get_front_mem_pool(), sizeof(Function));
     function->source_file         = package_unit_get_file_name();
     function->start_line_number   = identifier->line_number;
@@ -524,12 +509,21 @@ Function* new_function_definition(FunctionType        type,
     function->package             = get_package_unit()->parent_package;
     function->attribute_info      = nullptr;
     function->func_index          = get_package_unit()->function_list.size();
-    function->type                = type;
     function->function_name       = identifier->name;
-    function->parameter_list_size = parameter_list_size;
+    function->type                = type;
+    function->parameter_list_size = 0;
     function->parameter_list      = parameter_list;
+    function->return_list_size    = 0;
+    function->return_list         = return_list;
     function->block               = block;
     function->next                = nullptr;
+
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
+        function->parameter_list_size++;
+    }
+    for (FunctionReturnList* pos = return_list; pos != nullptr; pos = pos->next) {
+        function->return_list_size++;
+    }
 
 
     return function;
@@ -803,9 +797,7 @@ Block* start_new_block() {
     block->block_labels.break_label    = 0;
     block->block_labels.continue_label = 0;
 
-    /* printf("[start] parent:%p, current:%p\n", block->parent_block, block); */
-
-    get_package_unit()->current_block = block;
+    get_package_unit()->current_block  = block;
 
     return block;
 }
@@ -821,7 +813,6 @@ Block* finish_block(Block* block, Statement* statement_list) {
 
     get_package_unit()->current_block = block->parent_block;
 
-    /* printf("[end] current:%p, parent:%p\n", block, block->parent_block); */
     return block;
 }
 
@@ -1333,6 +1324,3 @@ int attribute_is_constructor(Attribute attribute) {
 int attribute_is_destructor(Attribute attribute) {
     return (attribute >> 5) & (0x01);
 }
-// -------------
-// class define
-// -------------

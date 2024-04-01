@@ -138,17 +138,11 @@ BEGIN:
         break;
 
     case EXPRESSION_TYPE_IDENTIFIER:
-        // TODO: 这里需要优化一下
-        // 没有必要赋值 package_posit
-        expression->u.identifier_expression->package_posit = expression->package_posit;
-        expression->convert_type                           = fix_identifier_expression(expression->u.identifier_expression, block);
+        fix_identifier_expression(expression, expression->u.identifier_expression, block);
         break;
 
     case EXPRESSION_TYPE_FUNCTION_CALL:
-        // TODO: 这里需要优化一下
-        // 没有必要赋值 package_posit
-        expression->u.function_call_expression->package_posit = expression->package_posit;
-        fix_function_call_expression(expression->u.function_call_expression, block, func);
+        fix_function_call_expression(expression, expression->u.function_call_expression, block, func);
         break;
 
     case EXPRESSION_TYPE_METHOD_CALL:
@@ -399,18 +393,18 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
     }
 }
 
-TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block* block) {
-    assert(expression != nullptr);
-    // TODO: 在这里要判断 identifier 是function 还是变量，
-    // 然后从不同地方进行搜索
-    // 并判断当前代码片段是否已经声明过相关的变量和函数
-    // 报错提示
-    //
-    Declaration* declaration = nullptr;
-    Function*    function    = nullptr;
-    switch (expression->type) {
+void fix_identifier_expression(Expression*           expression,
+                               IdentifierExpression* identifier_expression,
+                               Block*                block) {
+
+    assert(identifier_expression != nullptr);
+
+    Declaration*   declaration    = nullptr;
+    TypeSpecifier* type_specifier = nullptr;
+
+    switch (identifier_expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
-        declaration = search_declaration(expression->package_posit, expression->identifier, block);
+        declaration = search_declaration(identifier_expression->package_posit, identifier_expression->identifier, block);
 
         // error-report ERROR_UNDEFINITE_VARIABLE
         if (declaration == nullptr) {
@@ -418,19 +412,19 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
             char advice_buffer[1024];
             snprintf(error_message_buffer, 1024,
                      "use undeclared identifier `%s`; E:%d.",
-                     expression->identifier,
+                     identifier_expression->identifier,
                      ERROR_UNDEFINITE_VARIABLE);
             snprintf(advice_buffer, 1024,
                      "definite variable `%s` like: `var bool|int|double|string %s;` before use it.",
-                     expression->identifier,
-                     expression->identifier);
+                     identifier_expression->identifier,
+                     identifier_expression->identifier);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
                 .package_unit            = nullptr,
                 .source_file_name        = get_package_unit()->current_file_name,
-                .line_content            = package_unit_get_line_content(expression->line_number),
-                .line_number             = expression->line_number,
+                .line_content            = package_unit_get_line_content(identifier_expression->line_number),
+                .line_number             = identifier_expression->line_number,
                 .column_number           = 0,
                 .error_message           = std::string(error_message_buffer),
                 .advice                  = std::string(advice_buffer),
@@ -440,50 +434,16 @@ TypeSpecifier* fix_identifier_expression(IdentifierExpression* expression, Block
             };
             ring_compile_error_report(&context);
         }
-        expression->u.declaration = declaration;
-        return declaration->type_specifier;
+        identifier_expression->u.declaration = declaration;
+        type_specifier                       = declaration->type_specifier;
         break;
 
-    case IDENTIFIER_EXPRESSION_TYPE_FUNCTION:
-        if (is_native_function_identifier(expression->package_posit, expression->identifier)) {
-            return nullptr;
-        }
-        function = search_function(expression->package_posit, expression->identifier);
-
-        // error-report ERROR_UNDEFINITE_VARIABLE
-        if (function == nullptr) {
-            char error_message_buffer[1024];
-            char advice_buffer[1024];
-            snprintf(error_message_buffer, 1024, "use undeclared function `%s`; E:%d",
-                     expression->identifier,
-                     ERROR_UNDEFINITE_VARIABLE);
-            snprintf(advice_buffer, 1024, "definite function `%s` like: `function %s() {}` before use it.",
-                     expression->identifier,
-                     expression->identifier);
-
-            ErrorReportContext context = {
-                .package                 = nullptr,
-                .package_unit            = nullptr,
-                .source_file_name        = get_package_unit()->current_file_name,
-                .line_content            = package_unit_get_line_content(expression->line_number),
-                .line_number             = expression->line_number,
-                .column_number           = 0,
-                .error_message           = std::string(error_message_buffer),
-                .advice                  = std::string(advice_buffer),
-                .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
-                .ring_compiler_file      = (char*)__FILE__,
-                .ring_compiler_file_line = __LINE__,
-            };
-            ring_compile_error_report(&context);
-        }
-        expression->u.function = function;
-        break;
 
     default:
         break;
     }
 
-    return nullptr;
+    expression->convert_type = type_specifier;
 }
 
 void fix_assign_expression(AssignExpression* expression, Block* block, Function* func) {
@@ -531,7 +491,8 @@ void fix_binary_expression(Expression* expression, BinaryExpression* binary_expr
     }
 }
 
-void fix_function_call_expression(FunctionCallExpression* function_call_expression,
+void fix_function_call_expression(Expression*             expression,
+                                  FunctionCallExpression* function_call_expression,
                                   Block*                  block,
                                   Function*               func) {
 
@@ -539,14 +500,52 @@ void fix_function_call_expression(FunctionCallExpression* function_call_expressi
         return;
     }
 
-    // TODO: 这里需要优化一下
-    // 没有必要赋值 package_posit
-    function_call_expression->function_identifier_expression->package_posit = function_call_expression->package_posit;
-    fix_expression(function_call_expression->function_identifier_expression, block, func);
+
+    Function* function = nullptr;
+    if (!is_native_function_identifier(function_call_expression->package_posit,
+                                       function_call_expression->func_identifier)) {
+        function = search_function(function_call_expression->package_posit,
+                                   function_call_expression->func_identifier);
+
+        // error-report ERROR_UNDEFINITE_VARIABLE
+        if (function == nullptr) {
+            char error_message_buffer[1024];
+            char advice_buffer[1024];
+            snprintf(error_message_buffer, 1024, "use undeclared function `%s`; E:%d",
+                     function_call_expression->func_identifier,
+                     ERROR_UNDEFINITE_VARIABLE);
+            snprintf(advice_buffer, 1024, "definite function `%s` like: `function %s() {}` before use it.",
+                     function_call_expression->func_identifier,
+                     function_call_expression->func_identifier);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = nullptr,
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(expression->line_number),
+                .line_number             = expression->line_number,
+                .column_number           = 0,
+                .error_message           = std::string(error_message_buffer),
+                .advice                  = std::string(advice_buffer),
+                .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+
+        function_call_expression->function = function;
+    }
 
     ArgumentList* pos = function_call_expression->argument_list;
     for (; pos != nullptr; pos = pos->next) {
         fix_expression(pos->expression, block, func);
+    }
+
+    // function_call_expression 的类型取决于 function 返回值的类型
+    // TODO: 但是当前只能取 return_list 的第一个值
+    if (function != nullptr && function->return_list_size) {
+        expression->convert_type = function->return_list->type_specifier;
     }
 }
 
@@ -576,7 +575,27 @@ void fix_method_call_expression(Expression*           expression,
     // 2. find member declaration by member identifier.
     member_declaration = search_class_member(class_definition, member_identifier);
     if (member_declaration == nullptr) {
-        ring_error_report("fix_member_expression error\n");
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "not found method `%s`; E:%d.",
+                 member_identifier,
+                 ERROR_INVALID_NOT_FOUND_CLASS_METHOD);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(method_call_expression->line_number),
+            .line_number             = method_call_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
     if (member_declaration->type != MEMBER_METHOD) {
         DEFINE_ERROR_REPORT_STR;
@@ -677,10 +696,11 @@ void fix_array_index_expression(Expression*           expression,
                                 Function*             func) {
     assert(array_index_expression != nullptr);
 
+    char*        package_posit    = array_index_expression->array_expression->u.identifier_expression->package_posit;
     char*        array_identifier = array_index_expression->array_expression->u.identifier_expression->identifier;
     Declaration* declaration      = nullptr;
 
-    declaration                   = search_declaration(expression->package_posit,
+    declaration                   = search_declaration(package_posit,
                                                        array_identifier,
                                                        block);
 

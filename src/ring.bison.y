@@ -1224,7 +1224,7 @@ function_call_expression
         debug_bison_info_with_green("[RULE::function_call_expression]\t ");
         $$ = create_function_call_expression($1, $3);
     }
-    | identifier TOKEN_LP TOKEN_RP
+    | identifier TOKEN_LP               TOKEN_RP
     {
         debug_bison_info_with_green("[RULE::function_call_expression]\t ");
         $$ = create_function_call_expression($1, nullptr);

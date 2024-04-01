@@ -1146,7 +1146,6 @@ struct StatementExecResult {
 struct Expression {
     unsigned int   line_number;
 
-    char*          package_posit;
     TypeSpecifier* convert_type; // 一个复杂表达式最后结果值的类型, FIX_AST_UPDATE
     ExpressionType type;
     union {
@@ -1176,7 +1175,6 @@ struct Expression {
 typedef enum {
     IDENTIFIER_EXPRESSION_TYPE_UNKNOW,
     IDENTIFIER_EXPRESSION_TYPE_VARIABLE,
-    IDENTIFIER_EXPRESSION_TYPE_FUNCTION,
 } IdentifierExpressionType;
 
 struct IdentifierExpression {
@@ -1323,8 +1321,8 @@ struct FunctionCallExpression {
     unsigned int  line_number;
 
     char*         package_posit;
-
-    Expression*   function_identifier_expression;
+    char*         func_identifier;
+    Function*     function;
     ArgumentList* argument_list;
 };
 
@@ -2053,7 +2051,6 @@ void                          add_function_definition(AttributeInfo* attribute_i
 
 Expression*                   expression_add_package_posit(Expression* expression, char* package_posit);
 Expression*                   create_expression_identifier(char* identifier);
-Expression*                   create_expression_identifier2(char* identifier, IdentifierExpressionType type);
 Expression*                   create_expression_identifier_with_index(Expression* array_expression, DimensionExpression* index);
 Expression*                   create_member_expression(Expression* object_expression, char* member_identifier);
 Expression*                   create_expression_from_function_call(FunctionCallExpression* function_call_expression);
@@ -2188,10 +2185,15 @@ void                    fix_if_statement(IfStatement* if_statement, Block* block
 void                    fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
 void                    fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
 void                    fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
-TypeSpecifier*          fix_identifier_expression(IdentifierExpression* expression, Block* block);
+void                    fix_identifier_expression(Expression*           expression,
+                                                  IdentifierExpression* identifier_expression,
+                                                  Block*                block);
 void                    fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
 void                    fix_binary_expression(Expression* expression, BinaryExpression* binary_expression, Block* block, Function* func);
-void                    fix_function_call_expression(FunctionCallExpression* function_call_expression, Block* block, Function* func);
+void                    fix_function_call_expression(Expression*             expression,
+                                                     FunctionCallExpression* function_call_expression,
+                                                     Block*                  block,
+                                                     Function*               func);
 void                    fix_method_call_expression(Expression*           expression,
                                                    MethodCallExpression* method_call_expression,
                                                    Block*                block,
