@@ -1336,7 +1336,7 @@ void generate_vmcode_from_logical_expression(Package_Executer* executer,
     if (opcode == RVM_CODE_LOGICAL_AND) {
         generate_vmcode_from_expression(executer, left, opcode_buffer);
 
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_SHALLOW_COPY, (0 << 8) | 1, expression->line_number);
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label, expression->line_number);
 
@@ -1346,7 +1346,7 @@ void generate_vmcode_from_logical_expression(Package_Executer* executer,
     } else if (opcode == RVM_CODE_LOGICAL_OR) {
         generate_vmcode_from_expression(executer, left, opcode_buffer);
 
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, (0 << 8) | 1, expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_SHALLOW_COPY, (0 << 8) | 1, expression->line_number);
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_TRUE, end_label, expression->line_number);
 
@@ -1915,7 +1915,7 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer*     
         // 2. shallow duplicate class-object
         unsigned int oper_num = 0;
         oper_num              = (0 << 8) | 2;
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_DUPLICATE, oper_num, pos->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_SHALLOW_COPY, oper_num, pos->line_number);
 
 
         FieldMember* field_member = pos->field_member;

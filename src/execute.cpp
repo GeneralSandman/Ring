@@ -302,6 +302,9 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int         return_value_list_size = 0;
     unsigned int         array_size             = 0;
 
+    unsigned int         dst_offset             = 0;
+    unsigned int         src_offset             = 0;
+
     bool                 bool_value             = false;
     int                  int_value              = 0;
     double               double_value           = 0;
@@ -1130,20 +1133,20 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         // duplicate
-        case RVM_CODE_DUPLICATE: {
-            unsigned int dst_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
-            unsigned int src_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]);
+        case RVM_CODE_SHALLOW_COPY:
+            dst_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
+            src_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]);
             STACK_COPY_OFFSET(rvm, -dst_offset, -src_offset);
             if (dst_offset == 0)
                 runtime_stack->top_index++;
             rvm->pc += 3;
-        } break;
-        case RVM_CODE_DEEP_COPY: {
+            break;
+        case RVM_CODE_DEEP_COPY:
             // TODO: 这里有个不足
             // 就是 deep_copy 没有区分数据的类型,
             // 所以说需要进入函数内部进行选择处理 deep_copy, 后续需要进行优化
-            unsigned int dst_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
-            unsigned int src_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]);
+            dst_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
+            src_offset = OPCODE_GET_1BYTE(&code_list[rvm->pc + 2]);
 
             if (STACK_GET_TYPE_OFFSET(rvm, -src_offset) == RVM_VALUE_TYPE_CLASS_OB) {
                 RVM_ClassObject* src_class_object = STACK_GET_CLASS_OB_OFFSET(rvm, -src_offset);
@@ -1160,7 +1163,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             if (dst_offset == 0)
                 runtime_stack->top_index++;
             rvm->pc += 3;
-        } break;
+            break;
 
         // func
         case RVM_CODE_PUSH_FUNC:

@@ -801,7 +801,7 @@ typedef enum {
     RVM_CODE_JUMP_IF_TRUE,
 
     // duplicate
-    RVM_CODE_DUPLICATE,
+    RVM_CODE_SHALLOW_COPY,
     RVM_CODE_DEEP_COPY,
 
     // func
