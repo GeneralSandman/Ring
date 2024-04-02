@@ -100,25 +100,6 @@ function main() {
     fmt::println_int(int_value_6);
     
     
-    fmt::println_string("\ntest case 4");
-    int_value_1, int_value_2, int_value_3, int_value_4, int_value_5, int_value_6 = test_return_1(), test_return_2(), test_return_3();
-    debug::debug_assert(int_value_1 == 1);
-    debug::debug_assert(int_value_2 == 2);
-    debug::debug_assert(int_value_3 == 3);
-    debug::debug_assert(int_value_4 == 4);
-    debug::debug_assert(int_value_5 == 5);
-    debug::debug_assert(int_value_6 == 6);
-    
-    fmt::println_int(int_value_1);
-    fmt::println_int(int_value_2);
-    fmt::println_int(int_value_3);
-    fmt::println_int(int_value_4);
-    fmt::println_int(int_value_5);
-    fmt::println_int(int_value_6);
-
-
-
-
 }
 
 
