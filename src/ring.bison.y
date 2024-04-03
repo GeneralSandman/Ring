@@ -1271,7 +1271,7 @@ class_object_literal_expression
     ;
 
 assign_expression
-    : left_value_expression TOKEN_ASSIGN right_value_expression
+    : left_value_expression_list TOKEN_ASSIGN right_value_expression_list
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ASSIGN, $1, $3);
@@ -1300,11 +1300,6 @@ assign_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN, create_expression_identifier($1), $3);
-    }
-    | left_value_expression TOKEN_COMMA left_value_expression_list  TOKEN_ASSIGN right_value_expression_list
-    {
-        debug_bison_info_with_green("[RULE::assign_expression]\t ");
-        $$ = create_multi_assign_expression($1, $3, $5);
     }
     ;
 

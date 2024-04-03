@@ -19,6 +19,54 @@
 #include <cstring>
 
 
+// 直接使用 全局 TypeSpecifier, 不使用 mem_alloc
+static TypeSpecifier bool_type_specifier = TypeSpecifier{
+    .line_number  = 0,
+    .kind         = RING_BASIC_TYPE_BOOL,
+    .u.array_type = nullptr,
+    .dimension    = 0,
+    .sub          = 0,
+};
+static TypeSpecifier int_type_specifier = TypeSpecifier{
+    .line_number  = 0,
+    .kind         = RING_BASIC_TYPE_INT,
+    .u.array_type = nullptr,
+    .dimension    = 0,
+    .sub          = 0,
+};
+static TypeSpecifier double_type_specifier = TypeSpecifier{
+    .line_number  = 0,
+    .kind         = RING_BASIC_TYPE_DOUBLE,
+    .u.array_type = nullptr,
+    .dimension    = 0,
+    .sub          = 0,
+};
+static TypeSpecifier string_type_specifier = TypeSpecifier{
+    .line_number  = 0,
+    .kind         = RING_BASIC_TYPE_STRING,
+    .u.array_type = nullptr,
+    .dimension    = 0,
+    .sub          = 0,
+};
+// EXPRESSION_CLEAR_CONVERT_TYPE
+// EXPRESSION_ADD_CONVERT_TYPE
+
+// 清除 expression 所代表的 convert_type_size 和 convert_type
+#define EXPRESSION_CLEAR_CONVERT_TYPE(expression) \
+    (expression)->convert_type_size = 0;          \
+    (expression)->convert_type      = nullptr;
+
+// 添加 expression 所代表的 convert_type_size 和 convert_type
+// 其实 只有 function-call/method-call 表达式: convert_type_size > 1
+// 其余的都是 convert_type_size = 1
+#define EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier)                             \
+    (expression)->convert_type_size = (expression)->convert_type_size + 1;                  \
+    (expression)->convert_type =                                                            \
+        (TypeSpecifier**)realloc((expression)->convert_type,                                \
+                                 (expression)->convert_type_size * sizeof(TypeSpecifier*)); \
+    (expression)->convert_type[expression->convert_type_size - 1] = (type_specifier);
+
+
 void ring_compiler_fix_ast(Package* package) {
     // fix class list
     unsigned int class_index = 0;
@@ -114,24 +162,21 @@ BEGIN:
     switch (expression->type) {
 
     case EXPRESSION_TYPE_LITERAL_BOOL:
-        expression->convert_type              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-        expression->convert_type->line_number = expression->line_number;
-        expression->convert_type->kind        = RING_BASIC_TYPE_BOOL;
+        // TODO: 这里可以分配一个公共的 TypeSpecifier, 可以节约空间
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        EXPRESSION_ADD_CONVERT_TYPE(expression, &bool_type_specifier);
         break;
     case EXPRESSION_TYPE_LITERAL_INT:
-        expression->convert_type              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-        expression->convert_type->line_number = expression->line_number;
-        expression->convert_type->kind        = RING_BASIC_TYPE_INT;
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        EXPRESSION_ADD_CONVERT_TYPE(expression, &int_type_specifier);
         break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
-        expression->convert_type              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-        expression->convert_type->line_number = expression->line_number;
-        expression->convert_type->kind        = RING_BASIC_TYPE_DOUBLE;
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        EXPRESSION_ADD_CONVERT_TYPE(expression, &double_type_specifier);
         break;
     case EXPRESSION_TYPE_LITERAL_STRING:
-        expression->convert_type              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-        expression->convert_type->line_number = expression->line_number;
-        expression->convert_type->kind        = RING_BASIC_TYPE_STRING;
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        EXPRESSION_ADD_CONVERT_TYPE(expression, &string_type_specifier);
         break;
 
     case EXPRESSION_TYPE_VARIABLE:
@@ -154,7 +199,7 @@ BEGIN:
         break;
 
     case EXPRESSION_TYPE_TERNARY:
-        fix_ternary_condition_expression(expression->u.ternary_expression, block, func);
+        fix_ternary_condition_expression(expression, expression->u.ternary_expression, block, func);
         break;
 
 
@@ -164,6 +209,9 @@ BEGIN:
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
     case EXPRESSION_TYPE_ARITHMETIC_DIV:
     case EXPRESSION_TYPE_ARITHMETIC_MOD:
+        // TODO: 细分
+        fix_binary_math_expression(expression, expression->u.binary_expression, block, func);
+        break;
     case EXPRESSION_TYPE_LOGICAL_AND:
     case EXPRESSION_TYPE_LOGICAL_OR:
     case EXPRESSION_TYPE_RELATIONAL_EQ:
@@ -172,7 +220,8 @@ BEGIN:
     case EXPRESSION_TYPE_RELATIONAL_GE:
     case EXPRESSION_TYPE_RELATIONAL_LT:
     case EXPRESSION_TYPE_RELATIONAL_LE:
-        fix_binary_expression(expression, expression->u.binary_expression, block, func);
+        // TODO: 细分
+        fix_binary_relational_expression(expression, expression->u.binary_expression, block, func);
         break;
 
 
@@ -180,7 +229,7 @@ BEGIN:
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
     case EXPRESSION_TYPE_UNITARY_INCREASE:
     case EXPRESSION_TYPE_UNITARY_DECREASE:
-        fix_expression(expression->u.unitary_expression, block, func);
+        fix_unitary_expression(expression, expression->u.unitary_expression, block, func);
         break;
 
 
@@ -443,7 +492,8 @@ void fix_identifier_expression(Expression*           expression,
         break;
     }
 
-    expression->convert_type = type_specifier;
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier);
 }
 
 void fix_assign_expression(AssignExpression* expression, Block* block, Function* func) {
@@ -451,18 +501,147 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
         return;
     }
 
-    for (Expression* pos = expression->left; pos; pos = pos->next) {
+    unsigned int                left_expr_num = 0;
+    std::vector<TypeSpecifier*> left_convert_type;
+    // 对于 left, left_expr_num 和 left_convert_type.size() 是相同的
+    for (Expression* pos = expression->left; pos; pos = pos->next, left_expr_num++) {
         fix_expression(pos, block, func);
+
+        left_convert_type.push_back(pos->convert_type[0]);
     }
-    for (Expression* pos = expression->operand; pos; pos = pos->next) {
+
+    bool                        has_call        = false;
+    Expression*                 call_expression = nullptr;
+
+    unsigned int                right_expr_num  = 0;
+    std::vector<TypeSpecifier*> right_convert_type;
+    // 对于 left, 如果 function 有多个返回值, right_expr_num 和 right_convert_type.size() 是不相同的
+    for (Expression* pos = expression->operand; pos; pos = pos->next, right_expr_num++) {
+
+        if (pos->type == EXPRESSION_TYPE_FUNCTION_CALL
+            || pos->type == EXPRESSION_TYPE_METHOD_CALL) {
+            call_expression = pos;
+            has_call        = true;
+        }
+
         fix_expression(pos, block, func);
+
+        for (unsigned int i = 0; i < pos->convert_type_size; i++) {
+            right_convert_type.push_back(pos->convert_type[i]);
+        }
     }
+
+
+    if (left_expr_num > 1 || right_expr_num > 1) {
+        expression->type = ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN;
+    }
+
+    // error-report ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS
+    // operand中有多个, 其中有 function_call/method_call 不允许
+    if (right_expr_num > 1 && has_call) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "function-call/method-call is not allowed in multiple operands; E:%d.",
+                 ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(call_expression->line_number),
+            .line_number             = call_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+
+    // error-report ERROR_ASSIGNMENT_MISMATCH_NUM
+    if (left_convert_type.size() != right_convert_type.size()) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "assignment mismatch: %lu variables not match %lu operands; E:%d.",
+                 left_convert_type.size(),
+                 right_convert_type.size(),
+                 ERROR_ASSIGNMENT_MISMATCH_NUM);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(expression->line_number),
+            .line_number             = expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+    std::string left_type_s;
+    std::string right_type_s;
+    for (unsigned int i = 0; i < left_convert_type.size(); i++) {
+
+        // TODO: 深度比较
+        if (left_convert_type[i]->kind != right_convert_type[i]->kind) {
+            DEFINE_ERROR_REPORT_STR;
+
+            std::string left_str  = "(";
+            std::string right_str = "(";
+            // TODO: 第一个空格需要去掉
+            for (TypeSpecifier* type : left_convert_type) {
+                left_str += "," + format_type_specifier(type);
+            }
+            left_str += ")";
+            // TODO: 第一个空格需要去掉
+            for (TypeSpecifier* type : right_convert_type) {
+                right_str += "," + format_type_specifier(type);
+            }
+            right_str += ")";
+
+            // TODO:
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "assignment mismatch: expect %s but return %s; E:%d.",
+                     left_str.c_str(),
+                     right_str.c_str(),
+                     ERROR_ASSIGNMENT_MISMATCH_NUM);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(expression->line_number),
+                .line_number             = expression->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+    }
+
+    //
 }
 
-void fix_binary_expression(Expression* expression, BinaryExpression* binary_expression, Block* block, Function* func) {
-    if (expression == nullptr || binary_expression == nullptr) {
-        return;
-    }
+void fix_binary_math_expression(Expression*       expression,
+                                BinaryExpression* binary_expression,
+                                Block* block, Function* func) {
+
+    assert(expression != nullptr);
+    assert(binary_expression != nullptr);
 
     Expression* left_expression  = binary_expression->left_expression;
     Expression* right_expression = binary_expression->right_expression;
@@ -471,24 +650,54 @@ void fix_binary_expression(Expression* expression, BinaryExpression* binary_expr
     fix_expression(right_expression, block, func);
 
     if (expression->convert_type == nullptr) {
-        expression->convert_type              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-        expression->convert_type->line_number = expression->line_number;
+        TypeSpecifier* convert_type = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+        convert_type->kind          = RING_BASIC_TYPE_INT;
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        EXPRESSION_ADD_CONVERT_TYPE(expression, convert_type);
     }
 
     if (expression->type == EXPRESSION_TYPE_CONCAT) {
-        expression->convert_type->kind = RING_BASIC_TYPE_STRING;
+        expression->convert_type[0]->kind = RING_BASIC_TYPE_STRING;
         return;
     }
 
     if (left_expression->type == EXPRESSION_TYPE_LITERAL_DOUBLE
         || right_expression->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
-        expression->convert_type->kind = RING_BASIC_TYPE_DOUBLE;
+        expression->convert_type[0]->kind = RING_BASIC_TYPE_DOUBLE;
     }
 
-    if ((left_expression->convert_type && left_expression->convert_type->kind == RING_BASIC_TYPE_DOUBLE)
-        || (right_expression->convert_type && right_expression->convert_type->kind == RING_BASIC_TYPE_DOUBLE)) {
-        expression->convert_type->kind = RING_BASIC_TYPE_DOUBLE;
+    if ((left_expression->convert_type && left_expression->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)
+        || (right_expression->convert_type && right_expression->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)) {
+        expression->convert_type[0]->kind = RING_BASIC_TYPE_DOUBLE;
     }
+}
+
+void fix_binary_relational_expression(Expression*       expression,
+                                      BinaryExpression* binary_expression,
+                                      Block* block, Function* func) {
+
+    assert(expression != nullptr);
+    assert(binary_expression != nullptr);
+
+    Expression* left_expression  = binary_expression->left_expression;
+    Expression* right_expression = binary_expression->right_expression;
+
+    fix_expression(left_expression, block, func);
+    fix_expression(right_expression, block, func);
+
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, &bool_type_specifier);
+}
+
+void fix_unitary_expression(Expression* expression,
+                            Expression* unitary_expression,
+                            Block* block, Function* func) {
+
+    fix_expression(unitary_expression, block, func);
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, unitary_expression->convert_type[0]);
 }
 
 void fix_function_call_expression(Expression*             expression,
@@ -500,10 +709,15 @@ void fix_function_call_expression(Expression*             expression,
         return;
     }
 
+    ArgumentList* pos = function_call_expression->argument_list;
+    for (; pos != nullptr; pos = pos->next) {
+        fix_expression(pos->expression, block, func);
+    }
+
 
     Function* function = nullptr;
-    if (!is_native_function_identifier(function_call_expression->package_posit,
-                                       function_call_expression->func_identifier)) {
+    if (!is_buildin_function_identifier(function_call_expression->package_posit,
+                                        function_call_expression->func_identifier)) {
         function = search_function(function_call_expression->package_posit,
                                    function_call_expression->func_identifier);
 
@@ -535,17 +749,16 @@ void fix_function_call_expression(Expression*             expression,
         }
 
         function_call_expression->function = function;
-    }
 
-    ArgumentList* pos = function_call_expression->argument_list;
-    for (; pos != nullptr; pos = pos->next) {
-        fix_expression(pos->expression, block, func);
-    }
 
-    // function_call_expression 的类型取决于 function 返回值的类型
-    // TODO: 但是当前只能取 return_list 的第一个值
-    if (function != nullptr && function->return_list_size) {
-        expression->convert_type = function->return_list->type_specifier;
+        // function_call_expression 的类型取决于 function 返回值的类型
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        FunctionReturnList* pos = function->return_list;
+        for (; pos != nullptr; pos = pos->next) {
+            EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
+        }
+    } else {
+        fix_buildin_func(expression, function_call_expression, block, func);
     }
 }
 
@@ -567,7 +780,7 @@ void fix_method_call_expression(Expression*           expression,
     fix_expression(object_expression, block, func);
 
     // 1. find class definition by object.
-    class_definition = object_expression->convert_type->u.class_type->class_definition;
+    class_definition = object_expression->convert_type[0]->u.class_type->class_definition;
     if (class_definition == nullptr) {
         ring_error_report("fix_method_call_expression error\n");
     }
@@ -631,8 +844,10 @@ void fix_method_call_expression(Expression*           expression,
 
     // method_call_expression 的类型取决于 method返回值的类型
     // TODO: 但是当前只能取 return_list 的第一个值
-    if (member_declaration->u.method->return_list_size) {
-        expression->convert_type = member_declaration->u.method->return_list->type_specifier;
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    FunctionReturnList* return_pos = member_declaration->u.method->return_list;
+    for (; return_pos != nullptr; return_pos = return_pos->next) {
+        EXPRESSION_ADD_CONVERT_TYPE(expression, return_pos->type_specifier);
     }
 }
 
@@ -742,7 +957,8 @@ void fix_array_index_expression(Expression*           expression,
     }
     fix_type_specfier(type);
 
-    expression->convert_type = type;
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, type);
 }
 
 void fix_new_array_expression(Expression*         expression,
@@ -752,6 +968,9 @@ void fix_new_array_expression(Expression*         expression,
 
     fix_dimension_expression(new_array_expression->dimension_expression, block, func);
     fix_type_specfier(new_array_expression->type_specifier);
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, (new_array_expression->type_specifier));
 }
 
 void fix_dimension_expression(DimensionExpression* dimension_expression,
@@ -777,6 +996,9 @@ void fix_array_literal_expression(Expression*             expression,
     for (; pos != nullptr; pos = pos->next) {
         fix_expression(pos, block, func);
     }
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, array_literal_expression->type_specifier);
 }
 
 void fix_class_object_literal_expression(Expression*                   expression,
@@ -870,6 +1092,9 @@ void fix_class_object_literal_expression(Expression*                   expressio
         // fix init_expression
         fix_expression(pos->init_expression, block, func);
     }
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, literal_expression->type_specifier);
 }
 
 // TODO:
@@ -891,7 +1116,7 @@ void fix_member_expression(Expression*       expression,
     fix_expression(object_expression, block, func);
 
     // 1. find class definition by object.
-    class_definition = object_expression->convert_type->u.class_type->class_definition;
+    class_definition = object_expression->convert_type[0]->u.class_type->class_definition;
     if (class_definition == nullptr) {
         ring_error_report("fix_member_expression error, class_definition is null\n");
     }
@@ -931,7 +1156,8 @@ void fix_member_expression(Expression*       expression,
 
 
     // expression 最终的类型取决于field-member 的类型
-    expression->convert_type = member_declaration->u.field->type_specifier;
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, member_declaration->u.field->type_specifier);
     fix_class_member_expression(member_expression, object_expression, member_identifier);
 }
 
@@ -974,7 +1200,11 @@ ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, c
     return member_declaration;
 }
 
-void fix_ternary_condition_expression(TernaryExpression* ternary_expression, Block* block, Function* func) {
+void fix_ternary_condition_expression(Expression*        expression,
+                                      TernaryExpression* ternary_expression,
+                                      Block*             block,
+                                      Function*          func) {
+
     if (ternary_expression == nullptr) {
         return;
     }
@@ -982,6 +1212,23 @@ void fix_ternary_condition_expression(TernaryExpression* ternary_expression, Blo
     fix_expression(ternary_expression->condition_expression, block, func);
     fix_expression(ternary_expression->true_expression, block, func);
     fix_expression(ternary_expression->false_expression, block, func);
+
+    if (ternary_expression->true_expression->convert_type_size != 1
+        || ternary_expression->false_expression->convert_type_size != 1) {
+        // TODO: error-report
+        // ring_error_report("true_expression false_expression is invalid\n");
+    }
+
+    // TODO: error-report 类型不匹配
+    // if (true_expression->convert_type != false_expression->convert_type) {
+    // }
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    if (ternary_expression->true_expression->convert_type_size) {
+        EXPRESSION_ADD_CONVERT_TYPE(expression, ternary_expression->true_expression->convert_type[0]);
+    }
+
+    return;
 }
 
 void add_parameter_to_declaration(Parameter* parameter, Block* block) {
@@ -1048,7 +1295,11 @@ Function* search_function(char* package_posit, char* identifier) {
     return nullptr;
 }
 
-int is_native_function_identifier(char* package_posit, char* identifier) {
+int is_buildin_function_identifier(char* package_posit, char* identifier) {
+    // if (package_posit != nullptr) {
+    //     return 0;
+    // }
+
     if (str_eq(identifier, "len")) {
         return 1;
     } else if (str_eq(identifier, "capacity")) {
@@ -1061,4 +1312,43 @@ int is_native_function_identifier(char* package_posit, char* identifier) {
         return 1;
     }
     return 0;
+}
+
+void fix_buildin_func(Expression*             expression,
+                      FunctionCallExpression* function_call_expression,
+                      Block*                  block,
+                      Function*               func) {
+
+    char* identifier = function_call_expression->func_identifier;
+    if (str_eq(identifier, "len")) {
+
+        // FIXME: 应该把这个 从 fix_buildin_func 中移出
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        EXPRESSION_ADD_CONVERT_TYPE(expression, &int_type_specifier);
+
+    } else if (str_eq(identifier, "capacity")) {
+
+        // FIXME: 应该把这个 从 fix_buildin_func 中移出
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        EXPRESSION_ADD_CONVERT_TYPE(expression, &int_type_specifier);
+
+    } else if (str_eq(identifier, "push")) {
+    } else if (str_eq(identifier, "pop")) {
+        TypeSpecifier* array_type_specifier = function_call_expression->argument_list->expression->convert_type[0];
+
+        if (array_type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
+            // TODO
+            // error-report pop array
+            ring_error_report("only pop a array");
+        }
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        // FIXME: 这里不太对, 如果是多维数组的话
+        EXPRESSION_ADD_CONVERT_TYPE(expression, (array_type_specifier->sub));
+
+    } else if (str_eq(identifier, "to_string")) {
+
+        // FIXME: 应该把这个 从 fix_buildin_func 中移出
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        EXPRESSION_ADD_CONVERT_TYPE(expression, &string_type_specifier);
+    }
 }

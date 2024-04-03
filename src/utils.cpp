@@ -563,6 +563,44 @@ std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
     return result;
 }
 
+std::string format_type_specifier(TypeSpecifier* type_specifier) {
+    assert(type_specifier != nullptr);
+
+    std::string str = "";
+
+    switch (type_specifier->kind) {
+    case RING_BASIC_TYPE_BOOL:
+        str = "bool";
+        break;
+    case RING_BASIC_TYPE_INT:
+        str = "int";
+        break;
+    case RING_BASIC_TYPE_DOUBLE:
+        str = "double";
+        break;
+    case RING_BASIC_TYPE_STRING:
+        str = "string";
+        break;
+
+    case RING_BASIC_TYPE_CLASS:
+        str = "class";
+        break;
+    case RING_BASIC_TYPE_ARRAY:
+        str = "array";
+        break;
+
+    case RING_BASIC_TYPE_ANY:
+        str = "any";
+        break;
+
+    default:
+        str = ".unknow";
+        break;
+    }
+
+    return str;
+}
+
 
 /* Split a line into arguments, where every argument can be in the
  * following programming-language REPL-alike form:

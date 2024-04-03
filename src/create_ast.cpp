@@ -236,18 +236,6 @@ Expression* create_expression_unitary(ExpressionType type, Expression* unitary_e
     return expression;
 }
 
-// ring.bison.y 中 第一个参数是 VariableType
-// 该定义       中 第一个参数是 BasicValueType
-// TODO: 这里以后统一
-Expression* create_expression_unitary_with_convert_type(BasicValueType convert_type,
-                                                        Expression*    expression) {
-
-    debug_ast_info_with_yellow("convert_type:%d", convert_type);
-
-    assert(expression != nullptr);
-
-    return expression;
-}
 
 Expression* create_expression_literal(ExpressionType type, char* literal_interface) {
     debug_ast_info_with_yellow("type:%d", type);
@@ -310,10 +298,13 @@ Expression* create_cast_expression(TypeSpecifier* cast_type, Expression* operand
  * 也就是说 type_specifier 是 booll int double string class
  *
  */
-Expression* create_new_array_expression(TypeSpecifier*       type_specifier,
+// TODO:
+Expression* create_new_array_expression(TypeSpecifier*       sub_type,
                                         DimensionExpression* dimension_expression) {
 
-    Expression* expression                                   = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
+    TypeSpecifier* type_specifier                            = create_type_specifier_array(sub_type, dimension_expression);
+
+    Expression*    expression                                = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                                  = package_unit_get_line_number();
     expression->convert_type                                 = nullptr; // fix in fix_ast
     expression->type                                         = EXPRESSION_TYPE_NEW_ARRAY;
@@ -403,15 +394,16 @@ MethodCallExpression* create_method_call_expression(Expression*   object_express
     return method_call_expression;
 }
 
-ArrayLiteralExpression* create_array_literal_expression(TypeSpecifier*       type_specifier,
+ArrayLiteralExpression* create_array_literal_expression(TypeSpecifier*       sub_type,
                                                         DimensionExpression* dimension_expression,
                                                         Expression*          expression_list) {
+    TypeSpecifier*          type_specifier = create_type_specifier_array(sub_type, dimension_expression);
 
-    ArrayLiteralExpression* array_literal = (ArrayLiteralExpression*)mem_alloc(get_front_mem_pool(), sizeof(ArrayLiteralExpression));
-    array_literal->line_number            = package_unit_get_line_number();
-    array_literal->type_specifier         = type_specifier;
-    array_literal->dimension_expression   = dimension_expression;
-    array_literal->expression_list        = expression_list;
+    ArrayLiteralExpression* array_literal  = (ArrayLiteralExpression*)mem_alloc(get_front_mem_pool(), sizeof(ArrayLiteralExpression));
+    array_literal->line_number             = package_unit_get_line_number();
+    array_literal->type_specifier          = type_specifier;
+    array_literal->dimension_expression    = dimension_expression;
+    array_literal->expression_list         = expression_list;
     return array_literal;
 }
 
@@ -879,13 +871,15 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
  * array-string
  * 类数组 嵌套数组
  */
-TypeSpecifier* create_type_specifier_array(TypeSpecifier* type, DimensionExpression* dimension) {
+TypeSpecifier* create_type_specifier_array(TypeSpecifier*       sub_type,
+                                           DimensionExpression* dimension_expression) {
+
     TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
     type_specifier->line_number   = package_unit_get_line_number();
     type_specifier->kind          = RING_BASIC_TYPE_ARRAY;
     type_specifier->u.array_type  = nullptr;
-    type_specifier->dimension     = dimension->dimension;
-    type_specifier->sub           = type;
+    type_specifier->dimension     = dimension_expression->dimension;
+    type_specifier->sub           = sub_type;
 
     // error-report ERROR_ARRAY_DIMENSION_INVALID
     if (type_specifier->dimension > MAX_DIMENSION_NUM) {

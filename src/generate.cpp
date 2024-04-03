@@ -1024,20 +1024,19 @@ void generate_vmcode_from_expression(Package_Executer* executer,
         generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_MOD_INT);
         break;
 
-    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
-        generate_vmcode_from_unitary_minus_expression(executer, expression->u.unitary_expression, opcode_buffer, RVM_CODE_MINUS_INT);
-        break;
-
     case EXPRESSION_TYPE_LOGICAL_AND:
         generate_vmcode_from_logical_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_LOGICAL_AND);
         break;
     case EXPRESSION_TYPE_LOGICAL_OR:
         generate_vmcode_from_logical_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_LOGICAL_OR);
         break;
+
+    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
+        generate_vmcode_from_unitary_minus_expression(executer, expression->u.unitary_expression, opcode_buffer, RVM_CODE_MINUS_INT);
+        break;
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
         generate_vmcode_from_unitary_not_expression(executer, expression->u.unitary_expression, opcode_buffer, RVM_CODE_LOGICAL_NOT);
         break;
-
     case EXPRESSION_TYPE_UNITARY_INCREASE:
     case EXPRESSION_TYPE_UNITARY_DECREASE:
         generate_vmcode_from_increase_decrease_expression(executer, expression, opcode_buffer);
@@ -1135,7 +1134,8 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer,
 
     // += -= *= /= %= .=
     unsigned int opcode_offset = 0;
-    if (expression->operand->convert_type != nullptr && expression->operand->convert_type->kind == RING_BASIC_TYPE_DOUBLE) {
+    if (expression->operand->convert_type != nullptr
+        && expression->operand->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE) {
         opcode_offset += 1;
     }
     switch (expression->type) {
@@ -1375,8 +1375,8 @@ void generate_vmcode_from_binary_expression(Package_Executer* executer,
         goto END;
     }
 
-    if (left->convert_type != nullptr && left->convert_type->kind == RING_BASIC_TYPE_STRING
-        && right->convert_type != nullptr && right->convert_type->kind == RING_BASIC_TYPE_STRING) {
+    if (left->convert_type != nullptr && left->convert_type[0]->kind == RING_BASIC_TYPE_STRING
+        && right->convert_type != nullptr && right->convert_type[0]->kind == RING_BASIC_TYPE_STRING) {
         // TODO: 要在语义检查里严格检查
         // 肯定是eq ne gt ge lt le
         opcode = RVM_Opcode(opcode + 2);
@@ -1387,8 +1387,8 @@ void generate_vmcode_from_binary_expression(Package_Executer* executer,
     if (left->type == EXPRESSION_TYPE_LITERAL_DOUBLE
         || right->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
         opcode = RVM_Opcode(opcode + 1);
-    } else if ((left->convert_type != nullptr && left->convert_type->kind == RING_BASIC_TYPE_DOUBLE)
-               || (right->convert_type != nullptr && right->convert_type->kind == RING_BASIC_TYPE_DOUBLE)) {
+    } else if ((left->convert_type != nullptr && left->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)
+               || (right->convert_type != nullptr && right->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)) {
         opcode = RVM_Opcode(opcode + 1);
     }
 
@@ -1593,7 +1593,7 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
         return;
     }
 
-    if (is_native_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
+    if (is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
         generate_vmcode_from_native_function_call_expression(executer, function_call_expression, opcode_buffer);
         return;
     }
@@ -1632,10 +1632,10 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
     char*         function_identifier = function_call_expression->func_identifier;
 
     if (str_eq(function_identifier, "len")) {
-        if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
+        if (function_call_expression->argument_list->expression->convert_type[0]->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_LEN, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_ARRAY) {
+        } else if (function_call_expression->argument_list->expression->convert_type[0]->kind == RING_BASIC_TYPE_ARRAY) {
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_LEN, 0, function_call_expression->line_number);
         } else {
@@ -1643,10 +1643,10 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
             ring_error_report("function `len()` argument is not string or array\n");
         }
     } else if (str_eq(function_identifier, "capacity")) {
-        if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_STRING) {
+        if (function_call_expression->argument_list->expression->convert_type[0]->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_CAPACITY, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->kind == RING_BASIC_TYPE_ARRAY) {
+        } else if (function_call_expression->argument_list->expression->convert_type[0]->kind == RING_BASIC_TYPE_ARRAY) {
             generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_CAPACITY, 0, function_call_expression->line_number);
         } else {
@@ -1659,19 +1659,19 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
             generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
         }
 
-        if (function_call_expression->argument_list->expression->convert_type->kind != RING_BASIC_TYPE_ARRAY) {
+        if (function_call_expression->argument_list->expression->convert_type[0]->kind != RING_BASIC_TYPE_ARRAY) {
             ring_error_report("error: push() only used to append value to array\n");
         }
 
-        if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_BOOL) {
+        if (function_call_expression->argument_list->expression->convert_type[0]->sub->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_BOOL, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_INT) {
+        } else if (function_call_expression->argument_list->expression->convert_type[0]->sub->kind == RING_BASIC_TYPE_INT) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_INT, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_DOUBLE) {
+        } else if (function_call_expression->argument_list->expression->convert_type[0]->sub->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_DOUBLE, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_STRING) {
+        } else if (function_call_expression->argument_list->expression->convert_type[0]->sub->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_STRING, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_CLASS) {
+        } else if (function_call_expression->argument_list->expression->convert_type[0]->sub->kind == RING_BASIC_TYPE_CLASS) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_APPEND_CLASS_OB, 0, function_call_expression->line_number);
         } else {
             ring_error_report("error: push() is only be used by bool[] int[] double[] string[] class[]\n");
@@ -1681,19 +1681,19 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
         pos = function_call_expression->argument_list;
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
 
-        if (pos->expression->convert_type->kind != RING_BASIC_TYPE_ARRAY) {
+        if (pos->expression->convert_type[0]->kind != RING_BASIC_TYPE_ARRAY) {
             ring_error_report("error: pop() only used to append value to array\n");
         }
 
-        if (pos->expression->convert_type->sub->kind == RING_BASIC_TYPE_BOOL) {
+        if (pos->expression->convert_type[0]->sub->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_BOOL, 0, function_call_expression->line_number);
-        } else if (pos->expression->convert_type->sub->kind == RING_BASIC_TYPE_INT) {
+        } else if (pos->expression->convert_type[0]->sub->kind == RING_BASIC_TYPE_INT) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_INT, 0, function_call_expression->line_number);
-        } else if (pos->expression->convert_type->sub->kind == RING_BASIC_TYPE_DOUBLE) {
+        } else if (pos->expression->convert_type[0]->sub->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_DOUBLE, 0, function_call_expression->line_number);
-        } else if (pos->expression->convert_type->sub->kind == RING_BASIC_TYPE_STRING) {
+        } else if (pos->expression->convert_type[0]->sub->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_STRING, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type->sub->kind == RING_BASIC_TYPE_CLASS) {
+        } else if (function_call_expression->argument_list->expression->convert_type[0]->sub->kind == RING_BASIC_TYPE_CLASS) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_ARRAY_POP_CLASS_OB, 0, function_call_expression->line_number);
         } else {
             ring_error_report("error: pop() is only be used by bool[] int[] double[] string[] class[]\n");
@@ -1703,11 +1703,11 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
 
 
-        if (pos->expression->convert_type->kind == RING_BASIC_TYPE_BOOL) {
+        if (pos->expression->convert_type[0]->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_BOOL_2_STRING, 0, function_call_expression->line_number);
-        } else if (pos->expression->convert_type->kind == RING_BASIC_TYPE_INT) {
+        } else if (pos->expression->convert_type[0]->kind == RING_BASIC_TYPE_INT) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_INT_2_STRING, 0, function_call_expression->line_number);
-        } else if (pos->expression->convert_type->kind == RING_BASIC_TYPE_DOUBLE) {
+        } else if (pos->expression->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_DOUBLE_2_STRING, 0, function_call_expression->line_number);
         } else {
             ring_error_report("error: to_string() only be used by bool/int/double\n");
@@ -1759,31 +1759,31 @@ void generate_vmcode_from_cast_expression(Package_Executer* executer,
     switch (cast_expression->type_specifier->kind) {
     case RING_BASIC_TYPE_BOOL:
         if (cast_expression->operand->convert_type != nullptr
-            && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_INT) {
+            && cast_expression->operand->convert_type[0]->kind == RING_BASIC_TYPE_INT) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_BOOL, 0, cast_expression->line_number);
         } else if (cast_expression->operand->convert_type != nullptr
-                   && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_DOUBLE) {
+                   && cast_expression->operand->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_DOUBLE_TO_INT, 0, cast_expression->line_number);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_BOOL, 0, cast_expression->line_number);
         }
         break;
     case RING_BASIC_TYPE_INT:
         if (cast_expression->operand->convert_type != nullptr
-            && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_BOOL) {
+            && cast_expression->operand->convert_type[0]->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_BOOL_TO_INT, 0, cast_expression->line_number);
         } else if (cast_expression->operand->convert_type != nullptr
-                   && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_DOUBLE) {
+                   && cast_expression->operand->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_DOUBLE_TO_INT, 0, cast_expression->line_number);
         }
         break;
 
     case RING_BASIC_TYPE_DOUBLE:
         if (cast_expression->operand->convert_type != nullptr
-            && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_BOOL) {
+            && cast_expression->operand->convert_type[0]->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_BOOL_TO_INT, 0, cast_expression->line_number);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_DOUBLE, 0, cast_expression->line_number);
         } else if (cast_expression->operand->convert_type != nullptr
-                   && cast_expression->operand->convert_type->kind == RING_BASIC_TYPE_INT) {
+                   && cast_expression->operand->convert_type[0]->kind == RING_BASIC_TYPE_INT) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_CAST_INT_TO_DOUBLE, 0, cast_expression->line_number);
         }
         break;
@@ -1851,6 +1851,9 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
     debug_generate_info_with_darkgreen("\t");
     assert(new_array_expression != nullptr);
     assert(new_array_expression->dimension_expression != nullptr);
+    assert(new_array_expression->type_specifier != nullptr);
+    assert(new_array_expression->type_specifier->kind == RING_BASIC_TYPE_ARRAY);
+    assert(new_array_expression->type_specifier->sub != nullptr);
 
     // TODO: 继续支持多维数组
     // dimension 当前只能是1
@@ -1868,17 +1871,18 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
     // 将维度 push stack 中
 
     // unsigned int size = new_array_expression->dimension_expression->dimension_list->num;
+    TypeSpecifier* sub_type_specifier = new_array_expression->type_specifier->sub;
 
-    if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_BOOL) {
+    if (sub_type_specifier->kind == RING_BASIC_TYPE_BOOL) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_BOOL, dimension, new_array_expression->line_number);
-    } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_INT) {
+    } else if (sub_type_specifier->kind == RING_BASIC_TYPE_INT) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_INT, dimension, new_array_expression->line_number);
-    } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_DOUBLE) {
+    } else if (sub_type_specifier->kind == RING_BASIC_TYPE_DOUBLE) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_DOUBLE, dimension, new_array_expression->line_number);
-    } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_STRING) {
+    } else if (sub_type_specifier->kind == RING_BASIC_TYPE_STRING) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_STRING, dimension, new_array_expression->line_number);
-    } else if (new_array_expression->type_specifier->kind == RING_BASIC_TYPE_CLASS) {
-        ClassDefinition* class_definition = new_array_expression->type_specifier->u.class_type->class_definition;
+    } else if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
+        ClassDefinition* class_definition = sub_type_specifier->u.class_type->class_definition;
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_CLASS_OB, (dimension << 8) | (class_definition->class_index), new_array_expression->line_number);
     } else {
         ring_error_report("error: new array only support bool[] int[] double[] string[] class[]\n");
@@ -1935,6 +1939,10 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
     debug_generate_info_with_darkgreen("\t");
     assert(array_literal_expression != nullptr);
     assert(array_literal_expression->expression_list != nullptr);
+    assert(array_literal_expression->dimension_expression != nullptr);
+    assert(array_literal_expression->type_specifier != nullptr);
+    assert(array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_ARRAY);
+    assert(array_literal_expression->type_specifier->sub != nullptr);
 
     int         size = 0;
     Expression* pos  = array_literal_expression->expression_list;
@@ -1943,19 +1951,21 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
         size++;
     }
 
-    unsigned int oper_num = 0;
+    TypeSpecifier* sub_type_specifier = array_literal_expression->type_specifier->sub;
+
+    unsigned int   oper_num           = 0;
 
     if (array_literal_expression->dimension_expression->dimension == 1) {
-        if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_BOOL) {
+        if (sub_type_specifier->kind == RING_BASIC_TYPE_BOOL) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_BOOL, size, array_literal_expression->line_number);
-        } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_INT) {
+        } else if (sub_type_specifier->kind == RING_BASIC_TYPE_INT) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_INT, size, array_literal_expression->line_number);
-        } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_DOUBLE) {
+        } else if (sub_type_specifier->kind == RING_BASIC_TYPE_DOUBLE) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE, size, array_literal_expression->line_number);
-        } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_STRING) {
+        } else if (sub_type_specifier->kind == RING_BASIC_TYPE_STRING) {
             generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_STRING, size, array_literal_expression->line_number);
-        } else if (array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_CLASS) {
-            ClassDefinition* class_definition = array_literal_expression->type_specifier->u.class_type->class_definition;
+        } else if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
+            ClassDefinition* class_definition = sub_type_specifier->u.class_type->class_definition;
             oper_num                          = (class_definition->class_index << 16) | size;
             generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB, oper_num, array_literal_expression->line_number);
         } else {

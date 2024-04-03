@@ -985,15 +985,6 @@ typedef enum {
     FUNCTION_TYPE_DERIVE,
 } FunctionType;
 
-typedef enum {
-    BASICVALUE_TYPE_UNKNOW = 0,
-    BASICVALUE_TYPE_BOOL,
-    BASICVALUE_TYPE_INT,
-    BASICVALUE_TYPE_DOUBLE,
-    BASICVALUE_TYPE_CHAR,
-    BASICVALUE_TYPE_STRING,
-    BASICVALUE_TYPE_ARRAY,
-} BasicValueType;
 
 typedef enum {
     ASSIGN_EXPRESSION_TYPE_UNKNOW = 0,
@@ -1007,26 +998,17 @@ typedef enum {
     ASSIGN_EXPRESSION_TYPE_CONCAT_ASSIGN, // .=
 } AssignExpressionType;
 
-struct Ring_BasicValue {
-    BasicValueType type;
-    BasicValueType array_member_type;
 
-    union {
-        Ring_Bool   bool_value;
-        int         int_value;
-        double      double_value;
-        char        char_value;
-        char*       string_value; // 暂时没用到
-        Ring_Array* array_value;
-    } u;
-    Ring_BasicValue* next; // FIXME: 这个用在 return 多个的时候 return 1,2; 见 interpret_binary_expression:invoke_function
-    // FIXME: 以后更改这个地方
-};
+typedef struct {
+    const char*                 identifier;
 
-struct Ring_Array {
-    unsigned int     size;
-    Ring_BasicValue* data;
-};
+    int                         param_size;
+    std::vector<TypeSpecifier*> param_types;
+
+    int                         return_size;
+    std::vector<TypeSpecifier*> return_types;
+
+} Ring_Buildin_Func;
 
 // ----------------------------------
 // class define
@@ -1144,10 +1126,23 @@ struct StatementExecResult {
 };
 
 struct Expression {
-    unsigned int   line_number;
+    unsigned int line_number;
 
-    TypeSpecifier* convert_type; // 一个复杂表达式最后结果值的类型, FIX_AST_UPDATE
-    ExpressionType type;
+
+    /*
+     * 一个表达式肯定是有返回值的(除了assign 表达式)(所以 assign是不是应该是个语句, 而不是表达式)
+     * 需要通过返回值与后续的操作进行比对, 数据的类型要保持一致, string不能赋值给int变量
+     * 对于 function-call/method-call 这种的, 返回值可能有多个, 所以convert_type_size > 1
+     *
+     * convert_type 统一在 fix_ast中进行更新.
+     * fix_ast 中不对 TypeSpecifier进行内存分配, 支持保存指针
+     *
+     * 但是这里可能很大部分 convert_type_size 都为1, 如果选择
+     */
+    unsigned int    convert_type_size;
+    TypeSpecifier** convert_type;
+
+    ExpressionType  type;
     union {
         Ring_Bool                     bool_literal;
         int                           int_literal;
@@ -1720,25 +1715,30 @@ typedef enum {
     ERROR_CODE_SEMANTIC_CHECH_ERROR,
 
 
-    ERROR_CODE_GRAMMAR_ERROR             = 100000, // 语法错误
+    ERROR_CODE_GRAMMAR_ERROR                 = 100000, // 语法错误
 
 
-    ERROR_UNDEFINITE_VARIABLE            = 200000,
-    ERROR_REDEFINITE_GLOBAL_VARIABLE     = 200001, // 重复定义全局变量
-    ERROR_REDEFINITE_FUNCTION            = 200002, // 重复定义函数
-    ERROR_MINUS_OPER_INVALID_USE         = 200003, // - 符号 不合法使用
-    ERROR_DUPLICATE_IMPORT_PACKAGE       = 200004, // 重复 import package
-    ERROR_INVALID_VARIABLE_IDENTIFIER    = 200005, // 不合法的变量标识符
-    ERROR_TOO_MANY_LOCAL_VARIABLES       = 200006, // 局部变量数量超过限制
-    ERROR_TOO_MANY_FIELDS_IN_CLASS       = 200007, // class 中 field 的数量超过限制
-    ERROR_TOO_MANY_METHODS_IN_CLASS      = 200008, // class 中 method 的数量超过限制
-    ERROR_MISS_CLASS_DEFINITION          = 200009, // 缺少 class 定义
-    ERROR_INVALID_FIELD_IN_CLASS         = 200010, // field 不合法
-    ERROR_ARRAY_DIMENSION_INVALID        = 200011, // 数组维度不合法
-    ERROR_ASSIGN_TO_METHOD_OF_CLASS      = 200012, // 不能给 class中 method赋值
-    ERROR_INVALID_NOT_FOUND_CLASS_FIELD  = 200013, // 找不到 class field
-    ERROR_INVALID_NOT_FOUND_CLASS_METHOD = 200014, // 找不到 class field
-    ERROR_UNCLOSED_STRING_LITERAL        = 200015, // 未关闭的字符串常量
+    ERROR_UNDEFINITE_VARIABLE                = 200000,
+    ERROR_REDEFINITE_GLOBAL_VARIABLE         = 200001, // 重复定义全局变量
+    ERROR_REDEFINITE_FUNCTION                = 200002, // 重复定义函数
+    ERROR_MINUS_OPER_INVALID_USE             = 200003, // - 符号 不合法使用
+    ERROR_DUPLICATE_IMPORT_PACKAGE           = 200004, // 重复 import package
+    ERROR_INVALID_VARIABLE_IDENTIFIER        = 200005, // 不合法的变量标识符
+    ERROR_TOO_MANY_LOCAL_VARIABLES           = 200006, // 局部变量数量超过限制
+    ERROR_TOO_MANY_FIELDS_IN_CLASS           = 200007, // class 中 field 的数量超过限制
+    ERROR_TOO_MANY_METHODS_IN_CLASS          = 200008, // class 中 method 的数量超过限制
+    ERROR_MISS_CLASS_DEFINITION              = 200009, // 缺少 class 定义
+    ERROR_INVALID_FIELD_IN_CLASS             = 200010, // field 不合法
+    ERROR_ARRAY_DIMENSION_INVALID            = 200011, // 数组维度不合法
+    ERROR_ASSIGN_TO_METHOD_OF_CLASS          = 200012, // 不能给 class中 method赋值
+    ERROR_INVALID_NOT_FOUND_CLASS_FIELD      = 200013, // 找不到 class field
+    ERROR_INVALID_NOT_FOUND_CLASS_METHOD     = 200014, // 找不到 class field
+    ERROR_UNCLOSED_STRING_LITERAL            = 200015, // 未关闭的字符串常量
+
+    ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS = 200016, // 函数调用用到 多项赋值中
+
+    ERROR_ASSIGNMENT_MISMATCH_NUM            = 200017, // 赋值时, 左值和右值的数量不匹配
+    ERROR_ASSIGNMENT_MISMATCH_TYPE           = 200018, // 赋值时, 左值和右值的类型不匹配
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -2061,11 +2061,11 @@ Expression*                   create_expression_assign(AssignExpression* assign_
 Expression*                   create_expression_ternary(Expression* condition, Expression* true_expression, Expression* false_expression);
 Expression*                   create_expression_binary(ExpressionType type, Expression* left, Expression* right);
 Expression*                   create_expression_unitary(ExpressionType type, Expression* unitary_expression);
-Expression*                   create_expression_unitary_with_convert_type(BasicValueType convert_type, Expression* expression);
 Expression*                   create_expression_literal(ExpressionType type, char* literal_interface);
 Expression*                   create_expression_bool_literal(ExpressionType type, Ring_Bool value);
 Expression*                   create_cast_expression(TypeSpecifier* cast_type, Expression* operand);
-Expression*                   create_new_array_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression);
+Expression*                   create_new_array_expression(TypeSpecifier*       sub_type,
+                                                          DimensionExpression* dimension_expression);
 
 FieldInitExpression*          create_field_init_expression(char* field_identifier, Expression* init_expression);
 FieldInitExpression*          field_init_list_add_item(FieldInitExpression* list, FieldInitExpression* item);
@@ -2075,7 +2075,7 @@ AssignExpression*             create_multi_assign_expression(Expression* first_l
                                                              Expression* operand);
 FunctionCallExpression*       create_function_call_expression(char* identifier, ArgumentList* argument_list);
 MethodCallExpression*         create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list);
-ArrayLiteralExpression*       create_array_literal_expression(TypeSpecifier* type_specifier, DimensionExpression* dimension_expression, Expression* expression_list);
+ArrayLiteralExpression*       create_array_literal_expression(TypeSpecifier* sub_type, DimensionExpression* dimension_expression, Expression* expression_list);
 ClassObjectLiteralExpression* create_class_object_literal_expression(TypeSpecifier* type_specifier, FieldInitExpression* field_init_expression_list);
 Expression*                   expression_list_add_item(Expression* expression_list, Expression* expression);
 ArgumentList*                 argument_list_add_item(ArgumentList* argument_list, ArgumentList* argument);
@@ -2116,7 +2116,7 @@ SubDimensionExpression*       create_sub_dimension_expression(Expression* num_ex
 SubDimensionExpression*       sub_dimension_expression_list_add_item(SubDimensionExpression* list, SubDimensionExpression* item);
 
 TypeSpecifier*                create_type_specifier(Ring_BasicType basic_type);
-TypeSpecifier*                create_type_specifier_array(TypeSpecifier* type, DimensionExpression* dimension);
+TypeSpecifier*                create_type_specifier_array(TypeSpecifier* sub_type, DimensionExpression* dimension);
 TypeSpecifier*                create_class_type_specifier(char* identifier);
 
 Declaration*                  create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
@@ -2189,7 +2189,15 @@ void                    fix_identifier_expression(Expression*           expressi
                                                   IdentifierExpression* identifier_expression,
                                                   Block*                block);
 void                    fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
-void                    fix_binary_expression(Expression* expression, BinaryExpression* binary_expression, Block* block, Function* func);
+void                    fix_binary_math_expression(Expression*       expression,
+                                                   BinaryExpression* binary_expression,
+                                                   Block* block, Function* func);
+void                    fix_binary_relational_expression(Expression*       expression,
+                                                         BinaryExpression* binary_expression,
+                                                         Block* block, Function* func);
+void                    fix_unitary_expression(Expression* expression,
+                                               Expression* unitary_expression,
+                                               Block* block, Function* func);
 void                    fix_function_call_expression(Expression*             expression,
                                                      FunctionCallExpression* function_call_expression,
                                                      Block*                  block,
@@ -2216,11 +2224,19 @@ void                    fix_member_expression(Expression* expression, MemberExpr
 void                    fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
 ClassDefinition*        search_class_definition(char* class_identifier);
 ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, char* member_identifier);
-void                    fix_ternary_condition_expression(TernaryExpression* ternary_expression, Block* block, Function* func);
+void                    fix_ternary_condition_expression(Expression*        expression,
+                                                         TernaryExpression* ternary_expression,
+                                                         Block*             block,
+                                                         Function*          func);
 void                    add_parameter_to_declaration(Parameter* parameter, Block* block);
 Declaration*            search_declaration(char* package_posit, char* identifier, Block* block);
 Function*               search_function(char* package_posit, char* identifier);
-int                     is_native_function_identifier(char* package_posit, char* identifier);
+
+int                     is_buildin_function_identifier(char* package_posit, char* identifier);
+void                    fix_buildin_func(Expression*             expression,
+                                         FunctionCallExpression* function_call_expression,
+                                         Block*                  block,
+                                         Function*               func);
 // --------------------
 
 
@@ -2494,6 +2510,8 @@ unsigned int             get_source_line_number_by_pc(RVM_Function* function, un
 std::string              format_rvm_type(RVM_Value* value);
 std::string              format_rvm_value(RVM_Value* value);
 std::string              format_rvm_call_stack(Ring_VirtualMachine* rvm);
+
+std::string              format_type_specifier(TypeSpecifier* type_specifier);
 
 std::vector<std::string> splitargs(const char* line);
 static int               hex_digit_to_int(char c);

@@ -9,6 +9,7 @@ OBJS   = \
 	semantic_check.o\
 	fix_ast.o\
 	vm.o\
+	buildin.o\
 	generate.o\
 	execute.o\
 	compiler.o\
@@ -176,6 +177,7 @@ create_ast.o: create_ast.cpp ring.hpp
 semantic_check.o: semantic_check.cpp ring.hpp
 fix_ast.o: fix_ast.cpp ring.hpp
 vm.o: vm.cpp ring.hpp
+buildin.o: buildin.cpp ring.hpp
 generate.o: generate.cpp ring.hpp
 execute.o: execute.cpp ring.hpp
 bytecode.o: bytecode.cpp ring.hpp
