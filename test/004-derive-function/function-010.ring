@@ -9,7 +9,7 @@ import {
 
 
 
-function test(var int int_value_1, var int int_value_2) {
+function test(var int int_value_1, var int int_value_2) -> (int,int,int,int) {
 	var int int_value_3;
 	var int int_value_4;
 

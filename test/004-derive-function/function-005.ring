@@ -9,16 +9,16 @@ import {
 
 
 
-function test_return_1() {
+function test_return_1() -> (int) {
     return 1;
 }
 
 
-function test_return_2() {
+function test_return_2() -> (int,int) {
     return 2, 3;
 }
 
-function test_return_3() {
+function test_return_3() -> (int,int,int) {
     return 4, 5, 6;
 }
 

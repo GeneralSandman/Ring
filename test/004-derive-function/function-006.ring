@@ -9,20 +9,20 @@ import {
 
 
 
-function test_return_1() {
+function test_return_1() -> (int) {
 	var int int_value_local_1;
 	int_value_local_1 = 1;
     return int_value_local_1;
 }
 
 
-function test_return_2() {
+function test_return_2() -> (int,int) {
 	var int int_value_local_1;
 	int_value_local_1 = 2;
     return int_value_local_1, int_value_local_1 + 1;
 }
 
-function test_return_3() {
+function test_return_3() -> (int,int,int) {
 	var int int_value_local_1;
 	int_value_local_1 = 4;
     return int_value_local_1, int_value_local_1 + 1, int_value_local_1 + 2;

@@ -16,7 +16,7 @@ global {
 
 
 
-function test_1(var int int_value_1, var int int_value_2) {
+function test_1(var int int_value_1, var int int_value_2) -> (int, int) {
     fmt::println_string("function test_1");
 
     fmt::println_int(int_value_1);
