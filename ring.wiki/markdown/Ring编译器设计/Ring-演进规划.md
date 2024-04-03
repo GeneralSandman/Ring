@@ -418,13 +418,14 @@ class-object  ✅
 或者一个 语句 `"bool"`; 栈空间会不太正确.
 
 
-### B. 测试多种成员相互交织
+### B. 测试链式调用 ✅ 
+
+1. 主要是要修正 function method 的 return_list  ✅ 
+2. 测试 function method field各种相互组合的场景 ✅ 
 
 
-ClassMemberDeclaration 中 return_list 为空, 需要修正
+例如:  ./test/008-class/class-052.ring:208
 
-test/008-class/class-050.ring
-test/008-class/class-051.ring
 
 ```
     job_1.printInfo();
@@ -437,6 +438,120 @@ test/008-class/class-051.ring
 ```
     job_1.returnSelf().Job2.Job3.returnSelf().Job4.printInfo();
 ```
+
+
+```
+copyJob4(
+        copyJob3(
+            copyJob2(
+                copyJob1(job_1).Job2
+                ).Job3
+            ).Job4
+        ).printInfo();
+```
+
+
+
+### C. duplicate字节码修改一下名字 ✅ 
+
+duplicate 修改成 shallow_copy 更好理解,
+与 deep_copy相对应
+
+
+### D. class-object literal 中, 最后一个元素后边有没有逗号都可以 ✅ 
+
+
+
+### E. 命令行交互式调试虚拟机工具
+
+
+#### a. Stack详情 和 字节码详情 信息的展示做一个简单的重构 ✅ 
+
+1. Stack详情: 可以详细展示数据的类型和数值
+2. 字节码详情: 可以显示当前位置的前后20行字节码, 同时显示当前的所在的函数名称
+
+
+#### b. printf标准输出 和 交互式的命令行展示信息 冲突 ✅ 
+
+1. DEBUG_RVM_INTERACTIVE情况下: printf标准输出会重定向到文件 /tmp/ring-debug-vm.stdout.log
+2. 交互式的命令行展示信息(Stack详情、字节码详情) 通过 stderr 的形式输出.
+
+
+
+#### c. 目前只能一步一步的运行, 需要支持进入函数和不进入函数 // TODO:
+
+Enter 一步一步
+step:
+next:
+until:
+
+
+
+### F. 针对函数调用专门优化语义报错 提示
+
+1. 赋值操作 left 和 right 数量类型的是否正确一致 ✅ 
+2. 参数的数量不一致
+3. 参数的类型不一致
+4. 返回值的数量不一致
+5. 返回值的类型不一致
+
+#### a.多项赋值和函数调用应该做一个限制
+
+函数:
+```
+func test_0() {
+}
+
+func test_1() (bool) {
+	return false
+}
+
+func test_2() (bool, int) {
+	return false, 0
+}
+
+func main() {
+
+    // 这种情况不应该允许
+    // test_2() 的返回值是一个整体
+	a, b, c := test_1(), test_2()
+
+    // 这种情况不应该允许
+    // test_0() 没有返回值
+    a, b, c := test_0(), test_1(), test_1(), test_1()
+
+    // 这种情况下应该允许
+    // 函数的返回值只有一个
+    a, b, c := test_1(), test_1(), test_1()
+    a, b, c := test_1(), test_1(), false
+	a, b, c := false, test_1(), test_1()
+
+}
+```
+
+也就是多返回值不能用在
+
+### G. 如果只有单独的表达式(push stack value) 但是没有 pop, 会造成栈空间的增长
+
+```
+1;
+2;
+"asefad";
+test(); // 有返回值但是没有接手
+
+```
+
+白白浪费了一个stack空间.
+
+
+
+### H. AST 路径的缩减
+
+
+
+### I. fix_binary_math_expression()  fix_binary_relational_expression() 要做精细化的划分
+
+把逻辑分开, 每层逻辑可以保持干净
 
 -----------------------------
 
@@ -469,9 +584,9 @@ method printInfo() {
 FIXME: 这样写是会崩溃的, 因为本来没返回值, 这里却返回了, 需要强制检查返回值.
 
 
-### D. BUG: 多赋值 和 array
+### D. 多项赋值 的深度 copy, 通过 RVM_CODE_DEEP_COPY 解决这个问题 ✅ 
 
-test/008-class/class-030.ring
+#### a. 在这种情况下, 实际上是 对 数组元素class-object的deep-copy
 
 ```
 for(i = 0; i<5; i++) {
@@ -480,49 +595,86 @@ for(i = 0; i<5; i++) {
 }
 ```
 
-不能正确交换, 值发生了覆盖, 需要单独处理
 
-rvm_array_get_class_object 在某些时候需要浅copy, 某些时候需要深度copy, 如何区分这个
+#### b. 在这种情况下, 实际上是 对 数组元素class-object的shallow-copy
 
-arr[1].tmp = 1;
-
-
-
-
-### E. BUG: 
-
-RVM_CODE_DEEP_COPY 真对于多维数组的赋值
-
-a[2,2];
-
-a[0,0] = a[1,1]; // FIXME: 这里好像是浅copy, 需要优化
+```
+global_job_array_0[9-i].Int = 1;
+```
 
 
 
-### F. 参见 测试用例补充一下完善的功能
 
-test/008-class/class-014.ring
-test/008-class/class-015.ring
+### E. 添加一个新的字节码: RVM_CODE_DEEP_COPY  ✅ 
+
+RVM_CODE_DEEP_COPY 是对栈上的数据做深度copy.
+RVM_CODE_SHALLOW_COPY 是对栈上的数据做浅copy.
 
 
-test/008-class/class-020.ring
-test/008-class/class-021.ring
-test/008-class/class-022.ring
-test/008-class/class-023.ring
-
-test/008-class/class-030.ring
-
-test/008-class/class-040.ring
+TODO: 以后需要这样规划:
+默认字节码是对栈上的数据做shallow-copy
+但是对于 deep-copy的场景(赋值、函数传递), 需要显式生成一个字节码: RVM_CODE_DEEP_COPY , 专门处理数据的deep-copy
 
 
 
-### G. 命令行交互式调试虚拟机工具
 
-Enter 一步一步
-step:
-next:
-until:
 
+### F. 完善测试用例 ✅ 
+
+#### a.  ✅ 
+
+数组元素为 class-obect
+通过索引访问数组元素并直接调用method
+`global_job_array_0[i].printInfo();`
+
+
+#### b. ✅ 
+
+数组元素为 class-obect
+通过for-range访问数组元素并直接调用method
+```
+for(local_job_value in range global_job_array_0) {
+    local_job_value.printInfo();
+}
+```
+
+
+
+#### c. ✅ 
+
+数组的元素为 class-obect
+Usage: 将数组内的所有的对象顺序反转
+Code:
+```
+global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];
+for(i = 0; i<5; i++) {
+    global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];
+}
+```
+
+
+#### d. ✅ 
+
+
+数组的元素为 class-obect, 数组为二维数组
+直接通过索引交换元素, 只不过是一次交换一整列
+```
+global_job_array_0 = new Job[2,2];
+global_job_array_0[0], global_job_array_0[1] = global_job_array_0[1], global_job_array_0[0];
+```
+
+
+#### e. ✅ 
+
+class有4级嵌套
+测试对象嵌套的初始化
+测试嵌套访问method
+```
+    job_1.printInfo();
+    job_1.Job2.printInfo();
+    job_1.Job2.Job3.printInfo();
+    job_1.Job2.Job3.Job4.printInfo();
+```
 
 
 -----------------------------
