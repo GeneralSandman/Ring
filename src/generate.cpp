@@ -229,7 +229,7 @@ void class_def_deep_copy(Package_Executer*    executer,
         }
     }
 
-    // error-report ERROR_TOO_MANY_FIELDS_IN_CLASS
+    // Ring-Compiler-Error-Report  ERROR_TOO_MANY_FIELDS_IN_CLASS
     if (dst->field_size > 255) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -257,7 +257,7 @@ void class_def_deep_copy(Package_Executer*    executer,
         ring_compile_error_report(&context);
     }
 
-    // error-report ERROR_TOO_MANY_METHODS_IN_CLASS
+    // Ring-Compiler-Error-Report  ERROR_TOO_MANY_METHODS_IN_CLASS
     if (dst->method_size > 255) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -1447,7 +1447,7 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer,
         opcode = RVM_CODE_MINUS_DOUBLE;
         break;
     default: {
-        // error-report ERROR_MINUS_OPER_INVALID_USE
+        // Ring-Compiler-Error-Report  ERROR_MINUS_OPER_INVALID_USE
         char error_message_buffer[1024];
         char advice_buffer[1024];
         snprintf(error_message_buffer, 1024, "%sError:%s "

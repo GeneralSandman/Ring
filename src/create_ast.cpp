@@ -450,7 +450,7 @@ Identifier* new_identifier(IdentifierType type, char* name) {
 
     Identifier* identifier   = (Identifier*)mem_alloc(get_front_mem_pool(), sizeof(Identifier));
     identifier->line_number  = package_unit_get_line_number();
-    identifier->type         = type;
+    identifier->type         = type; // 在 fix_ast 中修正
     identifier->name         = name;
     identifier->array_index  = 0;
     identifier->parent_scope = nullptr;
@@ -881,7 +881,7 @@ TypeSpecifier* create_type_specifier_array(TypeSpecifier*       sub_type,
     type_specifier->dimension     = dimension_expression->dimension;
     type_specifier->sub           = sub_type;
 
-    // error-report ERROR_ARRAY_DIMENSION_INVALID
+    // Ring-Compiler-Error-Report  ERROR_ARRAY_DIMENSION_INVALID
     if (type_specifier->dimension > MAX_DIMENSION_NUM) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -961,7 +961,7 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier,
     Identifier*  pos_ider = identifier_list;
     Expression*  pos_init = initializer_list;
     for (pos_ider = identifier_list; pos_ider; pos_ider = pos_ider->next) {
-        // error-report ERROR_INVALID_VARIABLE_IDENTIFIER
+        // Ring-Compiler-Error-Report  ERROR_INVALID_VARIABLE_IDENTIFIER
         if (str_eq(pos_ider->name, "self")) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -1059,7 +1059,7 @@ void import_package_list_add_item(char* package_name, char* rename) {
 
     // duplicate import package
     for (ImportPackageInfo* import_pack : get_package_unit()->import_package_list) {
-        // error-report ERROR_DUPLICATE_IMPORT_PACKAGE
+        // Ring-Compiler-Error-Report  ERROR_DUPLICATE_IMPORT_PACKAGE
         if (str_eq(import_pack->package_name, package_name)) {
             DEFINE_ERROR_REPORT_STR;
             snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -1186,7 +1186,7 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier,
     debug_ast_info_with_yellow("\t");
 
     // 当前field 的类型只能是 bool int double string
-    // error-report
+    // Ring-Compiler-Error-Report
     if (type_specifier->kind == RING_BASIC_TYPE_ANY
         || type_specifier->kind == RING_BASIC_TYPE_UNKNOW
         || (type_specifier->kind == RING_BASIC_TYPE_ARRAY

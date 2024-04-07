@@ -22,7 +22,7 @@ void ring_compiler_analysis_global_variable(Package* package) {
         std::string identifier = std::string(decl->identifier);
         auto        iter       = package->global_declaration_map.find(identifier);
 
-        // error-report ERROR_REDEFINITE_GLOBAL_VARIABLE
+        // Ring-Compiler-Error-Report  ERROR_REDEFINITE_GLOBAL_VARIABLE
         if (iter != package->global_declaration_map.end()) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -59,7 +59,7 @@ void ring_compiler_analysis_function(Package* package) {
         std::string identifier = std::string(function->function_name);
         auto        iter       = package->function_map.find(identifier);
 
-        // error-report ERROR_REDEFINITE_FUNCTION
+        // Ring-Compiler-Error-Report  ERROR_REDEFINITE_FUNCTION
         if (iter != package->function_map.end()) {
             DEFINE_ERROR_REPORT_STR;
 

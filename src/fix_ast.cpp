@@ -19,52 +19,40 @@
 #include <cstring>
 
 
-// 直接使用 全局 TypeSpecifier, 不使用 mem_alloc
-static TypeSpecifier bool_type_specifier = TypeSpecifier{
+/*
+ * bool_type_specifier int_type_specifier double_type_specifier string_type_specifier
+ *
+ * 直接使用 全局 TypeSpecifier, 不使用 mem_alloc
+ * 因为对于基础类型的 TypeSpecifier, 不会对TypeSpecifier进行修改, 全局变量可满足要求
+ */
+TypeSpecifier bool_type_specifier = TypeSpecifier{
     .line_number  = 0,
     .kind         = RING_BASIC_TYPE_BOOL,
     .u.array_type = nullptr,
     .dimension    = 0,
     .sub          = 0,
 };
-static TypeSpecifier int_type_specifier = TypeSpecifier{
+TypeSpecifier int_type_specifier = TypeSpecifier{
     .line_number  = 0,
     .kind         = RING_BASIC_TYPE_INT,
     .u.array_type = nullptr,
     .dimension    = 0,
     .sub          = 0,
 };
-static TypeSpecifier double_type_specifier = TypeSpecifier{
+TypeSpecifier double_type_specifier = TypeSpecifier{
     .line_number  = 0,
     .kind         = RING_BASIC_TYPE_DOUBLE,
     .u.array_type = nullptr,
     .dimension    = 0,
     .sub          = 0,
 };
-static TypeSpecifier string_type_specifier = TypeSpecifier{
+TypeSpecifier string_type_specifier = TypeSpecifier{
     .line_number  = 0,
     .kind         = RING_BASIC_TYPE_STRING,
     .u.array_type = nullptr,
     .dimension    = 0,
     .sub          = 0,
 };
-// EXPRESSION_CLEAR_CONVERT_TYPE
-// EXPRESSION_ADD_CONVERT_TYPE
-
-// 清除 expression 所代表的 convert_type_size 和 convert_type
-#define EXPRESSION_CLEAR_CONVERT_TYPE(expression) \
-    (expression)->convert_type_size = 0;          \
-    (expression)->convert_type      = nullptr;
-
-// 添加 expression 所代表的 convert_type_size 和 convert_type
-// 其实 只有 function-call/method-call 表达式: convert_type_size > 1
-// 其余的都是 convert_type_size = 1
-#define EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier)                             \
-    (expression)->convert_type_size = (expression)->convert_type_size + 1;                  \
-    (expression)->convert_type =                                                            \
-        (TypeSpecifier**)realloc((expression)->convert_type,                                \
-                                 (expression)->convert_type_size * sizeof(TypeSpecifier*)); \
-    (expression)->convert_type[expression->convert_type_size - 1] = (type_specifier);
 
 
 void ring_compiler_fix_ast(Package* package) {
@@ -162,7 +150,6 @@ BEGIN:
     switch (expression->type) {
 
     case EXPRESSION_TYPE_LITERAL_BOOL:
-        // TODO: 这里可以分配一个公共的 TypeSpecifier, 可以节约空间
         EXPRESSION_CLEAR_CONVERT_TYPE(expression);
         EXPRESSION_ADD_CONVERT_TYPE(expression, &bool_type_specifier);
         break;
@@ -245,11 +232,9 @@ BEGIN:
 
 
     case EXPRESSION_TYPE_ARRAY_INDEX:
-        // TODO: 后续废弃 使用 EXPRESSION_TYPE_ELEMENT_ACCESS
         fix_array_index_expression(expression, expression->u.array_index_expression, block, func);
         break;
     case EXPRESSION_TYPE_MEMBER:
-        // TODO: 后续废弃 使用 EXPRESSION_TYPE_ELEMENT_ACCESS
         fix_member_expression(expression, expression->u.member_expression, block, func);
         break;
 
@@ -289,7 +274,7 @@ void add_declaration(Declaration* declaration, Block* block, Function* func) {
             pos->variable_index = block->declaration_list_size++;
             pos->is_local       = 1;
 
-            // error-report ERROR_TOO_MANY_LOCAL_VARIABLE
+            // Ring-Compiler-Error-Report  ERROR_TOO_MANY_LOCAL_VARIABLE
             if (block->declaration_list_size > 255) {
                 DEFINE_ERROR_REPORT_STR;
 
@@ -329,19 +314,19 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
         return;
     }
 
-    // 如果这个变量是类
-    // 找到类的定义
 
     ClassDefinition* class_definition = nullptr;
     char*            class_identifier = nullptr;
 
 
+    // 如果这个变量是类
+    // 找到类的定义
     if (type_specifier->kind == RING_BASIC_TYPE_CLASS
         && type_specifier->u.class_type != nullptr) {
         class_identifier = type_specifier->u.class_type->class_identifier;
         class_definition = search_class_definition(class_identifier);
 
-        // error-report ERROR_MISS_CLASS_DEFINITION
+        // Ring-Compiler-Error-Report  ERROR_MISS_CLASS_DEFINITION
         if (class_definition == nullptr) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -455,7 +440,7 @@ void fix_identifier_expression(Expression*           expression,
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
         declaration = search_declaration(identifier_expression->package_posit, identifier_expression->identifier, block);
 
-        // error-report ERROR_UNDEFINITE_VARIABLE
+        // Ring-Compiler-Error-Report  ERROR_UNDEFINITE_VARIABLE
         if (declaration == nullptr) {
             char error_message_buffer[1024];
             char advice_buffer[1024];
@@ -536,7 +521,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
         expression->type = ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN;
     }
 
-    // error-report ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS
+    // Ring-Compiler-Error-Report  ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS
     // operand中有多个, 其中有 function_call/method_call 不允许
     if (right_expr_num > 1 && has_call) {
         DEFINE_ERROR_REPORT_STR;
@@ -562,7 +547,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
     }
 
 
-    // error-report ERROR_ASSIGNMENT_MISMATCH_NUM
+    // Ring-Compiler-Error-Report  ERROR_ASSIGNMENT_MISMATCH_NUM
     if (left_convert_type.size() != right_convert_type.size()) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -632,8 +617,6 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
             ring_compile_error_report(&context);
         }
     }
-
-    //
 }
 
 void fix_binary_math_expression(Expression*       expression,
@@ -716,12 +699,17 @@ void fix_function_call_expression(Expression*             expression,
 
 
     Function* function = nullptr;
-    if (!is_buildin_function_identifier(function_call_expression->package_posit,
-                                        function_call_expression->func_identifier)) {
+    if (is_buildin_function_identifier(function_call_expression->package_posit,
+                                       function_call_expression->func_identifier)) {
+
+        fix_buildin_func(expression, function_call_expression, block, func);
+
+    } else {
+
         function = search_function(function_call_expression->package_posit,
                                    function_call_expression->func_identifier);
 
-        // error-report ERROR_UNDEFINITE_VARIABLE
+        // Ring-Compiler-Error-Report  ERROR_UNDEFINITE_VARIABLE
         if (function == nullptr) {
             char error_message_buffer[1024];
             char advice_buffer[1024];
@@ -757,8 +745,6 @@ void fix_function_call_expression(Expression*             expression,
         for (; pos != nullptr; pos = pos->next) {
             EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
         }
-    } else {
-        fix_buildin_func(expression, function_call_expression, block, func);
     }
 }
 
@@ -843,7 +829,6 @@ void fix_method_call_expression(Expression*           expression,
     }
 
     // method_call_expression 的类型取决于 method返回值的类型
-    // TODO: 但是当前只能取 return_list 的第一个值
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     FunctionReturnList* return_pos = member_declaration->u.method->return_list;
     for (; return_pos != nullptr; return_pos = return_pos->next) {
@@ -904,7 +889,6 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
     }
 }
 
-// TODO: 需要兼容多维数组
 void fix_array_index_expression(Expression*           expression,
                                 ArrayIndexExpression* array_index_expression,
                                 Block*                block,
@@ -939,7 +923,7 @@ void fix_array_index_expression(Expression*           expression,
     /*
      * e.g. var int[,,,] students;
      *
-     * students is four-dimension array.
+     * students is a four-dimension array.
      * students[0] is a three-dimension array.
      * students[0,0,0] is a int value.
      */
@@ -1026,7 +1010,7 @@ void fix_class_object_literal_expression(Expression*                   expressio
                 }
             } else if (decl->type == MEMBER_METHOD) {
 
-                // error-report ERROR_ASSIGN_TO_METHOD_OF_CLASS
+                // Ring-Compiler-Error-Report  ERROR_ASSIGN_TO_METHOD_OF_CLASS
                 if (str_eq(field_identifier, decl->u.method->identifier)) {
                     DEFINE_ERROR_REPORT_STR;
 
@@ -1056,7 +1040,7 @@ void fix_class_object_literal_expression(Expression*                   expressio
             }
         }
 
-        // error-report ERROR_INVALID_NOT_FOUND_CLASS_FIELD
+        // Ring-Compiler-Error-Report  ERROR_INVALID_NOT_FOUND_CLASS_FIELD
         if (field_member == nullptr) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -1097,8 +1081,9 @@ void fix_class_object_literal_expression(Expression*                   expressio
     EXPRESSION_ADD_CONVERT_TYPE(expression, literal_expression->type_specifier);
 }
 
-// TODO:
-// 暂时只支持field-member
+/*
+ * fix_member_expression 只是 修正 field
+ */
 void fix_member_expression(Expression*       expression,
                            MemberExpression* member_expression,
                            Block*            block,
@@ -1171,6 +1156,7 @@ void fix_class_member_expression(MemberExpression* member_expression,
 
 ClassDefinition* search_class_definition(char* class_identifier) {
     assert(class_identifier != nullptr);
+
     for (ClassDefinition* pos : get_package_unit()->class_definition_list) {
         if (str_eq(pos->identifier, class_identifier)) {
             return pos;
@@ -1293,62 +1279,4 @@ Function* search_function(char* package_posit, char* identifier) {
         }
     }
     return nullptr;
-}
-
-int is_buildin_function_identifier(char* package_posit, char* identifier) {
-    // if (package_posit != nullptr) {
-    //     return 0;
-    // }
-
-    if (str_eq(identifier, "len")) {
-        return 1;
-    } else if (str_eq(identifier, "capacity")) {
-        return 1;
-    } else if (str_eq(identifier, "push")) {
-        return 1;
-    } else if (str_eq(identifier, "pop")) {
-        return 1;
-    } else if (str_eq(identifier, "to_string")) {
-        return 1;
-    }
-    return 0;
-}
-
-void fix_buildin_func(Expression*             expression,
-                      FunctionCallExpression* function_call_expression,
-                      Block*                  block,
-                      Function*               func) {
-
-    char* identifier = function_call_expression->func_identifier;
-    if (str_eq(identifier, "len")) {
-
-        // FIXME: 应该把这个 从 fix_buildin_func 中移出
-        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-        EXPRESSION_ADD_CONVERT_TYPE(expression, &int_type_specifier);
-
-    } else if (str_eq(identifier, "capacity")) {
-
-        // FIXME: 应该把这个 从 fix_buildin_func 中移出
-        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-        EXPRESSION_ADD_CONVERT_TYPE(expression, &int_type_specifier);
-
-    } else if (str_eq(identifier, "push")) {
-    } else if (str_eq(identifier, "pop")) {
-        TypeSpecifier* array_type_specifier = function_call_expression->argument_list->expression->convert_type[0];
-
-        if (array_type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
-            // TODO
-            // error-report pop array
-            ring_error_report("only pop a array");
-        }
-        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-        // FIXME: 这里不太对, 如果是多维数组的话
-        EXPRESSION_ADD_CONVERT_TYPE(expression, (array_type_specifier->sub));
-
-    } else if (str_eq(identifier, "to_string")) {
-
-        // FIXME: 应该把这个 从 fix_buildin_func 中移出
-        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-        EXPRESSION_ADD_CONVERT_TYPE(expression, &string_type_specifier);
-    }
 }

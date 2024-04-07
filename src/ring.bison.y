@@ -645,7 +645,7 @@ continue_statement
     ;
 
 return_statement
-    : TOKEN_RETURN TOKEN_SEMICOLON
+    : TOKEN_RETURN                 TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::return_statement]\t ");
         $$ = create_return_statement(nullptr);
@@ -854,7 +854,6 @@ expression_list
         $$ = expression_list_add_item($1, $3);
     }
     ;
-// TODO: 这里有个expression需要删除掉
 expression
     : right_value_expression
     ;
@@ -922,7 +921,6 @@ logical_expression_or
     : logical_expression_and
     {
         debug_bison_info_with_green("[RULE::logical_expression_or:1]\t ");
-        // $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_AND, $1, $3);
     }
     | logical_expression_or TOKEN_OR logical_expression_and
     {
@@ -935,7 +933,6 @@ logical_expression_and
     : equality_expression
     {
         debug_bison_info_with_green("[RULE::logical_expression_and]\t ");
-        // $$ = create_expression_binary(EXPRESSION_TYPE_LOGICAL_OR, $1, $3);
     }
     | logical_expression_and TOKEN_AND equality_expression
     {
@@ -1159,11 +1156,11 @@ member_expression
     ;
 
 method_call_expression
-    : primary_not_new_array TOKEN_DOT identifier TOKEN_LP TOKEN_RP
+    : primary_not_new_array TOKEN_DOT identifier TOKEN_LP               TOKEN_RP
     {
         $$ = create_expression_from_method_call(create_method_call_expression($1, $3, nullptr));
     }
-    | member_expression     TOKEN_DOT identifier TOKEN_LP TOKEN_RP
+    | member_expression     TOKEN_DOT identifier TOKEN_LP               TOKEN_RP
     {
         $$ = create_expression_from_method_call(create_method_call_expression($1, $3, nullptr));
     }
@@ -1320,7 +1317,7 @@ identifier_v2
     : IDENTIFIER
     {
         debug_bison_info_with_green("[RULE::identifier_v2]\t identifier_v2(%s)", $1);
-        $$ = new_identifier(IDENTIFIER_TYPE_UNKNOW, $1); // TODO: 在 fix_ast 中修正
+        $$ = new_identifier(IDENTIFIER_TYPE_UNKNOW, $1);
     }
     ;
 
@@ -1364,47 +1361,6 @@ jump_tag_statement
         $$ = create_jump_tag_statement($3);
     }
     ;
-
-// cast
-//     : TOKEN_LT type_specifier TOKEN_GT expression
-//     {
-//         debug_bison_info_with_green("[RULE::cast %d] \t ", $2);
-//          /*$$ = create_cast_expression($2, $4); */
-//     }
-//     ;
-
-/*
-dot_expression
-    : identifier
-    {
-        debug_bison_info_with_green("[RULE::dot_expression:1]\t ");
-        $$ = create_expression_identifier($1);
-    }
-    | function_call_expression
-    {
-
-    }
-    | dot_expression TOKEN_DOT identifier
-    {
-        debug_bison_info_with_green("[RULE::dot_expression:4]\t ");
-    }
-    | dot_expression TOKEN_DOT function_call_expression
-    {
-        debug_bison_info_with_green("[RULE::dot_expression:4]\t ");
-    }
-    ;
-*/
-
-/*
-method_call_expression
-    : identifier TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
-    {
-        debug_bison_info_with_green("[RULE::function_call_expression]\t ");
-        $$ = create_method_call_expression(create_expression_identifier($1), $3, $5);
-    }
-    ;
-
-*/
 
 
 %%

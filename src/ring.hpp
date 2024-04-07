@@ -12,7 +12,7 @@
 #define RING_VERSION "ring-v0.2.14-beta Copyright (C) 2021-2023 ring.wiki, ZhenhuLi"
 
 
-typedef struct Args                         Args;
+typedef struct Ring_Arg                         Ring_Arg;
 typedef struct Ring_VirtualMachine          Ring_VirtualMachine;
 typedef struct ImportPackageInfo            ImportPackageInfo;
 typedef struct CompilerEntry                CompilerEntry;
@@ -120,14 +120,6 @@ typedef struct MemBlock                     MemBlock;
 
 typedef struct Ring_Grammar_Info            Ring_Grammar_Info;
 
-
-struct Args {
-    bool  command_run;
-    bool  command_dump;
-    bool  command_debug;
-
-    char* input_file_name;
-};
 
 typedef enum {
     GRAMMAR_UNKNOW = 0,
@@ -999,6 +991,21 @@ typedef enum {
 } AssignExpressionType;
 
 
+typedef void (*BuildinFuncFix)(Expression*             expression,
+                               FunctionCallExpression* function_call_expression,
+                               Block*                  block,
+                               Function*               func);
+
+
+typedef enum {
+    RING_BUILD_IN_FNC_UNKNOW = 0,
+    RING_BUILD_IN_FNC_LEN,
+    RING_BUILD_IN_FNC_CAPACITY,
+    RING_BUILD_IN_FNC_PUSH,
+    RING_BUILD_IN_FNC_POP,
+    RING_BUILD_IN_FNC_TO_STRING,
+} RING_BUILD_IN_FUNC_ID;
+
 typedef struct {
     const char*                 identifier;
 
@@ -1007,6 +1014,8 @@ typedef struct {
 
     int                         return_size;
     std::vector<TypeSpecifier*> return_types;
+
+    BuildinFuncFix              buildin_func_fix;
 
 } Ring_Buildin_Func;
 
@@ -1167,6 +1176,23 @@ struct Expression {
     Expression* next;
 };
 
+
+// 清除 expression 所代表的 convert_type_size 和 convert_type
+#define EXPRESSION_CLEAR_CONVERT_TYPE(expression) \
+    (expression)->convert_type_size = 0;          \
+    (expression)->convert_type      = nullptr;
+
+// 添加 expression 所代表的 convert_type_size 和 convert_type
+// 其实 只有 function-call/method-call 表达式: convert_type_size > 1
+// 其余的都是 convert_type_size = 1
+#define EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier)                             \
+    (expression)->convert_type_size = (expression)->convert_type_size + 1;                  \
+    (expression)->convert_type =                                                            \
+        (TypeSpecifier**)realloc((expression)->convert_type,                                \
+                                 (expression)->convert_type_size * sizeof(TypeSpecifier*)); \
+    (expression)->convert_type[expression->convert_type_size - 1] = (type_specifier);
+
+
 typedef enum {
     IDENTIFIER_EXPRESSION_TYPE_UNKNOW,
     IDENTIFIER_EXPRESSION_TYPE_VARIABLE,
@@ -1221,7 +1247,7 @@ struct KeyExpression {
     KeyExpression* next;
 };
 
-// TODO: 准备废弃, 使用 KeyExpression
+// 还未使用
 struct ArrayIndexExpression {
     unsigned int         line_number;
 
@@ -1229,7 +1255,7 @@ struct ArrayIndexExpression {
     DimensionExpression* index_expression;
 };
 
-// TODO: 准备废弃, 使用 KeyExpression
+// 还未使用
 struct MemberExpression {
     unsigned int            line_number;
 
@@ -1408,7 +1434,6 @@ typedef enum {
     BLOCK_TYPE_FOR,
     BLOCK_TYPE_DOFOR,
     BLOCK_TYPE_FUNCTION,
-    // BLOCK_TYPE_OTHER,
 } BlockType;
 
 typedef struct BlockLabels {
@@ -1530,7 +1555,6 @@ struct ForTernaryStatement {
     Expression* post_expression;
 };
 
-// 类似于 AssignExpression
 struct ForRangeStatement {
     Expression* left;
     Expression* operand;
@@ -1549,7 +1573,8 @@ struct DoForStatement {
 struct BreakStatement {
     unsigned int line_number;
 
-    unsigned int break_loop_num; // break; break 1; break 2;
+    unsigned int break_loop_num;
+    // 语法:  break; break 1; break 2;
 };
 
 struct TagDefinitionStatement {
@@ -1599,6 +1624,33 @@ typedef enum {
     RVM_DEBUG_MODE_STEPOUT,
 
 } RVM_DebugMode;
+
+
+#define RING_CMD_T_RUN "run"
+#define RING_CMD_T_DUMP "dump"
+#define RING_CMD_T_RDB "rdb"
+#define RING_CMD_T_MAN "man"
+#define RING_CMD_T_VERSION "version"
+#define RING_CMD_T_HELP "help"
+
+enum RING_COMMAND_TYPE {
+    RING_COMMAND_UNKNOW,
+
+    RING_COMMAND_RUN,
+    RING_COMMAND_DUMP,
+    RING_COMMAND_RDB,
+
+    RING_COMMAND_MAN,
+    RING_COMMAND_VERSION,
+    RING_COMMAND_HELP,
+};
+
+struct Ring_Arg {
+    RING_COMMAND_TYPE cmd;
+
+    std::string       input_file_name; // run/dump/rdb
+    std::string       keyword;         // man
+};
 
 
 // rdb cmd token
@@ -1764,8 +1816,6 @@ struct ErrorMessageInfo {
     std::string error_messaage;
 };
 
-/*
- * */
 typedef enum {
     ERROR_REPORT_TYPE_UNKNOW,
     ERROR_REPORT_TYPE_EXIT_NOW, // 立即退出
@@ -1787,13 +1837,14 @@ struct ErrorReportContext {
     ErrorReportType report_type;
 
 
+    char*           ring_compiler_file;
+    unsigned int    ring_compiler_file_line;
     /*
-    ring_compiler_file
-    ring_compiler_file_line
-        ring 编译器的源文件, 可以快速定位 error-report 所在的位置
-    */
-    char*        ring_compiler_file;
-    unsigned int ring_compiler_file_line;
+     * ring_compiler_file
+     * ring_compiler_file_line
+     *     Ring 编译器开发者专用
+     *     ring 编译器的源文件, 可以快速定位 error-report 所在的位置
+     */
 };
 
 typedef enum {
@@ -1968,7 +2019,7 @@ struct MemBlock {
 int   ring_repl();
 void  ring_repl_completion(const char* buf, linenoiseCompletions* lc);
 char* ring_repl_hints(const char* buf, int* color, int* bold);
-int   register_debugger(Ring_VirtualMachine* rvm, Args args);
+int   register_debugger(Ring_VirtualMachine* rvm, Ring_Arg args);
 
 
 /* --------------------
@@ -2232,11 +2283,6 @@ void                    add_parameter_to_declaration(Parameter* parameter, Block
 Declaration*            search_declaration(char* package_posit, char* identifier, Block* block);
 Function*               search_function(char* package_posit, char* identifier);
 
-int                     is_buildin_function_identifier(char* package_posit, char* identifier);
-void                    fix_buildin_func(Expression*             expression,
-                                         FunctionCallExpression* function_call_expression,
-                                         Block*                  block,
-                                         Function*               func);
 // --------------------
 
 
@@ -2523,7 +2569,7 @@ static int               hex_digit_to_int(char c);
  * function definition
  *
  */
-void ring_give_man_help(char* keyword);
+void ring_give_man_help(const char* keyword);
 // --------------------
 
 /* --------------------
@@ -2596,6 +2642,43 @@ RDB_Arg rdb_parse_command(const char* line);
 
 void    rdb_input_completion(const char* buf, linenoiseCompletions* lc);
 char*   rdb_input_hints(const char* buf, int* color, int* bold);
+
+// --------------------
+
+
+/* --------------------
+ * buildin.cpp
+ * function definition
+ *
+ */
+
+
+void                  fix_buildin_func_len(Expression*             expression,
+                                           FunctionCallExpression* function_call_expression,
+                                           Block*                  block,
+                                           Function*               func);
+void                  fix_buildin_func_capacity(Expression*             expression,
+                                                FunctionCallExpression* function_call_expression,
+                                                Block*                  block,
+                                                Function*               func);
+void                  fix_buildin_func_push(Expression*             expression,
+                                            FunctionCallExpression* function_call_expression,
+                                            Block*                  block,
+                                            Function*               func);
+void                  fix_buildin_func_pop(Expression*             expression,
+                                           FunctionCallExpression* function_call_expression,
+                                           Block*                  block,
+                                           Function*               func);
+void                  fix_buildin_func_to_string(Expression*             expression,
+                                                 FunctionCallExpression* function_call_expression,
+                                                 Block*                  block,
+                                                 Function*               func);
+
+RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* identifier);
+void                  fix_buildin_func(Expression*             expression,
+                                       FunctionCallExpression* function_call_expression,
+                                       Block*                  block,
+                                       Function*               func);
 
 // --------------------
 

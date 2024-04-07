@@ -161,7 +161,7 @@ std::string class_definite =
     "\033[0;33m+Tip:\033[0m\n"
     "\n";
 
-void ring_give_man_help(char* keyword) {
+void ring_give_man_help(const char* keyword) {
     std::string res = help_list;
     if (str_eq(keyword, "var")) {
         res = variable_definite;

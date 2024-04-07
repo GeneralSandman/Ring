@@ -250,7 +250,7 @@ extern "C" int yywrap(){
     BEGIN LINE_STRING_LITERAL_STATE;
 }
 <LINE_STRING_LITERAL_STATE>\n {
-    // error-report unclosed string literal
+    // Ring-Compiler-Error-Report  unclosed string literal
     if(true) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -281,7 +281,7 @@ extern "C" int yywrap(){
     BEGIN LINE_STRING_LITERAL_STATE;
 }
 <LINE_STRING_LITERAL_STATE>\r\n {
-    // error-report unclosed string literal
+    // Ring-Compiler-Error-Report  unclosed string literal
     if(true) {
         DEFINE_ERROR_REPORT_STR;
 
