@@ -274,6 +274,7 @@ int register_debugger(Ring_VirtualMachine* rvm, Ring_Arg args) {
     debug_config->display_globals    = false;
     debug_config->display_locals     = false;
     debug_config->display_call_stack = false;
+    debug_config->step_cmd           = RDB_COMMAND_STEP_UNKNOW;
     debug_config->break_points       = std::vector<unsigned int>{};
     rvm->debug_config                = debug_config;
 

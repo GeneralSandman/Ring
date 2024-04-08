@@ -1662,15 +1662,18 @@ struct Ring_Arg {
 #define RDB_CMD_T_LOCAL "local"
 #define RDB_CMD_T_CONT "cont"
 #define RDB_CMD_T_BT "bt"
-#define RDB_CMD_T_STEP "step"
-#define RDB_CMD_T_NEXT "next"
-#define RDB_CMD_T_UNTIL "until"
 
 #define RDB_CMD_T_BREAK "break"
 #define RDB_CMD_T_BREAK_SET "set"
 #define RDB_CMD_T_BREAK_UNSET "unset"
 #define RDB_CMD_T_BREAK_LIST "list"
 #define RDB_CMD_T_BREAK_CLEAR "clear"
+
+#define RDB_CMD_T_STEP "step"
+#define RDB_CMD_T_STEP_OVER "over"
+#define RDB_CMD_T_STEP_INTO "into"
+#define RDB_CMD_T_STEP_OUT "out"
+
 
 #define RDB_CMD_T_CODE "code"
 #define RDB_CMD_T_CODE_LIST "list"
@@ -1687,11 +1690,10 @@ enum RDB_COMMAND_TYPE {
     RDB_COMMAND_LOCAL,
     RDB_COMMAND_CONT,
     RDB_COMMAND_BT,
-    RDB_COMMAND_STEP,
-    RDB_COMMAND_NEXT,
-    RDB_COMMAND_UNTIL,
 
     RDB_COMMAND_BREAK,
+
+    RDB_COMMAND_STEP,
 
     RDB_COMMAND_CODE,
 
@@ -1705,6 +1707,13 @@ enum RDB_COMMAND_BREAK_TYPE {
     RDB_COMMAND_BREAK_CLEAR,
 };
 
+enum RDB_COMMAND_STEP_TYPE {
+    RDB_COMMAND_STEP_UNKNOW,
+    RDB_COMMAND_STEP_OVER,
+    RDB_COMMAND_STEP_INTO,
+    RDB_COMMAND_STEP_OUT,
+};
+
 struct RDB_Command {
     std::string              token;
     std::vector<std::string> rule;
@@ -1716,7 +1725,8 @@ struct RDB_Command {
 
 struct RDB_Arg {
     RDB_COMMAND_TYPE       cmd;
-    RDB_COMMAND_BREAK_TYPE cmd_break;
+    RDB_COMMAND_BREAK_TYPE break_cmd;
+    RDB_COMMAND_STEP_TYPE  step_cmd;
 
     std::string            argument;
 };
@@ -1730,13 +1740,16 @@ struct RDB_Arg {
 #define TRACE_EVENT_RETURN "return"
 
 struct RVM_DebugConfig {
-    bool          enable;
-    TraceDispacth trace_dispatch;
+    bool                  enable;
+    TraceDispacth         trace_dispatch;
 
-    bool          stop_at_entry;
-    bool          display_globals;
-    bool          display_locals;
-    bool          display_call_stack;
+    bool                  stop_at_entry;
+    bool                  display_globals;
+    bool                  display_locals;
+    bool                  display_call_stack;
+
+    RDB_COMMAND_STEP_TYPE step_cmd;
+
 
     // break_points 先简单实现, 只能在 main package 中设置断点
     std::vector<unsigned int> break_points;
