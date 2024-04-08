@@ -100,7 +100,7 @@ void ring_compiler_analysis_class(Package* package) {
 
 void ring_compiler_check_exit(Package* package) {
     if (package->compile_error_num > 0) {
-        fprintf(stderr, "%d errors generated, exit.\n", package->compile_error_num);
+        fprintf(stderr, "\n\n%d errors generated, exit.\n", package->compile_error_num);
         fflush(stderr);
         exit(1);
     }

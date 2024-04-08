@@ -12,7 +12,7 @@
 #define RING_VERSION "ring-v0.2.14-beta Copyright (C) 2021-2023 ring.wiki, ZhenhuLi"
 
 
-typedef struct Ring_Arg                         Ring_Arg;
+typedef struct Ring_Arg                     Ring_Arg;
 typedef struct Ring_VirtualMachine          Ring_VirtualMachine;
 typedef struct ImportPackageInfo            ImportPackageInfo;
 typedef struct CompilerEntry                CompilerEntry;
@@ -1791,6 +1791,7 @@ typedef enum {
 
     ERROR_ASSIGNMENT_MISMATCH_NUM            = 200017, // 赋值时, 左值和右值的数量不匹配
     ERROR_ASSIGNMENT_MISMATCH_TYPE           = 200018, // 赋值时, 左值和右值的类型不匹配
+    ERROR_CONCAT_OPERATOR_MISMATCH_TYPE      = 200019, // string .. 操作数类型不不匹配
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -2240,6 +2241,9 @@ void                    fix_identifier_expression(Expression*           expressi
                                                   IdentifierExpression* identifier_expression,
                                                   Block*                block);
 void                    fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
+void                    fix_binary_concat_expression(Expression*       expression,
+                                                     BinaryExpression* binary_expression,
+                                                     Block* block, Function* func);
 void                    fix_binary_math_expression(Expression*       expression,
                                                    BinaryExpression* binary_expression,
                                                    Block* block, Function* func);

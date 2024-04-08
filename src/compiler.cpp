@@ -566,7 +566,7 @@ void ring_compile_error_report(ErrorReportContext* context) {
     // TODO: 目前对于错误的积累，设计的还不是特别完善
     // compile_error_num 应该是全局的
     if (context->package_unit->compile_error_num >= 1) {
-        fprintf(stderr, "%d errors generated, exit.\n", context->package_unit->compile_error_num);
+        fprintf(stderr, "\n\n%d errors generated, exit.\n", context->package_unit->compile_error_num);
         fflush(stderr);
         exit(1);
     }

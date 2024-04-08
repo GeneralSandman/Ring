@@ -191,12 +191,13 @@ BEGIN:
 
 
     case EXPRESSION_TYPE_CONCAT:
+        fix_binary_concat_expression(expression, expression->u.binary_expression, block, func);
+        break;
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
     case EXPRESSION_TYPE_ARITHMETIC_SUB:
     case EXPRESSION_TYPE_ARITHMETIC_MUL:
     case EXPRESSION_TYPE_ARITHMETIC_DIV:
     case EXPRESSION_TYPE_ARITHMETIC_MOD:
-        // TODO: 细分
         fix_binary_math_expression(expression, expression->u.binary_expression, block, func);
         break;
     case EXPRESSION_TYPE_LOGICAL_AND:
@@ -442,13 +443,12 @@ void fix_identifier_expression(Expression*           expression,
 
         // Ring-Compiler-Error-Report  ERROR_UNDEFINITE_VARIABLE
         if (declaration == nullptr) {
-            char error_message_buffer[1024];
-            char advice_buffer[1024];
-            snprintf(error_message_buffer, 1024,
+            DEFINE_ERROR_REPORT_STR;
+            snprintf(compile_err_buf, 1024,
                      "use undeclared identifier `%s`; E:%d.",
                      identifier_expression->identifier,
                      ERROR_UNDEFINITE_VARIABLE);
-            snprintf(advice_buffer, 1024,
+            snprintf(compile_adv_buf, 1024,
                      "definite variable `%s` like: `var bool|int|double|string %s;` before use it.",
                      identifier_expression->identifier,
                      identifier_expression->identifier);
@@ -460,8 +460,8 @@ void fix_identifier_expression(Expression*           expression,
                 .line_content            = package_unit_get_line_content(identifier_expression->line_number),
                 .line_number             = identifier_expression->line_number,
                 .column_number           = 0,
-                .error_message           = std::string(error_message_buffer),
-                .advice                  = std::string(advice_buffer),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
                 .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
                 .ring_compiler_file      = (char*)__FILE__,
                 .ring_compiler_file_line = __LINE__,
@@ -617,6 +617,74 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
             ring_compile_error_report(&context);
         }
     }
+}
+
+void fix_binary_concat_expression(Expression*       expression,
+                                  BinaryExpression* binary_expression,
+                                  Block* block, Function* func) {
+
+    assert(expression != nullptr);
+    assert(binary_expression != nullptr);
+
+    Expression* left_expression  = binary_expression->left_expression;
+    Expression* right_expression = binary_expression->right_expression;
+
+    fix_expression(left_expression, block, func);
+    fix_expression(right_expression, block, func);
+
+
+    // Ring-Compiler-Error-Report  ERROR_CONCAT_OPERATOR_MISMATCH_TYPE
+    if (left_expression->convert_type_size != 1
+        || right_expression->convert_type_size != 1) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "Type error: string concat operator `..` can only be applied to string; E:%d.",
+                 ERROR_CONCAT_OPERATOR_MISMATCH_TYPE);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(left_expression->line_number),
+            .line_number             = left_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+    // Ring-Compiler-Error-Report  ERROR_CONCAT_OPERATOR_MISMATCH_TYPE
+    if (left_expression->convert_type[0]->kind != RING_BASIC_TYPE_STRING
+        || right_expression->convert_type[0]->kind != RING_BASIC_TYPE_STRING) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "Type error: string concat operator `..` can only be applied to string; E:%d.",
+                 ERROR_CONCAT_OPERATOR_MISMATCH_TYPE);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(left_expression->line_number),
+            .line_number             = left_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, &string_type_specifier);
 }
 
 void fix_binary_math_expression(Expression*       expression,
