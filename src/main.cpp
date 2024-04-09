@@ -267,16 +267,19 @@ char* ring_repl_hints(const char* buf, int* color, int* bold) {
 
 
 int register_debugger(Ring_VirtualMachine* rvm, Ring_Arg args) {
-    RVM_DebugConfig* debug_config    = (RVM_DebugConfig*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_DebugConfig));
-    debug_config->enable             = true;
-    debug_config->trace_dispatch     = debug_trace_dispatch;
-    debug_config->enable_trace_event = 0;
-    debug_config->stop_at_entry      = true;
-    debug_config->display_globals    = false;
-    debug_config->display_locals     = false;
-    debug_config->display_call_stack = false;
-    debug_config->step_cmd           = RDB_COMMAND_STEP_UNKNOW;
-    debug_config->break_points       = std::vector<unsigned int>{};
+    RVM_DebugConfig* debug_config      = (RVM_DebugConfig*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_DebugConfig));
+    debug_config->enable               = true;
+    debug_config->trace_dispatch       = debug_trace_dispatch;
+    debug_config->enable_trace_event   = 0;
+    debug_config->stop_at_entry        = true;
+    debug_config->display_globals      = false;
+    debug_config->display_locals       = false;
+    debug_config->display_call_stack   = false;
+    debug_config->step_cmd             = RDB_COMMAND_STEP_UNKNOW;
+    debug_config->call_func_deep_count = 0;
+    debug_config->step_over_deep_count = 0;
+    debug_config->step_out_deep_count  = 0;
+    debug_config->break_points         = std::vector<unsigned int>{};
 
     SET_TRACE_EVENT_ALL(debug_config);
 
@@ -284,9 +287,11 @@ int register_debugger(Ring_VirtualMachine* rvm, Ring_Arg args) {
 
     printf(LOG_COLOR_YELLOW);
     printf("%s\n", RING_VERSION);
+    printf("\n");
     printf("Start Ring Debugger...\n");
     printf("\n");
     printf("Input file:%s\n", args.input_file_name.c_str());
+    printf("\n");
     printf(LOG_COLOR_CLEAR);
 
     return 0;

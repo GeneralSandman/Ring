@@ -51,20 +51,20 @@ TOOL_GEN_VMCODE_DOC_OBJS  = vm.o tool_gen_vmcode_doc.o
 # -lncurses for tigetnum tigetnum
 
 # DEBUG_XX 来控制不同阶段的debug日志
-#  DEBUG_FLEX 						控制flex工具日志
-#  DEBUG_BISON 						控制bison工具日志，一般来说与DEBUG_FLEX 一块效果比较好，能看到哪一行
-#  DEUBG_CREATE_AST 					控制生成AST日志
-#  DEBUG_STD_LIB 					控制 std lib 的 debug 路径
-#  DEBUG_COMPILER_SUMMARY 			控制编译阶段的信息：词法分析、语法分析、语意分析
-#  DEBUG_COMPILER_DETAIL 			控制编译阶段的信息：词法分析、语法分析、语意分析
-#  DEBUG_GENERATE_SUMMARY 			代码生成阶段 概要: 只会打印出相关的package package_unit信息
-#  DEBUG_GENERATE_DETAIL 			代码生成阶段 详情: 会打印出package对应的字节码
-#  DEBUG_GENERATE_OUTPUT_VMCODE 		代码生成节点： 只打印出相应的字节码
-#  DEBUG_EXEC_VM  					vm运行阶段的调试信息
-#  DEBUG_RVM_INTERACTIVE 			控制调试RVM
-#  DDEBUG_RVM_MEM_POOL_DETAIL 		展示 Memory Pool 内存分配的详情
-#  DEBUG_RVM_GC_DETAIL 				展示 Garbage Collect 的详情
-#  DEBUG_RDB_TRACE_DISPATH 			展示 rdb trace_dispath 的详情, 可以展示每一次回掉到debugger的详情
+#  DEBUG_FLEX 					     控制flex工具日志
+#  DEBUG_BISON 					     控制bison工具日志，一般来说与DEBUG_FLEX 一块效果比较好，能看到解析到哪一行
+#  DEUBG_CREATE_AST 			     控制生成AST日志
+#  DEBUG_STD_LIB 				     控制 std lib 的 debug 路径
+#  DEBUG_COMPILER_SUMMARY 		     控制编译阶段的信息：词法分析、语法分析、语意分析
+#  DEBUG_COMPILER_DETAIL 		     控制编译阶段的信息：词法分析、语法分析、语意分析
+#  DEBUG_GENERATE_SUMMARY 		     代码生成阶段 概要: 只会打印出相关的package package_unit信息
+#  DEBUG_GENERATE_DETAIL 		     代码生成阶段 详情: 会打印出package对应的字节码
+#  DEBUG_GENERATE_OUTPUT_VMCODE      代码生成节点： 只打印出相应的字节码
+#  DEBUG_EXEC_VM  				     vm运行阶段的调试信息
+#  DEBUG_RVM_INTERACTIVE 		     控制调试RVM
+#  DDEBUG_RVM_MEM_POOL_DETAIL 	     展示 Memory Pool 内存分配的详情
+#  DEBUG_RVM_GC_DETAIL 			     展示 Garbage Collect 的详情
+#  DEBUG_RDB_TRACE_DISPATH_DETAIL    展示 rdb trace_dispath 的详情, 可以展示每一次回掉到debugger的详情
 CFLAGS = -c -static -O2 -std=c++17 \
 				-Wall \
 				-Wextra \
@@ -86,7 +86,7 @@ CFLAGS = -c -static -O2 -std=c++17 \
 				 -DDEBUG_RVM_INTERACTIVE1 \
 				 -DDEBUG_RVM_MEM_POOL_DETAIL1 \
 				 -DDEBUG_RVM_GC_DETAIL1 \
-				 -DDEBUG_RDB_TRACE_DISPATH1
+				 -DDEBUG_RDB_TRACE_DISPATH_DETAIL1
 
 CFLAGS+= -I../deps/linenoise
 CFLAGS+= -I../deps/clipp

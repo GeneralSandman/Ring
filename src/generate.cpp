@@ -1618,7 +1618,11 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, function_call_expression->line_number);
 
 
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, function_call_expression->line_number);
+    if (function_call_expression->function->type == FUNCTION_TYPE_NATIVE) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC_NATIVE, 0, function_call_expression->line_number);
+    } else if (function_call_expression->function->type == FUNCTION_TYPE_DERIVE) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, function_call_expression->line_number);
+    }
 }
 
 // native function 这个函数名起的 不太好

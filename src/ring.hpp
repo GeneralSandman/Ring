@@ -800,6 +800,7 @@ typedef enum {
     RVM_CODE_PUSH_FUNC,
     RVM_CODE_PUSH_METHOD,
     RVM_CODE_ARGUMENT_NUM,
+    RVM_CODE_INVOKE_FUNC_NATIVE,
     RVM_CODE_INVOKE_FUNC,
     RVM_CODE_INVOKE_METHOD,
     RVM_CODE_RETURN,
@@ -1798,6 +1799,9 @@ struct RVM_DebugConfig {
     bool                  display_call_stack;
 
     RDB_COMMAND_STEP_TYPE step_cmd;
+    unsigned int          call_func_deep_count;
+    unsigned int          step_over_deep_count; // 记录刚才 step-over 操作的位置
+    unsigned int          step_out_deep_count;  // 记录刚才 step—out 操作的位置
 
 
     // break_points 先简单实现, 只能在 main package 中设置断点
@@ -1807,9 +1811,10 @@ struct RVM_DebugConfig {
 
 struct RVM_Frame {
     Ring_VirtualMachine*                            rvm;
-    const char*                                     callee_func;
+    RVM_CallInfo*                                   call_info;
+
     unsigned int                                    next_pc;
-    const char*                                     next_opcode;
+    RVM_Opcode                                      next_opcode;
     unsigned int                                    source_line_number;
 
     std::vector<std::pair<std::string, RVM_Value*>> globals;
@@ -2622,6 +2627,7 @@ unsigned int             get_source_line_number_by_pc(RVM_Function* function, un
 std::string              format_rvm_type(RVM_Value* value);
 std::string              format_rvm_value(RVM_Value* value);
 std::string              format_rvm_call_stack(Ring_VirtualMachine* rvm);
+std::string              format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int source_line_number);
 
 std::string              format_type_specifier(TypeSpecifier* type_specifier);
 

@@ -339,19 +339,10 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         if (rvm->debug_config != nullptr && rvm->debug_config->enable) {
             assert(rvm->debug_config->trace_dispatch != nullptr);
 
-            RVM_Opcode_Info opcode_info;
-            opcode_info = RVM_Opcode_Infos[opcode];
-
             std::vector<std::pair<std::string, RVM_Value*>> globals;
             std::vector<std::pair<std::string, RVM_Value*>> locals;
 
-            // 1
-            std::string function_name;
-            function_name = "$ring!start()";
-            if (rvm->call_info != nullptr
-                && rvm->call_info->callee_function != nullptr) {
-                function_name = std::string(rvm->call_info->callee_function->func_name) + "()";
-            }
+
             // 2. build globals
             for (int i = 0; i < rvm->executer->global_variable_size; i++) {
                 std::pair<std::string, RVM_Value*> global = {
@@ -399,25 +390,25 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             //     }
             // }
 
-            unsigned int source_code_line_number = 0;
+            unsigned int source_line_number = 0;
             if (rvm->call_info != nullptr
                 && rvm->call_info->callee_function != nullptr) {
-                source_code_line_number = get_source_line_number_by_pc(rvm->call_info->callee_function, rvm->pc);
+                source_line_number = get_source_line_number_by_pc(rvm->call_info->callee_function, rvm->pc);
             }
 
-            if (source_code_line_number != 0 && source_code_line_number != prev_code_line_number) {
+            if (source_line_number != 0 && source_line_number != prev_code_line_number) {
                 if (!str_eq(event, TRACE_EVENT_RETURN))
                     event = TRACE_EVENT_LINE;
-                prev_code_line_number = source_code_line_number;
+                prev_code_line_number = source_line_number;
             }
 
             //
             frame = RVM_Frame{
                 .rvm                = rvm,
-                .callee_func        = function_name.c_str(),
+                .call_info          = rvm->call_info,
                 .next_pc            = rvm->pc,
-                .next_opcode        = opcode_info.name.c_str(),
-                .source_line_number = source_code_line_number,
+                .next_opcode        = (RVM_Opcode)opcode,
+                .source_line_number = source_line_number,
                 .globals            = globals,
                 .locals             = locals,
             };
@@ -1183,6 +1174,19 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             argument_list_size = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
             rvm->pc += 2;
             break;
+        case RVM_CODE_INVOKE_FUNC_NATIVE:
+            oper_num = STACK_GET_INT_OFFSET(rvm, -1);
+            // TODO: 这里是不是直接放在字节码里比较好, 不放在 runtime_stack中
+            package_index = oper_num >> 8;
+            func_index    = oper_num & 0XFF;
+
+            runtime_stack->top_index--;
+            assert(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE);
+            invoke_native_function(rvm,
+                                   &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
+                                   argument_list_size);
+            rvm->pc += 1;
+            break;
         case RVM_CODE_INVOKE_FUNC:
             oper_num = STACK_GET_INT_OFFSET(rvm, -1);
             // TODO: 这里是不是直接放在字节码里比较好, 不放在 runtime_stack中
@@ -1190,19 +1194,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             func_index    = oper_num & 0XFF;
 
             runtime_stack->top_index--;
-            if (rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE) {
-                invoke_native_function(rvm,
-                                       &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
-                                       argument_list_size);
-                rvm->pc += 1;
-            } else if (rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE) {
-                invoke_derive_function(rvm,
-                                       &function,
-                                       nullptr, &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
-                                       &code_list, &code_size,
-                                       &rvm->pc,
-                                       &caller_stack_base);
-            }
+            assert(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE);
+            invoke_derive_function(rvm,
+                                   &function,
+                                   nullptr, &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
+                                   &code_list, &code_size,
+                                   &rvm->pc,
+                                   &caller_stack_base);
+
             break;
         case RVM_CODE_INVOKE_METHOD:
             method_index   = STACK_GET_INT_OFFSET(rvm, -1);
