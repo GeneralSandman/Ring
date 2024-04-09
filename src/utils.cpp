@@ -576,9 +576,9 @@ std::string format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int sourc
     result += "$ring!";
     // TODO: 这里想个更好的办法, 减少代码重复
     if (pos->callee_object == nullptr) {
-        result += format_rvm_function(rvm->executer, pos->callee_function) + "\n";
+        result += format_rvm_function(rvm->executer, pos->callee_function);
     } else {
-        result += std::string(pos->callee_object->class_ref->identifier) + "." + format_rvm_function(rvm->executer, pos->callee_function) + "\n";
+        result += std::string(pos->callee_object->class_ref->identifier) + "." + format_rvm_function(rvm->executer, pos->callee_function);
     }
 
 
