@@ -1732,16 +1732,65 @@ struct RDB_Arg {
 };
 
 
+#define TRACE_EVENT_SAE "stop-at-entry"
+#define TRACE_EVENT_OPCODE "opcode"
 #define TRACE_EVENT_LINE "line"
 #define TRACE_EVENT_CALL "call"
-#define TRACE_EVENT_SAE "stop-at-entry"
-#define TRACE_EVENT_EXIT "exit"
-#define TRACE_EVENT_OPCODE "opcode"
 #define TRACE_EVENT_RETURN "return"
+#define TRACE_EVENT_EXIT "exit"
+
+
+#define ENABLE_TRACE_EVENT_SAE (1 << 0)
+#define ENABLE_TRACE_EVENT_OPCODE (1 << 1)
+#define ENABLE_TRACE_EVENT_LINE (1 << 2)
+#define ENABLE_TRACE_EVENT_CALL (1 << 3)
+#define ENABLE_TRACE_EVENT_RETURN (1 << 4)
+#define ENABLE_TRACE_EVENT_EXIT (1 << 5)
+#define ENABLE_TRACE_EVENT_ALL (ENABLE_TRACE_EVENT_SAE      \
+                                | ENABLE_TRACE_EVENT_OPCODE \
+                                | ENABLE_TRACE_EVENT_LINE   \
+                                | ENABLE_TRACE_EVENT_CALL   \
+                                | ENABLE_TRACE_EVENT_RETURN \
+                                | ENABLE_TRACE_EVENT_EXIT)
+
+#define DISABLE_TRACE_EVENT_SAE (~ENABLE_TRACE_EVENT_SAE)
+#define DISABLE_TRACE_EVENT_OPCODE (~ENABLE_TRACE_EVENT_OPCODE)
+#define DISABLE_TRACE_EVENT_LINE (~ENABLE_TRACE_EVENT_LINE)
+#define DISABLE_TRACE_EVENT_CALL (~ENABLE_TRACE_EVENT_CALL)
+#define DISABLE_TRACE_EVENT_RETURN (~ENABLE_TRACE_EVENT_RETURN)
+#define DISABLE_TRACE_EVENT_EXIT (~ENABLE_TRACE_EVENT_EXIT)
+#define DISABLE_TRACE_EVENT_ALL (~ENABLE_TRACE_EVENT_ALL)
+
+#define SET_TRACE_EVENT_SAE(debug_config) ((debug_config)->enable_trace_event |= ENABLE_TRACE_EVENT_SAE)
+#define SET_TRACE_EVENT_OPCODE(debug_config) ((debug_config)->enable_trace_event |= ENABLE_TRACE_EVENT_OPCODE)
+#define SET_TRACE_EVENT_LINE(debug_config) ((debug_config)->enable_trace_event |= ENABLE_TRACE_EVENT_LINE)
+#define SET_TRACE_EVENT_CALL(debug_config) ((debug_config)->enable_trace_event |= ENABLE_TRACE_EVENT_CALL)
+#define SET_TRACE_EVENT_RETURN(debug_config) ((debug_config)->enable_trace_event |= ENABLE_TRACE_EVENT_RETURN)
+#define SET_TRACE_EVENT_EXIT(debug_config) ((debug_config)->enable_trace_event |= ENABLE_TRACE_EVENT_EXIT)
+#define SET_TRACE_EVENT_ALL(debug_config) ((debug_config)->enable_trace_event |= ENABLE_TRACE_EVENT_ALL)
+
+#define UNSET_TRACE_EVENT_SAE(debug_config) ((debug_config)->enable_trace_event &= DISABLE_TRACE_EVENT_SAE)
+#define UNSET_TRACE_EVENT_OPCODE(debug_config) ((debug_config)->enable_trace_event &= DISABLE_TRACE_EVENT_OPCODE)
+#define UNSET_TRACE_EVENT_LINE(debug_config) ((debug_config)->enable_trace_event &= DISABLE_TRACE_EVENT_LINE)
+#define UNSET_TRACE_EVENT_CALL(debug_config) ((debug_config)->enable_trace_event &= DISABLE_TRACE_EVENT_CALL)
+#define UNSET_TRACE_EVENT_RETURN(debug_config) ((debug_config)->enable_trace_event &= DISABLE_TRACE_EVENT_RETURN)
+#define UNSET_TRACE_EVENT_EXIT(debug_config) ((debug_config)->enable_trace_event &= DISABLE_TRACE_EVENT_EXIT)
+#define UNSET_TRACE_EVENT_ALL(debug_config) ((debug_config)->enable_trace_event &= DISABLE_TRACE_EVENT_ALL)
+
+
+#define ISSET_TRACE_EVENT_SAE(debug_config) ((debug_config)->enable_trace_event & ENABLE_TRACE_EVENT_SAE)
+#define ISSET_TRACE_EVENT_OPCODE(debug_config) ((debug_config)->enable_trace_event & ENABLE_TRACE_EVENT_OPCODE)
+#define ISSET_TRACE_EVENT_LINE(debug_config) ((debug_config)->enable_trace_event & ENABLE_TRACE_EVENT_LINE)
+#define ISSET_TRACE_EVENT_CALL(debug_config) ((debug_config)->enable_trace_event & ENABLE_TRACE_EVENT_CALL)
+#define ISSET_TRACE_EVENT_RETURN(debug_config) ((debug_config)->enable_trace_event & ENABLE_TRACE_EVENT_RETURN)
+#define ISSET_TRACE_EVENT_EXIT(debug_config) ((debug_config)->enable_trace_event & ENABLE_TRACE_EVENT_EXIT)
+#define ISSET_TRACE_EVENT_ALL(debug_config) ((debug_config)->enable_trace_event == ENABLE_TRACE_EVENT_ALL)
 
 struct RVM_DebugConfig {
     bool                  enable;
     TraceDispacth         trace_dispatch;
+    unsigned char         enable_trace_event;
+
 
     bool                  stop_at_entry;
     bool                  display_globals;
@@ -2650,11 +2699,14 @@ RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassO
  */
 
 int     debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg);
+int     dispath_sae(RVM_Frame* frame, const char* event, const char* arg);
+int     dispath_opcode(RVM_Frame* frame, const char* event, const char* arg);
 int     dispath_line(RVM_Frame* frame, const char* event, const char* arg);
 int     dispath_call(RVM_Frame* frame, const char* event, const char* arg);
+int     dispath_return(RVM_Frame* frame, const char* event, const char* arg);
 int     dispath_exit(RVM_Frame* frame, const char* event, const char* arg);
-int     dispath_opcode(RVM_Frame* frame, const char* event, const char* arg);
 
+int     rdb_cli(RVM_Frame* frame, const char* event, const char* arg);
 RDB_Arg rdb_parse_command(const char* line);
 
 void    rdb_input_completion(const char* buf, linenoiseCompletions* lc);

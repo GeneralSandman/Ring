@@ -60,22 +60,28 @@ std::string rdb_command_help_message =
     "\n"
     "All Commands:\n"
     "    \n"
+    "        help                                :get help message\n"
+    "        clear                               :clear screen\n"
+    "        quit(q)                             :quit rdb\n"
+    "\n"
     "        global                              :list global variables\n"
     "        local                               :list local variables\n"
-    "        cont, c                             :continue running\n"
     "        bt                                  :show call stack\n"
-    "        clear                               :clear screen\n"
-    "        quit, q                             :quit rdb\n"
+    "        cont(c)                             :exec commands\n"
+    "        step  <command>                     :exec commands\n"
     "        break <command> [argumens]          :breakpoints commands\n"
+    "\n"
+    "Exec Commands:\n"
+    "        cont      (c)                       :continue running until hit break-point\n"
+    "        step over (n)                       :whihout into function\n"
+    "        step into (i)                       :into function\n"
+    "        step out  (o)                       :run to current function return\n"
     "\n"
     "Breakpoints Commands:\n"
     "        break set   <line-number>           :set    break point at line-number\n"
     "        break unset <line-number>           :unset  break point at line-number\n"
     "        break list                          :list   all break points\n"
     "        break clear                         :delete all break points\n"
-    "\n"
-    "Help Commands:\n"
-    "        help                                :get help message\n"
     "\n";
 
 
@@ -228,37 +234,73 @@ int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
 
     trace_count++;
 
-
-    if (str_eq(event, TRACE_EVENT_LINE)) {
-        dispath_line(frame, event, arg);
-    } else if (str_eq(event, TRACE_EVENT_CALL)) {
-        if (str_eq(frame->callee_func, "$ring!start()") && frame->rvm->debug_config->stop_at_entry) {
-            dispath_line(frame, TRACE_EVENT_SAE, arg);
-        } else {
-            dispath_call(frame, event, arg);
+    if (str_eq(event, TRACE_EVENT_CALL)
+        && str_eq(frame->callee_func, "$ring!start()")) {
+        if (frame->rvm->debug_config->stop_at_entry) {
+            event = TRACE_EVENT_SAE;
         }
-    } else if (str_eq(event, TRACE_EVENT_EXIT)) {
-        dispath_exit(frame, event, arg);
+    }
+
+
+    if (str_eq(event, TRACE_EVENT_SAE)) {
+        if (ISSET_TRACE_EVENT_SAE(frame->rvm->debug_config))
+            dispath_sae(frame, event, arg);
     } else if (str_eq(event, TRACE_EVENT_OPCODE)) {
-        dispath_opcode(frame, event, arg);
+        if (ISSET_TRACE_EVENT_OPCODE(frame->rvm->debug_config))
+            dispath_opcode(frame, event, arg);
+    } else if (str_eq(event, TRACE_EVENT_LINE)) {
+        if (ISSET_TRACE_EVENT_LINE(frame->rvm->debug_config))
+            dispath_line(frame, event, arg);
+    } else if (str_eq(event, TRACE_EVENT_CALL)) {
+        if (ISSET_TRACE_EVENT_CALL(frame->rvm->debug_config))
+            dispath_call(frame, event, arg);
+    } else if (str_eq(event, TRACE_EVENT_RETURN)) {
+        if (ISSET_TRACE_EVENT_RETURN(frame->rvm->debug_config))
+            dispath_return(frame, event, arg);
+    } else if (str_eq(event, TRACE_EVENT_EXIT)) {
+        if (ISSET_TRACE_EVENT_EXIT(frame->rvm->debug_config))
+            dispath_exit(frame, event, arg);
     }
 
     return 0;
 }
 
+int dispath_sae(RVM_Frame* frame, const char* event, const char* arg) {
+
+    printf(LOG_COLOR_GREEN);
+    printf("[+]stop at entry\n");
+    printf(LOG_COLOR_CLEAR);
+
+
+    rdb_cli(frame, event, arg);
+
+
+    printf(LOG_COLOR_CLEAR);
+    return 0;
+}
+
+int dispath_opcode(RVM_Frame* frame, const char* event, const char* arg) {
+    return 0;
+}
 
 int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
-    char*                      line;
-    std::string                call_stack;
-    unsigned int               breakpoint_line;
     std::vector<unsigned int>& break_points = frame->rvm->debug_config->break_points;
-    RDB_COMMAND_STEP_TYPE      step_cmd     = frame->rvm->debug_config->step_cmd;
+    RDB_COMMAND_STEP_TYPE&     step_cmd     = frame->rvm->debug_config->step_cmd;
 
     // 1. check trace event
     printf(LOG_COLOR_GREEN);
-    if (str_eq(event, TRACE_EVENT_SAE)) {
-        printf("[+]stop at entry");
+    if (step_cmd != RDB_COMMAND_STEP_UNKNOW) {
+        if (step_cmd == RDB_COMMAND_STEP_OVER) {
+            printf("[+]Step over, stop at line:%d\n", frame->source_line_number);
+        } else if (step_cmd == RDB_COMMAND_STEP_INTO) {
+            printf("[+]Step into, stop at line:%d\n", frame->source_line_number);
+        } else {
+            goto END_DISPATH_LINE;
+        }
+
+        step_cmd = RDB_COMMAND_STEP_UNKNOW;
+
     } else {
         // check hit breakpoints
         int hit_breakpoint_num = -1;
@@ -273,18 +315,10 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
         if (hit_breakpoint_num != -1) {
             printf("[+]stop breakpoint num:%d where:%d\n", hit_breakpoint_num, frame->source_line_number);
         } else {
-            goto END;
+            goto END_DISPATH_LINE;
         }
     }
     printf(LOG_COLOR_CLEAR);
-
-
-    // 2. config linenoise
-    linenoiseSetMultiLine(1);
-    linenoiseSetCompletionCallback(rdb_input_completion);
-    linenoiseSetHintsCallback(rdb_input_hints);
-    linenoiseHistoryLoad(RDB_HISTORY_FILE);
-    linenoiseHistorySetMaxLen(1024);
 
 
     printf(LOG_COLOR_GREEN);
@@ -307,6 +341,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
     }
 
     if (frame->rvm->debug_config->display_call_stack) {
+        std::string call_stack;
         call_stack = format_rvm_call_stack(frame->rvm);
         printf("[+]call stack:\n");
         printf("%s", call_stack.c_str());
@@ -314,9 +349,49 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
     printf(LOG_COLOR_CLEAR);
 
 
-    // 3. read ring debugger command
+    rdb_cli(frame, event, arg);
+
+
+END_DISPATH_LINE:
+    printf(LOG_COLOR_CLEAR);
+    return 0;
+}
+
+int dispath_call(RVM_Frame* frame, const char* event, const char* arg) {
+    return 0;
+}
+
+int dispath_return(RVM_Frame* frame, const char* event, const char* arg) {
+    return 0;
+}
+
+int dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
+    printf(LOG_COLOR_GREEN);
+    printf("[Process exited, code:%d]\n", 0);
+    printf(LOG_COLOR_CLEAR);
+
+    return 0;
+}
+
+
+// 启动命令行交互式输入输出
+int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
+    char*                      line;
+    std::string                call_stack;
+    unsigned int               breakpoint_line;
+    std::vector<unsigned int>& break_points = frame->rvm->debug_config->break_points;
+
+    // 1. config linenoise
+    linenoiseSetMultiLine(1);
+    linenoiseSetCompletionCallback(rdb_input_completion);
+    linenoiseSetHintsCallback(rdb_input_hints);
+    linenoiseHistoryLoad(RDB_HISTORY_FILE);
+    linenoiseHistorySetMaxLen(1024);
+
+
+    // 2. read ring debugger command
     while (1) {
-        bool    is_break = false;
+        bool    break_read_input = false;
         RDB_Arg rdb_arg;
 
         // read and parse command
@@ -363,7 +438,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
             }
         } else if (rdb_arg.cmd == RDB_COMMAND_CONT) {
             printf("Continuing...\n");
-            is_break = true;
+            break_read_input = true;
         } else if (rdb_arg.cmd == RDB_COMMAND_BT) {
             call_stack = format_rvm_call_stack(frame->rvm);
             printf("[+]call stack:\n");
@@ -406,7 +481,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
                 printf("Step out...\n");
             }
 
-            is_break = true;
+            break_read_input = true;
         }
 
 
@@ -416,30 +491,14 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
         printf(LOG_COLOR_CLEAR);
         fflush(stdout);
         free(line);
-        if (is_break) {
+        if (break_read_input) {
             break;
         }
     }
 
-END:
+
     linenoiseHistorySave(RDB_HISTORY_FILE);
     printf(LOG_COLOR_CLEAR);
-    return 0;
-}
-
-int dispath_call(RVM_Frame* frame, const char* event, const char* arg) {
-    return 0;
-}
-
-int dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
-    printf(LOG_COLOR_GREEN);
-    printf("[Process exited, code:%d]\n", 0);
-    printf(LOG_COLOR_CLEAR);
-
-    return 0;
-}
-
-int dispath_opcode(RVM_Frame* frame, const char* event, const char* arg) {
     return 0;
 }
 
@@ -458,16 +517,19 @@ RDB_Arg rdb_parse_command(const char* line) {
     auto break_rule =
         ((clipp::command(RDB_CMD_T_BREAK_SET).set(break_cmd, RDB_COMMAND_BREAK_SET), clipp::value("line-number", argument))
          | (clipp::command(RDB_CMD_T_BREAK_UNSET).set(break_cmd, RDB_COMMAND_BREAK_UNSET), clipp::value("line-number", argument))
-         | (clipp::command(RDB_CMD_T_BREAK_LIST).set(break_cmd, RDB_COMMAND_BREAK_LIST))
-         | (clipp::command(RDB_CMD_T_BREAK_CLEAR).set(break_cmd, RDB_COMMAND_BREAK_CLEAR)));
+         | clipp::command(RDB_CMD_T_BREAK_LIST).set(break_cmd, RDB_COMMAND_BREAK_LIST)
+         | clipp::command(RDB_CMD_T_BREAK_CLEAR).set(break_cmd, RDB_COMMAND_BREAK_CLEAR));
     // step action
-    auto step_rule = ((clipp::command(RDB_CMD_T_STEP_OVER).set(step_cmd, RDB_COMMAND_STEP_OVER))
-                      | (clipp::command(RDB_CMD_T_STEP_INTO).set(step_cmd, RDB_COMMAND_STEP_INTO))
-                      | (clipp::command(RDB_CMD_T_STEP_OUT).set(step_cmd, RDB_COMMAND_STEP_OUT)));
+    auto step_rule = (clipp::command(RDB_CMD_T_STEP_OVER).set(step_cmd, RDB_COMMAND_STEP_OVER)
+                      | clipp::command(RDB_CMD_T_STEP_INTO).set(step_cmd, RDB_COMMAND_STEP_INTO)
+                      | clipp::command(RDB_CMD_T_STEP_OUT).set(step_cmd, RDB_COMMAND_STEP_OUT));
 
     auto rdb_command_rule =
         ((clipp::command(RDB_CMD_T_BREAK).set(cmd, RDB_COMMAND_BREAK), break_rule)
          | (clipp::command(RDB_CMD_T_STEP).set(cmd, RDB_COMMAND_STEP), step_rule)
+         | clipp::command("n").set(cmd, RDB_COMMAND_STEP).set(step_cmd, RDB_COMMAND_STEP_OVER)
+         | clipp::command("i").set(cmd, RDB_COMMAND_STEP).set(step_cmd, RDB_COMMAND_STEP_INTO)
+         | clipp::command("o").set(cmd, RDB_COMMAND_STEP).set(step_cmd, RDB_COMMAND_STEP_OUT)
          | clipp::command(RDB_CMD_T_GLOBAL).set(cmd, RDB_COMMAND_GLOBAL)
          | clipp::command(RDB_CMD_T_LOCAL).set(cmd, RDB_COMMAND_LOCAL)
          | clipp::command(RDB_CMD_T_CONT).set(cmd, RDB_COMMAND_CONT) | clipp::command("c").set(cmd, RDB_COMMAND_CONT)
