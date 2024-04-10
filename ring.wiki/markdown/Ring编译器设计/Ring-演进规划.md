@@ -89,7 +89,7 @@
 
 ### 不成熟的想法
 
-1. 支持Ring Eval, e.g.  ./bin/lua eval "fmt::println_string("hello world")";
+1. 支持Ring Eval, e.g.  ./bin/lua eval "fmt::println_string("hello world")";  默认导入所有的std package, 不能指定全局变量, 直接就是main函数中代码
 2. Closure
 3. 函数式编程
 4. 中间代码优化, 死代码消除, 常量折叠
@@ -292,16 +292,6 @@ Usetime  = 12S
 
 ```
 
-1. bug
-debug::debug_assert(reflect::typeof(bool_value) == "bool");
-这样判断会失败。
-
-字符串的比较没有做好
-
-
-2. bug
-global value 来说，全局变量没有进行初始化。
-
 
 3. bug
 
@@ -405,6 +395,49 @@ class-object  ✅
    这里有一个隐喻，就是jobs[0] 取出来应该得是个指针，
    不能是深度copy
    不然继续访问 jobs[0].Running 还是老的Value。
+
+
+-----------------------------
+
+
+## 2024-04-08周
+
+
+### A. ring debugger 实现 step-over step-into step-out ✅ 
+
+
+### 命令: step over (命令缩写 n) ✅ 
+
+- 执行被调用的函数或方法，而不进入其中。
+- 当需要快速了解函数或方法的调用结果时使用。
+
+### 命令: step into (命令缩写 i) ✅ 
+
+- 进入被调用的函数或方法中，逐行执行代码。
+- 当需要深入了解函数或方法的内部实现时使用。
+
+### 命令: step out (命令缩写 o) ✅ 
+
+- 退出当前执行的函数或方法，返回到调用它的位置。
+- 当需要跳出嵌套的函数调用并继续执行主函数时使用。
+
+
+
+1. FIXME: Break set 还有个bug, 如果某行为注释或者空行, breakpoint 可能不会生效, 验证测试下
+2. cont 命令 是不是 跟 step命令一块放在一起比较好
+
+
+### B. ring debugger 如何显示源代码文件的内容, 方便调试
+
+1. 显示所在的 文件 函数 行数  ✅ 
+2. 显示所在位置的 内容 TODO:
+
+
+
+### C. break points 可以保存到本地文件中, 可以方便下次加载
+
+
+### D. ring程序终止之后, 不退出 rdb, 可以重新 run 当前的程序
 
 
 -----------------------------
@@ -529,7 +562,7 @@ func main() {
 }
 ```
 
-也就是多返回值不能用在
+也就是多返回值不能作为多项赋值的右值
 
 ### G. 如果只有单独的表达式(push stack value) 但是没有 pop, 会造成栈空间的增长
 
