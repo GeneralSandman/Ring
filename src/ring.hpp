@@ -9,7 +9,7 @@
 #include <unordered_set>
 #include <vector>
 
-#define RING_VERSION "ring-v0.2.14-beta Copyright (C) 2021-2023 ring.wiki, ZhenhuLi"
+#define RING_VERSION "ring-v0.2.14-beta Copyright (C) 2021-2024 ring.wiki, ZhenhuLi"
 
 
 typedef struct Ring_Arg                     Ring_Arg;
@@ -20,6 +20,7 @@ typedef struct ExecuterEntry                ExecuterEntry;
 typedef struct Package_Executer             Package_Executer;
 typedef struct Package                      Package;
 typedef struct PackageUnit                  PackageUnit;
+typedef struct RingFileStat                 RingFileStat;
 
 typedef struct RVM_Variable                 RVM_Variable;
 typedef struct RVM_RuntimeStack             RVM_RuntimeStack;
@@ -164,6 +165,21 @@ typedef struct {
 
 } RVM_Value;
 
+
+// Ring 源代码的相关信息
+struct RingFileStat {
+    char* path; // 文件的绝对路径
+    char* name; // 文件的名称
+    FILE* fp;
+    char* md5;
+
+    // 该文件每行的偏移量，用于快速获取某行的内容
+    // line_offset_map[0] 没有意义，因为文件都是从第1行开始的
+    // line_offset_map[3] 表示第3行开始的文件字节偏移量 和 字节大小
+    // 可通过 fseek() 快速获取某行的内容
+    std::vector<SourceLineInfo> line_offset_map;
+};
+
 typedef int (*TraceDispacth)(RVM_Frame* frame, const char* event, const char* arg);
 
 struct Ring_VirtualMachine {
@@ -294,7 +310,7 @@ struct PackageUnit {
 
     std::string  current_file_name;
     FILE*        current_file_fp; // 这个 FILE* 只能给 bison使用
-    FILE*        file_fp_random;  // 用来获取文件内容
+    FILE*        file_fp_random;  // 用来随机fseek并获取文件内容
 
     unsigned int current_line_number;
     unsigned int current_column_number;
@@ -302,8 +318,8 @@ struct PackageUnit {
 
     // 该文件每行的偏移量，用于快速获取某行的内容
     // line_offset_map[0] 没有意义，因为文件都是从第1行开始的
-    // line_offset_map[3] 表示第3行开始的文件字节偏移量
-    // 可通过 lseek() 快速获取某行的内容
+    // line_offset_map[3] 表示第3行开始的文件字节偏移量 和 字节大小
+    // 可通过 fseek() 快速获取某行的内容
     off_t                           current_line_start_offset;
     off_t                           current_offset;
     std::vector<SourceLineInfo>     line_offset_map;
@@ -1661,6 +1677,7 @@ struct Ring_Arg {
 
 #define RDB_CMD_T_GLOBAL "global"
 #define RDB_CMD_T_LOCAL "local"
+#define RDB_CMD_T_RUN "run"
 #define RDB_CMD_T_CONT "cont"
 #define RDB_CMD_T_BT "bt"
 
@@ -1689,6 +1706,7 @@ enum RDB_COMMAND_TYPE {
 
     RDB_COMMAND_GLOBAL,
     RDB_COMMAND_LOCAL,
+    RDB_COMMAND_RUN,
     RDB_COMMAND_CONT,
     RDB_COMMAND_BT,
 

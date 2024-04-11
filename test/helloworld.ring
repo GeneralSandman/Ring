@@ -55,7 +55,7 @@ function main() {
 	fmt::println_string(string_value);
 
 
-      string_value = `ring Copyright (C) 2021-2023 ring.wiki, ZhenhuLi`;
+      string_value = `ring Copyright (C) 2021-2024 ring.wiki, ZhenhuLi`;
 	fmt::println_string(string_value);
 
 }

@@ -306,6 +306,7 @@ void package_unit_compile(PackageUnit* package_unit) {
     }
 
 #ifdef DEBUG_CREATE_AST
+    // 展示当前源代码文件的内容, 分行展示 FIXME: 文件的最后一行不能正确记录并展示
     // check package_unit->line_offset_map is valid
     printf("File:%s\n", package_unit->current_file_name.c_str());
     for (int i = 1; i < package_unit->line_offset_map.size(); i++) {
@@ -418,12 +419,16 @@ std::string package_unit_get_line_content(unsigned int line_number) {
     if (line_number >= g_package_unit->line_offset_map.size()) {
         return "";
     }
+
+    // 找到源代码行数 所对应的 文件的偏移、行的空间
+    // 方便 fseek快速定位读取
     off_t        line_offset = g_package_unit->line_offset_map[line_number].start_offset;
     unsigned int size        = g_package_unit->line_offset_map[line_number].size;
 
-    // 这里得使用一个新的随机指针, 不然会印象 bision继续 向下分析
+    // 这里得使用一个新的随机读取指针, 不能和bison使用的fp共用
+    // 不然会影响 bision继续 向下分析
     fseek(g_package_unit->file_fp_random, line_offset, SEEK_SET);
-    char buffer[500];
+    char buffer[500]; // TODO: 这里后续要按需分配
     if (fgets(buffer, size, g_package_unit->file_fp_random) == NULL) {
         ring_error_report("Warning: fgets line content is error.\n");
     }
