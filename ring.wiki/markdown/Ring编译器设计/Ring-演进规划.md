@@ -432,13 +432,36 @@ class-object  ✅
 1. 显示所在的 文件 函数 行数  ✅ 
 2. 显示所在位置的 内容 TODO:
 
+RingFileStat 记录源代码的元信息方便后续访问加载
 
 
 ### C. break points 可以保存到本地文件中, 可以方便下次加载
 
+类似于 gdb 的 save breakpoints <file-name>
+
+文件的格式可以参考一下 gdb是如何生成的
+
+```
+<breakpoint-type> <breakpoint-address> <breakpoint-enabled> <breakpoint-function> <breakpoint-line>
+```
+
+
+- <breakpoint-type> 是断点的类型，例如 breakpoint 或 watchpoint。
+- <breakpoint-address> 是断点的地址。
+- <breakpoint-enabled> 是一个布尔值，指示断点是否已启用。
+- <breakpoint-function> 是断点设置处的函数名称（如果已知）。
+- <breakpoint-line> 是断点设置处的行号（如果已知）。
+
+breakpoint 0x100000f40 y main 10
+watchpoint 0x100001000 y my_function 20
+
+
+
 
 ### D. ring程序终止之后, 不退出 rdb, 可以重新 run 当前的程序
 
+
+这里可能比较难设计, 需要把当前运行的进程kill掉, 重新捕获命令后输入, 然后重新拉起任务(语法分析, 生成Opcode, 执行)
 
 -----------------------------
 
