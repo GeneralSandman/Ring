@@ -282,6 +282,11 @@ int register_debugger(Ring_VirtualMachine* rvm, Ring_Arg args) {
     debug_config->break_points         = std::vector<unsigned int>{};
 
     SET_TRACE_EVENT_ALL(debug_config);
+    if (debug_config->stop_at_entry) {
+        SET_TRACE_EVENT_SAE(debug_config);
+    } else {
+        UNSET_TRACE_EVENT_SAE(debug_config);
+    }
 
     rvm->debug_config = debug_config;
 

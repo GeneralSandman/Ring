@@ -2,6 +2,8 @@
 #include "ring.hpp"
 #include <algorithm>
 #include <iostream>
+#include <sys/stat.h>
+#include <unistd.h>
 
 
 /*
@@ -79,6 +81,9 @@ std::string rdb_command_help_message =
     "        break unset <line-number>           :unset  break point at line-number\n"
     "        break list                          :list   all break points\n"
     "        break clear                         :delete all break points\n"
+    "\n"
+    "Source Code Commands:\n"
+    "        code list                           :list ring source code\n"
     "\n";
 
 
@@ -207,9 +212,22 @@ std::vector<RDB_Command> rdb_commands = {
 
     {
         .token       = RDB_CMD_T_CODE,
-        .rule        = {},
-        .description = "list source file code",
-        .sub_command = std::vector<RDB_Command>{},
+        .rule        = std::vector<std::string>{"code", "list"},
+        .description = "code command",
+        .sub_command = std::vector<RDB_Command>{
+            {
+                .token       = "-",
+                .rule        = {},
+                .description = "-",
+                .sub_command = {},
+            },
+            {
+                .token       = RDB_CMD_T_CODE_LIST,
+                .rule        = std::vector<std::string>{"code", "list"},
+                .description = "list source file code",
+                .sub_command = std::vector<RDB_Command>{},
+            },
+        },
     },
 
 };
@@ -220,30 +238,30 @@ static unsigned int trace_count = 0;
 int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
 
     RVM_DebugConfig* debug_config = frame->rvm->debug_config;
-    std::string      func_name;
+    // std::string      func_name;
 
-    func_name = "$ring!start()";
-    if (frame->call_info != nullptr
-        && frame->call_info->callee_function != nullptr) {
-        func_name = std::string(frame->call_info->callee_function->func_name) + "()";
-    }
+    // func_name = "$ring!start()";
+    // if (frame->call_info != nullptr
+    //     && frame->call_info->callee_function != nullptr) {
+    //     func_name = std::string(frame->call_info->callee_function->func_name) + "()";
+    // }
 
-    if (str_eq(event, TRACE_EVENT_CALL)
-        && str_eq(func_name.c_str(), "$ring!start()")) {
-        if (debug_config->stop_at_entry) {
-            event = TRACE_EVENT_SAE;
-        }
-    }
+    // if (str_eq(event, TRACE_EVENT_CALL)
+    //     && str_eq(func_name.c_str(), "$ring!start()")) {
+    //     if (debug_config->stop_at_entry) {
+    //         event = TRACE_EVENT_SAE;
+    //     }
+    // }
 
 
 #ifdef DEBUG_RDB_TRACE_DISPATH_DETAIL
-    // printf("---debug_trace_dispatch[%u]---\n", trace_count);
-    // printf("|[@]event:            %s\n", event);
-    // printf("|[@]current_function: %s\n", frame->callee_func);
-    // printf("|[@]next_opcode:      %s\n", frame->next_opcode);
-    // printf("|[@]source_line_num:  %u\n", frame->source_line_number);
-    // printf("---debug_trace_dispatch---\n");
-    // printf("\n\n");
+    printf("---debug_trace_dispatch[%u]---\n", trace_count);
+    printf("|[@]event:            %s\n", event);
+    printf("|[@]current_function: %s\n", frame->callee_func);
+    printf("|[@]next_opcode:      %s\n", frame->next_opcode);
+    printf("|[@]source_line_num:  %u\n", frame->source_line_number);
+    printf("---debug_trace_dispatch---\n");
+    printf("\n\n");
 #endif
 
 
@@ -535,6 +553,66 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
 
 
             break_read_input = true;
+        } else if (rdb_arg.cmd == RDB_COMMAND_CODE) {
+            switch (rdb_arg.code_cmd) {
+            case RDB_COMMAND_CODE_LIST: {
+                printf("[@]Code list\n");
+                RingFileStat* file_stat = nullptr;
+
+                file_stat               = frame->call_info->callee_function->ring_file_stat;
+
+
+#ifdef DEBUG_RDB_TRACE_DISPATH_DETAIL
+                printf("source file abs_path: %s, last-modified: %lld\n", file_stat->abs_path.c_str(), file_stat->last_modified);
+                printf("source file number:%u\n", frame->source_line_number);
+#endif
+
+                struct stat stat_;
+                if (stat(file_stat->abs_path.c_str(), &stat_) != 0) {
+                    ring_error_report("get file stat error:%s, path:%s\n", strerror(errno), file_stat->abs_path.c_str());
+                }
+
+                time_t now;
+                time(&now);
+                if (file_stat->last_modified < stat_.st_mtime) {
+                    printf("[@]Warning: source file is modified, please reload it.\n");
+                }
+
+                // 列出周围15行代码 7+1+7
+                // 文件名称
+                // pointer | line-number | content
+
+                printf("\n");
+                printf("@File: %s:%u\n", file_stat->abs_path.c_str(), frame->source_line_number);
+
+                unsigned int start_line = 0;
+                unsigned int end_line   = 0;
+                start_line              = (frame->source_line_number - 7 >= 1) ? (frame->source_line_number - 7) : 1;
+                end_line                = (frame->source_line_number + 7 < file_stat->line_offset_map.size()) ? (frame->source_line_number + 7) : file_stat->line_offset_map.size();
+                // printf("DEUBG:start_line = %d | end_line = %d\n", start_line, end_line);
+
+                printf("@Content:\n");
+                for (; start_line <= end_line; start_line++) {
+                    std::string content = get_file_content(file_stat, start_line);
+                    std::string pointer = "";
+                    if (start_line == frame->source_line_number) {
+                        pointer = "->";
+                    }
+
+                    printf("%4s %d | %s\n", pointer.c_str(), start_line, content.c_str());
+                }
+
+            } break;
+            default:
+                break;
+            }
+        }
+
+        printf(LOG_COLOR_CLEAR);
+
+        // 3. break read input
+        if (break_read_input) {
+            break;
         }
 
 
@@ -560,6 +638,7 @@ RDB_Arg rdb_parse_command(const char* line) {
     RDB_COMMAND_TYPE         cmd       = RDB_COMMAND_UNKNOW;
     RDB_COMMAND_BREAK_TYPE   break_cmd = RDB_COMMAND_BREAK_UNKNOW;
     RDB_COMMAND_STEP_TYPE    step_cmd  = RDB_COMMAND_STEP_UNKNOW;
+    RDB_COMMAND_CODE_TYPE    code_cmd  = RDB_COMMAND_CODE_UNKNOW;
     std::string              argument;
 
 
@@ -575,21 +654,24 @@ RDB_Arg rdb_parse_command(const char* line) {
     // step action
     auto step_rule = (clipp::command(RDB_CMD_T_STEP_OVER).set(step_cmd, RDB_COMMAND_STEP_OVER)
                       | clipp::command(RDB_CMD_T_STEP_INTO).set(step_cmd, RDB_COMMAND_STEP_INTO)
-                      | clipp::command(RDB_CMD_T_STEP_OUT).set(step_cmd, RDB_COMMAND_STEP_OUT)); // TODO: step out 后续支持
+                      | clipp::command(RDB_CMD_T_STEP_OUT).set(step_cmd, RDB_COMMAND_STEP_OUT));
+    // code action
+    auto code_rule = (clipp::command(RDB_CMD_T_CODE_LIST).set(code_cmd, RDB_COMMAND_CODE_LIST));
 
     auto rdb_command_rule =
         ((clipp::command(RDB_CMD_T_BREAK).set(cmd, RDB_COMMAND_BREAK), break_rule)
          | (clipp::command(RDB_CMD_T_STEP).set(cmd, RDB_COMMAND_STEP), step_rule)
          | clipp::command("n").set(cmd, RDB_COMMAND_STEP).set(step_cmd, RDB_COMMAND_STEP_OVER)
          | clipp::command("i").set(cmd, RDB_COMMAND_STEP).set(step_cmd, RDB_COMMAND_STEP_INTO)
-         | clipp::command("o").set(cmd, RDB_COMMAND_STEP).set(step_cmd, RDB_COMMAND_STEP_OUT) // TODO: step out 后续支持
+         | clipp::command("o").set(cmd, RDB_COMMAND_STEP).set(step_cmd, RDB_COMMAND_STEP_OUT)
+         | (clipp::command(RDB_CMD_T_CODE).set(cmd, RDB_COMMAND_CODE), code_rule)
+         | clipp::command("l").set(cmd, RDB_COMMAND_CODE).set(code_cmd, RDB_COMMAND_CODE_LIST)
          | clipp::command(RDB_CMD_T_GLOBAL).set(cmd, RDB_COMMAND_GLOBAL)
          | clipp::command(RDB_CMD_T_LOCAL).set(cmd, RDB_COMMAND_LOCAL)
          | clipp::command(RDB_CMD_T_CONT).set(cmd, RDB_COMMAND_CONT) | clipp::command("c").set(cmd, RDB_COMMAND_CONT)
          | clipp::command(RDB_CMD_T_BT).set(cmd, RDB_COMMAND_BT)
          | clipp::command(RDB_CMD_T_CLEAR).set(cmd, RDB_COMMAND_CLEAR)
          | clipp::command(RDB_CMD_T_QUIT).set(cmd, RDB_COMMAND_QUIT) | clipp::command("q").set(cmd, RDB_COMMAND_QUIT)
-         | clipp::command(RDB_CMD_T_STEP).set(cmd, RDB_COMMAND_STEP)
          | clipp::command(RDB_CMD_T_HELP).set(cmd, RDB_COMMAND_HELP) | clipp::command("?").set(cmd, RDB_COMMAND_HELP));
 
 
@@ -599,6 +681,7 @@ RDB_Arg rdb_parse_command(const char* line) {
         .cmd       = cmd,
         .break_cmd = break_cmd,
         .step_cmd  = step_cmd,
+        .code_cmd  = code_cmd,
         .argument  = argument,
     };
 }
@@ -687,6 +770,17 @@ char* rdb_input_hints(const char* buf, int* color, int* bold) {
             }
 
             hit_str = std::string("    // ") + rdb_commands[RDB_COMMAND_STEP].sub_command[rdb_arg.step_cmd].description;
+        }
+    } else if (rdb_arg.cmd == RDB_COMMAND_CODE) {
+        if (args.size() == 1 || match_argc == 1) {
+            return (char*)" list  // list source file code";
+        } else if (match_argc == 2) {
+
+            if (rdb_arg.code_cmd == RDB_COMMAND_CODE_UNKNOW) {
+                return nullptr;
+            }
+
+            hit_str = std::string("    // ") + rdb_commands[RDB_COMMAND_CODE].sub_command[rdb_arg.code_cmd].description;
         }
     }
 

@@ -3,8 +3,11 @@
 #include <cstdio>
 #include <cstring>
 #include <dirent.h>
+#include <errno.h>
+#include <libgen.h>
 #include <string>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <vector>
 
 
@@ -239,6 +242,98 @@ std::vector<std::string> list_files_of_dir(char* dir) {
     }
     closedir(dp);
     return file_list;
+}
+
+
+/*
+ * 计算文件的 file_stat, 方便后续直接引用
+ *
+ * file_name 可以是绝对路径, 可以是相对路径
+ *
+ * TODO: 文件的路径可能要兼容 linux 和 windows
+ */
+RingFileStat* create_ring_file_stat(std::string& file_name) {
+
+    assert(file_name.size());
+
+    char absolute_path[PATH_MAX];
+    if (file_name[0] == '/') {
+        strcpy(absolute_path, file_name.c_str());
+    } else {
+        char cwd[PATH_MAX];
+        if (getcwd(cwd, sizeof(cwd)) == NULL) {
+            ring_error_report("getcwd error:%s\n", strerror(errno));
+        }
+
+        snprintf(absolute_path, sizeof(absolute_path), "%s/%s", cwd, file_name.c_str());
+    }
+
+    // 将相对路径转换为绝对路径，并解析符号链接和 .. 和 . 目录引用
+    char* real_path = realpath(absolute_path, NULL);
+    if (real_path == NULL) {
+        ring_error_report("realpath error:%s, path:%s\n", strerror(errno), absolute_path);
+    }
+
+    struct stat stat_;
+    if (stat(real_path, &stat_) != 0) {
+        ring_error_report("get file stat error:%s, path:%s\n", strerror(errno), real_path);
+    }
+
+    FILE* fp = fopen(real_path, "r");
+    if (fp == nullptr) {
+        ring_error_report("open file error:%s, path:%s\n", strerror(errno), real_path);
+    }
+
+
+    RingFileStat* file_stat    = (RingFileStat*)mem_alloc(nullptr, sizeof(RingFileStat)); // TODO: 内存分配在哪里
+    file_stat->dir             = std::string(basename(real_path));
+    file_stat->file_name       = std::string(dirname(real_path));
+    file_stat->abs_path        = std::string(real_path);
+    file_stat->last_modified   = stat_.st_mtime;
+    file_stat->fp              = fp;
+    file_stat->line_offset_map = std::vector<SourceLineInfo>{SourceLineInfo{0, 0}};
+
+    return file_stat;
+}
+
+// get_file_contents [start_line, end_line)
+std::vector<std::string> get_file_contents(RingFileStat* file_stat, unsigned int start_line, unsigned int end_line) {
+    if (end_line < start_line) {
+        end_line = start_line + end_line;
+    }
+
+    if (start_line >= file_stat->line_offset_map.size()) {
+        return std::vector<std::string>{};
+    }
+
+    std::vector<std::string> result;
+    for (unsigned int i = start_line; i < end_line; i++) {
+        result.push_back(get_file_content(file_stat, i));
+    }
+
+
+    return result;
+}
+
+std::string get_file_content(RingFileStat* file_stat, unsigned int line_number) {
+    if (line_number >= file_stat->line_offset_map.size()) {
+        return "";
+    }
+
+    // 找到源代码行数 所对应的 文件的偏移、行的空间
+    // 方便 fseek快速定位读取
+    off_t        line_offset = file_stat->line_offset_map[line_number].start_offset;
+    unsigned int size        = file_stat->line_offset_map[line_number].size;
+
+    // 这里得使用一个新的随机读取指针, 不能和bison使用的fp共用
+    // 不然会影响 bision继续 向下分析
+    fseek(file_stat->fp, line_offset, SEEK_SET);
+    char buffer[500]; // TODO: 这里后续要按需分配
+    if (fgets(buffer, size, file_stat->fp) == NULL) {
+        ring_error_report("Warning: fgets line content is error.\n");
+    }
+
+    return std::string(buffer);
 }
 
 /*

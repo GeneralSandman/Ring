@@ -187,6 +187,12 @@ void package_compile(Package* package) {
         PackageUnit* package_unit = package_unit_create(package, source_file);
         package_unit_compile(package_unit);
         package->package_unit_list.push_back(package_unit);
+
+        // package unit 编译完成之后
+        // package_unit->line_offset_map 以成功更新
+        // FIXME: 这里直接copy过去, 实现的不太好
+        // 应该动态更新 file_stat
+        package_unit->ring_file_stat->line_offset_map = package_unit->line_offset_map;
     }
 
     for (PackageUnit* package_unit : package->package_unit_list) {
@@ -250,6 +256,7 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
 
     g_package_unit->parent_package                   = parent_package;
 
+    g_package_unit->ring_file_stat                   = create_ring_file_stat(file_name);
     g_package_unit->current_file_name                = file_name;
     g_package_unit->current_file_fp                  = nullptr;
     g_package_unit->file_fp_random                   = nullptr;
@@ -282,6 +289,12 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
         || g_package_unit->file_fp_random == nullptr) {
         ring_error_report("%s not found.\n", file_name.c_str());
     }
+
+
+    // 这里得使用一个新的随机读取指针, 不能和bison使用的fp共用
+    // 不然会影响 bision继续 向下分析
+    fseek(g_package_unit->file_fp_random, 0, SEEK_END);
+
 
     return g_package_unit;
 }

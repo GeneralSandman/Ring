@@ -21,6 +21,7 @@ typedef struct Package_Executer             Package_Executer;
 typedef struct Package                      Package;
 typedef struct PackageUnit                  PackageUnit;
 typedef struct RingFileStat                 RingFileStat;
+typedef struct SourceLineInfo               SourceLineInfo;
 
 typedef struct RVM_Variable                 RVM_Variable;
 typedef struct RVM_RuntimeStack             RVM_RuntimeStack;
@@ -168,10 +169,12 @@ typedef struct {
 
 // Ring 源代码的相关信息
 struct RingFileStat {
-    char* path; // 文件的绝对路径
-    char* name; // 文件的名称
-    FILE* fp;
-    char* md5;
+    std::string dir;           // 文件path的绝对路径
+    std::string file_name;     // 文件的名称
+    std::string abs_path;      // 文件全路径的绝对路径
+    long long   last_modified; // last_modified 时间戳, 后续使用md5
+
+    FILE*       fp; // 随机访问 fp
 
     // 该文件每行的偏移量，用于快速获取某行的内容
     // line_offset_map[0] 没有意义，因为文件都是从第1行开始的
@@ -293,10 +296,10 @@ struct Package {
     unsigned int                                      compile_error_num;
 };
 
-typedef struct SourceLineInfo {
+struct SourceLineInfo {
     off_t        start_offset; // 某行相对于文件开始的偏移
     unsigned int size;         // 某行的字符数量
-} SourceLineInfo;
+};
 
 /*
  * PackageUnit 与 Package 的逻辑关系
@@ -306,15 +309,16 @@ typedef struct SourceLineInfo {
  * 一个 Package 可以有多个 PackageUnit
  */
 struct PackageUnit {
-    Package*     parent_package;
+    Package*      parent_package;
 
-    std::string  current_file_name;
-    FILE*        current_file_fp; // 这个 FILE* 只能给 bison使用
-    FILE*        file_fp_random;  // 用来随机fseek并获取文件内容
+    RingFileStat* ring_file_stat; // ring源代码文件信息
+    std::string   current_file_name;
+    FILE*         current_file_fp; // 这个 FILE* 只能给 bison使用
+    FILE*         file_fp_random;  // 用来随机fseek并获取文件内容
 
-    unsigned int current_line_number;
-    unsigned int current_column_number;
-    Ring_String* current_line_content;
+    unsigned int  current_line_number;
+    unsigned int  current_column_number;
+    Ring_String*  current_line_content;
 
     // 该文件每行的偏移量，用于快速获取某行的内容
     // line_offset_map[0] 没有意义，因为文件都是从第1行开始的
@@ -429,6 +433,8 @@ struct RVM_Function {
     std::string        source_file;
     unsigned int       start_line_number; // 源码的开始行
     unsigned int       end_line_number;   // 源码的结束行
+
+    RingFileStat*      ring_file_stat; // 所属的 ring 源代码文件,
 
     char*              func_name;
     RVMFunctionType    type;
@@ -1104,7 +1110,8 @@ struct MethodMember {
     unsigned int        start_line_number; // 源码的开始行
     unsigned int        end_line_number;   // 源码的结束行
 
-    Package*            package; // 所属的package
+    Package*            package;        // 所属的package
+    RingFileStat*       ring_file_stat; // 所属的 ring 源代码文件,
 
     AttributeInfo*      attribute_info;
 
@@ -1479,7 +1486,8 @@ struct Function {
     unsigned int        start_line_number; // 源码的开始行
     unsigned int        end_line_number;   // 源码的结束行
 
-    Package*            package; // 所属的package
+    Package*            package;        // 所属的package
+    RingFileStat*       ring_file_stat; // 所属的 ring 源代码文件,
 
     AttributeInfo*      attribute_info;
 
@@ -1706,7 +1714,6 @@ enum RDB_COMMAND_TYPE {
 
     RDB_COMMAND_GLOBAL,
     RDB_COMMAND_LOCAL,
-    RDB_COMMAND_RUN,
     RDB_COMMAND_CONT,
     RDB_COMMAND_BT,
 
@@ -1733,6 +1740,11 @@ enum RDB_COMMAND_STEP_TYPE {
     RDB_COMMAND_STEP_OUT,
 };
 
+enum RDB_COMMAND_CODE_TYPE {
+    RDB_COMMAND_CODE_UNKNOW,
+    RDB_COMMAND_CODE_LIST,
+};
+
 struct RDB_Command {
     std::string              token;
     std::vector<std::string> rule;
@@ -1746,6 +1758,7 @@ struct RDB_Arg {
     RDB_COMMAND_TYPE       cmd;
     RDB_COMMAND_BREAK_TYPE break_cmd;
     RDB_COMMAND_STEP_TYPE  step_cmd;
+    RDB_COMMAND_CODE_TYPE  code_cmd;
 
     std::string            argument;
 };
@@ -2632,6 +2645,9 @@ void                     ring_vm_code_dump(RVM_Function* function, RVM_Byte* cod
 void                     ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
 void                     ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm);
 std::vector<std::string> list_files_of_dir(char* dir);
+RingFileStat*            create_ring_file_stat(std::string& file_name);
+std::vector<std::string> get_file_contents(RingFileStat* file_stat, unsigned int start_line, unsigned int end_line);
+std::string              get_file_content(RingFileStat* file_stat, unsigned int line_number);
 
 void                     dump_vm_function(Package_Executer*    package_executer,
                                           RVM_ClassDefinition* class_definition,

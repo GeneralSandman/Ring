@@ -325,8 +325,10 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
     unsigned int*        dimension_list        = (unsigned int*)calloc(1, sizeof(unsigned int) * MAX_DIMENSION_NUM);
 
-    while (rvm->pc < code_size) {
-        RVM_Byte opcode = code_list[rvm->pc];
+    RVM_Byte             prev_opcde            = 0;
+    RVM_Byte             opcode                = 0;
+    for (; rvm->pc < code_size; prev_opcde = opcode) {
+        opcode = code_list[rvm->pc];
 
 #ifdef DEBUG_RVM_INTERACTIVE
         int debug_rvm_res = 0;
@@ -376,6 +378,12 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 event = TRACE_EVENT_OPCODE;
             }
 
+            if (prev_opcde == RVM_CODE_INVOKE_FUNC
+                && str_eq(rvm->call_info->callee_function->func_name, "main")) {
+                // FIXME: 有可能 @main
+                event = TRACE_EVENT_SAE;
+            }
+
             // if (rvm->call_info != nullptr
             //     && rvm->call_info->callee_function != nullptr
             //     && rvm->call_info->callee_function->type == RVM_FUNCTION_TYPE_DERIVE) {
@@ -396,9 +404,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 source_line_number = get_source_line_number_by_pc(rvm->call_info->callee_function, rvm->pc);
             }
 
-            if (source_line_number != 0 && source_line_number != prev_code_line_number) {
-                if (!str_eq(event, TRACE_EVENT_RETURN))
+            if (source_line_number != 0
+                && source_line_number != prev_code_line_number) {
+                if (!str_eq(event, TRACE_EVENT_RETURN) && !str_eq(event, TRACE_EVENT_SAE)) {
                     event = TRACE_EVENT_LINE;
+                }
                 prev_code_line_number = source_line_number;
             }
 

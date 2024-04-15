@@ -499,6 +499,7 @@ Function* new_function_definition(FunctionType        type,
     function->start_line_number   = identifier->line_number;
     function->end_line_number     = package_unit_get_line_number();
     function->package             = get_package_unit()->parent_package;
+    function->ring_file_stat      = get_package_unit()->ring_file_stat;
     function->attribute_info      = nullptr;
     function->func_index          = get_package_unit()->function_list.size();
     function->function_name       = identifier->name;
@@ -1238,6 +1239,7 @@ MethodMember* create_class_member_method(FunctionType        type,
     method_member->end_line_number     = package_unit_get_line_number();
 
     method_member->package             = get_package_unit()->parent_package;
+    method_member->ring_file_stat      = get_package_unit()->ring_file_stat;
 
     method_member->attribute_info      = nullptr;
 

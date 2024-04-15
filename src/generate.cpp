@@ -308,6 +308,7 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
     dst->source_file       = src->source_file;
     dst->start_line_number = src->start_line_number;
     dst->end_line_number   = src->end_line_number;
+    dst->ring_file_stat    = src->ring_file_stat;
     dst->func_name         = src->function_name;
 
     if (src->type == FUNCTION_TYPE_NATIVE) {
@@ -367,6 +368,7 @@ void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src)
     dst->rvm_function->source_file         = src->source_file;
     dst->rvm_function->start_line_number   = src->start_line_number;
     dst->rvm_function->end_line_number     = src->end_line_number;
+    dst->rvm_function->ring_file_stat      = src->ring_file_stat;
     dst->rvm_function->func_name           = src->identifier;
     dst->rvm_function->type                = RVM_FUNCTION_TYPE_DERIVE;
 
