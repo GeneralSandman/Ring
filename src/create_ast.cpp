@@ -372,8 +372,6 @@ AssignExpression* create_multi_assign_expression(Expression* first_left_value_ex
 FunctionCallExpression* create_function_call_expression(char*         func_identifier,
                                                         ArgumentList* argument_list) {
 
-    debug_ast_info_with_yellow("identifier:%s", identifier);
-
     FunctionCallExpression* function_call_expression = (FunctionCallExpression*)mem_alloc(get_front_mem_pool(), sizeof(FunctionCallExpression));
     function_call_expression->line_number            = package_unit_get_line_number();
     function_call_expression->package_posit          = nullptr;

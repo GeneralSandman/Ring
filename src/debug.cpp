@@ -60,8 +60,7 @@ std::string rdb_command_help_message =
     "\n"
     "        <command> [arguments]\n"
     "\n"
-    "Commands:\n"
-    "    \n"
+    "Basic Commands:\n"
     "        help(?)                             :get help message\n"
     "        clear                               :clear screen\n"
     "        quit(q)                             :quit rdb\n"
@@ -83,7 +82,7 @@ std::string rdb_command_help_message =
     "        break clear                         :delete all break points\n"
     "\n"
     "Source Code Commands:\n"
-    "        code list                           :list ring source code\n"
+    "        code list (l)                       :list ring source code\n"
     "\n";
 
 
@@ -570,15 +569,17 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
                 struct stat stat_;
                 if (stat(file_stat->abs_path.c_str(), &stat_) != 0) {
                     ring_error_report("get file stat error:%s, path:%s\n", strerror(errno), file_stat->abs_path.c_str());
+                    goto END_GET_LINE;
                 }
 
                 time_t now;
                 time(&now);
                 if (file_stat->last_modified < stat_.st_mtime) {
                     printf("[@]Warning: source file is modified, please reload it.\n");
+                    goto END_GET_LINE;
                 }
 
-                // 列出周围15行代码 7+1+7
+                // 列出当前位置的最近15行代码 前7+1+后7
                 // 文件名称
                 // pointer | line-number | content
 

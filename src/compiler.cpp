@@ -408,8 +408,8 @@ void package_unit_update_line_content(char* str) {
     g_package_unit->current_column_number += str_len;
 
     if (str_eq(str, "\n") || str_eq(str, "\r\n")) {
-        // TODO: 这里 -1 没搞明白
-        g_package_unit->line_offset_map[g_package_unit->current_line_number].size -= (str_len - 1);
+        // size is not contained '\n'.
+        g_package_unit->line_offset_map[g_package_unit->current_line_number].size -= str_len;
 
         g_package_unit->current_line_start_offset = g_package_unit->current_offset;
     }
@@ -441,8 +441,13 @@ std::string package_unit_get_line_content(unsigned int line_number) {
     // 这里得使用一个新的随机读取指针, 不能和bison使用的fp共用
     // 不然会影响 bision继续 向下分析
     fseek(g_package_unit->file_fp_random, line_offset, SEEK_SET);
-    char buffer[500]; // TODO: 这里后续要按需分配
-    if (fgets(buffer, size, g_package_unit->file_fp_random) == NULL) {
+    char buffer[1024]; // TODO: 这里后续要按需分配
+    if (size == 0) {
+        return "";
+    }
+    // size + 1 because fgets read size (including the final null-character).
+    if (fgets(buffer, size + 1, g_package_unit->file_fp_random) == NULL) {
+        printf("size:%d ,line_number:%d\n", size, line_number);
         ring_error_report("Warning: fgets line content is error.\n");
     }
 

@@ -328,8 +328,12 @@ std::string get_file_content(RingFileStat* file_stat, unsigned int line_number) 
     // 这里得使用一个新的随机读取指针, 不能和bison使用的fp共用
     // 不然会影响 bision继续 向下分析
     fseek(file_stat->fp, line_offset, SEEK_SET);
-    char buffer[500]; // TODO: 这里后续要按需分配
-    if (fgets(buffer, size, file_stat->fp) == NULL) {
+    char buffer[1024]; // TODO: 这里后续要按需分配
+    if (size == 0) {
+        return "";
+    }
+    // size + 1 because fgets read size (including the final null-character).
+    if (fgets(buffer, size + 1, file_stat->fp) == NULL) {
         ring_error_report("Warning: fgets line content is error.\n");
     }
 
