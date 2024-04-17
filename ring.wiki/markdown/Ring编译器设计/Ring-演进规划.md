@@ -402,6 +402,26 @@ class-object  ✅
 
 ## 2024-04-08周
 
+### A. ring debugger 完善一下 help 提示信息  ✅ 
+
+对标 https://ring.wiki 中doc
+
+
+### B. bt 展示的行数不太对,  ✅ 
+
+当前行数正确, 
+上一层栈的行数不正确
+
+
+### C. 修正bug ✅ 
+
+fmt::println() 参数为string的时候,行为不太正确, 需要通过 length来控制
+
+-----------------------------
+
+
+## 2024-04-08周
+
 
 ### A. ring debugger 实现 step-over step-into step-out ✅ 
 
