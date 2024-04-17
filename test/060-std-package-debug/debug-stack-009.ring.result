@@ -1,0 +1,61 @@
+
+test 1-------------
+main()::0
+main()::1
+test1()::0
+test1()::1
+test2()::0
+test2()::1
+Job::test1()::0
+Job::test1()::1
+Job::test2()::0
+Job::test2()::1
+Job::test3()::0
+Job::test3()::1
+Job::test3()::2
+Job::test3()::3
+Tool::test1()::0
+Tool::test1()::1
+Tool::test2()::0
+Tool::test2()::1
+Tool::test3()::0
+Tool::test3()::1
+Tool::test3()::2
+Tool::test3()::3
+#0 $ring!test4()
+    ./test/060-std-package-debug/debug-stack-009.ring:124
+#1 $ring!test3()
+    ./test/060-std-package-debug/debug-stack-009.ring:120
+#2 $ring!Tool.test3()
+    ./test/060-std-package-debug/debug-stack-009.ring:73
+#3 $ring!Tool.test2()
+    ./test/060-std-package-debug/debug-stack-009.ring:63
+#4 $ring!Tool.test1()
+    ./test/060-std-package-debug/debug-stack-009.ring:55
+#5 $ring!Job.test3()
+    ./test/060-std-package-debug/debug-stack-009.ring:41
+#6 $ring!Job.test2()
+    ./test/060-std-package-debug/debug-stack-009.ring:31
+#7 $ring!Job.test1()
+    ./test/060-std-package-debug/debug-stack-009.ring:23
+#8 $ring!test2()
+    ./test/060-std-package-debug/debug-stack-009.ring:113
+#9 $ring!test1()
+    ./test/060-std-package-debug/debug-stack-009.ring:105
+#10 $ring!main()
+    ./test/060-std-package-debug/debug-stack-009.ring:96
+#11 $ring!start()
+Tool::test2()::2
+Tool::test2()::3
+Tool::test1()::2
+Tool::test1()::3
+Job::test2()::2
+Job::test2()::3
+Job::test1()::2
+Job::test1()::3
+test2()::2
+test2()::3
+test1()::2
+test1()::3
+main()::2
+main()::3

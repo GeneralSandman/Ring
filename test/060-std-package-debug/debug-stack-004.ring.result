@@ -12,3 +12,4 @@
     ./test/060-std-package-debug/debug-stack-004.ring:22
 #6 $ring!main()
     ./test/060-std-package-debug/debug-stack-004.ring:15
+#7 $ring!start()

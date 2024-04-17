@@ -2,3 +2,4 @@
     ./test/060-std-package-debug/debug-stack-000.ring:19
 #1 $ring!main()
     ./test/060-std-package-debug/debug-stack-000.ring:15
+#2 $ring!start()

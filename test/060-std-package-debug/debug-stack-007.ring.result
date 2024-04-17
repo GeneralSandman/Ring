@@ -1,0 +1,27 @@
+
+test 1-------------
+main()::0
+main()::1
+Job::test1()::0
+Job::test1()::1
+Job::test2()::0
+Job::test2()::1
+Job::test3()::0
+Job::test3()::1
+Job::test3()::2
+Job::test3()::3
+#0 $ring!Job.test3()
+    ./test/060-std-package-debug/debug-stack-007.ring:41
+#1 $ring!Job.test2()
+    ./test/060-std-package-debug/debug-stack-007.ring:31
+#2 $ring!Job.test1()
+    ./test/060-std-package-debug/debug-stack-007.ring:23
+#3 $ring!main()
+    ./test/060-std-package-debug/debug-stack-007.ring:63
+#4 $ring!start()
+Job::test2()::2
+Job::test2()::3
+Job::test1()::2
+Job::test1()::3
+main()::2
+main()::3
