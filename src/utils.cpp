@@ -758,6 +758,34 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
     return str;
 }
 
+std::string format_function_parameters(Parameter* parameter) {
+    std::string              str = "";
+    std::vector<std::string> strings;
+
+
+    for (; parameter != nullptr; parameter = parameter->next) {
+        strings.push_back(format_type_specifier(parameter->type_specifier));
+    }
+
+    str = string_join(strings, ",");
+
+    return str;
+}
+
+std::string format_function_arguments(ArgumentList* argument) {
+    std::string              str = "";
+    std::vector<std::string> strings;
+
+
+    for (; argument != nullptr; argument = argument->next) {
+        strings.push_back(format_type_specifier(argument->expression->convert_type[0]));
+    }
+
+    str = string_join(strings, ",");
+
+    return str;
+}
+
 
 /* Split a line into arguments, where every argument can be in the
  * following programming-language REPL-alike form:
@@ -896,4 +924,14 @@ static int hex_digit_to_int(char c) {
     case 'F': return 15;
     default: return 0;
     }
+}
+
+std::string string_join(const std::vector<std::string>& lst, const std::string& delim) {
+    std::string ret;
+    for (const auto& s : lst) {
+        if (!ret.empty())
+            ret += delim;
+        ret += s;
+    }
+    return ret;
 }

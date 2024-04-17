@@ -376,7 +376,13 @@ FunctionCallExpression* create_function_call_expression(char*         func_ident
     function_call_expression->line_number            = package_unit_get_line_number();
     function_call_expression->package_posit          = nullptr;
     function_call_expression->func_identifier        = func_identifier;
+    function_call_expression->argument_list_size     = 0;
     function_call_expression->argument_list          = argument_list;
+
+    for (ArgumentList* pos = argument_list; pos != nullptr; pos = pos->next) {
+        function_call_expression->argument_list_size++;
+    }
+
     return function_call_expression;
 }
 

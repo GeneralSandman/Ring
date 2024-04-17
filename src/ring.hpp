@@ -1370,6 +1370,8 @@ struct FunctionCallExpression {
     char*         package_posit;
     char*         func_identifier;
     Function*     function;
+
+    unsigned int  argument_list_size;
     ArgumentList* argument_list;
 };
 
@@ -1892,6 +1894,9 @@ typedef enum {
     ERROR_ASSIGNMENT_MISMATCH_NUM            = 200017, // 赋值时, 左值和右值的数量不匹配
     ERROR_ASSIGNMENT_MISMATCH_TYPE           = 200018, // 赋值时, 左值和右值的类型不匹配
     ERROR_CONCAT_OPERATOR_MISMATCH_TYPE      = 200019, // string .. 操作数类型不不匹配
+
+    ERROR_ARGUMENT_MISMATCH_NUM              = 200020, // 函数调用参数数量类型不匹配
+    ERROR_ARGUMENT_MISMATCH_TYPE             = 200021, // 函数调用参数数量类型不匹配
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -2667,9 +2672,13 @@ std::string              format_rvm_call_stack(Ring_VirtualMachine* rvm);
 std::string              format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int source_line_number);
 
 std::string              format_type_specifier(TypeSpecifier* type_specifier);
+std::string              format_function_parameters(Parameter* parameter);
+std::string              format_function_arguments(ArgumentList* argument);
 
 std::vector<std::string> splitargs(const char* line);
 static int               hex_digit_to_int(char c);
+
+std::string              string_join(const std::vector<std::string>& lst, const std::string& delim);
 // --------------------
 
 
