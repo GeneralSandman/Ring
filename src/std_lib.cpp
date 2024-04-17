@@ -405,6 +405,7 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
 // TODO:
 RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     std::string result;
+    std::string tmp;
 
     for (unsigned int args_index = 0; args_index < arg_count; args_index++) {
         if (args_index != 0) {
@@ -427,7 +428,8 @@ RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, 
             result += std::to_string(args[args_index].u.double_value);
             break;
         case RVM_VALUE_TYPE_STRING:
-            result += args[args_index].u.string_value->data;
+            tmp.assign(args[args_index].u.string_value->data, args[args_index].u.string_value->length);
+            result += tmp;
             break;
         default:
             break;
