@@ -628,34 +628,61 @@ std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
     unsigned int  offset = 0;
     RVM_CallInfo* pos    = rvm->call_info;
     std::string   result;
+    std::string   item;
 
+    std::string   prefix;
+    std::string   func_name;
+    std::string   source_file;
+    unsigned int  source_line_number = 0;
 
     for (; pos != nullptr; pos = pos->next, offset++) {
-        if (pos->callee_function == nullptr) {
-            result += "#" + std::to_string(offset) + " $ring!start()\n";
-        } else {
-            unsigned int source_line_number = 0;
-            std::string  source_file        = pos->callee_function->source_file;
 
+        if (offset == 0) {
+            prefix = "#" + std::to_string(offset) + " $ring!";
 
-            result += "#" + std::to_string(offset) + " $ring!";
-            // TODO: 这里想个更好的办法, 减少代码重复
             if (pos->callee_object == nullptr) {
-                result += format_rvm_function(rvm->executer, pos->callee_function) + "\n";
+                func_name = format_rvm_function(rvm->executer, pos->callee_function);
             } else {
-                result += std::string(pos->callee_object->class_ref->identifier) + "." + format_rvm_function(rvm->executer, pos->callee_function) + "\n";
+                func_name = std::string(pos->callee_object->class_ref->identifier)
+                    + "."
+                    + format_rvm_function(rvm->executer, pos->callee_function);
             }
 
+            source_file        = pos->callee_function->source_file;
+            source_line_number = get_source_line_number_by_pc(pos->callee_function, rvm->pc);
 
-            if (offset == 0) {
-                // 当前正在执行的函数
-                source_line_number = get_source_line_number_by_pc(pos->callee_function, rvm->pc);
-            } else {
-                // 调用栈内的函数
-                source_line_number = get_source_line_number_by_pc(pos->callee_function, pos->caller_pc);
-            }
-            result += "    " + source_file + ":" + std::to_string(source_line_number) + "\n";
+            //
+            item = prefix + func_name + "\n"
+                + "    " + source_file + ":" + std::to_string(source_line_number) + "\n";
+
+            result += item;
+
+            offset++;
         }
+
+        prefix = "#" + std::to_string(offset) + " $ring!";
+
+        if (pos->caller_function == nullptr) {
+            item = prefix + "start()\n";
+        } else {
+
+            if (pos->caller_object == nullptr) {
+                func_name = format_rvm_function(rvm->executer, pos->caller_function);
+            } else {
+                func_name = std::string(pos->caller_object->class_ref->identifier)
+                    + "."
+                    + format_rvm_function(rvm->executer, pos->caller_function);
+            }
+
+            source_file        = pos->caller_function->source_file;
+            source_line_number = get_source_line_number_by_pc(pos->caller_function, pos->caller_pc);
+
+            //
+            item = prefix + func_name + "\n"
+                + "    " + source_file + ":" + std::to_string(source_line_number) + "\n";
+        }
+
+        result += item;
     }
 
     return result;

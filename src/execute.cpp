@@ -314,7 +314,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Array*           array_c                = nullptr;
 
     RVM_ClassDefinition* rvm_class_definition   = nullptr;
-    RVM_Function*        function               = nullptr;
+    RVM_ClassObject*     caller_class_ob        = nullptr;
+    RVM_Function*        caller_function        = nullptr;
     RVM_Method*          method                 = nullptr;
 
 
@@ -1206,7 +1207,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             assert(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE);
             invoke_derive_function(rvm,
-                                   &function,
+                                   &caller_class_ob, &caller_function,
                                    nullptr, &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
                                    &code_list, &code_size,
                                    &rvm->pc,
@@ -1223,7 +1224,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // TODO: 但是这里, gc会释放么, 让 invoke_derive_function变得不合法
             method = &(class_ob_value->class_ref->method_list[method_index]);
             invoke_derive_function(rvm,
-                                   &function,
+                                   &caller_class_ob, &caller_function,
                                    class_ob_value, method->rvm_function,
                                    &code_list, &code_size,
                                    &rvm->pc,
@@ -1235,7 +1236,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             [[fallthrough]];
         case RVM_CODE_FUNCTION_FINISH:
             derive_function_finish(rvm,
-                                   &function, nullptr,
+                                   &caller_class_ob, &caller_function,
+                                   nullptr,
                                    &code_list, &code_size,
                                    &rvm->pc, &caller_stack_base, return_value_list_size);
             rvm->pc += 1;
@@ -1593,7 +1595,7 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
  *
  */
 void invoke_derive_function(Ring_VirtualMachine* rvm,
-                            RVM_Function**       caller_function,
+                            RVM_ClassObject** caller_object, RVM_Function** caller_function,
                             RVM_ClassObject* callee_object, RVM_Function* callee_function,
                             RVM_Byte** code_list, unsigned int* code_size,
                             unsigned int* pc,
@@ -1601,6 +1603,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
 
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->magic_number         = CALL_INFO_MAGIC_NUMBER;
+    callinfo->caller_object        = *caller_object;
     callinfo->caller_function      = *caller_function;
     callinfo->caller_pc            = *pc;
     callinfo->caller_stack_base    = *caller_stack_base;
@@ -1612,6 +1615,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     store_callinfo(rvm, callinfo);
 
     // 上下文切换
+    *caller_object     = callee_object;
     *caller_function   = callee_function;
     *code_list         = callee_function->u.derive_func->code_list;
     *code_size         = callee_function->u.derive_func->code_size;
@@ -1644,7 +1648,8 @@ void derive_function_return(Ring_VirtualMachine* rvm,
  *
  * */
 void derive_function_finish(Ring_VirtualMachine* rvm,
-                            RVM_Function** caller_function, RVM_Function* callee_function,
+                            RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                            RVM_Function* callee_function,
                             RVM_Byte** code_list, unsigned int* code_size,
                             unsigned int* pc,
                             unsigned int* caller_stack_base,
@@ -1663,6 +1668,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     restore_callinfo(rvm, &callinfo);
     assert(callinfo->magic_number == CALL_INFO_MAGIC_NUMBER);
 
+    *caller_object     = callinfo->caller_object;
     *caller_function   = callinfo->caller_function;
     *pc                = callinfo->caller_pc; // 调用完成之后, caller_pc + 1, 在 execute 中统一update
     *caller_stack_base = callinfo->caller_stack_base;

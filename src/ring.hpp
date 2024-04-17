@@ -886,6 +886,8 @@ typedef enum {
 
 struct RVM_CallInfo {
     unsigned int     magic_number;
+
+    RVM_ClassObject* caller_object;
     RVM_Function*    caller_function;
     unsigned int     caller_pc; // 调用者的返回地址
     unsigned int     caller_stack_base;
@@ -2492,7 +2494,7 @@ void                 rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_
 int                  ring_execute_vm_code(Ring_VirtualMachine* rvm);
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
-                                            RVM_Function**       caller_function,
+                                            RVM_ClassObject** caller_object, RVM_Function** caller_function,
                                             RVM_ClassObject* callee_object, RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
@@ -2504,7 +2506,8 @@ void                 derive_function_return(Ring_VirtualMachine* rvm,
                                             unsigned int* caller_stack_base,
                                             unsigned int  return_value_list_size);
 void                 derive_function_finish(Ring_VirtualMachine* rvm,
-                                            RVM_Function** caller_function, RVM_Function* callee_function,
+                                            RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                                            RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
                                             unsigned int* caller_stack_base,
