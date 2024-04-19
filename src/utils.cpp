@@ -764,12 +764,16 @@ std::string format_function_parameters(Parameter* parameter) {
 
 
     for (; parameter != nullptr; parameter = parameter->next) {
-        strings.push_back(format_type_specifier(parameter->type_specifier));
+        str += format_type_specifier(parameter->type_specifier);
+        if (parameter->is_variadic) {
+            str += "...";
+        }
+
+        strings.push_back(str);
     }
 
-    str = string_join(strings, ",");
 
-    return str;
+    return string_join(strings, ",");
 }
 
 std::string format_function_arguments(ArgumentList* argument) {

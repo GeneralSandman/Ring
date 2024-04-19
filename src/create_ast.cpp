@@ -498,6 +498,47 @@ Function* new_function_definition(FunctionType        type,
 
     debug_ast_info_with_yellow("functionType:%d, identifier:%s", type, identifier->name);
 
+    unsigned parameter_list_size = 0;
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
+        parameter_list_size++;
+    }
+
+    unsigned int parameter_index = 0;
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
+
+        // 可变参数只能在函数定义中作为 最后一个参数
+        // Ring-Compiler-Error-Report  ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER
+        if (pos->is_variadic && parameter_index != parameter_list_size - 1) {
+            DEFINE_ERROR_REPORT_STR;
+
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "can only use ... with final parameter in function %s; E:%d.",
+                     identifier->name,
+                     ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(identifier->line_number),
+                .line_number             = identifier->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+        parameter_index++;
+    }
+
+    unsigned int return_list_size = 0;
+    for (FunctionReturnList* pos = return_list; pos != nullptr; pos = pos->next) {
+        return_list_size++;
+    }
+
     Function* function            = (Function*)mem_alloc(get_front_mem_pool(), sizeof(Function));
     function->source_file         = package_unit_get_file_name();
     function->start_line_number   = identifier->line_number;
@@ -508,19 +549,12 @@ Function* new_function_definition(FunctionType        type,
     function->func_index          = get_package_unit()->function_list.size();
     function->function_name       = identifier->name;
     function->type                = type;
-    function->parameter_list_size = 0;
+    function->parameter_list_size = parameter_list_size;
     function->parameter_list      = parameter_list;
-    function->return_list_size    = 0;
+    function->return_list_size    = return_list_size;
     function->return_list         = return_list;
     function->block               = block;
     function->next                = nullptr;
-
-    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
-        function->parameter_list_size++;
-    }
-    for (FunctionReturnList* pos = return_list; pos != nullptr; pos = pos->next) {
-        function->return_list_size++;
-    }
 
 
     return function;

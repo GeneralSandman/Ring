@@ -522,7 +522,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
     }
 
     // Ring-Compiler-Error-Report  ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS
-    // operand中有多个, 其中有 function_call/method_call 不允许
+    // operand中有多个, 其中有 function_call, 这是不合法的
     if (right_expr_num > 1 && has_call) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -575,9 +575,12 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
 
     std::string left_type_s;
     std::string right_type_s;
+
+    // Ring-Compiler-Error-Report  ERROR_ASSIGNMENT_MISMATCH_TYPE
     for (unsigned int i = 0; i < left_convert_type.size(); i++) {
 
         // TODO: 深度比较
+        // TODO: 比对 类
         if (left_convert_type[i]->kind != right_convert_type[i]->kind) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -599,7 +602,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
                      "assignment mismatch: expect %s but return %s; E:%d.",
                      left_str.c_str(),
                      right_str.c_str(),
-                     ERROR_ASSIGNMENT_MISMATCH_NUM);
+                     ERROR_ASSIGNMENT_MISMATCH_TYPE);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -777,32 +780,7 @@ void fix_function_call_expression(Expression*             expression,
         function = search_function(function_call_expression->package_posit,
                                    function_call_expression->func_identifier);
 
-        // Ring-Compiler-Error-Report  ERROR_UNDEFINITE_VARIABLE
-        if (function == nullptr) {
-            char error_message_buffer[1024];
-            char advice_buffer[1024];
-            snprintf(error_message_buffer, 1024, "use undeclared function `%s`; E:%d",
-                     function_call_expression->func_identifier,
-                     ERROR_UNDEFINITE_VARIABLE);
-            snprintf(advice_buffer, 1024, "definite function `%s` like: `function %s() {}` before use it.",
-                     function_call_expression->func_identifier,
-                     function_call_expression->func_identifier);
-
-            ErrorReportContext context = {
-                .package                 = nullptr,
-                .package_unit            = nullptr,
-                .source_file_name        = get_package_unit()->current_file_name,
-                .line_content            = package_unit_get_line_content(expression->line_number),
-                .line_number             = expression->line_number,
-                .column_number           = 0,
-                .error_message           = std::string(error_message_buffer),
-                .advice                  = std::string(advice_buffer),
-                .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
-                .ring_compiler_file      = (char*)__FILE__,
-                .ring_compiler_file_line = __LINE__,
-            };
-            ring_compile_error_report(&context);
-        }
+        check_function_call(function_call_expression, function);
 
         function_call_expression->function = function;
 
@@ -841,6 +819,8 @@ void fix_method_call_expression(Expression*           expression,
 
     // 2. find member declaration by member identifier.
     member_declaration = search_class_member(class_definition, member_identifier);
+
+    // Ring-Compiler-Error-Report  ERROR_INVALID_NOT_FOUND_CLASS_METHOD
     if (member_declaration == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 

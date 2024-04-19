@@ -1869,34 +1869,36 @@ typedef enum {
     ERROR_CODE_SEMANTIC_CHECH_ERROR,
 
 
-    ERROR_CODE_GRAMMAR_ERROR                 = 100000, // 语法错误
+    ERROR_CODE_GRAMMAR_ERROR                  = 100000, // 语法错误
 
 
-    ERROR_UNDEFINITE_VARIABLE                = 200000,
-    ERROR_REDEFINITE_GLOBAL_VARIABLE         = 200001, // 重复定义全局变量
-    ERROR_REDEFINITE_FUNCTION                = 200002, // 重复定义函数
-    ERROR_MINUS_OPER_INVALID_USE             = 200003, // - 符号 不合法使用
-    ERROR_DUPLICATE_IMPORT_PACKAGE           = 200004, // 重复 import package
-    ERROR_INVALID_VARIABLE_IDENTIFIER        = 200005, // 不合法的变量标识符
-    ERROR_TOO_MANY_LOCAL_VARIABLES           = 200006, // 局部变量数量超过限制
-    ERROR_TOO_MANY_FIELDS_IN_CLASS           = 200007, // class 中 field 的数量超过限制
-    ERROR_TOO_MANY_METHODS_IN_CLASS          = 200008, // class 中 method 的数量超过限制
-    ERROR_MISS_CLASS_DEFINITION              = 200009, // 缺少 class 定义
-    ERROR_INVALID_FIELD_IN_CLASS             = 200010, // field 不合法
-    ERROR_ARRAY_DIMENSION_INVALID            = 200011, // 数组维度不合法
-    ERROR_ASSIGN_TO_METHOD_OF_CLASS          = 200012, // 不能给 class中 method赋值
-    ERROR_INVALID_NOT_FOUND_CLASS_FIELD      = 200013, // 找不到 class field
-    ERROR_INVALID_NOT_FOUND_CLASS_METHOD     = 200014, // 找不到 class field
-    ERROR_UNCLOSED_STRING_LITERAL            = 200015, // 未关闭的字符串常量
+    ERROR_UNDEFINITE_VARIABLE                 = 200000,
+    ERROR_REDEFINITE_GLOBAL_VARIABLE          = 200001, // 重复定义全局变量
+    ERROR_REDEFINITE_FUNCTION                 = 200002, // 重复定义函数
+    ERROR_MINUS_OPER_INVALID_USE              = 200003, // - 符号 不合法使用
+    ERROR_DUPLICATE_IMPORT_PACKAGE            = 200004, // 重复 import package
+    ERROR_INVALID_VARIABLE_IDENTIFIER         = 200005, // 不合法的变量标识符
+    ERROR_TOO_MANY_LOCAL_VARIABLES            = 200006, // 局部变量数量超过限制
+    ERROR_TOO_MANY_FIELDS_IN_CLASS            = 200007, // class 中 field 的数量超过限制
+    ERROR_TOO_MANY_METHODS_IN_CLASS           = 200008, // class 中 method 的数量超过限制
+    ERROR_MISS_CLASS_DEFINITION               = 200009, // 缺少 class 定义
+    ERROR_INVALID_FIELD_IN_CLASS              = 200010, // field 不合法
+    ERROR_ARRAY_DIMENSION_INVALID             = 200011, // 数组维度不合法
+    ERROR_ASSIGN_TO_METHOD_OF_CLASS           = 200012, // 不能给 class中 method赋值
+    ERROR_INVALID_NOT_FOUND_CLASS_FIELD       = 200013, // 找不到 class field
+    ERROR_INVALID_NOT_FOUND_CLASS_METHOD      = 200014, // 找不到 class field
+    ERROR_UNCLOSED_STRING_LITERAL             = 200015, // 未关闭的字符串常量
 
-    ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS = 200016, // 函数调用用到 多项赋值中
+    ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS  = 200016, // 函数调用用到 多项赋值中
 
-    ERROR_ASSIGNMENT_MISMATCH_NUM            = 200017, // 赋值时, 左值和右值的数量不匹配
-    ERROR_ASSIGNMENT_MISMATCH_TYPE           = 200018, // 赋值时, 左值和右值的类型不匹配
-    ERROR_CONCAT_OPERATOR_MISMATCH_TYPE      = 200019, // string .. 操作数类型不不匹配
+    ERROR_ASSIGNMENT_MISMATCH_NUM             = 200017, // 赋值时, 左值和右值的数量不匹配
+    ERROR_ASSIGNMENT_MISMATCH_TYPE            = 200018, // 赋值时, 左值和右值的类型不匹配
+    ERROR_CONCAT_OPERATOR_MISMATCH_TYPE       = 200019, // string .. 操作数类型不不匹配
 
-    ERROR_ARGUMENT_MISMATCH_NUM              = 200020, // 函数调用参数数量类型不匹配
-    ERROR_ARGUMENT_MISMATCH_TYPE             = 200021, // 函数调用参数数量类型不匹配
+    ERROR_UNDEFINITE_FUNCTION                 = 300000,
+    ERROR_ARGUMENT_MISMATCH_NUM               = 300001, // 函数调用参数数量类型不匹配
+    ERROR_ARGUMENT_MISMATCH_TYPE              = 300002, // 函数调用参数数量类型不匹配
+    ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER = 300003, // 函数定义中不合法的 可变参数
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -2320,6 +2322,7 @@ void ring_compiler_analysis_import_package(Package* package);
 void ring_compiler_analysis_global_variable(Package* package);
 void ring_compiler_analysis_function(Package* package);
 void ring_compiler_analysis_class(Package* package);
+void check_function_call(FunctionCallExpression* function_call_expression, Function* function);
 
 void ring_compiler_check_exit(Package* package);
 // --------------------
