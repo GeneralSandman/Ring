@@ -400,6 +400,8 @@ struct TypeSpecifier {
     } u;
     unsigned int   dimension; // 维度，用来指明sub
     TypeSpecifier* sub;
+    // 只有当 kind == array, sub才用了指明数组中元素的类型,
+    // TODO: 后续应该把 sub放在 array_type中
 };
 
 typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);

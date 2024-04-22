@@ -137,22 +137,18 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
     std::string   parameter_str = format_function_parameters(parameter_pos);
     std::string   argument_str  = format_function_arguments(argument_pos);
 
-    // TODO:
-    // argument 有多个, 并且 有 argument 是个 function_call, 并且 返回值有多个
-    // 这种语法是不被允许的
-    // TODO: 比对 any类型
-    // TODO: 需要 兼容  var any... any_value 这种参数
-    // TODO: 深度比较
-    // TODO: 比对 类
+
     // Ring-Compiler-Error-Report  ERROR_ARGUMENT_MISMATCH_TYPE
-
-
+    // TODO:
+    // 这里比对 arguments 和 parameters, 有几个细节需要注意
+    // 1. 深度比对派生类型 数组(多维数组)、类
+    // 2. 比对 parameter 为     any类型
+    // 3. 比对 parameter 为 可变参数类型
+    // 4. 如果 parameter 有多个, 并且 argument 是个 function_call, 并且 funciton_call 的返回值有多个, 这种语法是不合法的
+    // TIP. argument 给 parameter copy 数据, 其实就行赋值, 要遵守多项赋值过程中 对于 function_call 的限制.
     for (; argument_pos != nullptr && parameter_pos != nullptr;) {
 
-
-        // TODO: 深度比较
-        // TODO: 比对 类
-        if (parameter_pos->type_specifier->kind != RING_BASIC_TYPE_ANY // FIXME: 修正 any类型
+        if (parameter_pos->type_specifier->kind != RING_BASIC_TYPE_ANY
             && parameter_pos->type_specifier->kind != argument_pos->expression->convert_type[0]->kind) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -187,8 +183,6 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
 }
 
 void ring_compiler_analysis_class(Package* package) {
-    // for (ClassDefinition* pos : package->class_definition_list) {
-    // }
 }
 
 void ring_compiler_check_exit(Package* package) {
