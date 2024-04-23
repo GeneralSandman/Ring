@@ -1889,6 +1889,8 @@ RVM_String* concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b
 
 
 /*
+ * rvm_new_array_literal_bool
+ *
  * 只用来初始化一维数组常量
  */
 RVM_Array* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsigned int size) {
@@ -1904,6 +1906,8 @@ RVM_Array* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsigned int siz
 }
 
 /*
+ * rvm_new_array_literal_int
+ *
  * 只用来初始化一维数组常量
  */
 RVM_Array* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size) {
@@ -1919,6 +1923,8 @@ RVM_Array* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size
 }
 
 /*
+ * rvm_new_array_literal_double
+ *
  * 只用来初始化一维数组常量
  */
 RVM_Array* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, unsigned int size) {
@@ -1934,6 +1940,8 @@ RVM_Array* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, unsigned int s
 }
 
 /*
+ * rvm_new_array_literal_string
+ *
  * 只用来初始化一维数组常量
  */
 RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int size) {
@@ -1950,6 +1958,8 @@ RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int s
 }
 
 /*
+ * rvm_new_array_literal_class_object
+ *
  * 只用来初始化一维数组常量
  */
 RVM_Array* rvm_new_array_literal_class_object(Ring_VirtualMachine* rvm,

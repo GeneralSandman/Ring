@@ -160,10 +160,12 @@ cleandeps: clean
 
 
 # 输出 y.output y.tab.cpp y.tab.hpp
-# -t : 诊断模式
+# -t :                诊断模式
+# -dv :               输出详细信息
 # -Wcounterexamples : generate conflict counterexamples
 y.tab.hpp y.tab.cpp : ring.bison.y
-	$(BisonBin) -o y.tab.cpp -dv -Wcounterexamples ring.bison.y  
+	$(BisonBin) -o y.tab.cpp -dv ring.bison.y  
+#	$(BisonBin) -o y.tab.cpp -dv -Wcounterexamples ring.bison.y  
 
 # 输出 lex.yy.cpp
 lex.yy.cpp : ring.flex.l ring.bison.y y.tab.hpp

@@ -676,45 +676,45 @@ function_definition
     : TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, nullptr, $5);
+        $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, nullptr, $5);
     }
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, nullptr, nullptr);
+        $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, nullptr, nullptr);
     }
 
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, $6);
+        $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, $6);
     }
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, nullptr);
+        $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, nullptr);
     }
 
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, $7, $9);
+        $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, $7, $9);
     }
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, $7, nullptr);
+        $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, nullptr, $7, nullptr);
     }
 
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, $10);
+        $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, $10);
     }
     | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
-        $$ = new_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, nullptr);
+        $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, nullptr);
     }
     ;
 
@@ -1304,12 +1304,12 @@ identifier_list
     : identifier
     {
         debug_bison_info_with_green("[RULE::identifier_list]\t ");
-        $$ = new_identifier(IDENTIFIER_TYPE_VARIABLE, $1);
+        $$ = create_identifier(IDENTIFIER_TYPE_VARIABLE, $1);
     }
     | identifier_list TOKEN_COMMA identifier
     {
         debug_bison_info_with_green("[RULE::identifier_list]\t ");
-        $$ = identifier_list_add_item($1, new_identifier(IDENTIFIER_TYPE_VARIABLE, $3));
+        $$ = identifier_list_add_item($1, create_identifier(IDENTIFIER_TYPE_VARIABLE, $3));
     }
     ;
 
@@ -1317,7 +1317,7 @@ identifier_v2
     : IDENTIFIER
     {
         debug_bison_info_with_green("[RULE::identifier_v2]\t identifier_v2(%s)", $1);
-        $$ = new_identifier(IDENTIFIER_TYPE_UNKNOW, $1);
+        $$ = create_identifier(IDENTIFIER_TYPE_UNKNOW, $1);
     }
     ;
 

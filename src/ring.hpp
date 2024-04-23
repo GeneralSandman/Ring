@@ -4,6 +4,7 @@
 
 #include "linenoise.h"
 #include <cstdio>
+#include <cstring>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -2241,12 +2242,12 @@ ClassObjectLiteralExpression* create_class_object_literal_expression(TypeSpecifi
 Expression*                   expression_list_add_item(Expression* expression_list, Expression* expression);
 ArgumentList*                 argument_list_add_item(ArgumentList* argument_list, ArgumentList* argument);
 ArgumentList*                 create_argument_list_from_expression(Expression* expression);
-Identifier*                   new_identifier(IdentifierType type, char* name);
+Identifier*                   create_identifier(IdentifierType type, char* name);
 Identifier*                   identifier_list_add_item(Identifier* identifier_list, Identifier* identifier);
 FunctionReturnList*           create_function_return_list(TypeSpecifier* type_specifier);
 FunctionReturnList*           function_return_list_add_item(FunctionReturnList* return_list,
                                                             TypeSpecifier*      type_specifier);
-Function*                     new_function_definition(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
+Function*                     create_function_definition(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
 
 Statement*                    create_statement_from_if(IfStatement* if_statement);
 IfStatement*                  create_if_statement(Expression* expression, Block* if_block, ElseIfStatement* elseif_statement_list, Block* else_block);

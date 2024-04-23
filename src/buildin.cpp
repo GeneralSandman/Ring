@@ -38,6 +38,7 @@ Ring_Buildin_Func Ring_Buildin_Funcs[] = {
         .identifier       = "pop",
         .param_size       = 1,
         .param_types      = std::vector<TypeSpecifier*>{},
+        .return_size      = 0,
         .return_types     = std::vector<TypeSpecifier*>{},
         .buildin_func_fix = fix_buildin_func_pop,
     },

@@ -449,7 +449,7 @@ ArgumentList* create_argument_list_from_expression(Expression* expression) {
     return argument_list;
 }
 
-Identifier* new_identifier(IdentifierType type, char* name) {
+Identifier* create_identifier(IdentifierType type, char* name) {
     debug_ast_info_with_yellow("identifier name:%s", name);
 
     Identifier* identifier   = (Identifier*)mem_alloc(get_front_mem_pool(), sizeof(Identifier));
@@ -490,11 +490,11 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
     return return_list;
 }
 
-Function* new_function_definition(FunctionType        type,
-                                  Identifier*         identifier,
-                                  Parameter*          parameter_list,
-                                  FunctionReturnList* return_list,
-                                  Block*              block) {
+Function* create_function_definition(FunctionType        type,
+                                     Identifier*         identifier,
+                                     Parameter*          parameter_list,
+                                     FunctionReturnList* return_list,
+                                     Block*              block) {
 
     debug_ast_info_with_yellow("functionType:%d, identifier:%s", type, identifier->name);
 

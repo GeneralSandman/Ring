@@ -26,32 +26,28 @@
  * 因为对于基础类型的 TypeSpecifier, 不会对TypeSpecifier进行修改, 全局变量可满足要求
  */
 TypeSpecifier bool_type_specifier = TypeSpecifier{
-    .line_number  = 0,
-    .kind         = RING_BASIC_TYPE_BOOL,
-    .u.array_type = nullptr,
-    .dimension    = 0,
-    .sub          = 0,
+    .line_number = 0,
+    .kind        = RING_BASIC_TYPE_BOOL,
+    .dimension   = 0,
+    .sub         = 0,
 };
 TypeSpecifier int_type_specifier = TypeSpecifier{
-    .line_number  = 0,
-    .kind         = RING_BASIC_TYPE_INT,
-    .u.array_type = nullptr,
-    .dimension    = 0,
-    .sub          = 0,
+    .line_number = 0,
+    .kind        = RING_BASIC_TYPE_INT,
+    .dimension   = 0,
+    .sub         = 0,
 };
 TypeSpecifier double_type_specifier = TypeSpecifier{
-    .line_number  = 0,
-    .kind         = RING_BASIC_TYPE_DOUBLE,
-    .u.array_type = nullptr,
-    .dimension    = 0,
-    .sub          = 0,
+    .line_number = 0,
+    .kind        = RING_BASIC_TYPE_DOUBLE,
+    .dimension   = 0,
+    .sub         = 0,
 };
 TypeSpecifier string_type_specifier = TypeSpecifier{
-    .line_number  = 0,
-    .kind         = RING_BASIC_TYPE_STRING,
-    .u.array_type = nullptr,
-    .dimension    = 0,
-    .sub          = 0,
+    .line_number = 0,
+    .kind        = RING_BASIC_TYPE_STRING,
+    .dimension   = 0,
+    .sub         = 0,
 };
 
 
@@ -1270,9 +1266,34 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
 
     Parameter* pos = parameter;
     for (; pos; pos = pos->next) {
+
+        TypeSpecifier* src_type_specifier = pos->type_specifier;
+        TypeSpecifier* type_specifier     = nullptr;
+
+        if (pos->is_variadic) {
+            // fix type_specifier to array.
+            type_specifier              = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+            type_specifier->line_number = src_type_specifier->line_number;
+            type_specifier->kind        = RING_BASIC_TYPE_ARRAY;
+
+            if (src_type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
+                // 直接增加一个维度即可
+                type_specifier->dimension = src_type_specifier->dimension + 1;
+                type_specifier->sub       = src_type_specifier->sub;
+
+            } else {
+                // 元素升级为数组
+                type_specifier->dimension = 1;
+                type_specifier->sub       = src_type_specifier;
+            }
+        } else {
+            type_specifier = src_type_specifier;
+        }
+
+
         Declaration* declaration    = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
         declaration->line_number    = pos->line_number;
-        declaration->type_specifier = pos->type_specifier;
+        declaration->type_specifier = type_specifier;
         declaration->identifier     = pos->identifier;
         declaration->initializer    = nullptr;
         declaration->is_const       = 0;
