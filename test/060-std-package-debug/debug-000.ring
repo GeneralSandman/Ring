@@ -38,6 +38,7 @@ typedef class Job {
 		fmt::println("Job::test3()::1");
 		fmt::println("Job::test3()::2");
 		fmt::println("Job::test3()::3");
+		debug::print_call_stack();
     }
 }
 
@@ -104,6 +105,7 @@ function test2() {
 }
 
 function test3() {
+	debug::print_call_stack();
 	fmt::println("test3()::0");
 	fmt::println("test3()::1");
 	fmt::println("test3()::2");
