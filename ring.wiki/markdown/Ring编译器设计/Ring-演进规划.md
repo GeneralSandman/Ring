@@ -16,7 +16,7 @@
 ## 总规划
 
 
-完善Ring的基本功能 争取 2024-12-31之前发布第一个release版本
+完善Ring的基本功能, 争取在2024-12-31之前发布第一个release版本.
 
 
 ### 数据类型
@@ -49,6 +49,7 @@
 1. 函数调用
 2. 参数、局部变量、返回值、self关键字
 3. 可变参数+any类型
+4. 参数的深度copy, 浅copy
 
 
 ### 语义分析
@@ -116,6 +117,8 @@
 - ✅ : 完成
 
 
+
+-----------------------------
 
 
 
@@ -251,7 +254,7 @@ TODO: Closure&Upvalue
 
 
 
-### Ring想要借鉴的一些Lua语法
+### Ring想要借鉴的一些语法
 
 
 #### 1. lua 索引
@@ -273,6 +276,29 @@ www.runoob.com
 ```
 
 
+#### 2. 字符串的format
+
+1. python 的 formate函数比较人性化, 需要自己改造一下
+
+
+```
+language = "Python"
+school = "freeCodeCamp"
+print(f"I'm learning {language} from {school}.")
+```
+
+
+```
+txt = "For only {price:.2f} dollars!"
+print(txt.format(price = 49))
+```
+
+2. java
+
+```
+int x = 10, y = 20;
+String s = STR."\{x} + \{y} = \{x + y}";
+```
 
 -----------------------------
 
@@ -301,6 +327,10 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 
 ### 测试集 ring dump
 
+如何测试 ring dump
+1. 新写一个单独的测试脚本.
+2. 对 dump 信息进行输出, 与预期结果进行比较.
+
 
 ### 要完善的测试用例
 
@@ -325,7 +355,7 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 -----------------------------
 
 
-## 专项-语义报错
+## 开发专项-语义报错
 
 1. 变量名称重复
    1. block中定义的 局部变量重复(函数没有参数)
@@ -364,7 +394,7 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 -----------------------------
 
 
-## 专项-类
+## 开发专项-类
 
 1. field类型
    1. bool ✅ 
@@ -377,7 +407,7 @@ package_unit_update_line_content 有点bug, 文件的最后一行不能存储下
 -----------------------------
 
 
-## 专项-数组
+## 开发专项-数组
 
 1. 数组 new 支持动态，e.g.  `array = new int[a,b,c];`
 
@@ -397,10 +427,56 @@ class-object  ✅
    不然继续访问 jobs[0].Running 还是老的Value。
 
 
+
 -----------------------------
 
 
-## 2024-04-08周
+## 2024-04-22周
+
+
+
+### A. BUG:ring package_unit 记录文件内容, 最后一行记录不了,  ✅ 
+
+
+### B. CentOS Ubuntu 环境coredump
+
+TODO: file_stat 对应的 so 没有安装
+
+
+### C. 可变参数类型 应用到 @derive函数中, 也就是如何访问可变参数类型
+
+1. 语义检查: 将变量的类型变成数组, 如果变量的类型已经是数组了, 那就加一个维度
+2. vm execute: 需要把参数转化成数组, 然后压入栈中, 然后后续通过数组的形式去访问可变参数
+   - 可以对可变参数列表进行 for-range len() capacity() 操作
+
+
+实现方式: 额外生成一个opcode, new_array_int. (当 var any... any_values, 需要对应那种字节码)
+
+new_array_literal_bool 这个操作码 应该是在函数内部, 还是在函数外部
+
+1. 如果要是放在函数外部, 实现起来不太优雅, 还要区分 @native @derive function, 因为 @native funciton 的便利性, 可以直接进行访问
+2. 如果要是放在函数内部实现, 可能会破坏函数的字节码展示, 让user感觉多了好几个字节码
+
+
+### D. ring dump 中, 格式化 可变参数类型不正确
+
+
+### E 多维数组 + 可变参数类型, 类型的多维展开
+
+
+### F. 三元表达式 如何判断表达式的类型
+
+a ? b : c; 
+b 和 c 的表达式类型必须一致, 然后这个三元表达式的最终类型 就是 b c 表达式的类型.
+
+./bin/ring run ./test/002-operator/condition-oper-001.ring
+
+
+
+-----------------------------
+
+
+## 2024-04-15周
 
 ### A. ring debugger 完善一下 help 提示信息  ✅ 
 
@@ -416,6 +492,102 @@ class-object  ✅
 ### C. 修正bug ✅ 
 
 fmt::println() 参数为string的时候,行为不太正确, 需要通过 length来控制
+
+
+### D. 语义分析, 函数调用, 参数数量不对
+
+### E. 语义分析, 函数调用, 参数类型不对
+
+需要区分 any 类型 和可变参数类型
+
+例如 
+
+```
+@native
+function println(var any... any_value);
+
+@native
+function printf(var string format, var any... any_value);
+```
+
+
+
+### F. 关于函数多返回值的使用方式
+
+函数定义:
+
+```
+function func_return_2_value() (bool, int) {
+
+}
+```
+
+
+#### a. 应用到多项赋值的情况下
+
+这样是可允许的, 因为 func_return_2_value() 的返回值是作为一个 整体 (bool, int), 函数调用表达式后边还有别的表达式, 所以 能够展开为 bool, int:
+
+```
+a, b = func_return_2_value();
+```
+
+
+但是这样是不被允许的, 因为 func_return_2_value() 的返回值是作为一个 整体 (bool, int), 函数调用表达式后边还有别的表达式, 所以不能够展开
+
+```
+a, b, c = func_return_2_value(), "str";
+```
+
+
+当然常规情况下, 这样是可以允许的:
+
+```
+a, b, c = true, 1, "aa";
+```
+
+
+
+#### b. 函数多返回值的 作为 下一个函数传递
+
+
+这样是可允许的, 也是因为 func_return_2_value() 返回值作为一个整体, 可以继续展开:
+```
+    function func_pass_2_value(var bool bool_value, var int int_value) {
+    
+    }
+
+    func_pass_2_value(func_return_2_value());
+```
+
+
+这样是不可允许的, 因为 func_return_2_value() 后边还有别的表达式, 不能继续展开:
+```
+    function func_pass_3_value(var bool bool_value, var int int_value, var string string_value) {
+    
+    }
+
+    func_pass_3_value(func_return_2_value(), "str");
+```
+
+
+
+TODO: 关于展开
+在这里, 多次取到一个名字叫做展开, 就是指 函数调用表达式后边还有别的表达式, 不能继续展开. 如何只是一个单独的表达式, 他自己是可以自己展开的
+如何使用一种通用的方法去描述这种 能够展开的情况
+
+### G. 关于 ring 语义分析 中, 强制检查变量的类型
+
+TODO: 关于类型的比较
+1. 基础类型的比较只需要比 TypeSpecifier.kind 即可
+2. 对于 数组 类型的比较 (比较数组的维度, 和数组元素的类型 )
+3. 对于 类   类型的比较 (类应该有一个全局的标识符, 这个标识符用来 作为 class的 unique-id, 如 package+class-identifier )
+4. 对于函数有多项返回值的情况, 还需要处理是否能够展开
+5. 还要考虑 函数调用中 any类型 和 可变参数类型
+6. 当前, 函数还不能作为变量进行传递, 所以暂时先不考虑 函数类型的比较, 函数如何区分 unique-id.
+
+
+
+
 
 -----------------------------
 
