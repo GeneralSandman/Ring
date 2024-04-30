@@ -342,6 +342,7 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
 
 
         // deep copy local variable
+        // declaration_list 即包括 parameter 也 包括 block中声明的局部变量
         Declaration* pos = src->block->declaration_list;
         i                = 0;
         for (; pos != nullptr; pos = pos->next, i++) {

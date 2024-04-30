@@ -443,10 +443,11 @@ struct RVM_Function {
     RVMFunctionType    type;
 
     unsigned int       parameter_size;
-    RVM_LocalVariable* parameter_list;
+    RVM_LocalVariable* parameter_list; // TODO: parameter_list 保存的信息还不是特别多, 需要继续优化
 
     unsigned int       local_variable_size;
-    RVM_LocalVariable* local_variable_list;
+    RVM_LocalVariable* local_variable_list; // TODO: parameter_list 保存的信息还不是特别多, 需要继续优化
+    // local_variable_list 是包含 parameter_list的, 因为 会通过访问局部变量的方式 访问 parameter
 
     union {
         NativeFunction* native_func;
