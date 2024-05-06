@@ -1168,6 +1168,12 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         // func
+        case RVM_CODE_ARGUMENT_NUM:
+            argument_list_size = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
+            STACK_SET_INT_OFFSET(rvm, 0, argument_list_size);
+            runtime_stack->top_index++;
+            rvm->pc += 2;
+            break;
         case RVM_CODE_PUSH_FUNC:
             // 这里设计的不太好
             func_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
@@ -1181,16 +1187,15 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index++;
             rvm->pc += 3;
             break;
-        case RVM_CODE_ARGUMENT_NUM:
-            argument_list_size = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
-            rvm->pc += 2;
-            break;
+
         case RVM_CODE_INVOKE_FUNC_NATIVE:
-            // TODO: 这里是不是直接放在字节码里比较好, 不放在 runtime_stack中
-            oper_num      = STACK_GET_INT_OFFSET(rvm, -1);
-            package_index = oper_num >> 8;
-            func_index    = oper_num & 0XFF;
-            runtime_stack->top_index--;
+            argument_list_size = STACK_GET_INT_OFFSET(rvm, -2);
+
+            oper_num           = STACK_GET_INT_OFFSET(rvm, -1);
+            package_index      = oper_num >> 8;
+            func_index         = oper_num & 0XFF;
+
+            runtime_stack->top_index -= 2;
 
             assert(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE);
             invoke_native_function(rvm,
@@ -1199,11 +1204,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 1;
             break;
         case RVM_CODE_INVOKE_FUNC:
-            // TODO: 这里是不是直接放在字节码里比较好, 不放在 runtime_stack中
-            oper_num      = STACK_GET_INT_OFFSET(rvm, -1);
-            package_index = oper_num >> 8;
-            func_index    = oper_num & 0XFF;
-            runtime_stack->top_index--;
+            argument_list_size = STACK_GET_INT_OFFSET(rvm, -2);
+
+            oper_num           = STACK_GET_INT_OFFSET(rvm, -1);
+            package_index      = oper_num >> 8;
+            func_index         = oper_num & 0XFF;
+
+            runtime_stack->top_index -= 2;
 
             assert(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE);
             invoke_derive_function(rvm,
@@ -1211,13 +1218,17 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                    nullptr, &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
                                    &code_list, &code_size,
                                    &rvm->pc,
-                                   &caller_stack_base);
+                                   &caller_stack_base,
+                                   argument_list_size);
 
             break;
         case RVM_CODE_INVOKE_METHOD:
-            method_index   = STACK_GET_INT_OFFSET(rvm, -1);
-            class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -2);
-            runtime_stack->top_index -= 2;
+
+            argument_list_size = STACK_GET_INT_OFFSET(rvm, -3);
+            class_ob_value     = STACK_GET_CLASS_OB_OFFSET(rvm, -2);
+            method_index       = STACK_GET_INT_OFFSET(rvm, -1);
+            runtime_stack->top_index -= 3;
+
             // 每个对象的成员变量 是单独存储的
             // 但是 method 没必要单独存储, 在 class_definition 中就可以, 通过指针寻找 class_definition
             // 需要将 class_object 赋值给 self 变量
@@ -1228,7 +1239,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                    class_ob_value, method->rvm_function,
                                    &code_list, &code_size,
                                    &rvm->pc,
-                                   &caller_stack_base);
+                                   &caller_stack_base,
+                                   argument_list_size);
             break;
         case RVM_CODE_RETURN:
             return_value_list_size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
@@ -1599,7 +1611,8 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
                             RVM_ClassObject* callee_object, RVM_Function* callee_function,
                             RVM_Byte** code_list, unsigned int* code_size,
                             unsigned int* pc,
-                            unsigned int* caller_stack_base) {
+                            unsigned int* caller_stack_base,
+                            unsigned int  argument_list_size) {
 
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->magic_number         = CALL_INFO_MAGIC_NUMBER;
@@ -1623,10 +1636,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     *caller_stack_base = rvm->runtime_stack->top_index;
 
 
-    init_derive_function_local_variable(rvm, callee_object, callee_function);
-
-    unsigned int local_variable_size = callee_function->local_variable_size;
-    rvm->runtime_stack->top_index += local_variable_size;
+    init_derive_function_local_variable(rvm, callee_object, callee_function, argument_list_size);
 }
 
 void derive_function_return(Ring_VirtualMachine* rvm,
@@ -1734,14 +1744,19 @@ void restore_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo** call_info) {
 }
 
 /*
- * callee_class_object 是 callee_function的 所属对象
+ * init_derive_function_local_variable 对函数中的局部变量进行初始化, 并放入runtime_stack中]
+ * 会造成栈空间的增长
+ *
+ * 1. callee_class_object 是 callee_function的 所属对象
+ *    用来区分是 method调用, 并 把 callee_class_object 初始化给 self 变量
  *
  * FIXME: 初始化局部变量列表的时候存在问题
  * FIXME: 如果局部变量是个数组
  */
 void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                          RVM_ClassObject*     callee_object,
-                                         RVM_Function*        function) {
+                                         RVM_Function*        function,
+                                         unsigned int         argument_list_size) {
 
     RVM_TypeSpecifier*   type_specifier            = nullptr;
     RVM_ClassDefinition* rvm_class_definition      = nullptr;
@@ -1749,31 +1764,110 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
     RVM_String*          string                    = nullptr;
     unsigned int         alloc_size                = 0;
 
-    unsigned int         stack_argument_size       = 0; // arguments size in stack whick pushed by function-call.
     unsigned int         stack_argument_list_index = 0; // arguments list's absolute index in stack.
     unsigned int         block_local_var_offset    = 0;
 
     // Step-0: relocate argument list's abs index in stack.
-    stack_argument_size = function->parameter_size;
-    // FIXME: parameter_size != argument_list_size when parameter is variadic parameter.
-    stack_argument_list_index = rvm->runtime_stack->top_index - stack_argument_size;
+    stack_argument_list_index = rvm->runtime_stack->top_index - argument_list_size;
 
 
-    // Step-1: 初始化 self 变量
+    // Step-1: 对于method调用, 初始化 self 对象变量
     if (callee_object != nullptr) {
         STACK_SET_CLASS_OB_INDEX(rvm, rvm->runtime_stack->top_index + block_local_var_offset, callee_object);
         block_local_var_offset++;
     }
 
     // Step-2: 通过实参 来初始化形参
-    for (unsigned int i = 0; i < stack_argument_size; i++, block_local_var_offset++) {
-        STACK_COPY_INDEX(rvm,
-                         rvm->runtime_stack->top_index + block_local_var_offset,
-                         stack_argument_list_index + i);
+    // 如果parameter is variadic. 需要转换成array
+    // 然后通过array的形式去访问可变参数.
+    unsigned int stack_argument_offset = 0;
+    for (unsigned int i = 0;
+         i < function->parameter_size && stack_argument_offset < argument_list_size;
+         i++, block_local_var_offset++) {
+
+        RVM_Parameter* parameter = &function->parameter_list[i];
+
+        if (parameter->is_variadic) {
+            // 可变参数只能是函数的最后一个参数,
+            // 直接一次性全部获取完成
+            // TODO: 当前只能一维数组
+            unsigned int size             = argument_list_size - stack_argument_offset;
+            unsigned int dimension        = 1;
+            unsigned int dimension_list[] = {size};
+
+            RVM_Array*   array            = nullptr;
+
+            switch (parameter->type_specifier->kind) {
+            case RING_BASIC_TYPE_BOOL:
+                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL, nullptr);
+                break;
+            case RING_BASIC_TYPE_INT:
+                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT, nullptr);
+                break;
+            case RING_BASIC_TYPE_DOUBLE:
+                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE, nullptr);
+                break;
+            case RING_BASIC_TYPE_STRING:
+                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING, nullptr);
+                break;
+            case RING_BASIC_TYPE_CLASS:
+                rvm_class_definition = &(rvm->class_list[parameter->type_specifier->u.class_def_index]);
+                array                = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLASS_OBJECT, rvm_class_definition);
+                break;
+
+            default:
+                ring_error_report("only support bool/int/double/string/class as variadic parameter");
+                break;
+            }
+
+            // 将stack中的参数放入array中
+            for (unsigned array_i = 0; stack_argument_offset < argument_list_size; array_i++, stack_argument_offset++) {
+                switch (parameter->type_specifier->kind) {
+                case RING_BASIC_TYPE_BOOL: {
+                    RVM_Bool tmp        = STACK_GET_BOOL_INDEX(rvm,
+                                                               stack_argument_list_index + stack_argument_offset);
+                    bool     bool_value = tmp;
+                    rvm_array_set_bool(rvm, array, array_i, &bool_value);
+                } break;
+                case RING_BASIC_TYPE_INT: {
+                    int int_value = STACK_GET_INT_INDEX(rvm,
+                                                        stack_argument_list_index + stack_argument_offset);
+                    rvm_array_set_int(rvm, array, array_i, &int_value);
+                } break;
+                case RING_BASIC_TYPE_DOUBLE: {
+                    double double_value = STACK_GET_DOUBLE_INDEX(rvm,
+                                                                 stack_argument_list_index + stack_argument_offset);
+                    rvm_array_set_double(rvm, array, array_i, &double_value);
+                } break;
+                case RING_BASIC_TYPE_STRING: {
+                    RVM_String* string_value = STACK_GET_STRING_INDEX(rvm,
+                                                                      stack_argument_list_index + stack_argument_offset);
+                    rvm_array_set_string(rvm, array, array_i, &string_value);
+                } break;
+                case RING_BASIC_TYPE_CLASS: {
+                    RVM_ClassObject* class_ob = STACK_GET_CLASS_OB_INDEX(rvm,
+                                                                         stack_argument_list_index + stack_argument_offset);
+                    rvm_array_set_class_object(rvm, array, array_i, &class_ob);
+                } break;
+
+                default:
+                    ring_error_report("only support bool/int/double/string/class as variadic parameter");
+                    break;
+                }
+            }
+
+            STACK_SET_ARRAY_INDEX(rvm, rvm->runtime_stack->top_index + block_local_var_offset, array);
+
+            // 可变参数只能是函数的最后一个参数
+            break;
+        } else {
+            STACK_COPY_INDEX(rvm,
+                             rvm->runtime_stack->top_index + block_local_var_offset,
+                             stack_argument_list_index + stack_argument_offset);
+            stack_argument_offset++;
+        }
     }
 
-    // TODO: 如果parameter is variadic. 需要转换成array
-    // 然后通过array的形式去访问可变参数.
 
     // Step-3: 初始化函数中声明的局部变量
     // FIXME:local_variable_list 其实是包含 parameter_list , 这样初始化重复了
@@ -1806,7 +1900,6 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             rvm_heap_alloc_size_incr(rvm, alloc_size);
             STACK_SET_STRING_INDEX(rvm, rvm->runtime_stack->top_index + block_local_var_offset, string);
             break;
-
         case RING_BASIC_TYPE_CLASS:
             rvm_class_definition = &(rvm->class_list[type_specifier->u.class_def_index]);
             class_ob             = rvm_new_class_object(rvm, rvm_class_definition);
@@ -1818,7 +1911,11 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
         }
     }
 
-    // printf("init_derive_function_local_variable:%d\n", local_variable_offset);
+    // Step-End: increase top index of runtime_stack.
+    unsigned int local_variable_size = function->local_variable_size;
+    rvm->runtime_stack->top_index += local_variable_size;
+    // printf("init_derive_function_local_variable: local_variable_size:%d\n", local_variable_size);
+    // printf("init_derive_function_local_variable: block_local_var_offset:%d\n", block_local_var_offset);
 }
 
 
@@ -2217,7 +2314,11 @@ ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Array* array, int i
     return ERROR_CODE_SUCCESS;
 }
 
-// TODO: 重新考虑一下, 可能存在内存泄漏
+/*
+ * deep copy `value` and set by `array`&`index`
+ *
+ * FIXME: 重新考虑一下, 可能存在内存泄漏
+ */
 ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_String** value) {
     if (index >= array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
@@ -2284,6 +2385,9 @@ ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm,
     return ERROR_CODE_SUCCESS;
 }
 
+/*
+ * deep copy `value` and set by `array`&`index`
+ */
 ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm,
                                      RVM_Array*           array,
                                      int                  index,

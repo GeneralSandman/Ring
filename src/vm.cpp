@@ -162,9 +162,9 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
 
     // func
+    {RVM_CODE_ARGUMENT_NUM, "argument_num", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "", ""},
     {RVM_CODE_PUSH_FUNC, "push_func", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", ""},
     {RVM_CODE_PUSH_METHOD, "push_method", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", ""},
-    {RVM_CODE_ARGUMENT_NUM, "argument_num", OPCODE_OPERAND_TYPE_1BYTE_A, 0, "", ""},
     {RVM_CODE_INVOKE_FUNC_NATIVE, "invoke_func_native", OPCODE_OPERAND_TYPE_0BYTE, -1, "", ""},
     {RVM_CODE_INVOKE_FUNC, "invoke_func", OPCODE_OPERAND_TYPE_0BYTE, -1, "", ""},
     {RVM_CODE_INVOKE_METHOD, "invoke_method", OPCODE_OPERAND_TYPE_0BYTE, -2, "", ""},

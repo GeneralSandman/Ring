@@ -831,9 +831,9 @@ typedef enum {
     RVM_CODE_DEEP_COPY,
 
     // func
+    RVM_CODE_ARGUMENT_NUM,
     RVM_CODE_PUSH_FUNC,
     RVM_CODE_PUSH_METHOD,
-    RVM_CODE_ARGUMENT_NUM,
     RVM_CODE_INVOKE_FUNC_NATIVE,
     RVM_CODE_INVOKE_FUNC,
     RVM_CODE_INVOKE_METHOD,
@@ -2515,7 +2515,8 @@ void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_ClassObject* callee_object, RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
-                                            unsigned int* caller_stack_base);
+                                            unsigned int* caller_stack_base,
+                                            unsigned int  argument_list_size);
 void                 derive_function_return(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
@@ -2532,7 +2533,9 @@ void                 derive_function_finish(Ring_VirtualMachine* rvm,
 void                 store_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo* call_info);
 void                 restore_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo** call_info);
 void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm,
-                                                         RVM_ClassObject* callee_object, RVM_Function* function);
+                                                         RVM_ClassObject*     callee_object,
+                                                         RVM_Function*        function,
+                                                         unsigned int         argument_list_size);
 
 RVM_String*          string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal);
 RVM_String*          concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b);
