@@ -1239,23 +1239,31 @@ void fix_ternary_condition_expression(Expression*        expression,
         return;
     }
 
-    fix_expression(ternary_expression->condition_expression, block, func);
-    fix_expression(ternary_expression->true_expression, block, func);
-    fix_expression(ternary_expression->false_expression, block, func);
+    Expression* condition_expression = ternary_expression->condition_expression;
+    Expression* true_expression      = ternary_expression->true_expression;
+    Expression* false_expression     = ternary_expression->false_expression;
 
-    if (ternary_expression->true_expression->convert_type_size != 1
-        || ternary_expression->false_expression->convert_type_size != 1) {
+    fix_expression(condition_expression, block, func);
+    fix_expression(true_expression, block, func);
+    fix_expression(false_expression, block, func);
+
+    if (true_expression->convert_type_size != false_expression->convert_type_size) {
         // TODO: error-report
-        // ring_error_report("true_expression false_expression is invalid\n");
+        ring_error_report("true_expression false_expression type_specifier size invalid\n");
     }
 
+
     // TODO: error-report 类型不匹配
-    // if (true_expression->convert_type != false_expression->convert_type) {
-    // }
+    if (true_expression->convert_type_size) {
+        if (true_expression->convert_type[0]->kind != false_expression->convert_type[0]->kind) {
+            ring_error_report("true_expression false_expression type unmatch\n");
+        }
+    }
+
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-    if (ternary_expression->true_expression->convert_type_size) {
-        EXPRESSION_ADD_CONVERT_TYPE(expression, ternary_expression->true_expression->convert_type[0]);
+    if (true_expression->convert_type_size) {
+        EXPRESSION_ADD_CONVERT_TYPE(expression, true_expression->convert_type[0]);
     }
 
     return;
