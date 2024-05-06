@@ -1783,7 +1783,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
     unsigned int stack_argument_offset = 0;
     for (unsigned int i = 0;
          i < function->parameter_size && stack_argument_offset < argument_list_size;
-         i++, block_local_var_offset++) {
+         i++, block_local_var_offset++, stack_argument_offset++) {
 
         RVM_Parameter* parameter = &function->parameter_list[i];
 
@@ -1864,13 +1864,11 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             STACK_COPY_INDEX(rvm,
                              rvm->runtime_stack->top_index + block_local_var_offset,
                              stack_argument_list_index + stack_argument_offset);
-            stack_argument_offset++;
         }
     }
 
 
     // Step-3: 初始化函数中声明的局部变量
-    // FIXME:local_variable_list 其实是包含 parameter_list , 这样初始化重复了
     for (unsigned int i = 0; i < function->local_variable_size; i++, block_local_var_offset++) {
         type_specifier = function->local_variable_list[i].type_specifier;
 
@@ -1880,6 +1878,21 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             // function->local_variable_list[0] 是self 变量
             // 将 callee_object 初始化给 self
             // 这个操作 已经在 Step-1 完成了, 该变量需要忽略.
+            continue;
+        }
+
+        // local_variable_list 其实是包含 parameter_list , 避免重复初始化
+        // 看看 是否已经在 Step-2初始化了
+        // TODO: 后续优化一下, 这个试下方式不太好
+        bool already_init = false;
+        for (unsigned int p = 0; p < function->parameter_size; p++) {
+            RVM_Parameter* parameter = &function->parameter_list[p];
+            if (str_eq(function->local_variable_list[i].identifier, parameter->identifier)) {
+                already_init = true;
+                break;
+            }
+        }
+        if (already_init) {
             continue;
         }
 
@@ -1912,8 +1925,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
     }
 
     // Step-End: increase top index of runtime_stack.
-    unsigned int local_variable_size = function->local_variable_size;
-    rvm->runtime_stack->top_index += local_variable_size;
+    rvm->runtime_stack->top_index += function->local_variable_size;
     // printf("init_derive_function_local_variable: local_variable_size:%d\n", local_variable_size);
     // printf("init_derive_function_local_variable: block_local_var_offset:%d\n", block_local_var_offset);
 }
