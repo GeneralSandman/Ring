@@ -105,7 +105,9 @@ typedef struct RVM_GC_Object                RVM_GC_Object;
 typedef struct RVM_BasicTypeSpecifier       RVM_BasicTypeSpecifier;
 typedef struct RVM_TypeSpecifier            RVM_TypeSpecifier;
 
+typedef struct RVM_Parameter                RVM_Parameter;
 typedef struct RVM_LocalVariable            RVM_LocalVariable;
+
 typedef struct NativeFunction               NativeFunction;
 typedef struct DeriveFunction               DeriveFunction;
 typedef struct RVM_Function                 RVM_Function;
@@ -413,6 +415,12 @@ typedef enum {
     RVM_FUNCTION_TYPE_DERIVE, // 派生函数，库函数，Ring编写的库函数
 } RVMFunctionType;
 
+struct RVM_Parameter {
+    RVM_TypeSpecifier* type_specifier;
+    bool               is_variadic; // variadic parameter function can be called with any number of trailing arguments.
+    char*              identifier;
+};
+
 struct RVM_LocalVariable {
     RVM_TypeSpecifier* type_specifier;
     char*              identifier;
@@ -443,7 +451,7 @@ struct RVM_Function {
     RVMFunctionType    type;
 
     unsigned int       parameter_size;
-    RVM_LocalVariable* parameter_list; // TODO: parameter_list 保存的信息还不是特别多, 需要继续优化
+    RVM_Parameter*     parameter_list; // TODO: parameter_list 保存的信息还不是特别多, 需要继续优化
 
     unsigned int       local_variable_size;
     RVM_LocalVariable* local_variable_list; // TODO: parameter_list 保存的信息还不是特别多, 需要继续优化
@@ -905,9 +913,6 @@ struct RVM_CallInfo {
 };
 
 #define CALL_INFO_MAGIC_NUMBER (0x8421) // 33852
-#define CALL_INFO_SIZE ((sizeof(RVM_CallInfo) - 1) / sizeof(RVM_Value) + 1)
-
-#define CALL_INFO_SIZE_V2 1
 
 /*
  * Ring_String 是专门给源信息使用的

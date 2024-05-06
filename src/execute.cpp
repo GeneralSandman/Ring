@@ -1186,12 +1186,12 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 2;
             break;
         case RVM_CODE_INVOKE_FUNC_NATIVE:
-            oper_num = STACK_GET_INT_OFFSET(rvm, -1);
             // TODO: 这里是不是直接放在字节码里比较好, 不放在 runtime_stack中
+            oper_num      = STACK_GET_INT_OFFSET(rvm, -1);
             package_index = oper_num >> 8;
             func_index    = oper_num & 0XFF;
-
             runtime_stack->top_index--;
+
             assert(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_NATIVE);
             invoke_native_function(rvm,
                                    &rvm->executer_entry->package_executer_list[package_index]->function_list[func_index],
@@ -1199,12 +1199,12 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 1;
             break;
         case RVM_CODE_INVOKE_FUNC:
-            oper_num = STACK_GET_INT_OFFSET(rvm, -1);
             // TODO: 这里是不是直接放在字节码里比较好, 不放在 runtime_stack中
+            oper_num      = STACK_GET_INT_OFFSET(rvm, -1);
             package_index = oper_num >> 8;
             func_index    = oper_num & 0XFF;
-
             runtime_stack->top_index--;
+
             assert(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE);
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function,
@@ -1233,7 +1233,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_RETURN:
             return_value_list_size = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             rvm->pc += 3;
-            [[fallthrough]];
+            [[fallthrough]]; // make g++ happy
         case RVM_CODE_FUNCTION_FINISH:
             derive_function_finish(rvm,
                                    &caller_class_ob, &caller_function,
@@ -1698,8 +1698,6 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
  *
  */
 void store_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo* call_info) {
-    // TODO: 这里有点兼容逻辑, 需要吧 CALL_INFO_SIZE_V2 去掉
-    rvm->runtime_stack->top_index += CALL_INFO_SIZE_V2;
 
     if (rvm->call_info == nullptr) {
         rvm->call_info = call_info;
@@ -1720,8 +1718,6 @@ void store_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo* call_info) {
  *
  */
 void restore_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo** call_info) {
-    // TODO: 这里有点兼容逻辑, 需要吧 CALL_INFO_SIZE_V2 去掉
-    rvm->runtime_stack->top_index -= CALL_INFO_SIZE_V2;
 
     assert(rvm->call_info != nullptr);
 
@@ -1760,8 +1756,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
     // Step-0: relocate argument list's abs index in stack.
     stack_argument_size = function->parameter_size;
     // FIXME: parameter_size != argument_list_size when parameter is variadic parameter.
-    stack_argument_list_index = rvm->runtime_stack->top_index - CALL_INFO_SIZE_V2 - stack_argument_size;
-    // FIXME: 这里有点兼容逻辑, 需要把 CALL_INFO_SIZE_V2 去掉
+    stack_argument_list_index = rvm->runtime_stack->top_index - stack_argument_size;
 
 
     // Step-1: 初始化 self 变量

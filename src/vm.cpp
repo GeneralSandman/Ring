@@ -229,7 +229,11 @@ std::string format_rvm_function(Package_Executer* package_executer,
         if (i != 0) {
             result += ", ";
         }
-        result += format_rvm_type_specifier(package_executer, function->parameter_list[i].type_specifier);
+
+        std::string tmp = format_rvm_type_specifier(package_executer, function->parameter_list[i].type_specifier)
+            + (function->parameter_list[i].is_variadic ? "..." : "");
+
+        result += tmp;
     }
     result += ")";
 

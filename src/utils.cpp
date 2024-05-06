@@ -373,8 +373,10 @@ void dump_vm_function(Package_Executer*    package_executer,
     // 2. function parameters
     printf("+Parameter:   %d\n", function->parameter_size);
     for (unsigned int i = 0; i < function->parameter_size; i++) {
+        std::string tmp = format_rvm_type_specifier(package_executer, function->parameter_list[i].type_specifier)
+            + (function->parameter_list[i].is_variadic ? "..." : "");
         printf(" ├──%-20s %-20s\n",
-               format_rvm_type_specifier(package_executer, function->parameter_list[i].type_specifier).c_str(),
+               tmp.c_str(),
                function->parameter_list[i].identifier);
     }
 

@@ -321,8 +321,8 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
         dst->type                = RVM_FUNCTION_TYPE_DERIVE;
 
         dst->parameter_size      = src->parameter_list_size;
-        dst->parameter_list      = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
-                                                                 sizeof(RVM_LocalVariable) * dst->parameter_size);
+        dst->parameter_list      = (RVM_Parameter*)mem_alloc(NULL_MEM_POOL,
+                                                             sizeof(RVM_Parameter) * dst->parameter_size);
 
         dst->local_variable_size = src->block->declaration_list_size;
         dst->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
@@ -334,6 +334,7 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
         Parameter*   param = src->parameter_list;
         for (; param != nullptr; param = param->next, i++) {
             dst->parameter_list[i].identifier     = param->identifier;
+            dst->parameter_list[i].is_variadic    = param->is_variadic;
             dst->parameter_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
                                                                                   sizeof(RVM_TypeSpecifier));
 
@@ -374,8 +375,8 @@ void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src)
     dst->rvm_function->type                = RVM_FUNCTION_TYPE_DERIVE;
 
     dst->rvm_function->parameter_size      = src->parameter_list_size;
-    dst->rvm_function->parameter_list      = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
-                                                                           sizeof(RVM_LocalVariable) * dst->rvm_function->parameter_size);
+    dst->rvm_function->parameter_list      = (RVM_Parameter*)mem_alloc(NULL_MEM_POOL,
+                                                                       sizeof(RVM_Parameter) * dst->rvm_function->parameter_size);
 
     dst->rvm_function->local_variable_size = src->block->declaration_list_size;
     dst->rvm_function->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
@@ -388,6 +389,7 @@ void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src)
     Parameter*   param = src->parameter_list;
     for (; param != nullptr; param = param->next, i++) {
         dst->rvm_function->parameter_list[i].identifier     = param->identifier;
+        dst->rvm_function->parameter_list[i].is_variadic    = param->is_variadic;
         dst->rvm_function->parameter_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
                                                                                             sizeof(RVM_TypeSpecifier));
 
