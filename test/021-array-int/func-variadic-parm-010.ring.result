@@ -1,0 +1,39 @@
+test case 1--------
+sum = 1
+debug_assert PASS
+
+test case 2--------
+sum = 3
+debug_assert PASS
+
+test case 3--------
+sum = 6
+debug_assert PASS
+
+test case 4--------
+sum = 10
+debug_assert PASS
+
+test case 5--------
+sum = 15
+debug_assert PASS
+
+test case 6--------
+sum = 21
+debug_assert PASS
+
+test case 7--------
+sum = 28
+debug_assert PASS
+
+test case 8--------
+sum = 36
+debug_assert PASS
+
+test case 9--------
+sum = 45
+debug_assert PASS
+
+test case 10--------
+sum = 55
+debug_assert PASS
