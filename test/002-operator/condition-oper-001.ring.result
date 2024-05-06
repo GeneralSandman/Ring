@@ -1,24 +1,26 @@
 
-test case 1
-invoke function test_b
+test case 1-----------
 invoke function test_a
-
-test case 2
-invoke function return_false
 invoke function test_b
+
+test case 2-----------
 invoke function return_true
 invoke function test_a
+invoke function return_false
+invoke function test_b
 
-test case 3
-invoke function return_false
-invoke function return_false
-false
-debug_assert PASS
+test case 3-----------
 invoke function return_true
 invoke function return_true
 true
 debug_assert PASS
 
-test case 4
+test case 4-----------
+invoke function return_false
+invoke function return_false
+false
 debug_assert PASS
-debug_assert PASS
+
+test case 5-----------
+1
+2
