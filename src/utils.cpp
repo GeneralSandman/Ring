@@ -284,14 +284,32 @@ RingFileStat* create_ring_file_stat(std::string& file_name) {
         ring_error_report("open file error:%s, path:%s\n", strerror(errno), real_path);
     }
 
+    // 绝对路径中 取文件名
+    char* basename_ = basename(real_path);
+    if (basename_ == nullptr) {
+        ring_error_report("basename error:%s, path:%s\n", strerror(errno), real_path);
+    }
+
+    // 绝对路径中 取路径名
+    char* dirname_ = dirname(real_path);
+    if (dirname_ == nullptr) {
+        ring_error_report("dirname error:%s, path:%s\n", strerror(errno), real_path);
+    }
+
 
     RingFileStat* file_stat    = (RingFileStat*)mem_alloc(nullptr, sizeof(RingFileStat)); // TODO: 内存分配在哪里
-    file_stat->dir             = std::string(basename(real_path));
-    file_stat->file_name       = std::string(dirname(real_path));
-    file_stat->abs_path        = std::string(real_path);
+    file_stat->dir             = dirname_;
+    file_stat->file_name       = basename_;
+    file_stat->abs_path        = real_path;
     file_stat->last_modified   = stat_.st_mtime;
     file_stat->fp              = fp;
     file_stat->line_offset_map = std::vector<SourceLineInfo>{SourceLineInfo{0, 0}};
+
+    /*
+     * 在 g++ (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0 中
+     * file_stat->dir             = std::string(basename(real_path));
+     * 会引起崩溃
+     */
 
     return file_stat;
 }
