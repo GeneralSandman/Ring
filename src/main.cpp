@@ -136,19 +136,21 @@ int main(int argc, char** argv) {
      * 初始化语法处理节点相关的struct
      */
     CompilerEntry* compiler_entry = compiler_entry_create();
-    // FIX: 目前main package 只能有一个源文件
+    // FIXME: 目前main package 只能有一个源文件
     // main package 源文件即为 ring run 指定的输入文件
-    Package* main_package        = package_create_input_file(compiler_entry,
-                                                             (char*)"main",
-                                                             (char*)ring_arg.input_file_name.c_str());
-    compiler_entry->main_package = main_package; // TODO: optimize the method of set main_package;
+    Package* main_package = package_create_input_file(compiler_entry,
+                                                      (char*)"main",
+                                                      (char*)ring_arg.input_file_name.c_str());
+    // TODO: optimize the method of set main_package;
+    compiler_entry->main_package = main_package;
 
     /*
      * 初始化代码生成阶段相关的struct
      */
     ExecuterEntry*    executer_entry        = executer_entry_create();
     Package_Executer* main_package_executer = package_executer_create(executer_entry, (char*)"main");
-    executer_entry->main_package_executer   = main_package_executer; // TODO: optimize the method of set main_package_executer;
+    // TODO: optimize the method of set main_package_executer;
+    executer_entry->main_package_executer = main_package_executer;
 
     /*
      * 初始化虚拟机相关的struct

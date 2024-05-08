@@ -319,7 +319,7 @@ void package_unit_compile(PackageUnit* package_unit) {
     }
 
 #ifdef DEBUG_CREATE_AST
-    // 展示当前源代码文件的内容, 分行展示 FIXME: 文件的最后一行不能正确记录并展示
+    // 分行展示当前源代码文件的内容
     // check package_unit->line_offset_map is valid
     printf("File:%s\n", package_unit->current_file_name.c_str());
     for (int i = 1; i < package_unit->line_offset_map.size(); i++) {

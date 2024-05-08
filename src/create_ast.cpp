@@ -254,9 +254,7 @@ Expression* create_expression_literal(ExpressionType type, char* literal_interfa
         sscanf(literal_interface, "%lf", &expression->u.double_literal);
         break;
     case EXPRESSION_TYPE_LITERAL_STRING:
-        // TODO: 这里不太对，可能要开辟新的内存
         expression->u.string_literal = literal_interface;
-        // sscanf(literal_interface, "%s", expression->u.string_literal);
         break;
     default:
         break;
@@ -298,7 +296,6 @@ Expression* create_cast_expression(TypeSpecifier* cast_type, Expression* operand
  * 也就是说 type_specifier 是 booll int double string class
  *
  */
-// TODO:
 Expression* create_new_array_expression(TypeSpecifier*       sub_type,
                                         DimensionExpression* dimension_expression) {
 
@@ -355,7 +352,6 @@ AssignExpression* create_multi_assign_expression(Expression* first_left_value_ex
                                                  Expression* left_value_exp_list,
                                                  Expression* operand) {
 
-    // TODO: 这里要判断一下，identifier是不是已经定义过了，并且identifier 不是函数，还要涉及到identifier重复的问题。
     debug_ast_info_with_yellow("");
 
     Expression*       left              = expression_list_add_item(first_left_value_exp, left_value_exp_list);
