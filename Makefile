@@ -37,6 +37,7 @@ help:
 	@echo "make clean                : clean object"
 	@echo "make cleandeps            : clean deps object"
 	@echo "make testall              : run automated-testing.sh"
+	@echo "make testdump             : run automated-testing-dump.sh"
 	@echo "make install              : install ring bin and package"
 	@echo "make uninstall            : uninstall ring bin and package"
 	@echo "make echo                 : print build info"
@@ -54,7 +55,10 @@ clean check cleandeps:
 
 testall:
 	bash ./test/automated-testing.sh
-  
+
+testdump:
+	bash ./test/automated-testing-dump.sh
+
 install:
 	@echo "\033[34m[+]Install Bin\033[0m"
 	$(CMD_INSTALL_EXEC) ./bin/ring $(INSTALL_BIN)

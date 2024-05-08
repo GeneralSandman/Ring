@@ -2,14 +2,14 @@
 
 # Action:
 # 对 ./test 所有的测试用例进行自动化测试,
-# 执行 ring run xxx.ring 命令 运行, 得到输出结果 xxx.ring.result.tmp, 
-# 与预期结果 xxx.ring.result 进行比对
+# 执行 ring dump xxx.ring 命令 运行, 得到输出结果 xxx.ring.dump.tmp, 
+# 与预期结果 xxx.ring.dump 进行比对
 # 会输出 测试的详情和测试数量汇总
 
 # Usage:
 # 1. 触发全部自动化测试
-#    make testall
-#    或者 bash ./test/automated-testing.sh
+#    make testdump
+#    或者 bash ./test/automated-testing-dump.sh
 # 2. 测试的轮数
 #    默认1轮, 可调整 TEST_LOOP_NUM
 # 3. 控制测试的模块: 
@@ -37,46 +37,46 @@ if [[ "$1" != "" ]]; then
     TEST_RING_BIN="$1"
 fi
 
-TEST_RING_COMMAND="run"
+TEST_RING_COMMAND="dump"
 
 
 # 要测试的文件夹
 TEST_PATH="./test"
 TEST_MODELS=(
-    "001-bool"
-    "002-int"
-    "003-double"
-    "004-string"
+#    "001-bool"
+#    "002-int"
+#    "003-double"
+#    "004-string"
 
     "001-basic-type" 
 
-    "002-operator" 
-    "003-native-function" 
+#    "002-operator" 
+#    "003-native-function" 
     "004-derive-function" 
-    "006-variable" 
-    "007-array"
-    "008-class" 
-    "010-main-entry" 
-    "011-global-variable" 
-    "012-local-variable"
-    "013-gc"
-
-    "020-array-bool"
-    "021-array-int"
-    "022-array-double"
-    "023-array-string"
-    "024-array-class"
-
-    "030-if"
-    "031-for"
-    "032-do-for"
-    "033-for-range"
-
-    "060-std-package-debug"
-    "061-std-package-fmt"
-    "062-std-package-reflect"
-    "063-std-package-os"
-    "064-std-package-vm"
+#    "006-variable" 
+#    "007-array"
+#    "008-class" 
+#    "010-main-entry" 
+#    "011-global-variable" 
+#    "012-local-variable"
+#    "013-gc"
+#
+#    "020-array-bool"
+#    "021-array-int"
+#    "022-array-double"
+#    "023-array-string"
+#    "024-array-class"
+#
+#    "030-if"
+#    "031-for"
+#    "032-do-for"
+#    "033-for-range"
+#
+#    "060-std-package-debug"
+#    "061-std-package-fmt"
+#    "062-std-package-reflect"
+#    "063-std-package-os"
+#    "064-std-package-vm"
     )
 
 # 跳过测试的case
@@ -108,7 +108,7 @@ NOT_TEST_FILES=(
   )
 
 # 测试的结果文件, 主要用于存放本次测试的失败结果
-TEST_RESULT="./automated-testing.sh.result"
+TEST_RESULT="./automated-testing-dump.sh.result"
 
 
 
@@ -176,8 +176,8 @@ exportTestCase(){
 autoTestAction(){
     model=$1
     source_code_file=$2"/"$3
-    run_result_file=$2"/"$3".result"
-    run_result_file_tmp=$2"/"$3".result.tmp"
+    run_result_file=$2"/"$3".dump"
+    run_result_file_tmp=$2"/"$3".dump.tmp"
     result=""
 
 

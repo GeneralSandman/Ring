@@ -1,0 +1,105 @@
+#Constants:       0
+
+#Globals:       0
+
+$get_level_by_score(var int)    <./test/004-derive-function/function-019.ring:11,17>
++Parameter:   1
+ ├──var int              score               
++Local:       1
+ ├──var int              score               
++Instructions:
+ ├──*Num    *Instruction                  *Operand            *SourceLineNum    
+ ├──0       push_int_1byte                0                   12                
+ ├──1       push_stack_int                0                                     
+ ├──2       le_int                                                              
+ ├──3       duplicate                     0, 1                                  
+ ├──4       jump_if_false                 19                                    
+ ├──5       push_stack_int                0                                     
+ ├──6       push_int_1byte                100                                   
+ ├──7       le_int                                                              
+ ├──8       logical_and                                                         
+ ├──9       jump_if_false                 34                  16                
+ ├──10      push_stack_int                0                   13                
+ ├──11      push_int_1byte                10                                    
+ ├──12      div_int                                                             
+ ├──13      return                        1                                     
+ ├──14      jump                          42                  16                
+ ├──15      push_int_1byte                0                   15                
+ ├──16      return                        1                                     
+ ├──17      jump                          42                                    
+ ├──18      function_finish                                   17                
+
+$main()    <./test/004-derive-function/function-019.ring:20,42>
++Parameter:   0
++Local:       3
+ ├──var int              sum                 
+ ├──var int              score               
+ ├──var int              level               
++Instructions:
+ ├──*Num    *Instruction                  *Operand            *SourceLineNum    
+ ├──0       push_int_1byte                0                   26                
+ ├──1       pop_stack_int                 0                                     
+ ├──2       push_int_1byte                9                   27                
+ ├──3       minus_int                                                           
+ ├──4       pop_stack_int                 1                                     
+ ├──5       push_stack_int                1                                     
+ ├──6       push_int_1byte                110                                   
+ ├──7       le_int                                                              
+ ├──8       jump_if_false                 54                                    
+ ├──9       push_stack_int                1                   28                
+ ├──10      argument_num                  1                                     
+ ├──11      push_func                     1536                                  
+ ├──12      invoke_func                                                         
+ ├──13      pop_stack_int                 2                                     
+ ├──14      push_stack_int                0                   29                
+ ├──15      push_stack_int                2                                     
+ ├──16      add_int                                                             
+ ├──17      pop_stack_int                 0                                     
+ ├──18      push_stack_int                1                   27                
+ ├──19      push_int_1byte                1                                     
+ ├──20      add_int                                                             
+ ├──21      pop_stack_int                 1                                     
+ ├──22      jump                          11                  30                
+ ├──23      push_stack_int                0                   31                
+ ├──24      argument_num                  1                                     
+ ├──25      push_func                     513                                   
+ ├──26      invoke_func_native                                                  
+ ├──27      push_stack_int                0                   32                
+ ├──28      push_int_2byte                460                                   
+ ├──29      eq_int                                                              
+ ├──30      argument_num                  1                                     
+ ├──31      push_func                     768                                   
+ ├──32      invoke_func_native                                                  
+ ├──33      push_int_1byte                0                   35                
+ ├──34      pop_stack_int                 0                                     
+ ├──35      push_int_1byte                9                   36                
+ ├──36      minus_int                                                           
+ ├──37      pop_stack_int                 1                                     
+ ├──38      push_stack_int                1                                     
+ ├──39      push_int_1byte                110                                   
+ ├──40      le_int                                                              
+ ├──41      jump_if_false                 124                                   
+ ├──42      push_stack_int                0                   37                
+ ├──43      push_stack_int                1                                     
+ ├──44      argument_num                  1                                     
+ ├──45      push_func                     1536                                  
+ ├──46      invoke_func                                                         
+ ├──47      add_int                                                             
+ ├──48      pop_stack_int                 0                                     
+ ├──49      push_stack_int                1                   36                
+ ├──50      push_int_1byte                1                                     
+ ├──51      add_int                                                             
+ ├──52      pop_stack_int                 1                                     
+ ├──53      jump                          87                  38                
+ ├──54      push_stack_int                0                   39                
+ ├──55      argument_num                  1                                     
+ ├──56      push_func                     513                                   
+ ├──57      invoke_func_native                                                  
+ ├──58      push_stack_int                0                   40                
+ ├──59      push_int_2byte                460                                   
+ ├──60      eq_int                                                              
+ ├──61      argument_num                  1                                     
+ ├──62      push_func                     768                                   
+ ├──63      invoke_func_native                                                  
+ ├──64      function_finish                                   42                
+
