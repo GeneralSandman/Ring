@@ -81,29 +81,7 @@ TEST_MODELS=(
 
 # 跳过测试的case
 NOT_TEST_FILES=(
-  "./test/004-derive-function/function-021.ring" 
-  # 函数传递 var int... int_value_list
 
-
-  "./test/013-gc/gc-000.ring" 
-  # 数组的地址  如何进行 自动化测试
-
-
-  "./test/002-operator/arith-oper-002.ring"
-  # double 数值比对, 存在bug
-
-  "./test/062-std-package-reflect/reflect-001.ring"
-  # 1. class-object数组，typeof获取不到正确的类型
-  # 2. 针对多维数组，typeof获取不到正确的类型
-  # 2023-01-31
-
-  "./test/002-operator/arith-oper-003.ring"
-  # 还没有支持括号运算符
-
-
-
-  "./test/060-std-package-debug/debug-000.ring"
-  # 只用来测试 ring rdb
 
   )
 

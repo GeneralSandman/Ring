@@ -1,0 +1,42 @@
+#Constants:       0
+
+#Globals:       0
+
+$test(var int...)    <./test/004-derive-function/function-021.ring:12,17>
++Parameter:   1
+ ├──var int...           int_value_list      
++Local:       2
+ ├──var int[!1]          int_value_list      
+ ├──var int              int_value           
++Instructions:
+ ├──*Num    *Instruction                  *Operand            *SourceLineNum    
+ ├──0       push_stack_array              0                   14                
+ ├──1       push_int_2byte                0                                     
+ ├──2       range_array_int               24                                    
+ ├──3       pop_stack_int                 1                   16                
+ ├──4       push_stack_int                1                   15                
+ ├──5       argument_num                  1                                     
+ ├──6       push_func                     517                                   
+ ├──7       invoke_func_native                                                  
+ ├──8       jump                          6                   14                
+ ├──9       for_range_finish              0                                     
+ ├──10      function_finish                                   17                
+
+$main()    <./test/004-derive-function/function-021.ring:21,29>
++Parameter:   0
++Local:       2
+ ├──var int              int_value_0         
+ ├──var int              int_value_1         
++Instructions:
+ ├──*Num    *Instruction                  *Operand            *SourceLineNum    
+ ├──0       push_int_1byte                1                   25                
+ ├──1       pop_stack_int                 0                                     
+ ├──2       push_int_1byte                2                   26                
+ ├──3       pop_stack_int                 1                                     
+ ├──4       push_stack_int                0                   28                
+ ├──5       push_stack_int                1                                     
+ ├──6       argument_num                  2                                     
+ ├──7       push_func                     1536                                  
+ ├──8       invoke_func                                                         
+ ├──9       function_finish                                   29                
+

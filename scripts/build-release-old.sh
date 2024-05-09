@@ -24,7 +24,7 @@ apt-get -y install valgrind
 
 # build
 cd /home/Ring && \
-make clean && make && make install && make testall
+make cleandeps && make clean && make && make install && make testall && make testdump
 
 
 
@@ -58,7 +58,7 @@ cd /home && \
     
 # build
 cd /home/Ring && \
-make clean && make && make install && make testall
+make cleandeps && make clean && make && make install && make testall && make testdump
 
 
 
