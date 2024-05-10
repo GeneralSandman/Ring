@@ -52,6 +52,5 @@ function main() {
     debug::debug_assert(int_value_2 == 2);
     debug::debug_assert(int_value_3 == 3);
     debug::debug_assert(int_value_4 == 4);
-    return 0;
 
 }
