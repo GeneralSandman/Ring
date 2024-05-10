@@ -46,7 +46,7 @@ $test(var int, var int)    <./test/004-derive-function/function-010.ring:12,27>
  ├──28      return                        4                                     
  ├──29      function_finish                                   27                
 
-$main()    <./test/004-derive-function/function-010.ring:30,57>
+$main()    <./test/004-derive-function/function-010.ring:30,56>
 +Parameter:   0
 +Local:       4
  ├──var int              int_value_1         
@@ -133,7 +133,5 @@ $main()    <./test/004-derive-function/function-010.ring:30,57>
  ├──75      argument_num                  1                                     
  ├──76      push_func                     768                                   
  ├──77      invoke_func_native                                                  
- ├──78      push_int_1byte                0                   55                
- ├──79      return                        1                                     
- ├──80      function_finish                                   57                
+ ├──78      function_finish                                   56                
 

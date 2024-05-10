@@ -22,21 +22,21 @@ $test(var int...)    <./test/004-derive-function/function-021.ring:12,17>
  ├──9       for_range_finish              0                                     
  ├──10      function_finish                                   17                
 
-$main()    <./test/004-derive-function/function-021.ring:21,29>
+$main()    <./test/004-derive-function/function-021.ring:22,30>
 +Parameter:   0
 +Local:       2
  ├──var int              int_value_0         
  ├──var int              int_value_1         
 +Instructions:
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_int_1byte                1                   25                
+ ├──0       push_int_1byte                1                   26                
  ├──1       pop_stack_int                 0                                     
- ├──2       push_int_1byte                2                   26                
+ ├──2       push_int_1byte                2                   27                
  ├──3       pop_stack_int                 1                                     
- ├──4       push_stack_int                0                   28                
+ ├──4       push_stack_int                0                   29                
  ├──5       push_stack_int                1                                     
  ├──6       argument_num                  2                                     
  ├──7       push_func                     1536                                  
  ├──8       invoke_func                                                         
- ├──9       function_finish                                   29                
+ ├──9       function_finish                                   30                
 
