@@ -795,7 +795,7 @@ std::string format_function_parameters(Parameter* parameter) {
     }
 
 
-    return string_join(strings, ",");
+    return strings_join(strings, ",");
 }
 
 // TODO: 格式化数组类型
@@ -808,7 +808,7 @@ std::string format_function_arguments(ArgumentList* argument) {
         strings.push_back(format_type_specifier(argument->expression->convert_type[0]));
     }
 
-    str = string_join(strings, ",");
+    str = strings_join(strings, ",");
 
     return str;
 }
@@ -953,7 +953,7 @@ static int hex_digit_to_int(char c) {
     }
 }
 
-std::string string_join(const std::vector<std::string>& lst, const std::string& delim) {
+std::string strings_join(const std::vector<std::string>& lst, const std::string& delim) {
     std::string ret;
     for (const auto& s : lst) {
         if (!ret.empty())

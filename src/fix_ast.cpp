@@ -54,22 +54,14 @@ TypeSpecifier string_type_specifier = TypeSpecifier{
 void ring_compiler_fix_ast(Package* package) {
     // fix class list
     unsigned int class_index = 0;
-    for (ClassDefinition* pos : package->class_definition_list) {
-        pos->class_index = class_index++;
-        fix_class_definition(pos);
+    for (ClassDefinition* class_def : package->class_definition_list) {
+        class_def->class_index = class_index++;
+        fix_class_definition(class_def);
     }
 
     // fix function list
-    for (Function* pos : package->function_list) {
-        if (pos->block) {
-            add_parameter_to_declaration(pos->parameter_list, pos->block);
-            fix_statement_list(pos->block->statement_list, pos->block, pos);
-        }
-
-        FunctionReturnList* return_list = pos->return_list;
-        for (; return_list != nullptr; return_list = return_list->next) {
-            fix_type_specfier(return_list->type_specifier);
-        }
+    for (Function* func : package->function_list) {
+        fix_function_definition(func);
     }
 }
 
@@ -89,6 +81,19 @@ void ring_compiler_fix_ast(PackageUnit* package_unit) {
             add_parameter_to_declaration(pos->parameter_list, pos->block);
             fix_statement_list(pos->block->statement_list, pos->block, pos);
         }
+    }
+}
+
+void fix_function_definition(Function* func) {
+
+    FunctionReturnList* return_list = func->return_list;
+    for (; return_list != nullptr; return_list = return_list->next) {
+        fix_type_specfier(return_list->type_specifier);
+    }
+
+    if (func->block) {
+        add_parameter_to_declaration(func->parameter_list, func->block);
+        fix_statement_list(func->block->statement_list, func->block, func);
     }
 }
 
@@ -418,9 +423,152 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
         return;
     }
 
-    Expression* pos;
-    for (pos = return_statement->return_list; pos; pos = pos->next) {
+
+    bool                        has_call        = false;
+    Expression*                 call_expression = nullptr;
+
+    std::vector<TypeSpecifier*> return_convert_type;
+    unsigned                    return_exp_num = 0;
+
+    for (Expression* pos = return_statement->return_list;
+         pos != nullptr;
+         pos = pos->next, return_exp_num++) {
+
+        if (pos->type == EXPRESSION_TYPE_FUNCTION_CALL
+            || pos->type == EXPRESSION_TYPE_METHOD_CALL) {
+            call_expression = pos;
+            has_call        = true;
+        }
+
         fix_expression(pos, block, func);
+
+        for (unsigned int i = 0; i < pos->convert_type_size; i++) {
+            return_convert_type.push_back(pos->convert_type[i]);
+        }
+    }
+
+
+    // check return语句 中表达式的类型 和 function_definition 中的 返回值类型 是否一致
+
+    // Ring-Compiler-Error-Report  ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS
+    // operand中有多个, 其中有 function_call, 这是不合法的
+    if (return_exp_num > 1 && has_call) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "function-call/method-call is not allowed in multiple operands; E:%d.",
+                 ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(return_statement->line_number),
+            .line_number             = return_statement->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+
+    if (func == nullptr) {
+        // TODO:
+        // 如果是个method 的话, func 为空
+        // 这里是不应该的
+        // 但是 Function MethodMember 结构基本相同, 但是略有差异, 后续考虑统一,
+        // 然后 func 不能 为空
+        // 这里暂时先跳过检查
+        return;
+    }
+
+    // Ring-Compiler-Error-Report  ERROR_FUNCTION_MISMATCH_RETURN_NUM
+    if (func->return_list_size != return_convert_type.size()) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "the number of return expression list mismatch function definition return value list, expect %d but return %d; E:%d.",
+                 func->return_list_size,
+                 return_convert_type.size(),
+                 ERROR_FUNCTION_MISMATCH_RETURN_NUM);
+        snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                 "delete useless local variable in this block.");
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(return_statement->line_number),
+            .line_number             = return_statement->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+
+    std::vector<std::string> expect_type_strs;
+    std::string              expect_type_str;
+    for (FunctionReturnList* pos = func->return_list;
+         pos != nullptr;
+         pos = pos->next) {
+
+        expect_type_strs.push_back(format_type_specifier(pos->type_specifier));
+    }
+    expect_type_str = "(" + strings_join(expect_type_strs, ", ") + ")";
+
+    std::vector<std::string> actual_type_strs;
+    std::string              actual_type_str;
+    for (TypeSpecifier* type : return_convert_type) {
+        actual_type_strs.push_back(format_type_specifier(type));
+    }
+    actual_type_str = "(" + strings_join(actual_type_strs, ", ") + ")";
+
+
+    // Ring-Compiler-Error-Report  ERROR_FUNCTION_MISMATCH_RETURN_TYPE
+    FunctionReturnList* return_value = func->return_list;
+    unsigned int        i            = 0;
+    for (; return_value != nullptr;
+         return_value = return_value->next, i++) {
+
+        TypeSpecifier* expect = return_value->type_specifier;
+        TypeSpecifier* actual = return_convert_type[i];
+
+        // TODO: 深度比较
+        // TODO: 比对 类
+        if (expect->kind != actual->kind) {
+            DEFINE_ERROR_REPORT_STR;
+
+            // TODO:
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "return mismatch: expect %s but return %s; E:%d.",
+                     expect_type_str.c_str(),
+                     actual_type_str.c_str(),
+                     ERROR_ASSIGNMENT_MISMATCH_TYPE);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(return_statement->line_number),
+                .line_number             = return_statement->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
     }
 }
 
@@ -477,6 +625,16 @@ void fix_identifier_expression(Expression*           expression,
     EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier);
 }
 
+/*
+ * fix_assign_expression 主要对 assignment 语句进行语义检查和AST的修正
+ *
+ * 1. 检查 left 和 right 的数量是否匹配
+ * 2. 检查 left 和 right 的类型是否匹配
+ * 3. assignment 是多项赋值语句的时候, 情况复杂了
+ *    3.1 如果 right 是function-call, 并且这个函数有多个返回值, 那么: 在 right中 只能存在 这个function-call
+ *        a,b,c = test(); // 合法的, 因为test()返回值作为一个整体, 可以继续展开成 三个表达式
+ *        a,b,c,c = test(), 1; // 不合法的, 因为test()返回值作为一个整体, 是不能继续展开的, 只能是一个表达式
+ */
 void fix_assign_expression(AssignExpression* expression, Block* block, Function* func) {
     if (expression == nullptr) {
         return;
@@ -569,8 +727,18 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
         ring_compile_error_report(&context);
     }
 
-    std::string left_type_s;
-    std::string right_type_s;
+    std::string left_type_s  = "(";
+    std::string right_type_s = "(";
+    // TODO: 第一个空格需要去掉
+    for (TypeSpecifier* type : left_convert_type) {
+        left_type_s += "," + format_type_specifier(type);
+    }
+    left_type_s += ")";
+    // TODO: 第一个空格需要去掉
+    for (TypeSpecifier* type : right_convert_type) {
+        right_type_s += "," + format_type_specifier(type);
+    }
+    right_type_s += ")";
 
     // Ring-Compiler-Error-Report  ERROR_ASSIGNMENT_MISMATCH_TYPE
     for (unsigned int i = 0; i < left_convert_type.size(); i++) {
@@ -580,24 +748,11 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
         if (left_convert_type[i]->kind != right_convert_type[i]->kind) {
             DEFINE_ERROR_REPORT_STR;
 
-            std::string left_str  = "(";
-            std::string right_str = "(";
-            // TODO: 第一个空格需要去掉
-            for (TypeSpecifier* type : left_convert_type) {
-                left_str += "," + format_type_specifier(type);
-            }
-            left_str += ")";
-            // TODO: 第一个空格需要去掉
-            for (TypeSpecifier* type : right_convert_type) {
-                right_str += "," + format_type_specifier(type);
-            }
-            right_str += ")";
-
             // TODO:
             snprintf(compile_err_buf, sizeof(compile_err_buf),
                      "assignment mismatch: expect %s but return %s; E:%d.",
-                     left_str.c_str(),
-                     right_str.c_str(),
+                     left_type_s.c_str(),
+                     right_type_s.c_str(),
                      ERROR_ASSIGNMENT_MISMATCH_TYPE);
 
             ErrorReportContext context = {

@@ -1116,6 +1116,7 @@ struct FieldMember {
 };
 
 // 类方法
+// TODO: 这里的数据结构和  Function结构有点像, 如何把两个融合在一起
 struct MethodMember {
     std::string         source_file;
     unsigned int        start_line_number; // 源码的开始行
@@ -1909,6 +1910,9 @@ typedef enum {
     ERROR_ARGUMENT_MISMATCH_TYPE              = 300002, // 函数调用参数数量类型不匹配
     ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER = 300003, // 函数定义中不合法的 可变参数
 
+    ERROR_FUNCTION_MISMATCH_RETURN_NUM        = 300004, // 函数定义的返回值和return中的返回值类型不匹配
+    ERROR_FUNCTION_MISMATCH_RETURN_TYPE       = 300005, // 函数定义的返回值和return中的返回值类型不匹配
+
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
 
@@ -2344,6 +2348,7 @@ void ring_compiler_check_exit(Package* package);
  */
 void                    ring_compiler_fix_ast(Package* package);
 void                    ring_compiler_fix_ast(PackageUnit* package_unit);
+void                    fix_function_definition(Function* func);
 void                    fix_statement_list(Statement* statement_list, Block* block, Function* func);
 void                    fix_statement(Statement* statement, Block* block, Function* func);
 void                    fix_expression(Expression* expression, Block* block, Function* func);
@@ -2693,7 +2698,7 @@ std::string              format_function_arguments(ArgumentList* argument);
 std::vector<std::string> splitargs(const char* line);
 static int               hex_digit_to_int(char c);
 
-std::string              string_join(const std::vector<std::string>& lst, const std::string& delim);
+std::string              strings_join(const std::vector<std::string>& lst, const std::string& delim);
 // --------------------
 
 
