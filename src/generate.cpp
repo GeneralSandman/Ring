@@ -211,23 +211,15 @@ void class_def_deep_copy(Package_Executer*    executer,
                          ClassDefinition*     src) {
     debug_generate_info_with_darkgreen("\t");
 
-    dst->source_file            = src->source_file;
-    dst->start_line_number      = src->start_line_number;
-    dst->end_line_number        = src->end_line_number;
-    dst->identifier             = src->identifier;
-    dst->field_size             = 0;
-    dst->field_list             = nullptr;
-    dst->method_size            = 0;
-    dst->method_list            = nullptr;
+    dst->source_file       = src->source_file;
+    dst->start_line_number = src->start_line_number;
+    dst->end_line_number   = src->end_line_number;
+    dst->identifier        = src->identifier;
+    dst->field_size        = src->field_size;
+    dst->field_list        = nullptr;
+    dst->method_size       = src->method_size;
+    dst->method_list       = nullptr;
 
-    ClassMemberDeclaration* pos = src->member;
-    for (; pos != nullptr; pos = pos->next) {
-        if (pos->type == MEMBER_FIELD) {
-            dst->field_size++;
-        } else if (pos->type == MEMBER_METHOD) {
-            dst->method_size++;
-        }
-    }
 
     // Ring-Compiler-Error-Report  ERROR_TOO_MANY_FIELDS_IN_CLASS
     if (dst->field_size > 255) {
@@ -290,15 +282,16 @@ void class_def_deep_copy(Package_Executer*    executer,
 
     unsigned int field_index  = 0;
     unsigned int method_index = 0;
-    pos                       = src->member;
-    for (; pos != nullptr; pos = pos->next) {
-        if (pos->type == MEMBER_FIELD) {
-            copy_field(executer, &dst->field_list[field_index], pos->u.field);
-            field_index++;
-        } else if (pos->type == MEMBER_METHOD) {
-            copy_method(executer, &dst->method_list[method_index], pos->u.method);
-            method_index++;
-        }
+
+    for (FieldMember* pos = src->field_list;
+         pos != nullptr;
+         pos = pos->next, field_index++) {
+        copy_field(executer, &dst->field_list[field_index], pos);
+    }
+    for (MethodMember* pos = src->method_list;
+         pos != nullptr;
+         pos = pos->next, method_index++) {
+        copy_method(executer, &dst->method_list[method_index], pos);
     }
 }
 
@@ -1247,8 +1240,8 @@ void generate_pop_to_leftvalue_member(Package_Executer* executer,
     }
 
     RVM_Opcode opcode        = RVM_CODE_UNKNOW;
-    opcode                   = convert_opcode_by_rvm_type(RVM_CODE_POP_FIELD_BOOL, member_expression->member_declaration->u.field->type_specifier);
-    unsigned int field_index = member_expression->member_declaration->u.field->index_of_class;
+    opcode                   = convert_opcode_by_rvm_type(RVM_CODE_POP_FIELD_BOOL, member_expression->field_member->type_specifier);
+    unsigned int field_index = member_expression->field_member->index_of_class;
 
     generate_vmcode_from_expression(executer, member_expression->object_expression, opcode_buffer);
     generate_vmcode(executer, opcode_buffer, opcode, field_index, member_expression->line_number);
@@ -1746,8 +1739,7 @@ void generate_vmcode_from_method_call_expression(Package_Executer*     executer,
     generate_vmcode_from_expression(executer, method_call_expression->object_expression, opcode_buffer);
 
     // generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer, 1);
-    ClassMemberDeclaration* member_declaration  = method_call_expression->member_declaration;
-    unsigned                member_method_index = member_declaration->u.method->index_of_class;
+    unsigned member_method_index = method_call_expression->method_member->index_of_class;
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_METHOD, member_method_index, method_call_expression->line_number);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_METHOD, 0, method_call_expression->line_number);
 }
@@ -1818,9 +1810,9 @@ void generate_vmcode_from_member_expression(Package_Executer* executer,
     generate_vmcode_from_expression(executer, member_expression->object_expression, opcode_buffer);
 
     // member
-    ClassMemberDeclaration* member_declaration = member_expression->member_declaration;
-    RVM_Opcode              opcode             = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FIELD_BOOL, member_declaration->u.field->type_specifier);
-    unsigned                member_field_index = member_declaration->u.field->index_of_class;
+    FieldMember* field_member       = member_expression->field_member;
+    RVM_Opcode   opcode             = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FIELD_BOOL, field_member->type_specifier);
+    unsigned     member_field_index = field_member->index_of_class;
     generate_vmcode(executer, opcode_buffer, opcode, member_field_index, member_expression->line_number);
 }
 

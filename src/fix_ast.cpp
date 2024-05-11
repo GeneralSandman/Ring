@@ -241,7 +241,7 @@ BEGIN:
         fix_array_index_expression(expression, expression->u.array_index_expression, block, func);
         break;
     case EXPRESSION_TYPE_MEMBER:
-        fix_member_expression(expression, expression->u.member_expression, block, func);
+        fix_field_member_expression(expression, expression->u.member_expression, block, func);
         break;
 
     case EXPRESSION_TYPE_ELEMENT_ACCESS:
@@ -956,10 +956,10 @@ void fix_method_call_expression(Expression*           expression,
         return;
     }
 
-    char*                   member_identifier  = method_call_expression->member_identifier;
-    ClassDefinition*        class_definition   = nullptr;
-    ClassMemberDeclaration* member_declaration = nullptr;
-    Expression*             object_expression  = method_call_expression->object_expression;
+    char*            member_identifier = method_call_expression->member_identifier;
+    ClassDefinition* class_definition  = nullptr;
+    MethodMember*    method            = nullptr;
+    Expression*      object_expression = method_call_expression->object_expression;
 
     // 0. fix object expression
     fix_expression(object_expression, block, func);
@@ -971,10 +971,10 @@ void fix_method_call_expression(Expression*           expression,
     }
 
     // 2. find member declaration by member identifier.
-    member_declaration = search_class_member(class_definition, member_identifier);
+    method = search_class_method(class_definition, member_identifier);
 
     // Ring-Compiler-Error-Report  ERROR_INVALID_NOT_FOUND_CLASS_METHOD
-    if (member_declaration == nullptr) {
+    if (method == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
         snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -997,31 +997,8 @@ void fix_method_call_expression(Expression*           expression,
         };
         ring_compile_error_report(&context);
     }
-    if (member_declaration->type != MEMBER_METHOD) {
-        DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "`%s` is a field, not a method; E:%d.",
-                 member_identifier,
-                 ERROR_INVALID_NOT_FOUND_CLASS_METHOD);
-
-
-        ErrorReportContext context = {
-            .package                 = nullptr,
-            .package_unit            = get_package_unit(),
-            .source_file_name        = get_package_unit()->current_file_name,
-            .line_content            = package_unit_get_line_content(method_call_expression->line_number),
-            .line_number             = method_call_expression->line_number,
-            .column_number           = package_unit_get_column_number(),
-            .error_message           = std::string(compile_err_buf),
-            .advice                  = std::string(compile_adv_buf),
-            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
-            .ring_compiler_file      = (char*)__FILE__,
-            .ring_compiler_file_line = __LINE__,
-        };
-        ring_compile_error_report(&context);
-    }
-    method_call_expression->member_declaration = member_declaration;
+    method_call_expression->method_member = method;
 
     // 4. fix argument list
     ArgumentList* pos = method_call_expression->argument_list;
@@ -1031,7 +1008,7 @@ void fix_method_call_expression(Expression*           expression,
 
     // method_call_expression 的类型取决于 method返回值的类型
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-    FunctionReturnList* return_pos = member_declaration->u.method->return_list;
+    FunctionReturnList* return_pos = method->return_list;
     for (; return_pos != nullptr; return_pos = return_pos->next) {
         EXPRESSION_ADD_CONVERT_TYPE(expression, return_pos->type_specifier);
     }
@@ -1043,14 +1020,17 @@ void fix_class_definition(ClassDefinition* class_definition) {
     unsigned int field_index  = 0;
     unsigned int method_index = 0;
 
-    for (ClassMemberDeclaration* pos = class_definition->member; pos != nullptr; pos = pos->next) {
-        if (pos->type == MEMBER_FIELD) {
-            pos->u.field->index_of_class = field_index++;
-            fix_class_field(class_definition, pos->u.field);
-        } else if (pos->type == MEMBER_METHOD) {
-            pos->u.method->index_of_class = method_index++;
-            fix_class_method(class_definition, pos->u.method);
-        }
+    for (FieldMember* pos = class_definition->field_list;
+         pos != nullptr;
+         pos = pos->next, field_index++) {
+        pos->index_of_class = field_index;
+        fix_class_field(class_definition, pos);
+    }
+    for (MethodMember* pos = class_definition->method_list;
+         pos != nullptr;
+         pos = pos->next, method_index++) {
+        pos->index_of_class = method_index;
+        fix_class_method(class_definition, pos);
     }
 }
 
@@ -1203,41 +1183,10 @@ void fix_class_object_literal_expression(Expression*                   expressio
 
         char*        field_identifier = pos->field_identifier;
         FieldMember* field_member     = nullptr;
-        for (ClassMemberDeclaration* decl = class_definition->member; decl != nullptr; decl = decl->next) {
-            if (decl->type == MEMBER_FIELD) {
-                if (str_eq(field_identifier, decl->u.field->identifier)) {
-                    field_member = decl->u.field;
-                    break;
-                }
-            } else if (decl->type == MEMBER_METHOD) {
-
-                // Ring-Compiler-Error-Report  ERROR_ASSIGN_TO_METHOD_OF_CLASS
-                if (str_eq(field_identifier, decl->u.method->identifier)) {
-                    DEFINE_ERROR_REPORT_STR;
-
-                    snprintf(compile_err_buf, sizeof(compile_err_buf),
-                             "`%s` is method of class `%s`, cant't assign value to method; E:%d.",
-                             field_identifier,
-                             class_definition->identifier,
-                             ERROR_ASSIGN_TO_METHOD_OF_CLASS);
-
-
-                    ErrorReportContext context = {
-                        .package                 = nullptr,
-                        .package_unit            = get_package_unit(),
-                        .source_file_name        = get_package_unit()->current_file_name,
-                        .line_content            = package_unit_get_line_content(pos->line_number),
-                        .line_number             = pos->line_number,
-                        .column_number           = package_unit_get_column_number(),
-                        .error_message           = std::string(compile_err_buf),
-                        .advice                  = std::string(compile_adv_buf),
-                        .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
-                        .ring_compiler_file      = (char*)__FILE__,
-                        .ring_compiler_file_line = __LINE__,
-                    };
-                    ring_compile_error_report(&context);
-                    break;
-                }
+        for (FieldMember* pos = class_definition->field_list; pos != nullptr; pos = pos->next) {
+            if (str_eq(field_identifier, pos->identifier)) {
+                field_member = pos;
+                break;
             }
         }
 
@@ -1283,19 +1232,19 @@ void fix_class_object_literal_expression(Expression*                   expressio
 }
 
 /*
- * fix_member_expression 只是 修正 field
+ * fix_field_member_expression 只是 修正 field
  */
-void fix_member_expression(Expression*       expression,
-                           MemberExpression* member_expression,
-                           Block*            block,
-                           Function*         func) {
+void fix_field_member_expression(Expression*       expression,
+                                 MemberExpression* member_expression,
+                                 Block*            block,
+                                 Function*         func) {
 
     assert(member_expression != nullptr);
 
-    char*                   member_identifier  = member_expression->member_identifier;
-    ClassDefinition*        class_definition   = nullptr;
-    ClassMemberDeclaration* member_declaration = nullptr;
-    Expression*             object_expression  = member_expression->object_expression;
+    char*            member_identifier = member_expression->member_identifier;
+    ClassDefinition* class_definition  = nullptr;
+    FieldMember*     field             = nullptr;
+    Expression*      object_expression = member_expression->object_expression;
 
 
     // 0. fix object expression
@@ -1304,24 +1253,21 @@ void fix_member_expression(Expression*       expression,
     // 1. find class definition by object.
     class_definition = object_expression->convert_type[0]->u.class_type->class_definition;
     if (class_definition == nullptr) {
-        ring_error_report("fix_member_expression error, class_definition is null\n");
+        ring_error_report("fix_field_member_expression error, class_definition is null\n");
     }
 
 
     // 2. find member declaration by member identifier.
-    member_declaration = search_class_member(class_definition, member_identifier);
-    if (member_declaration == nullptr) {
-        ring_error_report("fix_member_expression error, member_declaration is null, member_identifier:%s\n",
-                          member_identifier);
-    }
-    if (member_declaration->type != MEMBER_FIELD) {
+    field = search_class_field(class_definition, member_identifier);
+
+    // Ring-Compiler-Error-Report  ERROR_INVALID_NOT_FOUND_CLASS_FIELD
+    if (field == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
         snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "`%s` is a method, not a field; E:%d.",
+                 "not found field `%s`; E:%d.",
                  member_identifier,
                  ERROR_INVALID_NOT_FOUND_CLASS_FIELD);
-
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1338,12 +1284,13 @@ void fix_member_expression(Expression*       expression,
         };
         ring_compile_error_report(&context);
     }
-    member_expression->member_declaration = member_declaration;
+
+    member_expression->field_member = field;
 
 
     // expression 最终的类型取决于field-member 的类型
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-    EXPRESSION_ADD_CONVERT_TYPE(expression, member_declaration->u.field->type_specifier);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, field->type_specifier);
     fix_class_member_expression(member_expression, object_expression, member_identifier);
 }
 
@@ -1367,24 +1314,35 @@ ClassDefinition* search_class_definition(char* class_identifier) {
     return nullptr;
 }
 
-ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, char* member_identifier) {
+
+FieldMember* search_class_field(ClassDefinition* class_definition, char* identifier) {
     assert(class_definition != nullptr);
 
-    ClassMemberDeclaration* member_declaration = nullptr;
+    FieldMember* res = nullptr;
 
-    for (member_declaration = class_definition->member; member_declaration != nullptr; member_declaration = member_declaration->next) {
-        if (member_declaration->type == MEMBER_FIELD) {
-            if (str_eq(member_declaration->u.field->identifier, member_identifier)) {
-                break;
-            }
-        } else if (member_declaration->type == MEMBER_METHOD) {
-            if (str_eq(member_declaration->u.method->identifier, member_identifier)) {
-                break;
-            }
+    for (FieldMember* pos = class_definition->field_list; pos != nullptr; pos = pos->next) {
+        if (str_eq(pos->identifier, identifier)) {
+            res = pos;
+            break;
         }
     }
 
-    return member_declaration;
+    return res;
+}
+
+MethodMember* search_class_method(ClassDefinition* class_definition, char* identifier) {
+    assert(class_definition != nullptr);
+
+    MethodMember* res = nullptr;
+
+    for (MethodMember* pos = class_definition->method_list; pos != nullptr; pos = pos->next) {
+        if (str_eq(pos->identifier, identifier)) {
+            res = pos;
+            break;
+        }
+    }
+
+    return res;
 }
 
 void fix_ternary_condition_expression(Expression*        expression,

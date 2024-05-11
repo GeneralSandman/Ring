@@ -122,17 +122,17 @@ Expression* create_expression_identifier_with_index(Expression*          array_e
 
 Expression* create_member_expression(Expression* object_expression, char* member_identifier) {
 
-    MemberExpression* member_expression   = (MemberExpression*)mem_alloc(get_front_mem_pool(), sizeof(MemberExpression));
-    member_expression->line_number        = package_unit_get_line_number();
-    member_expression->object_expression  = object_expression;
-    member_expression->member_identifier  = member_identifier;
-    member_expression->member_declaration = nullptr;
+    MemberExpression* member_expression  = (MemberExpression*)mem_alloc(get_front_mem_pool(), sizeof(MemberExpression));
+    member_expression->line_number       = package_unit_get_line_number();
+    member_expression->object_expression = object_expression;
+    member_expression->member_identifier = member_identifier;
+    member_expression->field_member      = nullptr;
 
-    Expression* expression                = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
-    expression->line_number               = package_unit_get_line_number();
-    expression->convert_type              = nullptr; // fix in fix_ast
-    expression->type                      = EXPRESSION_TYPE_MEMBER;
-    expression->u.member_expression       = member_expression;
+    Expression* expression               = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
+    expression->line_number              = package_unit_get_line_number();
+    expression->convert_type             = nullptr; // fix in fix_ast
+    expression->type                     = EXPRESSION_TYPE_MEMBER;
+    expression->u.member_expression      = member_expression;
 
     return expression;
 }
@@ -1146,7 +1146,10 @@ ClassDefinition* start_class_definition(char* class_identifier) {
     class_def->start_line_number = package_unit_get_line_number();
     class_def->end_line_number   = package_unit_get_line_number();
     class_def->identifier        = class_identifier;
-    class_def->member            = nullptr;
+    class_def->field_size        = 0;
+    class_def->field_list        = nullptr;
+    class_def->method_size       = 0;
+    class_def->method_list       = nullptr;
     class_def->next              = nullptr;
 
 
@@ -1161,8 +1164,46 @@ ClassDefinition* finish_class_definition(ClassDefinition*        class_def,
 
     assert(class_def != nullptr);
 
+    unsigned int  field_size  = 0;
+    FieldMember*  field_list  = nullptr;
+    FieldMember*  prev_field  = nullptr;
+    unsigned int  method_size = 0;
+    MethodMember* method_list = nullptr;
+    MethodMember* prev_method = nullptr;
+
+    // 分别存储在 field_list 和 method_list
+    for (ClassMemberDeclaration* pos = class_member_declar; pos != nullptr; pos = pos->next) {
+        if (pos->type == MEMBER_FIELD) {
+
+            pos->u.field->next = nullptr;
+            if (prev_field == nullptr) {
+                field_list = pos->u.field;
+            } else {
+                prev_field->next = pos->u.field;
+            }
+
+            prev_field = pos->u.field;
+            field_size++;
+        } else if (pos->type == MEMBER_METHOD) {
+
+            pos->u.method->next = nullptr;
+            if (prev_method == nullptr) {
+                method_list = pos->u.method;
+            } else {
+                prev_method->next = pos->u.method;
+            }
+
+            prev_method = pos->u.method;
+            method_size++;
+        }
+    }
+
     class_def->end_line_number = package_unit_get_line_number();
-    class_def->member          = class_member_declar;
+    class_def->field_size      = field_size;
+    class_def->field_list      = field_list;
+    class_def->method_size     = method_size;
+    class_def->method_list     = method_list;
+
 
     return class_def;
 }
@@ -1192,7 +1233,6 @@ ClassMemberDeclaration* create_class_member_field_declaration(Attribute    attri
 
     ClassMemberDeclaration* class_member_declar = (ClassMemberDeclaration*)mem_alloc(get_front_mem_pool(), sizeof(ClassMemberDeclaration));
     class_member_declar->line_number            = package_unit_get_line_number();
-    class_member_declar->attribute              = attribute;
     class_member_declar->type                   = MEMBER_FIELD;
     class_member_declar->u.field                = field_member;
     class_member_declar->next                   = nullptr;
@@ -1207,7 +1247,6 @@ ClassMemberDeclaration* create_class_member_method_declaration(Attribute     att
 
     ClassMemberDeclaration* class_member_declar = (ClassMemberDeclaration*)mem_alloc(get_front_mem_pool(), sizeof(ClassMemberDeclaration));
     class_member_declar->line_number            = package_unit_get_line_number();
-    class_member_declar->attribute              = attribute;
     class_member_declar->type                   = MEMBER_METHOD;
     class_member_declar->u.method               = method_member;
     class_member_declar->next                   = nullptr;
@@ -1274,8 +1313,6 @@ MethodMember* create_class_member_method(FunctionType        type,
 
     method_member->package             = get_package_unit()->parent_package;
     method_member->ring_file_stat      = get_package_unit()->ring_file_stat;
-
-    method_member->attribute_info      = nullptr;
 
     method_member->index_of_class      = -1;
 

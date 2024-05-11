@@ -50,7 +50,6 @@ typedef struct ArrayLiteralExpression       ArrayLiteralExpression;
 typedef struct ClassObjectLiteralExpression ClassObjectLiteralExpression;
 typedef struct CastExpression               CastExpression;
 typedef struct KeyExpression                KeyExpression;
-typedef struct ElementAccessExpression      ElementAccessExpression;
 typedef struct MemberExpression             MemberExpression;
 typedef struct MemberExpressionV2           MemberExpressionV2;
 typedef struct DimensionExpression          DimensionExpression;
@@ -1059,15 +1058,21 @@ typedef struct {
 
 
 struct ClassDefinition {
-    std::string             source_file;
-    unsigned int            start_line_number; // 源码的开始行
-    unsigned int            end_line_number;   // 源码的结束行
+    std::string      source_file;
+    unsigned int     start_line_number; // 源码的开始行
+    unsigned int     end_line_number;   // 源码的结束行
 
-    unsigned int            class_index;
-    char*                   identifier;
-    ClassMemberDeclaration* member;
+    unsigned int     class_index;
+    char*            identifier;
 
-    ClassDefinition*        next;
+
+    unsigned int     field_size;
+    FieldMember*     field_list;
+
+    unsigned int     method_size;
+    MethodMember*    method_list;
+
+    ClassDefinition* next;
 };
 
 typedef enum {
@@ -1093,10 +1098,11 @@ typedef enum {
     MEMBER_METHOD,
 } ClassMemberType;
 
+// ClassMemberDeclaration 只用来 在 create_ast的时候, 收集 field method的列表
+// create_ast 之后边不再使用
 struct ClassMemberDeclaration {
     unsigned int    line_number;
 
-    Attribute       attribute;
     ClassMemberType type;
     union {
         FieldMember*  field;
@@ -1113,6 +1119,8 @@ struct FieldMember {
     unsigned int   index_of_class; // fix it in fix_ast
     TypeSpecifier* type_specifier;
     char*          identifier;
+
+    FieldMember*   next;
 };
 
 // 类方法
@@ -1125,8 +1133,6 @@ struct MethodMember {
     Package*            package;        // 所属的package
     RingFileStat*       ring_file_stat; // 所属的 ring 源代码文件,
 
-    AttributeInfo*      attribute_info;
-
     unsigned int        index_of_class; // fix it in fix_ast
 
     char*               identifier;
@@ -1138,6 +1144,8 @@ struct MethodMember {
     FunctionReturnList* return_list;
 
     Block*              block;
+
+    MethodMember*       next;
 };
 
 
@@ -1256,34 +1264,6 @@ typedef enum {
 } RVM_Value_Copy_Type;
 
 
-struct ElementAccessExpression {
-    unsigned int   line_number;
-
-    Expression*    target_expression;
-    KeyExpression* key_expression;
-};
-
-
-typedef enum {
-    KEY_EXPRESSION_TYPE_UNKNOW = 0,
-    KEY_EXPRESSION_TYPE_INDEX,
-    KEY_EXPRESSION_TYPE_MEMBER,
-} KeyExpressionType;
-
-struct KeyExpression {
-    unsigned int        line_number;
-
-    RVM_Value_Copy_Type copy_type;
-
-    KeyExpressionType   type;
-    union {
-        DimensionExpression* index_expression;
-        MemberExpressionV2*  member_expression;
-    } u;
-    KeyExpression* next;
-};
-
-// 还未使用
 struct ArrayIndexExpression {
     unsigned int         line_number;
 
@@ -1291,20 +1271,12 @@ struct ArrayIndexExpression {
     DimensionExpression* index_expression;
 };
 
-// 还未使用
 struct MemberExpression {
-    unsigned int            line_number;
+    unsigned int line_number;
 
-    Expression*             object_expression;
-    char*                   member_identifier;
-    ClassMemberDeclaration* member_declaration; // FIX_AST_UPDATE
-};
-
-struct MemberExpressionV2 {
-    unsigned int            line_number;
-
-    char*                   member_identifier;
-    ClassMemberDeclaration* member_declaration; // FIX_AST_UPDATE
+    Expression*  object_expression;
+    char*        member_identifier;
+    FieldMember* field_member; // FIX_AST_UPDATE
 };
 
 
@@ -1386,12 +1358,12 @@ struct FunctionCallExpression {
 };
 
 struct MethodCallExpression {
-    unsigned int            line_number;
+    unsigned int  line_number;
 
-    Expression*             object_expression;
-    char*                   member_identifier;
-    ClassMemberDeclaration* member_declaration; // FIX_AST_UPDATE
-    ArgumentList*           argument_list;
+    Expression*   object_expression;
+    char*         member_identifier;
+    MethodMember* method_member;
+    ArgumentList* argument_list;
 };
 
 struct Identifier {
@@ -2346,68 +2318,70 @@ void ring_compiler_check_exit(Package* package);
  * function definition
  *
  */
-void                    ring_compiler_fix_ast(Package* package);
-void                    ring_compiler_fix_ast(PackageUnit* package_unit);
-void                    fix_function_definition(Function* func);
-void                    fix_statement_list(Statement* statement_list, Block* block, Function* func);
-void                    fix_statement(Statement* statement, Block* block, Function* func);
-void                    fix_expression(Expression* expression, Block* block, Function* func);
-void                    add_declaration(Declaration* declaration, Block* block, Function* func);
-void                    fix_type_specfier(TypeSpecifier* type_specifier);
-void                    fix_block(Block* block, Function* func);
-void                    fix_if_statement(IfStatement* if_statement, Block* block, Function* func);
-void                    fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
-void                    fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
-void                    fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
-void                    fix_identifier_expression(Expression*           expression,
-                                                  IdentifierExpression* identifier_expression,
-                                                  Block*                block);
-void                    fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
-void                    fix_binary_concat_expression(Expression*       expression,
-                                                     BinaryExpression* binary_expression,
-                                                     Block* block, Function* func);
-void                    fix_binary_math_expression(Expression*       expression,
-                                                   BinaryExpression* binary_expression,
-                                                   Block* block, Function* func);
-void                    fix_binary_relational_expression(Expression*       expression,
-                                                         BinaryExpression* binary_expression,
-                                                         Block* block, Function* func);
-void                    fix_unitary_expression(Expression* expression,
-                                               Expression* unitary_expression,
-                                               Block* block, Function* func);
-void                    fix_function_call_expression(Expression*             expression,
-                                                     FunctionCallExpression* function_call_expression,
-                                                     Block*                  block,
-                                                     Function*               func);
-void                    fix_method_call_expression(Expression*           expression,
-                                                   MethodCallExpression* method_call_expression,
-                                                   Block*                block,
-                                                   Function*             func);
-void                    fix_class_definition(ClassDefinition* class_definition);
-void                    fix_class_field(ClassDefinition* class_definition, FieldMember* field);
-void                    fix_class_method(ClassDefinition* class_definition, MethodMember* method);
+void             ring_compiler_fix_ast(Package* package);
+void             ring_compiler_fix_ast(PackageUnit* package_unit);
+void             fix_function_definition(Function* func);
+void             fix_statement_list(Statement* statement_list, Block* block, Function* func);
+void             fix_statement(Statement* statement, Block* block, Function* func);
+void             fix_expression(Expression* expression, Block* block, Function* func);
+void             add_declaration(Declaration* declaration, Block* block, Function* func);
+void             fix_type_specfier(TypeSpecifier* type_specifier);
+void             fix_block(Block* block, Function* func);
+void             fix_if_statement(IfStatement* if_statement, Block* block, Function* func);
+void             fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
+void             fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
+void             fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
+void             fix_identifier_expression(Expression*           expression,
+                                           IdentifierExpression* identifier_expression,
+                                           Block*                block);
+void             fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
+void             fix_binary_concat_expression(Expression*       expression,
+                                              BinaryExpression* binary_expression,
+                                              Block* block, Function* func);
+void             fix_binary_math_expression(Expression*       expression,
+                                            BinaryExpression* binary_expression,
+                                            Block* block, Function* func);
+void             fix_binary_relational_expression(Expression*       expression,
+                                                  BinaryExpression* binary_expression,
+                                                  Block* block, Function* func);
+void             fix_unitary_expression(Expression* expression,
+                                        Expression* unitary_expression,
+                                        Block* block, Function* func);
+void             fix_function_call_expression(Expression*             expression,
+                                              FunctionCallExpression* function_call_expression,
+                                              Block*                  block,
+                                              Function*               func);
+void             fix_method_call_expression(Expression*           expression,
+                                            MethodCallExpression* method_call_expression,
+                                            Block*                block,
+                                            Function*             func);
+void             fix_class_definition(ClassDefinition* class_definition);
+void             fix_class_field(ClassDefinition* class_definition, FieldMember* field);
+void             fix_class_method(ClassDefinition* class_definition, MethodMember* method);
 
 
-void                    fix_array_index_expression(Expression*           expression,
-                                                   ArrayIndexExpression* array_index_expression,
-                                                   Block*                block,
-                                                   Function*             func);
-void                    fix_new_array_expression(Expression* expression, NewArrayExpression* new_array_expression, Block* block, Function* func);
-void                    fix_dimension_expression(DimensionExpression* dimension_expression, Block* block, Function* func);
-void                    fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func);
+void             fix_array_index_expression(Expression*           expression,
+                                            ArrayIndexExpression* array_index_expression,
+                                            Block*                block,
+                                            Function*             func);
+void             fix_new_array_expression(Expression* expression, NewArrayExpression* new_array_expression, Block* block, Function* func);
+void             fix_dimension_expression(DimensionExpression* dimension_expression, Block* block, Function* func);
+void             fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func);
 
-void                    fix_class_object_literal_expression(Expression* expression, ClassObjectLiteralExpression* literal_expression, Block* block, Function* func);
-void                    fix_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func);
-void                    fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
-ClassDefinition*        search_class_definition(char* class_identifier);
-ClassMemberDeclaration* search_class_member(ClassDefinition* class_definition, char* member_identifier);
-void                    fix_ternary_condition_expression(Expression*        expression,
-                                                         TernaryExpression* ternary_expression,
-                                                         Block*             block,
-                                                         Function*          func);
-void                    add_parameter_to_declaration(Parameter* parameter, Block* block);
-Declaration*            search_declaration(char* package_posit, char* identifier, Block* block);
-Function*               search_function(char* package_posit, char* identifier);
+void             fix_class_object_literal_expression(Expression* expression, ClassObjectLiteralExpression* literal_expression, Block* block, Function* func);
+void             fix_field_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func);
+void             fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
+ClassDefinition* search_class_definition(char* class_identifier);
+FieldMember*     search_class_field(ClassDefinition* class_definition, char* identifier);
+MethodMember*    search_class_method(ClassDefinition* class_definition, char* identifier);
+
+void             fix_ternary_condition_expression(Expression*        expression,
+                                                  TernaryExpression* ternary_expression,
+                                                  Block*             block,
+                                                  Function*          func);
+void             add_parameter_to_declaration(Parameter* parameter, Block* block);
+Declaration*     search_declaration(char* package_posit, char* identifier, Block* block);
+Function*        search_function(char* package_posit, char* identifier);
 
 // --------------------
 
