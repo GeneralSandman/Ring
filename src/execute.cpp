@@ -2471,10 +2471,10 @@ RVM_String* rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value) {
 
     if (value) {
         string->length = 4;
-        strncpy(string->data, "true", 4);
+        memcpy(string->data, "true", 4);
     } else {
         string->length = 5;
-        strncpy(string->data, "false", 5);
+        memcpy(string->data, "false", 5);
     }
 
     rvm_heap_list_add_object(rvm, (RVM_GC_Object*)string);

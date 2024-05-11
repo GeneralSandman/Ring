@@ -28,24 +28,28 @@
 TypeSpecifier bool_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_BOOL,
+    .u           = {.array_type = nullptr},
     .dimension   = 0,
     .sub         = 0,
 };
 TypeSpecifier int_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_INT,
+    .u           = {.array_type = nullptr},
     .dimension   = 0,
     .sub         = 0,
 };
 TypeSpecifier double_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_DOUBLE,
+    .u           = {.array_type = nullptr},
     .dimension   = 0,
     .sub         = 0,
 };
 TypeSpecifier string_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_STRING,
+    .u           = {.array_type = nullptr},
     .dimension   = 0,
     .sub         = 0,
 };
@@ -424,8 +428,7 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
     }
 
 
-    bool                        has_call        = false;
-    Expression*                 call_expression = nullptr;
+    bool                        has_call = false;
 
     std::vector<TypeSpecifier*> return_convert_type;
     unsigned                    return_exp_num = 0;
@@ -436,8 +439,7 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
 
         if (pos->type == EXPRESSION_TYPE_FUNCTION_CALL
             || pos->type == EXPRESSION_TYPE_METHOD_CALL) {
-            call_expression = pos;
-            has_call        = true;
+            has_call = true;
         }
 
         fix_expression(pos, block, func);
@@ -491,7 +493,7 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
         DEFINE_ERROR_REPORT_STR;
 
         snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "the number of return expression list mismatch function definition return value list, expect %d but return %d; E:%d.",
+                 "the number of return expression list mismatch function definition return value list, expect %d but return %ld; E:%d.",
                  func->return_list_size,
                  return_convert_type.size(),
                  ERROR_FUNCTION_MISMATCH_RETURN_NUM);

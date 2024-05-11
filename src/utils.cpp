@@ -256,7 +256,7 @@ RingFileStat* create_ring_file_stat(std::string& file_name) {
 
     assert(file_name.size());
 
-    char absolute_path[PATH_MAX];
+    char absolute_path[PATH_MAX * 2];
     if (file_name[0] == '/') {
         strcpy(absolute_path, file_name.c_str());
     } else {
@@ -265,7 +265,8 @@ RingFileStat* create_ring_file_stat(std::string& file_name) {
             ring_error_report("getcwd error:%s\n", strerror(errno));
         }
 
-        snprintf(absolute_path, sizeof(absolute_path), "%s/%s", cwd, file_name.c_str());
+        snprintf(absolute_path, sizeof(absolute_path),
+                 "%s/%s", cwd, file_name.c_str());
     }
 
     // 将相对路径转换为绝对路径，并解析符号链接和 .. 和 . 目录引用
