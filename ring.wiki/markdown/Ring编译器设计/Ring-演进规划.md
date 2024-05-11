@@ -60,12 +60,14 @@
 ### GC
 
 1. 实现了最简单的STW Mark&Sweep GC算法
+2. 实现进阶版GC: 三色标记的 Incremental Mark and Sweep 算法
 
 ### 项目组织
 
 1. package 源代码的组织形式 import/package
 2. 第三方package的安装和下载
 3. 项目编译过程中并发编译
+4. 支持一个package中有多个文件
 
 ### 工具链
 
@@ -307,14 +309,14 @@ String s = STR."\{x} + \{y} = \{x + y}";
 ### 测试集
 
 ```
-2024-03-30
+2024-05-06
 
 
 [Result]:
-Pass/All = 297/297
+Pass/All = 314/314
 NotTest  = 6
 Fail     = 0
-Usetime  = 12S
+Usetime  = 18S
 
 ```
 
@@ -427,6 +429,65 @@ class-object  ✅
    不然继续访问 jobs[0].Running 还是老的Value。
 
 
+-----------------------------
+
+
+## 2024-05-06周
+
+### A. variadic parameter 复杂测试用例 ✅ 
+
+test/020-array-bool/func-variadic-parm-001.ring
+
+test/020-array-bool/func-variadic-parm-002.ring
+
+
+### B. 三目条件表达式 优化表达式的类型 ✅ 
+
+
+a ? b : c; 
+b 和 c 的表达式类型必须一致, 然后这个三元表达式的最终类型 就是 b c 表达式的类型.
+
+./bin/ring run ./test/002-operator/condition-oper-001.ring
+
+### C. ring rdb breakpoint 操作优化
+
+1. break set 的时候, 行号如果是个空行, 怎么办
+
+- 确定是最后一行
+- 向后查找 第一个非空行 设置断点
+
+
+2. break list 信息优化
+
+
+### D. 完成 ./test/automated-testing-dump.sh 用于 测试 ring dump 命令 ✅ 
+
+
+### E. CentOS Ubuntu 环境 coredump ✅ 
+
+经定位, 是 linux g++ 有点问题 
+
+```
+char *dir;
+
+std::string tmp = std::string(dir);
+
+```
+
+std::string(dir); 实现方式有问题.
+
+
+### F. 函数中 return 语句的合法性检查, 检查和函数定义中的函数返回值是否一致 TODO:
+
+
+1. return 的语句中, 也不能 func()返回多个返回值 与单个返回值并存.
+2. return 语句中, 支持 func()返回多个返回值, `递归调用场景`
+
+method 中还不能进行强制检查 return 语句
+
+这里基本实现了, 但是代码结构得重构一下.
+
+
 
 -----------------------------
 
@@ -438,12 +499,12 @@ class-object  ✅
 ### A. BUG:ring package_unit 记录文件内容, 最后一行记录不了,  ✅ 
 
 
-### B. CentOS Ubuntu 环境coredump
+### B. CentOS Ubuntu 环境coredump ✅ 
 
 TODO: file_stat 对应的 so 没有安装
 
 
-### C. 可变参数类型 应用到 @derive函数中, 也就是如何访问可变参数类型
+### C. 可变参数类型 应用到 @derive函数中, 也就是如何访问可变参数类型 ✅ 
 
 1. 语义检查: 将变量的类型变成数组, 如果变量的类型已经是数组了, 那就加一个维度
 2. vm execute: 需要把参数转化成数组, 然后压入栈中, 然后后续通过数组的形式去访问可变参数
@@ -456,20 +517,19 @@ new_array_literal_bool 这个操作码 应该是在函数内部, 还是在函数
 
 1. 如果要是放在函数外部, 实现起来不太优雅, 还要区分 @native @derive function, 因为 @native funciton 的便利性, 可以直接进行访问
 2. 如果要是放在函数内部实现, 可能会破坏函数的字节码展示, 让user感觉多了好几个字节码
+3. 如何去访问这个 临时的数组, 这个数组变量的identifier就是 parameter 的identifier
 
 
-### D. ring dump 中, 格式化 可变参数类型不正确
+这里还有一个抉择, 就是关于 可变参数列表 转化成 数组,
+这个操作 是单独用一个专门的字节码表示, 还是通过 在 init_derive_function_local_variable 中 实现(这样实现的话, 没有单独的字节码, 会在内部将列表转化为数组, 然后压入栈中, 这样需要在RVM_Function中需要详细记录参数的类型, 是不是可变参数, 根据可变参数进行详细的操作.)
 
 
-### E 多维数组 + 可变参数类型, 类型的多维展开
+### D. ring dump 中, 格式化 可变参数类型不正确 ✅ 
 
 
-### F. 三元表达式 如何判断表达式的类型
+### E 多维数组 + 可变参数类型, 类型的多维展开  TODO:
 
-a ? b : c; 
-b 和 c 的表达式类型必须一致, 然后这个三元表达式的最终类型 就是 b c 表达式的类型.
 
-./bin/ring run ./test/002-operator/condition-oper-001.ring
 
 
 
@@ -483,7 +543,7 @@ b 和 c 的表达式类型必须一致, 然后这个三元表达式的最终类�
 对标 https://ring.wiki 中doc
 
 
-### B. bt 展示的行数不太对,  ✅ 
+### B. ring debugger bt 展示的行数不太对,  ✅ 
 
 当前行数正确, 
 上一层栈的行数不正确
@@ -512,7 +572,7 @@ function printf(var string format, var any... any_value);
 
 
 
-### F. 关于函数多返回值的使用方式
+### F. 关于函数多返回值的使用方式 ✅ 
 
 函数定义:
 
@@ -619,7 +679,7 @@ TODO: 关于类型的比较
 2. cont 命令 是不是 跟 step命令一块放在一起比较好
 
 
-### B. ring debugger 如何显示源代码文件的内容, 方便调试
+### B. ring debugger 如何显示源代码文件的内容, 方便调试 ✅ 
 
 命令: ```code list```
 
@@ -1351,7 +1411,7 @@ method 调用 function
 ### B. 函数调用中，局部变量的数量写死为20，如何处理一下
 
 1. function 测试通过   ✅ 
-2. method 未测试 ✅ 
+2. method 测试通过 ✅ 
 
 
 ### C. 数组常量
