@@ -37,6 +37,7 @@ if [[ "$1" != "" ]]; then
     TEST_RING_BIN="$1"
 fi
 
+# 测试功能 ring dump xxx.ring
 TEST_RING_COMMAND="dump"
 
 
