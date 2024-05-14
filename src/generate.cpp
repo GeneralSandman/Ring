@@ -174,7 +174,7 @@ void add_functions(Package* package, Package_Executer* executer) {
     for (Function* pos : package->function_list) {
         copy_function(executer, &(executer->function_list[i]), pos);
         // 注册main函数
-        if (str_eq(pos->function_name, "main")) {
+        if (str_eq(pos->identifier, "main")) {
             // printf("find main:%d\n", i);
             executer->main_func_index = i;
         }
@@ -290,7 +290,7 @@ void class_def_deep_copy(Package_Executer*    executer,
     }
     for (MethodMember* pos = src->method_list;
          pos != nullptr;
-         pos = pos->next, method_index++) {
+         pos = (MethodMember*)pos->next, method_index++) {
         copy_method(executer, &dst->method_list[method_index], pos);
     }
 }
@@ -302,7 +302,7 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
     dst->start_line_number = src->start_line_number;
     dst->end_line_number   = src->end_line_number;
     dst->ring_file_stat    = src->ring_file_stat;
-    dst->func_name         = src->function_name;
+    dst->func_name         = src->identifier;
 
     if (src->type == FUNCTION_TYPE_NATIVE) {
         dst->type                = RVM_FUNCTION_TYPE_NATIVE;

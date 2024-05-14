@@ -52,8 +52,6 @@ void add_function_definition(AttributeInfo* attribute_info, Function* function_d
     assert(function_definition != nullptr);
     debug_ast_info_with_yellow("function_definition->type:%d", function_definition->type);
 
-    function_definition->attribute_info = attribute_info;
-
     for (AttributeInfo* pos = attribute_info; pos; pos = pos->next) {
         if (str_eq(pos->name, "native")) {
             function_definition->type = FUNCTION_TYPE_NATIVE;
@@ -93,7 +91,7 @@ Expression* create_expression_identifier(char* identifier) {
 
     Expression* expression                      = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                     = package_unit_get_line_number();
-    expression->convert_type                    = nullptr; // fix in fix_ast
+    expression->convert_type                    = nullptr; // UPDATED_BY_FIX_AST
     expression->type                            = EXPRESSION_TYPE_IDENTIFIER;
     expression->u.identifier_expression         = identifier_expression;
     expression->next                            = nullptr;
@@ -113,7 +111,7 @@ Expression* create_expression_identifier_with_index(Expression*          array_e
 
     Expression* expression                       = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                      = package_unit_get_line_number();
-    expression->convert_type                     = nullptr; // fix in fix_ast
+    expression->convert_type                     = nullptr; // UPDATED_BY_FIX_AST
     expression->type                             = EXPRESSION_TYPE_ARRAY_INDEX;
     expression->u.array_index_expression         = array_index_expression;
 
@@ -130,7 +128,7 @@ Expression* create_member_expression(Expression* object_expression, char* member
 
     Expression* expression               = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number              = package_unit_get_line_number();
-    expression->convert_type             = nullptr; // fix in fix_ast
+    expression->convert_type             = nullptr; // UPDATED_BY_FIX_AST
     expression->type                     = EXPRESSION_TYPE_MEMBER;
     expression->u.member_expression      = member_expression;
 
@@ -142,7 +140,7 @@ Expression* create_expression_from_function_call(FunctionCallExpression* functio
 
     Expression* expression                 = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                = package_unit_get_line_number();
-    expression->convert_type               = nullptr; // fix in fix_ast
+    expression->convert_type               = nullptr; // UPDATED_BY_FIX_AST
     expression->type                       = EXPRESSION_TYPE_FUNCTION_CALL;
     expression->u.function_call_expression = function_call_expression;
     return expression;
@@ -153,7 +151,7 @@ Expression* create_expression_from_method_call(MethodCallExpression* method_call
 
     Expression* expression               = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number              = package_unit_get_line_number();
-    expression->convert_type             = nullptr; // fix in fix_ast
+    expression->convert_type             = nullptr; // UPDATED_BY_FIX_AST
     expression->type                     = EXPRESSION_TYPE_METHOD_CALL;
     expression->u.method_call_expression = method_call_expression;
     return expression;
@@ -164,7 +162,7 @@ Expression* create_expression_from_array_literal(ArrayLiteralExpression* array_l
 
     Expression* expression                 = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                = package_unit_get_line_number();
-    expression->convert_type               = nullptr; // fix in fix_ast
+    expression->convert_type               = nullptr; // UPDATED_BY_FIX_AST
     expression->type                       = EXPRESSION_TYPE_ARRAY_LITERAL;
     expression->u.array_literal_expression = array_literal;
     return expression;
@@ -175,7 +173,7 @@ Expression* create_expression_from_class_object_literal(ClassObjectLiteralExpres
 
     Expression* expression                        = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                       = package_unit_get_line_number();
-    expression->convert_type                      = nullptr; // fix in fix_ast
+    expression->convert_type                      = nullptr; // UPDATED_BY_FIX_AST
     expression->type                              = EXPRESSION_TYPE_CLASS_OBJECT_LITERAL;
     expression->u.class_object_literal_expression = object_literal;
     return expression;
@@ -186,7 +184,7 @@ Expression* create_expression_assign(AssignExpression* assign_expression) {
 
     Expression* expression          = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number         = package_unit_get_line_number();
-    expression->convert_type        = nullptr; // fix in fix_ast
+    expression->convert_type        = nullptr; // UPDATED_BY_FIX_AST
     expression->type                = EXPRESSION_TYPE_ASSIGN;
     expression->u.assign_expression = assign_expression;
     return expression;
@@ -198,7 +196,7 @@ Expression* create_expression_ternary(Expression* condition,
 
     Expression* expression                                 = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                                = package_unit_get_line_number();
-    expression->convert_type                               = nullptr; // fix in fix_ast
+    expression->convert_type                               = nullptr; // UPDATED_BY_FIX_AST
     expression->type                                       = EXPRESSION_TYPE_TERNARY;
     expression->u.ternary_expression                       = (TernaryExpression*)mem_alloc(get_front_mem_pool(), sizeof(TernaryExpression));
     expression->u.ternary_expression->line_number          = package_unit_get_line_number();
@@ -213,7 +211,7 @@ Expression* create_expression_binary(ExpressionType type, Expression* left, Expr
 
     Expression* expression                            = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                           = package_unit_get_line_number();
-    expression->convert_type                          = nullptr; // fix in fix_ast
+    expression->convert_type                          = nullptr; // UPDATED_BY_FIX_AST
     expression->type                                  = type;
     expression->u.binary_expression                   = (BinaryExpression*)mem_alloc(get_front_mem_pool(), sizeof(BinaryExpression));
     expression->u.binary_expression->line_number      = package_unit_get_line_number();
@@ -228,7 +226,7 @@ Expression* create_expression_unitary(ExpressionType type, Expression* unitary_e
 
     Expression* expression           = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number          = package_unit_get_line_number();
-    expression->convert_type         = nullptr; // fix in fix_ast
+    expression->convert_type         = nullptr; // UPDATED_BY_FIX_AST
     expression->type                 = type;
     expression->u.unitary_expression = unitary_expression;
     expression->next                 = nullptr;
@@ -243,7 +241,7 @@ Expression* create_expression_literal(ExpressionType type, char* literal_interfa
     assert(literal_interface != nullptr);
     Expression* expression   = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number  = package_unit_get_line_number();
-    expression->convert_type = nullptr; // fix in fix_ast
+    expression->convert_type = nullptr; // UPDATED_BY_FIX_AST
 
     expression->type         = type;
     switch (type) {
@@ -268,7 +266,7 @@ Expression* create_expression_bool_literal(ExpressionType type, Ring_Bool value)
 
     Expression* expression     = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number    = package_unit_get_line_number();
-    expression->convert_type   = nullptr; // fix in fix_ast
+    expression->convert_type   = nullptr; // UPDATED_BY_FIX_AST
     expression->type           = type;
     expression->u.bool_literal = value;
 
@@ -278,7 +276,7 @@ Expression* create_expression_bool_literal(ExpressionType type, Ring_Bool value)
 Expression* create_cast_expression(TypeSpecifier* cast_type, Expression* operand) {
     Expression* expression                        = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                       = package_unit_get_line_number();
-    expression->convert_type                      = nullptr; // fix in fix_ast
+    expression->convert_type                      = nullptr; // UPDATED_BY_FIX_AST
     expression->type                              = EXPRESSION_TYPE_CAST;
     expression->u.cast_expression                 = (CastExpression*)mem_alloc(get_front_mem_pool(), sizeof(CastExpression));
     expression->u.cast_expression->line_number    = package_unit_get_line_number();
@@ -303,7 +301,7 @@ Expression* create_new_array_expression(TypeSpecifier*       sub_type,
 
     Expression*    expression                                = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                                  = package_unit_get_line_number();
-    expression->convert_type                                 = nullptr; // fix in fix_ast
+    expression->convert_type                                 = nullptr; // UPDATED_BY_FIX_AST
     expression->type                                         = EXPRESSION_TYPE_NEW_ARRAY;
     expression->u.new_array_expression                       = (NewArrayExpression*)mem_alloc(get_front_mem_pool(), sizeof(NewArrayExpression));
     expression->u.new_array_expression->line_number          = package_unit_get_line_number();
@@ -319,7 +317,7 @@ FieldInitExpression* create_field_init_expression(char*       field_identifier,
     FieldInitExpression* expression = (FieldInitExpression*)mem_alloc(get_front_mem_pool(), sizeof(FieldInitExpression));
     expression->line_number         = package_unit_get_line_number();
     expression->field_identifier    = field_identifier;
-    expression->field_member        = nullptr; // 在 fix_ast 中修正
+    expression->field_member        = nullptr; // UPDATED_BY_FIX_AST
     expression->init_expression     = init_expression;
     expression->next                = nullptr;
     return expression;
@@ -450,7 +448,7 @@ Identifier* create_identifier(IdentifierType type, char* name) {
 
     Identifier* identifier   = (Identifier*)mem_alloc(get_front_mem_pool(), sizeof(Identifier));
     identifier->line_number  = package_unit_get_line_number();
-    identifier->type         = type; // 在 fix_ast 中修正
+    identifier->type         = type; // UPDATED_BY_FIX_AST
     identifier->name         = name;
     identifier->array_index  = 0;
     identifier->parent_scope = nullptr;
@@ -541,16 +539,21 @@ Function* create_function_definition(FunctionType        type,
     function->end_line_number     = package_unit_get_line_number();
     function->package             = get_package_unit()->parent_package;
     function->ring_file_stat      = get_package_unit()->ring_file_stat;
-    function->attribute_info      = nullptr;
-    function->func_index          = get_package_unit()->function_list.size();
-    function->function_name       = identifier->name;
-    function->type                = type;
+
+    function->identifier          = identifier->name;
+
     function->parameter_list_size = parameter_list_size;
     function->parameter_list      = parameter_list;
+
     function->return_list_size    = return_list_size;
     function->return_list         = return_list;
+
     function->block               = block;
+
     function->next                = nullptr;
+
+    function->func_index          = get_package_unit()->function_list.size();
+    function->type                = type;
 
 
     return function;
@@ -971,7 +974,7 @@ Declaration* create_declaration(TypeSpecifier* type, char* identifier, Expressio
     declaration->initializer    = initializer;
     declaration->is_const       = 0;
     declaration->is_local       = 0;
-    declaration->variable_index = -1; // fix in fix_ast.c::add_declaration
+    declaration->variable_index = -1; // UPDATED_BY_FIX_AST
     declaration->next           = nullptr;
     return declaration;
 }
@@ -1190,7 +1193,7 @@ ClassDefinition* finish_class_definition(ClassDefinition*        class_def,
             if (prev_method == nullptr) {
                 method_list = pos->u.method;
             } else {
-                prev_method->next = pos->u.method;
+                prev_method->next = (FunctionTuple*)pos->u.method;
             }
 
             prev_method = pos->u.method;
@@ -1310,11 +1313,8 @@ MethodMember* create_class_member_method(FunctionType        type,
     method_member->source_file         = package_unit_get_file_name();
     method_member->start_line_number   = identifier->line_number;
     method_member->end_line_number     = package_unit_get_line_number();
-
     method_member->package             = get_package_unit()->parent_package;
     method_member->ring_file_stat      = get_package_unit()->ring_file_stat;
-
-    method_member->index_of_class      = -1;
 
     method_member->identifier          = identifier->name;
 
@@ -1325,6 +1325,11 @@ MethodMember* create_class_member_method(FunctionType        type,
     method_member->return_list         = return_list;
 
     method_member->block               = block;
+
+    method_member->next                = nullptr;
+
+    method_member->index_of_class      = -1;
+
 
     for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
         method_member->parameter_list_size++;

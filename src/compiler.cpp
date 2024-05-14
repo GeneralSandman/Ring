@@ -244,7 +244,7 @@ void package_dump(Package* package) {
 
     printf("|## Function:\n");
     for (auto function : package->function_list) {
-        printf("|\tfunction_name: %s%s%s\n", LOG_COLOR_YELLOW, function->function_name, LOG_COLOR_CLEAR);
+        printf("|\tfunction_name: %s%s%s\n", LOG_COLOR_YELLOW, function->identifier, LOG_COLOR_CLEAR);
     }
 
     printf("|------------------ Package-Dump-end  ------------------\n");
@@ -347,7 +347,7 @@ void package_unit_dump(PackageUnit* package_unit) {
 
     printf("|## Function:\n");
     for (auto function : package_unit->function_list) {
-        printf("|\tfunction_name: %s%s%s\n", LOG_COLOR_YELLOW, function->function_name, LOG_COLOR_CLEAR);
+        printf("|\tfunction_name: %s%s%s\n", LOG_COLOR_YELLOW, function->identifier, LOG_COLOR_CLEAR);
     }
 
     printf("|------------------ PackageUnit-Dump-end  ------------------\n");
@@ -574,7 +574,8 @@ void ring_compile_error_report(ErrorReportContext* context) {
     }
 
 #ifdef DEBUG
-    fprintf(stderr, "|RingDebug: %s:%d\n", context->ring_compiler_file, context->ring_compiler_file_line);
+    fprintf(stderr, "|RingDebug: %s:%d\n",
+            context->ring_compiler_file, context->ring_compiler_file_line);
 #endif
 
     // fprintf(stderr, "\n\n\n\n");

@@ -65,6 +65,7 @@ typedef struct IdentifierExpression         IdentifierExpression;
 typedef struct ArgumentList                 ArgumentList;
 typedef struct Parameter                    Parameter;
 typedef struct Identifier                   Identifier;
+typedef struct FunctionTuple                FunctionTuple;
 typedef struct Function                     Function;
 typedef struct Block                        Block;
 typedef struct FunctionReturnList           FunctionReturnList;
@@ -387,7 +388,7 @@ struct Ring_DeriveType_Array {
 
 struct Ring_DeriveType_Class {
     char*            class_identifier;
-    ClassDefinition* class_definition; // FIX_AST_UPDATE
+    ClassDefinition* class_definition; // UPDATED_BY_FIX_AST
 };
 
 
@@ -493,7 +494,6 @@ struct RVM_ClassDefinition {
     RVM_Method*  method_list;
 };
 
-// generate.c
 
 typedef enum {
     CONSTANTPOOL_TYPE_UNKNOW,
@@ -530,25 +530,20 @@ typedef enum {
     GC_MARK_COLOR_BLACK, // 不需要被回收
 } GC_Mark;
 
-struct RVM_GC_Object {
-    RVM_GC_Object_Type gc_type;
-    GC_Mark            gc_mark;
-    RVM_GC_Object*     gc_prev;
-    RVM_GC_Object*     gc_next;
-};
 
-// TODO:
 #define RVM_GC_Object_Header    \
     RVM_GC_Object_Type gc_type; \
     GC_Mark            gc_mark; \
     RVM_GC_Object*     gc_prev; \
     RVM_GC_Object*     gc_next;
 
+struct RVM_GC_Object {
+    RVM_GC_Object_Header;
+};
 
 /*
  * RVM 中 string 运行时表示, 专用
  */
-// TODO:
 struct RVM_String {
     RVM_GC_Object_Header;
 
@@ -1116,36 +1111,11 @@ struct ClassMemberDeclaration {
 struct FieldMember {
     unsigned int   line_number;
 
-    unsigned int   index_of_class; // fix it in fix_ast
+    unsigned int   index_of_class; // UPDATED_BY_FIX_AST
     TypeSpecifier* type_specifier;
     char*          identifier;
 
     FieldMember*   next;
-};
-
-// 类方法
-// TODO: 这里的数据结构和  Function结构有点像, 如何把两个融合在一起
-struct MethodMember {
-    std::string         source_file;
-    unsigned int        start_line_number; // 源码的开始行
-    unsigned int        end_line_number;   // 源码的结束行
-
-    Package*            package;        // 所属的package
-    RingFileStat*       ring_file_stat; // 所属的 ring 源代码文件,
-
-    unsigned int        index_of_class; // fix it in fix_ast
-
-    char*               identifier;
-
-    unsigned int        parameter_list_size;
-    Parameter*          parameter_list;
-
-    unsigned int        return_list_size;
-    FunctionReturnList* return_list;
-
-    Block*              block;
-
-    MethodMember*       next;
 };
 
 
@@ -1276,7 +1246,7 @@ struct MemberExpression {
 
     Expression*  object_expression;
     char*        member_identifier;
-    FieldMember* field_member; // FIX_AST_UPDATE
+    FieldMember* field_member; // UPDATED_BY_FIX_AST
 };
 
 
@@ -1389,7 +1359,7 @@ struct FieldInitExpression {
     unsigned int         line_number;
 
     char*                field_identifier;
-    FieldMember*         field_member; // 在 fix_ast 中修正
+    FieldMember*         field_member; // UPDATED_BY_FIX_AST
     Expression*          init_expression;
     FieldInitExpression* next;
 };
@@ -1467,30 +1437,37 @@ struct Block {
     BlockLabels  block_labels;
 };
 
+
+#define FUNCTION_TUPLE_HEADER                                                    \
+    std::string         source_file;       /*ring source file*/                  \
+    unsigned int        start_line_number; /*start line no in ring source file*/ \
+    unsigned int        end_line_number;   /*end   line no in ring source file*/ \
+    Package*            package;           /*function's package*/                \
+    RingFileStat*       ring_file_stat;    /*ring source file stat*/             \
+    char*               identifier;                                              \
+    unsigned int        parameter_list_size;                                     \
+    Parameter*          parameter_list;                                          \
+    unsigned int        return_list_size;                                        \
+    FunctionReturnList* return_list;                                             \
+    Block*              block;                                                   \
+    FunctionTuple*      next;
+
+
+struct FunctionTuple {
+    FUNCTION_TUPLE_HEADER;
+};
+
 struct Function {
-    std::string         source_file;
-    unsigned int        start_line_number; // 源码的开始行
-    unsigned int        end_line_number;   // 源码的结束行
+    FUNCTION_TUPLE_HEADER;
 
-    Package*            package;        // 所属的package
-    RingFileStat*       ring_file_stat; // 所属的 ring 源代码文件,
+    unsigned int func_index;
+    FunctionType type;
+};
 
-    AttributeInfo*      attribute_info;
+struct MethodMember {
+    FUNCTION_TUPLE_HEADER;
 
-    unsigned int        func_index;
-
-    char*               function_name;
-    FunctionType        type;
-
-    unsigned int        parameter_list_size;
-    Parameter*          parameter_list;
-
-    unsigned int        return_list_size;
-    FunctionReturnList* return_list;
-
-    Block*              block;
-
-    Function*           next;
+    unsigned int index_of_class; // UPDATED_BY_FIX_AST
 };
 
 struct FunctionReturnList {
@@ -2319,42 +2296,41 @@ void ring_compiler_check_exit(Package* package);
  *
  */
 void             ring_compiler_fix_ast(Package* package);
-void             ring_compiler_fix_ast(PackageUnit* package_unit);
 void             fix_function_definition(Function* func);
-void             fix_statement_list(Statement* statement_list, Block* block, Function* func);
-void             fix_statement(Statement* statement, Block* block, Function* func);
-void             fix_expression(Expression* expression, Block* block, Function* func);
-void             add_declaration(Declaration* declaration, Block* block, Function* func);
+void             fix_statement_list(Statement* statement_list, Block* block, FunctionTuple* func);
+void             fix_statement(Statement* statement, Block* block, FunctionTuple* func);
+void             fix_expression(Expression* expression, Block* block, FunctionTuple* func);
+void             add_declaration(Declaration* declaration, Block* block, FunctionTuple* func);
 void             fix_type_specfier(TypeSpecifier* type_specifier);
-void             fix_block(Block* block, Function* func);
-void             fix_if_statement(IfStatement* if_statement, Block* block, Function* func);
-void             fix_for_statement(ForStatement* for_statement, Block* block, Function* func);
-void             fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func);
-void             fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func);
+void             fix_block(Block* block, FunctionTuple* func);
+void             fix_if_statement(IfStatement* if_statement, Block* block, FunctionTuple* func);
+void             fix_for_statement(ForStatement* for_statement, Block* block, FunctionTuple* func);
+void             fix_dofor_statement(DoForStatement* dofor_statement, Block* block, FunctionTuple* func);
+void             fix_return_statement(ReturnStatement* return_statement, Block* block, FunctionTuple* func);
 void             fix_identifier_expression(Expression*           expression,
                                            IdentifierExpression* identifier_expression,
                                            Block*                block);
-void             fix_assign_expression(AssignExpression* expression, Block* block, Function* func);
+void             fix_assign_expression(AssignExpression* expression, Block* block, FunctionTuple* func);
 void             fix_binary_concat_expression(Expression*       expression,
                                               BinaryExpression* binary_expression,
-                                              Block* block, Function* func);
+                                              Block* block, FunctionTuple* func);
 void             fix_binary_math_expression(Expression*       expression,
                                             BinaryExpression* binary_expression,
-                                            Block* block, Function* func);
+                                            Block* block, FunctionTuple* func);
 void             fix_binary_relational_expression(Expression*       expression,
                                                   BinaryExpression* binary_expression,
-                                                  Block* block, Function* func);
+                                                  Block* block, FunctionTuple* func);
 void             fix_unitary_expression(Expression* expression,
                                         Expression* unitary_expression,
-                                        Block* block, Function* func);
+                                        Block* block, FunctionTuple* func);
 void             fix_function_call_expression(Expression*             expression,
                                               FunctionCallExpression* function_call_expression,
                                               Block*                  block,
-                                              Function*               func);
+                                              FunctionTuple*          func);
 void             fix_method_call_expression(Expression*           expression,
                                             MethodCallExpression* method_call_expression,
                                             Block*                block,
-                                            Function*             func);
+                                            FunctionTuple*        func);
 void             fix_class_definition(ClassDefinition* class_definition);
 void             fix_class_field(ClassDefinition* class_definition, FieldMember* field);
 void             fix_class_method(ClassDefinition* class_definition, MethodMember* method);
@@ -2363,13 +2339,13 @@ void             fix_class_method(ClassDefinition* class_definition, MethodMembe
 void             fix_array_index_expression(Expression*           expression,
                                             ArrayIndexExpression* array_index_expression,
                                             Block*                block,
-                                            Function*             func);
-void             fix_new_array_expression(Expression* expression, NewArrayExpression* new_array_expression, Block* block, Function* func);
-void             fix_dimension_expression(DimensionExpression* dimension_expression, Block* block, Function* func);
-void             fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, Function* func);
+                                            FunctionTuple*        func);
+void             fix_new_array_expression(Expression* expression, NewArrayExpression* new_array_expression, Block* block, FunctionTuple* func);
+void             fix_dimension_expression(DimensionExpression* dimension_expression, Block* block, FunctionTuple* func);
+void             fix_array_literal_expression(Expression* expression, ArrayLiteralExpression* array_literal_expression, Block* block, FunctionTuple* func);
 
-void             fix_class_object_literal_expression(Expression* expression, ClassObjectLiteralExpression* literal_expression, Block* block, Function* func);
-void             fix_field_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, Function* func);
+void             fix_class_object_literal_expression(Expression* expression, ClassObjectLiteralExpression* literal_expression, Block* block, FunctionTuple* func);
+void             fix_field_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, FunctionTuple* func);
 void             fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
 ClassDefinition* search_class_definition(char* class_identifier);
 FieldMember*     search_class_field(ClassDefinition* class_definition, char* identifier);
@@ -2378,7 +2354,7 @@ MethodMember*    search_class_method(ClassDefinition* class_definition, char* id
 void             fix_ternary_condition_expression(Expression*        expression,
                                                   TernaryExpression* ternary_expression,
                                                   Block*             block,
-                                                  Function*          func);
+                                                  FunctionTuple*     func);
 void             add_parameter_to_declaration(Parameter* parameter, Block* block);
 Declaration*     search_declaration(char* package_posit, char* identifier, Block* block);
 Function*        search_function(char* package_posit, char* identifier);
@@ -2793,7 +2769,7 @@ RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* 
 void                  fix_buildin_func(Expression*             expression,
                                        FunctionCallExpression* function_call_expression,
                                        Block*                  block,
-                                       Function*               func);
+                                       FunctionTuple*          func);
 
 // --------------------
 

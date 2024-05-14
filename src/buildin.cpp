@@ -153,10 +153,10 @@ RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* 
 void fix_buildin_func(Expression*             expression,
                       FunctionCallExpression* function_call_expression,
                       Block*                  block,
-                      Function*               func) {
+                      FunctionTuple*          func) {
 
     RING_BUILD_IN_FUNC_ID    func_id = is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier);
 
     extern Ring_Buildin_Func Ring_Buildin_Funcs[];
-    Ring_Buildin_Funcs[func_id].buildin_func_fix(expression, function_call_expression, block, func);
+    Ring_Buildin_Funcs[func_id].buildin_func_fix(expression, function_call_expression, block, (Function*)func);
 }

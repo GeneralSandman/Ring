@@ -69,24 +69,6 @@ void ring_compiler_fix_ast(Package* package) {
     }
 }
 
-// 修正ast
-// TODO: 废弃这个
-void ring_compiler_fix_ast(PackageUnit* package_unit) {
-    // fix class list
-    unsigned int class_index = 0;
-    for (ClassDefinition* pos : package_unit->class_definition_list) {
-        pos->class_index = class_index++;
-        fix_class_definition(pos);
-    }
-
-    // fix function list
-    for (Function* pos : package_unit->function_list) {
-        if (pos->block) {
-            add_parameter_to_declaration(pos->parameter_list, pos->block);
-            fix_statement_list(pos->block->statement_list, pos->block, pos);
-        }
-    }
-}
 
 void fix_function_definition(Function* func) {
 
@@ -97,11 +79,11 @@ void fix_function_definition(Function* func) {
 
     if (func->block) {
         add_parameter_to_declaration(func->parameter_list, func->block);
-        fix_statement_list(func->block->statement_list, func->block, func);
+        fix_statement_list(func->block->statement_list, func->block, (FunctionTuple*)func);
     }
 }
 
-void fix_statement_list(Statement* statement_list, Block* block, Function* func) {
+void fix_statement_list(Statement* statement_list, Block* block, FunctionTuple* func) {
     if (statement_list == nullptr) {
         return;
     }
@@ -111,7 +93,7 @@ void fix_statement_list(Statement* statement_list, Block* block, Function* func)
     }
 }
 
-void fix_statement(Statement* statement, Block* block, Function* func) {
+void fix_statement(Statement* statement, Block* block, FunctionTuple* func) {
     switch (statement->type) {
     case STATEMENT_TYPE_EXPRESSION:
         fix_expression(statement->u.expression, block, func);
@@ -146,7 +128,7 @@ void fix_statement(Statement* statement, Block* block, Function* func) {
     }
 }
 
-void fix_expression(Expression* expression, Block* block, Function* func) {
+void fix_expression(Expression* expression, Block* block, FunctionTuple* func) {
 
 BEGIN:
     if (expression == nullptr) {
@@ -259,7 +241,7 @@ BEGIN:
     goto BEGIN;
 }
 
-void add_declaration(Declaration* declaration, Block* block, Function* func) {
+void add_declaration(Declaration* declaration, Block* block, FunctionTuple* func) {
     assert(declaration != nullptr);
 
     Declaration* pos  = declaration;
@@ -371,14 +353,14 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
     }
 }
 
-void fix_block(Block* block, Function* func) {
+void fix_block(Block* block, FunctionTuple* func) {
     if (block == nullptr) {
         return;
     }
     fix_statement_list(block->statement_list, block, func);
 }
 
-void fix_if_statement(IfStatement* if_statement, Block* block, Function* func) {
+void fix_if_statement(IfStatement* if_statement, Block* block, FunctionTuple* func) {
     fix_expression(if_statement->condition_expression, block, func);
 
     fix_block(if_statement->if_block, func);
@@ -391,7 +373,7 @@ void fix_if_statement(IfStatement* if_statement, Block* block, Function* func) {
     }
 }
 
-void fix_for_statement(ForStatement* for_statement, Block* block, Function* func) {
+void fix_for_statement(ForStatement* for_statement, Block* block, FunctionTuple* func) {
     if (for_statement == nullptr) {
         return;
     }
@@ -411,7 +393,7 @@ void fix_for_statement(ForStatement* for_statement, Block* block, Function* func
     fix_block(for_statement->block, func);
 }
 
-void fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function* func) {
+void fix_dofor_statement(DoForStatement* dofor_statement, Block* block, FunctionTuple* func) {
     if (dofor_statement == nullptr) {
         return;
     }
@@ -422,7 +404,7 @@ void fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function
     fix_expression(dofor_statement->post_expression, block, func);
 }
 
-void fix_return_statement(ReturnStatement* return_statement, Block* block, Function* func) {
+void fix_return_statement(ReturnStatement* return_statement, Block* block, FunctionTuple* func) {
     if (return_statement == nullptr) {
         return;
     }
@@ -478,16 +460,6 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
     }
 
 
-    if (func == nullptr) {
-        // TODO:
-        // 如果是个method 的话, func 为空
-        // 这里是不应该的
-        // 但是 Function MethodMember 结构基本相同, 但是略有差异, 后续考虑统一,
-        // 然后 func 不能 为空
-        // 这里暂时先跳过检查
-        return;
-    }
-
     // Ring-Compiler-Error-Report  ERROR_FUNCTION_MISMATCH_RETURN_NUM
     if (func->return_list_size != return_convert_type.size()) {
         DEFINE_ERROR_REPORT_STR;
@@ -497,8 +469,7 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
                  func->return_list_size,
                  return_convert_type.size(),
                  ERROR_FUNCTION_MISMATCH_RETURN_NUM);
-        snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                 "delete useless local variable in this block.");
+
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -637,7 +608,7 @@ void fix_identifier_expression(Expression*           expression,
  *        a,b,c = test(); // 合法的, 因为test()返回值作为一个整体, 可以继续展开成 三个表达式
  *        a,b,c,c = test(), 1; // 不合法的, 因为test()返回值作为一个整体, 是不能继续展开的, 只能是一个表达式
  */
-void fix_assign_expression(AssignExpression* expression, Block* block, Function* func) {
+void fix_assign_expression(AssignExpression* expression, Block* block, FunctionTuple* func) {
     if (expression == nullptr) {
         return;
     }
@@ -777,7 +748,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, Function*
 
 void fix_binary_concat_expression(Expression*       expression,
                                   BinaryExpression* binary_expression,
-                                  Block* block, Function* func) {
+                                  Block* block, FunctionTuple* func) {
 
     assert(expression != nullptr);
     assert(binary_expression != nullptr);
@@ -845,7 +816,7 @@ void fix_binary_concat_expression(Expression*       expression,
 
 void fix_binary_math_expression(Expression*       expression,
                                 BinaryExpression* binary_expression,
-                                Block* block, Function* func) {
+                                Block* block, FunctionTuple* func) {
 
     assert(expression != nullptr);
     assert(binary_expression != nullptr);
@@ -881,7 +852,7 @@ void fix_binary_math_expression(Expression*       expression,
 
 void fix_binary_relational_expression(Expression*       expression,
                                       BinaryExpression* binary_expression,
-                                      Block* block, Function* func) {
+                                      Block* block, FunctionTuple* func) {
 
     assert(expression != nullptr);
     assert(binary_expression != nullptr);
@@ -899,7 +870,7 @@ void fix_binary_relational_expression(Expression*       expression,
 
 void fix_unitary_expression(Expression* expression,
                             Expression* unitary_expression,
-                            Block* block, Function* func) {
+                            Block* block, FunctionTuple* func) {
 
     fix_expression(unitary_expression, block, func);
 
@@ -910,7 +881,7 @@ void fix_unitary_expression(Expression* expression,
 void fix_function_call_expression(Expression*             expression,
                                   FunctionCallExpression* function_call_expression,
                                   Block*                  block,
-                                  Function*               func) {
+                                  FunctionTuple*          func) {
 
     if (function_call_expression == nullptr) {
         return;
@@ -950,7 +921,7 @@ void fix_function_call_expression(Expression*             expression,
 void fix_method_call_expression(Expression*           expression,
                                 MethodCallExpression* method_call_expression,
                                 Block*                block,
-                                Function*             func) {
+                                FunctionTuple*        func) {
 
     if (method_call_expression == nullptr) {
         return;
@@ -1028,7 +999,7 @@ void fix_class_definition(ClassDefinition* class_definition) {
     }
     for (MethodMember* pos = class_definition->method_list;
          pos != nullptr;
-         pos = pos->next, method_index++) {
+         pos = (MethodMember*)pos->next, method_index++) {
         pos->index_of_class = method_index;
         fix_class_method(class_definition, pos);
     }
@@ -1039,11 +1010,9 @@ void fix_class_field(ClassDefinition* class_definition, FieldMember* field) {
 }
 
 void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
-    // add self declaration
     Block* block = method->block;
 
-
-    // self
+    // `self` variable
     TypeSpecifier* type_specifier    = create_class_type_specifier(class_definition->identifier);
 
     Declaration*   self_declaration  = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
@@ -1056,24 +1025,25 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
     self_declaration->variable_index = -1;
     self_declaration->next           = nullptr;
 
-    // 在 method 添加 self 变量命名
+    // add `self` variable to local variable list.
     add_declaration(self_declaration, block, nullptr);
-
-    if (block != nullptr) {
-        add_parameter_to_declaration(method->parameter_list, block);
-        fix_statement_list(block->statement_list, block, nullptr);
-    }
 
     FunctionReturnList* return_list = method->return_list;
     for (; return_list != nullptr; return_list = return_list->next) {
         fix_type_specfier(return_list->type_specifier);
+    }
+
+    if (block != nullptr) {
+        add_parameter_to_declaration(method->parameter_list, block);
+        fix_statement_list(block->statement_list, block, (FunctionTuple*)method);
     }
 }
 
 void fix_array_index_expression(Expression*           expression,
                                 ArrayIndexExpression* array_index_expression,
                                 Block*                block,
-                                Function*             func) {
+                                FunctionTuple*        func) {
+
     assert(array_index_expression != nullptr);
 
     char*        package_posit    = array_index_expression->array_expression->u.identifier_expression->package_posit;
@@ -1129,7 +1099,7 @@ void fix_array_index_expression(Expression*           expression,
 void fix_new_array_expression(Expression*         expression,
                               NewArrayExpression* new_array_expression,
                               Block*              block,
-                              Function*           func) {
+                              FunctionTuple*      func) {
 
     fix_dimension_expression(new_array_expression->dimension_expression, block, func);
     fix_type_specfier(new_array_expression->type_specifier);
@@ -1140,7 +1110,7 @@ void fix_new_array_expression(Expression*         expression,
 
 void fix_dimension_expression(DimensionExpression* dimension_expression,
                               Block*               block,
-                              Function*            func) {
+                              FunctionTuple*       func) {
 
     SubDimensionExpression* pos = dimension_expression->dimension_list;
     for (; pos != nullptr; pos = pos->next) {
@@ -1151,7 +1121,7 @@ void fix_dimension_expression(DimensionExpression* dimension_expression,
 void fix_array_literal_expression(Expression*             expression,
                                   ArrayLiteralExpression* array_literal_expression,
                                   Block*                  block,
-                                  Function*               func) {
+                                  FunctionTuple*          func) {
 
     assert(array_literal_expression != nullptr);
 
@@ -1169,7 +1139,7 @@ void fix_array_literal_expression(Expression*             expression,
 void fix_class_object_literal_expression(Expression*                   expression,
                                          ClassObjectLiteralExpression* literal_expression,
                                          Block*                        block,
-                                         Function*                     func) {
+                                         FunctionTuple*                func) {
 
     assert(literal_expression != nullptr);
 
@@ -1237,7 +1207,7 @@ void fix_class_object_literal_expression(Expression*                   expressio
 void fix_field_member_expression(Expression*       expression,
                                  MemberExpression* member_expression,
                                  Block*            block,
-                                 Function*         func) {
+                                 FunctionTuple*    func) {
 
     assert(member_expression != nullptr);
 
@@ -1335,7 +1305,7 @@ MethodMember* search_class_method(ClassDefinition* class_definition, char* ident
 
     MethodMember* res = nullptr;
 
-    for (MethodMember* pos = class_definition->method_list; pos != nullptr; pos = pos->next) {
+    for (MethodMember* pos = class_definition->method_list; pos != nullptr; pos = (MethodMember*)pos->next) {
         if (str_eq(pos->identifier, identifier)) {
             res = pos;
             break;
@@ -1348,7 +1318,7 @@ MethodMember* search_class_method(ClassDefinition* class_definition, char* ident
 void fix_ternary_condition_expression(Expression*        expression,
                                       TernaryExpression* ternary_expression,
                                       Block*             block,
-                                      Function*          func) {
+                                      FunctionTuple*     func) {
 
     if (ternary_expression == nullptr) {
         return;
@@ -1458,7 +1428,7 @@ Function* search_function(char* package_posit, char* identifier) {
 
         // TODO: 封装成函数
         for (auto function : package->function_list) {
-            if (str_eq(function->function_name, identifier)) {
+            if (str_eq(function->identifier, identifier)) {
                 return function;
             }
         }
@@ -1466,7 +1436,7 @@ Function* search_function(char* package_posit, char* identifier) {
         return nullptr;
     }
     for (Function* pos : get_package_unit()->function_list) {
-        if (str_eq(identifier, pos->function_name)) {
+        if (str_eq(identifier, pos->identifier)) {
             return pos;
         }
     }

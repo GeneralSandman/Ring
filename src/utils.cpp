@@ -27,7 +27,7 @@ void ring_compiler_functions_dump(PackageUnit* package_unit) {
     printf("\n");
 
     for (Function* func : package_unit->function_list) {
-        printf("function[%d]: name:%s\n", i, func->function_name);
+        printf("function[%d]: name:%s\n", i, func->identifier);
         if (func->block) {
             decl = func->block->declaration_list;
             for (j = 0, decl = func->block->declaration_list; decl; decl = decl->next, j++) {

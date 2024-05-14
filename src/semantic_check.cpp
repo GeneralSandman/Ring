@@ -56,7 +56,7 @@ void ring_compiler_analysis_global_variable(Package* package) {
 
 void ring_compiler_analysis_function(Package* package) {
     for (Function* function : package->function_list) {
-        std::string identifier = std::string(function->function_name);
+        std::string identifier = std::string(function->identifier);
         auto        iter       = package->function_map.find(identifier);
 
         // Ring-Compiler-Error-Report  ERROR_REDEFINITE_FUNCTION
@@ -66,12 +66,12 @@ void ring_compiler_analysis_function(Package* package) {
             snprintf(compile_err_buf, sizeof(compile_err_buf),
                      "redefinition of function `%s`; E:%d.",
 
-                     function->function_name,
+                     function->identifier,
                      ERROR_REDEFINITE_FUNCTION);
             snprintf(compile_adv_buf, sizeof(compile_adv_buf),
                      "the first definition of function `%s` is here.",
 
-                     function->function_name);
+                     function->identifier);
 
             ErrorReportContext context = {
                 .package                 = package,
