@@ -40,7 +40,7 @@ void print_package_executer(Package_Executer* package_executer) {
     printf("|FunctionList:\n");
 
     for (unsigned int i = 0; i < package_executer->function_size; i++) {
-        printf("|\t func_name: %s%s%s\n", LOG_COLOR_YELLOW, package_executer->function_list[i].func_name, LOG_COLOR_CLEAR);
+        printf("|\t func_name: %s%s%s\n", LOG_COLOR_YELLOW, package_executer->function_list[i].identifier, LOG_COLOR_CLEAR);
     }
 
     printf("|------------------ Package_Executer-Dump-end   ------------------\n\n");
@@ -302,7 +302,7 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
     dst->start_line_number = src->start_line_number;
     dst->end_line_number   = src->end_line_number;
     dst->ring_file_stat    = src->ring_file_stat;
-    dst->func_name         = src->identifier;
+    dst->identifier        = src->identifier;
 
     if (src->type == FUNCTION_TYPE_NATIVE) {
         dst->type                = RVM_FUNCTION_TYPE_NATIVE;
@@ -364,7 +364,7 @@ void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src)
     dst->rvm_function->start_line_number   = src->start_line_number;
     dst->rvm_function->end_line_number     = src->end_line_number;
     dst->rvm_function->ring_file_stat      = src->ring_file_stat;
-    dst->rvm_function->func_name           = src->identifier;
+    dst->rvm_function->identifier          = src->identifier;
     dst->rvm_function->type                = RVM_FUNCTION_TYPE_DERIVE;
 
     dst->rvm_function->parameter_size      = src->parameter_list_size;

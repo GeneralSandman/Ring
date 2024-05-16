@@ -447,7 +447,7 @@ struct RVM_Function {
 
     RingFileStat*      ring_file_stat; // 所属的 ring 源代码文件,
 
-    char*              func_name;
+    char*              identifier;
     RVMFunctionType    type;
 
     unsigned int       parameter_size;
@@ -541,9 +541,7 @@ struct RVM_GC_Object {
     RVM_GC_Object_Header;
 };
 
-/*
- * RVM 中 string 运行时表示, 专用
- */
+
 struct RVM_String {
     RVM_GC_Object_Header;
 
@@ -1047,10 +1045,6 @@ typedef struct {
 
 } Ring_Buildin_Func;
 
-// ----------------------------------
-// class define
-// ----------------------------------
-
 
 struct ClassDefinition {
     std::string      source_file;
@@ -1118,10 +1112,6 @@ struct FieldMember {
     FieldMember*   next;
 };
 
-
-// ----------------------------------
-// class define
-// ----------------------------------
 
 struct Statement {
     unsigned int  line_number;
@@ -1590,7 +1580,7 @@ struct ReturnStatement {
 
 
 struct StdPackageNativeFunction {
-    char*               func_name;
+    char*               identifier;
     RVM_NativeFuncProc* func_proc;
     int                 arg_count;
     int                 return_list_count;

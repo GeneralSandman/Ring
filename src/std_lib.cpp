@@ -121,7 +121,7 @@ void compile_std_lib(CompilerEntry* compiler_entry, ExecuterEntry* executer_entr
 
         // registe @native function
         for (StdPackageNativeFunction native_function : std_package_info.native_function_list) {
-            register_lib(package_executer, native_function.func_name, native_function.func_proc, native_function.arg_count, native_function.return_list_count);
+            register_lib(package_executer, native_function.identifier, native_function.func_proc, native_function.arg_count, native_function.return_list_count);
         }
     }
 }
@@ -134,7 +134,7 @@ void register_lib(Package_Executer*   package_executer,
 
     for (unsigned int i = 0; i < package_executer->function_size; i++) {
         RVM_Function* function = &package_executer->function_list[i];
-        if (function->type == RVM_FUNCTION_TYPE_NATIVE && str_eq(function->func_name, func_name)) {
+        if (function->type == RVM_FUNCTION_TYPE_NATIVE && str_eq(function->identifier, func_name)) {
             function->u.native_func                    = (NativeFunction*)mem_alloc(NULL_MEM_POOL, sizeof(NativeFunction));
             function->u.native_func->func_proc         = func_proc;
             function->u.native_func->arg_count         = arg_count;

@@ -70,7 +70,7 @@ void ring_vm_code_dump(RVM_Function* function,
 
     std::string func_name = "top_level";
     if (function) {
-        func_name = std::string(function->func_name);
+        func_name = std::string(function->identifier);
     }
 
     STDERR_MOVE_CURSOR(screen_row++, screen_col);

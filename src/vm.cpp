@@ -221,7 +221,7 @@ std::string format_rvm_function(Package_Executer* package_executer,
     std::string result;
 
     // 1. funtion identifier
-    result += std::string(function->func_name);
+    result += std::string(function->identifier);
     result += "(";
 
     // 2. function parameters

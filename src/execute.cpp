@@ -380,7 +380,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             }
 
             if (prev_opcde == RVM_CODE_INVOKE_FUNC
-                && str_eq(rvm->call_info->callee_function->func_name, "main")) {
+                && str_eq(rvm->call_info->callee_function->identifier, "main")) {
                 // FIXME: 有可能 @main
                 event = TRACE_EVENT_SAE;
             }
