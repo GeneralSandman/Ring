@@ -306,7 +306,7 @@ String s = STR."\{x} + \{y} = \{x + y}";
 
 ## 测试
 
-### 测试集
+### 测试集  ring run
 
 ```
 2024-05-06
@@ -321,26 +321,27 @@ Usetime  = 18S
 ```
 
 
-3. bug
 
-package_unit_update_line_content 有点bug, 文件的最后一行不能存储下来
+### 测试集 ring dump ✅
 
+```
+2024-05-30
 
-
-### 测试集 ring dump
-
-如何测试 ring dump
-1. 新写一个单独的测试脚本.
-2. 对 dump 信息进行输出, 与预期结果进行比较.
+[Result]:
+Pass/All = 23/23
+NotTest  = 0
+Fail     = 0
+Usetime  = 1S
+```
 
 
 ### 要完善的测试用例
 
-1. function return class object
-2. Pass class object as parameter to function
-3. Pass string as parameters to function 
-4. Return class object from function
-5. Return string from function
+1. function return class object ✅
+2. Pass class object as parameter to function ✅
+3. Pass string as parameters to function       ✅
+4. Return class object from function        ✅
+5. Return string from function          ✅
 6. Array & ClassObject
 7. Array & String  ✅
 8. Test array bool(global/local/argument/return)  ✅ 
@@ -432,6 +433,145 @@ class-object  ✅
 -----------------------------
 
 
+## 2024-06-03周
+
+### B. break point 信息优化
+
+
+### C. 如何判断 class 递归定义
+
+
+### D. 一个package中含有多个ring源代码文件
+
+
+### E. 当前只能在main package中定义全局变量, 
+
+如何在非main package中定义全局变量, 并能够在别的包中使用其他包的全局变量.
+涉及到一个问题: 全局变量如何排布. 
+
+
+### F. 当前只能在main package中定义 class
+
+
+### G. string 支持 utf-8编码
+
+-----------------------------
+
+
+## 2024-05-27周
+
+
+### A. 实现新一代垃圾回收算法
+
+#### 1. 重新规划一下 vm-execute 过程中 动态分配类型的流程逻辑
+派生数据类型 heap_size() 的正确性
+
+#### 2. 关于RVM_Value 占用的内存优化
+
+RVM_Value 中的字段 RVM_Value_Type 其实是个int, 占用了4字节, 这其实是一个很大的内存浪费,
+
+需要调研一下, golang 中 interface的实现逻辑, python的实现逻辑
+
+Golang 中 interface是如何实现的 https://halfrost.com/go_interface/
+
+
+关于lua中, 如何用一个 struct 存放所有的数据类型, 也是 struct+(type&union)
+
+```
+/*
+** Union of all Lua values
+*/
+typedef union Value {
+    struct GCObject* gc; /* collectable objects */
+    void*            p;  /* light userdata */
+    lua_CFunction    f;  /* light C functions */
+    lua_Integer      i;  /* integer numbers */
+    lua_Number       n;  /* float numbers */
+    /* not used, but may avoid warnings for uninitialized value */
+    lu_byte ub;
+} Value;
+
+
+/*
+** Tagged Values. This is the basic representation of values in Lua:
+** an actual value plus a tag with its type.
+*/
+
+#define TValuefields \
+    Value   value_;  \
+    lu_byte tt_
+
+typedef struct TValue {
+    TValuefields;
+} TValue;
+```
+
+
+#### 3. ring int 类型其实是 long long , 这样数据表达的范围更大
+
+
+将 RVM_Value 中的 int 改成 long long , 目前主流的虚拟机都是这么解决的
+
+-----------------------------
+
+
+## 2024-05-13周
+
+### A. ring.hpp 中 Function 和 MethodMember 两个 struct融合为一个  ✅ 
+
+Function MethodMember 派生自 FunctionTuple;
+
+```cpp
+#define FUNCTION_TUPLE_HEADER                                                    \
+    std::string         source_file;       /*ring source file*/                  \
+    unsigned int        start_line_number; /*start line no in ring source file*/ \
+    unsigned int        end_line_number;   /*end   line no in ring source file*/ \
+    Package*            package;           /*function's package*/                \
+    RingFileStat*       ring_file_stat;    /*ring source file stat*/             \
+    char*               identifier;                                              \
+    unsigned int        parameter_list_size;                                     \
+    Parameter*          parameter_list;                                          \
+    unsigned int        return_list_size;                                        \
+    FunctionReturnList* return_list;                                             \
+    Block*              block;                                                   \
+    FunctionTuple*      next;
+
+
+struct FunctionTuple {
+    FUNCTION_TUPLE_HEADER;
+};
+
+struct Function {
+    FUNCTION_TUPLE_HEADER;
+
+    unsigned int func_index;
+    FunctionType type;
+};
+
+struct MethodMember {
+    FUNCTION_TUPLE_HEADER;
+
+    unsigned int index_of_class; // UPDATED_BY_FIX_AST
+};
+```
+
+
+
+## B. return 语句 语义检查的
+
+这个函数检查不过去, 需要优化
+
+```
+function pass_to_string(var string string_value) -> (string) {
+    fmt::printf("string_value={}\n", string_value);
+    return "#" + string_value;
+}
+```
+
+
+-----------------------------
+
+
 ## 2024-05-06周
 
 ### A. variadic parameter 复杂测试用例 ✅ 
@@ -457,7 +597,13 @@ b 和 c 的表达式类型必须一致, 然后这个三元表达式的最终类�
 - 向后查找 第一个非空行 设置断点
 
 
-2. break list 信息优化
+2. break list 信息优化, 需要有以下信息
+
+- 文件名
+- 函数名
+- 包名
+- 行号
+- 数量
 
 
 ### D. 完成 ./test/automated-testing-dump.sh 用于 测试 ring dump 命令 ✅ 
