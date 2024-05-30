@@ -311,10 +311,10 @@ int dispath_opcode(RVM_Frame* frame, const char* event, const char* arg) {
 
 int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
-    RVM_DebugConfig*           debug_config = frame->rvm->debug_config;
-    std::vector<unsigned int>& break_points = debug_config->break_points;
-    RDB_COMMAND_STEP_TYPE&     step_cmd     = debug_config->step_cmd;
-    std::string                location;
+    RVM_DebugConfig*             debug_config = frame->rvm->debug_config;
+    std::vector<RVM_BreakPoint>& break_points = debug_config->break_points;
+    RDB_COMMAND_STEP_TYPE&       step_cmd     = debug_config->step_cmd;
+    std::string                  location;
 
     // 1. check trace event
     printf(LOG_COLOR_GREEN);
@@ -340,7 +340,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
         int hit_breakpoint_num = -1;
 
         for (int i = 0; i < break_points.size(); i++) {
-            if (break_points[i] == frame->source_line_number) {
+            if (break_points[i].line_number == frame->source_line_number) {
                 hit_breakpoint_num = i;
                 break;
             }
@@ -434,12 +434,13 @@ int dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
 
 // 启动命令行交互式输入输出
 int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
-    char*                      line;
-    std::string                call_stack;
-    unsigned int               breakpoint_line;
-    RVM_DebugConfig*           debug_config = frame->rvm->debug_config;
+    bool                         is_exit = false;
+    char*                        line;
+    std::string                  call_stack;
+    unsigned int                 breakpoint_line;
+    RVM_DebugConfig*             debug_config = frame->rvm->debug_config;
 
-    std::vector<unsigned int>& break_points = frame->rvm->debug_config->break_points;
+    std::vector<RVM_BreakPoint>& break_points = frame->rvm->debug_config->break_points;
 
     // 1. config linenoise
     linenoiseSetMultiLine(1);
@@ -481,7 +482,9 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
             STDOUT_CLEAR_SCREEN;
         } else if (rdb_arg.cmd == RDB_COMMAND_QUIT) {
             printf("[@]CMD: Exit Ring Debugger...\n");
-            exit(0);
+
+            break_read_input = true;
+            is_exit          = true;
         } else if (rdb_arg.cmd == RDB_COMMAND_GLOBAL) {
             printf("[@]globals:\n");
             for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
@@ -509,21 +512,39 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
                 printf("[@]Breakpoint %lu set at %d\n",
                        break_points.size(),
                        breakpoint_line);
-                break_points.push_back(breakpoint_line);
+
+                RVM_BreakPoint breakpoint = RVM_BreakPoint{
+                    .package     = nullptr, // TODO:
+                    .file_name   = nullptr, // TODO:
+                    .func_name   = nullptr, // TODO:
+                    .line_number = breakpoint_line,
+                };
+
+                break_points.push_back(breakpoint);
             } else if (rdb_arg.break_cmd == RDB_COMMAND_BREAK_UNSET) {
                 breakpoint_line = atoi(rdb_arg.argument.c_str());
                 printf("[@]Breakpoint %lu unset at %d\n",
                        break_points.size(),
                        breakpoint_line);
-                break_points.erase(std::remove(break_points.begin(),
-                                               break_points.end(),
-                                               breakpoint_line),
-                                   break_points.end());
+
+                std::vector<RVM_BreakPoint>::iterator iter;
+                for (iter = break_points.begin(); iter != break_points.end();) {
+                    if (iter->line_number == breakpoint_line) {
+                        iter = break_points.erase(iter);
+                    } else {
+                        iter++;
+                    }
+                }
+
             } else if (rdb_arg.break_cmd == RDB_COMMAND_BREAK_LIST) {
                 printf("[@]Breakpoints:\n");
-                printf("Num   Where\n");
+                printf("*Num    *Package   *File      *Func      *LineNo \n");
                 for (int i = 0; i < break_points.size(); i++) {
-                    printf("%4d %4d\n", i, break_points[i]);
+                    printf("%-7d %-10s %-10s %-10s %-7d\n", i,
+                           break_points[i].package,
+                           break_points[i].file_name,
+                           break_points[i].func_name,
+                           break_points[i].line_number);
                 }
             } else if (rdb_arg.break_cmd == RDB_COMMAND_BREAK_CLEAR) {
                 printf("[@]Clear all breakpoint \n");
@@ -610,13 +631,6 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
             }
         }
 
-        printf(LOG_COLOR_CLEAR);
-
-        // 3. break read input
-        if (break_read_input) {
-            break;
-        }
-
 
         linenoiseHistoryAdd(line);
 
@@ -632,6 +646,10 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
 
     linenoiseHistorySave(RDB_HISTORY_FILE);
     printf(LOG_COLOR_CLEAR);
+
+    if (is_exit) {
+        exit(0);
+    }
     return 0;
 }
 

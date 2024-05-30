@@ -91,6 +91,7 @@ typedef struct StdPackageNativeFunction     StdPackageNativeFunction;
 typedef struct StdPackageInfo               StdPackageInfo;
 typedef struct RDB_Command                  RDB_Command;
 typedef struct RVM_DebugConfig              RVM_DebugConfig;
+typedef struct RVM_BreakPoint               RVM_BreakPoint;
 typedef struct RVM_Frame                    RVM_Frame;
 typedef struct ErrorMessageInfo             ErrorMessageInfo;
 typedef struct ErrorReportContext           ErrorReportContext;
@@ -139,7 +140,7 @@ struct Ring_Grammar_Info {
     std::vector<std::string> grammar;
 };
 
-typedef enum {
+typedef enum : unsigned char {
     RVM_VALUE_TYPE_UNKNOW,
 
     RVM_VALUE_TYPE_BOOL,
@@ -151,11 +152,20 @@ typedef enum {
 
 } RVM_Value_Type;
 
-typedef enum {
+typedef enum : int {
     RVM_FALSE,
     RVM_TRUE,
 } RVM_Bool;
 
+/*
+ * 在这里有个问题:
+ * 如果没有 RVM_Value.type 的时候, size(RVM_Value)=8,
+ * 如果有 RVM_Value.type 的时候, size(RVM_Value)=16,
+ * 因为内存对齐的原因导致8字节被浪费了, 这里需要优化一下
+ *
+ * TIP-1: 为什么 bool_value 的类型为 int
+ *        这样在 vm实现字节码的时候, 可以少实现一个, bool_value int_value 比较方法一致
+ */
 typedef struct {
     RVM_Value_Type type;
     union {
@@ -1789,8 +1799,15 @@ struct RVM_DebugConfig {
 
 
     // break_points 先简单实现, 只能在 main package 中设置断点
-    std::vector<unsigned int> break_points;
+    std::vector<RVM_BreakPoint> break_points;
     // RVM_DebugMode debug_mode;
+};
+
+struct RVM_BreakPoint {
+    char*        package;
+    char*        file_name;
+    char*        func_name;
+    unsigned int line_number;
 };
 
 struct RVM_Frame {
@@ -2446,14 +2463,16 @@ void              type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier
 RVM_RuntimeStack*    new_runtime_stack();
 RVM_RuntimeStatic*   new_runtime_static();
 RVM_RuntimeHeap*     new_runtime_heap();
-Ring_VirtualMachine* ring_virtualmachine_create();
 
+Ring_VirtualMachine* ring_virtualmachine_create();
 void                 ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm, ExecuterEntry* executer_entry);
-void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 ring_virtualmachine_init(Ring_VirtualMachine* rvm);
+
 void                 rvm_add_static_variable(Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
 void                 rvm_init_static_variable(Ring_VirtualMachine* rvm, Package_Executer* executer, RVM_RuntimeStatic* runtime_static);
+
 int                  ring_execute_vm_code(Ring_VirtualMachine* rvm);
+
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_ClassObject** caller_object, RVM_Function** caller_function,

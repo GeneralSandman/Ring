@@ -281,7 +281,7 @@ int register_debugger(Ring_VirtualMachine* rvm, Ring_Arg args) {
     debug_config->call_func_deep_count = 0;
     debug_config->step_over_deep_count = 0;
     debug_config->step_out_deep_count  = 0;
-    debug_config->break_points         = std::vector<unsigned int>{};
+    debug_config->break_points         = std::vector<RVM_BreakPoint>{};
 
     SET_TRACE_EVENT_ALL(debug_config);
     if (debug_config->stop_at_entry) {
