@@ -464,7 +464,10 @@ class-object  ✅
 ### A. 实现新一代垃圾回收算法
 
 #### 1. 重新规划一下 vm-execute 过程中 动态分配类型的流程逻辑
-派生数据类型 heap_size() 的正确性
+
+1.  heap_size() 返回值正确性
+    1.  派生数据类型 类型分配计算的是否正确
+    2.  
 
 #### 2. 关于RVM_Value 占用的内存优化
 
@@ -510,7 +513,116 @@ typedef struct TValue {
 #### 3. ring int 类型其实是 long long , 这样数据表达的范围更大
 
 
-将 RVM_Value 中的 int 改成 long long , 目前主流的虚拟机都是这么解决的
+1. 将 RVM_Value 中的 int 改成 int32 , lua虚拟机都是这么解决的
+3. 在 RVM_Value 中 新添加一个 基础数据类型, int64, 然后对应的相应的虚拟机字节码都要 添加
+
+然后还有一个棘手的问题就是 各种数据类型之间的转换, 隐式类型转换/显式类型转换, 还有各种地方的兼容性处理
+
+3. array/class 中也要 支持 int64, 问题的复杂度一下就上升了 
+
+
+这里还有一个关键的问题, 就是关于 len() capacity() 中 返回值是什么类型:
+1. int
+2. uint
+3. int64
+
+在这里, 不如比对一下golang是如何处理的: 
+1. 使用 int 而不是 uint 的好处是这样无心智负担的写出这样的代码, 而不用担心程序崩溃
+   
+```
+    // 倒序遍历数组
+   for i := lenUInt(nums) - 1; i >= 0; i-- {
+      fmt.Printf("i:%d -> num:%d\n", i, nums[i])
+   }
+```
+
+2. 为什么使用 int, 而不是 int64
+
+```
+
+Go 语言的设计者 Rob Pike 在 Go 的邮件列表中曾经解释过这个问题。
+
+len() 函数返回 int 而不是 int64 的原因主要有两个：
+
+历史原因：Go 语言的前身是 Plan 9 的编程语言，Plan 9 中的 len() 函数也返回 int。在设计 Go 语言时，作者们决定保持这个惯例，以便更好地与 Plan 9 相兼容。
+实际需求：在大多数情况下，int 类型足以表示容器的长度。即使在 32 位系统上，int 也可以表示非常大的数组或 slice。只有在非常特殊的情况下，例如处理非常大的数组或 slice 时，才需要使用 int64。
+此外，使用 int 还有一个好处，那就是可以与其他语言更好地交互。例如，在 C 语言中，数组的索引通常是 int 类型的，而不是 int64。因此，如果 Go 语言的 len() 函数返回 int64，那么在与 C 语言交互时可能会出现问题。
+
+总之，Go 语言的 len() 函数返回 int 是出于历史原因、实际需求和与其他语言的兼容性考虑的结果。
+```
+
+
+#### jvm 中的基本数据类型和对应的相关的字节码
+
+```
+Java 中有以下八种基础数据类型：
+
+byte：8 位有符号整数，取值范围为 -128 到 127。
+short：16 位有符号整数，取值范围为 -32768 到 32767。
+int：32 位有符号整数，取值范围为 -2147483648 到 2147483647。
+long：64 位有符号整数，取值范围为 -9223372036854775808 到 9223372036854775807。
+float：32 位浮点数，取值范围为 -3.4e38 到 3.4e38。
+double：64 位浮点数，取值范围为 -1.8e308 到 1.8e308。
+boolean：布尔值，取值为 true 或 false。
+char：16 位无符号整数，表示 Unicode 字符，取值范围为 0 到 65535。
+这些基础数据类型是 Java 语言的基本组成部分，其他数据类型都是基于这些类型派生出来的。
+```
+
+
+```
+Java 中的基础数据类型对应的 JVM 字节码如下：
+
+byte：
+加载：bload、baload
+存储：bastore
+操作：iinc、iadd、isub、imul、idiv、irem 等（使用 int 操作码，因为 byte 会被隐式转换为 int）
+
+
+short：
+加载：sload、saload
+存储：sastore
+操作：iinc、iadd、isub、imul、idiv、irem 等（使用 int 操作码，因为 short 会被隐式转换为 int）
+
+
+int：
+加载：iload、iaload
+存储：iastore
+操作：iinc、iadd、isub、imul、idiv、irem 等
+
+
+long：
+加载：lload、laload
+存储：lastore
+操作：linc、ladd、lsub、lmul、ldiv、lrem 等
+
+
+float：
+加载：fload、faload
+存储：fastore
+操作：finc、fadd、fsub、fmul、fdiv、frem 等
+
+
+double：
+加载：dload、daload
+存储：dastore
+操作：dinc、dadd、dsub、dmul、ddiv、drem 等
+
+
+boolean：
+加载：无特殊字节码，使用 iload 或 aload 加载 boolean 值
+存储：无特殊字节码，使用 iastore 或 astore 存储 boolean 值
+操作：使用 int 操作码，例如 iconst_0、iconst_1 等
+
+
+char：
+加载：aload、caload
+存储：astore、castore
+操作：使用 int 操作码，例如 iinc、iadd、isub 等（因为 char 会被隐式转换为 int）
+需要注意的是，JVM 字节码并不是一一对应的，例如 int 操作码可以用于 byte、short 和 char 等类型的操作。
+
+
+```
+
 
 -----------------------------
 
