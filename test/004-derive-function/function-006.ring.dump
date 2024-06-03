@@ -126,7 +126,7 @@ $main()    <./test/004-derive-function/function-006.ring:32,109>
  ├──59      invoke_func_native                                                  
  ├──60      push_string                   0                   57                
  ├──61      argument_num                  1                                     
- ├──62      push_func                     515                                   
+ ├──62      push_func                     516                                   
  ├──63      invoke_func_native                                                  
  ├──64      argument_num                  0                   58                
  ├──65      push_func                     1536                                  
@@ -194,7 +194,7 @@ $main()    <./test/004-derive-function/function-006.ring:32,109>
  ├──127     invoke_func_native                                                  
  ├──128     push_string                   1                   74                
  ├──129     argument_num                  1                                     
- ├──130     push_func                     515                                   
+ ├──130     push_func                     516                                   
  ├──131     invoke_func_native                                                  
  ├──132     argument_num                  0                   75                
  ├──133     push_func                     1537                                  
@@ -264,7 +264,7 @@ $main()    <./test/004-derive-function/function-006.ring:32,109>
  ├──197     invoke_func_native                                                  
  ├──198     push_string                   2                   91                
  ├──199     argument_num                  1                                     
- ├──200     push_func                     515                                   
+ ├──200     push_func                     516                                   
  ├──201     invoke_func_native                                                  
  ├──202     argument_num                  0                   92                
  ├──203     push_func                     1538                                  

@@ -75,7 +75,7 @@ $main()    <./test/004-derive-function/function-015.ring:32,83>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   0                   38                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     515                                   
+ ├──2       push_func                     516                                   
  ├──3       invoke_func_native                                                  
  ├──4       push_int_1byte                122                 39                
  ├──5       push_int_1byte                123                                   
@@ -95,7 +95,7 @@ $main()    <./test/004-derive-function/function-015.ring:32,83>
  ├──19      invoke_func_native                                                  
  ├──20      push_string                   1                   46                
  ├──21      argument_num                  1                                     
- ├──22      push_func                     515                                   
+ ├──22      push_func                     516                                   
  ├──23      invoke_func_native                                                  
  ├──24      push_int_1byte                124                 47                
  ├──25      push_int_1byte                123                                   
@@ -115,7 +115,7 @@ $main()    <./test/004-derive-function/function-015.ring:32,83>
  ├──39      invoke_func_native                                                  
  ├──40      push_string                   2                   54                
  ├──41      argument_num                  1                                     
- ├──42      push_func                     515                                   
+ ├──42      push_func                     516                                   
  ├──43      invoke_func_native                                                  
  ├──44      push_int_1byte                124                 55                
  ├──45      push_int_1byte                123                                   
@@ -135,7 +135,7 @@ $main()    <./test/004-derive-function/function-015.ring:32,83>
  ├──59      invoke_func_native                                                  
  ├──60      push_string                   3                   62                
  ├──61      argument_num                  1                                     
- ├──62      push_func                     515                                   
+ ├──62      push_func                     516                                   
  ├──63      invoke_func_native                                                  
  ├──64      push_int_1byte                1                   63                
  ├──65      push_int_1byte                100                                   
@@ -187,7 +187,7 @@ $main()    <./test/004-derive-function/function-015.ring:32,83>
  ├──111     invoke_func_native                                                  
  ├──112     push_string                   4                   76                
  ├──113     argument_num                  1                                     
- ├──114     push_func                     515                                   
+ ├──114     push_func                     516                                   
  ├──115     invoke_func_native                                                  
  ├──116     push_int_1byte                1                   78                
  ├──117     push_int_1byte                2                                     

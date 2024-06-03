@@ -96,7 +96,7 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   0                   41                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     515                                   
+ ├──2       push_func                     516                                   
  ├──3       invoke_func_native                                                  
  ├──4       push_int_1byte                1                   42                
  ├──5       argument_num                  1                                     
@@ -170,7 +170,7 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──73      invoke_func_native                                                  
  ├──74      push_string                   1                   55                
  ├──75      argument_num                  1                                     
- ├──76      push_func                     515                                   
+ ├──76      push_func                     516                                   
  ├──77      invoke_func_native                                                  
  ├──78      push_int_1byte                1                   56                
  ├──79      argument_num                  1                                     
@@ -244,7 +244,7 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──147     invoke_func_native                                                  
  ├──148     push_string                   2                   68                
  ├──149     argument_num                  1                                     
- ├──150     push_func                     515                                   
+ ├──150     push_func                     516                                   
  ├──151     invoke_func_native                                                  
  ├──152     push_int_1byte                1                   69                
  ├──153     argument_num                  1                                     

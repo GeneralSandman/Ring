@@ -16,7 +16,7 @@ $test(var int...)    <./test/004-derive-function/function-021.ring:12,17>
  ├──3       pop_stack_int                 1                   16                
  ├──4       push_stack_int                1                   15                
  ├──5       argument_num                  1                                     
- ├──6       push_func                     517                                   
+ ├──6       push_func                     518                                   
  ├──7       invoke_func_native                                                  
  ├──8       jump                          6                   14                
  ├──9       for_range_finish              0                                     

@@ -243,7 +243,7 @@ $main()    <./test/004-derive-function/function-012.ring:82,91>
  ├──13      pop_stack_int                 0                                     
  ├──14      push_string                   0                   87                
  ├──15      argument_num                  1                                     
- ├──16      push_func                     515                                   
+ ├──16      push_func                     516                                   
  ├──17      invoke_func_native                                                  
  ├──18      push_stack_int                0                   88                
  ├──19      argument_num                  1                                     

@@ -16,7 +16,7 @@ $test_1(var int, var int)    <./test/004-derive-function/function-011.ring:19,30
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   0                   20                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     515                                   
+ ├──2       push_func                     516                                   
  ├──3       invoke_func_native                                                  
  ├──4       push_stack_int                0                   22                
  ├──5       argument_num                  1                                     

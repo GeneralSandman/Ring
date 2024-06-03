@@ -93,14 +93,14 @@ $main()    <./test/004-derive-function/function-004.ring:32,52>
  ├──29      invoke_func_native                                                  
  ├──30      push_string                   0                   40                
  ├──31      argument_num                  1                                     
- ├──32      push_func                     515                                   
+ ├──32      push_func                     516                                   
  ├──33      invoke_func_native                                                  
  ├──34      argument_num                  0                   42                
  ├──35      push_func                     1536                                  
  ├──36      invoke_func                                                         
  ├──37      push_string                   1                   43                
  ├──38      argument_num                  1                                     
- ├──39      push_func                     515                                   
+ ├──39      push_func                     516                                   
  ├──40      invoke_func_native                                                  
  ├──41      push_static_int               0                   45                
  ├──42      argument_num                  1                                     
@@ -132,7 +132,7 @@ $main()    <./test/004-derive-function/function-004.ring:32,52>
  ├──68      invoke_func_native                                                  
  ├──69      push_string                   2                   50                
  ├──70      argument_num                  1                                     
- ├──71      push_func                     515                                   
+ ├──71      push_func                     516                                   
  ├──72      invoke_func_native                                                  
  ├──73      function_finish                                   52                
 
