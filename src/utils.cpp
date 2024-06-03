@@ -513,6 +513,9 @@ std::string dump_vm_constant(RVM_ConstantPool* constant) {
     case CONSTANTPOOL_TYPE_INT:
         return "int(" + std::to_string(constant->u.int_value) + ")";
         break;
+    case CONSTANTPOOL_TYPE_INT64:
+        return "int64(" + std::to_string(constant->u.int64_value) + ")";
+        break;
     case CONSTANTPOOL_TYPE_DOUBLE:
         return "double(" + std::to_string(constant->u.double_value) + ")";
         break;
@@ -573,6 +576,9 @@ std::string format_rvm_type(RVM_Value* value) {
     case RVM_VALUE_TYPE_INT:
         type_s = "int";
         break;
+    case RVM_VALUE_TYPE_INT64:
+        type_s = "int64";
+        break;
     case RVM_VALUE_TYPE_DOUBLE:
         type_s = "double";
         break;
@@ -586,6 +592,7 @@ std::string format_rvm_type(RVM_Value* value) {
         switch (value->u.array_value->type) {
         case RVM_ARRAY_BOOL: type_s = "bool"; break;
         case RVM_ARRAY_INT: type_s = "int"; break;
+        case RVM_ARRAY_INT64: type_s = "int64"; break;
         case RVM_ARRAY_DOUBLE: type_s = "double"; break;
         case RVM_ARRAY_STRING: type_s = "string"; break;
         case RVM_ARRAY_CLASS_OBJECT: type_s = "class"; break;
@@ -619,6 +626,9 @@ std::string format_rvm_value(RVM_Value* value) {
         break;
     case RVM_VALUE_TYPE_INT:
         result = std::to_string(value->u.int_value);
+        break;
+    case RVM_VALUE_TYPE_INT64:
+        result = std::to_string(value->u.int64_value);
         break;
     case RVM_VALUE_TYPE_DOUBLE:
         result = std::to_string(value->u.double_value);
@@ -753,6 +763,9 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
         break;
     case RING_BASIC_TYPE_INT:
         str = "int";
+        break;
+    case RING_BASIC_TYPE_INT64:
+        str = "int64";
         break;
     case RING_BASIC_TYPE_DOUBLE:
         str = "double";

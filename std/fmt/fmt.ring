@@ -18,6 +18,9 @@ function println_bool(var bool bool_value);
 function println_int(var int int_value);
 
 @native
+function println_int64(var int64 int64_value);
+
+@native
 function println_double(var double double_value);
 
 @native

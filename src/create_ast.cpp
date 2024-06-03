@@ -245,9 +245,28 @@ Expression* create_expression_literal(ExpressionType type, char* literal_interfa
 
     expression->type         = type;
     switch (type) {
-    case EXPRESSION_TYPE_LITERAL_INT:
-        sscanf(literal_interface, "%d", &(expression->u.int_literal));
-        break;
+    case EXPRESSION_TYPE_LITERAL_INT: {
+        unsigned long long int64_value = 0;
+        sscanf(literal_interface, "%llu", &int64_value);
+
+        if (int64_value <= INT32_MAX) {
+            expression->type          = EXPRESSION_TYPE_LITERAL_INT;
+            expression->u.int_literal = (int)int64_value;
+        } else if (int64_value <= INT64_MAX) {
+            expression->type            = EXPRESSION_TYPE_LITERAL_INT64;
+            expression->u.int64_literal = int64_value;
+        } else {
+            // FIXME:
+            // ring error report 数据类型溢出
+            // 这里还有一个棘手的问题需要处理一下
+            // 2147483648 会溢出 但是 -2147483648 不会溢出, 所以针对 负号 还要做更加细致的语义检查
+            // 9223372036854775808 同理
+            // 更合理的方式应该是在常量折叠之后 再 进行判断
+            expression->type            = EXPRESSION_TYPE_LITERAL_INT64;
+            expression->u.int64_literal = int64_value;
+        }
+
+    } break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
         sscanf(literal_interface, "%lf", &expression->u.double_literal);
         break;

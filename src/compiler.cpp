@@ -611,6 +611,7 @@ std::string trans_flex_token_to_human_char(std::string str) {
         {"`typedef`", "TOKEN_TYPEDEF"},
         {"`bool`", "TOKEN_BOOL"},
         {"`int`", "TOKEN_INT"},
+        {"`int64`", "TOKEN_INT64"},
         {"`double`", "TOKEN_DOUBLE"},
         {"`string`", "TOKEN_STRING"},
         {"`struct`", "TOKEN_STRUCT"},

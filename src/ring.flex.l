@@ -23,6 +23,7 @@ extern "C" int yywrap(){
 <INITIAL>"typedef"      { package_unit_update_line_content(yytext); return TOKEN_TYPEDEF;        }
 <INITIAL>"bool"         { package_unit_update_line_content(yytext); return TOKEN_BOOL;           }
 <INITIAL>"int"          { package_unit_update_line_content(yytext); return TOKEN_INT;            }
+<INITIAL>"int64"        { package_unit_update_line_content(yytext); return TOKEN_INT64;          }
 <INITIAL>"double"       { package_unit_update_line_content(yytext); return TOKEN_DOUBLE;         }
 <INITIAL>"string"       { package_unit_update_line_content(yytext); return TOKEN_STRING;         }
 <INITIAL>"struct"       { package_unit_update_line_content(yytext); return TOKEN_STRUCT;         }

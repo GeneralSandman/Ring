@@ -145,6 +145,7 @@ typedef enum : unsigned char {
 
     RVM_VALUE_TYPE_BOOL,
     RVM_VALUE_TYPE_INT,
+    RVM_VALUE_TYPE_INT64,
     RVM_VALUE_TYPE_DOUBLE,
     RVM_VALUE_TYPE_STRING,
     RVM_VALUE_TYPE_CLASS_OB,
@@ -171,6 +172,7 @@ typedef struct {
     union {
         RVM_Bool         bool_value;
         int              int_value;
+        long long        int64_value;
         double           double_value;
         RVM_String*      string_value;
         RVM_ClassObject* class_ob_value;
@@ -376,6 +378,7 @@ typedef enum {
 
     RING_BASIC_TYPE_BOOL,
     RING_BASIC_TYPE_INT,
+    RING_BASIC_TYPE_INT64,
     RING_BASIC_TYPE_DOUBLE,
     RING_BASIC_TYPE_STRING,
     RING_BASIC_TYPE_CLASS,
@@ -508,6 +511,7 @@ struct RVM_ClassDefinition {
 typedef enum {
     CONSTANTPOOL_TYPE_UNKNOW,
     CONSTANTPOOL_TYPE_INT,
+    CONSTANTPOOL_TYPE_INT64,
     CONSTANTPOOL_TYPE_DOUBLE,
     CONSTANTPOOL_TYPE_STRING,
 } ConstantPoolType;
@@ -515,9 +519,10 @@ typedef enum {
 struct RVM_ConstantPool {
     ConstantPoolType type;
     union {
-        int    int_value;
-        double double_value;
-        char*  string_value;
+        int       int_value;
+        long long int64_value;
+        double    double_value;
+        char*     string_value;
     } u;
 };
 
@@ -564,6 +569,7 @@ typedef enum {
     RVM_ARRAY_UNKNOW,
     RVM_ARRAY_BOOL,         // bool 数组
     RVM_ARRAY_INT,          // int 数组
+    RVM_ARRAY_INT64,        // int64 数组
     RVM_ARRAY_DOUBLE,       // double 数组
     RVM_ARRAY_STRING,       // string 数组
     RVM_ARRAY_CLASS_OBJECT, // 类 数组
@@ -581,6 +587,7 @@ struct RVM_Array {
     union {
         bool*            bool_array;
         int*             int_array;
+        long long*       int64_array;
         double*          double_array;
         RVM_String**     string_array;
         RVM_ClassObject* class_ob_array;
@@ -688,18 +695,21 @@ typedef enum {
     RVM_CODE_PUSH_INT_1BYTE, // operand 0-255
     RVM_CODE_PUSH_INT_2BYTE, // operand 256-65535
     RVM_CODE_PUSH_INT,       // bigger 65535
+    RVM_CODE_PUSH_INT64,     // bigger 65535
     RVM_CODE_PUSH_DOUBLE,
     RVM_CODE_PUSH_STRING,
 
     // static
     RVM_CODE_POP_STATIC_BOOL,
     RVM_CODE_POP_STATIC_INT,
+    RVM_CODE_POP_STATIC_INT64,
     RVM_CODE_POP_STATIC_DOUBLE,
     RVM_CODE_POP_STATIC_STRING,
     RVM_CODE_POP_STATIC_CLASS_OB,
     RVM_CODE_POP_STATIC_ARRAY,
     RVM_CODE_PUSH_STATIC_BOOL,
     RVM_CODE_PUSH_STATIC_INT,
+    RVM_CODE_PUSH_STATIC_INT64,
     RVM_CODE_PUSH_STATIC_DOUBLE,
     RVM_CODE_PUSH_STATIC_STRING,
     RVM_CODE_PUSH_STATIC_CLASS_OB,
@@ -709,12 +719,14 @@ typedef enum {
     // stack
     RVM_CODE_POP_STACK_BOOL,
     RVM_CODE_POP_STACK_INT,
+    RVM_CODE_POP_STACK_INT64,
     RVM_CODE_POP_STACK_DOUBLE,
     RVM_CODE_POP_STACK_STRING,
     RVM_CODE_POP_STACK_CLASS_OB,
     RVM_CODE_POP_STACK_ARRAY,
     RVM_CODE_PUSH_STACK_BOOL,
     RVM_CODE_PUSH_STACK_INT,
+    RVM_CODE_PUSH_STACK_INT64,
     RVM_CODE_PUSH_STACK_DOUBLE,
     RVM_CODE_PUSH_STACK_STRING,
     RVM_CODE_PUSH_STACK_CLASS_OB,
@@ -724,6 +736,7 @@ typedef enum {
     RVM_CODE_PUSH_ARRAY_A,
     RVM_CODE_PUSH_ARRAY_BOOL,
     RVM_CODE_PUSH_ARRAY_INT,
+    RVM_CODE_PUSH_ARRAY_INT64,
     RVM_CODE_PUSH_ARRAY_DOUBLE,
     RVM_CODE_PUSH_ARRAY_STRING,
     RVM_CODE_PUSH_ARRAY_CLASS_OB,
@@ -731,6 +744,7 @@ typedef enum {
     RVM_CODE_POP_ARRAY_A,
     RVM_CODE_POP_ARRAY_BOOL,
     RVM_CODE_POP_ARRAY_INT,
+    RVM_CODE_POP_ARRAY_INT64,
     RVM_CODE_POP_ARRAY_DOUBLE,
     RVM_CODE_POP_ARRAY_STRING,
     RVM_CODE_POP_ARRAY_CLASS_OB,
@@ -738,12 +752,14 @@ typedef enum {
     // array append
     RVM_CODE_ARRAY_APPEND_BOOL,
     RVM_CODE_ARRAY_APPEND_INT,
+    RVM_CODE_ARRAY_APPEND_INT64,
     RVM_CODE_ARRAY_APPEND_DOUBLE,
     RVM_CODE_ARRAY_APPEND_STRING,
     RVM_CODE_ARRAY_APPEND_CLASS_OB,
     // array pop
     RVM_CODE_ARRAY_POP_BOOL,
     RVM_CODE_ARRAY_POP_INT,
+    RVM_CODE_ARRAY_POP_INT64,
     RVM_CODE_ARRAY_POP_DOUBLE,
     RVM_CODE_ARRAY_POP_STRING,
     RVM_CODE_ARRAY_POP_CLASS_OB,
@@ -751,12 +767,14 @@ typedef enum {
     // class
     RVM_CODE_POP_FIELD_BOOL,
     RVM_CODE_POP_FIELD_INT,
+    RVM_CODE_POP_FIELD_INT64,
     RVM_CODE_POP_FIELD_DOUBLE,
     RVM_CODE_POP_FIELD_STRING,
     RVM_CODE_POP_FIELD_CLASS_OB,
     RVM_CODE_POP_FIELD_ARRAY,
     RVM_CODE_PUSH_FIELD_BOOL,
     RVM_CODE_PUSH_FIELD_INT,
+    RVM_CODE_PUSH_FIELD_INT64,
     RVM_CODE_PUSH_FIELD_DOUBLE,
     RVM_CODE_PUSH_FIELD_STRING,
     RVM_CODE_PUSH_FIELD_CLASS_OB,
@@ -764,21 +782,27 @@ typedef enum {
 
     // arithmetic
     RVM_CODE_ADD_INT,
+    RVM_CODE_ADD_INT64,
     RVM_CODE_ADD_DOUBLE,
 
     RVM_CODE_SUB_INT,
+    RVM_CODE_SUB_INT64,
     RVM_CODE_SUB_DOUBLE,
 
     RVM_CODE_MUL_INT,
+    RVM_CODE_MUL_INT64,
     RVM_CODE_MUL_DOUBLE,
 
     RVM_CODE_DIV_INT,
+    RVM_CODE_DIV_INT64,
     RVM_CODE_DIV_DOUBLE,
 
     RVM_CODE_MOD_INT,
+    RVM_CODE_MOD_INT64,
     RVM_CODE_MOD_DOUBLE,
 
     RVM_CODE_MINUS_INT,
+    RVM_CODE_MINUS_INT64,
     RVM_CODE_MINUS_DOUBLE,
 
     RVM_CODE_SELF_INCREASE,
@@ -800,26 +824,32 @@ typedef enum {
 
     // relational
     RVM_CODE_RELATIONAL_EQ_INT,
+    RVM_CODE_RELATIONAL_EQ_INT64,
     RVM_CODE_RELATIONAL_EQ_DOUBLE,
     RVM_CODE_RELATIONAL_EQ_STRING,
 
     RVM_CODE_RELATIONAL_NE_INT,
+    RVM_CODE_RELATIONAL_NE_INT64,
     RVM_CODE_RELATIONAL_NE_DOUBLE,
     RVM_CODE_RELATIONAL_NE_STRING,
 
     RVM_CODE_RELATIONAL_GT_INT,
+    RVM_CODE_RELATIONAL_GT_INT64,
     RVM_CODE_RELATIONAL_GT_DOUBLE,
     RVM_CODE_RELATIONAL_GT_STRING,
 
     RVM_CODE_RELATIONAL_GE_INT,
+    RVM_CODE_RELATIONAL_GE_INT64,
     RVM_CODE_RELATIONAL_GE_DOUBLE,
     RVM_CODE_RELATIONAL_GE_STRING,
 
     RVM_CODE_RELATIONAL_LT_INT,
+    RVM_CODE_RELATIONAL_LT_INT64,
     RVM_CODE_RELATIONAL_LT_DOUBLE,
     RVM_CODE_RELATIONAL_LT_STRING,
 
     RVM_CODE_RELATIONAL_LE_INT,
+    RVM_CODE_RELATIONAL_LE_INT64,
     RVM_CODE_RELATIONAL_LE_DOUBLE,
     RVM_CODE_RELATIONAL_LE_STRING,
 
@@ -847,12 +877,14 @@ typedef enum {
     // array
     RVM_CODE_NEW_ARRAY_BOOL,
     RVM_CODE_NEW_ARRAY_INT,
+    RVM_CODE_NEW_ARRAY_INT64,
     RVM_CODE_NEW_ARRAY_DOUBLE,
     RVM_CODE_NEW_ARRAY_STRING,
     RVM_CODE_NEW_ARRAY_CLASS_OB,
 
     RVM_CODE_NEW_ARRAY_LITERAL_BOOL,
     RVM_CODE_NEW_ARRAY_LITERAL_INT,
+    RVM_CODE_NEW_ARRAY_LITERAL_INT64,
     RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE,
     RVM_CODE_NEW_ARRAY_LITERAL_STRING,
     RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB,
@@ -871,6 +903,7 @@ typedef enum {
     // range
     RVM_CODE_FOR_RANGE_ARRAY_BOOL,
     RVM_CODE_FOR_RANGE_ARRAY_INT,
+    RVM_CODE_FOR_RANGE_ARRAY_INT64,
     RVM_CODE_FOR_RANGE_ARRAY_DOUBLE,
     RVM_CODE_FOR_RANGE_ARRAY_STRING,
     RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB,
@@ -880,6 +913,7 @@ typedef enum {
     // convert
     RVM_CODE_BOOL_2_STRING,
     RVM_CODE_INT_2_STRING,
+    RVM_CODE_INT64_2_STRING,
     RVM_CODE_DOUBLE_2_STRING,
 
     // 不能在生成代码的时候使用
@@ -954,6 +988,7 @@ typedef enum {
     EXPRESSION_TYPE_UNKNOW = 0,
     EXPRESSION_TYPE_LITERAL_BOOL,
     EXPRESSION_TYPE_LITERAL_INT,
+    EXPRESSION_TYPE_LITERAL_INT64,
     EXPRESSION_TYPE_LITERAL_DOUBLE,
     EXPRESSION_TYPE_LITERAL_STRING,
     EXPRESSION_TYPE_VARIABLE,
@@ -1168,7 +1203,8 @@ struct Expression {
     ExpressionType  type;
     union {
         Ring_Bool                     bool_literal;
-        int                           int_literal;
+        unsigned int                  int_literal;   // 注意这里是 unsigned
+        unsigned long long            int64_literal; // 注意这里是 unsigned
         double                        double_literal;
         char*                         string_literal;
         IdentifierExpression*         identifier_expression;
@@ -2421,9 +2457,18 @@ void              generate_vmcode_from_unitary_not_expression(Package_Executer* 
 void              generate_vmcode_from_increase_decrease_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_identifier_expression(Package_Executer* executer, IdentifierExpression* identifier_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_bool_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_int_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_double_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_string_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_int_expression(Package_Executer* executer,
+                                                      Expression*       expression,
+                                                      RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_int64_expression(Package_Executer* executer,
+                                                        Expression*       expression,
+                                                        RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_double_expression(Package_Executer* executer,
+                                                         Expression*       expression,
+                                                         RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_string_expression(Package_Executer* executer,
+                                                         Expression*       expression,
+                                                         RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_native_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_method_call_expression(Package_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer);
@@ -2440,6 +2485,7 @@ void              generate_vmcode(Package_Executer* executer, RVM_OpcodeBuffer* 
 
 int               constant_pool_grow(Package_Executer* executer, unsigned int growth_size);
 int               constant_pool_add_int(Package_Executer* executer, int int_literal);
+int               constant_pool_add_int64(Package_Executer* executer, long long int64_literal);
 int               constant_pool_add_double(Package_Executer* executer, double double_literal);
 int               constant_pool_add_string(Package_Executer* executer, char* string_literal);
 
@@ -2507,6 +2553,7 @@ RVM_String*          concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_
 
 RVM_Array*           rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsigned int size);
 RVM_Array*           rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size);
+RVM_Array*           rvm_new_array_literal_int64(Ring_VirtualMachine* rvm, unsigned int size);
 RVM_Array*           rvm_new_array_literal_double(Ring_VirtualMachine* rvm, unsigned int size);
 RVM_Array*           rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int size);
 RVM_Array*           rvm_new_array_literal_class_object(Ring_VirtualMachine* rvm,
@@ -2535,6 +2582,12 @@ ErrorCode            rvm_array_set_int(Ring_VirtualMachine* rvm, RVM_Array* arra
 ErrorCode            rvm_array_append_int(Ring_VirtualMachine* rvm, RVM_Array* array, int* value);
 ErrorCode            rvm_array_pop_int(Ring_VirtualMachine* rvm, RVM_Array* array, int* value);
 
+ErrorCode            rvm_array_get_int64(Ring_VirtualMachine* rvm, RVM_Array* array, int index, long long* value);
+ErrorCode            rvm_array_set_int64(Ring_VirtualMachine* rvm, RVM_Array* array, int index, long long* value);
+ErrorCode            rvm_array_append_int64(Ring_VirtualMachine* rvm, RVM_Array* array, long long* value);
+ErrorCode            rvm_array_pop_int64(Ring_VirtualMachine* rvm, RVM_Array* array, long long* value);
+
+
 ErrorCode            rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Array* array, int index, double* value);
 ErrorCode            rvm_array_set_double(Ring_VirtualMachine* rvm, RVM_Array* array, int index, double* value);
 ErrorCode            rvm_array_append_double(Ring_VirtualMachine* rvm, RVM_Array* array, double* value);
@@ -2553,6 +2606,7 @@ ErrorCode            rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Ar
 
 RVM_String*          rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value);
 RVM_String*          rvm_int_2_string(Ring_VirtualMachine* rvm, int value);
+RVM_String*          rvm_int64_2_string(Ring_VirtualMachine* rvm, long long value);
 RVM_String*          rvm_double_2_string(Ring_VirtualMachine* rvm, double value);
 
 int                  rvm_string_cmp(RVM_String* string1, RVM_String* string2);
@@ -2592,6 +2646,7 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
 
 RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_fmt_println_int64(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);

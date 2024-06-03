@@ -302,6 +302,10 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
             alloc_size         = sizeof(int) * array->capacity;
             array->u.int_array = (int*)calloc(1, alloc_size);
             break;
+        case RVM_ARRAY_INT64:
+            alloc_size           = sizeof(long long) * array->capacity;
+            array->u.int64_array = (long long*)calloc(1, alloc_size);
+            break;
         case RVM_ARRAY_DOUBLE:
             alloc_size            = sizeof(double) * array->capacity;
             array->u.double_array = (double*)calloc(1, alloc_size);

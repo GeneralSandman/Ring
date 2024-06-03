@@ -79,6 +79,7 @@ int yylex();
 %token TOKEN_TYPEDEF
 %token TOKEN_BOOL
 %token TOKEN_INT 
+%token TOKEN_INT64
 %token TOKEN_DOUBLE 
 %token TOKEN_STRING 
 %token TOKEN_STRUCT 
@@ -803,6 +804,11 @@ basic_type_specifier
     {
         debug_bison_info_with_green("[RULE::basic_type_specifier]\t variable_type(TOKEN_INT) ");
         $$ = RING_BASIC_TYPE_INT;
+    }
+    | TOKEN_INT64
+    {
+        debug_bison_info_with_green("[RULE::basic_type_specifier]\t variable_type(TOKEN_INT64) ");
+        $$ = RING_BASIC_TYPE_INT64;
     }
     | TOKEN_DOUBLE
     {

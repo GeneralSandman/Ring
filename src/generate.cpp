@@ -990,6 +990,9 @@ void generate_vmcode_from_expression(Package_Executer* executer,
     case EXPRESSION_TYPE_LITERAL_INT:
         generate_vmcode_from_int_expression(executer, expression, opcode_buffer);
         break;
+    case EXPRESSION_TYPE_LITERAL_INT64:
+        generate_vmcode_from_int64_expression(executer, expression, opcode_buffer);
+        break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
         generate_vmcode_from_double_expression(executer, expression, opcode_buffer);
         break;
@@ -1134,7 +1137,7 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer,
     unsigned int opcode_offset = 0;
     if (expression->operand->convert_type != nullptr
         && expression->operand->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE) {
-        opcode_offset += 1;
+        opcode_offset += 2;
     }
     switch (expression->type) {
     case ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN:
@@ -1377,17 +1380,17 @@ void generate_vmcode_from_binary_expression(Package_Executer* executer,
         && right->convert_type != nullptr && right->convert_type[0]->kind == RING_BASIC_TYPE_STRING) {
         // TODO: 要在语义检查里严格检查
         // 肯定是eq ne gt ge lt le
-        opcode = RVM_Opcode(opcode + 2);
+        opcode = RVM_Opcode(opcode + 3);
         goto END;
     }
 
 
     if (left->type == EXPRESSION_TYPE_LITERAL_DOUBLE
         || right->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
-        opcode = RVM_Opcode(opcode + 1);
+        opcode = RVM_Opcode(opcode + 2);
     } else if ((left->convert_type != nullptr && left->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)
                || (right->convert_type != nullptr && right->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)) {
-        opcode = RVM_Opcode(opcode + 1);
+        opcode = RVM_Opcode(opcode + 2);
     }
 
 END:
@@ -1441,6 +1444,9 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer,
     case EXPRESSION_TYPE_LITERAL_INT:
         opcode = RVM_CODE_MINUS_INT;
         break;
+    case EXPRESSION_TYPE_LITERAL_INT64:
+        opcode = RVM_CODE_MINUS_INT64;
+        break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
         opcode = RVM_CODE_MINUS_DOUBLE;
         break;
@@ -1449,7 +1455,7 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer,
         char error_message_buffer[1024];
         char advice_buffer[1024];
         snprintf(error_message_buffer, 1024, "%sError:%s "
-                                             "minus operator only be used in int/double literal; E:%d",
+                                             "minus operator only be used in int/int64/double literal; E:%d",
                  LOG_COLOR_RED,
                  LOG_COLOR_CLEAR,
                  ERROR_MINUS_OPER_INVALID_USE);
@@ -1555,6 +1561,21 @@ void generate_vmcode_from_int_expression(Package_Executer* executer,
         int constant_index = constant_pool_add_int(executer, expression->u.int_literal);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT, constant_index, expression->line_number);
     }
+}
+
+void generate_vmcode_from_int64_expression(Package_Executer* executer,
+                                           Expression*       expression,
+                                           RVM_OpcodeBuffer* opcode_buffer) {
+
+    debug_generate_info_with_darkgreen("\t");
+    if (expression == nullptr) {
+        return;
+    }
+    assert(expression->type == EXPRESSION_TYPE_LITERAL_INT64);
+
+
+    int constant_index = constant_pool_add_int64(executer, expression->u.int64_literal);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT64, constant_index, expression->line_number);
 }
 
 void generate_vmcode_from_double_expression(Package_Executer* executer,
@@ -2110,6 +2131,15 @@ int constant_pool_add_int(Package_Executer* executer, int int_literal) {
     return index;
 }
 
+int constant_pool_add_int64(Package_Executer* executer, long long int64_literal) {
+    debug_generate_info_with_darkgreen("\t");
+    int index                                         = constant_pool_grow(executer, 1);
+
+    executer->constant_pool_list[index].type          = CONSTANTPOOL_TYPE_INT64;
+    executer->constant_pool_list[index].u.int64_value = int64_literal;
+    return index;
+}
+
 int constant_pool_add_double(Package_Executer* executer, double double_literal) {
     debug_generate_info_with_darkgreen("\t");
     int index                                          = constant_pool_grow(executer, 1);
@@ -2238,6 +2268,15 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_FIELD_INT
         return RVM_Opcode(opcode + 1);
         break;
+    case RING_BASIC_TYPE_INT64:
+        // RVM_CODE_POP_STATIC_INT64
+        // RVM_CODE_PUSH_STATIC_INT64
+        // RVM_CODE_POP_STACK_INT64
+        // RVM_CODE_PUSH_STACK_INT64
+        // RVM_CODE_POP_FIELD_INT64
+        // RVM_CODE_PUSH_FIELD_INT64
+        return RVM_Opcode(opcode + 2);
+        break;
     case RING_BASIC_TYPE_DOUBLE:
         // RVM_CODE_POP_STATIC_DOUBLE
         // RVM_CODE_PUSH_STATIC_DOUBLE
@@ -2245,7 +2284,7 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STACK_DOUBLE
         // RVM_CODE_POP_FIELD_DOUBLE
         // RVM_CODE_PUSH_FIELD_DOUBLE
-        return RVM_Opcode(opcode + 2);
+        return RVM_Opcode(opcode + 3);
         break;
     case RING_BASIC_TYPE_STRING:
         // RVM_CODE_POP_STATIC_STRING
@@ -2254,7 +2293,7 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STACK_STRING
         // RVM_CODE_POP_FIELD_STRING
         // RVM_CODE_PUSH_FIELD_STRING
-        return RVM_Opcode(opcode + 3);
+        return RVM_Opcode(opcode + 4);
         break;
     case RING_BASIC_TYPE_CLASS:
         // RVM_CODE_POP_STATIC_CLASS_OB
@@ -2263,7 +2302,7 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STACK_CLASS_OB
         // RVM_CODE_POP_FIELD_CLASS_OB
         // RVM_CODE_PUSH_FIELD_CLASS_OB
-        return RVM_Opcode(opcode + 4);
+        return RVM_Opcode(opcode + 5);
         break;
     case RING_BASIC_TYPE_ARRAY:
         // RVM_CODE_POP_STATIC_ARRAY
@@ -2272,7 +2311,7 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STACK_ARRAY
         // RVM_CODE_POP_FIELD_ARRAY
         // RVM_CODE_PUSH_FIELD_ARRAY
-        return RVM_Opcode(opcode + 5);
+        return RVM_Opcode(opcode + 6);
         break;
 
     default:

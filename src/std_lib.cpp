@@ -58,6 +58,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         std::vector<StdPackageNativeFunction>{
             {(char*)"println_bool", std_lib_fmt_println_bool, 1, 0},
             {(char*)"println_int", std_lib_fmt_println_int, 1, 0},
+            {(char*)"println_int64", std_lib_fmt_println_int64, 1, 0},
             {(char*)"println_double", std_lib_fmt_println_double, 1, 0},
             {(char*)"println_string", std_lib_fmt_println_string, 1, 0},
             {(char*)"println_pointer", std_lib_fmt_println_pointer, 1, 0},
@@ -269,6 +270,32 @@ RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
 
 /*
  * Package: fmt
+ * Function: println_int64
+ * Type: @native
+ */
+RVM_Value std_lib_fmt_println_int64(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        ring_error_report("std_lib_fmt_println_int64 only one arguement\n");
+    }
+
+    RVM_Value ret;
+    ret.u.int_value     = 0;
+
+    char* output_buffer = (char*)mem_alloc(NULL_MEM_POOL, 22 * sizeof(char));
+
+    snprintf(output_buffer, 22, "%lld\n", args->u.int64_value);
+
+    printf(output_buffer, "");
+    fflush(stdout);
+
+    mem_free(NULL_MEM_POOL, (void*)output_buffer, 22 * sizeof(char));
+
+
+    return ret;
+}
+
+/*
+ * Package: fmt
  * Function: println_double
  * Type: @native
  */
@@ -424,6 +451,9 @@ RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, 
         case RVM_VALUE_TYPE_INT:
             result += std::to_string(args[args_index].u.int_value);
             break;
+        case RVM_VALUE_TYPE_INT64:
+            result += std::to_string(args[args_index].u.int64_value);
+            break;
         case RVM_VALUE_TYPE_DOUBLE:
             result += std::to_string(args[args_index].u.double_value);
             break;
@@ -496,6 +526,9 @@ RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, R
                     break;
                 case RVM_VALUE_TYPE_INT:
                     result += std::to_string(args[args_index].u.int_value);
+                    break;
+                case RVM_VALUE_TYPE_INT64:
+                    result += std::to_string(args[args_index].u.int64_value);
                     break;
                 case RVM_VALUE_TYPE_DOUBLE:
                     result += std::to_string(args[args_index].u.double_value);

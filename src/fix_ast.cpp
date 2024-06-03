@@ -39,6 +39,13 @@ TypeSpecifier int_type_specifier = TypeSpecifier{
     .dimension   = 0,
     .sub         = 0,
 };
+TypeSpecifier int64_type_specifier = TypeSpecifier{
+    .line_number = 0,
+    .kind        = RING_BASIC_TYPE_INT64,
+    .u           = {.array_type = nullptr},
+    .dimension   = 0,
+    .sub         = 0,
+};
 TypeSpecifier double_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_DOUBLE,
@@ -143,6 +150,10 @@ BEGIN:
     case EXPRESSION_TYPE_LITERAL_INT:
         EXPRESSION_CLEAR_CONVERT_TYPE(expression);
         EXPRESSION_ADD_CONVERT_TYPE(expression, &int_type_specifier);
+        break;
+    case EXPRESSION_TYPE_LITERAL_INT64:
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        EXPRESSION_ADD_CONVERT_TYPE(expression, &int64_type_specifier);
         break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
         EXPRESSION_CLEAR_CONVERT_TYPE(expression);
