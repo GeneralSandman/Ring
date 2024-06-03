@@ -1,0 +1,11 @@
+test case 1-----------
+0
+debug_assert PASS
+
+test case 2-----------
+9223372036854775807
+debug_assert PASS
+
+test case 3-----------
+-9223372036854775808
+debug_assert PASS
