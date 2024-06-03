@@ -1125,12 +1125,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // logical
         case RVM_CODE_LOGICAL_AND:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) && STACK_GET_INT_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT_OFFSET(rvm, -2) && STACK_GET_INT_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_LOGICAL_OR:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) || STACK_GET_INT_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT_OFFSET(rvm, -2) || STACK_GET_INT_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
@@ -1141,127 +1143,151 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // relational
         case RVM_CODE_RELATIONAL_EQ_INT:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) == STACK_GET_INT_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT_OFFSET(rvm, -2) == STACK_GET_INT_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_EQ_INT64:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT64_OFFSET(rvm, -2) == STACK_GET_INT64_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT64_OFFSET(rvm, -2) == STACK_GET_INT64_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_EQ_DOUBLE:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) == STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_DOUBLE_OFFSET(rvm, -2) == STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_EQ_STRING:
-            STACK_GET_BOOL_OFFSET(rvm, -2) = (RVM_Bool)(rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) == 0);
+            bool_value = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) == 0);
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
 
         case RVM_CODE_RELATIONAL_NE_INT:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) != STACK_GET_INT_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT_OFFSET(rvm, -2) != STACK_GET_INT_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_NE_INT64:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT64_OFFSET(rvm, -2) != STACK_GET_INT64_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT64_OFFSET(rvm, -2) != STACK_GET_INT64_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_NE_DOUBLE:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) != STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_DOUBLE_OFFSET(rvm, -2) != STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_NE_STRING:
-            STACK_GET_BOOL_OFFSET(rvm, -2) = (RVM_Bool)(rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) != 0);
+            bool_value = (RVM_Bool)(rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) != 0);
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
 
         case RVM_CODE_RELATIONAL_GT_INT:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) > STACK_GET_INT_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT_OFFSET(rvm, -2) > STACK_GET_INT_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GT_INT64:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT64_OFFSET(rvm, -2) > STACK_GET_INT64_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT64_OFFSET(rvm, -2) > STACK_GET_INT64_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GT_DOUBLE:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) > STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_DOUBLE_OFFSET(rvm, -2) > STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GT_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) > 0);
+            bool_value = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) > 0);
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
 
         case RVM_CODE_RELATIONAL_GE_INT:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) >= STACK_GET_INT_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT_OFFSET(rvm, -2) >= STACK_GET_INT_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GE_INT64:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT64_OFFSET(rvm, -2) >= STACK_GET_INT64_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT64_OFFSET(rvm, -2) >= STACK_GET_INT64_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GE_DOUBLE:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) >= STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_DOUBLE_OFFSET(rvm, -2) >= STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_GE_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) >= 0);
+            bool_value = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) >= 0);
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
 
         case RVM_CODE_RELATIONAL_LT_INT:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) < STACK_GET_INT_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT_OFFSET(rvm, -2) < STACK_GET_INT_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LT_INT64:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT64_OFFSET(rvm, -2) < STACK_GET_INT64_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT64_OFFSET(rvm, -2) < STACK_GET_INT64_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LT_DOUBLE:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) < STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_DOUBLE_OFFSET(rvm, -2) < STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LT_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) < 0);
+            bool_value = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) < 0);
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
 
         case RVM_CODE_RELATIONAL_LE_INT:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) <= STACK_GET_INT_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT_OFFSET(rvm, -2) <= STACK_GET_INT_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LE_INT64:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT64_OFFSET(rvm, -2) <= STACK_GET_INT64_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_INT64_OFFSET(rvm, -2) <= STACK_GET_INT64_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LE_DOUBLE:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_DOUBLE_OFFSET(rvm, -2) <= STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            bool_value = (STACK_GET_DOUBLE_OFFSET(rvm, -2) <= STACK_GET_DOUBLE_OFFSET(rvm, -1));
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
         case RVM_CODE_RELATIONAL_LE_STRING:
-            STACK_GET_INT_OFFSET(rvm, -2) = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) <= 0);
+            bool_value = (rvm_string_cmp(STACK_GET_STRING_OFFSET(rvm, -2), STACK_GET_STRING_OFFSET(rvm, -1)) <= 0);
+            STACK_SET_BOOL_OFFSET(rvm, -2, (RVM_Bool)bool_value);
             runtime_stack->top_index--;
             rvm->pc++;
             break;
