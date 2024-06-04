@@ -314,6 +314,9 @@ std::string format_rvm_type_specifier(Package_Executer*  package_executer,
     case RING_BASIC_TYPE_INT:
         str = "int";
         break;
+    case RING_BASIC_TYPE_INT64:
+        str = "int64";
+        break;
     case RING_BASIC_TYPE_DOUBLE:
         str = "double";
         break;
@@ -324,6 +327,7 @@ std::string format_rvm_type_specifier(Package_Executer*  package_executer,
         switch (type_specifier->sub->kind) {
         case RING_BASIC_TYPE_BOOL: str = "bool"; break;
         case RING_BASIC_TYPE_INT: str = "int"; break;
+        case RING_BASIC_TYPE_INT64: str = "int64"; break;
         case RING_BASIC_TYPE_DOUBLE: str = "double"; break;
         case RING_BASIC_TYPE_STRING: str = "string"; break;
         case RING_BASIC_TYPE_CLASS:

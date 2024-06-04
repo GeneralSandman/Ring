@@ -184,6 +184,9 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
     case RVM_VALUE_TYPE_INT:
         str = "int";
         break;
+    case RVM_VALUE_TYPE_INT64:
+        str = "int64";
+        break;
     case RVM_VALUE_TYPE_DOUBLE:
         str = "double";
         break;
@@ -394,6 +397,9 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
         break;
     case RVM_VALUE_TYPE_INT:
         snprintf(output_buffer, length, "%p\n", &(args->u.int_value));
+        break;
+    case RVM_VALUE_TYPE_INT64:
+        snprintf(output_buffer, length, "%p\n", &(args->u.int64_value));
         break;
     case RVM_VALUE_TYPE_DOUBLE:
         snprintf(output_buffer, length, "%p\n", &(args->u.double_value));
@@ -656,6 +662,9 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
         break;
     case RVM_VALUE_TYPE_INT:
         str = "int";
+        break;
+    case RVM_VALUE_TYPE_INT64:
+        str = "int64";
         break;
     case RVM_VALUE_TYPE_DOUBLE:
         str = "double";

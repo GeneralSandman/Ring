@@ -251,6 +251,9 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
         case RING_BASIC_TYPE_INT:
             STATIC_SET_INT_INDEX(rvm, i, 0);
             break;
+        case RING_BASIC_TYPE_INT64:
+            STATIC_SET_INT64_INDEX(rvm, i, 0);
+            break;
         case RING_BASIC_TYPE_DOUBLE:
             STATIC_SET_DOUBLE_INDEX(rvm, i, 0.0);
             break;
@@ -2024,6 +2027,9 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             case RING_BASIC_TYPE_INT:
                 array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT, nullptr);
                 break;
+            case RING_BASIC_TYPE_INT64:
+                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT64, nullptr);
+                break;
             case RING_BASIC_TYPE_DOUBLE:
                 array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE, nullptr);
                 break;
@@ -2053,6 +2059,11 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                     int int_value = STACK_GET_INT_INDEX(rvm,
                                                         stack_argument_list_index + stack_argument_offset);
                     rvm_array_set_int(rvm, array, array_i, &int_value);
+                } break;
+                case RING_BASIC_TYPE_INT64: {
+                    long long int64_value = STACK_GET_INT64_INDEX(rvm,
+                                                                  stack_argument_list_index + stack_argument_offset);
+                    rvm_array_set_int64(rvm, array, array_i, &int64_value);
                 } break;
                 case RING_BASIC_TYPE_DOUBLE: {
                     double double_value = STACK_GET_DOUBLE_INDEX(rvm,
@@ -2122,6 +2133,9 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             break;
         case RING_BASIC_TYPE_INT:
             STACK_SET_INT_INDEX(rvm, rvm->runtime_stack->top_index + block_local_var_offset, 0);
+            break;
+        case RING_BASIC_TYPE_INT64:
+            STACK_SET_INT64_INDEX(rvm, rvm->runtime_stack->top_index + block_local_var_offset, 0);
             break;
         case RING_BASIC_TYPE_DOUBLE:
             STACK_SET_DOUBLE_INDEX(rvm, rvm->runtime_stack->top_index + block_local_var_offset, 0.0);

@@ -39,6 +39,9 @@ void gc_summary(Ring_VirtualMachine* rvm) {
         case RVM_VALUE_TYPE_INT:
             type = "int";
             break;
+        case RVM_VALUE_TYPE_INT64:
+            type = "int64";
+            break;
         case RVM_VALUE_TYPE_DOUBLE:
             type = "double";
             break;
@@ -82,6 +85,9 @@ void gc_summary(Ring_VirtualMachine* rvm) {
             break;
         case RVM_VALUE_TYPE_INT:
             type = "int";
+            break;
+        case RVM_VALUE_TYPE_INT64:
+            type = "int64";
             break;
         case RVM_VALUE_TYPE_DOUBLE:
             type = "double";
@@ -195,6 +201,8 @@ void gc_mark_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
         case RVM_ARRAY_BOOL:
             break;
         case RVM_ARRAY_INT:
+            break;
+        case RVM_ARRAY_INT64:
             break;
         case RVM_ARRAY_DOUBLE:
             break;
@@ -378,6 +386,12 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         memcpy(array->u.int_array, src->u.int_array, alloc_size);
         break;
 
+    case RVM_ARRAY_INT64:
+        alloc_size           = sizeof(long long) * array->capacity;
+        array->u.int64_array = (long long*)calloc(1, alloc_size);
+        memcpy(array->u.int64_array, src->u.int64_array, alloc_size);
+        break;
+
     case RVM_ARRAY_DOUBLE:
         alloc_size            = sizeof(double) * array->capacity;
         array->u.double_array = (double*)calloc(1, alloc_size);
@@ -460,6 +474,9 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
             case RVM_VALUE_TYPE_INT:
                 free_size += 4;
                 break;
+            case RVM_VALUE_TYPE_INT64:
+                free_size += 8;
+                break;
             case RVM_VALUE_TYPE_DOUBLE:
                 free_size += 8;
                 break;
@@ -481,6 +498,10 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
         case RVM_ARRAY_INT:
             free_size = sizeof(int) * array->capacity;
             free(array->u.int_array);
+            break;
+        case RVM_ARRAY_INT64:
+            free_size = sizeof(long long) * array->capacity;
+            free(array->u.int64_array);
             break;
         case RVM_ARRAY_DOUBLE:
             free_size = sizeof(double) * array->capacity;
@@ -579,6 +600,11 @@ RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm,
             field[field_index].type        = RVM_VALUE_TYPE_INT;
             field[field_index].u.int_value = 0;
             alloc_data_size += 4;
+            break;
+        case RING_BASIC_TYPE_INT64:
+            field[field_index].type          = RVM_VALUE_TYPE_INT64;
+            field[field_index].u.int64_value = 0;
+            alloc_data_size += 8;
             break;
         case RING_BASIC_TYPE_DOUBLE:
             field[field_index].type           = RVM_VALUE_TYPE_DOUBLE;
