@@ -680,11 +680,13 @@ struct RVM_Opcode_Info {
     /*
      * 字节码的注释, 放在结构体里边, 用于快速生成文档, 目前暂无使用意义, 后续放在debug控制
      *
-     * usage_comment: 字节码注释
+     * usage_comment:    简要描述一个字节码相关的操作
      * stack_top_change: 对 runtime_stack 的操作变化
+     * math_formula:     通过一个数学公式描述字节码操作
      */
     std::string usage_comment;
     std::string stack_top_change;
+    std::string math_formula;
 };
 
 typedef enum {

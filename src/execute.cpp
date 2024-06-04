@@ -532,6 +532,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             runtime_stack->top_index--;
             rvm->pc += 3;
             break;
+
         case RVM_CODE_PUSH_STATIC_BOOL:
             runtime_static_index = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
             STACK_SET_BOOL_OFFSET(rvm, 0, rvm->runtime_static->data[runtime_static_index].u.bool_value);

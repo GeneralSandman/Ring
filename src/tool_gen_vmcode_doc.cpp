@@ -1,11 +1,12 @@
 #include "ring.hpp"
 
 
-extern RVM_Opcode_Info
-            RVM_Opcode_Infos[];
+extern std::string     operand_desc;
+extern std::string     math_formula_desc;
 
+extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
-std::string title = "## 1. Ring Stacked-Based VM 指令集";
+std::string            title = "## 1. Ring Stacked-Based VM 指令集";
 
 
 // tool
@@ -46,12 +47,15 @@ int main() {
     }
 
 
+    printf("\n\n");
     printf("### 操作数类型说明\n\n");
-    printf("0Byte: 无操作数\n\n");
-    printf("1Byte_A: 1字节操作数A\n\n");
-    printf("2Byte_As: 2字节操作数A\n\n");
-    printf("2Byte_AB: 1字节操作数A和1字节操作数B\n\n");
-    printf("3Byte_ABs: 1字节操作数A和2字节操作数B\n\n");
+    printf("%s", operand_desc.c_str());
+
+    printf("\n\n");
+    printf("### 操作数公式说明\n\n");
+    printf("```\n");
+    printf("%s", math_formula_desc.c_str());
+    printf("```\n");
 
     return 0;
 }
