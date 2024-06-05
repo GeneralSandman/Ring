@@ -6,13 +6,11 @@ extern std::string     math_formula_desc;
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
-std::string            title = "## 1. Ring Stacked-Based VM 指令集";
-
 
 // tool
 int main() {
-    printf("\n\n\n");
-    printf("%s\n\n", title.c_str());
+    printf("# Ring VitrualMachine Instruction Set\n\n");
+    printf("## 1. Ring Stacked-Based VM 指令集\n\n");
 
 
     printf("| Num    |            指令               | 操作数类型 | 栈顶值变化                  | 栈高度 | 含义                               |\n");

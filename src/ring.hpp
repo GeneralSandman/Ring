@@ -918,7 +918,7 @@ typedef enum {
     RVM_CODE_INT64_2_STRING,
     RVM_CODE_DOUBLE_2_STRING,
 
-    // 不能在生成代码的时候使用
+    // 不对应实际的字节码, 不能在生成代码的时候使用
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
 } RVM_Opcode;
 

@@ -19,6 +19,8 @@ std::string math_formula_desc =
     "So(1) 通过 offset 1 , 来操作 stack 空间\n"
     "C(1)  通过index 1, 从ConstantPool  Constant\n"
     "\n"
+    "Field(object, As).int 将object的第As个Field作为int赋值\n"
+    "\n"
     "A As AB Bs 分别代表字节码后边的操作数\n"
     "FSB 代表 FunctionStackBase\n"
     "\n";
@@ -27,14 +29,14 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_UNKNOW, "", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
 
 
-    // init double string const
+    // push int/int64/double/string const to stack
     {RVM_CODE_PUSH_BOOL, "push_bool", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "push constant bool value to stack", "[]-->[int]", "So(0).bool = A.bool"},
-    {RVM_CODE_PUSH_INT_1BYTE, "push_int_1byte", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "push 1byte int constant value to stack", "[]-->[int]", "So(0).int = A.int"},      // 后边紧跟 int 常量 1 type
-    {RVM_CODE_PUSH_INT_2BYTE, "push_int_2byte", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push 2byte int constant value to stack", "[]-->[int]", "So(0).int = As.int"},    // 后边紧跟 int 常量 2 type
-    {RVM_CODE_PUSH_INT, "push_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant int value to stack", "[]-->[int]", "So(0).int = C(As).int"},                   // 后边紧跟 int 常量 2 的索引 这里的还要 改一下 OPCODE_OPERAND_TYPE_2BYTE
-    {RVM_CODE_PUSH_INT64, "push_int64", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant int64 value to stack", "[]-->[int]", "So(0).int64 = C(As).int64"},         // 后边紧跟 int 常量 2 的索引 这里的还要 改一下 OPCODE_OPERAND_TYPE_2BYTE
-    {RVM_CODE_PUSH_DOUBLE, "push_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant double value to stack", "[]-->[double]", "So(0).double = C(As).double"}, // 后边紧跟 double 常量
-    {RVM_CODE_PUSH_STRING, "push_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant string value to stack", "[]-->[string]", "So(0).string = C(As).string"}, // 后边紧跟 string 常量
+    {RVM_CODE_PUSH_INT_1BYTE, "push_int_1byte", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "push 1byte int constant value to stack", "[]-->[int]", "So(0).int = A.int"},
+    {RVM_CODE_PUSH_INT_2BYTE, "push_int_2byte", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push 2byte int constant value to stack", "[]-->[int]", "So(0).int = As.int"},
+    {RVM_CODE_PUSH_INT, "push_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant int value to stack", "[]-->[int]", "So(0).int = C(As).int"},
+    {RVM_CODE_PUSH_INT64, "push_int64", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant int64 value to stack", "[]-->[int]", "So(0).int64 = C(As).int64"},
+    {RVM_CODE_PUSH_DOUBLE, "push_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant double value to stack", "[]-->[double]", "So(0).double = C(As).double"},
+    {RVM_CODE_PUSH_STRING, "push_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant string value to stack", "[]-->[string]", "So(0).string = C(As).string"},
 
 
     // static
@@ -90,6 +92,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_POP_ARRAY_STRING, "pop_array_string", OPCODE_OPERAND_TYPE_0BYTE, -3, "assign to string array by index", "[int,object,int]->[]", ""},
     {RVM_CODE_POP_ARRAY_CLASS_OB, "pop_array_class_ob", OPCODE_OPERAND_TYPE_0BYTE, -3, "assign to object array by index", "[int,object,int]->[]", ""},
 
+
     // array append
     {RVM_CODE_ARRAY_APPEND_BOOL, "array_append_bool", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[object,bool]->[]", ""},
     {RVM_CODE_ARRAY_APPEND_INT, "array_append_int", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[object,int]->[]", ""},
@@ -107,21 +110,22 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
 
     // class
-    {RVM_CODE_POP_FIELD_BOOL, "pop_field_bool", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "assign to class field whith bool", "[bool,object]->[]", ""},
-    {RVM_CODE_POP_FIELD_INT, "pop_field_int", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "", "[int,object]->[]", ""},
-    {RVM_CODE_POP_FIELD_INT64, "pop_field_int64", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "", "[int64,object]->[]", ""},
-    {RVM_CODE_POP_FIELD_DOUBLE, "pop_field_double", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "", "[double,object]->[]", ""},
-    {RVM_CODE_POP_FIELD_STRING, "pop_field_string", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "", "[string,object]->[]", ""},
-    {RVM_CODE_POP_FIELD_CLASS_OB, "pop_field_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "", "[object,object]->[]", ""},
-    {RVM_CODE_POP_FIELD_ARRAY, "pop_field_array", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "", "[array,object]->[]", ""},
+    {RVM_CODE_POP_FIELD_BOOL, "pop_field_bool", OPCODE_OPERAND_TYPE_2BYTE_As, -2, "assign to class field whith bool", "[bool,object]->[]", "Field(So(-1).object, As).bool = So(-2).bool"},
+    {RVM_CODE_POP_FIELD_INT, "pop_field_int", OPCODE_OPERAND_TYPE_2BYTE_As, -2, "", "[int,object]->[]", "Field(So(-1).object, As).int = So(-2).int"},
+    {RVM_CODE_POP_FIELD_INT64, "pop_field_int64", OPCODE_OPERAND_TYPE_2BYTE_As, -2, "", "[int64,object]->[]", "Field(So(-1).object, As).int64 = So(-2).int64"},
+    {RVM_CODE_POP_FIELD_DOUBLE, "pop_field_double", OPCODE_OPERAND_TYPE_2BYTE_As, -2, "", "[double,object]->[]", "Field(So(-1).object, As).double = So(-2).double"},
+    {RVM_CODE_POP_FIELD_STRING, "pop_field_string", OPCODE_OPERAND_TYPE_2BYTE_As, -2, "", "[string,object]->[]", "Field(So(-1).object, As).string = So(-2).string"},
+    {RVM_CODE_POP_FIELD_CLASS_OB, "pop_field_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, -2, "", "[object,object]->[]", "Field(So(-1).object, As).object = So(-2).object"},
+    {RVM_CODE_POP_FIELD_ARRAY, "pop_field_array", OPCODE_OPERAND_TYPE_2BYTE_As, -2, "", "[array,object]->[]", "Field(So(-1).object, As).array = So(-2).array"},
 
-    {RVM_CODE_PUSH_FIELD_BOOL, "push_field_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", "[object]->[bool]", ""},
-    {RVM_CODE_PUSH_FIELD_INT, "push_field_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", "[object]->[int]", ""},
-    {RVM_CODE_PUSH_FIELD_INT64, "push_field_int64", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", "[object]->[int64]", ""},
-    {RVM_CODE_PUSH_FIELD_DOUBLE, "push_field_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", "[object]->[double]", ""},
-    {RVM_CODE_PUSH_FIELD_STRING, "push_field_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", "[object]->[string]", ""},
-    {RVM_CODE_PUSH_FIELD_CLASS_OB, "push_field_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", "[object]->[string]", ""},
-    {RVM_CODE_PUSH_FIELD_ARRAY, "push_field_array", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", "[object]->[string]", ""},
+    {RVM_CODE_PUSH_FIELD_BOOL, "push_field_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[bool]", "S(-1).bool = Field(So(-1).object, As).bool"},
+    {RVM_CODE_PUSH_FIELD_INT, "push_field_int", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[int]", "S(-1).int = Field(So(-1).object, As).int"},
+    {RVM_CODE_PUSH_FIELD_INT64, "push_field_int64", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[int64]", "S(-1).int64 = Field(So(-1).object, As).int64"},
+    {RVM_CODE_PUSH_FIELD_DOUBLE, "push_field_double", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[double]", "S(-1).double = Field(So(-1).object, As).double"},
+    {RVM_CODE_PUSH_FIELD_STRING, "push_field_string", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[string]", "S(-1).string = Field(So(-1).object, As).string"},
+    {RVM_CODE_PUSH_FIELD_CLASS_OB, "push_field_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[object]", "S(-1).object = Field(So(-1).object, As).object"},
+    {RVM_CODE_PUSH_FIELD_ARRAY, "push_field_array", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[array]", "S(-1).array = Field(So(-1).object, As).array"},
+
 
     // arithmetic
     {RVM_CODE_ADD_INT, "add_int", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "[int,int]->[int]", ""},
@@ -153,6 +157,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
     {RVM_CODE_CONCAT, "concat", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "", ""},
 
+
     // type cast
     {RVM_CODE_CAST_BOOL_TO_INT, "cast_bool_to_int", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
     {RVM_CODE_CAST_INT_TO_DOUBLE, "cast_int_to_double", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
@@ -165,6 +170,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_LOGICAL_AND, "logical_and", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "[bool,bool]->[bool]", ""},
     {RVM_CODE_LOGICAL_OR, "logical_or", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "[bool,bool]->[bool]", ""},
     {RVM_CODE_LOGICAL_NOT, "logical_not", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "[bool,bool]->[bool]", ""},
+
 
     // relational
     {RVM_CODE_RELATIONAL_EQ_INT, "eq_int", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "[int,int]->[bool]", ""},
@@ -197,10 +203,12 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_RELATIONAL_LE_DOUBLE, "le_double", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "[double,double]->[bool]", ""},
     {RVM_CODE_RELATIONAL_LE_STRING, "le_string", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "[string,string]->[bool]", ""},
 
+
     // jump
     {RVM_CODE_JUMP, "jump", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "", ""},
     {RVM_CODE_JUMP_IF_FALSE, "jump_if_false", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "", "", ""},
     {RVM_CODE_JUMP_IF_TRUE, "jump_if_true", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "", "", ""},
+
 
     // duplicate
     {RVM_CODE_SHALLOW_COPY, "duplicate", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, "", "shallow copy value from B to A.", ""},
@@ -218,6 +226,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_FUNCTION_FINISH, "function_finish", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
 
     {RVM_CODE_EXIT, "exit", OPCODE_OPERAND_TYPE_1BYTE_A, 0, "", "", ""},
+
 
     // array
     {RVM_CODE_NEW_ARRAY_BOOL, "new_array_bool", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "create an array of bool with dimension", "", ""},
@@ -241,8 +250,10 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_STRING_LEN, "push_string_len", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
     {RVM_CODE_PUSH_STRING_CAPACITY, "push_string_capacity", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
 
+
     // class
     {RVM_CODE_NEW_CLASS_OB_LITERAL, "new_class_ob_literal", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "", "", ""},
+
 
     // range
     {RVM_CODE_FOR_RANGE_ARRAY_BOOL, "range_array_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "range bool value for array", "", ""},
