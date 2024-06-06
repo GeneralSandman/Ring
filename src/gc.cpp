@@ -628,6 +628,8 @@ RVM_ClassObject* rvm_new_class_object(Ring_VirtualMachine* rvm,
             field[field_index].u.class_ob_value       = rvm_new_class_object(rvm, sub_class_definition);
         } break;
         case RING_BASIC_TYPE_ARRAY:
+            field[field_index].type          = RVM_VALUE_TYPE_ARRAY;
+            field[field_index].u.array_value = nullptr;
             alloc_data_size += 8;
             break;
         default:

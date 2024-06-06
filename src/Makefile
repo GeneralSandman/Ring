@@ -21,6 +21,7 @@ OBJS   = \
 	gc.o\
 	debug.o\
 	../deps/linenoise/linenoise.o\
+	fmt.o\
 	main.o
 
 # bison 可执行文件路径
@@ -105,7 +106,7 @@ persist-settings: cleandeps
 
 .SUFFIXES: .cpp .c
 .cpp.o:
-	$(CC) $(CFLAGS) $<
+	$(CC) $(CFLAGS) $< -o $@
 
 $(TARGET):$(OBJS); $(shell if [ ! -e $(BIN) ];then mkdir -p $(BIN); fi)
 	$(CC) $(OBJS) -lm -pthread -o $(BIN)/$@
@@ -194,4 +195,4 @@ debug.o: debug.cpp ring.hpp
 thread_pool.o: thread_pool.c ring.hpp
 main.o: main.cpp ring.hpp
 tool_gen_vmcode_doc.o: tool_gen_vmcode_doc.cpp ring.hpp
-
+fmt.o: fmt.cpp ring.hpp

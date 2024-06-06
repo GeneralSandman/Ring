@@ -43,6 +43,7 @@ help:
 	@echo "make echo                 : print build info"
 	@echo "make check                : check build dependencies"
 	@echo "make compile_commands     : update compile_commands.json"
+	@echo "make tool_gen_vmcode_doc  : build tool_gen_vmcode_doc"
 
 # 生成一个脚本用于 将 Ring 虚拟机指令集生成一个 markdown表格
 # Usage:

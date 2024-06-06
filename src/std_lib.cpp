@@ -445,31 +445,7 @@ RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, 
             result += " ";
         }
 
-        switch (args[args_index].type) {
-            // TODO: 这里重复了, 如何重写
-        case RVM_VALUE_TYPE_BOOL:
-            if (args[args_index].u.bool_value == RVM_FALSE) {
-                result += std::string("false");
-            } else {
-                result += std::string("true");
-            }
-            break;
-        case RVM_VALUE_TYPE_INT:
-            result += std::to_string(args[args_index].u.int_value);
-            break;
-        case RVM_VALUE_TYPE_INT64:
-            result += std::to_string(args[args_index].u.int64_value);
-            break;
-        case RVM_VALUE_TYPE_DOUBLE:
-            result += std::to_string(args[args_index].u.double_value);
-            break;
-        case RVM_VALUE_TYPE_STRING:
-            tmp.assign(args[args_index].u.string_value->data, args[args_index].u.string_value->length);
-            result += tmp;
-            break;
-        default:
-            break;
-        }
+        result += fmt_any(&args[args_index]);
     }
     result += "\n";
 

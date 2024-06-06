@@ -2841,6 +2841,25 @@ void                  fix_buildin_func(Expression*             expression,
 
 
 /* --------------------
+ * fmt.cpp
+ * function definition
+ *
+ */
+std::string fmt_any(RVM_Value* value);
+std::string fmt_bool(RVM_Value* value);
+std::string fmt_int(RVM_Value* value);
+std::string fmt_int64(RVM_Value* value);
+std::string fmt_double(RVM_Value* value);
+std::string fmt_string(RVM_Value* value);
+std::string fmt_class(RVM_Value* value);
+std::string fmt_class(RVM_ClassObject* class_object);
+std::string fmt_array(RVM_Value* value);
+std::string fmt_array(RVM_Array* array_value);
+
+// --------------------
+
+
+/* --------------------
  * thread_pool.c
  * function definition
  *

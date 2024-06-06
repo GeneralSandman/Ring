@@ -609,6 +609,13 @@ std::string format_rvm_type(RVM_Value* value) {
     return type_s;
 }
 
+/*
+ * format_rvm_value
+ *
+ * 这个函数的扩展性还不是特别好, 目前只是给debugger使用,
+ * 因为在 formate  string 的时候, 怕数据过多, 只formate了 8 个字符
+ *
+ */
 std::string format_rvm_value(RVM_Value* value) {
     std::string result;
     std::string str_data;
