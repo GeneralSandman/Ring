@@ -1005,6 +1005,7 @@ void generate_vmcode_from_expression(Package_Executer* executer,
         generate_vmcode_from_identifier_expression(executer, expression->u.identifier_expression, opcode_buffer);
         break;
     case EXPRESSION_TYPE_CONCAT:
+        // TODO: 这里需要单独拆分开
         generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_CONCAT);
         break;
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
@@ -1046,22 +1047,12 @@ void generate_vmcode_from_expression(Package_Executer* executer,
         break;
 
     case EXPRESSION_TYPE_RELATIONAL_EQ:
-        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_EQ_INT);
-        break;
     case EXPRESSION_TYPE_RELATIONAL_NE:
-        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_NE_INT);
-        break;
     case EXPRESSION_TYPE_RELATIONAL_GT:
-        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_GT_INT);
-        break;
     case EXPRESSION_TYPE_RELATIONAL_GE:
-        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_GE_INT);
-        break;
     case EXPRESSION_TYPE_RELATIONAL_LT:
-        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_LT_INT);
-        break;
     case EXPRESSION_TYPE_RELATIONAL_LE:
-        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_RELATIONAL_LE_INT);
+        generate_vmcode_from_relational_expression(executer, expression->type, expression->u.binary_expression, opcode_buffer);
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
@@ -1398,6 +1389,76 @@ void generate_vmcode_from_binary_expression(Package_Executer* executer,
     }
 
 END:
+    generate_vmcode_from_expression(executer, left, opcode_buffer);
+    generate_vmcode_from_expression(executer, right, opcode_buffer);
+
+    generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
+}
+
+void generate_vmcode_from_relational_expression(Package_Executer* executer,
+                                                ExpressionType    expression_type,
+                                                BinaryExpression* expression,
+                                                RVM_OpcodeBuffer* opcode_buffer) {
+
+    assert(expression != nullptr);
+    assert(expression_type == EXPRESSION_TYPE_RELATIONAL_EQ
+           || expression_type == EXPRESSION_TYPE_RELATIONAL_NE
+           || expression_type == EXPRESSION_TYPE_RELATIONAL_GT
+           || expression_type == EXPRESSION_TYPE_RELATIONAL_GE
+           || expression_type == EXPRESSION_TYPE_RELATIONAL_LT
+           || expression_type == EXPRESSION_TYPE_RELATIONAL_LE);
+
+
+    Expression*    left       = expression->left_expression;
+    Expression*    right      = expression->right_expression;
+
+
+    TypeSpecifier* left_type  = left->convert_type[0];
+    TypeSpecifier* right_type = right->convert_type[0];
+
+    RVM_Opcode     opcode     = RVM_CODE_UNKNOW;
+
+    switch (expression_type) {
+    case EXPRESSION_TYPE_RELATIONAL_EQ:
+        opcode = RVM_CODE_RELATIONAL_EQ_INT;
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_NE:
+        opcode = RVM_CODE_RELATIONAL_NE_INT;
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_GT:
+        opcode = RVM_CODE_RELATIONAL_GT_INT;
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_GE:
+        opcode = RVM_CODE_RELATIONAL_GE_INT;
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_LT:
+        opcode = RVM_CODE_RELATIONAL_LT_INT;
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_LE:
+        opcode = RVM_CODE_RELATIONAL_LE_INT;
+        break;
+    default: break;
+    }
+
+    assert(left_type->kind == right_type->kind);
+
+
+    switch (left_type->kind) {
+    case RING_BASIC_TYPE_INT:
+        break;
+    case RING_BASIC_TYPE_INT64:
+        opcode = RVM_Opcode(opcode + 1);
+        break;
+    case RING_BASIC_TYPE_DOUBLE:
+        opcode = RVM_Opcode(opcode + 2);
+        break;
+    case RING_BASIC_TYPE_STRING:
+        opcode = RVM_Opcode(opcode + 3);
+        break;
+    default: break;
+    }
+
+
     generate_vmcode_from_expression(executer, left, opcode_buffer);
     generate_vmcode_from_expression(executer, right, opcode_buffer);
 

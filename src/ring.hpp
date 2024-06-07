@@ -2362,7 +2362,12 @@ void             fix_binary_concat_expression(Expression*       expression,
 void             fix_binary_math_expression(Expression*       expression,
                                             BinaryExpression* binary_expression,
                                             Block* block, FunctionTuple* func);
+void             fix_binary_logical_expression(Expression*       expression,
+                                               ExpressionType    expression_type,
+                                               BinaryExpression* binary_expression,
+                                               Block* block, FunctionTuple* func);
 void             fix_binary_relational_expression(Expression*       expression,
+                                                  ExpressionType    expression_type,
                                                   BinaryExpression* binary_expression,
                                                   Block* block, FunctionTuple* func);
 void             fix_unitary_expression(Expression* expression,
@@ -2454,6 +2459,10 @@ void              generate_pop_to_leftvalue_member(Package_Executer* executer, M
 void              generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_logical_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_binary_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
+void              generate_vmcode_from_relational_expression(Package_Executer* executer,
+                                                             ExpressionType    expression_type,
+                                                             BinaryExpression* expression,
+                                                             RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_unitary_minus_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_unitary_not_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
 void              generate_vmcode_from_increase_decrease_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);

@@ -200,14 +200,15 @@ BEGIN:
         break;
     case EXPRESSION_TYPE_LOGICAL_AND:
     case EXPRESSION_TYPE_LOGICAL_OR:
+        fix_binary_logical_expression(expression, expression->type, expression->u.binary_expression, block, func);
+        break;
     case EXPRESSION_TYPE_RELATIONAL_EQ:
     case EXPRESSION_TYPE_RELATIONAL_NE:
     case EXPRESSION_TYPE_RELATIONAL_GT:
     case EXPRESSION_TYPE_RELATIONAL_GE:
     case EXPRESSION_TYPE_RELATIONAL_LT:
     case EXPRESSION_TYPE_RELATIONAL_LE:
-        // TODO: 细分
-        fix_binary_relational_expression(expression, expression->u.binary_expression, block, func);
+        fix_binary_relational_expression(expression, expression->type, expression->u.binary_expression, block, func);
         break;
 
 
@@ -861,18 +862,113 @@ void fix_binary_math_expression(Expression*       expression,
     }
 }
 
+void fix_binary_logical_expression(Expression*       expression,
+                                   ExpressionType    expression_type,
+                                   BinaryExpression* binary_expression,
+                                   Block* block, FunctionTuple* func) {
+
+    assert(expression != nullptr);
+    assert(binary_expression != nullptr);
+
+    Expression* left  = binary_expression->left_expression;
+    Expression* right = binary_expression->right_expression;
+
+    fix_expression(left, block, func);
+    fix_expression(right, block, func);
+
+    // 检查两边操作数的合法性
+    if (left->convert_type == nullptr) {
+        // TODO: ring error report
+    }
+    if (left->convert_type_size != 1) {
+        // TODO: ring error report
+    }
+
+    if (right->convert_type == nullptr) {
+        // TODO: ring error report
+    }
+    if (right->convert_type_size != 1) {
+        // TODO: ring error report
+    }
+
+    TypeSpecifier* left_type  = left->convert_type[0];
+    TypeSpecifier* right_type = right->convert_type[0];
+
+    if (left_type->kind != RING_BASIC_TYPE_BOOL) {
+        // TODO: ring error report
+    }
+
+    if (right_type->kind != RING_BASIC_TYPE_BOOL) {
+        // TODO: ring error report
+    }
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, &bool_type_specifier);
+}
+
 void fix_binary_relational_expression(Expression*       expression,
+                                      ExpressionType    expression_type,
                                       BinaryExpression* binary_expression,
                                       Block* block, FunctionTuple* func) {
 
     assert(expression != nullptr);
     assert(binary_expression != nullptr);
+    assert(expression_type == EXPRESSION_TYPE_RELATIONAL_EQ
+           || expression_type == EXPRESSION_TYPE_RELATIONAL_NE
+           || expression_type == EXPRESSION_TYPE_RELATIONAL_GT
+           || expression_type == EXPRESSION_TYPE_RELATIONAL_GE
+           || expression_type == EXPRESSION_TYPE_RELATIONAL_LT
+           || expression_type == EXPRESSION_TYPE_RELATIONAL_LE);
 
-    Expression* left_expression  = binary_expression->left_expression;
-    Expression* right_expression = binary_expression->right_expression;
+    Expression* left  = binary_expression->left_expression;
+    Expression* right = binary_expression->right_expression;
 
-    fix_expression(left_expression, block, func);
-    fix_expression(right_expression, block, func);
+    fix_expression(left, block, func);
+    fix_expression(right, block, func);
+
+    // 检查两边操作数的合法性
+    if (left->convert_type == nullptr) {
+        // TODO:ring error report
+    }
+    if (left->convert_type_size != 1) {
+        // TODO:ring error report
+    }
+
+    if (right->convert_type == nullptr) {
+        // TODO:ring error report
+    }
+    if (right->convert_type_size != 1) {
+        // TODO:ring error report
+    }
+
+    TypeSpecifier* left_type  = left->convert_type[0];
+    TypeSpecifier* right_type = right->convert_type[0];
+
+    // 检查两遍的类型是否匹配
+    if (expression_type == EXPRESSION_TYPE_RELATIONAL_EQ || expression_type == EXPRESSION_TYPE_RELATIONAL_NE) {
+        if (left_type->kind != RING_BASIC_TYPE_BOOL) {
+            // TODO:ring error report
+        }
+
+        if (right_type->kind != RING_BASIC_TYPE_BOOL) {
+            // TODO:ring error report
+        }
+    } else {
+        // TODO: 后续写成 宏, 方便复用
+        if (left_type->kind == RING_BASIC_TYPE_BOOL
+            || left_type->kind == RING_BASIC_TYPE_CLASS
+            || left_type->kind == RING_BASIC_TYPE_ARRAY
+            || left_type->kind == RING_BASIC_TYPE_ANY) {
+            // TODO:ring error report
+        }
+
+        if (right_type->kind == RING_BASIC_TYPE_BOOL
+            || right_type->kind == RING_BASIC_TYPE_CLASS
+            || right_type->kind == RING_BASIC_TYPE_ARRAY
+            || left_type->kind == RING_BASIC_TYPE_ANY) {
+            // TODO:ring error report
+        }
+    }
 
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
