@@ -39,7 +39,7 @@ global {
 	var Job1[]   global_job1_array_0;
 }
 
-// TestDetail: 测试 fmt::println 函数
+// TestDetail: 测试 fmt::println fmt::printf 函数
 // TestDetail:  测试 打印数组 打印ClassObject
 @main
 function main() {
@@ -48,13 +48,17 @@ function main() {
 
 	fmt::println("test case 1 -------------");
 	fmt::println(global_job1_value_0);
+	fmt::printf("{}\n", global_job1_value_0);
 
 
 
-	fmt::println("\ntest case 1 -------------");
+	fmt::println("\ntest case 2 -------------");
 	global_string_array_0 = string[]{"1", "2", "3", "4", "5"};
 	fmt::println(global_string_array_0);
+	fmt::printf("{}\n", global_string_array_0);
 
+
+	fmt::println("\ntest case 3 -------------");
 	global_job1_array_0 = Job1[]{
 	    Job1{
 			Bool: true, 
@@ -88,5 +92,6 @@ function main() {
 		},
 	};
 	fmt::println(global_job1_array_0);
+	fmt::printf("{}\n", global_job1_array_0);
 
 }

@@ -1,6 +1,11 @@
 test case 1 -------------
 {Bool:false Int:0 Int64:0 Double:0.000000 String: StringArray:[] Job2:{Bool:false Int:0 Int64:0 Double:0.000000 String:}}
+{Bool:false Int:0 Int64:0 Double:0.000000 String: StringArray:[] Job2:{Bool:false Int:0 Int64:0 Double:0.000000 String:}}
 
-test case 1 -------------
+test case 2 -------------
 [1 2 3 4 5]
+[1 2 3 4 5]
+
+test case 3 -------------
+[{Bool:true Int:1 Int64:9223372036854775807 Double:1.000000 String:1 StringArray:[1 2 3 4 5] Job2:{Bool:true Int:1 Int64:9223372036854775807 Double:1.000000 String:1}} {Bool:false Int:2 Int64:9223372036854775807 Double:2.000000 String:2 StringArray:[1 2 3 4 5] Job2:{Bool:false Int:2 Int64:9223372036854775807 Double:2.000000 String:2}}]
 [{Bool:true Int:1 Int64:9223372036854775807 Double:1.000000 String:1 StringArray:[1 2 3 4 5] Job2:{Bool:true Int:1 Int64:9223372036854775807 Double:1.000000 String:1}} {Bool:false Int:2 Int64:9223372036854775807 Double:2.000000 String:2 StringArray:[1 2 3 4 5] Job2:{Bool:false Int:2 Int64:9223372036854775807 Double:2.000000 String:2}}]
