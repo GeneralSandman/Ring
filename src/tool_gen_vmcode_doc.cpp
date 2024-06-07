@@ -13,8 +13,8 @@ int main() {
     printf("## 1. Ring Stacked-Based VM 指令集\n\n");
 
 
-    printf("| Num    |            指令               | 操作数类型 | 栈顶值变化                  | 栈高度 | 含义                               |\n");
-    printf("| ------ | ---------------------------- | -------- | ---------------------------- | ---------------------------- | ------------------------------------------------ |\n");
+    printf("| Num    |            指令               | 操作数类型 | 栈顶值变化                  | 栈高度 | 含义                               |  公式描述 |\n");
+    printf("| ------ | ---------------------------- | -------- | ---------------------------- | ---------------------------- | ------------------------------------------------ |  ---- |\n");
 
     for (RVM_Byte vmcode = RVM_CODE_PUSH_BOOL; vmcode <= RVM_CODES_NUM; vmcode++) {
         RVM_Opcode_Info opcode_info  = RVM_Opcode_Infos[vmcode];
@@ -35,13 +35,14 @@ int main() {
             runtime_stack_increment_str = "+" + std::to_string(opcode_info.runtime_stack_increment);
         }
 
-        printf("|%5d|%30s|%10s|%30s|%30s|%50s|\n",
+        printf("|%5d|%30s|%10s|%30s|%30s|%50s|%s|\n",
                int(vmcode),
                vmcode_name.c_str(),
                operand_type.c_str(),
                opcode_info.stack_top_change.c_str(),
                runtime_stack_increment_str.c_str(),
-               opcode_info.usage_comment.c_str());
+               opcode_info.usage_comment.c_str(),
+               opcode_info.math_formula.c_str());
     }
 
 

@@ -19,7 +19,7 @@ std::string math_formula_desc =
     "So(1) 通过 offset 1 , 来操作 stack 空间\n"
     "C(1)  通过index 1, 从ConstantPool  Constant\n"
     "\n"
-    "Field(object, As).int 将object的第As个Field作为int赋值\n"
+    "Field(object, As).int 将object的第As个Field作为int\n"
     "\n"
     "A As AB Bs 分别代表字节码后边的操作数\n"
     "FSB 代表 FunctionStackBase\n"

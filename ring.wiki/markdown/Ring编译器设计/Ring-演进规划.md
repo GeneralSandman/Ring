@@ -490,6 +490,25 @@ bool_value =  (STACK_GET_INT_OFFSET(rvm, -2) <= STACK_GET_INT_OFFSET(rvm, -1));
 STACK_SET_BOOL_OFFSET(rvm, -2, bool_value);
 ```
 
+
+### B. 有个重大bug
+
+就是 int常量 给 int64 赋值的时候 会存在问题.
+
+
+### C. test/061-std-package-fmt/fmt-007.ring 这个测试用例需要再完善一下
+
+
+### D. std package vm heap_size()  返回值统一改成 int64
+
+
+### E. 支持 命名 any类型的 局部变量/全局变量
+
+任何值都可以赋值给它
+
+
+### F. 检测 binary-expression 两边的表达式要保持一致
+
 -----------------------------
 
 
