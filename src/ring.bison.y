@@ -1205,12 +1205,12 @@ basic_value_literal_expression
     | TOKEN_TRUE
     {
         debug_bison_info_with_green("[RULE::literal_term:TOKEN_TRUE]\t ");
-        $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, BOOL_TRUE);
+        $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, true);
     }
     | TOKEN_FALSE
     {
         debug_bison_info_with_green("[RULE::literal_term:TOKEN_FALSE]\t ");
-        $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, BOOL_FALSE);
+        $$ = create_expression_bool_literal(EXPRESSION_TYPE_LITERAL_BOOL, false);
     }
     ;
 

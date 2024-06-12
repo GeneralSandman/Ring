@@ -13,7 +13,7 @@
 #define RING_VERSION "ring-v0.2.14-beta Copyright (C) 2021-2024 ring.wiki, ZhenhuLi"
 
 
-typedef struct Ring_Arg                     Ring_Arg;
+typedef struct Ring_Command_Arg             Ring_Command_Arg;
 typedef struct Ring_VirtualMachine          Ring_VirtualMachine;
 typedef struct ImportPackageInfo            ImportPackageInfo;
 typedef struct CompilerEntry                CompilerEntry;
@@ -519,10 +519,10 @@ typedef enum {
 struct RVM_ConstantPool {
     ConstantPoolType type;
     union {
-        int       int_value;
-        long long int64_value;
-        double    double_value;
-        char*     string_value;
+        int         int_value;
+        long long   int64_value;
+        double      double_value;
+        const char* string_value;
     } u;
 };
 
@@ -922,10 +922,6 @@ typedef enum {
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
 } RVM_Opcode;
 
-typedef enum {
-    BOOL_FALSE = 0,
-    BOOL_TRUE  = 1
-} Ring_Bool;
 
 typedef enum {
     IDENTIFIER_TYPE_UNKNOW = 0,
@@ -1204,11 +1200,11 @@ struct Expression {
 
     ExpressionType  type;
     union {
-        Ring_Bool                     bool_literal;
-        unsigned int                  int_literal;   // 注意这里是 unsigned
-        unsigned long long            int64_literal; // 注意这里是 unsigned
+        bool                          bool_literal;
+        int                           int_literal;   // 注意这里是 unsigned
+        long long                     int64_literal; // 注意这里是 unsigned
         double                        double_literal;
-        char*                         string_literal;
+        const char*                   string_literal;
         IdentifierExpression*         identifier_expression;
         FunctionCallExpression*       function_call_expression;
         MethodCallExpression*         method_call_expression;
@@ -1671,11 +1667,12 @@ enum RING_COMMAND_TYPE {
     RING_COMMAND_HELP,
 };
 
-struct Ring_Arg {
+struct Ring_Command_Arg {
     RING_COMMAND_TYPE cmd;
 
     std::string       input_file_name; // run/dump/rdb
     std::string       keyword;         // man
+    int               optimize_level;
 };
 
 
@@ -1898,6 +1895,8 @@ typedef enum {
     ERROR_ASSIGNMENT_MISMATCH_NUM             = 200017, // 赋值时, 左值和右值的数量不匹配
     ERROR_ASSIGNMENT_MISMATCH_TYPE            = 200018, // 赋值时, 左值和右值的类型不匹配
     ERROR_CONCAT_OPERATOR_MISMATCH_TYPE       = 200019, // string .. 操作数类型不不匹配
+
+    ERROR_OVERFLOWS                           = 200020, // 溢出
 
     ERROR_UNDEFINITE_FUNCTION                 = 300000,
     ERROR_ARGUMENT_MISMATCH_NUM               = 300001, // 函数调用参数数量类型不匹配
@@ -2134,7 +2133,7 @@ struct MemBlock {
 int   ring_repl();
 void  ring_repl_completion(const char* buf, linenoiseCompletions* lc);
 char* ring_repl_hints(const char* buf, int* color, int* bold);
-int   register_debugger(Ring_VirtualMachine* rvm, Ring_Arg args);
+int   register_debugger(Ring_VirtualMachine* rvm, Ring_Command_Arg args);
 
 
 /* --------------------
@@ -2161,6 +2160,8 @@ char*        get_string_literal();
 void           init_front_mem_pool();
 MemPool*       get_front_mem_pool();
 void           destory_front_mem_pool();
+
+const char*    get_string_constant_literal(const char* str1, const char* str2);
 
 CompilerEntry* compiler_entry_create();
 CompilerEntry* get_compiler_entry();
@@ -2228,7 +2229,7 @@ Expression*                   create_expression_ternary(Expression* condition, E
 Expression*                   create_expression_binary(ExpressionType type, Expression* left, Expression* right);
 Expression*                   create_expression_unitary(ExpressionType type, Expression* unitary_expression);
 Expression*                   create_expression_literal(ExpressionType type, char* literal_interface);
-Expression*                   create_expression_bool_literal(ExpressionType type, Ring_Bool value);
+Expression*                   create_expression_bool_literal(ExpressionType type, bool value);
 Expression*                   create_cast_expression(TypeSpecifier* cast_type, Expression* operand);
 Expression*                   create_new_array_expression(TypeSpecifier*       sub_type,
                                                           DimensionExpression* dimension_expression);
@@ -2411,6 +2412,26 @@ Function*        search_function(char* package_posit, char* identifier);
 
 // --------------------
 
+/* --------------------
+ * crop_ast.cpp
+ * function definition
+ *
+ */
+void crop_binary_logical_expression(Expression*       expression,
+                                    ExpressionType    expression_type,
+                                    BinaryExpression* binary_expression,
+                                    Block* block, FunctionTuple* func);
+void crop_binary_concat_expression(Expression*       expression,
+                                   BinaryExpression* binary_expression,
+                                   Block* block, FunctionTuple* func);
+void crop_binary_match_expression(Expression*       expression,
+                                  BinaryExpression* binary_expression,
+                                  Block* block, FunctionTuple* func);
+void crop_unitary_expression(Expression* expression,
+                             Expression* unitary_expression,
+                             Block* block, FunctionTuple* func);
+// --------------------
+
 
 /* --------------------
  * generate.cpp
@@ -2498,7 +2519,7 @@ int               constant_pool_grow(Package_Executer* executer, unsigned int gr
 int               constant_pool_add_int(Package_Executer* executer, int int_literal);
 int               constant_pool_add_int64(Package_Executer* executer, long long int64_literal);
 int               constant_pool_add_double(Package_Executer* executer, double double_literal);
-int               constant_pool_add_string(Package_Executer* executer, char* string_literal);
+int               constant_pool_add_string(Package_Executer* executer, const char* string_literal);
 
 unsigned int      opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer);
 void              opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address);

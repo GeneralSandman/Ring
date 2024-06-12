@@ -2230,7 +2230,7 @@ int constant_pool_add_double(Package_Executer* executer, double double_literal) 
     return index;
 }
 
-int constant_pool_add_string(Package_Executer* executer, char* string_literal) {
+int constant_pool_add_string(Package_Executer* executer, const char* string_literal) {
     debug_generate_info_with_darkgreen("\t");
     int index                                          = constant_pool_grow(executer, 1);
 

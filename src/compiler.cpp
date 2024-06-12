@@ -17,6 +17,10 @@ static CompilerEntry*    g_compiler_entry = nullptr;
 // 这里暂时使用全局变量
 MemPool* front_mem_pool = nullptr;
 
+// 用于存储 string constant literal
+// 只能前端使用
+std::unordered_set<std::string> string_constant_literal_map;
+
 
 // 初始化一次
 void init_front_mem_pool() {
@@ -37,6 +41,17 @@ void destory_front_mem_pool() {
     }
 
     destory_mem_pool(front_mem_pool);
+}
+
+const char* get_string_constant_literal(const char* str1, const char* str2) {
+    std::string str = str1;
+    str += str2;
+
+    string_constant_literal_map.insert(str);
+
+    std::unordered_set<std::string>::iterator iter = string_constant_literal_map.find(str);
+
+    return iter->c_str();
 }
 
 

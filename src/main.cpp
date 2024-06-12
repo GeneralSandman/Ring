@@ -14,10 +14,10 @@
 std::string command_help_message =
     "Ring Command Usage: \n"
     "\n"
-    "        ring <command> [arguments]\n"
+    "        ring [options] <command> [arguments]\n"
     "\n"
     "All Commands:\n"
-    "    \n"
+    "\n"
     "        run    <filename>                              :compile and run Ring program\n"
     "        dump   <filename>                              :dump bytecode detail after compile\n"
     "        rdb    <filename>                              :debug interactive\n"
@@ -25,22 +25,40 @@ std::string command_help_message =
     "        man    <keyword>                               :get prompt of ring by keyword\n"
     "        version                                        :get Ring version\n"
     "        help                                           :get Ring version\n"
+    "\n"
+    "Options:\n"
+    "\n"
+    "        -O1                                            :optimize bytecode with level 1\n"
     "\n";
 // "        build  <filename>                              :compile and generate bytecode\n"
 // "        repl                                           :start interactive program\n"
 
 
-Ring_Arg ring_parse_command(int argc, char** argv) {
-    Ring_Arg          args;
+Ring_Command_Arg ring_parse_command(int argc, char** argv) {
+    Ring_Command_Arg  args;
     RING_COMMAND_TYPE cmd = RING_COMMAND_UNKNOW;
     std::string       input_file_name;
     std::string       keyword;
+    int               optimize_level = 0;
 
 
-    auto              ring_command_rule =
-        ((clipp::command(RING_CMD_T_RUN).set(cmd, RING_COMMAND_RUN), clipp::value("input-file", input_file_name))
-         | (clipp::command(RING_CMD_T_DUMP).set(cmd, RING_COMMAND_DUMP), clipp::value("input-file", input_file_name))
-         | (clipp::command(RING_CMD_T_RDB).set(cmd, RING_COMMAND_RDB), clipp::value("input-file", input_file_name))
+    // option
+    auto option_rule = (clipp::option("-O", "--Opt") & clipp::value("opt-level", optimize_level));
+
+    // run command
+    auto run_rule = (clipp::command(RING_CMD_T_RUN).set(cmd, RING_COMMAND_RUN),
+                     clipp::value("input-file", input_file_name));
+
+    // dump command
+    auto dump_rule = ((clipp::command(RING_CMD_T_DUMP).set(cmd, RING_COMMAND_DUMP),
+                       clipp::value("input_file_name", input_file_name)));
+
+    // rdb command
+    auto rdb_rule = ((clipp::command(RING_CMD_T_RDB).set(cmd, RING_COMMAND_RDB), clipp::value("input_file_name", input_file_name)));
+
+
+    auto ring_command_rule =
+        ((option_rule, run_rule | dump_rule | rdb_rule)
          | (clipp::command(RING_CMD_T_MAN).set(cmd, RING_COMMAND_MAN), clipp::value("keyword", keyword))
          | clipp::command(RING_CMD_T_VERSION).set(cmd, RING_COMMAND_VERSION)
          | clipp::command(RING_CMD_T_HELP).set(cmd, RING_COMMAND_HELP));
@@ -50,21 +68,26 @@ Ring_Arg ring_parse_command(int argc, char** argv) {
     // printf("cmd:%d\n", cmd);
     // printf("input_file_name:%s\n", input_file_name.c_str());
     // printf("keyword:%s\n", keyword.c_str());
+    // printf("optimize_level:%d\n", optimize_level);
 
-    args = Ring_Arg{
+
+    args = Ring_Command_Arg{
         .cmd             = cmd,
         .input_file_name = input_file_name,
         .keyword         = keyword,
+        .optimize_level  = optimize_level,
     };
 
     return args;
 }
 
 
+Ring_Command_Arg ring_command_arg;
+
+//
 int main(int argc, char** argv) {
 
-    Ring_Arg ring_arg;
-    int      exit_code = 0;
+    int exit_code = 0;
 
 
 #ifdef DEBUG_RVM_INTERACTIVE
@@ -94,8 +117,8 @@ int main(int argc, char** argv) {
 #endif
 
     // parse and switch ring command
-    ring_arg = ring_parse_command(argc, argv);
-    switch (ring_arg.cmd) {
+    ring_command_arg = ring_parse_command(argc, argv);
+    switch (ring_command_arg.cmd) {
     case RING_COMMAND_UNKNOW:
         fprintf(stderr, "Unknow command, type `ring help` find tip.\n");
         exit(ERROR_CODE_COMMAND_ERROR);
@@ -111,7 +134,7 @@ int main(int argc, char** argv) {
         exit(ERROR_CODE_SUCCESS);
         break;
     case RING_COMMAND_MAN:
-        ring_give_man_help(ring_arg.keyword.c_str());
+        ring_give_man_help(ring_command_arg.keyword.c_str());
         exit(ERROR_CODE_SUCCESS);
         break;
     case RING_COMMAND_HELP:
@@ -140,7 +163,7 @@ int main(int argc, char** argv) {
     // main package 源文件即为 ring run 指定的输入文件
     Package* main_package = package_create_input_file(compiler_entry,
                                                       (char*)"main",
-                                                      (char*)ring_arg.input_file_name.c_str());
+                                                      (char*)ring_command_arg.input_file_name.c_str());
     // TODO: optimize the method of set main_package;
     compiler_entry->main_package = main_package;
 
@@ -173,14 +196,14 @@ int main(int argc, char** argv) {
     // Complier force destory memory of front-end.
     destory_front_mem_pool();
 
-    if (ring_arg.cmd == RING_COMMAND_DUMP) {
+    if (ring_command_arg.cmd == RING_COMMAND_DUMP) {
         // Only dump `main` package bytecode detail.
         package_executer_dump(executer_entry->main_package_executer);
         return 0;
     }
 
-    if (ring_arg.cmd == RING_COMMAND_RDB) {
-        register_debugger(ring_vm, ring_arg);
+    if (ring_command_arg.cmd == RING_COMMAND_RDB) {
+        register_debugger(ring_vm, ring_command_arg);
     }
 
     // Step-6: 加载虚拟机
@@ -268,7 +291,7 @@ char* ring_repl_hints(const char* buf, int* color, int* bold) {
 }
 
 
-int register_debugger(Ring_VirtualMachine* rvm, Ring_Arg args) {
+int register_debugger(Ring_VirtualMachine* rvm, Ring_Command_Arg args) {
     RVM_DebugConfig* debug_config      = (RVM_DebugConfig*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_DebugConfig));
     debug_config->enable               = true;
     debug_config->trace_dispatch       = debug_trace_dispatch;

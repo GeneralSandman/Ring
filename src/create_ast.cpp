@@ -320,7 +320,7 @@ Expression* create_expression_literal(ExpressionType type, char* literal_interfa
     return expression;
 }
 
-Expression* create_expression_bool_literal(ExpressionType type, Ring_Bool value) {
+Expression* create_expression_bool_literal(ExpressionType type, bool value) {
     debug_ast_info_with_yellow("type:%d, boolean:%d", type, value);
 
     Expression* expression     = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));

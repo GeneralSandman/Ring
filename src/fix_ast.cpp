@@ -61,7 +61,10 @@ TypeSpecifier string_type_specifier = TypeSpecifier{
     .sub         = 0,
 };
 
+extern Ring_Command_Arg ring_command_arg;
 
+
+//
 void ring_compiler_fix_ast(Package* package) {
     // fix class list
     unsigned int class_index = 0;
@@ -69,6 +72,7 @@ void ring_compiler_fix_ast(Package* package) {
         class_def->class_index = class_index++;
         fix_class_definition(class_def);
     }
+
 
     // fix function list
     for (Function* func : package->function_list) {
@@ -824,8 +828,13 @@ void fix_binary_concat_expression(Expression*       expression,
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     EXPRESSION_ADD_CONVERT_TYPE(expression, &string_type_specifier);
+
+    if (ring_command_arg.optimize_level > 0) {
+        crop_binary_concat_expression(expression, binary_expression, block, func);
+    }
 }
 
+// TODO:
 void fix_binary_math_expression(Expression*       expression,
                                 BinaryExpression* binary_expression,
                                 Block* block, FunctionTuple* func) {
@@ -833,32 +842,64 @@ void fix_binary_math_expression(Expression*       expression,
     assert(expression != nullptr);
     assert(binary_expression != nullptr);
 
-    Expression* left_expression  = binary_expression->left_expression;
-    Expression* right_expression = binary_expression->right_expression;
+    Expression* left  = binary_expression->left_expression;
+    Expression* right = binary_expression->right_expression;
 
-    fix_expression(left_expression, block, func);
-    fix_expression(right_expression, block, func);
+    fix_expression(left, block, func);
+    fix_expression(right, block, func);
+
+    // 检查两边操作数的合法性
+    if (left->convert_type == nullptr) {
+        // TODO: ring error report
+    }
+    if (left->convert_type_size != 1) {
+        // TODO: ring error report
+    }
+
+    if (right->convert_type == nullptr) {
+        // TODO: ring error report
+    }
+    if (right->convert_type_size != 1) {
+        // TODO: ring error report
+    }
+
+    TypeSpecifier* left_type  = left->convert_type[0];
+    TypeSpecifier* right_type = right->convert_type[0];
+
+    if (left_type->kind == RING_BASIC_TYPE_BOOL) {
+        // TODO: ring error report
+    }
+
+    if (right_type->kind == RING_BASIC_TYPE_BOOL) {
+        // TODO: ring error report
+    }
+
+    if (left_type->kind != right_type->kind) {
+        // TODO: ring error report
+    }
+
 
     if (expression->convert_type == nullptr) {
         TypeSpecifier* convert_type = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-        convert_type->kind          = RING_BASIC_TYPE_INT;
+        convert_type->kind          = RING_BASIC_TYPE_UNKNOW;
         EXPRESSION_CLEAR_CONVERT_TYPE(expression);
         EXPRESSION_ADD_CONVERT_TYPE(expression, convert_type);
     }
 
-    if (expression->type == EXPRESSION_TYPE_CONCAT) {
-        expression->convert_type[0]->kind = RING_BASIC_TYPE_STRING;
-        return;
+    if (left_type->kind == RING_BASIC_TYPE_INT) {
+        expression->convert_type[0]->kind = RING_BASIC_TYPE_INT;
     }
 
-    if (left_expression->type == EXPRESSION_TYPE_LITERAL_DOUBLE
-        || right_expression->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
+    if (left_type->kind == RING_BASIC_TYPE_INT64) {
+        expression->convert_type[0]->kind = RING_BASIC_TYPE_INT64;
+    }
+
+    if (left_type->kind == RING_BASIC_TYPE_DOUBLE) {
         expression->convert_type[0]->kind = RING_BASIC_TYPE_DOUBLE;
     }
 
-    if ((left_expression->convert_type && left_expression->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)
-        || (right_expression->convert_type && right_expression->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)) {
-        expression->convert_type[0]->kind = RING_BASIC_TYPE_DOUBLE;
+    if (ring_command_arg.optimize_level > 0) {
+        crop_binary_match_expression(expression, binary_expression, block, func);
     }
 }
 
@@ -904,6 +945,10 @@ void fix_binary_logical_expression(Expression*       expression,
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     EXPRESSION_ADD_CONVERT_TYPE(expression, &bool_type_specifier);
+
+    if (ring_command_arg.optimize_level > 0) {
+        crop_binary_logical_expression(expression, expression_type, binary_expression, block, func);
+    }
 }
 
 void fix_binary_relational_expression(Expression*       expression,
@@ -983,6 +1028,10 @@ void fix_unitary_expression(Expression* expression,
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     EXPRESSION_ADD_CONVERT_TYPE(expression, unitary_expression->convert_type[0]);
+
+    if (ring_command_arg.optimize_level > 0) {
+        crop_unitary_expression(expression, unitary_expression, block, func);
+    }
 }
 
 void fix_function_call_expression(Expression*             expression,
