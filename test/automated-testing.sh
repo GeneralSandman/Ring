@@ -37,9 +37,14 @@ if [[ "$1" != "" ]]; then
     TEST_RING_BIN="$1"
 fi
 
+# ring 命令行 option
+TEST_RING_OPTION="-O1"
+
 # 测试功能 ring run xxx.ring
 TEST_RING_COMMAND="run"
 
+
+TEST_COMMAND="${TEST_RING_BIN} ${TEST_RING_OPTION} ${TEST_RING_COMMAND}"
 
 # 要测试的文件夹
 TEST_PATH="./test"
@@ -191,7 +196,7 @@ autoTestAction(){
     let all_num++
 
 
-    $TEST_RING_BIN $TEST_RING_COMMAND $source_code_file &> $run_result_file_tmp
+    $TEST_COMMAND $source_code_file &> $run_result_file_tmp
     if [[ "$?" -ne 0 ]];then
         result="FAILED"
         let fail_num++
@@ -252,6 +257,19 @@ for((test_loop=1;test_loop<=$TEST_LOOP_NUM;test_loop++)); do {
 done
 
 
+# --------------------
+printf "\n\n"
+printf "\033[32m"
+printf "[TestInfo]:\n"
+printf "TEST_LOOP_NUM     = $TEST_LOOP_NUM\n" 
+printf "TEST_RING_BIN     = $TEST_RING_BIN\n" 
+printf "TEST_RING_OPTION  = $TEST_RING_OPTION\n" 
+printf "TEST_RING_COMMAND = $TEST_RING_COMMAND\n" 
+printf "TEST_COMMAND      = $TEST_COMMAND\n" 
+printf "TEST_PATH         = $TEST_PATH\n"
+printf "\033[0m"
+
+# --------------------
 printf "\n\n"
 if [[ $succ_num -eq $all_num ]];then
     printf "\033[32m"
