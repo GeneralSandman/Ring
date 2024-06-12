@@ -248,13 +248,16 @@ Expression* create_expression_literal(ExpressionType type, char* literal_interfa
     case EXPRESSION_TYPE_LITERAL_INT: {
         unsigned long long int64_value = 0;
         sscanf(literal_interface, "%llu", &int64_value);
+        /*
+         * 在这里解析到的 int 常量都是正数
+         */
 
         if (int64_value <= INT32_MAX) {
             expression->type          = EXPRESSION_TYPE_LITERAL_INT;
-            expression->u.int_literal = (int)int64_value;
+            expression->u.int_literal = (unsigned int)int64_value;
         } else if (int64_value <= INT64_MAX) {
             expression->type            = EXPRESSION_TYPE_LITERAL_INT64;
-            expression->u.int64_literal = int64_value;
+            expression->u.int64_literal = (unsigned long long)int64_value;
         } else {
             // FIXME:
             // ring error report 数据类型溢出
@@ -262,9 +265,46 @@ Expression* create_expression_literal(ExpressionType type, char* literal_interfa
             // 2147483648 会溢出 但是 -2147483648 不会溢出, 所以针对 负号 还要做更加细致的语义检查
             // 9223372036854775808 同理
             // 更合理的方式应该是在常量折叠之后 再 进行判断
-            expression->type            = EXPRESSION_TYPE_LITERAL_INT64;
-            expression->u.int64_literal = int64_value;
+
+
+            // Ring-Compiler-Error-Report  ERROR_OVERFLOWS
+            DEFINE_ERROR_REPORT_STR;
+
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "can't use num literal `%s` in expression, raise overflows; E:%d.",
+                     literal_interface,
+                     ERROR_OVERFLOWS);
+
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(expression->line_number),
+                .line_number             = expression->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
         }
+
+    } break;
+    case EXPRESSION_TYPE_LITERAL_INT64: {
+        unsigned int literal_length = strlen(literal_interface);
+        if (literal_interface[literal_length - 1] != 'L') {
+            // error report  invalid int64 literal
+        }
+        literal_interface[literal_length - 1] = '\0';
+
+        unsigned long long int64_value        = 0;
+        sscanf(literal_interface, "%llu", &int64_value);
+
+        expression->type            = EXPRESSION_TYPE_LITERAL_INT64;
+        expression->u.int64_literal = int64_value;
 
     } break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:

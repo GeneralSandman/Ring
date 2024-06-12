@@ -139,6 +139,17 @@ extern "C" int yywrap(){
 
     return INT_LITERAL;
 }
+<INITIAL>([1-9][0-9]*L)|"0L" {
+    debug_flex_info_with_red("[STATUS:INITIAL]\t line_num(%d),column_num(%d),int64_literal(%s)",
+        package_unit_get_line_number(), 
+        package_unit_get_column_number(), 
+        yytext);
+
+    package_unit_update_line_content(yytext);
+    yylval.m_literal_interface = yytext;
+
+    return INT64_LITERAL;
+}
 <INITIAL>[0-9]+\.[0-9]+ {
     debug_flex_info_with_red("[STATUS:INITIAL]\t line_num(%d),column_num(%d),double_literal(%s)",
         package_unit_get_line_number(), 

@@ -168,11 +168,12 @@ int yylex();
 %token TOKEN_NUM_SIGN
 
 %token INT_LITERAL
+%token INT64_LITERAL
 %token DOUBLE_LITERAL
 %token STRING_LITERAL
 %token IDENTIFIER
 
-%type <m_literal_interface> INT_LITERAL DOUBLE_LITERAL STRING_LITERAL TOKEN_TRUE TOKEN_FALSE
+%type <m_literal_interface> INT_LITERAL INT64_LITERAL DOUBLE_LITERAL STRING_LITERAL TOKEN_TRUE TOKEN_FALSE
 %type <m_identifier> identifier IDENTIFIER // TODO: 废弃, 使用 identifier_v2
 %type <m_identifier_v2>   identifier_v2
 %type <m_identifier_list> identifier_list
@@ -1185,6 +1186,11 @@ basic_value_literal_expression
     {
         debug_bison_info_with_green("[RULE::literal_term:INT_LITERAL]\t ");
         $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_INT, $1);
+    }
+    | INT64_LITERAL
+    {
+        debug_bison_info_with_green("[RULE::literal_term:INT64_LITERAL]\t ");
+        $$ = create_expression_literal(EXPRESSION_TYPE_LITERAL_INT64, $1);
     }
     | DOUBLE_LITERAL
     {
