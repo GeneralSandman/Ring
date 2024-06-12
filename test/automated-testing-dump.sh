@@ -38,7 +38,7 @@ if [[ "$1" != "" ]]; then
 fi
 
 # ring 命令行 option
-TEST_RING_OPTION="-O1"
+TEST_RING_OPTION="-O0"
 
 # 测试功能 ring dump xxx.ring
 TEST_RING_COMMAND="dump"
