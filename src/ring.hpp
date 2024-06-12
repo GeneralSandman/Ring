@@ -1672,7 +1672,7 @@ struct Ring_Command_Arg {
 
     std::string       input_file_name; // run/dump/rdb
     std::string       keyword;         // man
-    int               optimize_level;
+    unsigned int      optimize_level;
 };
 
 
@@ -2417,6 +2417,10 @@ Function*        search_function(char* package_posit, char* identifier);
  * function definition
  *
  */
+
+void crop_if_statement(IfStatement* if_statement, Block* block, FunctionTuple* func);
+void crop_for_statement(ForStatement* for_statement, Block* block, FunctionTuple* func);
+
 void crop_binary_logical_expression(Expression*       expression,
                                     ExpressionType    expression_type,
                                     BinaryExpression* binary_expression,

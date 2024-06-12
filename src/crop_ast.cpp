@@ -1,5 +1,31 @@
 #include "ring.hpp"
 
+void crop_if_statement(IfStatement* if_statement, Block* block, FunctionTuple* func) {
+    Expression* condition = if_statement->condition_expression;
+
+    if (condition->type == EXPRESSION_TYPE_LITERAL_BOOL) {
+        if (condition->u.bool_literal == false) {
+            if_statement->if_block = nullptr;
+        } else {
+            if_statement->else_block = nullptr;
+        }
+    }
+}
+
+void crop_for_statement(ForStatement* for_statement, Block* block, FunctionTuple* func) {
+
+    if (for_statement->type == FOR_STATEMENT_TYPE_TERNARY) {
+        Expression* condition = for_statement->u.ternary_statement->condition_expression;
+
+        if (condition->type == EXPRESSION_TYPE_LITERAL_BOOL) {
+            if (condition->u.bool_literal == false) {
+                for_statement->block = nullptr;
+            }
+        }
+    }
+}
+
+
 void crop_binary_logical_expression(Expression*       expression,
                                     ExpressionType    expression_type,
                                     BinaryExpression* binary_expression,

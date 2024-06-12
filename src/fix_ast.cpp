@@ -377,7 +377,12 @@ void fix_block(Block* block, FunctionTuple* func) {
 }
 
 void fix_if_statement(IfStatement* if_statement, Block* block, FunctionTuple* func) {
+
     fix_expression(if_statement->condition_expression, block, func);
+
+    if (ring_command_arg.optimize_level > 0) {
+        crop_if_statement(if_statement, block, func);
+    }
 
     fix_block(if_statement->if_block, func);
     fix_block(if_statement->else_block, func);
@@ -403,6 +408,10 @@ void fix_for_statement(ForStatement* for_statement, Block* block, FunctionTuple*
         fix_expression(for_statement->u.range_statement->operand, block, func);
     } else {
         ring_error_report("for statement type is invalid error\n");
+    }
+
+    if (ring_command_arg.optimize_level > 0) {
+        crop_for_statement(for_statement, block, func);
     }
 
 

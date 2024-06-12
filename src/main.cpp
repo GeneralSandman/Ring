@@ -39,7 +39,7 @@ Ring_Command_Arg ring_parse_command(int argc, char** argv) {
     RING_COMMAND_TYPE cmd = RING_COMMAND_UNKNOW;
     std::string       input_file_name;
     std::string       keyword;
-    int               optimize_level = 0;
+    unsigned int      optimize_level = 0;
 
 
     // option
