@@ -1238,7 +1238,7 @@ struct Expression {
     (expression)->convert_type =                                                            \
         (TypeSpecifier**)realloc((expression)->convert_type,                                \
                                  (expression)->convert_type_size * sizeof(TypeSpecifier*)); \
-    (expression)->convert_type[expression->convert_type_size - 1] = (type_specifier);
+    (expression)->convert_type[(expression)->convert_type_size - 1] = (type_specifier);
 
 
 typedef enum {
@@ -2421,6 +2421,10 @@ Function*        search_function(char* package_posit, char* identifier);
 void crop_if_statement(IfStatement* if_statement, Block* block, FunctionTuple* func);
 void crop_for_statement(ForStatement* for_statement, Block* block, FunctionTuple* func);
 
+void crop_ternary_condition_expression(Expression*        expression,
+                                       TernaryExpression* ternary_expression,
+                                       Block*             block,
+                                       FunctionTuple*     func);
 void crop_binary_logical_expression(Expression*       expression,
                                     ExpressionType    expression_type,
                                     BinaryExpression* binary_expression,

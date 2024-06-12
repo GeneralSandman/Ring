@@ -1497,6 +1497,15 @@ void fix_ternary_condition_expression(Expression*        expression,
     fix_expression(true_expression, block, func);
     fix_expression(false_expression, block, func);
 
+    if (condition_expression->convert_type_size != 1) {
+        // TODO: error-report
+    }
+    TypeSpecifier* condition_type = condition_expression->convert_type[0];
+    if (condition_type->kind != RING_BASIC_TYPE_BOOL) {
+        // TODO: error-report
+    }
+
+
     if (true_expression->convert_type_size != false_expression->convert_type_size) {
         // TODO: error-report
         ring_error_report("true_expression false_expression type_specifier size invalid\n");
@@ -1515,6 +1524,11 @@ void fix_ternary_condition_expression(Expression*        expression,
     if (true_expression->convert_type_size) {
         EXPRESSION_ADD_CONVERT_TYPE(expression, true_expression->convert_type[0]);
     }
+
+    if (ring_command_arg.optimize_level > 0) {
+        crop_ternary_condition_expression(expression, ternary_expression, block, func);
+    }
+
 
     return;
 }

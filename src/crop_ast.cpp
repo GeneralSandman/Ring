@@ -25,6 +25,24 @@ void crop_for_statement(ForStatement* for_statement, Block* block, FunctionTuple
     }
 }
 
+void crop_ternary_condition_expression(Expression*        expression,
+                                       TernaryExpression* ternary_expression,
+                                       Block*             block,
+                                       FunctionTuple*     func) {
+
+    Expression* condition_expression = ternary_expression->condition_expression;
+    Expression* true_expression      = ternary_expression->true_expression;
+    Expression* false_expression     = ternary_expression->false_expression;
+
+    if (condition_expression->type == EXPRESSION_TYPE_LITERAL_BOOL) {
+        if (condition_expression->u.bool_literal) {
+            memcpy(expression, true_expression, sizeof(Expression));
+        } else {
+            memcpy(expression, false_expression, sizeof(Expression));
+        }
+    }
+}
+
 
 void crop_binary_logical_expression(Expression*       expression,
                                     ExpressionType    expression_type,
