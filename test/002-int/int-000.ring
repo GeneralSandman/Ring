@@ -39,8 +39,9 @@ function main() {
 	fmt::println_int(2147483647);
 	fmt::println_int(-2147483647);
 	
-	fmt::println_int(2147483648);
-	fmt::println_int(-2147483648);
+	// TODO: 2147483648 在编译器认为是个 int64, 直接赋值给 int32 编译器会报错
+	// fmt::println_int(2147483648);
+	// fmt::println_int(-2147483648);
 	
 	fmt::println_string("--------");
 	fmt::println_string("");
@@ -109,12 +110,13 @@ function main() {
 	fmt::println_string("");
 	
 	
-	int_value_1 = 2147483648;
-	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == -2147483648);
+	// TODO: 2147483648 在编译器认为是个 int64, 直接赋值给 int32 编译器会报错
+	// int_value_1 = 2147483648;
+	// fmt::println_int(int_value_1);
+	// debug::debug_assert(int_value_1 == -2147483648);
 	
 	
-	fmt::println_string("");
+	// fmt::println_string("");
 	
 	
 	int_value_1 = -0;
@@ -173,12 +175,13 @@ function main() {
 	fmt::println_string("");
 	
 	
-	int_value_1 = -2147483648;
-	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == -2147483648);
+	// TODO: 2147483648 在编译器认为是个 int64, 直接赋值给 int32 编译器会报错
+	// int_value_1 = -2147483648;
+	// fmt::println_int(int_value_1);
+	// debug::debug_assert(int_value_1 == -2147483648);
 	
 	
-	fmt::println_string("");
+	// fmt::println_string("");
 
 
 

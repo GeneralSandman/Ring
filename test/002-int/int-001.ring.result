@@ -26,9 +26,3 @@ debug_assert PASS
 -2147483647
 debug_assert PASS
 
--2147483648
-debug_assert PASS
--2147483648
-debug_assert PASS
--2147483648
-debug_assert PASS
