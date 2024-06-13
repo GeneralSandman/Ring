@@ -983,3 +983,31 @@ std::string strings_join(const std::vector<std::string>& lst, const std::string&
     }
     return ret;
 }
+
+/*
+ * rvm_string_cmp 和 string_compare 实现重复了，后续需要结合到一起
+ * TODO: 这里实现的不太优雅
+ */
+int string_compare(const char* str1, unsigned int str1_len, const char* str2, unsigned int str2_len) {
+
+    if (str1_len == 0 && str2_len == 0) {
+        return 0;
+    } else if (str1_len == 0 && str2_len != 0) {
+        return -1;
+    } else if (str1_len != 0 && str2_len == 0) {
+        return 1;
+    }
+
+    unsigned int min_len = (str1_len > str2_len) ? str2_len : str1_len;
+    int          res     = strncmp(str1, str2, min_len);
+    if (res == 0) {
+        if (str1_len > str2_len)
+            return 1;
+        else if (str1_len == str2_len)
+            return 0;
+        else
+            return -1;
+    } else {
+        return res;
+    }
+}

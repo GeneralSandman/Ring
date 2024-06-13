@@ -2429,6 +2429,10 @@ void crop_binary_logical_expression(Expression*       expression,
                                     ExpressionType    expression_type,
                                     BinaryExpression* binary_expression,
                                     Block* block, FunctionTuple* func);
+void crop_binary_relational_expression(Expression*       expression,
+                                       ExpressionType    expression_type,
+                                       BinaryExpression* binary_expression,
+                                       Block* block, FunctionTuple* func);
 void crop_binary_concat_expression(Expression*       expression,
                                    BinaryExpression* binary_expression,
                                    Block* block, FunctionTuple* func);
@@ -2753,6 +2757,7 @@ std::vector<std::string> splitargs(const char* line);
 static int               hex_digit_to_int(char c);
 
 std::string              strings_join(const std::vector<std::string>& lst, const std::string& delim);
+int                      string_compare(const char* str1, unsigned int str1_len, const char* str2, unsigned int str2_len);
 // --------------------
 
 

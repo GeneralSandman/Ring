@@ -999,7 +999,8 @@ void fix_binary_relational_expression(Expression*       expression,
     TypeSpecifier* right_type = right->convert_type[0];
 
     // 检查两遍的类型是否匹配
-    if (expression_type == EXPRESSION_TYPE_RELATIONAL_EQ || expression_type == EXPRESSION_TYPE_RELATIONAL_NE) {
+    if (expression_type == EXPRESSION_TYPE_RELATIONAL_EQ
+        || expression_type == EXPRESSION_TYPE_RELATIONAL_NE) {
         if (left_type->kind != RING_BASIC_TYPE_BOOL) {
             // TODO:ring error report
         }
@@ -1027,6 +1028,10 @@ void fix_binary_relational_expression(Expression*       expression,
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     EXPRESSION_ADD_CONVERT_TYPE(expression, &bool_type_specifier);
+
+    if (ring_command_arg.optimize_level > 0) {
+        crop_binary_relational_expression(expression, expression_type, binary_expression, block, func);
+    }
 }
 
 void fix_unitary_expression(Expression* expression,

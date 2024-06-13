@@ -2861,7 +2861,10 @@ RVM_String* rvm_double_2_string(Ring_VirtualMachine* rvm, double value) {
 }
 
 
-// TODO: 这里实现的不太优雅
+/*
+ * rvm_string_cmp 和 string_compare 实现重复了，后续需要结合到一起
+ * TODO: 这里实现的不太优雅
+ */
 int rvm_string_cmp(RVM_String* string1, RVM_String* string2) {
     char*        str1     = nullptr;
     char*        str2     = nullptr;

@@ -87,6 +87,164 @@ void crop_binary_logical_expression(Expression*       expression,
     }
 }
 
+void crop_binary_relational_expression(Expression*       expression,
+                                       ExpressionType    expression_type,
+                                       BinaryExpression* binary_expression,
+                                       Block* block, FunctionTuple* func) {
+
+    Expression* left  = binary_expression->left_expression;
+    Expression* right = binary_expression->right_expression;
+
+
+    if (left->type == EXPRESSION_TYPE_LITERAL_BOOL && right->type == EXPRESSION_TYPE_LITERAL_BOOL) {
+        switch (expression_type) {
+        case EXPRESSION_TYPE_RELATIONAL_EQ:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.bool_literal == right->u.bool_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_NE:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.bool_literal != right->u.bool_literal);
+            break;
+
+        default:
+            break;
+        }
+    } else if (left->type == EXPRESSION_TYPE_LITERAL_INT && right->type == EXPRESSION_TYPE_LITERAL_INT) {
+        switch (expression_type) {
+        case EXPRESSION_TYPE_RELATIONAL_EQ:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int_literal == right->u.int_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_NE:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int_literal != right->u.int_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_GT:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int_literal > right->u.int_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_GE:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int_literal >= right->u.int_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_LT:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int_literal < right->u.int_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_LE:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int_literal <= right->u.int_literal);
+            break;
+
+        default:
+            break;
+        }
+    } else if (left->type == EXPRESSION_TYPE_LITERAL_INT64 && right->type == EXPRESSION_TYPE_LITERAL_INT64) {
+        switch (expression_type) {
+        case EXPRESSION_TYPE_RELATIONAL_EQ:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int64_literal == right->u.int64_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_NE:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int64_literal != right->u.int64_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_GT:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int64_literal > right->u.int64_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_GE:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int64_literal >= right->u.int64_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_LT:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int64_literal < right->u.int64_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_LE:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.int64_literal <= right->u.int64_literal);
+            break;
+
+        default:
+            break;
+        }
+    } else if (left->type == EXPRESSION_TYPE_LITERAL_DOUBLE && right->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
+        switch (expression_type) {
+        case EXPRESSION_TYPE_RELATIONAL_EQ:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.double_literal == right->u.double_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_NE:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.double_literal != right->u.double_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_GT:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.double_literal > right->u.double_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_GE:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.double_literal >= right->u.double_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_LT:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.double_literal < right->u.double_literal);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_LE:
+            expression->type           = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal = (left->u.double_literal <= right->u.double_literal);
+            break;
+
+        default:
+            break;
+        }
+    } else if (left->type == EXPRESSION_TYPE_LITERAL_STRING && right->type == EXPRESSION_TYPE_LITERAL_STRING) {
+        switch (expression_type) {
+        case EXPRESSION_TYPE_RELATIONAL_EQ:
+            expression->type = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal =
+                (string_compare(left->u.string_literal, strlen(left->u.string_literal), right->u.string_literal, strlen(right->u.string_literal))
+                 == 0);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_NE:
+            expression->type = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal =
+                (string_compare(left->u.string_literal, strlen(left->u.string_literal), right->u.string_literal, strlen(right->u.string_literal))
+                 != 0);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_GT:
+            expression->type = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal =
+                (string_compare(left->u.string_literal, strlen(left->u.string_literal), right->u.string_literal, strlen(right->u.string_literal))
+                 > 0);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_GE:
+            expression->type = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal =
+                (string_compare(left->u.string_literal, strlen(left->u.string_literal), right->u.string_literal, strlen(right->u.string_literal))
+                 >= 0);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_LT:
+            expression->type = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal =
+                (string_compare(left->u.string_literal, strlen(left->u.string_literal), right->u.string_literal, strlen(right->u.string_literal))
+                 < 0);
+            break;
+        case EXPRESSION_TYPE_RELATIONAL_LE:
+            expression->type = EXPRESSION_TYPE_LITERAL_BOOL;
+            expression->u.bool_literal =
+                (string_compare(left->u.string_literal, strlen(left->u.string_literal), right->u.string_literal, strlen(right->u.string_literal))
+                 <= 0);
+            break;
+
+        default:
+            break;
+        }
+    }
+}
+
 void crop_binary_concat_expression(Expression*       expression,
                                    BinaryExpression* binary_expression,
                                    Block* block, FunctionTuple* func) {
