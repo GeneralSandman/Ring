@@ -858,33 +858,137 @@ void fix_binary_math_expression(Expression*       expression,
     fix_expression(right, block, func);
 
     // 检查两边操作数的合法性
-    if (left->convert_type == nullptr) {
-        // TODO: ring error report
-    }
-    if (left->convert_type_size != 1) {
-        // TODO: ring error report
+    if (left->convert_type_size != 1
+        || left->convert_type == nullptr) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "invalid operation: `%s` return no value; E:%d.",
+                 formate_expression(left).c_str(),
+                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(left->line_number),
+            .line_number             = left->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
 
-    if (right->convert_type == nullptr) {
-        // TODO: ring error report
+    if (right->convert_type_size != 1
+        || right->convert_type == nullptr) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "invalid operation: `%s` return no value; E:%d.",
+                 formate_expression(right).c_str(),
+                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(right->line_number),
+            .line_number             = right->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
-    if (right->convert_type_size != 1) {
-        // TODO: ring error report
-    }
+
 
     TypeSpecifier* left_type  = left->convert_type[0];
     TypeSpecifier* right_type = right->convert_type[0];
 
-    if (left_type->kind == RING_BASIC_TYPE_BOOL) {
-        // TODO: ring error report
+    if (left_type->kind == RING_BASIC_TYPE_BOOL
+        || left_type->kind == RING_BASIC_TYPE_ARRAY
+        || left_type->kind == RING_BASIC_TYPE_CLASS) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "invalid operation: invalid operand `%s`,only apply int/int64/double to math operator; E:%d.",
+                 formate_expression(left).c_str(),
+                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(left->line_number),
+            .line_number             = left->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
 
-    if (right_type->kind == RING_BASIC_TYPE_BOOL) {
-        // TODO: ring error report
+    if (right_type->kind == RING_BASIC_TYPE_BOOL
+        || right_type->kind == RING_BASIC_TYPE_ARRAY
+        || right_type->kind == RING_BASIC_TYPE_CLASS) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "invalid operation: invalid `%s`,only apply int/int64/double to math operator; E:%d.",
+                 formate_expression(right).c_str(),
+                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(right->line_number),
+            .line_number             = right->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
 
     if (left_type->kind != right_type->kind) {
-        // TODO: ring error report
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "invalid operation: `%s` is %s, `%s` is %s, type mismatch; E:%d.",
+                 formate_expression(left).c_str(),
+                 format_type_specifier(left_type).c_str(),
+                 formate_expression(right).c_str(),
+                 format_type_specifier(right_type).c_str(),
+                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(binary_expression->line_number),
+            .line_number             = binary_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
 
 

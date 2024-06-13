@@ -1895,8 +1895,9 @@ typedef enum {
     ERROR_ASSIGNMENT_MISMATCH_NUM             = 200017, // 赋值时, 左值和右值的数量不匹配
     ERROR_ASSIGNMENT_MISMATCH_TYPE            = 200018, // 赋值时, 左值和右值的类型不匹配
     ERROR_CONCAT_OPERATOR_MISMATCH_TYPE       = 200019, // string .. 操作数类型不不匹配
+    ERROR_MATH_OPERATOR_MISMATCH_TYPE         = 200020, // 数学运算操作数不是 int/int64/double 类型
 
-    ERROR_OVERFLOWS                           = 200020, // 溢出
+    ERROR_OVERFLOWS                           = 200051, // 溢出
 
     ERROR_UNDEFINITE_FUNCTION                 = 300000,
     ERROR_ARGUMENT_MISMATCH_NUM               = 300001, // 函数调用参数数量类型不匹配
@@ -2725,6 +2726,8 @@ std::string format_rvm_type_specifier(Package_Executer*  package_executer,
  * function definition
  *
  */
+std::string              formate_expression(Expression* expression);
+
 void                     ring_compiler_functions_dump(PackageUnit* package_unit);
 void                     ring_vm_constantpool_dump(Package_Executer* executer);
 void                     ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);

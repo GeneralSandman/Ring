@@ -13,6 +13,114 @@
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
+/*
+ * formate_expression
+ *
+ * 前端通过 bison 生成AST
+ * 这里将AST表达式转换为字符串
+ * 这样在语义分析的时候，可以展示源代码，报错提示更加人性化
+ */
+std::string formate_expression(Expression* expression) {
+    std::string result;
+
+    if (expression == nullptr) {
+        return result;
+    }
+
+    switch (expression->type) {
+
+    case EXPRESSION_TYPE_LITERAL_BOOL:
+        if (expression->u.bool_literal) {
+            result = "true";
+        } else {
+            result = "false";
+        }
+        break;
+    case EXPRESSION_TYPE_LITERAL_INT:
+        result = std::to_string(expression->u.int_literal);
+        break;
+    case EXPRESSION_TYPE_LITERAL_INT64:
+        result = std::to_string(expression->u.int64_literal);
+        break;
+    case EXPRESSION_TYPE_LITERAL_DOUBLE:
+        result = std::to_string(expression->u.double_literal);
+        break;
+    case EXPRESSION_TYPE_LITERAL_STRING:
+        result = expression->u.string_literal;
+        break;
+
+    case EXPRESSION_TYPE_VARIABLE:
+        break;
+
+    case EXPRESSION_TYPE_IDENTIFIER:
+        break;
+
+    case EXPRESSION_TYPE_FUNCTION_CALL:
+        result = expression->u.function_call_expression->func_identifier;
+        break;
+
+    case EXPRESSION_TYPE_METHOD_CALL:
+        break;
+
+    case EXPRESSION_TYPE_ASSIGN:
+        break;
+
+    case EXPRESSION_TYPE_TERNARY:
+        break;
+
+
+    case EXPRESSION_TYPE_CONCAT:
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_ADD:
+    case EXPRESSION_TYPE_ARITHMETIC_SUB:
+    case EXPRESSION_TYPE_ARITHMETIC_MUL:
+    case EXPRESSION_TYPE_ARITHMETIC_DIV:
+    case EXPRESSION_TYPE_ARITHMETIC_MOD:
+        break;
+    case EXPRESSION_TYPE_LOGICAL_AND:
+    case EXPRESSION_TYPE_LOGICAL_OR:
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_EQ:
+    case EXPRESSION_TYPE_RELATIONAL_NE:
+    case EXPRESSION_TYPE_RELATIONAL_GT:
+    case EXPRESSION_TYPE_RELATIONAL_GE:
+    case EXPRESSION_TYPE_RELATIONAL_LT:
+    case EXPRESSION_TYPE_RELATIONAL_LE:
+        break;
+
+
+    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
+    case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+    case EXPRESSION_TYPE_UNITARY_INCREASE:
+    case EXPRESSION_TYPE_UNITARY_DECREASE:
+        break;
+
+
+    case EXPRESSION_TYPE_NEW_ARRAY:
+        break;
+    case EXPRESSION_TYPE_ARRAY_LITERAL:
+        break;
+    case EXPRESSION_TYPE_CLASS_OBJECT_LITERAL:
+        break;
+
+
+    case EXPRESSION_TYPE_ARRAY_INDEX:
+        break;
+    case EXPRESSION_TYPE_MEMBER:
+        break;
+
+    case EXPRESSION_TYPE_ELEMENT_ACCESS:
+        break;
+
+    case EXPRESSION_TYPE_CAST:
+        break;
+
+    default: break;
+    }
+
+    return result;
+}
+
 
 // dump function by PackageUnit
 void ring_compiler_functions_dump(PackageUnit* package_unit) {

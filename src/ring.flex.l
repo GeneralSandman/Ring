@@ -1,4 +1,6 @@
 %{
+
+
 #include <cstdio>
 #include <cstring>
 #include <cstdarg>
@@ -11,7 +13,9 @@ extern "C" int yywrap(){
     return 1;
 }
 
+
 %}
+
 %start LINE_COMMENT     BLOCK_COMMENT    LINE_STRING_LITERAL_STATE    BLOCK_STRING_LITERAL_STATE
 
 %option yylineno

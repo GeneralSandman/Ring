@@ -1,4 +1,6 @@
 %{
+
+
 #include "ring.hpp"
 #include <cstdio>
 #define YYDEBUG 1
