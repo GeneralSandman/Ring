@@ -179,6 +179,18 @@ https://docs.oracle.com/cd/E19504-01/802-5880/6i9k05dh4/index.html
 3. 学习 Ocaml
 4. 学习 V8
 
+Golang Plan9 汇编
+https://studygolang.com/articles/21931
+https://xargin.com/plan9-assembly/
+
+深入理解golang汇编
+https://godmelon.com/2021/07/25/golang-plan9-sam/
+
+
+Intel格式和AT&T格式汇编区别
+https://www.cnblogs.com/hdk1993/p/4820353.html
+
+
 -----------------------------
 
 
@@ -320,6 +332,10 @@ Usetime  = 18S
 
 ```
 
+查看这两个测试用例中屏蔽的部分代码，后续并进行优化
+test/002-int/int-000.ring
+test/002-int/int-001.ring
+
 
 
 ### 测试集 ring dump ✅
@@ -443,6 +459,76 @@ class-object  ✅
 
 ## 开发专项-丰富标准库
 
+
+-----------------------------
+
+
+## 2024-06-11周
+
+### A. 中间代码优化-实现简单的常量折叠
+
+
+
+
+### B. 中间代码优化-实现简单的死代码删除
+
+
+### C. 为了比较好实现在编译过程中解析 int64常量，需要在数字常量的后边手动添加一个 L
+
+这样实现可以让编译器比较方便的认为他是一个 int64常量，但是后续这个肯定是要进行优化的。
+
+如：
+```
+0L;
+-1L;
+
+var int64 int64_value;
+
+int64_value = 288L; 
+int64_value = 288; // 编译错误
+```
+
+
+### D. int64 数据类型的测试用例要覆盖的全一点
+
+
+### F. 针对fix_ast中的 要优化的编译报错，进行统一处理
+
+1. 数学运算 + - * / %
+2. 逻辑运算 and or
+3. 非运算 not
+4. 负号 -
+5. 三目条件运算： ? :
+6. 比较运算 < > <= >= == !=
+7. 字符串拼接运算 ..
+
+
+1. left right 操作数 的类型要一致
+2. 不同的运算符 支持不同的操作数类型
+
+
+### G. dlv的调试命令参考一下 dlv gdb, 
+
+
+### H. 当前 int/int64/double/string 才能进行 大小比较运算
+
+如果 有一个class，class的两个对象，如何运用到 大小比较运算
+这里初步想到了两个解决办法：
+1. 类似于cpp，通过method重载运算符
+2. 类似于python，使用 重写以下方法：__gt__ __lt__ __ge__ __le__ __eq__ __ne__
+
+
+### I. 当前 int/int64/double/string 才能进行 大小比较运算
+
+
+### J. 当前 int/int64/double/string 才能进行 大小比较运算
+
+
+### K. 当前 int/int64/double/string 才能进行 大小比较运算
+
+
+### L. 当前 int/int64/double/string 才能进行 大小比较运算
+
 -----------------------------
 
 
@@ -496,6 +582,42 @@ STACK_SET_BOOL_OFFSET(rvm, -2, bool_value);
 就是 int常量 给 int64 赋值的时候 会存在问题.
 
 
+./test/002-int/int-000.ring: 这个编译会报错
+2147483648 在编译器认为是个 int64, 直接赋值给 int32 编译器会报错
+
+```
+	var int int_value_1 = 0;
+    int_value_1 = -2147483648;
+```
+
+
+2. bug
+```
+	// TODO: 2147483648 在编译器认为是个 int64, 直接赋值给 int32 编译器会报错
+	// int_value = 2147483648;
+	// fmt::println_int(int_value);
+	// debug::debug_assert(int_value == 2147483648);
+
+	// TODO: 2147483648 在编译器认为是个 int64, 直接赋值给 int32 编译器会报错
+	// int_value = -2147483648;
+	// fmt::println_int(int_value);
+	// debug::debug_assert(int_value == -2147483648);
+
+	// TODO: 2147483648 在编译器认为是个 int64, 0 认为是 int32 , 编译器报错
+	// int_value = 0-2147483648;
+	// fmt::println_int(int_value);
+	// debug::debug_assert(int_value == -2147483648);
+```
+
+
+3. 报错优化
+
+应该报错， 因为 1不是左值
+```
+1++;
+```
+
+
 ### C. test/061-std-package-fmt/fmt-007.ring 这个测试用例需要再完善一下
 
 
@@ -508,6 +630,8 @@ STACK_SET_BOOL_OFFSET(rvm, -2, bool_value);
 
 
 ### F. 检测 binary-expression 两边的表达式要保持一致
+
+
 
 -----------------------------
 
