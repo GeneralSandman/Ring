@@ -40,7 +40,7 @@ std::string formate_expression(Expression* expression) {
         result = std::to_string(expression->u.int_literal);
         break;
     case EXPRESSION_TYPE_LITERAL_INT64:
-        result = std::to_string(expression->u.int64_literal);
+        result = std::to_string(expression->u.int64_literal) + "L";
         break;
     case EXPRESSION_TYPE_LITERAL_DOUBLE:
         result = std::to_string(expression->u.double_literal);

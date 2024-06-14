@@ -2027,7 +2027,14 @@ struct MemBlock {
     MemBlock* next;
 };
 
-// ring 语法报错str
+/*
+ * DEFINE_ERROR_REPORT_STR ring 语法报错str
+ *
+ * 这里使用的局部变量，每次都分配
+ * TODO: 这里应该优化一下使用全局变量，不需要每次都分配
+ * 1. 目前没有做报错恢复，所以遇到一次错误就退出，不会分配很多次
+ * 2. 如果要改成 全局变量，那么在并发编译的时候要考虑这个问题
+ */
 #define DEFINE_ERROR_REPORT_STR                          \
     char compile_err_buf[2048];                          \
     char compile_adv_buf[2048];                          \
@@ -2362,6 +2369,7 @@ void             fix_binary_concat_expression(Expression*       expression,
                                               BinaryExpression* binary_expression,
                                               Block* block, FunctionTuple* func);
 void             fix_binary_math_expression(Expression*       expression,
+                                            ExpressionType    expression_type,
                                             BinaryExpression* binary_expression,
                                             Block* block, FunctionTuple* func);
 void             fix_binary_logical_expression(Expression*       expression,
