@@ -20,17 +20,13 @@ typedef class Job {
 //TestDetail: 编译错误
 @main
 function main() {
-      // func_0() + func_1(); // 编译报错
-      // func_1() + func_1(); // 正常
-      // func_5() + func_5(); // 编译报错
+      // true and true; // 编译成功
 
-      // fmt::println(1 + 1.1);
+      // true and 1; // 编译错误
+      // 1 and true; // 编译错误
 
-      // 2 + 2L;
-      // 2 - 2L;
-      2 * 2L;
-      2 / 2L;
-      2 % 2L;
+      true or 1;
+
 }
 
 
