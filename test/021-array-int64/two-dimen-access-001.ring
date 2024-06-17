@@ -29,7 +29,7 @@ function main() {
 
     var int i = 0;
     var int j = 0;
-    var int64 sum = 0;
+    var int64 sum = 0L;
 
     for(i = 0; i < 2; i = i+1) {
         for(j = 0; j < 4; j = j+1) {
