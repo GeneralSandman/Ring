@@ -917,6 +917,7 @@ typedef enum {
     RVM_CODE_INT_2_STRING,
     RVM_CODE_INT64_2_STRING,
     RVM_CODE_DOUBLE_2_STRING,
+    RVM_CODE_INT_2_INT64,
 
     // 不对应实际的字节码, 不能在生成代码的时候使用
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
@@ -1073,6 +1074,7 @@ typedef enum {
     RING_BUILD_IN_FNC_PUSH,
     RING_BUILD_IN_FNC_POP,
     RING_BUILD_IN_FNC_TO_STRING,
+    RING_BUILD_IN_FNC_TO_INT64,
 } RING_BUILD_IN_FUNC_ID;
 
 typedef struct {
@@ -2884,6 +2886,10 @@ void                  fix_buildin_func_to_string(Expression*             express
                                                  FunctionCallExpression* function_call_expression,
                                                  Block*                  block,
                                                  Function*               func);
+void                  fix_buildin_func_to_int64(Expression*             expression,
+                                                FunctionCallExpression* function_call_expression,
+                                                Block*                  block,
+                                                Function*               func);
 
 RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* identifier);
 void                  fix_buildin_func(Expression*             expression,

@@ -50,6 +50,14 @@ Ring_Buildin_Func Ring_Buildin_Funcs[] = {
         .return_types     = std::vector<TypeSpecifier*>{},
         .buildin_func_fix = fix_buildin_func_to_string,
     },
+    {
+        .identifier       = "to_int64",
+        .param_size       = 1,
+        .param_types      = std::vector<TypeSpecifier*>{},
+        .return_size      = 1,
+        .return_types     = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix = fix_buildin_func_to_int64,
+    },
 };
 
 void fix_buildin_func_len(Expression*             expression,
@@ -129,6 +137,24 @@ void fix_buildin_func_to_string(Expression*             expression,
     EXPRESSION_ADD_CONVERT_TYPE(expression, &string_type_specifier);
 }
 
+void fix_buildin_func_to_int64(Expression*             expression,
+                               FunctionCallExpression* function_call_expression,
+                               Block*                  block,
+                               Function*               func) {
+
+    TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
+
+    if (type_specifier->kind != RING_BASIC_TYPE_INT) {
+        // TODO:
+        // Ring-Compiler-Error-Report  pop array
+        ring_error_report("only apply int to to_int64()");
+    }
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    extern TypeSpecifier int64_type_specifier;
+    EXPRESSION_ADD_CONVERT_TYPE(expression, &int64_type_specifier);
+}
+
 
 RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* identifier) {
     if (package_posit != nullptr) {
@@ -145,6 +171,8 @@ RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* 
         return RING_BUILD_IN_FNC_POP;
     } else if (str_eq(identifier, "to_string")) {
         return RING_BUILD_IN_FNC_TO_STRING;
+    } else if (str_eq(identifier, "to_int64")) {
+        return RING_BUILD_IN_FNC_TO_INT64;
     }
 
     return RING_BUILD_IN_FNC_UNKNOW;

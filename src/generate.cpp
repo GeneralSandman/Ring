@@ -1806,6 +1806,15 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
         } else {
             ring_error_report("error: to_string() only be used by bool/int/double\n");
         }
+    } else if (str_eq(function_identifier, "to_int64")) {
+        pos = function_call_expression->argument_list;
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+
+        if (pos->expression->convert_type[0]->kind == RING_BASIC_TYPE_INT) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_INT_2_INT64, 0, function_call_expression->line_number);
+        } else {
+            ring_error_report("error: to_int64() only be used by int\n");
+        }
     }
 }
 
@@ -2276,6 +2285,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         case RVM_CODE_JUMP_IF_TRUE:
         case RVM_CODE_FOR_RANGE_ARRAY_BOOL:
         case RVM_CODE_FOR_RANGE_ARRAY_INT:
+        case RVM_CODE_FOR_RANGE_ARRAY_INT64:
         case RVM_CODE_FOR_RANGE_ARRAY_DOUBLE:
         case RVM_CODE_FOR_RANGE_ARRAY_STRING:
         case RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB:

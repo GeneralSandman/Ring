@@ -1778,6 +1778,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_SET_STRING_OFFSET(rvm, -1, string_value);
             rvm->pc += 1;
             break;
+        case RVM_CODE_INT_2_INT64:
+            int_value = STACK_GET_INT_OFFSET(rvm, -1);
+            STACK_SET_INT64_OFFSET(rvm, -1, int_value);
+            rvm->pc += 1;
+            break;
 
         default:
             ring_error_report("Vitual machine execute vmcode error: invalid opcode(%d), pc(%d)\n",
