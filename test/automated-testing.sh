@@ -51,6 +51,7 @@ TEST_PATH="./test"
 TEST_MODELS=(
     "001-bool"
     "002-int"
+    "002-int64"
     "003-double"
     "004-string"
 
@@ -69,6 +70,7 @@ TEST_MODELS=(
 
     "020-array-bool"
     "021-array-int"
+    "021-array-int64"
     "022-array-double"
     "023-array-string"
     "024-array-class"
