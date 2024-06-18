@@ -82,7 +82,7 @@ $fibonacci_2(var int)    <./test/004-derive-function/function-020.ring:19,35>
  ├──23      push_stack_int                4                   31                
  ├──24      pop_stack_int                 2                                     
  ├──25      push_stack_int                3                   28                
- ├──26      self_increase                                                       
+ ├──26      self_increase_int                                                   
  ├──27      pop_stack_int                 3                                     
  ├──28      jump                          32                  32                
  ├──29      push_stack_int                4                   33                
