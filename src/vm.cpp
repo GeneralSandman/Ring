@@ -152,8 +152,12 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_MINUS_INT64, "minus_int64", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "[int64,int64]->[int64]", ""},
     {RVM_CODE_MINUS_DOUBLE, "minus_double", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "[double,double]->[double]", ""},
 
-    {RVM_CODE_SELF_INCREASE, "self_increase", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
-    {RVM_CODE_SELF_DECREASE, "self_decrease", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
+    {RVM_CODE_SELF_INCREASE_INT, "self_increase_int", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
+    {RVM_CODE_SELF_INCREASE_INT64, "self_increase_int64", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
+    {RVM_CODE_SELF_INCREASE_DOUBLE, "self_increase_double", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
+    {RVM_CODE_SELF_DECREASE_INT, "self_decrease_int", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
+    {RVM_CODE_SELF_DECREASE_INT64, "self_decrease_int64", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
+    {RVM_CODE_SELF_DECREASE_DOUBLE, "self_decrease_double", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
 
     {RVM_CODE_CONCAT, "concat", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "", ""},
 

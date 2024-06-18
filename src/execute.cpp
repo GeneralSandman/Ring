@@ -1105,12 +1105,29 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc++;
             break;
 
-        case RVM_CODE_SELF_INCREASE:
+        case RVM_CODE_SELF_INCREASE_INT:
             STACK_GET_INT_OFFSET(rvm, -1) += 1;
             rvm->pc++;
             break;
-        case RVM_CODE_SELF_DECREASE:
+        case RVM_CODE_SELF_INCREASE_INT64:
+            STACK_GET_INT64_OFFSET(rvm, -1) += 1;
+            rvm->pc++;
+            break;
+        case RVM_CODE_SELF_INCREASE_DOUBLE:
+            STACK_GET_DOUBLE_OFFSET(rvm, -1) += 1.0;
+            rvm->pc++;
+            break;
+
+        case RVM_CODE_SELF_DECREASE_INT:
             STACK_GET_INT_OFFSET(rvm, -1) -= 1;
+            rvm->pc++;
+            break;
+        case RVM_CODE_SELF_DECREASE_INT64:
+            STACK_GET_INT64_OFFSET(rvm, -1) -= 1;
+            rvm->pc++;
+            break;
+        case RVM_CODE_SELF_DECREASE_DOUBLE:
+            STACK_GET_DOUBLE_OFFSET(rvm, -1) -= 1.0;
             rvm->pc++;
             break;
 

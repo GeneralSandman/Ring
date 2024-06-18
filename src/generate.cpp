@@ -1465,6 +1465,15 @@ void generate_vmcode_from_relational_expression(Package_Executer* executer,
     generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
 }
 
+
+/*
+ * TODO:
+ * 因为 ++ -- 语句只能用在单独的表达式中，不能组合
+ * 所以对于这种语句，在生成AST的时候可以转成
+ * += 1 += 1L += 1.0
+ * -= 1 -= 1L -= 1.0
+ * 这样可减少字节码的数量
+ */
 void generate_vmcode_from_increase_decrease_expression(Package_Executer* executer,
                                                        Expression*       expression,
                                                        RVM_OpcodeBuffer* opcode_buffer) {
@@ -1477,14 +1486,28 @@ void generate_vmcode_from_increase_decrease_expression(Package_Executer* execute
     Expression* unitary_expression = expression->u.unitary_expression;
     generate_vmcode_from_expression(executer, unitary_expression, opcode_buffer);
 
-    switch (expression->type) {
-    case EXPRESSION_TYPE_UNITARY_INCREASE:
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_SELF_INCREASE, 0, expression->line_number);
-        break;
+    TypeSpecifier* type = unitary_expression->convert_type[0];
 
-    case EXPRESSION_TYPE_UNITARY_DECREASE:
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_SELF_DECREASE, 0, expression->line_number);
-        break;
+    switch (expression->type) {
+    case EXPRESSION_TYPE_UNITARY_INCREASE: {
+        if (type->kind == RING_BASIC_TYPE_INT) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_SELF_INCREASE_INT, 0, expression->line_number);
+        } else if (type->kind == RING_BASIC_TYPE_INT64) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_SELF_INCREASE_INT64, 0, expression->line_number);
+        } else if (type->kind == RING_BASIC_TYPE_DOUBLE) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_SELF_INCREASE_DOUBLE, 0, expression->line_number);
+        }
+    } break;
+
+    case EXPRESSION_TYPE_UNITARY_DECREASE: {
+        if (type->kind == RING_BASIC_TYPE_INT) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_SELF_DECREASE_INT, 0, expression->line_number);
+        } else if (type->kind == RING_BASIC_TYPE_INT64) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_SELF_DECREASE_INT64, 0, expression->line_number);
+        } else if (type->kind == RING_BASIC_TYPE_DOUBLE) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_SELF_DECREASE_DOUBLE, 0, expression->line_number);
+        }
+    } break;
 
     default: break;
     }
