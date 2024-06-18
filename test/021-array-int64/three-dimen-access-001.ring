@@ -34,15 +34,14 @@ function main() {
     var int i = 0;
     var int j = 0;
     var int k = 0;
-    var int64 sum = 0;
+    var int64 sum = 0L;
 
     for(i = 0; i < 2; i = i+1) {
         for(j = 0; j < 2; j = j+1) {
             for(k = 0; k < 2; k = k+1) {
                 fmt::println_int64(global_int64_array_0[i, j, k]);
 
-                // TODO: 这里不能正确执行
-                sum = sum++;
+                sum++;
             }
         }
     }

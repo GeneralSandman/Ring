@@ -35,7 +35,6 @@ function main() {
         for(j = 0; j < 4; j = j+1) {
             fmt::println_int64(global_int64_array_0[i, j]);
 
-            // TODO: 这里不能正确执行
             sum = sum + to_int64(1);
         }
     }
