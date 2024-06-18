@@ -1,4 +1,5 @@
 #include "ring.hpp"
+#include <cassert>
 
 void crop_if_statement(IfStatement* if_statement, Block* block, FunctionTuple* func) {
     Expression* condition = if_statement->condition_expression;
