@@ -19,6 +19,7 @@
 # 5. 是否输出测试用例表: 
 #    调整 IS_EXPORT_TEST_DETAIL_SUMMARY
 #    测试描述会从测试文件中导出, 匹配前缀 // TestDetail:
+#    测试用例中导出测试失败的原因，匹配前缀 // Fatal:
 
 # 测试的轮数, 用于多次执行
 TEST_LOOP_NUM=1
@@ -58,6 +59,8 @@ TEST_MODELS=(
     "001-basic-type" 
 
     "002-operator" 
+    "002-operator/minus" 
+
     "003-native-function" 
     "004-derive-function" 
     "006-variable" 
