@@ -55,10 +55,10 @@ clean check cleandeps:
 	@cd src && $(MAKE) $@
 
 testall:
-	bash ./test/automated-testing.sh
+	bash ./test/000-auto-test-script/automated-testing.sh
 
 testdump:
-	bash ./test/automated-testing-dump.sh
+	bash ./test/000-auto-test-script/automated-testing-dump.sh
 
 install:
 	@echo "\033[34m[+]Install Bin\033[0m"
