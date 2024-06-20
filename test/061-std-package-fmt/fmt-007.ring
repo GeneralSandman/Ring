@@ -63,14 +63,14 @@ function main() {
 	    Job1{
 			Bool: true, 
 			Int: 1, 
-			Int64: 9223372036854775807,
+			Int64: 9223372036854775807L,
 			Double: 1.0, 
 			String: "1",
 			StringArray: string[]{"1", "2", "3", "4", "5"},
 			Job2: Job2{
 			    Bool: true, 
 			    Int: 1, 
-				Int64: 9223372036854775807,
+				Int64: 9223372036854775807L,
 				Double: 1.0, 
 			    String: "1",
 			},
@@ -78,14 +78,14 @@ function main() {
 	    Job1{
 			Bool: false, 
 			Int: 2, 
-			Int64: 9223372036854775807,
+			Int64: 9223372036854775807L,
 			Double: 2.0, 
 			String: "2",
 			StringArray: string[]{"1", "2", "3", "4", "5"},
 			Job2: Job2{
 			    Bool: false, 
 			    Int: 2, 
-				Int64: 9223372036854775807,
+				Int64: 9223372036854775807L,
 			    Double: 2.0, 
 			    String: "2",
 			},
