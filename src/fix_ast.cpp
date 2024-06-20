@@ -520,22 +520,29 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
     }
 
 
-    std::vector<std::string> expect_type_strs;
-    std::string              expect_type_str;
-    for (FunctionReturnList* pos = func->return_list;
-         pos != nullptr;
-         pos = pos->next) {
+    std::string expect_type_str;
+    // formate to string
+    {
+        std::vector<std::string> tmp;
+        for (FunctionReturnList* pos = func->return_list;
+             pos != nullptr;
+             pos = pos->next) {
 
-        expect_type_strs.push_back(format_type_specifier(pos->type_specifier));
+            tmp.push_back(format_type_specifier(pos->type_specifier));
+        }
+        expect_type_str = "(" + strings_join(tmp, ", ") + ")";
     }
-    expect_type_str = "(" + strings_join(expect_type_strs, ", ") + ")";
 
-    std::vector<std::string> actual_type_strs;
-    std::string              actual_type_str;
-    for (TypeSpecifier* type : return_convert_type) {
-        actual_type_strs.push_back(format_type_specifier(type));
+
+    std::string actual_type_str;
+    // formate to string
+    {
+        std::vector<std::string> tmp;
+        for (TypeSpecifier* type : return_convert_type) {
+            tmp.push_back(format_type_specifier(type));
+        }
+        actual_type_str = "(" + strings_join(tmp, ", ") + ")";
     }
-    actual_type_str = "(" + strings_join(actual_type_strs, ", ") + ")";
 
 
     // Ring-Compiler-Error-Report ERROR_FUNCTION_MISMATCH_RETURN_TYPE
@@ -732,18 +739,27 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
         ring_compile_error_report(&context);
     }
 
-    std::string left_type_s  = "(";
-    std::string right_type_s = "(";
-    // TODO: 第一个空格需要去掉
-    for (TypeSpecifier* type : left_convert_type) {
-        left_type_s += "," + format_type_specifier(type);
+    std::string left_type_s;
+    // formate left to string
+    {
+        std::vector<std::string> tmp;
+        for (TypeSpecifier* type : left_convert_type) {
+            tmp.push_back(format_type_specifier(type));
+        }
+        left_type_s = "(" + strings_join(tmp, ",") + ")";
     }
-    left_type_s += ")";
-    // TODO: 第一个空格需要去掉
-    for (TypeSpecifier* type : right_convert_type) {
-        right_type_s += "," + format_type_specifier(type);
+
+
+    std::string right_type_s;
+    // formate right to string
+    {
+        std::vector<std::string> tmp;
+        for (TypeSpecifier* type : left_convert_type) {
+            tmp.push_back(format_type_specifier(type));
+        }
+        right_type_s = "(" + strings_join(tmp, ",") + ")";
     }
-    right_type_s += ")";
+
 
     // Ring-Compiler-Error-Report ERROR_ASSIGNMENT_MISMATCH_TYPE
     for (unsigned int i = 0; i < left_convert_type.size(); i++) {
