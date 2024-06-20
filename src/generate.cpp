@@ -221,7 +221,7 @@ void class_def_deep_copy(Package_Executer*    executer,
     dst->method_list       = nullptr;
 
 
-    // Ring-Compiler-Error-Report  ERROR_TOO_MANY_FIELDS_IN_CLASS
+    // Ring-Compiler-Error-Report ERROR_TOO_MANY_FIELDS_IN_CLASS
     if (dst->field_size > 255) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -249,7 +249,7 @@ void class_def_deep_copy(Package_Executer*    executer,
         ring_compile_error_report(&context);
     }
 
-    // Ring-Compiler-Error-Report  ERROR_TOO_MANY_METHODS_IN_CLASS
+    // Ring-Compiler-Error-Report ERROR_TOO_MANY_METHODS_IN_CLASS
     if (dst->method_size > 255) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -1528,48 +1528,23 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer,
 
     generate_vmcode_from_expression(executer, expression, opcode_buffer);
 
-    switch (expression->type) {
-    case EXPRESSION_TYPE_LITERAL_INT:
+    // TODO:
+    TypeSpecifier* type_specifier = expression->convert_type[0];
+
+    switch (type_specifier->kind) {
+    case RING_BASIC_TYPE_INT:
         opcode = RVM_CODE_MINUS_INT;
         break;
-    case EXPRESSION_TYPE_LITERAL_INT64:
+    case RING_BASIC_TYPE_INT64:
         opcode = RVM_CODE_MINUS_INT64;
         break;
-    case EXPRESSION_TYPE_LITERAL_DOUBLE:
+    case RING_BASIC_TYPE_DOUBLE:
         opcode = RVM_CODE_MINUS_DOUBLE;
         break;
-    default: {
-        // Ring-Compiler-Error-Report  ERROR_MINUS_OPER_INVALID_USE
-        char error_message_buffer[1024];
-        char advice_buffer[1024];
-        snprintf(error_message_buffer, 1024, "%sError:%s "
-                                             "minus operator only be used in int/int64/double literal; E:%d",
-                 LOG_COLOR_RED,
-                 LOG_COLOR_CLEAR,
-                 ERROR_MINUS_OPER_INVALID_USE);
-        snprintf(advice_buffer, 1024, "%sTip:%s "
-                                      "minus operator used like: -1, -1.345",
-                 LOG_COLOR_YELLOW,
-                 LOG_COLOR_CLEAR);
+    default:
+        break;
+    }
 
-        ErrorReportContext context = {
-            .package                 = nullptr,
-            .package_unit            = nullptr,
-            .source_file_name        = get_package_unit()->current_file_name,
-            .line_content            = package_unit_get_line_content(expression->line_number),
-            .line_number             = expression->line_number,
-            .column_number           = 0,
-            .error_message           = std::string(error_message_buffer),
-            .advice                  = std::string(advice_buffer),
-            .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
-            .ring_compiler_file      = (char*)__FILE__,
-            .ring_compiler_file_line = __LINE__,
-        };
-        ring_compile_error_report(&context);
-    }
-    // TODO: 可以将 minus运算符 运用在 非 literal上
-    break;
-    }
 
     generate_vmcode(executer, opcode_buffer, opcode, 0, expression->line_number);
 }

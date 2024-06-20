@@ -69,7 +69,7 @@ void fix_buildin_func_len(Expression*             expression,
     if (array_type_specifier->kind != RING_BASIC_TYPE_STRING
         && array_type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
         // TODO:
-        // Ring-Compiler-Error-Report  pop array
+        // Ring-Compiler-Error-Report pop array
         ring_error_report("only len string/array");
     }
 
@@ -88,7 +88,7 @@ void fix_buildin_func_capacity(Expression*             expression,
     if (array_type_specifier->kind != RING_BASIC_TYPE_STRING
         && array_type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
         // TODO:
-        // Ring-Compiler-Error-Report  pop array
+        // Ring-Compiler-Error-Report pop array
         ring_error_report("only len string/array");
     }
 
@@ -106,7 +106,7 @@ void fix_buildin_func_push(Expression*             expression,
 
     if (array_type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
         // TODO:
-        // Ring-Compiler-Error-Report  pop array
+        // Ring-Compiler-Error-Report pop array
         ring_error_report("only pop a array");
     }
 }
@@ -120,7 +120,7 @@ void fix_buildin_func_pop(Expression*             expression,
 
     if (array_type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
         // TODO:
-        // Ring-Compiler-Error-Report  pop array
+        // Ring-Compiler-Error-Report pop array
         ring_error_report("only pop a array");
     }
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
@@ -146,7 +146,7 @@ void fix_buildin_func_to_int64(Expression*             expression,
 
     if (type_specifier->kind != RING_BASIC_TYPE_INT) {
         // TODO:
-        // Ring-Compiler-Error-Report  pop array
+        // Ring-Compiler-Error-Report pop array
         ring_error_report("only apply int to to_int64()");
     }
 

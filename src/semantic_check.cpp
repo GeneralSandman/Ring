@@ -22,7 +22,7 @@ void ring_compiler_analysis_global_variable(Package* package) {
         std::string identifier = std::string(decl->identifier);
         auto        iter       = package->global_declaration_map.find(identifier);
 
-        // Ring-Compiler-Error-Report  ERROR_REDEFINITE_GLOBAL_VARIABLE
+        // Ring-Compiler-Error-Report ERROR_REDEFINITE_GLOBAL_VARIABLE
         if (iter != package->global_declaration_map.end()) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -59,7 +59,7 @@ void ring_compiler_analysis_function(Package* package) {
         std::string identifier = std::string(function->identifier);
         auto        iter       = package->function_map.find(identifier);
 
-        // Ring-Compiler-Error-Report  ERROR_REDEFINITE_FUNCTION
+        // Ring-Compiler-Error-Report ERROR_REDEFINITE_FUNCTION
         if (iter != package->function_map.end()) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -104,7 +104,7 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
     assert(function_call_expression != nullptr);
 
 
-    // Ring-Compiler-Error-Report  ERROR_UNDEFINITE_FUNCTION
+    // Ring-Compiler-Error-Report ERROR_UNDEFINITE_FUNCTION
     if (function == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -138,7 +138,7 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
     std::string   argument_str  = format_function_arguments(argument_pos);
 
 
-    // Ring-Compiler-Error-Report  ERROR_ARGUMENT_MISMATCH_TYPE
+    // Ring-Compiler-Error-Report ERROR_ARGUMENT_MISMATCH_TYPE
     // TODO:
     // 这里比对 arguments 和 parameters, 有几个细节需要注意
     // 1. 深度比对派生类型 数组(多维数组)、类

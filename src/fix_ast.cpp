@@ -217,10 +217,17 @@ BEGIN:
 
 
     case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
+        fix_unitary_expression(expression, expression->u.unitary_expression, block, func);
+        fix_unitary_minus_expression(expression, expression->u.unitary_expression, block, func);
+        break;
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+        fix_unitary_expression(expression, expression->u.unitary_expression, block, func);
+        fix_unitary_not_expression(expression, expression->u.unitary_expression, block, func);
+        break;
     case EXPRESSION_TYPE_UNITARY_INCREASE:
     case EXPRESSION_TYPE_UNITARY_DECREASE:
         fix_unitary_expression(expression, expression->u.unitary_expression, block, func);
+        fix_unitary_increase_decrease_expression(expression, expression->u.unitary_expression, block, func);
         break;
 
 
@@ -278,7 +285,7 @@ void add_declaration(Declaration* declaration, Block* block, FunctionTuple* func
             pos->variable_index = block->declaration_list_size++;
             pos->is_local       = 1;
 
-            // Ring-Compiler-Error-Report  ERROR_TOO_MANY_LOCAL_VARIABLE
+            // Ring-Compiler-Error-Report ERROR_TOO_MANY_LOCAL_VARIABLE
             if (block->declaration_list_size > 255) {
                 DEFINE_ERROR_REPORT_STR;
 
@@ -330,7 +337,7 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
         class_identifier = type_specifier->u.class_type->class_identifier;
         class_definition = search_class_definition(class_identifier);
 
-        // Ring-Compiler-Error-Report  ERROR_MISS_CLASS_DEFINITION
+        // Ring-Compiler-Error-Report ERROR_MISS_CLASS_DEFINITION
         if (class_definition == nullptr) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -459,7 +466,7 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
 
     // check return语句 中表达式的类型 和 function_definition 中的 返回值类型 是否一致
 
-    // Ring-Compiler-Error-Report  ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS
+    // Ring-Compiler-Error-Report ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS
     // operand中有多个, 其中有 function_call, 这是不合法的
     if (return_exp_num > 1 && has_call) {
         DEFINE_ERROR_REPORT_STR;
@@ -485,7 +492,7 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
     }
 
 
-    // Ring-Compiler-Error-Report  ERROR_FUNCTION_MISMATCH_RETURN_NUM
+    // Ring-Compiler-Error-Report ERROR_FUNCTION_MISMATCH_RETURN_NUM
     if (func->return_list_size != return_convert_type.size()) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -531,7 +538,7 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
     actual_type_str = "(" + strings_join(actual_type_strs, ", ") + ")";
 
 
-    // Ring-Compiler-Error-Report  ERROR_FUNCTION_MISMATCH_RETURN_TYPE
+    // Ring-Compiler-Error-Report ERROR_FUNCTION_MISMATCH_RETURN_TYPE
     FunctionReturnList* return_value = func->return_list;
     unsigned int        i            = 0;
     for (; return_value != nullptr;
@@ -583,7 +590,7 @@ void fix_identifier_expression(Expression*           expression,
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
         declaration = search_declaration(identifier_expression->package_posit, identifier_expression->identifier, block);
 
-        // Ring-Compiler-Error-Report  ERROR_UNDEFINITE_VARIABLE
+        // Ring-Compiler-Error-Report ERROR_UNDEFINITE_VARIABLE
         if (declaration == nullptr) {
             DEFINE_ERROR_REPORT_STR;
             snprintf(compile_err_buf, 1024,
@@ -673,7 +680,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
         expression->type = ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN;
     }
 
-    // Ring-Compiler-Error-Report  ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS
+    // Ring-Compiler-Error-Report ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS
     // operand中有多个, 其中有 function_call, 这是不合法的
     if (right_expr_num > 1 && has_call) {
         DEFINE_ERROR_REPORT_STR;
@@ -699,7 +706,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     }
 
 
-    // Ring-Compiler-Error-Report  ERROR_ASSIGNMENT_MISMATCH_NUM
+    // Ring-Compiler-Error-Report ERROR_ASSIGNMENT_MISMATCH_NUM
     if (left_convert_type.size() != right_convert_type.size()) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -738,7 +745,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     }
     right_type_s += ")";
 
-    // Ring-Compiler-Error-Report  ERROR_ASSIGNMENT_MISMATCH_TYPE
+    // Ring-Compiler-Error-Report ERROR_ASSIGNMENT_MISMATCH_TYPE
     for (unsigned int i = 0; i < left_convert_type.size(); i++) {
 
         // TODO: 深度比较
@@ -785,7 +792,7 @@ void fix_binary_concat_expression(Expression*       expression,
     fix_expression(right_expression, block, func);
 
 
-    // Ring-Compiler-Error-Report  ERROR_CONCAT_OPERATOR_MISMATCH_TYPE
+    // Ring-Compiler-Error-Report ERROR_CONCAT_OPERATOR_MISMATCH_TYPE
     if (left_expression->convert_type_size != 1
         || right_expression->convert_type_size != 1) {
         DEFINE_ERROR_REPORT_STR;
@@ -810,7 +817,7 @@ void fix_binary_concat_expression(Expression*       expression,
         ring_compile_error_report(&context);
     }
 
-    // Ring-Compiler-Error-Report  ERROR_CONCAT_OPERATOR_MISMATCH_TYPE
+    // Ring-Compiler-Error-Report ERROR_CONCAT_OPERATOR_MISMATCH_TYPE
     if (left_expression->convert_type[0]->kind != RING_BASIC_TYPE_STRING
         || right_expression->convert_type[0]->kind != RING_BASIC_TYPE_STRING) {
         DEFINE_ERROR_REPORT_STR;
@@ -1449,10 +1456,122 @@ void fix_unitary_expression(Expression* expression,
 
     fix_expression(unitary_expression, block, func);
 
+    // TODO: 用统一的方法实现foramte
+    std::string oper;
+    switch (expression->type) {
+    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
+        oper = "-";
+        break;
+    case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+        oper = "not";
+        break;
+    case EXPRESSION_TYPE_UNITARY_INCREASE:
+        oper = "++";
+        break;
+    case EXPRESSION_TYPE_UNITARY_DECREASE:
+        oper = "--";
+        break;
+
+    default:
+        break;
+    }
+
+    if (unitary_expression->convert_type_size != 1
+        || unitary_expression->convert_type == nullptr) {
+        // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "mismatch typed in operator `%s`; E:%d.",
+                 oper.c_str(),
+                 ERROR_OPER_INVALID_USE);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(unitary_expression->line_number),
+            .line_number             = unitary_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     EXPRESSION_ADD_CONVERT_TYPE(expression, unitary_expression->convert_type[0]);
+}
 
+void fix_unitary_minus_expression(Expression* expression,
+                                  Expression* unitary_expression,
+                                  Block* block, FunctionTuple* func) {
+
+
+    // TODO: check convert_type 不是空
+    TypeSpecifier* type_specifier = unitary_expression->convert_type[0];
+
+    if (type_specifier->kind != RING_BASIC_TYPE_INT
+        && type_specifier->kind != RING_BASIC_TYPE_INT64
+        && type_specifier->kind != RING_BASIC_TYPE_DOUBLE) {
+        // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "operator `-` only be used in int/int64/double; E:%d.",
+                 ERROR_OPER_INVALID_USE);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(unitary_expression->line_number),
+            .line_number             = unitary_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+
+    // TODO: 需要继续完善类型检查
+    // 同时，自增自减只能是一个单独的 expression
     if (ring_command_arg.optimize_level > 0) {
+        // TODO: 这里需要继续细致的划分
+        crop_unitary_expression(expression, unitary_expression, block, func);
+    }
+}
+
+void fix_unitary_not_expression(Expression* expression,
+                                Expression* unitary_expression,
+                                Block* block, FunctionTuple* func) {
+
+
+    // TODO: 需要继续完善类型检查
+    // 同时，自增自减只能是一个单独的 expression
+    if (ring_command_arg.optimize_level > 0) {
+        // TODO: 这里需要继续细致的划分
+        crop_unitary_expression(expression, unitary_expression, block, func);
+    }
+}
+
+
+void fix_unitary_increase_decrease_expression(Expression* expression,
+                                              Expression* unitary_expression,
+                                              Block* block, FunctionTuple* func) {
+
+
+    // TODO: 需要继续完善类型检查
+    // 同时，自增自减只能是一个单独的 expression
+    if (ring_command_arg.optimize_level > 0) {
+        // TODO: 这里需要继续细致的划分
         crop_unitary_expression(expression, unitary_expression, block, func);
     }
 }
@@ -1523,7 +1642,7 @@ void fix_method_call_expression(Expression*           expression,
     // 2. find member declaration by member identifier.
     method = search_class_method(class_definition, member_identifier);
 
-    // Ring-Compiler-Error-Report  ERROR_INVALID_NOT_FOUND_CLASS_METHOD
+    // Ring-Compiler-Error-Report ERROR_INVALID_NOT_FOUND_CLASS_METHOD
     if (method == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -1739,7 +1858,7 @@ void fix_class_object_literal_expression(Expression*                   expressio
             }
         }
 
-        // Ring-Compiler-Error-Report  ERROR_INVALID_NOT_FOUND_CLASS_FIELD
+        // Ring-Compiler-Error-Report ERROR_INVALID_NOT_FOUND_CLASS_FIELD
         if (field_member == nullptr) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -1809,7 +1928,7 @@ void fix_field_member_expression(Expression*       expression,
     // 2. find member declaration by member identifier.
     field = search_class_field(class_definition, member_identifier);
 
-    // Ring-Compiler-Error-Report  ERROR_INVALID_NOT_FOUND_CLASS_FIELD
+    // Ring-Compiler-Error-Report ERROR_INVALID_NOT_FOUND_CLASS_FIELD
     if (field == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 

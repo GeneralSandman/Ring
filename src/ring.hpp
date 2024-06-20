@@ -1882,7 +1882,7 @@ typedef enum {
     ERROR_UNDEFINITE_VARIABLE                 = 200000,
     ERROR_REDEFINITE_GLOBAL_VARIABLE          = 200001, // 重复定义全局变量
     ERROR_REDEFINITE_FUNCTION                 = 200002, // 重复定义函数
-    ERROR_MINUS_OPER_INVALID_USE              = 200003, // - 符号 不合法使用
+    ERROR_OPER_INVALID_USE                    = 200003, // - 符号 不合法使用
     ERROR_DUPLICATE_IMPORT_PACKAGE            = 200004, // 重复 import package
     ERROR_INVALID_VARIABLE_IDENTIFIER         = 200005, // 不合法的变量标识符
     ERROR_TOO_MANY_LOCAL_VARIABLES            = 200006, // 局部变量数量超过限制
@@ -2386,9 +2386,20 @@ void             fix_binary_relational_expression(Expression*       expression,
                                                   ExpressionType    expression_type,
                                                   BinaryExpression* binary_expression,
                                                   Block* block, FunctionTuple* func);
+
 void             fix_unitary_expression(Expression* expression,
                                         Expression* unitary_expression,
                                         Block* block, FunctionTuple* func);
+void             fix_unitary_minus_expression(Expression* expression,
+                                              Expression* unitary_expression,
+                                              Block* block, FunctionTuple* func);
+void             fix_unitary_not_expression(Expression* expression,
+                                            Expression* unitary_expression,
+                                            Block* block, FunctionTuple* func);
+void             fix_unitary_increase_decrease_expression(Expression* expression,
+                                                          Expression* unitary_expression,
+                                                          Block* block, FunctionTuple* func);
+
 void             fix_function_call_expression(Expression*             expression,
                                               FunctionCallExpression* function_call_expression,
                                               Block*                  block,

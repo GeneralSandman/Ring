@@ -246,12 +246,15 @@ Expression* create_expression_literal(ExpressionType type, char* literal_interfa
     expression->type         = type;
     switch (type) {
     case EXPRESSION_TYPE_LITERAL_INT: {
-        unsigned long long int64_value = 0;
-        sscanf(literal_interface, "%llu", &int64_value);
+        unsigned int int_value = 0;
+        sscanf(literal_interface, "%u", &int_value);
+        expression->u.int_literal = int_value;
+        break;
         /*
          * 在这里解析到的 int 常量都是正数
          */
-
+        unsigned long long int64_value = 0;
+        sscanf(literal_interface, "%llu", &int64_value);
         if (int64_value <= INT32_MAX) {
             expression->type          = EXPRESSION_TYPE_LITERAL_INT;
             expression->u.int_literal = (unsigned int)int64_value;
@@ -267,7 +270,7 @@ Expression* create_expression_literal(ExpressionType type, char* literal_interfa
             // 更合理的方式应该是在常量折叠之后 再 进行判断
 
 
-            // Ring-Compiler-Error-Report  ERROR_OVERFLOWS
+            // Ring-Compiler-Error-Report ERROR_OVERFLOWS
             DEFINE_ERROR_REPORT_STR;
 
             snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -560,7 +563,7 @@ Function* create_function_definition(FunctionType        type,
     for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
 
         // 可变参数只能在函数定义中作为 最后一个参数
-        // Ring-Compiler-Error-Report  ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER
+        // Ring-Compiler-Error-Report ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER
         if (pos->is_variadic && parameter_index != parameter_list_size - 1) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -978,7 +981,7 @@ TypeSpecifier* create_type_specifier_array(TypeSpecifier*       sub_type,
     type_specifier->dimension     = dimension_expression->dimension;
     type_specifier->sub           = sub_type;
 
-    // Ring-Compiler-Error-Report  ERROR_ARRAY_DIMENSION_INVALID
+    // Ring-Compiler-Error-Report ERROR_ARRAY_DIMENSION_INVALID
     if (type_specifier->dimension > MAX_DIMENSION_NUM) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -1058,7 +1061,7 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier,
     Identifier*  pos_ider = identifier_list;
     Expression*  pos_init = initializer_list;
     for (pos_ider = identifier_list; pos_ider; pos_ider = pos_ider->next) {
-        // Ring-Compiler-Error-Report  ERROR_INVALID_VARIABLE_IDENTIFIER
+        // Ring-Compiler-Error-Report ERROR_INVALID_VARIABLE_IDENTIFIER
         if (str_eq(pos_ider->name, "self")) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -1156,7 +1159,7 @@ void import_package_list_add_item(char* package_name, char* rename) {
 
     // duplicate import package
     for (ImportPackageInfo* import_pack : get_package_unit()->import_package_list) {
-        // Ring-Compiler-Error-Report  ERROR_DUPLICATE_IMPORT_PACKAGE
+        // Ring-Compiler-Error-Report ERROR_DUPLICATE_IMPORT_PACKAGE
         if (str_eq(import_pack->package_name, package_name)) {
             DEFINE_ERROR_REPORT_STR;
             snprintf(compile_err_buf, sizeof(compile_err_buf),
