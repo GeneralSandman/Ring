@@ -36,6 +36,19 @@
 
 ### Features
 
+1. 新增基础数据类型 int64 (当前基础数据类型有：bool,int,int64,double,string)
+2. 对运算符的操作数做了更加细致的语义检查。
+3. fmt package 函数 `fmt::printf()` 和 `fmt::println()` 可以打印 数组和类详情
+
+---------------------
+
+
+## v0.2.14
+
+> Date: 2024-03-26
+
+### Features
+
 1. 多维数组
    1. 语法上支持多维数组, 定义一个二维数组`var int[,] array;`, 或者`var int[!2] array;`
    2. 新建二维数组, `array = new int[2,3];` 2*3的数组
