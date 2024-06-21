@@ -113,6 +113,10 @@ NOT_TEST_FILES=(
   "./test/060-std-package-debug/debug-000.ring"
   # 只用来测试 ring rdb
 
+
+  "./test/002-int64/default-value-003.ring"
+  # 暂时还没啥用
+
   )
 
 # 测试的结果文件, 主要用于存放本次测试的失败结果
