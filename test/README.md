@@ -17,3 +17,9 @@
 通过运行 `./bin/ring dump xxx.ring` 命令进行测试, 得到的结果 与 `xxx.ring.dump` 进行比对
 
 与 ./test/automated-testing.sh 相比, 没有必要全部比对.
+
+
+
+## 测试目录详解
+
+test/997-feature 主要是测试 feature：一个package中可以包含多个文件，可参见子目录中的 run.sh
