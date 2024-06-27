@@ -640,6 +640,7 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
         switch (args->u.array_value->type) {
         case RVM_ARRAY_BOOL: str = "bool"; break;
         case RVM_ARRAY_INT: str = "int"; break;
+        case RVM_ARRAY_INT64: str = "int64"; break;
         case RVM_ARRAY_DOUBLE: str = "double"; break;
         case RVM_ARRAY_STRING: str = "string"; break;
         case RVM_ARRAY_CLASS_OBJECT: str = "class"; break;
