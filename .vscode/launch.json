@@ -10,8 +10,9 @@
             "request": "launch",
             "program": "${workspaceFolder}/bin/ring",
             "args": [
+                "-O0",
                 "run",
-                "${workspaceFolder}/test/008-class/class-001.ring"
+                "${workspaceFolder}/test/021-array-int64/three-dimen-access-001.ring"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
