@@ -164,7 +164,7 @@
 1. Bison Official Document
 https://www.gnu.org/software/bison/manual/html_node/index.html#SEC_Contents
 
-2.Bison Error Handling
+2. Bison Error Handling
 https://docs.oracle.com/cd/E19504-01/802-5880/6i9k05dh4/index.html
 
 
@@ -321,20 +321,17 @@ String s = STR."\{x} + \{y} = \{x + y}";
 ### 测试集  ring run
 
 ```
-2024-05-06
+2024-06-24
 
 
 [Result]:
-Pass/All = 314/314
+Pass/All = 363/363
 NotTest  = 6
 Fail     = 0
 Usetime  = 18S
 
 ```
 
-查看这两个测试用例中屏蔽的部分代码，后续并进行优化
-test/002-int/int-000.ring
-test/002-int/int-001.ring
 
 
 
@@ -438,6 +435,7 @@ class-object  ✅
 
 2. 多维数组的语法糖 var int[!8]; 表示八维数组 ✅ 
    1. 创建多维数组的时候，不允许 !8
+   2. !8 这个位置只能是个int常量，不能是变量
 
 
 3. jobs[0].Running = false;  ✅ 
@@ -460,6 +458,34 @@ class-object  ✅
 ## 开发专项-丰富标准库
 
 
+
+-----------------------------
+
+
+## 2024-06-24周
+
+
+### A. 一个 Package中如何支持多个 源码文件
+
+测试历程：test/997-feature
+
+需要改进一下编译架构/流程，并发编译，提高编译速度
+
+需要确认几点：
+1. bison 如何支持并发编译
+2. 多个文件，语义分析的过程如何进行
+3. ./bin/ring run <file1> <file2>
+
+
+这个优化当前看来还有有点困难，是不是为时尚早？？？
+
+
+
+### B. 如何支持项目组织
+
+一个项目中含有多个Package，Package可以嵌套。
+
+
 -----------------------------
 
 
@@ -473,7 +499,7 @@ class-object  ✅
 ### B. 中间代码优化-实现简单的死代码删除
 
 
-### C. 为了比较好实现在编译过程中解析 int64常量，需要在数字常量的后边手动添加一个 L
+### C. 为了比较好实现在编译过程中解析 int64常量，需要在数字常量的后边手动添加一个 L ✅ 
 
 这样实现可以让编译器比较方便的认为他是一个 int64常量，但是后续这个肯定是要进行优化的。
 
@@ -522,15 +548,23 @@ int64_value = 288; // 编译错误
 
 TODO: 这里对应了 六个字节码，后续需要进行简化。
 
-### N. self increase/decrease 实现的存在问题
+### N. self increase/decrease 实现的存在问题 ✅ 
 
-不能对 global 变量进行自增
+只能对  int 自增，需要扩展到 int64/double
+
+做一个全面的测试
+1. int/int64/double ✅ 
+2. 全局变量/局部变量   ✅ 
+3. 类中的元素         ✅ 
+4. 数组中的元素       ✅ 
 
 
 ### K. 对 ring -O2 dump 进行自动化测试
 
 
-### Q. 关于 unitary 表达式
+-O2 会开启编译优化，精简字节码，所以需要有一个专门的测试用例脚本用来测试。
+
+### Q. 关于 unitary 表达式的语义检查，操作数的类型
 
 unitary 有 - not ++ --
 
@@ -540,8 +574,28 @@ unitary 有 - not ++ --
 3. 全局变量
 4. 类中的成员
 5. 数组中的元素
-6. 函数调用返回值
-7. method调用返回值
+6. 函数调用返回值 （++ -- 不行，他们不是左值）
+7. method调用返回值（++ -- 不行，他们不是左值）
+
+
+但是这种情况是可以的, 所以又成了左值和右值的问题：
+```
+func main() {
+	return_job().ID++         // 编译错误
+	return_job_pointer().ID++ // 可以
+}
+
+
+func return_job() Job {
+	job := Job{ID: 1, Name: "Job1"}
+	return job
+}
+
+func return_job_pointer() *Job {
+	job := Job{ID: 1, Name: "Job1"}
+	return &job
+}
+```
 
 -----------------------------
 
@@ -573,10 +627,10 @@ unitary 有 - not ++ --
 
 ```
 case RVM_CODE_RELATIONAL_LE_INT:
-            STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) <= STACK_GET_INT_OFFSET(rvm, -1));
-            runtime_stack->top_index--;
-            rvm->pc++;
-            break;
+    STACK_GET_INT_OFFSET(rvm, -2) = (STACK_GET_INT_OFFSET(rvm, -2) <= STACK_GET_INT_OFFSET(rvm, -1));
+    runtime_stack->top_index--;
+    rvm->pc++;
+    break;
 ```
 
 这里的流程设计的稍微不太好, 
@@ -634,16 +688,20 @@ STACK_SET_BOOL_OFFSET(rvm, -2, bool_value);
 
 ### C. test/061-std-package-fmt/fmt-007.ring 这个测试用例需要再完善一下
 
+完善一下 fmt::printf fmt::println 对于 类和数组的支持，需要验证 多层class的嵌套定义，包含数组类型等等。
+
 
 ### D. std package vm heap_size()  返回值统一改成 int64
 
 
 ### E. 支持 命名 any类型的 局部变量/全局变量
 
-任何值都可以赋值给它
+任何值都可以赋值给它，以此来实现范型。
 
 
 ### F. 检测 binary-expression 两边的表达式要保持一致
+
+基本完成  ✅ 
 
 
 ### G. 这里有个bug
@@ -661,13 +719,14 @@ var int64 sum = 0;
 sum = sum++;
 ```
 
+不能将 自增/自减 运用到复杂表达式中。
 
 -----------------------------
 
 
 ## 2024-05-27周
 
-### A. 添加一个新的基础数据类型 int64
+### A. 添加一个新的基础数据类型 int64 ✅ 
 
 int 的数据范围有限, 为了扩大数据范围, 引入int64, 如其名, 64位数据. 在c语言中使用 long long 表示
 
@@ -769,9 +828,9 @@ typedef struct TValue {
    
 ```
     // 倒序遍历数组
-   for i := lenUInt(nums) - 1; i >= 0; i-- {
-      fmt.Printf("i:%d -> num:%d\n", i, nums[i])
-   }
+    for i := lenUInt(nums) - 1; i >= 0; i-- {
+        fmt.Printf("i:%d -> num:%d\n", i, nums[i])
+    }
 ```
 
 2. 为什么使用 int, 而不是 int64
@@ -910,7 +969,7 @@ struct MethodMember {
 
 
 
-## B. return 语句 语义检查的
+## B. return 语句 语义检查的 ✅ 
 
 这个函数检查不过去, 需要优化
 
