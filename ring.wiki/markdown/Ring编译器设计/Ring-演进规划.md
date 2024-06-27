@@ -486,6 +486,15 @@ class-object  ✅
 一个项目中含有多个Package，Package可以嵌套。
 
 
+### C. 实现类rust 的模式匹配 match
+
+
+### D. 定一个比较大的计划，调研 golang rust swift moonbit php python lua 等语法规范
+
+
+### E. 调研 Lua JIT
+
+
 -----------------------------
 
 
