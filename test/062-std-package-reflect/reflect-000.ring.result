@@ -1,6 +1,7 @@
 test case 1
 bool
 int
+int64
 double
 string
 Job
@@ -8,6 +9,7 @@ Job
 test case 2
 bool
 int
+int64
 double
 string
 Job
@@ -15,5 +17,6 @@ Job
 test case 3
 bool
 int
+int64
 double
 string

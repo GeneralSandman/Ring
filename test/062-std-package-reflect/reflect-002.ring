@@ -13,10 +13,11 @@ import {
 }
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
-    field string  Name;
+    field bool    Bool;
+    field int     Int;
+    field int64   Int64;
+    field double  Double;
+    field string  String;
 }
 
 // TestDetail: 通过 字符串比较的方式来比较获取 typeof
@@ -25,6 +26,7 @@ typedef class Job {
 function main() {
 	var bool   bool_value;
 	var int    int_value;
+	var int64  int64_value;
 	var double double_value;
 	var string string_value;
 	var Job    job_class_value;
@@ -32,6 +34,7 @@ function main() {
 	fmt::println_string("test case 1");
 	fmt::println_string(reflect::typeof(bool_value));
 	fmt::println_string(reflect::typeof(int_value));
+	fmt::println_string(reflect::typeof(int64_value));
 	fmt::println_string(reflect::typeof(double_value));
 	fmt::println_string(reflect::typeof(string_value));
 	fmt::println_string(reflect::typeof(job_class_value));
@@ -39,6 +42,7 @@ function main() {
 	fmt::println_string("test case 2");
 	debug::debug_assert(reflect::typeof(bool_value)      == "bool");
 	debug::debug_assert(reflect::typeof(int_value)       == "int");
+	debug::debug_assert(reflect::typeof(int64_value)       == "int64");
 	debug::debug_assert(reflect::typeof(double_value)    == "double");
 	debug::debug_assert(reflect::typeof(string_value)    == "string");
 	debug::debug_assert(reflect::typeof(job_class_value) == "Job");

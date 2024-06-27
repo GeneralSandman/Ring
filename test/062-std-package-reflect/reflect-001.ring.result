@@ -1,6 +1,7 @@
 test case 1
 bool
 int
+int64
 double
 string
 Job
@@ -8,6 +9,7 @@ Job
 test case 2
 bool
 int
+int64
 double
 string
 Job
@@ -15,6 +17,7 @@ Job
 test case array one dimension
 bool[!1]
 int[!1]
+int64[!1]
 double[!1]
 string[!1]
 Job[!1]
@@ -22,6 +25,7 @@ Job[!1]
 test case array two dimension
 bool[!2]
 int[!2]
+int64[!2]
 double[!2]
 string[!2]
 Job[!2]
@@ -29,6 +33,7 @@ Job[!2]
 test case array three dimension
 bool[!3]
 int[!3]
+int64[!3]
 double[!3]
 string[!3]
 Job[!3]
@@ -36,6 +41,7 @@ Job[!3]
 test case array four dimension
 bool[!4]
 int[!4]
+int64[!4]
 double[!4]
 string[!4]
 Job[!4]

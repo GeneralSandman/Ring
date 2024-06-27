@@ -1,10 +1,12 @@
 test case 1
 bool
 int
+int64
 double
 string
 Job
 test case 2
+debug_assert PASS
 debug_assert PASS
 debug_assert PASS
 debug_assert PASS
