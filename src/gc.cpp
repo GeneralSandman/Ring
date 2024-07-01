@@ -264,15 +264,16 @@ RVM_String* rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src) {
 
 
 RVM_Array* new_array(Ring_VirtualMachine* rvm) {
-    RVM_Array* array    = (RVM_Array*)mem_alloc(rvm->meta_pool, sizeof(RVM_Array));
-    array->gc_type      = RVM_GC_OBJECT_TYPE_ARRAY;
-    array->gc_mark      = GC_MARK_COLOR_WHITE;
-    array->gc_prev      = nullptr;
-    array->gc_next      = nullptr;
-    array->type         = RVM_ARRAY_UNKNOW;
-    array->dimension    = 0;
-    array->length       = 0;
-    array->capacity     = 0;
+    RVM_Array* array = (RVM_Array*)mem_alloc(rvm->meta_pool, sizeof(RVM_Array));
+    array->gc_type   = RVM_GC_OBJECT_TYPE_ARRAY;
+    array->gc_mark   = GC_MARK_COLOR_WHITE;
+    array->gc_prev   = nullptr;
+    array->gc_next   = nullptr;
+    array->type      = RVM_ARRAY_UNKNOW;
+    array->dimension = 0;
+    array->length    = 0;
+    array->capacity  = 0;
+    // array->class_ref    = nullptr;
     array->u.bool_array = nullptr;
     return array;
 }
@@ -331,6 +332,7 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
             break;
         case RVM_ARRAY_CLASS_OBJECT:
             assert(class_definition != nullptr);
+            // array->class_ref        = class_definition;
             array->u.class_ob_array = (RVM_ClassObject*)mem_alloc(rvm->data_pool,
                                                                   sizeof(RVM_ClassObject) * array->capacity);
             for (unsigned int i = 0; i < array->length; i++) {
@@ -363,13 +365,14 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
 
 
 RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
-    RVM_Array* array  = nullptr;
+    RVM_Array* array = nullptr;
 
-    array             = new_array(rvm);
-    array->type       = src->type;
-    array->dimension  = src->dimension;
-    array->length     = src->length;
-    array->capacity   = src->capacity;
+    array            = new_array(rvm);
+    array->type      = src->type;
+    array->dimension = src->dimension;
+    array->length    = src->length;
+    array->capacity  = src->capacity;
+    // array->class_ref  = src->class_ref;
 
     size_t alloc_size = 0;
 
@@ -415,6 +418,7 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         break;
 
     case RVM_ARRAY_CLASS_OBJECT: {
+        // array->class_ref        = src->class_ref;
         array->u.class_ob_array = (RVM_ClassObject*)mem_alloc(rvm->meta_pool,
                                                               sizeof(RVM_ClassObject) * array->capacity);
         rvm_heap_alloc_size_incr(rvm, 0);

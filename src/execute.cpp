@@ -240,6 +240,7 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
     RVM_ClassObject*     class_ob             = nullptr;
     RVM_String*          string               = nullptr;
     unsigned int         alloc_size           = 0;
+    // RVM_TypeSpecifier*   sub_type_specifier   = nullptr;
 
     for (unsigned int i = 0; i < size; i++) {
         type_specifier = global_variable_list[i].type_specifier;
@@ -278,6 +279,12 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
             runtime_static->data[i].u.array_value->dimension = type_specifier->dimension;
             runtime_static->data[i].u.array_value->length    = 0;
             runtime_static->data[i].u.array_value->capacity  = 0;
+
+            // sub_type_specifier                               = type_specifier->sub;
+            // if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
+            //     RVM_ClassDefinition* class_definition            = &(rvm->class_list[sub_type_specifier->u.class_def_index]);
+            //     runtime_static->data[i].u.array_value->class_ref = class_definition;
+            // }
             break;
 
         default:
@@ -970,6 +977,16 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_FIELD_BOOL:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(rvm, -1);
             field_index    = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+            // TODO:
+            // 在 Ring VM 崩溃的时候，应该抛出详细信息，方便编译器的开发者定位问题
+            // 是通过宏控制，还是通过ring 执行时命令行控制
+            // 通过 ring 执行时 注入环境变量比较优雅，
+            // Usage: RVM_COLL_ERR=true ./bin/ring run ./test/000.ring
+            // if (class_ob_value == nullptr) {
+            //     std::string tmp = format_rvm_call_stack(rvm);
+            //     printf("tmp:%s\n", tmp.c_str());
+            //     ring_exec_err_report("Runtime Stack:\n%s\n", tmp.c_str());
+            // }
             STACK_SET_BOOL_OFFSET(rvm, -1, class_ob_value->field[field_index].u.bool_value);
             rvm->pc += 3;
             break;

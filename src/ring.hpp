@@ -593,6 +593,14 @@ struct RVM_Array {
         RVM_ClassObject* class_ob_array;
         RVM_Array*       a_array; // 多维数组
     } u;
+
+
+    // 这里实现的不太好，信息冗余了
+    // RVM_ClassDefinition* class_ref; // only when type == RVM_ARRAY_CLASS_OBJECT
+    // 添加这一行之后，这俩测试用例会报错
+    // ./bin/ring run ./test/024-array-class/for-range-000.ring
+    // ./bin/ring run ./test/024-array-class/for-range-001.ring
+    // 均发生在 push_field_bool
 };
 
 
@@ -2141,6 +2149,10 @@ struct MemBlock {
             LOG_COLOR_RED, __FILE__, __LINE__, ##__VA_ARGS__, LOG_COLOR_CLEAR); \
     exit(1);
 
+#define ring_exec_err_report(format, ...)                                       \
+    fprintf(stderr, "%s[Ring Core Panic][%s:%d]\n" format "%s\n",               \
+            LOG_COLOR_RED, __FILE__, __LINE__, ##__VA_ARGS__, LOG_COLOR_CLEAR); \
+    exit(1);
 
 #define DEBUG_RVM_INTERACTIVE_STDOUT_FILE "/tmp/ring-debug-vm.stdout.log"
 
