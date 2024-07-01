@@ -101,6 +101,7 @@ define install_package_std
 	$(call func_install_package_std,math)
 	$(call func_install_package_std,strings)
 	$(call func_install_package_std,reflect)
+	$(call func_install_package_std,buildin)
 endef
 	
 define uninstall_package_std
@@ -112,6 +113,7 @@ define uninstall_package_std
 	$(call func_uninstall_package_std,math)
 	$(call func_uninstall_package_std,strings)
 	$(call func_uninstall_package_std,reflect)
+	$(call func_uninstall_package_std,buildin)
 endef
 
 
