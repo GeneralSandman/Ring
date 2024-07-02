@@ -1682,9 +1682,12 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
 
     ArgumentList* pos                = function_call_expression->argument_list;
     unsigned int  argument_list_size = 0;
+    // TODO: 这里实现的不太对，需要考虑某个expression 为 function-call，并且这个 function-call 是多返回值类型的
+    // 需要考虑
+    // 1. 可变参数类型
     for (; pos != nullptr; pos = pos->next) {
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-        argument_list_size++;
+        argument_list_size += pos->expression->convert_type_size;
     }
 
     generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, function_call_expression->line_number);

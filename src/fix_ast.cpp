@@ -657,7 +657,6 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     // 对于 left, left_expr_num 和 left_convert_type.size() 是相同的
     for (Expression* pos = expression->left; pos; pos = pos->next, left_expr_num++) {
         fix_expression(pos, block, func);
-
         left_convert_type.push_back(pos->convert_type[0]);
     }
 
@@ -666,7 +665,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
 
     unsigned int                right_expr_num  = 0;
     std::vector<TypeSpecifier*> right_convert_type;
-    // 对于 left, 如果 function 有多个返回值, right_expr_num 和 right_convert_type.size() 是不相同的
+    // 对于 left, 如果某个表达式是个 function-call, 并且有多个返回值, right_expr_num 和 right_convert_type.size() 是不相同的
     for (Expression* pos = expression->operand; pos; pos = pos->next, right_expr_num++) {
 
         if (pos->type == EXPRESSION_TYPE_FUNCTION_CALL
@@ -687,8 +686,8 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
         expression->type = ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN;
     }
 
-    // Ring-Compiler-Error-Report ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS
     // operand中有多个, 其中有 function_call, 这是不合法的
+    // Ring-Compiler-Error-Report ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS
     if (right_expr_num > 1 && has_call) {
         DEFINE_ERROR_REPORT_STR;
 
@@ -713,6 +712,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     }
 
 
+    // 赋值操作 left/operand 数量不匹配
     // Ring-Compiler-Error-Report ERROR_ASSIGNMENT_MISMATCH_NUM
     if (left_convert_type.size() != right_convert_type.size()) {
         DEFINE_ERROR_REPORT_STR;
@@ -740,8 +740,8 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     }
 
     std::string left_type_s;
-    // formate left to string
     {
+        // formate left to string
         std::vector<std::string> tmp;
         for (TypeSpecifier* type : left_convert_type) {
             tmp.push_back(format_type_specifier(type));
@@ -751,8 +751,8 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
 
 
     std::string right_type_s;
-    // formate right to string
     {
+        // formate right to string
         std::vector<std::string> tmp;
         for (TypeSpecifier* type : left_convert_type) {
             tmp.push_back(format_type_specifier(type));
@@ -761,6 +761,8 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     }
 
 
+    // 赋值操作 left/operand 类型不匹配
+    // 这里先不考虑可变类型参数，比较复杂
     // Ring-Compiler-Error-Report ERROR_ASSIGNMENT_MISMATCH_TYPE
     for (unsigned int i = 0; i < left_convert_type.size(); i++) {
 

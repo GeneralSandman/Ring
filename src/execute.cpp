@@ -358,7 +358,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
 #ifdef DEBUG_RVM_INTERACTIVE
         int debug_rvm_res = 0;
-        debug_rvm_res     = debug_rvm(rvm, function, code_list, code_size, rvm->pc, caller_stack_base);
+        debug_rvm_res     = debug_rvm(rvm, caller_function, code_list, code_size, rvm->pc, caller_stack_base);
         if (debug_rvm_res != 0) {
             goto EXIT;
         }

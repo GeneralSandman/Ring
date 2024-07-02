@@ -425,6 +425,15 @@ AssignExpression* create_multi_assign_expression(Expression* first_left_value_ex
     return assing_expression;
 }
 
+
+/*
+function return_3_bool_1() -> (bool,bool,bool) {
+    return true, false, true;
+}
+fmt::println(return_3_bool_1());
+*  对于如上 fmt::printl() n函数调用，在语法分析阶段，暂时会将 argument_list_size认为1，
+*  需要在语义分析阶段将 argument_list_size 调整为3
+*/
 FunctionCallExpression* create_function_call_expression(char*         func_identifier,
                                                         ArgumentList* argument_list) {
 
