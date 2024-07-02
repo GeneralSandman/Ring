@@ -63,6 +63,9 @@ TEST_MODELS=(
 
     "003-native-function" 
     "004-derive-function" 
+    "004-derive-function/pass-argument" 
+    "004-derive-function/return-value" 
+
     "006-variable" 
     "007-array"
     "008-class" 
@@ -130,7 +133,8 @@ IS_EXPORT_TEST_DETAIL_SUMMARY=0
 # 输出测试用例表文件
 TEST_DETAIL_SUMMARY="./test/ring-测试用例表.md.raw"
 # 在测试文件中，可以单独写几行用于描述测试的细节
-# 用`// TestDetail:` 开始的行表示
+# 用 `// TestDetail:` 开始的行表示
+# 用 `// BUG:` 开始的行表示 ring编译器存在BUG，需要及时修复
 TEST_DETAIL_PREFIX="^// TestDetail:"
 
 # 如何在测试用例中描述测试的细节
