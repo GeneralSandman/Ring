@@ -70,11 +70,11 @@ function Student::set_name(var string _name) {
 
 
 
-var Student zhenhuli;
-zhenhuli.set_age(25);
-zhenhuli.set_name("zhenhuli");
+var Student ring;
+ring.set_age(25);
+ring.set_name("ring");
 
-zhenhuli.print_info();
+ring.print_info();
 
 ## 实现函数变量
 
@@ -180,7 +180,7 @@ var int int_value;
 var BillType bill_type;
 var BillKind bill_kind;
 
-var Student zhenhuli;
+var Student ring;
 
 
 
@@ -362,8 +362,8 @@ function printfln(var string format, var auto... value) -> (int);
 
 print(1, 1.2, "afsdf");
 println(1, 1.2, "asdfa");
-printf("{} is {}", "zhenhuli", 123);
-printfln("{} is {}", "zhenhuli", 123);
+printf("{} is {}", "ring", 123);
+printfln("{} is {}", "ring", 123);
 
 ```
 

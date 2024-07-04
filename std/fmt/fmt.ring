@@ -1,6 +1,6 @@
 //
 // File:    fmt.ring
-// Author:  zhenhuli - generalsandman@163.com
+// Author:  GeneralSandman - generalsandman@163.com
 // CDate:   2023-04-14
 // UDate:   2023-04-19
 //

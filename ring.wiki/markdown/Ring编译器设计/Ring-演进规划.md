@@ -135,8 +135,8 @@
    https://www.zhihu.com/column/c_1097089416010567680
 3. 《自己动手实现Lua：虚拟机、编译器和标准库》代码 
    https://github.com/GeneralSandman/luago-book
-4. 李振虎的lua学习笔记
-    https://github.com/GeneralSandman/zhenhuli-lua-learn-node
+4. lua学习笔记
+    https://github.com/GeneralSandman/GeneralSandman-lua-learn-node
 5. 构建Lua解释器
    https://manistein.github.io/blog/tags/let-us-build-a-lua-interpreter/
 
@@ -321,14 +321,26 @@ String s = STR."\{x} + \{y} = \{x + y}";
 ### 测试集  ring run
 
 ```
-2024-06-24
+2024-07-03
+
+
+[TestInfo]:
+TEST_LOOP_NUM     = 1
+TEST_RING_BIN     = ./bin/ring
+TEST_RING_OPTION  = -O1
+TEST_RING_COMMAND = run
+TEST_COMMAND      = ./bin/ring -O1 run
+TEST_PATH         = ./test
 
 
 [Result]:
-Pass/All = 363/363
-NotTest  = 6
-Fail     = 0
-Usetime  = 18S
+Pass/All = 376/377
+NotTest  = 5
+Fail     = 1
+Usetime  = 20S
+
+[NotPassCase]source_code_file                                             err_nums                                                    
+./test/062-std-package-reflect/reflect-001.ring              1            
 
 ```
 
@@ -350,23 +362,39 @@ Usetime  = 1S
 
 ### 要完善的测试用例
 
-1. function return class object ✅
-2. Pass class object as parameter to function ✅
-3. Pass string as parameters to function       ✅
-4. Return class object from function        ✅
-5. Return string from function          ✅
-6. Array & ClassObject
-7. Array & String  ✅
-8. Test array bool(global/local/argument/return)  ✅ 
-9. Test array int(global/local/argument/return)  ✅ 
-10. Test array double (global/local/argument/return)  ✅ 
-11. Test array string(global/local/argument/return)  ✅ 
-12. Test array class object(global/local/argument/return)
+1. 函数参数的传递    (Path: ./test/004-derive-function/pass-argument/*)
+   1. 参数的类型是基础类型  bool/int/int64/double/string
+   2. 参数的类型是类       class
+   3. 参数的类型是数组     bool[]/int[]/int64[]/double[]/string[]
+   4. 参数的类型是类数组   class[]
+2. 函数返回          (Path: ./test/004-derive-function/return-value/*)
+   1. 返回值的类型是基础类型 bool/int/int64/double/string
+   2. 返回值的类型是类      class
+   3. 返回值的类型是数组    bool[]/int[]/int64[]/double[]/string[]
+   4. 返回值的类型是数组    class[]
+3. 全局变量
+   1. 变量的定义+初始化 (Path: ./test/011-global-variable/def-and-init-*)
+4. 局部变量
+   1. 变量的定义+初始化 (Path: ./test/012-local-variable/def-and-init-*)
+   
 
-1. 一个 package中 有多个 class定义, 超过255个
+5. function return class object ✅
+6. Pass class object as parameter to function ✅
+7. Pass string as parameters to function       ✅
+8.  Return class object from function        ✅
+9.  Return string from function          ✅
+10. Array & ClassObject
+11. Array & String  ✅
+12. Test array bool(global/local/argument/return)  ✅ 
+13. Test array int(global/local/argument/return)  ✅ 
+14. Test array double (global/local/argument/return)  ✅ 
+15. Test array string(global/local/argument/return)  ✅ 
+16. Test array class object(global/local/argument/return)
 
-1. 多维数组
-2. 多维数组中 是 class
+17. 一个 package中 有多个 class定义, 超过255个
+
+18. 多维数组
+19. 多维数组中 是 class
 
 -----------------------------
 
@@ -406,6 +434,8 @@ Usetime  = 1S
 7. 变量
    1. 全局变量的数量
    2. 局部变量的数量
+8. 函数定义
+   1. 返回值的数量不能超过 255
 
 -----------------------------
 
@@ -458,6 +488,82 @@ class-object  ✅
 ## 开发专项-丰富标准库
 
 
+-----------------------------
+
+
+## 2024-07-01周
+
+### A. 函数定义中，参数的名字和局部变量的名字不能一样，需要报错提示
+
+
+### B. 隐式类型和显式类型转化
+
+因为 存在 int/int64/double ，如何不及早的考虑这个问题，Ring还是不太易用。
+
+
+
+### C. 对于 function-call method-call 没有做详细语义检查，尤其是参数匹配
+
+### D. function/method 的参数/返回值 最大不能超过 8, 除了可变参数
+
+
+### E. 这样 会 报错优化
+
+./test/999-bug-list/class.ring    
+
+```
+var Job1 local_job1_value_0 = Job1{
+		Bool:   false,
+		Int:    0,
+		Int64:  0L,
+		Double: 0.0,
+		String: "",
+	};
+```
+
+
+这样不会报错：
+```
+var Job1 local_job1_value_0;
+	
+	local_job1_value_0 = Job1{
+		Bool:   false,
+		Int:    0,
+		Int64:  0L,
+		Double: 0.0,
+		String: "",
+	};
+```
+
+
+
+也就是说对于类，在定义变量并且初始化的过程中，会存在问题，需要在 fix_ast中看一看
+
+
+
+### F. 测试所有类型的 定义并初始化
+
+1. bool/int/int64/double/string  通过常量初始化，通过变量初始化
+2. class 通过常量初始化，通过变量初始化
+3. 数组 通过常量初始化，通过变量初始化
+
+
+
+### G. 测试所有类型的 赋值
+
+1. bool/int/int64/double/string  通过常量赋值，通过变量赋值
+2. class 通过常量赋值，通过变量赋值
+3. 数组 通过常量赋值，通过变量赋值
+
+
+
+### H. 编译需要提示
+
+```
+var int a,b = 1;
+```
+
+这种情况下需要报错提示。
 
 -----------------------------
 
@@ -475,6 +581,7 @@ class-object  ✅
 1. bison 如何支持并发编译
 2. 多个文件，语义分析的过程如何进行
 3. ./bin/ring run <file1> <file2>
+4. ./bin/ring run ./   找到当前文件下的所有 ring文件进行编译链接
 
 
 这个优化当前看来还有有点困难，是不是为时尚早？？？
@@ -623,7 +730,9 @@ func return_job_pointer() *Job {
 ### E. 当前只能在main package中定义全局变量, 
 
 如何在非main package中定义全局变量, 并能够在别的包中使用其他包的全局变量.
-涉及到一个问题: 全局变量如何排布. 
+涉及到一个问题: 
+1. 全局变量如何排布. 
+2. 全局变量的初始化顺序
 
 
 ### F. 当前只能在main package中定义 class
@@ -1042,6 +1151,14 @@ std::string tmp = std::string(dir);
 ```
 
 std::string(dir); 实现方式有问题.
+
+应该直接这样即可:
+
+```
+char *dir;
+
+std::string tmp = dir;
+```
 
 
 ### F. 函数中 return 语句的合法性检查, 检查和函数定义中的函数返回值是否一致 TODO:
@@ -2410,12 +2527,12 @@ TODO: ring dump 展示是否为多维数组
 如果对于一个二维数组 a[][], a[1] 其实是个一维数组, 还需要完善一下语义检查.
 
 var int[] a; // 一维数组
-var int[,] a; // 二位数组
-var int[,,] a; // 二位数组
+var int[,] a; // 二维数组
+var int[,,] a; // 三维数组
 
 new int[10];    // 创建一维数组
-new int[10,20]; // 创建二维数组
-new int[10,20,30]; // 创建二维数组
+new int[10,20]; // 创建二维数组 10*20
+new int[10,20,30]; // 创建三维数组 10\*20\*30
 
 a[1,2,3]; // 访问数组
 
@@ -3455,10 +3572,10 @@ global {
    2. 参考 《自己动手实现Lua：虚拟机、编译器和标准库》 1-13章
    3. 参考 https://github.com/GeneralSandman/luago-book
    4. 自己的项目 就是通过CPP来解析Lua的字节码
-   5. 项目地址：https://github.com/GeneralSandman/zhenhuli-lua-learn-node
+   5. 项目地址：https://github.com/GeneralSandman/GeneralSandman-lua-learn-node
 
 
-1. zhenhuli-lua-learn-node
+1. lua-learn-node
    1. 完成了第二章的学习，并可以顺利通过CPP完成对第二章要点的完全掌握。
 2. 对知乎专栏Lua模块精讲的学习
    1. Lua设计与实现 基于lua源码对其设计与具体实现进行剖析 https://www.zhihu.com/column/c_1097089416010567680

@@ -1,6 +1,6 @@
 //
 // File:    buildin.ring
-// Author:  zhenhuli - generalsandman@163.com
+// Author:  GeneralSandman - generalsandman@163.com
 // Date:    2024-07-01
 //
 

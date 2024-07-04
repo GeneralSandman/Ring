@@ -1,6 +1,6 @@
 //
 // File:    debug-stack-003.ring
-// Author:  zhenhuli - generalsandman@163.com
+// Author:  GeneralSandman - generalsandman@163.com
 // Date:    2023-12-13
 //
 
