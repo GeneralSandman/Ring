@@ -99,7 +99,11 @@ std::string fmt_array(RVM_Array* array_value) {
 
         switch (array_value->type) {
         case RVM_ARRAY_BOOL:
-            result += array_value->u.bool_array[i];
+            if (array_value->u.bool_array[i]) {
+                result += "true";
+            } else {
+                result += "false";
+            }
             break;
         case RVM_ARRAY_INT:
             result += std::to_string(array_value->u.int_array[i]);
