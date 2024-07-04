@@ -10,11 +10,6 @@ typedef class Job {
     field int     Int;
     field double  Double;
 
-    @constructor
-    method Job(var bool _Bool, var int _Int, var double _Double) {
-        
-    }
-
     method PrintInfo() {
         
     }

@@ -11,11 +11,6 @@ typedef class Job {
     field int     JobID;
     field double  Score;
 
-    @constructor
-    method Job(var bool _Running, var int _JobID, var double _Score) {
-        
-    }
-
     method PrintInfo() {
         
     }
