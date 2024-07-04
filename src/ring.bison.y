@@ -234,11 +234,10 @@ int yylex();
 %type <m_field_member> field_member
 %type <m_method_member> method_member
 
-%type <m_attribute_info> attribute_list_v2 attribute_v2
+%type <m_attribute_info> attribute_list attribute
 
 %type <m_type_specifier>        type_specifier class_type_specifier
 %type <m_basic_type_specifier>  basic_type_specifier 
-%type <m_attribute> attribute attribute_list
 
 %type <m_expression_type>      self_incr_decr_token
 
@@ -343,7 +342,7 @@ definition_or_statement
         debug_bison_info_with_green("[RULE::statement:function_definition]\t ");
         add_function_definition(nullptr, $1);
     }
-    | attribute_list_v2 function_definition
+    | attribute_list function_definition
     {
         debug_bison_info_with_green("[RULE::statement:function_definition]\t ");
         add_function_definition($1, $2);
@@ -374,15 +373,15 @@ class_member_declaration_list
     ;
 
 class_member_declaration
-    : attribute_list field_member
+    : field_member
     {
         debug_bison_info_with_green("[RULE::class_member_declaration:field_member]\t ");
-        $$ = create_class_member_field_declaration($1, $2);
+        $$ = create_class_member_field_declaration(ACCESS_PUBLIC, $1);
     }
-    | attribute_list method_member
+    | method_member
     {
         debug_bison_info_with_green("[RULE::class_member_declaration:method_member]\t ");
-        $$ = create_class_member_method_declaration($1, $2);
+        $$ = create_class_member_method_declaration(ACCESS_PUBLIC, $1);
     }
     ;
 
@@ -437,49 +436,18 @@ method_member
     }
     ;
 
-attribute_list // TODO: delete
-    : /* empty */
-    {
-        debug_bison_info_with_green("[RULE::attribute_list]\t ");
-        $$ = ATTRIBUTE_NONE;
-    }
-    | TOKEN_ATTRIBUTE attribute
-    {
-        debug_bison_info_with_green("[RULE::attribute_list]\t ");
-        $$ = $2;
-    }
-    ;
 
-attribute // TODO: delete
-    : TOKEN_CONSTRUCTOR 
-    {
-       $$ = CONSTRUCTOR; 
-    }
-    | TOKEN_PUBLIC 
-    {
-       $$ = ACCESS_PUBLIC; 
-    }
-    | TOKEN_PRIVATE
-    {
-       $$ = ACCESS_PRIVATE; 
-    }
-    | TOKEN_DELETE
-    {
-       $$ = ACCESS_DELETE; 
-    }
-    ;
-
-attribute_list_v2
-    : attribute_v2
+attribute_list
+    : attribute
     {
     }
-    | attribute_list_v2 attribute_v2
+    | attribute_list attribute
     {
         $$ = attribute_info_add_item($1, $2);
     }
     ;
 
-attribute_v2
+attribute
     : TOKEN_ATTRIBUTE IDENTIFIER
     {
         $$ = create_attribute_info($2);
