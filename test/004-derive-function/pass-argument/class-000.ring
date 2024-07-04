@@ -15,7 +15,8 @@ typedef class Job1 {
 }
 
 
-// TestDetail: 测试函数返回 bool 类型
+// TestDetail: derive函数传递class类型参数
+// TestDetail: 分别传递1-8个class类型参数
 @main
 function main() {
 
@@ -34,7 +35,7 @@ function main() {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	};
 
 	pass_1_job1(local_job1_value_0);

@@ -6,7 +6,8 @@ import {
 }
 
 
-// TestDetail: 测试函数返回 bool 类型
+// TestDetail: derive函数传递int64类型参数
+// TestDetail: 分别传递1-8个int64类型参数
 @main
 function main() {
 

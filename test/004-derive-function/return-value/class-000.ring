@@ -62,7 +62,7 @@ function return_1_job1_1() -> (Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	};
 }
 
@@ -80,7 +80,7 @@ function return_2_job1_0() -> (Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	};
 }
 function return_2_job1_1() -> (Job1,Job1) {
@@ -89,7 +89,7 @@ function return_2_job1_1() -> (Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -113,7 +113,7 @@ function return_3_job1_0() -> (Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -128,7 +128,7 @@ function return_3_job1_1() -> (Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -140,7 +140,7 @@ function return_3_job1_1() -> (Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	};
 }
 
@@ -158,7 +158,7 @@ function return_4_job1_0() -> (Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -170,7 +170,7 @@ function return_4_job1_0() -> (Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	};
 }
 function return_4_job1_1() -> (Job1,Job1,Job1,Job1) {
@@ -179,7 +179,7 @@ function return_4_job1_1() -> (Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -191,7 +191,7 @@ function return_4_job1_1() -> (Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -215,7 +215,7 @@ function return_5_job1_0() -> (Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -227,7 +227,7 @@ function return_5_job1_0() -> (Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -242,7 +242,7 @@ function return_5_job1_1() -> (Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -254,7 +254,7 @@ function return_5_job1_1() -> (Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -266,7 +266,7 @@ function return_5_job1_1() -> (Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	};
 }
 
@@ -284,7 +284,7 @@ function return_6_job1_0() -> (Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -296,7 +296,7 @@ function return_6_job1_0() -> (Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -308,7 +308,7 @@ function return_6_job1_0() -> (Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	};
 }
 function return_6_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1) {
@@ -317,7 +317,7 @@ function return_6_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -329,7 +329,7 @@ function return_6_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -341,7 +341,7 @@ function return_6_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -365,7 +365,7 @@ function return_7_job1_0() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -377,7 +377,7 @@ function return_7_job1_0() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -389,7 +389,7 @@ function return_7_job1_0() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -404,7 +404,7 @@ function return_7_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -416,7 +416,7 @@ function return_7_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -428,7 +428,7 @@ function return_7_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -440,7 +440,7 @@ function return_7_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	};
 }
 
@@ -458,7 +458,7 @@ function return_8_job1_0() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -470,7 +470,7 @@ function return_8_job1_0() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -482,7 +482,7 @@ function return_8_job1_0() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -494,7 +494,7 @@ function return_8_job1_0() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	};
 }
 function return_8_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
@@ -503,7 +503,7 @@ function return_8_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -515,7 +515,7 @@ function return_8_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -527,7 +527,7 @@ function return_8_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
@@ -539,7 +539,7 @@ function return_8_job1_1() -> (Job1,Job1,Job1,Job1,Job1,Job1,Job1,Job1) {
 		Int:    1,
 		Int64:  1L,
 		Double: 1.0,
-		String: "qscdevgt456",
+		String: "ring-v0.2.14-beta",
 	}, Job1{
 		Bool:   false,
 		Int:    0,
