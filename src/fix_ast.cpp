@@ -267,23 +267,25 @@ BEGIN:
 void add_declaration(Declaration* declaration, Block* block, FunctionTuple* func) {
     assert(declaration != nullptr);
 
-    Declaration* pos  = declaration;
-    Declaration* next = pos->next;
-    for (; pos != nullptr; pos = next) {
-        next      = pos->next;
-        pos->next = nullptr;
+    Declaration* decl_pos  = declaration;
+    Declaration* decl_next = decl_pos->next;
+    for (; decl_pos != nullptr; decl_pos = decl_next) {
+        decl_next      = decl_pos->next;
+        decl_pos->next = nullptr;
 
         // fix type specifier
-        fix_type_specfier(pos->type_specifier);
+        fix_type_specfier(decl_pos->type_specifier);
+
+        fix_expression(decl_pos->initializer, block, func);
 
 
         if (block != nullptr) {
             // 局部变量
             block->declaration_list =
-                declaration_list_add_item(block->declaration_list, pos);
+                declaration_list_add_item(block->declaration_list, decl_pos);
 
-            pos->variable_index = block->declaration_list_size++;
-            pos->is_local       = 1;
+            decl_pos->variable_index = block->declaration_list_size++;
+            decl_pos->is_local       = 1;
 
             // Ring-Compiler-Error-Report ERROR_TOO_MANY_LOCAL_VARIABLE
             if (block->declaration_list_size > 255) {
@@ -313,9 +315,9 @@ void add_declaration(Declaration* declaration, Block* block, FunctionTuple* func
         } else {
             // 全局变量
             PackageUnit* package_unit = get_package_unit();
-            pos->variable_index       = package_unit->global_declaration_list.size();
-            pos->is_local             = 0;
-            package_unit->global_declaration_list.push_back(pos);
+            decl_pos->variable_index  = package_unit->global_declaration_list.size();
+            decl_pos->is_local        = 0;
+            package_unit->global_declaration_list.push_back(decl_pos);
         }
     }
 }
