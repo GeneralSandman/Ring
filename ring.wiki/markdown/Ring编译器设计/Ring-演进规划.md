@@ -21,13 +21,15 @@
 
 ### 数据类型
 
-1. 基本数据类型: bool int double string
+1. 基本数据类型: bool int int64 double string
 2. 派生数据类型: array class
 3. array: 多维数组
 4. class: field(各种数据类型的嵌套组合, 循环定义), method
-5. 用法: 可见范围(全局变量、局部变量)、定义、初始化、赋值、copy、函数传递、gc、heap_size计算、类型转化、(是否要支持auto推断类型)
-6. Any类型
-7. 类型的强制转换 与 隐式转换
+5. tuple 元组
+6. 枚举类型
+7. 用法: 可见范围(全局变量、局部变量)、定义、初始化、赋值、copy、函数传递、gc、heap_size计算、类型转化、(是否要支持auto推断类型)
+8. Any类型
+9. 类型的强制转换 与 隐式转换
 
 ### 运算符
 
@@ -491,6 +493,68 @@ class-object  ✅
 -----------------------------
 
 
+## 2024-07-08周
+
+
+### A. 如何实现命令行传递参数
+
+
+1. golang 是这样实现的，通过 os.Args 全局变量
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main()  {
+    fmt.Println(os.Args)
+}
+```
+
+
+2. ring 打算这么实现
+
+```bash
+./bin/ring run ./test.ring a b c
+```
+
+main 的函数原型
+
+```ring
+function main(var string[] args)  {
+    fmt::println(len(args));
+    fmt::prrintln(args);
+}
+```
+
+如果不打算收集 args，这样的main函数也是可以的
+```ring
+function main(var string[] args)  {
+    fmt::println(len(args));
+    fmt::prrintln(args);
+}
+```
+
+
+### B. main 函数原型支持 Return, 强制要求
+
+```ring
+function main() -> (int) {
+    return 0;
+}
+```
+
+
+### B. string 支持 substr
+
+
+### C. 数组 支持 取 sub-array
+
+-----------------------------
+
+
 ## 2024-07-01周
 
 ### A. 函数定义中，参数的名字和局部变量的名字不能一样，需要报错提示
@@ -507,7 +571,7 @@ class-object  ✅
 ### D. function/method 的参数/返回值 最大不能超过 8, 除了可变参数
 
 
-### E. 这样 会 报错优化
+### E. BUG: 类 local变量命名+初始化 运行报错， ✅ 
 
 ./test/999-bug-list/class.ring    
 
@@ -537,8 +601,7 @@ var Job1 local_job1_value_0;
 
 
 
-也就是说对于类，在定义变量并且初始化的过程中，会存在问题，需要在 fix_ast中看一看
-
+在 fix_ast 中 未对 initializer 进行修正
 
 
 ### F. 测试所有类型的 定义并初始化
@@ -564,6 +627,309 @@ var int a,b = 1;
 ```
 
 这种情况下需要报错提示。
+
+### I. 现在全局变量不能进行初始化，需要用户手动调用init函数进行初始化
+
+当初为什么这么设计：
+
+1. 首先考虑局部变量的初始化流程：
+
+```
+function test() {
+    var int local_int = 1;
+}
+```
+
+那么他在生成test() 对应的字节码入下：
+```
+$test()    <./test/998-error-report/test.ring:18,20>
++Parameter:   0
++Local:       1
+ ├──var int              local_int           
++Instructions:
+ ├──*Num    *Instruction                  *Operand            *SourceLineNum    
+ ├──0       push_int_1byte                1                   19                
+ ├──1       pop_stack_int                 0                                     
+ ├──2       function_finish                                   20                
+```
+
+也就是说，他实现了两个行为，初始化local变量所需要的空间+执行assignment语句字节码
+如果函数被调用的时候，正好在函数中执行 assignment语句字节码。
+
+
+2. 考虑全局变量
+
+```
+global {
+	var int global_int = 1;
+}
+
+@main
+function main() {
+}
+
+```
+
+他生成的字节码是这样的：
+```
+#Constants:       0
+
+#Globals:       1
+ ├──var int              global_int          
+
+$main()    <./test/998-error-report/test.ring:19,20>
++Parameter:   0
++Local:       0
++Instructions:
+ ├──*Num    *Instruction                  *Operand            *SourceLineNum    
+ ├──0       function_finish                                   20        
+```
+
+
+也就是说，他没有跟局部变量 对应的assignment字节码，没有调用时机。
+除非手动 写一个 init() 函数，ring 需要在进程启动的时候，按照package的引用顺序，依次调用 init() 函数中
+或者说，这个 init() 函数应该是 隐式的，不需要用户手动书写。
+
+
+3. golang中全局变量初始化时机
+
+```
+在 Go 语言中,全局变量的初始化时机有以下几种情况:
+
+1. **包级别变量初始化**:
+   - 包级别的变量会在程序启动时被自动初始化。
+   - 初始化顺序是先初始化包级别的常量,然后再初始化包级别的变量。
+   - 包级别变量的初始化是按照它们在代码中出现的顺序进行的。
+
+2. **init() 函数初始化**:
+   - 每个 Go 包都可以包含一个或多个 `init()` 函数,这些函数会在包级别变量初始化完成后被自动调用。
+   - `init()` 函数可以用于执行一些复杂的初始化逻辑,比如读取配置文件、连接数据库等。
+   - 多个 `init()` 函数的调用顺序遵循包的依赖关系,被依赖的包的 `init()` 函数先被调用。
+
+3. **main 函数初始化**:
+   - 在 `main` 包中,所有的包级别变量和 `init()` 函数的初始化都会在 `main()` 函数执行之前完成。
+   - 在 `main()` 函数中,可以访问和使用已经初始化好的全局变量。
+
+总的来说,Go 语言中全局变量的初始化顺序是:包级别常量 -> 包级别变量 -> `init()` 函数 -> `main()` 函数。开发者需要注意这种初始化顺序,以确保全局变量能够正确地初始化和使用。
+```
+
+敲定Ring global变量 当前实现方式：
+
+1. 用户不能定义 init() 函数
+2. 虚拟机内部实现 __init() 函数
+3. __init() 函数中 只进行全局变量的初始化
+4. 还要考虑 __init()函数的 调用顺序
+5. 在 初始化虚拟机的时候，依次调用 __init() 函数
+6. 添加一个环境变量 RING_DEBUG=trace_init_func=1 可以看见 init函数的执行顺序
+   1. RING_DEBUG=trace_init_func=1 ./bin/ring run ./test.ring
+
+
+
+### M. main-package 引用了 b-package
+
+如果 b-packag 含有 main() 函数，那么这个函数是不会被调用的，
+被调用的只有 main-package 中的main函数
+
+不然会产生逻辑错误
+
+ring 需要做一下限制
+
+1. 只能在main-package中实现的main() 函数才能被调用
+2. main-package在最top，别的包不能 import 它，也就是说这样是不合法的
+   ```
+   import "main"
+
+   main::func_test();
+   ```
+3. 不能通过 main包名访问 main包中的函数/全局变量
+   ```
+   main::func_test();
+   ```
+
+
+
+### N. 调研/涉及 switch/match 语法
+
+
+### K. 调研 enum/const 如何实现。
+
+
+### Z. 调用 rust 元组tuple的语法逻辑
+
+```rust
+fn main() {
+    // 创建一个元组
+    let my_tuple = (42, 3.14, "hello");
+
+    // 访问元组中的元素
+    println!("Integer: {}", my_tuple.0);
+    println!("Float: {}", my_tuple.1);
+    println!("String: {}", my_tuple.2);
+
+    // 解构赋值
+    let (a, b, c) = my_tuple;
+    println!("a = {}, b = {}, c = {}", a, b, c);
+}
+```
+
+tuple也可以match：
+```rust
+fn main() {
+    let point = (3.0, 4.0);
+
+    match point {
+        (0.0, 0.0) => println!("Origin"),
+        (x, 0.0) => println!("X axis: {}", x),
+        (0.0, y) => println!("Y axis: {}", y),
+        (x, y) => println!("({{}, {}})", x, y),
+    }
+}
+```
+
+
+其他各个语言的tuple语法，https://llever.com/rust-ffi-omnibus/tuples/
+
+2. cpp 的 tuple，还是一如既往的复杂
+
+https://en.cppreference.com/w/cpp/utility/tuple
+
+```cpp
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+ 
+std::tuple<double, char, std::string> get_student(int id)
+{
+    switch (id)
+    {
+        case 0: return {3.8, 'A', "Lisa Simpson"};
+        case 1: return {2.9, 'C', "Milhouse Van Houten"};
+        case 2: return {1.7, 'D', "Ralph Wiggum"};
+        case 3: return {0.6, 'F', "Bart Simpson"};
+    }
+ 
+    throw std::invalid_argument("id");
+}
+ 
+int main()
+{
+    const auto student0 = get_student(0);
+    std::cout << "ID: 0, "
+              << "GPA: " << std::get<0>(student0) << ", "
+              << "grade: " << std::get<1>(student0) << ", "
+              << "name: " << std::get<2>(student0) << '\n';
+ 
+    const auto student1 = get_student(1);
+    std::cout << "ID: 1, "
+              << "GPA: " << std::get<double>(student1) << ", "
+              << "grade: " << std::get<char>(student1) << ", "
+              << "name: " << std::get<std::string>(student1) << '\n';
+ 
+    double gpa2;
+    char grade2;
+    std::string name2;
+    std::tie(gpa2, grade2, name2) = get_student(2);
+    std::cout << "ID: 2, "
+              << "GPA: " << gpa2 << ", "
+              << "grade: " << grade2 << ", "
+              << "name: " << name2 << '\n';
+ 
+    // C++17 structured binding:
+    const auto [gpa3, grade3, name3] = get_student(3);
+    std::cout << "ID: 3, "
+              << "GPA: " << gpa3 << ", "
+              << "grade: " << grade3 << ", "
+              << "name: " << name3 << '\n';
+}
+```
+
+### X. 设计Ring tuple 语法
+
+```ring
+
+var int a = 1;
+var b = (false, 0, 1L, 1.1, "a");
+
+b.0;
+b.1;
+b.2; // 访问 tuple中的元素
+
+
+typedef tuple Student = (bool,int,int64,double,string);
+
+
+function test0(var (bool,int,int64,double,string) a) -> ((bool,int,int64,double,string)) {
+
+}
+
+function test1(var Student a) -> (Student) {
+
+}
+
+
+
+```
+
+
+体外话：
+
+```ring
+typedef class Job1 = {
+    field bool    Bool;
+    field int     Int;
+	field int64   Int64;
+    field double  Double;
+    field string  String;
+}
+
+这样设计的话：是不是可以跟var 对齐
+
+var     int   int_value = 1;
+typedef class Job1      = {};
+
+typedef tuple Student   = (bool,int);
+
+```
+
+
+tuple 没有method，每个field没有名字
+
+### U. golang switch 和 rust match 功能比对
+
+
+
+Golang 的 `switch` 语句和 Rust 的 `match` 语句在功能上有一些相似之处,但也存在一些重要的区别。下面是它们的比较:
+
+1. **语法和结构**:
+   - Golang 的 `switch` 语句使用 `case` 关键字来匹配值,而 Rust 的 `match` 语句使用模式匹配。
+   - Golang 的 `switch` 语句默认会在匹配到第一个 `case` 后直接退出,而 Rust 的 `match` 语句会继续检查其他分支,除非使用 `break` 语句。
+
+2. **匹配表达式**:
+   - Golang 的 `switch` 语句可以匹配任意类型的表达式,包括整数、浮点数、字符串等。
+   - Rust 的 `match` 语句可以匹配任意类型的表达式,包括枚举、元组、结构体等复杂类型。
+
+3. **穿透(Fallthrough)**:
+   - Golang 的 `switch` 语句支持 `fallthrough` 关键字,允许执行下一个 `case` 分支,除非使用 `break` 语句。
+   - Rust 的 `match` 语句没有类似的 `fallthrough` 机制,每个分支都是独立的。
+
+4. **默认分支**:
+   - Golang 的 `switch` 语句支持 `default` 关键字来定义默认分支。
+   - Rust 的 `match` 语句使用 `_` 作为通配符来定义默认分支。
+
+5. **返回值**:
+   - Golang 的 `switch` 语句可以返回值,与其分支的返回值相关。
+   - Rust 的 `match` 语句必须在每个分支上都有返回值,以确保整个表达式有返回值。
+
+总的来说,Golang 的 `switch` 语句更加灵活和简单,适合处理单一值的匹配。而 Rust 的 `match` 语句更加强大和安全,能够处理复杂的模式匹配。Rust 的 `match` 语句也更加鼓励完整性和穷尽性检查,提高了代码的可读性和可维护性。
+
+
+### R. 调研 java match 字节码的实现逻辑
+
+### Y. 还要检查 main-package中是否含有main函数
+
+
+### T. 废弃bison中老的 attribute 相关的语法。 ✅ 
 
 -----------------------------
 
