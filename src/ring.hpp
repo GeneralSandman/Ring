@@ -309,6 +309,11 @@ struct Package {
     std::vector<PackageUnit*>                         package_unit_list;
 
     unsigned int                                      compile_error_num;
+
+    std::vector<std::string>                          shell_args;
+    // shell_args 只有 main-package 才会用到
+    // e.g.  ./bin/ring run ./test.ring args1 args2
+    // shell_args 就是 [args1, args2]
 };
 
 struct SourceLineInfo {
@@ -1682,11 +1687,12 @@ enum RING_COMMAND_TYPE {
 };
 
 struct Ring_Command_Arg {
-    RING_COMMAND_TYPE cmd;
+    RING_COMMAND_TYPE        cmd;
 
-    std::string       input_file_name; // run/dump/rdb
-    std::string       keyword;         // man
-    unsigned int      optimize_level;
+    std::string              input_file_name; // run/dump/rdb
+    std::string              keyword;         // man
+    unsigned int             optimize_level;
+    std::vector<std::string> shell_args;
 };
 
 

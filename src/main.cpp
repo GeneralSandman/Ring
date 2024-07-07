@@ -35,11 +35,12 @@ std::string command_help_message =
 
 
 Ring_Command_Arg ring_parse_command(int argc, char** argv) {
-    Ring_Command_Arg  args;
-    RING_COMMAND_TYPE cmd = RING_COMMAND_UNKNOW;
-    std::string       input_file_name;
-    std::string       keyword;
-    unsigned int      optimize_level = 0;
+    Ring_Command_Arg         args;
+    RING_COMMAND_TYPE        cmd = RING_COMMAND_UNKNOW;
+    std::string              input_file_name;
+    std::string              keyword;
+    unsigned int             optimize_level = 0;
+    std::vector<std::string> shell_args;
 
 
     // option
@@ -56,9 +57,14 @@ Ring_Command_Arg ring_parse_command(int argc, char** argv) {
     // rdb command
     auto rdb_rule = ((clipp::command(RING_CMD_T_RDB).set(cmd, RING_COMMAND_RDB), clipp::value("input_file_name", input_file_name)));
 
+    // shell args
+    // e.g.  ./bin/ring run ./test.ring args1 args2
+    // shell_args 就是 [args1, args2]
+    auto shell_args_rule = clipp::values("shell-args", shell_args);
+
 
     auto ring_command_rule =
-        ((option_rule, run_rule | dump_rule | rdb_rule)
+        ((option_rule, run_rule | dump_rule | rdb_rule, shell_args_rule)
          | (clipp::command(RING_CMD_T_MAN).set(cmd, RING_COMMAND_MAN), clipp::value("keyword", keyword))
          | clipp::command(RING_CMD_T_VERSION).set(cmd, RING_COMMAND_VERSION)
          | clipp::command(RING_CMD_T_HELP).set(cmd, RING_COMMAND_HELP));
@@ -69,6 +75,16 @@ Ring_Command_Arg ring_parse_command(int argc, char** argv) {
     // printf("input_file_name:%s\n", input_file_name.c_str());
     // printf("keyword:%s\n", keyword.c_str());
     // printf("optimize_level:%d\n", optimize_level);
+    // printf("shell_args:\n");
+    // for (int i = 0; i < shell_args.size(); i++) {
+    //     printf("[i]:%s\n", shell_args[i].c_str());
+    // }
+
+    if (cmd == RING_COMMAND_RUN
+        || cmd == RING_COMMAND_DUMP
+        || cmd == RING_COMMAND_RDB) {
+        // shell_args.insert(shell_args.begin(), input_file_name);
+    }
 
 
     args = Ring_Command_Arg{
@@ -76,6 +92,7 @@ Ring_Command_Arg ring_parse_command(int argc, char** argv) {
         .input_file_name = input_file_name,
         .keyword         = keyword,
         .optimize_level  = optimize_level,
+        .shell_args      = shell_args,
     };
 
     return args;
@@ -164,6 +181,10 @@ int main(int argc, char** argv) {
     Package* main_package = package_create_input_file(compiler_entry,
                                                       (char*)"main",
                                                       (char*)ring_command_arg.input_file_name.c_str());
+    // 将 shell_args 注册到 main-package 中
+    // 在 main函数中可以通过这种方式获取:
+    // func main(var string[] args) { fmt::println(args); }
+    main_package->shell_args = ring_command_arg.shell_args;
     // TODO: optimize the method of set main_package;
     compiler_entry->main_package = main_package;
 

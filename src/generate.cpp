@@ -425,8 +425,18 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
         // exit code
         RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
         // FIXME: (package->compiler_entry->package_list.size() - 1) << 8) 这里要修正一下
+
+        // FIXME: 这里 shell_args 是否应该被释放, 不然 constant_pool 内存会变为invaid pointor
+        for (unsigned int i = 0; i < package->shell_args.size(); i++) {
+            int index = constant_pool_add_string(executer, package->shell_args[i].c_str());
+            generate_vmcode(executer, opcode_buffer,
+                            RVM_CODE_PUSH_STRING, index, 0);
+        }
         generate_vmcode(executer, opcode_buffer,
-                        RVM_CODE_ARGUMENT_NUM, 0, 0);
+                        RVM_CODE_NEW_ARRAY_LITERAL_STRING, package->shell_args.size(), 0);
+
+        generate_vmcode(executer, opcode_buffer,
+                        RVM_CODE_ARGUMENT_NUM, 1, 0);
         generate_vmcode(executer, opcode_buffer,
                         RVM_CODE_PUSH_FUNC,
                         ((package->compiler_entry->package_list.size() - 1) << 8) | executer->main_func_index, 0);
