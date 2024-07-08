@@ -5,6 +5,13 @@
  ├──var int              int_value_global_1  
  ├──var int              int_value_global_2  
 
+$__global_init()    <./test/004-derive-function/function-011.ring:0,0>
++Parameter:   0
++Local:       0
++Instructions:
+ ├──*Num    *Instruction                  *Operand            *SourceLineNum    
+ ├──0       function_finish                                                     
+
 $test_1(var int, var int)    <./test/004-derive-function/function-011.ring:19,30>
 +Parameter:   2
  ├──var int              int_value_1         
@@ -63,7 +70,7 @@ $main()    <./test/004-derive-function/function-011.ring:33,42>
  ├──12      push_int_1byte                123                 37                
  ├──13      push_int_1byte                234                                   
  ├──14      argument_num                  2                                     
- ├──15      push_func                     1536                                  
+ ├──15      push_func                     1537                                  
  ├──16      invoke_func                                                         
  ├──17      deep_copy                     1, 1                                  
  ├──18      pop_static_int                1                                     

@@ -6,6 +6,13 @@
 #Globals:       1
  ├──var int              int_value_global    
 
+$__global_init()    <./test/004-derive-function/function-003.ring:0,0>
++Parameter:   0
++Local:       0
++Instructions:
+ ├──*Num    *Instruction                  *Operand            *SourceLineNum    
+ ├──0       function_finish                                                     
+
 $func_use_global_variable()    <./test/004-derive-function/function-003.ring:18,28>
 +Parameter:   0
 +Local:       0
@@ -107,7 +114,7 @@ $main()    <./test/004-derive-function/function-003.ring:34,60>
  ├──44      push_func                     516                                   
  ├──45      invoke_func_native                                                  
  ├──46      argument_num                  0                   47                
- ├──47      push_func                     1536                                  
+ ├──47      push_func                     1537                                  
  ├──48      invoke_func                                                         
  ├──49      push_string                   1                   48                
  ├──50      argument_num                  1                                     

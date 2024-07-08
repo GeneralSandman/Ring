@@ -1,0 +1,6 @@
+true false
+1 2
+655367 655368
+655367655367.000000 655367655367.123047
+ring-v0.2.14-release ring-v0.2.14-beta
+{Bool:true Int:1 Int64:2 Double:3.000000 String:local_job1_value_0} {Bool:false Int:11 Int64:12 Double:13.000000 String:local_job1_value_1}

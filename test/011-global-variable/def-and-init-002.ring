@@ -6,23 +6,6 @@ import {
 }
 
 global {
-	
-}
-
-typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
-}
-
-
-// TestDetail: 测试 bool/int/int64/double/string/class 类型变量的定义和初始化
-// TestDetail: 均为局部变量
-@main
-function main() {
-
 	var bool   local_bool_value_0,   local_bool_value_1,   local_bool_value_2   = true, false, true;
 	var int    local_int_value_0,    local_int_value_1,    local_int_value_2    = 1, 2, 3;
 	var int64  local_int64_value_0,  local_int64_value_1,  local_int64_value_2  = 655367L, 655368L, 655369L;
@@ -50,6 +33,21 @@ function main() {
 			Double: 23.0,
 			String: "local_job1_value_2",
 		};
+}
+
+typedef class Job1 {
+    field bool    Bool;
+    field int     Int;
+	field int64   Int64;
+    field double  Double;
+    field string  String;
+}
+
+
+// TestDetail: 测试 bool/int/int64/double/string/class 类型变量的定义和初始化
+// TestDetail: 均为全局变量
+@main
+function main() {
 
 	fmt::println(local_bool_value_0,   local_bool_value_1,   local_bool_value_2);
 	fmt::println(local_int_value_0,    local_int_value_1,    local_int_value_2);
