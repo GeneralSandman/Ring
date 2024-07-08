@@ -276,7 +276,10 @@ struct Package_Executer {
     unsigned int         code_size;
     RVM_Byte*            code_list;
 
+    bool                 exist_main_func;
     unsigned int         main_func_index;
+    bool                 exist_global_init_func;
+    unsigned int         global_init_func_index;
 
     unsigned int         estimate_runtime_stack_capacity;
 };
@@ -289,14 +292,22 @@ struct Package_Executer {
  * 一个 Package 可以有多个 PackageUnit
  */
 struct Package {
-    CompilerEntry*                                    compiler_entry;
-    unsigned int                                      package_index; // 在 CompilerEntry 中的 index
-    char*                                             package_name;
-    char*                                             package_path;
+    CompilerEntry*           compiler_entry;
+    unsigned int             package_index; // 在 CompilerEntry 中的 index
+    char*                    package_name;
+    char*                    package_path;
 
-    std::vector<std::string>                          source_file_list;
+    std::vector<std::string> source_file_list;
 
+    // 当前 一个 package中只能有一个源文件，所以当前的设计是符合要求的
+    // 如果后续 一个packag中含有多个源文件，可能得需要这样设计：
+    // std::vecotr<<std::pair<unsigned int, Statment*>>  global_decl_list;
+    // 代表了 该package下所有的 global变量，分布在 多个 global{} 块中。
+    // pair.first 是 size
+    // pair.second 就是 global_statement_list
+    std::vector<std::pair<unsigned int, Statement*>>  global_block_statement_list;
     std::vector<Declaration*>                         global_declaration_list;
+
     std::vector<ClassDefinition*>                     class_definition_list;
     std::vector<Function*>                            function_list;
 
@@ -352,7 +363,6 @@ struct PackageUnit {
 
     unsigned int                    global_block_statement_list_size;
     Statement*                      global_block_statement_list;
-    std::vector<Declaration*>       global_declaration_list;
 
     std::vector<ClassDefinition*>   class_definition_list;
     std::vector<Function*>          function_list;
@@ -2374,11 +2384,12 @@ void ring_compiler_check_exit(Package* package);
  *
  */
 void             ring_compiler_fix_ast(Package* package);
+Function*        create_global_init_func(Package* package);
 void             fix_function_definition(Function* func);
 void             fix_statement_list(Statement* statement_list, Block* block, FunctionTuple* func);
 void             fix_statement(Statement* statement, Block* block, FunctionTuple* func);
 void             fix_expression(Expression* expression, Block* block, FunctionTuple* func);
-void             add_declaration(Declaration* declaration, Block* block, FunctionTuple* func);
+void             add_local_declaration(Declaration* declaration, Block* block, FunctionTuple* func);
 void             fix_type_specfier(TypeSpecifier* type_specifier);
 void             fix_block(Block* block, FunctionTuple* func);
 void             fix_if_statement(IfStatement* if_statement, Block* block, FunctionTuple* func);

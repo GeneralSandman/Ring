@@ -24,7 +24,10 @@ Package_Executer* package_executer_create(ExecuterEntry* executer_entry,
     executer->function_list                   = nullptr;
     executer->code_size                       = 0;
     executer->code_list                       = nullptr;
-    executer->main_func_index                 = -1;
+    executer->exist_main_func                 = false;
+    executer->main_func_index                 = 0;
+    executer->exist_global_init_func          = false;
+    executer->global_init_func_index          = -1;
     executer->estimate_runtime_stack_capacity = 0;
     return executer;
 }
@@ -169,16 +172,18 @@ void add_functions(Package* package, Package_Executer* executer) {
     executer->function_list = (RVM_Function*)mem_alloc(NULL_MEM_POOL,
                                                        sizeof(RVM_Function) * executer->function_size);
 
-    unsigned int i          = 0;
-    // 暂时只处理 native function
-    for (Function* pos : package->function_list) {
-        copy_function(executer, &(executer->function_list[i]), pos);
+    for (unsigned int i = 0; i < package->function_list.size(); i++) {
+        copy_function(executer, &(executer->function_list[i]), package->function_list[i]);
         // 注册main函数
-        if (str_eq(pos->identifier, "main")) {
+        if (str_eq(package->function_list[i]->identifier, "main")) {
             // printf("find main:%d\n", i);
+            executer->exist_main_func = true;
             executer->main_func_index = i;
+        } else if (str_eq(package->function_list[i]->identifier, "__global_init")) {
+            // printf("find __global_init:%d\n", i);
+            executer->exist_global_init_func = true;
+            executer->global_init_func_index = i;
         }
-        i++;
     }
 }
 
@@ -413,48 +418,74 @@ void copy_field(Package_Executer* executer, RVM_Field* dst, FieldMember* src) {
     type_specifier_deep_copy(dst->type_specifier, src->type_specifier);
 }
 
+void add_global_init_func(Package* package, Package_Executer* executer) {
+    debug_generate_info_with_darkgreen("\t");
+}
+
 void add_top_level_code(Package* package, Package_Executer* executer) {
     debug_generate_info_with_darkgreen("\t");
 
-    // FIXME: executer->main_func_index is unsigned int
-    if (executer->main_func_index != -1) {
-        // printf("executer->main_func_index\n");
-        // 生成一下字节码
-        // 找到main函数
-        // 调用 main 函数
-        // exit code
-        RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
-        // FIXME: (package->compiler_entry->package_list.size() - 1) << 8) 这里要修正一下
+    if (!executer->exist_main_func) {
+        // TODO: error report
+        // main-package 中 必须含有 main函数
+        return;
+    }
 
-        // FIXME: 这里 shell_args 是否应该被释放, 不然 constant_pool 内存会变为invaid pointor
-        for (unsigned int i = 0; i < package->shell_args.size(); i++) {
-            int index = constant_pool_add_string(executer, package->shell_args[i].c_str());
-            generate_vmcode(executer, opcode_buffer,
-                            RVM_CODE_PUSH_STRING, index, 0);
-        }
-        generate_vmcode(executer, opcode_buffer,
-                        RVM_CODE_NEW_ARRAY_LITERAL_STRING, package->shell_args.size(), 0);
+    RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
+    // FIXME: (package->compiler_entry->package_list.size() - 1) << 8) 需要统一修正一下
 
+
+    // step-1. 生成调用 __global_init() 函数相关的字节码
+    // 字节码：
+    //   argument_num
+    //   push_func
+    //   invoke_func
+    if (executer->exist_global_init_func) {
         generate_vmcode(executer, opcode_buffer,
-                        RVM_CODE_ARGUMENT_NUM, 1, 0);
+                        RVM_CODE_ARGUMENT_NUM, 0, 0);
         generate_vmcode(executer, opcode_buffer,
                         RVM_CODE_PUSH_FUNC,
-                        ((package->compiler_entry->package_list.size() - 1) << 8) | executer->main_func_index, 0);
+                        ((package->compiler_entry->package_list.size() - 1) << 8)
+                            | executer->global_init_func_index,
+                        0);
         generate_vmcode(executer, opcode_buffer,
                         RVM_CODE_INVOKE_FUNC, 0, 0);
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
-
-        executer->code_list = opcode_buffer->code_list;
-        executer->code_size = opcode_buffer->code_size;
-    } else {
-        // 必须有main函数
-        // RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
-        // generate_vmcode_from_statement_list(executer, nullptr, package->statement_list, opcode_buffer);
-        // opcode_buffer_fix_label(opcode_buffer);
-
-        // executer->code_list = opcode_buffer->code_list;
-        // executer->code_size = opcode_buffer->code_size;
     }
+
+
+    // step-2. 生成调用 main(var string[] args) 函数相关的字节码
+    // 字节码：
+    //   push_string
+    //   push_string
+    //   new_array_literal_string
+    //   argument_num
+    //   push_func
+    //   invoke_func
+    for (unsigned int i = 0; i < package->shell_args.size(); i++) {
+        // FIXME: 这里 shell_args 是否应该被释放, 不然 constant_pool 内存会变为invaid pointor
+        int index = constant_pool_add_string(executer, package->shell_args[i].c_str());
+        generate_vmcode(executer, opcode_buffer,
+                        RVM_CODE_PUSH_STRING, index, 0);
+    }
+    generate_vmcode(executer, opcode_buffer,
+                    RVM_CODE_NEW_ARRAY_LITERAL_STRING, package->shell_args.size(), 0);
+
+    generate_vmcode(executer, opcode_buffer,
+                    RVM_CODE_ARGUMENT_NUM, 1, 0);
+    generate_vmcode(executer, opcode_buffer,
+                    RVM_CODE_PUSH_FUNC,
+                    ((package->compiler_entry->package_list.size() - 1) << 8)
+                        | executer->main_func_index,
+                    0);
+    generate_vmcode(executer, opcode_buffer,
+                    RVM_CODE_INVOKE_FUNC, 0, 0);
+
+    // step-3. exit 字节码
+    // exit operand 应该从 main() 函数的返回值中捕获
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
+
+    executer->code_list = opcode_buffer->code_list;
+    executer->code_size = opcode_buffer->code_size;
 }
 
 void generate_code_from_function_definition(Package_Executer* executer,

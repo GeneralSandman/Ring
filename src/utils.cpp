@@ -129,10 +129,10 @@ void ring_compiler_functions_dump(PackageUnit* package_unit) {
     int          i = 0;
     int          j = 0;
 
-    for (Declaration* decl : package_unit->global_declaration_list) {
-        printf("global-variable: name:%s\n", decl->identifier);
-    }
-    printf("\n");
+    // for (Declaration* decl : package_unit->global_declaration_list) {
+    //     printf("global-variable: name:%s\n", decl->identifier);
+    // }
+    // printf("\n");
 
     for (Function* func : package_unit->function_list) {
         printf("function[%d]: name:%s\n", i, func->identifier);
@@ -532,7 +532,7 @@ void dump_vm_function(Package_Executer*    package_executer,
 
         for (unsigned int i = 0; i < code_size; opcode_num++) {
             std::string source_code_line_number;
-            if (i == code_line_map[code_line_map_index].opcode_begin_index) {
+            if (code_line_map_index < code_line_map.size() && i == code_line_map[code_line_map_index].opcode_begin_index) {
                 source_code_line_number = std::to_string(code_line_map[code_line_map_index].line_number);
                 code_line_map_index++;
             }

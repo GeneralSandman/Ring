@@ -13,18 +13,6 @@ void finish_global_block(Statement* global_statement_list) {
     for (; global_statement_list != nullptr; global_statement_list = global_statement_list->next) {
         get_package_unit()->global_block_statement_list_size++;
     }
-
-    // 将全局变量 添加到 package_unit->global_declaration_list 上
-    for (Statement* statement = get_package_unit()->global_block_statement_list; statement; statement = statement->next) {
-        switch (statement->type) {
-        case STATEMENT_TYPE_DECLARATION:
-            add_declaration(statement->u.declaration_statement, nullptr, nullptr);
-            break;
-        default:
-            ring_error_report("error statement->type:%d in global statement list\n", statement->type);
-            break;
-        }
-    }
 }
 
 Statement* statement_list_add_item(Statement* statement_list, Statement* statement) {
@@ -623,7 +611,7 @@ Function* create_function_definition(FunctionType        type,
 
     function->next                = nullptr;
 
-    function->func_index          = get_package_unit()->function_list.size();
+    function->func_index          = 0; // UPDATED_BY_FIX_AST
     function->type                = type;
 
 

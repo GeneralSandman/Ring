@@ -123,28 +123,30 @@ Package* package_create(CompilerEntry* compiler_entry,
     assert(compiler_entry != nullptr);
     debug_ast_info_with_yellow("\t package[%s] create", package_name);
 
-    Package* package                 = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
+    Package* package                     = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
 
-    package->compiler_entry          = compiler_entry;
-    package->package_index           = -1; // after: 这个应该在 fix的时候 设置
-    package->package_name            = package_name;
-    package->package_path            = package_path;
+    package->compiler_entry              = compiler_entry;
+    package->package_index               = -1; // UPDATED_BY_FIX_AST
+    package->package_name                = package_name;
+    package->package_path                = package_path;
 
-    package->source_file_list        = list_files_of_dir(package_path);
+    package->source_file_list            = list_files_of_dir(package_path);
 
-    package->global_declaration_list = std::vector<Declaration*>{};
-    package->class_definition_list   = std::vector<ClassDefinition*>{};
-    package->function_list           = std::vector<Function*>{};
+    package->global_block_statement_list = std::vector<std::pair<unsigned int, Statement*>>{};
+    package->global_declaration_list     = std::vector<Declaration*>{};
 
-    package->global_identifier_map   = std::unordered_set<std::string>{};
-    package->global_declaration_map  = std::unordered_map<std::string, Declaration*>{};
-    package->class_definition_map    = std::unordered_map<std::string, ClassDefinition*>{};
-    package->function_map            = std::unordered_map<std::string, Function*>{};
-    package->import_package_map      = std::unordered_map<std::string, std::string>{};
+    package->class_definition_list       = std::vector<ClassDefinition*>{};
+    package->function_list               = std::vector<Function*>{};
 
-    package->package_unit_list       = std::vector<PackageUnit*>{};
+    package->global_identifier_map       = std::unordered_set<std::string>{};
+    package->global_declaration_map      = std::unordered_map<std::string, Declaration*>{};
+    package->class_definition_map        = std::unordered_map<std::string, ClassDefinition*>{};
+    package->function_map                = std::unordered_map<std::string, Function*>{};
+    package->import_package_map          = std::unordered_map<std::string, std::string>{};
 
-    package->compile_error_num       = 0;
+    package->package_unit_list           = std::vector<PackageUnit*>{};
+
+    package->compile_error_num           = 0;
 
     return package;
 }
@@ -157,28 +159,30 @@ Package* package_create_input_file(CompilerEntry* compiler_entry,
     assert(compiler_entry != nullptr);
     debug_ast_info_with_yellow("\t package[%s] create", package_name);
 
-    Package* package                 = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
+    Package* package                     = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
 
-    package->compiler_entry          = compiler_entry;
-    package->package_index           = -1; // after: 这个应该在 fix的时候 设置
-    package->package_name            = package_name;
-    package->package_path            = nullptr;
+    package->compiler_entry              = compiler_entry;
+    package->package_index               = -1; // UPDATED_BY_FIX_AST
+    package->package_name                = package_name;
+    package->package_path                = nullptr;
 
-    package->source_file_list        = std::vector<std::string>{std::string(input_main_file)};
+    package->source_file_list            = std::vector<std::string>{std::string(input_main_file)};
 
-    package->global_declaration_list = std::vector<Declaration*>{};
-    package->class_definition_list   = std::vector<ClassDefinition*>{};
-    package->function_list           = std::vector<Function*>{};
+    package->global_block_statement_list = std::vector<std::pair<unsigned int, Statement*>>{};
+    package->global_declaration_list     = std::vector<Declaration*>{};
 
-    package->global_identifier_map   = std::unordered_set<std::string>{};
-    package->global_declaration_map  = std::unordered_map<std::string, Declaration*>{};
-    package->class_definition_map    = std::unordered_map<std::string, ClassDefinition*>{};
-    package->function_map            = std::unordered_map<std::string, Function*>{};
-    package->import_package_map      = std::unordered_map<std::string, std::string>{};
+    package->class_definition_list       = std::vector<ClassDefinition*>{};
+    package->function_list               = std::vector<Function*>{};
 
-    package->package_unit_list       = std::vector<PackageUnit*>{};
+    package->global_identifier_map       = std::unordered_set<std::string>{};
+    package->global_declaration_map      = std::unordered_map<std::string, Declaration*>{};
+    package->class_definition_map        = std::unordered_map<std::string, ClassDefinition*>{};
+    package->function_map                = std::unordered_map<std::string, Function*>{};
+    package->import_package_map          = std::unordered_map<std::string, std::string>{};
 
-    package->compile_error_num       = 0;
+    package->package_unit_list           = std::vector<PackageUnit*>{};
+
+    package->compile_error_num           = 0;
 
 
     return package;
@@ -211,9 +215,38 @@ void package_compile(Package* package) {
     }
 
     for (PackageUnit* package_unit : package->package_unit_list) {
-        for (Declaration* decl : package_unit->global_declaration_list) {
-            package->global_declaration_list.push_back(decl);
+
+        // 处理每个源文件中的全局变量
+        // 这里没有处理 命名顺序
+        if (package_unit->global_block_statement_list_size) {
+            package->global_block_statement_list.push_back(
+                std::pair<unsigned int, Statement*>(package_unit->global_block_statement_list_size,
+                                                    package_unit->global_block_statement_list));
         }
+
+        for (Statement* statement = package_unit->global_block_statement_list; statement; statement = statement->next) {
+            switch (statement->type) {
+            case STATEMENT_TYPE_DECLARATION: {
+                Declaration* decl_pos = statement->u.declaration_statement;
+                for (; decl_pos != nullptr; decl_pos = decl_pos->next) {
+
+                    fix_type_specfier(decl_pos->type_specifier);
+                    fix_expression(decl_pos->initializer, nullptr, nullptr);
+
+
+                    // 添加全局变量
+                    decl_pos->variable_index = package->global_declaration_list.size();
+                    decl_pos->is_local       = 0;
+                    package->global_declaration_list.push_back(decl_pos);
+                }
+            } break;
+            default:
+                ring_error_report("error statement->type:%d in global statement list\n", statement->type);
+                break;
+            }
+        }
+
+
         for (ClassDefinition* pos : package_unit->class_definition_list) {
             package->class_definition_list.push_back(pos);
         }
@@ -287,7 +320,6 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
 
     g_package_unit->global_block_statement_list_size = 0;
     g_package_unit->global_block_statement_list      = nullptr;
-    g_package_unit->global_declaration_list          = std::vector<Declaration*>{};
 
     g_package_unit->class_definition_list            = std::vector<ClassDefinition*>{};
     g_package_unit->function_list                    = std::vector<Function*>{};
@@ -350,10 +382,10 @@ void package_unit_dump(PackageUnit* package_unit) {
 
     printf("|## file_name: %s%s%s\n", LOG_COLOR_GREEN, package_unit->current_file_name.c_str(), LOG_COLOR_CLEAR);
 
-    printf("|## Declaration:\n");
-    for (Declaration* decl : package_unit->global_declaration_list) {
-        printf("|\tdeclaration global-variable: identifier:%s\n", decl->identifier);
-    }
+    // printf("|## Declaration:\n");
+    // for (Declaration* decl : package_unit->global_declaration_list) {
+    //     printf("|\tdeclaration global-variable: identifier:%s\n", decl->identifier);
+    // }
 
     printf("|## ClassDefinition:\n");
     for (auto class_definition : package_unit->class_definition_list) {

@@ -66,18 +66,118 @@ extern Ring_Command_Arg ring_command_arg;
 
 //
 void ring_compiler_fix_ast(Package* package) {
-    // fix class list
+
+    // step-1. fix class list
     unsigned int class_index = 0;
     for (ClassDefinition* class_def : package->class_definition_list) {
         class_def->class_index = class_index++;
         fix_class_definition(class_def);
     }
 
+    // step-2. fix global init statement
+    // 添加一个 __global_init() 函数
+    // 专门用来对全局变量的初始化
+    // TODO: 当前一个package中只能有一个文件, 所以当前的实现暂时没有什么问题
+    // TODO: global_init_func 应该根据 有无 global{} 块 针对性生成
+    Function*  global_init_func = create_global_init_func(package);
+    Statement* global_statement = nullptr;
+    if (global_init_func != nullptr) {
+        // global_init() 放在最开始的位置，重新开始修正 func_index
+        package->function_list.insert(package->function_list.begin(), global_init_func);
 
-    // fix function list
+        global_statement = global_init_func->block->statement_list;
+    }
+    // TODO: 这里还应该继续优化一下
+    // 不能只看 有没有 statement_list
+    // 对于这种情况，也不能生成 __global_init 函数
+    // e.g.  global { var bool bool_value; }
+    // 因为他没有对应的 initilizer, 所以不需要生成
+    for (; global_statement; global_statement = global_statement->next) {
+        switch (global_statement->type) {
+        case STATEMENT_TYPE_DECLARATION: {
+            Declaration* declaration = global_statement->u.declaration_statement;
+            for (; declaration != nullptr; declaration = declaration->next) {
+                fix_type_specfier(declaration->type_specifier);
+                fix_expression(declaration->initializer, nullptr, nullptr);
+            }
+        } break;
+        default:
+            // TODO: error-report
+            break;
+        }
+    }
+
+
+    // step-3. fix function list
+    unsigned int func_index = 0;
     for (Function* func : package->function_list) {
+        func->func_index = func_index++;
+        if (str_eq(func->identifier, "__global_init")) {
+            continue;
+        }
         fix_function_definition(func);
     }
+}
+
+Function* create_global_init_func(Package* package) {
+
+    if (package->global_block_statement_list.empty()) {
+        return nullptr;
+    }
+
+    Block* block                       = (Block*)mem_alloc(get_front_mem_pool(), sizeof(Block));
+    block->line_number                 = 0;
+    block->type                        = BLOCK_TYPE_UNKNOW;
+    block->declaration_list_size       = 0;
+    block->declaration_list            = nullptr;
+    block->statement_list_size         = 0;
+    block->statement_list              = nullptr;
+    block->parent_block                = nullptr;
+    block->block_labels.break_label    = 0;
+    block->block_labels.continue_label = 0;
+
+    unsigned int all_statement_size    = 0;
+    Statement*   all_statement         = nullptr;
+    Statement*   prev                  = nullptr;
+    // 处理每个源文件中的全局变量
+    // 这里没有处理 命名顺序
+    for (std::pair<unsigned int, Statement*> tuple : package->global_block_statement_list) {
+        unsigned int statement_list_size = tuple.first;
+        Statement*   statement_list      = tuple.second;
+
+        all_statement_size += statement_list_size;
+        for (; statement_list; statement_list = statement_list->next) {
+            if (prev == nullptr) {
+                all_statement = statement_list;
+            } else {
+                prev->next = statement_list;
+            }
+
+            prev = statement_list;
+        }
+    }
+
+    block->statement_list         = all_statement;
+    block->statement_list_size    = all_statement_size;
+
+
+    Function* function            = (Function*)mem_alloc(get_front_mem_pool(), sizeof(Function));
+    function->source_file         = package_unit_get_file_name();
+    function->start_line_number   = 0;
+    function->end_line_number     = 0;
+    function->package             = package;
+    function->ring_file_stat      = nullptr;
+    function->identifier          = (char*)"__global_init";
+    function->parameter_list_size = 0;
+    function->parameter_list      = nullptr;
+    function->return_list_size    = 0;
+    function->return_list         = nullptr;
+    function->block               = block;
+    function->next                = nullptr;
+    function->func_index          = 0;
+    function->type                = FUNCTION_TYPE_DERIVE;
+
+    return function;
 }
 
 
@@ -110,7 +210,7 @@ void fix_statement(Statement* statement, Block* block, FunctionTuple* func) {
         fix_expression(statement->u.expression, block, func);
         break;
     case STATEMENT_TYPE_DECLARATION:
-        add_declaration(statement->u.declaration_statement, block, func);
+        add_local_declaration(statement->u.declaration_statement, block, func);
         break;
 
     case STATEMENT_TYPE_IF:
@@ -264,8 +364,9 @@ BEGIN:
     goto BEGIN;
 }
 
-void add_declaration(Declaration* declaration, Block* block, FunctionTuple* func) {
+void add_local_declaration(Declaration* declaration, Block* block, FunctionTuple* func) {
     assert(declaration != nullptr);
+    assert(block != nullptr);
 
     Declaration* decl_pos  = declaration;
     Declaration* decl_next = decl_pos->next;
@@ -279,45 +380,37 @@ void add_declaration(Declaration* declaration, Block* block, FunctionTuple* func
         fix_expression(decl_pos->initializer, block, func);
 
 
-        if (block != nullptr) {
-            // 局部变量
-            block->declaration_list =
-                declaration_list_add_item(block->declaration_list, decl_pos);
+        // 添加局部变量
+        block->declaration_list =
+            declaration_list_add_item(block->declaration_list, decl_pos);
 
-            decl_pos->variable_index = block->declaration_list_size++;
-            decl_pos->is_local       = 1;
+        decl_pos->variable_index = block->declaration_list_size++;
+        decl_pos->is_local       = 1;
 
-            // Ring-Compiler-Error-Report ERROR_TOO_MANY_LOCAL_VARIABLE
-            if (block->declaration_list_size > 255) {
-                DEFINE_ERROR_REPORT_STR;
+        // Ring-Compiler-Error-Report ERROR_TOO_MANY_LOCAL_VARIABLE
+        if (block->declaration_list_size > 255) {
+            DEFINE_ERROR_REPORT_STR;
 
-                snprintf(compile_err_buf, sizeof(compile_err_buf),
-                         "the number of local variable is greater than 255 in this block; E:%d.",
-                         ERROR_TOO_MANY_LOCAL_VARIABLES);
-                snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                         "delete useless local variable in this block.");
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "the number of local variable is greater than 255 in this block; E:%d.",
+                     ERROR_TOO_MANY_LOCAL_VARIABLES);
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                     "delete useless local variable in this block.");
 
-                ErrorReportContext context = {
-                    .package                 = nullptr,
-                    .package_unit            = get_package_unit(),
-                    .source_file_name        = get_package_unit()->current_file_name,
-                    .line_content            = package_unit_get_line_content(declaration->line_number),
-                    .line_number             = declaration->line_number,
-                    .column_number           = package_unit_get_column_number(),
-                    .error_message           = std::string(compile_err_buf),
-                    .advice                  = std::string(compile_adv_buf),
-                    .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
-                    .ring_compiler_file      = (char*)__FILE__,
-                    .ring_compiler_file_line = __LINE__,
-                };
-                ring_compile_error_report(&context);
-            }
-        } else {
-            // 全局变量
-            PackageUnit* package_unit = get_package_unit();
-            decl_pos->variable_index  = package_unit->global_declaration_list.size();
-            decl_pos->is_local        = 0;
-            package_unit->global_declaration_list.push_back(decl_pos);
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(declaration->line_number),
+                .line_number             = declaration->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
         }
     }
 }
@@ -1794,7 +1887,7 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
     self_declaration->next           = nullptr;
 
     // add `self` variable to local variable list.
-    add_declaration(self_declaration, block, nullptr);
+    add_local_declaration(self_declaration, block, nullptr);
 
     FunctionReturnList* return_list = method->return_list;
     for (; return_list != nullptr; return_list = return_list->next) {
@@ -2176,13 +2269,23 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
         declaration->variable_index = -1; // fix in add_declaration
         declaration->next           = nullptr;
 
-        add_declaration(declaration, block, nullptr);
+        add_local_declaration(declaration, block, nullptr);
     }
 }
 
 // -----------------
 Declaration* search_declaration(char* package_posit, char* identifier, Block* block) {
     Declaration* decl = nullptr;
+
+    if (package_posit == nullptr || strlen(package_posit) == 0) {
+        // FIXME: 应该是在当前 package中查找, 而不是 main package
+        package_posit = (char*)"main";
+    }
+    CompilerEntry* compiler_entry = get_compiler_entry();
+    Package*       package        = search_package(compiler_entry, package_posit);
+    if (package == nullptr) {
+        printf("can't find package:%s\n", package_posit);
+    }
 
     for (; block; block = block->parent_block) {
         for (decl = block->declaration_list; decl; decl = decl->next) {
@@ -2191,7 +2294,7 @@ Declaration* search_declaration(char* package_posit, char* identifier, Block* bl
             }
         }
     }
-    for (Declaration* decl : get_package_unit()->global_declaration_list) {
+    for (Declaration* decl : package->global_declaration_list) {
         if (str_eq(identifier, decl->identifier)) {
             return decl;
         }
