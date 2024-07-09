@@ -235,7 +235,7 @@ TIP: 推荐 Lua 5.4.6 版本作为研究对象.
 ### 《自己动手实现Lua：虚拟机、编译器和标准库》
 
 这个书籍有几个地方其实我不太认可, 就是在实现 virtual machine stack 的时候, 使用的golang 的 interface{} 去存储数据,
-不太认可这样的办法, 可能借用Golang的特性, 简化的虚拟机的实现方式
+不太认可这样的办法, 借用了Golang的特性, 简化了虚拟机的实现方式。
 
 基于 Lua 5.4.4
 
@@ -323,7 +323,7 @@ String s = STR."\{x} + \{y} = \{x + y}";
 ### 测试集  ring run
 
 ```
-2024-07-03
+2024-07-09
 
 
 [TestInfo]:
@@ -336,13 +336,13 @@ TEST_PATH         = ./test
 
 
 [Result]:
-Pass/All = 376/377
+Pass/All = 392/393
 NotTest  = 5
 Fail     = 1
-Usetime  = 20S
+Usetime  = 22S
 
 [NotPassCase]source_code_file                                             err_nums                                                    
-./test/062-std-package-reflect/reflect-001.ring              1            
+./test/062-std-package-reflect/reflect-001.ring              1             
 
 ```
 
@@ -369,34 +369,37 @@ Usetime  = 1S
    2. 参数的类型是类       class
    3. 参数的类型是数组     bool[]/int[]/int64[]/double[]/string[]
    4. 参数的类型是类数组   class[]
+   5. TODO:  多维数组（基础类型+类）
 2. 函数返回          (Path: ./test/004-derive-function/return-value/*)
    1. 返回值的类型是基础类型 bool/int/int64/double/string
    2. 返回值的类型是类      class
    3. 返回值的类型是数组    bool[]/int[]/int64[]/double[]/string[]
    4. 返回值的类型是数组    class[]
+   5. TODO:  多维数组（基础类型+类）
 3. 全局变量
    1. 变量的定义+初始化 (Path: ./test/011-global-variable/def-and-init-*)
+   2. 全局变量的类型是基础类型 bool/int/int64/double/string
+   3. 全局变量的类型是类      class
+   4. 支持多个变量在一行内定义+初始化
+   5. TODO:  多维数组（基础类型+类）
 4. 局部变量
    1. 变量的定义+初始化 (Path: ./test/012-local-variable/def-and-init-*)
-   
+   2. 全局变量的类型是基础类型 bool/int/int64/double/string
+   3. 全局变量的类型是类      class
+   4. 支持多个变量在一行内定义+初始化
+   5. TODO:  多维数组（基础类型+类）
+5. 数组的 new
+   1. 数组常量 作为函数参数
+   2. 数组常量 作为函数返回值
+   3. 数组常量 赋值给 全局变量
+   4. 数组常量 赋值给 局部变量
+   5. 需要覆盖基础类型： bool[]/int[]/int64[]/double[]/string[]
+   6. 需要覆盖类：      class[]
+   7. TODO:  多维数组（基础类型+类）
 
-5. function return class object ✅
-6. Pass class object as parameter to function ✅
-7. Pass string as parameters to function       ✅
-8.  Return class object from function        ✅
-9.  Return string from function          ✅
-10. Array & ClassObject
-11. Array & String  ✅
-12. Test array bool(global/local/argument/return)  ✅ 
-13. Test array int(global/local/argument/return)  ✅ 
-14. Test array double (global/local/argument/return)  ✅ 
-15. Test array string(global/local/argument/return)  ✅ 
-16. Test array class object(global/local/argument/return)
 
-17. 一个 package中 有多个 class定义, 超过255个
 
-18. 多维数组
-19. 多维数组中 是 class
+
 
 -----------------------------
 
@@ -438,6 +441,8 @@ Usetime  = 1S
    2. 局部变量的数量
 8. 函数定义
    1. 返回值的数量不能超过 255
+9. package
+   1.  一个package中的数量不能超过 255
 
 -----------------------------
 
@@ -496,10 +501,11 @@ class-object  ✅
 ## 2024-07-08周
 
 
-### A. 如何实现命令行传递参数
+### A. 在Ring main()函数中 获取命令行参数
 
 
-1. golang 是这样实现的，通过 os.Args 全局变量
+1. golang 获取命令行参数方式，通过 os.Args 全局变量
+
 ```go
 package main
 
@@ -514,32 +520,24 @@ func main()  {
 ```
 
 
-2. ring 打算这么实现
+2. ring 获取命令行方式
+
+
+用户调用方式：
 
 ```bash
 ./bin/ring run ./test.ring a b c
 ```
 
-main 的函数原型
+ring main 的函数原型
 
 ```ring
-function main(var string[] args)  {
-    fmt::println(len(args));
-    fmt::prrintln(args);
+function main(var string[] args) -> (int) {
+    return 0;
 }
 ```
 
 如果不打算收集 args，这样的main函数也是可以的
-```ring
-function main(var string[] args)  {
-    fmt::println(len(args));
-    fmt::prrintln(args);
-}
-```
-
-
-### B. main 函数原型支持 Return, 强制要求
-
 ```ring
 function main() -> (int) {
     return 0;
@@ -547,10 +545,36 @@ function main() -> (int) {
 ```
 
 
-### B. string 支持 substr
+### B. main 函数原型支持 return int, 强制要求
+
+```ring
+function main(var string[] args) -> (int) {
+    return 0;
+}
+```
 
 
-### C. 数组 支持 取 sub-array
+1. 现在ring的实现，一个 os::exit(), 还有一个 RVM_CODE_EXIT 字节码
+2. 用户编程使用 的是 os::exit()
+3. 内部是在 调用完main函数之后，调用 RVM_CODE_EXIT 字节码
+
+
+### C. string 支持 substr
+
+
+### D. 数组 支持 取 sub-array
+
+
+### E. 当函数中没有函数返回值时，应该报错
+
+
+1. 该函数没有返回值
+
+```
+function main(var string[] args) -> (int) {
+	var int return_num = 200;
+}
+```
 
 -----------------------------
 
@@ -569,6 +593,13 @@ function main() -> (int) {
 ### C. 对于 function-call method-call 没有做详细语义检查，尤其是参数匹配
 
 ### D. function/method 的参数/返回值 最大不能超过 8, 除了可变参数
+
+1. 如果后边有初始化表达式，连续命名变量也不成超过八个
+
+```
+var bool a0,a1,a2,a3,a4,a5,a6,a7,a8 = false,false,false,false,false,false,false,false,false;
+// 编译错误
+```
 
 
 ### E. BUG: 类 local变量命名+初始化 运行报错， ✅ 
