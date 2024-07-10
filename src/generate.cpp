@@ -440,6 +440,8 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
     //   argument_num
     //   push_func
     //   invoke_func
+    // __global_init() 函数是不允许调试的
+    // 但是 __global_init() 函数调用的 函数是允许调试的
     if (executer->exist_global_init_func) {
         generate_vmcode(executer, opcode_buffer,
                         RVM_CODE_ARGUMENT_NUM, 0, 0);
@@ -481,7 +483,8 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
                     RVM_CODE_INVOKE_FUNC, 0, 0);
 
     // step-3. exit 字节码
-    // exit operand 应该从 main() 函数的返回值中捕获
+    unsigned int exit_code = 0;
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT_2BYTE, exit_code, 0);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
 
     executer->code_list = opcode_buffer->code_list;

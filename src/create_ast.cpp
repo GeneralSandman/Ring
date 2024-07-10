@@ -614,6 +614,65 @@ Function* create_function_definition(FunctionType        type,
     function->func_index          = 0; // UPDATED_BY_FIX_AST
     function->type                = type;
 
+    // 对于main()函数，检查 参数 和返回值
+    if (str_eq(function->identifier, "main")) {
+
+        // main() 函数没有返回值
+        // Ring-Compiler-Error-Report ERROR_FUNCTION_MAIN_INVALID
+        if (return_list_size != 0) {
+            DEFINE_ERROR_REPORT_STR;
+
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "function main() must have no return values; E:%d.",
+                     ERROR_FUNCTION_MAIN_INVALID);
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                     "def main like : `function main(var string[] args) {}`.");
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(function->start_line_number),
+                .line_number             = function->start_line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+
+        // main() 函数 如果有参数的话，参数只能有一个，类型必须是 string[]
+        // Ring-Compiler-Error-Report ERROR_FUNCTION_MAIN_INVALID
+        if (parameter_list_size >= 2
+            || (parameter_list_size == 1 && !TYPE_IS_STRING_ARRAY_1(parameter_list->type_specifier))) {
+            DEFINE_ERROR_REPORT_STR;
+
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "function main() must be one argument, and must be string[]; E:%d.",
+                     ERROR_FUNCTION_MAIN_INVALID);
+            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+                     "def main like : `function main(var string[] args) {}`.");
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(function->start_line_number),
+                .line_number             = function->start_line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+    }
+
 
     return function;
 }

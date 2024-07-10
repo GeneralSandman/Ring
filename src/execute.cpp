@@ -1490,9 +1490,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_EXIT:
-            oper_num = OPCODE_GET_1BYTE(&code_list[rvm->pc + 1]);
-            // exit(oper_num);
-            exit_code = 0;
+            oper_num  = STACK_GET_INT_OFFSET(rvm, -1);
+            exit_code = oper_num;
             goto EXIT;
             break;
 

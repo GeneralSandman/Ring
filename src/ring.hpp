@@ -435,6 +435,12 @@ struct TypeSpecifier {
     // TODO: 后续应该把 sub放在 array_type中
 };
 
+#define TYPE_IS_STRING_ARRAY_1(type_specifier)         \
+    (((type_specifier)->kind == RING_BASIC_TYPE_ARRAY) \
+     && ((type_specifier)->dimension == 1)             \
+     && ((type_specifier)->sub != nullptr)             \
+     && ((type_specifier)->sub->kind == RING_BASIC_TYPE_STRING))
+
 typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
 
 typedef enum {
@@ -1936,6 +1942,8 @@ typedef enum {
 
     ERROR_FUNCTION_MISMATCH_RETURN_NUM        = 300004, // 函数定义的返回值和return中的返回值类型不匹配
     ERROR_FUNCTION_MISMATCH_RETURN_TYPE       = 300005, // 函数定义的返回值和return中的返回值类型不匹配
+
+    ERROR_FUNCTION_MAIN_INVALID               = 300006, // main函数定义不合法
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,

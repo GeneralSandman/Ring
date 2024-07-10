@@ -229,7 +229,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_RETURN, "return", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "", ""},
     {RVM_CODE_FUNCTION_FINISH, "function_finish", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
 
-    {RVM_CODE_EXIT, "exit", OPCODE_OPERAND_TYPE_1BYTE_A, 0, "", "", ""},
+    {RVM_CODE_EXIT, "exit", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "", ""},
 
 
     // array
