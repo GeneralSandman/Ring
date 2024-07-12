@@ -605,6 +605,12 @@ struct RVM_Array {
     unsigned char  dimension;
     unsigned int   length;
     unsigned int   capacity;
+
+    // 这里实现的不太好，信息冗余了
+    // 只有当 type == RVM_ARRAY_CLASS_OBJECT 才有意义
+    RVM_ClassDefinition* class_ref;
+
+
     union {
         bool*            bool_array;
         int*             int_array;
@@ -614,14 +620,6 @@ struct RVM_Array {
         RVM_ClassObject* class_ob_array;
         RVM_Array*       a_array; // 多维数组
     } u;
-
-
-    // 这里实现的不太好，信息冗余了
-    // RVM_ClassDefinition* class_ref; // only when type == RVM_ARRAY_CLASS_OBJECT
-    // 添加这一行之后，这俩测试用例会报错
-    // ./bin/ring run ./test/024-array-class/for-range-000.ring
-    // ./bin/ring run ./test/024-array-class/for-range-001.ring
-    // 均发生在 push_field_bool
 };
 
 
@@ -936,6 +934,7 @@ typedef enum {
     RVM_CODE_NEW_CLASS_OB_LITERAL,
 
     // range
+    RVM_CODE_FOR_RANGE_ARRAY_A,
     RVM_CODE_FOR_RANGE_ARRAY_BOOL,
     RVM_CODE_FOR_RANGE_ARRAY_INT,
     RVM_CODE_FOR_RANGE_ARRAY_INT64,
@@ -2178,6 +2177,11 @@ struct MemBlock {
             LOG_COLOR_RED, __FILE__, __LINE__, ##__VA_ARGS__, LOG_COLOR_CLEAR); \
     exit(1);
 
+// TODO: 在虚拟机执行字节码的过程中，判断内部指针的合法性
+// 如果不合法的话，在开启Debug的时候，应该抛出堆栈信息，便于定位
+// #define vm_assert()
+
+
 #define DEBUG_RVM_INTERACTIVE_STDOUT_FILE "/tmp/ring-debug-vm.stdout.log"
 
 int   ring_repl();
@@ -2823,6 +2827,9 @@ static int               hex_digit_to_int(char c);
 
 std::string              strings_join(const std::vector<std::string>& lst, const std::string& delim);
 int                      string_compare(const char* str1, unsigned int str1_len, const char* str2, unsigned int str2_len);
+
+std::string formate_array_type(RVM_Array* array_value);
+std::string formate_array_item_type(RVM_Array* array_value);
 // --------------------
 
 

@@ -1119,3 +1119,42 @@ int string_compare(const char* str1, unsigned int str1_len, const char* str2, un
         return res;
     }
 }
+
+std::string formate_array_type(RVM_Array* array_value) {
+    std::string str = "";
+
+    //
+    str = formate_array_item_type(array_value) + "[!" + std::to_string(array_value->dimension) + "]";
+
+    return str;
+}
+
+std::string formate_array_item_type(RVM_Array* array_value) {
+    std::string str;
+
+    switch (array_value->type) {
+    case RVM_ARRAY_BOOL: str = "bool"; break;
+    case RVM_ARRAY_INT: str = "int"; break;
+    case RVM_ARRAY_INT64: str = "int64"; break;
+    case RVM_ARRAY_DOUBLE: str = "double"; break;
+    case RVM_ARRAY_STRING: str = "string"; break;
+    case RVM_ARRAY_CLASS_OBJECT:
+        if (array_value->class_ref == nullptr) {
+            str = "unknow";
+        } else {
+            str = array_value->class_ref->identifier;
+        }
+        break;
+    case RVM_ARRAY_A:
+        // 中间态数组
+        // 递归向下找，找到元素的类型，最后加上 数组维度
+        str = formate_array_item_type(array_value->u.a_array);
+        break;
+
+    default:
+        str = "unknow";
+        break;
+    }
+
+    return str;
+}
