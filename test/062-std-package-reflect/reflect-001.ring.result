@@ -14,7 +14,7 @@ double
 string
 Job
 
-test case array one dimension
+test case array 1-dimension
 bool[!1]
 int[!1]
 int64[!1]
@@ -22,7 +22,7 @@ double[!1]
 string[!1]
 Job[!1]
 
-test case array two dimension
+test case array 2-dimension
 bool[!2]
 int[!2]
 int64[!2]
@@ -30,7 +30,7 @@ double[!2]
 string[!2]
 Job[!2]
 
-test case array three dimension
+test case array 3-dimension
 bool[!3]
 int[!3]
 int64[!3]
@@ -38,7 +38,7 @@ double[!3]
 string[!3]
 Job[!3]
 
-test case array four dimension
+test case array 4-dimension
 bool[!4]
 int[!4]
 int64[!4]
@@ -46,9 +46,44 @@ double[!4]
 string[!4]
 Job[!4]
 
-test case array four dimension 2
+test case array 4-dimension/bool
 bool[!4]
 bool[!3]
 bool[!2]
 bool[!1]
 bool
+
+test case array 4-dimension/int
+int[!4]
+int[!3]
+int[!2]
+int[!1]
+int
+
+test case array 4-dimension/int64
+int64[!4]
+int64[!3]
+int64[!2]
+int64[!1]
+int64
+
+test case array 4-dimension/double
+double[!4]
+double[!3]
+double[!2]
+double[!1]
+double
+
+test case array 4-dimension/string
+string[!4]
+string[!3]
+string[!2]
+string[!1]
+string
+
+test case array 4-dimension/Job
+Job[!4]
+Job[!3]
+Job[!2]
+Job[!1]
+Job

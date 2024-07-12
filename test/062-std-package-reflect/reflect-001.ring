@@ -84,7 +84,7 @@ function main() {
   fmt::println_string(reflect::typeof(global_job_class_value_1));
 
 
-  fmt::println_string("\ntest case array one dimension");
+  fmt::println_string("\ntest case array 1-dimension");
   fmt::println_string(reflect::typeof(global_bool_array_1));
   fmt::println_string(reflect::typeof(global_int_array_1));
   fmt::println_string(reflect::typeof(global_int64_array_1));
@@ -93,7 +93,7 @@ function main() {
   fmt::println_string(reflect::typeof(global_job_array_1));
 
 
-  fmt::println_string("\ntest case array two dimension");
+  fmt::println_string("\ntest case array 2-dimension");
   fmt::println_string(reflect::typeof(global_bool_array_2));
   fmt::println_string(reflect::typeof(global_int_array_2));
   fmt::println_string(reflect::typeof(global_int64_array_2));
@@ -102,7 +102,7 @@ function main() {
   fmt::println_string(reflect::typeof(global_job_array_2));
 
 
-  fmt::println_string("\ntest case array three dimension");
+  fmt::println_string("\ntest case array 3-dimension");
   fmt::println_string(reflect::typeof(global_bool_array_3));
   fmt::println_string(reflect::typeof(global_int_array_3));
   fmt::println_string(reflect::typeof(global_int64_array_3));
@@ -111,7 +111,7 @@ function main() {
   fmt::println_string(reflect::typeof(global_job_array_3));
 
 
-  fmt::println_string("\ntest case array four dimension");
+  fmt::println_string("\ntest case array 4-dimension");
   fmt::println_string(reflect::typeof(global_bool_array_4));
   fmt::println_string(reflect::typeof(global_int_array_4));
   fmt::println_string(reflect::typeof(global_int64_array_4));
@@ -120,7 +120,7 @@ function main() {
   fmt::println_string(reflect::typeof(global_job_array_4));
 
 
-  fmt::println_string("\ntest case array four dimension 2");
+  fmt::println_string("\ntest case array 4-dimension/bool");
   global_bool_array_4 = new bool[1,2,3,4];
   fmt::println_string(reflect::typeof(global_bool_array_4));
   fmt::println_string(reflect::typeof(global_bool_array_4[0]));
@@ -128,4 +128,46 @@ function main() {
   fmt::println_string(reflect::typeof(global_bool_array_4[0,1,2]));
   fmt::println_string(reflect::typeof(global_bool_array_4[0,1,2,3]));
 
+  fmt::println_string("\ntest case array 4-dimension/int");
+  global_int_array_4 = new int[1,2,3,4];
+  fmt::println_string(reflect::typeof(global_int_array_4));
+  fmt::println_string(reflect::typeof(global_int_array_4[0]));
+  fmt::println_string(reflect::typeof(global_int_array_4[0,1]));
+  fmt::println_string(reflect::typeof(global_int_array_4[0,1,2]));
+  fmt::println_string(reflect::typeof(global_int_array_4[0,1,2,3]));
+
+  fmt::println_string("\ntest case array 4-dimension/int64");
+  global_int64_array_4 = new int64[1,2,3,4];
+  fmt::println_string(reflect::typeof(global_int64_array_4));
+  fmt::println_string(reflect::typeof(global_int64_array_4[0]));
+  fmt::println_string(reflect::typeof(global_int64_array_4[0,1]));
+  fmt::println_string(reflect::typeof(global_int64_array_4[0,1,2]));
+  fmt::println_string(reflect::typeof(global_int64_array_4[0,1,2,3]));
+
+  fmt::println_string("\ntest case array 4-dimension/double");
+  global_double_array_4 = new double[1,2,3,4];
+  fmt::println_string(reflect::typeof(global_double_array_4));
+  fmt::println_string(reflect::typeof(global_double_array_4[0]));
+  fmt::println_string(reflect::typeof(global_double_array_4[0,1]));
+  fmt::println_string(reflect::typeof(global_double_array_4[0,1,2]));
+  fmt::println_string(reflect::typeof(global_double_array_4[0,1,2,3]));
+
+  fmt::println_string("\ntest case array 4-dimension/string");
+  global_string_array_4 = new string[1,2,3,4];
+  fmt::println_string(reflect::typeof(global_string_array_4));
+  fmt::println_string(reflect::typeof(global_string_array_4[0]));
+  fmt::println_string(reflect::typeof(global_string_array_4[0,1]));
+  fmt::println_string(reflect::typeof(global_string_array_4[0,1,2]));
+  fmt::println_string(reflect::typeof(global_string_array_4[0,1,2,3]));
+
+  fmt::println_string("\ntest case array 4-dimension/Job");
+  global_job_array_4 = new Job[1,2,3,4];
+  fmt::println_string(reflect::typeof(global_job_array_4));
+  fmt::println_string(reflect::typeof(global_job_array_4[0]));
+  fmt::println_string(reflect::typeof(global_job_array_4[0,1]));
+  fmt::println_string(reflect::typeof(global_job_array_4[0,1,2]));
+  fmt::println_string(reflect::typeof(global_job_array_4[0,1,2,3]));
+
+
+  // TODO new int int64 double stirng
 }
