@@ -323,7 +323,7 @@ String s = STR."\{x} + \{y} = \{x + y}";
 ### 测试集  ring run
 
 ```
-2024-07-09
+2024-07-12
 
 
 [TestInfo]:
@@ -336,13 +336,10 @@ TEST_PATH         = ./test
 
 
 [Result]:
-Pass/All = 392/393
+Pass/All = 401/401
 NotTest  = 5
-Fail     = 1
-Usetime  = 22S
-
-[NotPassCase]source_code_file                                             err_nums                                                    
-./test/062-std-package-reflect/reflect-001.ring              1             
+Fail     = 0
+Usetime  = 23S     
 
 ```
 
@@ -381,13 +378,13 @@ Usetime  = 1S
    2. 全局变量的类型是基础类型 bool/int/int64/double/string
    3. 全局变量的类型是类      class
    4. 支持多个变量在一行内定义+初始化
-   5. TODO:  多维数组（基础类型+类）
+   5. TODO:  多维数组（基础类型+类） (Path: ./test/011-global-variable/def-and-init-array-*) ✅
 4. 局部变量
    1. 变量的定义+初始化 (Path: ./test/012-local-variable/def-and-init-*)
    2. 全局变量的类型是基础类型 bool/int/int64/double/string
    3. 全局变量的类型是类      class
    4. 支持多个变量在一行内定义+初始化
-   5. TODO:  多维数组（基础类型+类）
+   5. TODO:  多维数组（基础类型+类）  (Path: ./test/012-local-variable/def-and-init-array-*) ✅
 5. 数组的 new
    1. 数组常量 作为函数参数
    2. 数组常量 作为函数返回值
@@ -501,7 +498,7 @@ class-object  ✅
 ## 2024-07-08周
 
 
-### A. 在Ring main()函数中 获取命令行参数
+### A. Feature: 在Ring main()函数中 获取命令行参数
 
 
 1. golang 获取命令行参数方式，通过 os.Args 全局变量
@@ -519,8 +516,14 @@ func main()  {
 }
 ```
 
+2. c/cpp 获取命令行参数方式
 
-2. ring 获取命令行方式
+```cpp
+int main(int argc, char** argv) {
+}
+```
+
+3. ring 获取命令行方式
 
 
 用户调用方式：
@@ -545,36 +548,57 @@ function main() -> (int) {
 ```
 
 
-### B. main 函数原型支持 return int, 强制要求
+3. 还有个问题还没有完全根治：
 
-```ring
-function main(var string[] args) -> (int) {
-    return 0;
+有的测试用例是 检查 heap_size(), 有了 args数组，
+
+### B. Fix: main 函数中使用 var string[] args, 导致某些测试用例不通过
+
+
+### C. Feature: string支持 substr
+
+
+### D. Feature: 数组支持 sub-array
+
+
+### E. Feature: 强制检查 main函数的签名 ✅ 
+
+
+1. main 函数 没有返回值
+2. main 函数 如果有参数的话，参数只有有 一个，`var string[] args`
+3. main 函数的参数可以省略
+4. 合法的main函数定义
+
+```
+function main(var string[] args) {
+}
+```
+
+```
+function main() {
+    // main 函数 无需关注 命令行参数
+}
+```
+
+5. 如果main函数需要自定义返回值的话，请使用 `os::exit()` 函数
+   
+```
+function main() {
+    os::exit(-1);
 }
 ```
 
 
-1. 现在ring的实现，一个 os::exit(), 还有一个 RVM_CODE_EXIT 字节码
-2. 用户编程使用 的是 os::exit()
-3. 内部是在 调用完main函数之后，调用 RVM_CODE_EXIT 字节码
+### F. Feature: std reflect package 函数 typeof 支持 获取多维数组/多维数组 中间状态数据的类型 ✅ 
 
+1. 详细的测试用例可参见 ./test/062-std-package-reflect/reflect-001.ring 
 
-### C. string 支持 substr
+### G. Fix: for range 多维数组 rvm 会崩溃 ✅ 
 
-
-### D. 数组 支持 取 sub-array
-
-
-### E. 当函数中没有函数返回值时，应该报错
-
-
-1. 该函数没有返回值
-
-```
-function main(var string[] args) -> (int) {
-	var int return_num = 200;
-}
-```
+1. for range 多维数组是，其实 stack中的参数数是个多维数组的中间态
+2. 增加了一个 字节码 `range_array_a`
+3. 如果是多维数组是， for-range 对应的字节码 应该是 `range_array_a`
+4. rvm 执行 `range_array_a`
 
 -----------------------------
 
