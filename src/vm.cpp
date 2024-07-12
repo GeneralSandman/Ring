@@ -260,6 +260,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
 
     // range
+    {RVM_CODE_FOR_RANGE_ARRAY_A, "range_array_a", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "range array value for array", "", ""},
     {RVM_CODE_FOR_RANGE_ARRAY_BOOL, "range_array_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "range bool value for array", "", ""},
     {RVM_CODE_FOR_RANGE_ARRAY_INT, "range_array_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "range int value for array", "", ""},
     {RVM_CODE_FOR_RANGE_ARRAY_INT64, "range_array_int64", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "range int64 value for array", "", ""},

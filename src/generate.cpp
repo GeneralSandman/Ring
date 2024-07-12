@@ -802,20 +802,24 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
     if (declaration == nullptr) {
         ring_error_report("invalid range operand:%s\n", range_statement->operand->u.identifier_expression->identifier);
     }
-    if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_BOOL) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_BOOL, end_label, range_statement->operand->u.identifier_expression->line_number);
-    } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_INT) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_INT, end_label, range_statement->operand->u.identifier_expression->line_number);
-    } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_INT64) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_INT64, end_label, range_statement->operand->u.identifier_expression->line_number);
-    } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_DOUBLE) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_DOUBLE, end_label, range_statement->operand->u.identifier_expression->line_number);
-    } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_STRING) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_STRING, end_label, range_statement->operand->u.identifier_expression->line_number);
-    } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_CLASS) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB, end_label, range_statement->operand->u.identifier_expression->line_number);
+    if (declaration->type_specifier->dimension > 1) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_A, end_label, range_statement->operand->u.identifier_expression->line_number);
     } else {
-        ring_error_report("error: range expression only support bool[] int[] double[] string[]\n");
+        if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_BOOL) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_BOOL, end_label, range_statement->operand->u.identifier_expression->line_number);
+        } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_INT) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_INT, end_label, range_statement->operand->u.identifier_expression->line_number);
+        } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_INT64) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_INT64, end_label, range_statement->operand->u.identifier_expression->line_number);
+        } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_DOUBLE) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_DOUBLE, end_label, range_statement->operand->u.identifier_expression->line_number);
+        } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_STRING) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_STRING, end_label, range_statement->operand->u.identifier_expression->line_number);
+        } else if (declaration->type_specifier->sub->kind == RING_BASIC_TYPE_CLASS) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB, end_label, range_statement->operand->u.identifier_expression->line_number);
+        } else {
+            ring_error_report("error: range expression only support bool[] int[] double[] string[]\n");
+        }
     }
 
 
@@ -2334,6 +2338,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         case RVM_CODE_FOR_RANGE_ARRAY_DOUBLE:
         case RVM_CODE_FOR_RANGE_ARRAY_STRING:
         case RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB:
+        case RVM_CODE_FOR_RANGE_ARRAY_A:
         case RVM_CODE_FOR_RANGE_STRING:
             label                           = (opcode_buffer->code_list[i + 1] << 8) + (opcode_buffer->code_list[i + 2]);
             label_address                   = opcode_buffer->lable_list[label].label_address;

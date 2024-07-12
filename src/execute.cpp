@@ -240,7 +240,7 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
     RVM_ClassObject*     class_ob             = nullptr;
     RVM_String*          string               = nullptr;
     unsigned int         alloc_size           = 0;
-    // RVM_TypeSpecifier*   sub_type_specifier   = nullptr;
+    RVM_TypeSpecifier*   sub_type_specifier   = nullptr;
 
     for (unsigned int i = 0; i < size; i++) {
         type_specifier = global_variable_list[i].type_specifier;
@@ -280,11 +280,11 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
             runtime_static->data[i].u.array_value->length    = 0;
             runtime_static->data[i].u.array_value->capacity  = 0;
 
-            // sub_type_specifier                               = type_specifier->sub;
-            // if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
-            //     RVM_ClassDefinition* class_definition            = &(rvm->class_list[sub_type_specifier->u.class_def_index]);
-            //     runtime_static->data[i].u.array_value->class_ref = class_definition;
-            // }
+            sub_type_specifier                               = type_specifier->sub;
+            if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
+                RVM_ClassDefinition* class_definition            = &(rvm->class_list[sub_type_specifier->u.class_def_index]);
+                runtime_static->data[i].u.array_value->class_ref = class_definition;
+            }
             break;
 
         default:
@@ -1681,7 +1681,23 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
 
-        // range
+            // range
+        case RVM_CODE_FOR_RANGE_ARRAY_A:
+            array_value = STACK_GET_ARRAY_OFFSET(rvm, -2);
+            array_index = STACK_GET_INT_OFFSET(rvm, -1);
+            error_code  = rvm_array_get_array(rvm, array_value, array_index, &array_value);
+            if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
+                rvm->pc = OPCODE_GET_2BYTE(&code_list[rvm->pc + 1]);
+                break;
+            }
+            // runtime_stack->top_index -= 2; // 与 RVM_CODE_PUSH_ARRAY_A 的不同点 区别
+            STACK_SET_ARRAY_OFFSET(rvm, 0, array_value);
+            runtime_stack->top_index++;
+            rvm->pc += 3;
+
+            // increase iter of range
+            STACK_GET_INT_OFFSET(rvm, -2) += 1;
+            break;
         case RVM_CODE_FOR_RANGE_ARRAY_BOOL:
             array_value = STACK_GET_ARRAY_OFFSET(rvm, -2);
             array_index = STACK_GET_INT_OFFSET(rvm, -1);
