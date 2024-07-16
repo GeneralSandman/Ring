@@ -320,6 +320,7 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
             array->u.double_array = (double*)calloc(1, alloc_size);
             break;
         case RVM_ARRAY_STRING:
+            // FIXME: 这里内存的增长写的不太好
             alloc_size            = sizeof(RVM_String*) * array->capacity;
             array->u.string_array = (RVM_String**)mem_alloc(rvm->data_pool, alloc_size);
             for (unsigned int i = 0; i < array->length; i++) {
@@ -327,6 +328,7 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
                 alloc_size               = init_string(rvm, array->u.string_array[i], ROUND_UP8(1));
                 rvm_heap_list_add_object(rvm, (RVM_GC_Object*)(array->u.string_array[i]));
                 rvm_heap_alloc_size_incr(rvm, alloc_size);
+                // printf("alloc_size: %d\n", alloc_size);
             }
             alloc_size = 0;
             break;
@@ -358,7 +360,9 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
     }
 
     rvm_heap_list_add_object(rvm, (RVM_GC_Object*)array);
-    rvm_heap_alloc_size_incr(rvm, alloc_size);
+    if (alloc_size > 0) {
+        rvm_heap_alloc_size_incr(rvm, alloc_size);
+    }
 
     return array;
 }

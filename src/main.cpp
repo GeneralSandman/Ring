@@ -83,7 +83,7 @@ Ring_Command_Arg ring_parse_command(int argc, char** argv) {
     if (cmd == RING_COMMAND_RUN
         || cmd == RING_COMMAND_DUMP
         || cmd == RING_COMMAND_RDB) {
-        // shell_args.insert(shell_args.begin(), input_file_name);
+        shell_args.insert(shell_args.begin(), input_file_name);
     }
 
 
