@@ -1,4 +1,5 @@
-#Constants:       0
+#Constants:       1
+ ├──     0: string(./test/004-derive-function/function-019.ring)
 
 #Globals:       0
 

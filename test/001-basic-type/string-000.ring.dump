@@ -1,4 +1,4 @@
-#Constants:       20
+#Constants:       21
  ├──     0: string(1)
  ├──     1: string(2)
  ├──     2: string(3)
@@ -19,6 +19,7 @@
  ├──    17: string(ABCDEFGHIJKLMNOPQRSTUVWXYZ)
  ├──    18: string(abcdefghijklmnopqrstuvwxyz)
  ├──    19: string(abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ)
+ ├──    20: string(./test/001-basic-type/string-000.ring)
 
 #Globals:       0
 

@@ -1,4 +1,4 @@
-#Constants:       15
+#Constants:       16
  ├──     0: string(level 0)
  ├──     1: string(level 1)
  ├──     2: string(level 2)
@@ -14,6 +14,7 @@
  ├──    12: string(=====)
  ├──    13: string(=====)
  ├──    14: string()
+ ├──    15: string(./test/004-derive-function/function-013.ring)
 
 #Globals:       0
 

@@ -1,6 +1,7 @@
-#Constants:       1
+#Constants:       2
  ├──     0: string(
 test case 1 ======)
+ ├──     1: string(./test/004-derive-function/function-012.ring)
 
 #Globals:       0
 

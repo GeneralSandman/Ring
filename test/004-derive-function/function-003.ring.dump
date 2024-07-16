@@ -1,7 +1,8 @@
-#Constants:       3
+#Constants:       4
  ├──     0: string()
  ├──     1: string()
  ├──     2: string()
+ ├──     3: string(./test/004-derive-function/function-003.ring)
 
 #Globals:       1
  ├──var int              int_value_global    

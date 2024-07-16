@@ -1,4 +1,4 @@
-#Constants:       29
+#Constants:       30
  ├──     0: string(123)
  ├──     1: string(345)
  ├──     2: string(123)
@@ -32,6 +32,7 @@ test case 4)
  ├──    26: string(567)
  ├──    27: string(789)
  ├──    28: string(123345567789)
+ ├──    29: string(./test/001-basic-type/string-001.ring)
 
 #Globals:       0
 
