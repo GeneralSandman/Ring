@@ -495,6 +495,39 @@ class-object  ✅
 -----------------------------
 
 
+## 2024-07-15周
+
+
+### A. 检查一下 GC分配的字节数量是否一致
+
+在应用了 var string[] args 之后，字节数校验不太好
+
+
+### B. 一步步调试虚拟机的时候，能够显示某个字节码的功能/公式/全局变量/局部变量
+
+1. 这是一个 jvm 交互式调试工具
+   
+![alt text](image.png)
+
+
+2. formate rvm constant pool 的时候，转义字符要反转义
+
+![alt text](image-1.png)
+
+
+3. 如果字符串是空的话，constant pool 应该为空
+
+![alt text](image-2.png)
+
+
+4. string 常量，应该去重
+
+![alt text](image-3.png)
+
+
+-----------------------------
+
+
 ## 2024-07-08周
 
 
