@@ -442,7 +442,7 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
 
     std::vector<RVM_BreakPoint>& break_points = frame->rvm->debug_config->break_points;
 
-    // 1. config linenoise
+    // step-1. config linenoise
     linenoiseSetMultiLine(1);
     linenoiseSetCompletionCallback(rdb_input_completion);
     linenoiseSetHintsCallback(rdb_input_hints);
@@ -450,12 +450,12 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
     linenoiseHistorySetMaxLen(1024);
 
 
-    // 2. read ring debugger command
+    // step-2. read & parse & exec command
     while (1) {
         bool    break_read_input = false;
         RDB_Arg rdb_arg;
 
-        // read and parse command
+        // step-2.1 read & parse command
         printf("\n");
         line = linenoise(RDB_PREFIX);
         if (line == NULL) {
@@ -474,7 +474,7 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
         }
 
 
-        // exec command
+        // step-2.2 exec command
         printf(LOG_COLOR_GREEN);
         if (rdb_arg.cmd == RDB_COMMAND_HELP) {
             printf("[@]%s", rdb_command_help_message.c_str());
@@ -665,17 +665,17 @@ RDB_Arg rdb_parse_command(const char* line) {
     //
     argv = splitargs(line);
 
-    // break points
+    // break points rule
     auto break_rule =
         ((clipp::command(RDB_CMD_T_BREAK_SET).set(break_cmd, RDB_COMMAND_BREAK_SET), clipp::value("line-number", argument))
          | (clipp::command(RDB_CMD_T_BREAK_UNSET).set(break_cmd, RDB_COMMAND_BREAK_UNSET), clipp::value("line-number", argument))
          | clipp::command(RDB_CMD_T_BREAK_LIST).set(break_cmd, RDB_COMMAND_BREAK_LIST)
          | clipp::command(RDB_CMD_T_BREAK_CLEAR).set(break_cmd, RDB_COMMAND_BREAK_CLEAR));
-    // step action
+    // step action rule
     auto step_rule = (clipp::command(RDB_CMD_T_STEP_OVER).set(step_cmd, RDB_COMMAND_STEP_OVER)
                       | clipp::command(RDB_CMD_T_STEP_INTO).set(step_cmd, RDB_COMMAND_STEP_INTO)
                       | clipp::command(RDB_CMD_T_STEP_OUT).set(step_cmd, RDB_COMMAND_STEP_OUT));
-    // code action
+    // code action rule
     auto code_rule = (clipp::command(RDB_CMD_T_CODE_LIST).set(code_cmd, RDB_COMMAND_CODE_LIST));
 
     auto rdb_command_rule =
@@ -697,16 +697,18 @@ RDB_Arg rdb_parse_command(const char* line) {
 
     clipp::parse(argv, rdb_command_rule);
 
-    return RDB_Arg{
+    RDB_Arg result = RDB_Arg{
         .cmd       = cmd,
         .break_cmd = break_cmd,
         .step_cmd  = step_cmd,
         .code_cmd  = code_cmd,
         .argument  = argument,
     };
+    // printf("result info\n");
+    return result;
 }
 
-
+// ring debugger 输入补全回调
 void rdb_input_completion(const char* buf, linenoiseCompletions* lc) {
 
     for (RDB_Command& cmd : rdb_commands) {
@@ -723,8 +725,7 @@ void rdb_input_completion(const char* buf, linenoiseCompletions* lc) {
 }
 
 static std::string hit_str;
-
-//
+// ring debugger 输入提示回调
 char* rdb_input_hints(const char* buf, int* color, int* bold) {
     hit_str                                 = "";
 

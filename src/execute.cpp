@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <sys/ioctl.h>
 #include <unistd.h>
 
 
@@ -358,7 +357,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
 #ifdef DEBUG_RVM_INTERACTIVE
         int debug_rvm_res = 0;
-        debug_rvm_res     = debug_rvm(rvm, caller_function, code_list, code_size, rvm->pc, caller_stack_base);
+        debug_rvm_res     = debug_rvm_interactive(rvm, caller_function, code_list, code_size, rvm->pc, caller_stack_base);
         if (debug_rvm_res != 0) {
             goto EXIT;
         }
@@ -2995,49 +2994,4 @@ int rvm_heap_size(Ring_VirtualMachine* rvm) {
     // FIXME: 这里会溢出
     // TODO: 数据类型不够
     return rvm->runtime_heap->alloc_size;
-}
-
-int debug_rvm(Ring_VirtualMachine* rvm,
-              RVM_Function*        function,
-              RVM_Byte*            code_list,
-              unsigned int         code_size,
-              unsigned int         pc,
-              unsigned int         caller_stack_base) {
-
-    debug_exec_info_with_white("\t");
-
-    // get terminal windows size
-    struct winsize terminal_size;
-    if (isatty(STDERR_FILENO) == 0 || ioctl(STDERR_FILENO, TIOCGWINSZ, &terminal_size) < 0) {
-        ring_error_report("ioctl TIOCGWINSZ error");
-    }
-
-    if (terminal_size.ws_row < 41 || terminal_size.ws_col < 154) {
-        ring_error_report("In DEBUG_RVM_INTERACTIVE Mode:\n"
-                          "Current terminal window size: height:%d, width:%d\n"
-                          "Please adjust terminal window size: height > 41, width > 154\n",
-                          terminal_size.ws_row, terminal_size.ws_col);
-    }
-
-    STDERR_CLEAR_SCREEN;
-    ring_vm_dump_runtime_stack(rvm->runtime_stack, caller_stack_base, 1, 0);
-    ring_vm_code_dump(function, code_list, code_size, pc, 1, 70);
-
-    STDERR_MOVE_CURSOR(terminal_size.ws_row - 6, 0);
-    fprintf(stderr, "----------Operation--------\n");
-    fprintf(stderr, "|press   enter: step into.|\n");
-    // fprintf(stderr, "|        'i'  : step into.|\n");
-    // fprintf(stderr, "|        'v'  : step over.|\n");
-    // fprintf(stderr, "|        'o'  : step out. |\n");
-    fprintf(stderr, "|        'q'  : quit.     |\n");
-    fprintf(stderr, "---------------------------\n");
-    fprintf(stderr, "stdout redirect to: %s\n", DEBUG_RVM_INTERACTIVE_STDOUT_FILE);
-
-
-    char ch = getchar();
-    if (ch == 'q') {
-        return 1;
-    }
-
-    return 0;
 }

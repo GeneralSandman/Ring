@@ -1710,6 +1710,28 @@ struct Ring_Command_Arg {
     std::vector<std::string> shell_args;
 };
 
+// rdb cmd token
+#define VM_DB_CMD_T_HELP "help"
+#define VM_DB_CMD_T_CLEAR "clear"
+#define VM_DB_CMD_T_QUIT "quit"
+
+#define VM_DB_CMD_T_STACK "stack"
+
+enum VM_DB_COMMAND_TYPE {
+    VM_DB_COMMAND_UNKNOW,
+
+    VM_DB_COMMAND_HELP,
+    VM_DB_COMMAND_CLEAR,
+    VM_DB_COMMAND_QUIT,
+
+    VM_DB_COMMAND_STACK,
+};
+struct VM_DB_Arg {
+    VM_DB_COMMAND_TYPE cmd;
+
+    std::string        argument;
+};
+
 
 // rdb cmd token
 #define RDB_CMD_T_HELP "help"
@@ -2730,7 +2752,6 @@ void                 rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_G
 
 int                  rvm_heap_size(Ring_VirtualMachine* rvm);
 
-int                  debug_rvm(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base);
 // --------------------
 
 
@@ -2828,8 +2849,8 @@ static int               hex_digit_to_int(char c);
 std::string              strings_join(const std::vector<std::string>& lst, const std::string& delim);
 int                      string_compare(const char* str1, unsigned int str1_len, const char* str2, unsigned int str2_len);
 
-std::string formate_array_type(RVM_Array* array_value);
-std::string formate_array_item_type(RVM_Array* array_value);
+std::string              formate_array_type(RVM_Array* array_value);
+std::string              formate_array_item_type(RVM_Array* array_value);
 // --------------------
 
 
@@ -2896,7 +2917,7 @@ RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassO
 
 
 /* --------------------
- * gc.cpp
+ * debug.cpp
  * function definition
  *
  */
@@ -2915,6 +2936,18 @@ RDB_Arg rdb_parse_command(const char* line);
 void    rdb_input_completion(const char* buf, linenoiseCompletions* lc);
 char*   rdb_input_hints(const char* buf, int* color, int* bold);
 
+
+// --------------------
+
+/* --------------------
+ * vm-debug.cpp
+ * function definition
+ *
+ */
+
+int       debug_rvm_interactive(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base);
+int       vm_debugger_cli(Ring_VirtualMachine* rvm);
+VM_DB_Arg vm_db_parse_command(const char* line);
 // --------------------
 
 

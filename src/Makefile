@@ -21,6 +21,7 @@ OBJS   = \
 	mem_pool.o\
 	gc.o\
 	debug.o\
+	vm-debug.o\
 	../deps/linenoise/linenoise.o\
 	fmt.o\
 	main.o
@@ -66,14 +67,14 @@ TOOL_GEN_VMCODE_DOC_OBJS  = vm.o tool_gen_vmcode_doc.o
 #  DEBUG_RVM_INTERACTIVE 		     控制调试RVM
 #  DDEBUG_RVM_MEM_POOL_DETAIL 	     展示 Memory Pool 内存分配的详情
 #  DEBUG_RVM_GC_DETAIL 			     展示 Garbage Collect 的详情
-#  DEBUG_RDB_TRACE_DISPATH_DETAIL    展示 rdb trace_dispath 的详情, 可以展示每一次回掉到debugger的详情
+#  DEBUG_RDB_TRACE_DISPATH_DETAIL    调试开发Ring-Debugger: 展示 rdb trace_dispath 的详情, 可以展示每一次回掉到debugger的详情
 CFLAGS = -c -static -O2 -std=c++17 \
 				-Wall \
 				-Wextra \
 				-Wno-sign-compare \
 				-Wno-unused-parameter \
 				-Wno-unused-function \
-				 # -g \
+				  -g \
 				 -DDEBUG \
 				 -DDEBUG_FLEX1 \
 				 -DDEBUG_BISON1 \
@@ -85,7 +86,7 @@ CFLAGS = -c -static -O2 -std=c++17 \
 				 -DDEBUG_GENERATE_DETAIL1 \
 				 -DDEBUG_GENERATE_OUTPUT_VMCODE1 \
 				 -DDEBUG_EXEC_VM1 \
-				 -DDEBUG_RVM_INTERACTIVE1 \
+				 -DDEBUG_RVM_INTERACTIVE \
 				 -DDEBUG_RVM_MEM_POOL_DETAIL1 \
 				 -DDEBUG_RVM_GC_DETAIL1 \
 				 -DDEBUG_RDB_TRACE_DISPATH_DETAIL1
@@ -194,6 +195,7 @@ std_lib.o: std_lib.cpp ring.hpp
 mem_pool.o: mem_pool.cpp ring.hpp
 gc.o: gc.cpp ring.hpp
 debug.o: debug.cpp ring.hpp
+vm-debug.o: vm-debug.cpp ring.hpp
 thread_pool.o: thread_pool.c ring.hpp
 main.o: main.cpp ring.hpp
 tool_gen_vmcode_doc.o: tool_gen_vmcode_doc.cpp ring.hpp
