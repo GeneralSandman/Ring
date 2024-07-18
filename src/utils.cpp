@@ -195,6 +195,8 @@ void ring_vm_code_dump(RVM_Function* function,
     int                      pc_lines_index = 0; // 当前pc 所在的 lines 的 index
     // 取当前pc 所在的 前后20 行进行展示
 
+    RVM_Opcode_Info next_opcode_info;
+
     for (unsigned int i = 0; i < code_size; opcode_num++) {
         std::string pointer = "";
         if (i == pc) {
@@ -204,10 +206,13 @@ void ring_vm_code_dump(RVM_Function* function,
 
         RVM_Byte        opcode      = code_list[i++];
         RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
-        std::string     opcode_name = opcode_info.name;
         std::string     operand_str = "";
         int             operand1    = 0;
         int             operand2    = 0;
+
+        if (pointer.size()) {
+            next_opcode_info = opcode_info;
+        }
 
         switch (opcode_info.operand_type) {
         case OPCODE_OPERAND_TYPE_0BYTE:
@@ -243,7 +248,7 @@ void ring_vm_code_dump(RVM_Function* function,
         snprintf(line, sizeof(line),
                  "%-8d | %-30s | %20s | %5s | %-11s\n",
                  opcode_num,
-                 opcode_name.c_str(),
+                 opcode_info.name.c_str(),
                  operand_str.c_str(),
                  pointer.c_str(),
                  ""); // TODO: display sourceLineNo
@@ -257,6 +262,15 @@ void ring_vm_code_dump(RVM_Function* function,
             fprintf(stderr, "%s", lines[i].c_str());
         }
     }
+
+    STDERR_MOVE_CURSOR(screen_row++, screen_col);
+    fprintf(stderr, "---------------------------------------------------------------------------------------\n");
+    STDERR_MOVE_CURSOR(screen_row++, screen_col);
+    fprintf(stderr, "%s\n", next_opcode_info.name.c_str());
+    STDERR_MOVE_CURSOR(screen_row++, screen_col);
+    fprintf(stderr, "[+]Desc:    %s\n", next_opcode_info.usage_comment.c_str());
+    STDERR_MOVE_CURSOR(screen_row++, screen_col);
+    fprintf(stderr, "[+]Formula: %s\n", next_opcode_info.math_formula.c_str());
 }
 
 
@@ -284,10 +298,13 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack,
 
         STDERR_MOVE_CURSOR(screen_row++, screen_col);
 
-        RVM_Value   value     = runtime_stack->data[i];
-        std::string type_str  = format_rvm_type(&value);
-        std::string value_str = format_rvm_value(&value);
+        RVM_Value*  value     = &runtime_stack->data[i];
+        std::string type_str  = format_rvm_type(value);
+        std::string value_str = format_rvm_value(value);
         std::string format    = type_str + "(" + value_str + ")";
+        // 截断，不然命令行排版乱
+        // 如果要是全部都展示的话，请使用 stack 命令
+        format = format.substr(0, 20);
 
         fprintf(stderr, "%7d | %20s | %10s | %10s\n",
                 i, format.c_str(),
@@ -673,96 +690,64 @@ unsigned int get_source_line_number_by_pc(RVM_Function* function, unsigned int p
 }
 
 std::string format_rvm_type(RVM_Value* value) {
-    std::string type_s = "";
+    std::string str = "";
 
-    // TODO: 这里写和 std_lib.cpp::std_lib_reflect_typeof 重复了
-    // 后期需要降低重复度
     switch (value->type) {
     case RVM_VALUE_TYPE_BOOL:
-        type_s = "bool";
+        str = "bool";
         break;
     case RVM_VALUE_TYPE_INT:
-        type_s = "int";
+        str = "int";
         break;
     case RVM_VALUE_TYPE_INT64:
-        type_s = "int64";
+        str = "int64";
         break;
     case RVM_VALUE_TYPE_DOUBLE:
-        type_s = "double";
+        str = "double";
         break;
     case RVM_VALUE_TYPE_STRING:
-        type_s = "string";
+        str = "string";
         break;
     case RVM_VALUE_TYPE_CLASS_OB:
-        type_s = "class";
+        if (value->u.class_ob_value->class_ref == nullptr) {
+            str = "class";
+        } else {
+            str = std::string(value->u.class_ob_value->class_ref->identifier);
+        }
         break;
     case RVM_VALUE_TYPE_ARRAY:
-        switch (value->u.array_value->type) {
-        case RVM_ARRAY_BOOL: type_s = "bool"; break;
-        case RVM_ARRAY_INT: type_s = "int"; break;
-        case RVM_ARRAY_INT64: type_s = "int64"; break;
-        case RVM_ARRAY_DOUBLE: type_s = "double"; break;
-        case RVM_ARRAY_STRING: type_s = "string"; break;
-        case RVM_ARRAY_CLASS_OBJECT: type_s = "class"; break;
-        default: type_s = "unknow"; break;
-        }
-
-        type_s = type_s + "[!" + std::to_string(value->u.array_value->dimension) + "]";
+        str = formate_array_type(value->u.array_value);
         break;
     default:
-        type_s = "unknow";
+        str = "unknow";
         break;
     }
 
-    return type_s;
+    return str;
 }
 
 /*
  * format_rvm_value
  *
- * 这个函数的扩展性还不是特别好, 目前只是给debugger使用,
+ * 这个函数的扩展性还不是特别好
+ * 目前只有 rvm-iteractive-debugger 和 debugger 使用
  * 因为在 formate  string 的时候, 怕数据过多, 只formate了 8 个字符
  *
  */
 std::string format_rvm_value(RVM_Value* value) {
     std::string result;
-    std::string str_data;
+    // std::string str_data;
 
-    // std_lib.cpp:std_lib_fmt_printf 代码重复
-    // TODO: 需要后期优化
-    switch (value->type) {
-        // TODO: 这里重复了, 如何重写
-    case RVM_VALUE_TYPE_BOOL:
-        if (value->u.bool_value == RVM_FALSE) {
-            result = std::string("false");
-        } else {
-            result = std::string("true");
-        }
-        break;
-    case RVM_VALUE_TYPE_INT:
-        result = std::to_string(value->u.int_value);
-        break;
-    case RVM_VALUE_TYPE_INT64:
-        result = std::to_string(value->u.int64_value);
-        break;
-    case RVM_VALUE_TYPE_DOUBLE:
-        result = std::to_string(value->u.double_value);
-        break;
-    case RVM_VALUE_TYPE_STRING:
-        str_data = value->u.string_value->data;
-        // 最多取 8 个字符, 方便显示
-        result = "l:" + std::to_string(value->u.string_value->length) + ","
-            + "d:\"" + str_data.substr(0, 8) + "\"";
-        break;
-    case RVM_VALUE_TYPE_CLASS_OB:
-        result = std::string("class-ob"); // TODO:
-        break;
-    case RVM_VALUE_TYPE_ARRAY:
-        result = "l:" + std::to_string(value->u.array_value->length) + ","
-            + "c:" + std::to_string(value->u.array_value->capacity);
-        break;
-    default:
-        break;
+    result = fmt_any(value);
+
+    // 对于 array 需要加一下 lenght capacity
+    if (value->type == RVM_VALUE_TYPE_ARRAY) {
+        result = "len:"
+            + std::to_string(value->u.array_value->length)
+            + ", cap:"
+            + std::to_string(value->u.array_value->capacity)
+            + ", "
+            + result;
     }
 
     return result;

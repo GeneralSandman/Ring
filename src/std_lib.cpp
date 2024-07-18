@@ -613,36 +613,7 @@ RVM_Value std_lib_vm_garbage_collect(Ring_VirtualMachine* rvm, unsigned int arg_
 RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     std::string str = "";
 
-    switch (args->type) {
-    case RVM_VALUE_TYPE_BOOL:
-        str = "bool";
-        break;
-    case RVM_VALUE_TYPE_INT:
-        str = "int";
-        break;
-    case RVM_VALUE_TYPE_INT64:
-        str = "int64";
-        break;
-    case RVM_VALUE_TYPE_DOUBLE:
-        str = "double";
-        break;
-    case RVM_VALUE_TYPE_STRING:
-        str = "string";
-        break;
-    case RVM_VALUE_TYPE_CLASS_OB:
-        if (args->u.class_ob_value->class_ref == nullptr) {
-            str = "class";
-        } else {
-            str = std::string(args->u.class_ob_value->class_ref->identifier);
-        }
-        break;
-    case RVM_VALUE_TYPE_ARRAY:
-        str = formate_array_type(args->u.array_value);
-        break;
-    default:
-        str = "unknow";
-        break;
-    }
+    str             = format_rvm_type(args);
 
     RVM_Value ret;
     ret.type           = RVM_VALUE_TYPE_STRING;

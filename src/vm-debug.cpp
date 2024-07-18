@@ -41,8 +41,8 @@ int debug_rvm_interactive(Ring_VirtualMachine* rvm,
 
     STDERR_MOVE_CURSOR(terminal_size.ws_row - 10, 0);
     fprintf(stderr, "-------------Operation-----------\n");
-    fprintf(stderr, "stdout redirect to: %s\n", DEBUG_RVM_INTERACTIVE_STDOUT_FILE);
-    fprintf(stderr, "press 'help': get help message.\n");
+    fprintf(stderr, "[+]stdout redirect to: %s\n", DEBUG_RVM_INTERACTIVE_STDOUT_FILE);
+    fprintf(stderr, "[+]press 'help': get help message.\n");
 
 
     vm_debugger_cli(rvm);
@@ -71,25 +71,12 @@ std::string vm_db_command_help_message =
     "        clear                               :Clear the screen.\n"
     "        quit(q)                             :Quit from the debugger. The program being executed is aborted.\n"
     "\n"
-    "        global                              :Print the global variables.\n"
-    "        local                               :Print the local variables.\n"
-    "        bt                                  :Print a stack trace, with the most recent frame at the top.\n"
+    "Stack Value Commands:\n"
+    "        stack <index>                       :Display stack value by index.\n"
+    "        stack <b_index>-<e_index>           :Display stack values with index is [b_index, e_index).\n"
     "\n"
     "Exec Commands:\n"
-    "        cont      (c)                       :Continue execution, only stop when a breakpoint is encountered.\n"
-    "        \n"
-    "        step over (n)                       :Executes the current line of code and moves to the next line.\n"
-    "        step into (i)                       :Enters the current function or method and executes it line by line.\n"
-    "        step out  (o)                       :Exits the current function or method and returns to the caller.\n"
-    "\n"
-    "Breakpoints Commands:\n"
-    "        break set   <line-number>           :Set a break at *line-number*.\n"
-    "        break unset <line-number>           :Unset a breakpoint at *line-number*.\n"
-    "        break list                          :List  all the breakpoints.\n"
-    "        break clear                         :Clear all the breakpoints.\n"
-    "\n"
-    "Source Code Commands:\n"
-    "        code list (l)                       :list ring source code\n"
+    "        'Enter'                             :Execute one opcode.\n"
     "\n";
 
 
@@ -167,7 +154,7 @@ int vm_debugger_cli(Ring_VirtualMachine* rvm) {
                 std::string value_str = format_rvm_value(value);
                 std::string format    = type_str + "(" + value_str + ")";
 
-                fprintf(stderr, "    index[%u] value:%s\n", index, format.c_str());
+                fprintf(stderr, "    [%u] :%s\n", index, format.c_str());
             }
         }
 
