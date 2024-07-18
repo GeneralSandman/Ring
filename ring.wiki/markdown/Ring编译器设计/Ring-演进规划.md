@@ -509,18 +509,36 @@ class-object  ✅
    
 ![alt text](image.png)
 
+2. 支持简单的命令
+   - q 退出调试
+   - help 获得帮助信息
+   - stack 获取 RuntimeStack 的RVM_Value值详情
+  
+![命令获取RuntimeStack详情](image-4.png)
 
-2. formate rvm constant pool 的时候，转义字符要反转义
+
+3. 显示下一个字节码/功能/公式
+
+![](image-6.png)
+
+1. 每运行一步，在log中都打印 所有 全局/局部变量 的值
+
+所以 在运行过程中，还要捕获 frame
+
+
+### C. 关于 字符串常量在 vm中的优化
+
+1. formate rvm constant pool 的时候，转义字符要反转义
 
 ![alt text](image-1.png)
 
 
-3. 如果字符串是空的话，constant pool 应该为空
+2. 如果字符串是空的话，constant pool 应该为空
 
 ![alt text](image-2.png)
 
 
-4. string 常量，应该去重
+3. string 常量，应该去重
 
 ![alt text](image-3.png)
 
@@ -531,7 +549,7 @@ class-object  ✅
 ## 2024-07-08周
 
 
-### A. Feature: 在Ring main()函数中 获取命令行参数
+### A. Feature: 在Ring main()函数中 获取命令行参数 ✅ 
 
 
 1. golang 获取命令行参数方式，通过 os.Args 全局变量
@@ -581,11 +599,8 @@ function main() -> (int) {
 ```
 
 
-3. 还有个问题还没有完全根治：
 
-有的测试用例是 检查 heap_size(), 有了 args数组，
-
-### B. Fix: main 函数中使用 var string[] args, 导致某些测试用例不通过
+### B. Fix: main 函数中使用 var string[] args, 导致某些GC测试用例不通过 ✅ 
 
 
 ### C. Feature: string支持 substr
