@@ -495,6 +495,54 @@ class-object  ✅
 -----------------------------
 
 
+## 关于Ring后续的发展规划
+
+目前发展规划主要在 字节码虚拟机执行 OR 机器码二进制执行
+
+关于直接虚拟机还是二进制, 各自的优劣这里不再赘述. 
+在这里我整理一个我认为着重考虑的点:
+1. 虚拟机形式 很难实现自举, 强如Java迄今为止也没能实现.
+2. 虚拟机形式 执行速度太慢, 不然为什么会出现JIT
+
+通过自己对于目前发展方向的判断, 我认为直接生成二进制才是未来的主流, 他有几个极大的优势, 这个优势是虚拟机形式不能解决的:
+1. 直接生成二进制, 可到处分发, 目标机器无需安装任何依赖.
+   - 为什么这一点很重要呢, 我在腾讯和字节跳动都做过后台开发的工作, 其内部的网络访问策略非常严格, 发现在部署阶段, 如果需要遇到通过网络安装依赖, 经常需要寻找各种方案, 所以自己非常痛恨这种部署方式
+2. 后期编译器成熟之后可以实现自举
+3. 没有跟虚拟机一样, 运行时过于繁重, 
+
+
+发展方向讨论到现在已经有了比较大的倾向, 那么接下来有一个非常值得关注的问题:
+
+### 关于 编译生成可执行二进制的工作量
+
+1. 深入了解各个CPU架构的汇编指令: x86-64, arm, 
+
+
+### 参考资料
+
+
+1. QuickJS
+
+官方
+https://bellard.org/quickjs/
+
+中文
+https://github.com/quickjs-zh/QuickJS
+
+推荐:
+https://github.com/quickjs-ng/quickjs
+Forked: https://github.com/GeneralSandman/quickjs
+
+
+2. QuciJS 需要参考的地方
+
+
+quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
+
+
+-----------------------------
+
+
 ## 2024-07-15周
 
 
@@ -541,6 +589,131 @@ class-object  ✅
 3. string 常量，应该去重
 
 ![alt text](image-3.png)
+
+
+
+
+
+### D. 关于多个package中的 全局变量/函数/类 虚拟机的空间布局如何组织
+
+
+在 Java 中,当一个函数被调用时,对应的字节码指令如下:
+
+1. **方法调用指令**:
+   - `invokevirtual`: 用于调用对象的虚方法。
+   - `invokespecial`: 用于调用构造方法、私有方法以及父类的方法。
+   - `invokestatic`: 用于调用静态方法。
+   - `invokeinterface`: 用于调用接口方法。
+
+2. **参数传递**:
+   - 在方法调用指令之前,会先将参数压入操作数栈中。
+   - 参数的顺序是从左到右,最后一个参数先压栈。
+
+3. **返回值处理**:
+   - 方法执行完毕后,返回值会被压入操作数栈顶。
+   - 调用者可以从操作数栈中取出返回值。
+
+下面是一个简单的 Java 代码示例及其对应的字节码指令:
+
+```java
+public class Example {
+    public static int add(int a, int b) {
+        return a + b;
+    }
+
+    public static void main(String[] args) {
+        int result = add(3, 5);
+        System.out.println(result);
+    }
+}
+```
+
+对应的字节码指令如下:
+
+```
+// add 方法调用
+0: bipush        3
+2: bipush        5
+4: invokestatic  #2                  // Method add:(II)I
+7: istore_1
+
+// 打印结果
+8: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;
+11: iload_1
+12: invokevirtual #4                  // Method java/io/PrintStream.println:(I)V
+15: return
+```
+
+解释如下:
+
+1. `bipush 3` 和 `bipush 5` 将参数 `a` 和 `b` 压入操作数栈。
+2. `invokestatic #2` 调用静态方法 `add`。
+3. `istore_1` 将返回值存储到局部变量 `result`。
+4. `getstatic #3` 获取 `System.out` 对象。
+5. `iload_1` 将 `result` 从局部变量加载到操作数栈。
+6. `invokevirtual #4` 调用 `println` 方法打印结果。
+7. `return` 方法返回。
+
+总之,Java 的方法调用对应的字节码指令主要包括参数传递、方法调用和返回值处理等步骤。理解这些字节码指令有助于深入理解 Java 的运行机制。
+
+
+
+
+
+### E. invokevirtual 本质上是调用了一个函数, 函数是通过索引在函数表中查找到的; 如果import 了多个 package, 那么函数的索引是如何保证不冲突的; 也就是java如何实现的链接
+
+
+Java 中的 `invokevirtual` 指令确实是通过调用函数表(Virtual Method Table, VMT)来实现动态派发的。但是当存在多个导入的 package 时,Java 是如何确保函数索引不会冲突的呢?
+
+这涉及到 Java 的链接(Linking)机制:
+
+1. **类加载器(Class Loader)**:
+   - 每个类都由一个特定的类加载器加载。
+   - 类加载器负责从文件系统或网络等位置加载类文件,并定义该类在 JVM 中的名称空间。
+
+2. **名称空间**:
+   - 类加载器为每个加载的类创建一个唯一的名称空间。
+   - 这个名称空间包括类的名称、方法名称、字段名称等。
+
+3. **方法解析**:
+   - 当调用 `invokevirtual` 指令时,JVM 会首先在当前类的 VMT 中查找方法。
+   - 如果没找到,则会沿继承层次向上查找,直到找到为止。
+   - 查找过程中会考虑方法的名称、参数类型等信息来确定要调用的具体方法。
+
+4. **类文件结构**:
+   - 每个类文件都有一个常量池,用于存储类、方法、字段等的符号引用。
+   - 在链接阶段,JVM 会解析这些符号引用,并转换为直接引用(内存地址)。
+
+通过上述机制,即使 Java 项目中导入了多个 package,也能够确保方法调用的正确性:
+
+1. 每个类都有自己的名称空间,不会与其他类产生冲突。
+2. 方法调用时,JVM 会根据方法的完整签名(包括名称和参数类型)来查找正确的方法实现。
+3. 类文件的常量池存储了符号引用,在链接阶段会被解析为直接引用,保证了调用的正确性。
+
+总之,Java 的链接机制通过类加载器、名称空间、方法解析等机制,确保了即使导入了多个 package,也能够正确地调用目标方法,避免了索引冲突的问题。这是 Java 设计的一个重要特性,有助于提高代码的可扩展性和可维护性。
+
+
+
+### F. java 相关的书籍
+
+关于 Java 的链接机制和虚拟方法调用的实现,有几本比较优秀的书籍可以作为参考:
+
+1. **《Java 虚拟机规范》(The Java® Virtual Machine Specification)**
+   - https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-5.html
+   - 这是由 Oracle 官方发布的 Java 虚拟机规范,详细介绍了 JVM 的各种指令、数据结构和运行机制。
+   - 其中第 5 章"Loading, Linking, and Initializing"专门讨论了类的加载、链接和初始化过程,对虚拟方法调用有详细的描述。
+
+2. **《深入理解 Java 虚拟机》(Inside the Java Virtual Machine)**
+   - 这是一本非常经典的 Java 虚拟机实现原理方面的著作,由 Bill Venners 编写。
+   - 第 6 章"类加载和链接"深入探讨了 Java 类的加载过程、符号引用解析以及动态链接的实现细节。
+   - 第 7 章"对象创建与方法执行"则介绍了虚拟方法调用的具体机制。
+
+3. **《Java 程序员修炼之道》(The Complete Software Developer's Career Guide)**
+   - 这是一本专注于 Java 程序员职业发展的书籍,作者为 John Sonmez。
+   - 其中第 11 章"理解 Java 虚拟机"就包含了对 Java 虚拟机运行原理的详细解读,包括类加载、方法调用等内容。
+
+这些书籍都对 Java 虚拟机的底层实现机制进行了深入的分析和讨论,对于理解 Java 语言的运行原理以及优化 Java 程序的性能都有很大帮助。如果你对 Java 虚拟机的实现细节感兴趣,这些书籍是非常值得一读的。
+
 
 
 -----------------------------
