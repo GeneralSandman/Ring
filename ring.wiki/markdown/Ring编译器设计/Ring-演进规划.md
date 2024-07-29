@@ -44,6 +44,7 @@
 
 1. 语句: if else for do-for break continue return 
 2. 语句: switch-case
+3. 模式匹配 match
 
 
 ### function & method
@@ -52,11 +53,15 @@
 2. 参数、局部变量、返回值、self关键字
 3. 可变参数+any类型
 4. 参数的深度copy, 浅copy
+5. 匿名函数
+6. 闭包
+7. 函数作为变量/参数
 
 
 ### 语义分析
 
 1. 完善语义分析 报错机制
+2. 完善各种语法限制，争取在编译过程中就报错提示，尽量不允许在运行过程中崩溃
 
 
 ### GC
@@ -86,7 +91,7 @@
 ### 标准库
 
 
-1. 更加优化的方式实现 native-lib, ring方便调用c库
+1. 更加优化的方式实现 native-lib, ring方便调用c库, 与c库进行交互
 2. 实现相对完善的官方标准库 fmt sys math debug strings reflect
 3. fmt: 完善内置 printf 函数, 支持可变参数, 参考format函数
 4. reflect: 实现反射, 获取变量的类型
@@ -94,7 +99,7 @@
 
 ### 不成熟的想法
 
-1. 支持Ring Eval, e.g.  ./bin/lua eval "fmt::println_string("hello world")";  默认导入所有的std package, 不能指定全局变量, 直接就是main函数中代码
+1. 支持Ring Eval, e.g.  ./bin/ring eval "fmt::println_string("hello world")";  默认导入所有的std package, 不能指定全局变量, 直接就是main函数中代码
 2. Closure
 3. 函数式编程
 4. 中间代码优化, 死代码消除, 常量折叠
@@ -543,6 +548,23 @@ quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
 -----------------------------
 
 
+## 2024下半年发展大规划
+
+1. 匿名函数
+2. 闭包
+3. 协程
+4. 调用C语言，通过 .so共享库或者别的方式
+5. 增量式垃圾回收机制
+6. 支持范型
+7. 支持map
+8. 模式匹配
+9. 类型转换
+10. 指针
+
+
+-----------------------------
+
+
 ## 2024-07-15周
 
 
@@ -569,9 +591,18 @@ quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
 
 ![](image-6.png)
 
-1. 每运行一步，在log中都打印 所有 全局/局部变量 的值
+4. 每运行一步，在log中都打印 所有 全局/局部变量 的值
 
 所以 在运行过程中，还要捕获 frame
+
+5. 能够设置端点
+
+
+6. 实时显示对应的当前的源代码函数和内容
+
+7. 通过环境变量 运行 交互式调试工具
+
+RING_DEBUG=debug_vm_iter=1 ./bin/ring run ./test.ring
 
 
 ### C. 关于 字符串常量在 vm中的优化
