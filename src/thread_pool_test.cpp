@@ -7,8 +7,8 @@
 #include <unistd.h>
 
 void task(void* arg) {
-    printf("Thread #%u working on %d\n", (int)pthread_self(), (int)arg);
-    sleep(2);
+    printf("Thread #%zu working on %zu\n", (size_t)pthread_self(), (size_t)arg);
+    sleep(20);
 }
 
 void print_working_threads(void* arg) {

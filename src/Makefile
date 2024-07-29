@@ -119,6 +119,13 @@ $(TOOL_GEN_VMCODE_DOC_TARGET):$(TOOL_GEN_VMCODE_DOC_OBJS); $(shell if [ ! -e $(B
 	@echo "\033[32mBuild Tool Generate Vmcode Doc SUCCESS:" $(BIN)/$@ "\033[0m"
 
 
+TOOL_THREAD_POOL_TARGET= test_thread_pool
+TOOL_THREAD_POOL_OBJS  = thread_pool.o thread_pool_test.o
+
+$(TOOL_THREAD_POOL_TARGET):$(TOOL_THREAD_POOL_OBJS); $(shell if [ ! -e $(BIN) ];then mkdir -p $(BIN); fi)
+	$(CC) $(TOOL_THREAD_POOL_OBJS) -lm -pthread -o $(BIN)/$@
+	@echo "\033[32mBuild thread pool test SUCCESS:" $(BIN)/$@ "\033[0m"
+
 
 # 验证编译工具链是否符合要求
 # linux macos : command -v 
@@ -196,7 +203,8 @@ mem_pool.o: mem_pool.cpp ring.hpp
 gc.o: gc.cpp ring.hpp
 debug.o: debug.cpp ring.hpp
 vm-debug.o: vm-debug.cpp ring.hpp
-thread_pool.o: thread_pool.c ring.hpp
+thread_pool.o: thread_pool.cpp ring.hpp
+thread_pool_test.o: thread_pool_test.cpp ring.hpp
 main.o: main.cpp ring.hpp
 tool_gen_vmcode_doc.o: tool_gen_vmcode_doc.cpp ring.hpp
 fmt.o: fmt.cpp ring.hpp

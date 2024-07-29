@@ -44,11 +44,15 @@ help:
 	@echo "make check                : check build dependencies"
 	@echo "make compile_commands     : update compile_commands.json"
 	@echo "make tool_gen_vmcode_doc  : build tool_gen_vmcode_doc"
+	@echo "make test_thread_pool     : build test_thread_pool"
 
 # 生成一个脚本用于 将 Ring 虚拟机指令集生成一个 markdown表格
 # Usage:
 # 	  make tool_gen_vmcode_doc && ./bin/tool_gen_vmcode_doc
 $(TOOL_GEN_VMCODE_DOC_TARGET):
+	@cd src && $(MAKE) $@
+
+test_thread_pool:
 	@cd src && $(MAKE) $@
 
 clean check cleandeps:
