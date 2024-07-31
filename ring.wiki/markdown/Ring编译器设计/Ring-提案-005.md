@@ -8,7 +8,7 @@ Last updated: 2024-07-31
 
 Status: Draft/Design/Release
 
-Discussion at XXX.
+Discussion at https://github.com/GeneralSandman/Ring/issue/NNNNN.
 
 ## Abstract
 

@@ -25,3 +25,4 @@
   - [**Ring**提案-匿名函数&闭包](./markdown/Ring编译器设计/Ring-提案-002.md)
   - [**Ring**提案-垃圾回收](./markdown/Ring编译器设计/Ring-提案-003.md)
   - [**Ring**提案-标准库](./markdown/Ring编译器设计/Ring-提案-004.md)
+  - [**Ring**提案-枚举](./markdown/Ring编译器设计/Ring-提案-005.md)

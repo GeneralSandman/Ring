@@ -1,17 +1,20 @@
 # Proposal: 协程
 
-> 提出人：GeneralSandman
-> 
-> 提出时间：2024-07-23
-> 
-> 修订时间：2024-07-23
-> 
+Author(s): GeneralSandman
 
-## 1. 介绍
+First created: 2024-07-29
+
+Last updated: 2024-07-31
+
+Status: Draft/Design/Release
+
+Discussion at https://github.com/GeneralSandman/Ring/issue/NNNNN.
+
+## Abstract
 
 Ring语言提案001，主要讨论和调研 协程的实现，和用户编写代码的形式。
 
-## 2. 调研
+## Background
 
 ### 2.1 Golang的协程
 
@@ -36,6 +39,9 @@ https://www.reddit.com/r/golang/comments/199954n/what_is_gomaxprocs_actually_use
 
 1. 需要深度了解一下 Lua编译器中 LuaState各种结构的逻辑
 2. 深度了解 协程切换，需要做什么工作
+
+
+## Proposal
 
 
 ### A. 关于Ring中协程该如何实现
@@ -101,3 +107,22 @@ function main() {
    - 一个线程 epoll进行事件监听，调度线程
    - 另一个线程进行用户态代码的执行（这样有个好处就是，我可以设置一个golang的的线程数量 ）
 7. 如何设计协程切换
+
+## Rationale
+
+[A discussion of alternate approaches and the trade offs, advantages, and disadvantages of the specified approach.]
+
+## Compatibility
+
+[A discussion of the change with regard to the
+[compatibility guidelines](https://go.dev/doc/go1compat).]
+
+## Implementation
+
+[A description of the steps in the implementation, who will do them, and when.
+This should include a discussion of how the work fits into [Go's release cycle](https://go.dev/wiki/Go-Release-Cycle).]
+
+## Open issues (if applicable)
+
+[A discussion of issues relating to this proposal for which the author does not
+know the solution. This section may be omitted if there are none.]

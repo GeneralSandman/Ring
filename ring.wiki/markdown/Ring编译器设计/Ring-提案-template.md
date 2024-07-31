@@ -1,12 +1,14 @@
-[This is a template for Go's change proposal process, documented [here](../README.md).]
-
 # Proposal: [Title]
 
 Author(s): [Author Name, Co-Author Name]
 
+First created: [Date]
+
 Last updated: [Date]
 
-Discussion at https://go.dev/issue/NNNNN.
+Status: [Draft/Design/Release]
+
+Discussion at https://github.com/GeneralSandman/Ring/issue/NNNNN.
 
 ## Abstract
 
