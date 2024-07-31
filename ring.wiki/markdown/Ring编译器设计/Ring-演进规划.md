@@ -565,6 +565,138 @@ quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
 -----------------------------
 
 
+## 2024-07-29周
+
+### A. 关于Ring的限定符号
+
+1. 限定符号`::` 用于限定访问空间，主要侧重的是命名空间/层级/访问可见性
+
+1.1 访问 package中的函数：访问 `fmt` package  中的函数 `println`
+
+```ring
+import {
+    fmt;
+}
+
+function main() {
+    fmt::println("hello world");
+}
+```
+
+
+1.2 访问package中的类：使用 `job` package  中的类 `Job`
+
+```ring
+import {
+    job;
+}
+
+function main() {
+    var job::Job tmp;
+}
+```
+
+1.3 访问enum中的类型：
+
+```ring
+enum string Region {
+    Test = "test";
+    Prod = "prod";
+}
+
+
+function main() {
+    var string tmp = Region::Test;
+}
+```
+
+1.4 当然，也可以多级作用域指示：访问 `job` package 内的 枚举 `Region`, 枚举`Region` 中的枚举常量为 `Test`
+
+```ring
+import {
+    job;
+}
+
+function main() {
+    var string tmp = job::Region::Test;
+}
+```
+
+2. `.` 限定符号，主要用户访问类对象中的 成员/方法
+
+```ring
+typedef class Job {
+    field string Name;
+
+    method PrintInfo() {
+
+    }
+}
+function main() {
+    var Job tmp;
+
+    tmp.Name;
+    tmp.PrintInfo();
+}
+```
+
+
+3. `->` 用于函数返回值
+
+```ring
+function test() -> (int) {
+    return 0;
+}
+```
+
+
+
+### B. 关于Rust的限定符号
+
+Rust 中使用 `::` 符号来访问包和类型成员的主要原因如下:
+
+1. **命名空间和作用域**: Rust 使用 `::` 符号来明确指定命名空间和作用域。这样可以避免名称冲突,并帮助编译器确定正确的符号解析路径。
+
+   例如, `std::io::stdin()` 中的 `std` 和 `io` 就是命名空间,`stdin()` 是 `io` 模块中的一个函数。使用 `::` 可以清楚地表示这种嵌套的作用域关系。
+
+2. **区分变量和类型/模块**: Rust 中变量和类型/模块是区分的。变量使用 `.` 访问它们的方法和属性,而类型/模块使用 `::` 访问它们的关联函数和常量。
+
+   例如, `String::from("hello")` 中的 `String` 是一个类型,而 `"hello".to_string()` 中的 `to_string()` 是 `String` 类型的方法。使用 `::` 可以清楚地区分这两种情况。
+
+3. **全局访问**: `::` 符号也可以用于全局访问,即从根作用域开始访问。这在某些情况下很有用,比如访问标准库中的类型或函数。
+
+   例如, `::std::env::args()` 可以直接从根作用域访问标准库的 `env` 模块中的 `args()` 函数。
+
+4. **一致性和习惯**: 在 Rust 生态系统中,使用 `::` 符号访问包和类型成员已经成为一种惯例和标准。这种使用方式也与其他语言(如 C++、Java 等)的习惯保持一致,有利于开发者的学习和理解。
+
+总之,Rust 中使用 `::` 符号的主要目的是为了明确表达命名空间、作用域和类型/模块的关系,从而提高代码的可读性和可维护性。这种使用习惯也有助于Rust开发者快速上手并与其他语言开发者进行交流。
+
+
+
+```
+struct Circle {
+    radius: f64,
+}
+
+impl Circle {
+    fn new(radius: f64) -> Circle {
+        Circle { radius }
+    }
+
+    fn area(&self) -> f64 {
+        std::f64::consts::PI * self.radius * self.radius
+    }
+}
+
+let circle = Circle::new(5.0);
+println!("Area: {}", circle.area());
+```
+
+Circle::new() 是一个关联函数,用于创建新的 Circle 实例。circle.area() 则是一个成员函数,用于计算圆的面积
+
+-----------------------------
+
+
 ## 2024-07-15周
 
 
