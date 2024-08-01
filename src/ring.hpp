@@ -37,6 +37,8 @@ typedef struct Ring_String                  Ring_String;
 typedef struct Ring_BasicValue              Ring_BasicValue;
 typedef struct Ring_Array                   Ring_Array;
 
+typedef struct EnumDeclaration              EnumDeclaration;
+typedef struct EnumItemDeclaration          EnumItemDeclaration;
 typedef struct ClassDefinition              ClassDefinition;
 typedef struct ClassMemberDeclaration       ClassMemberDeclaration;
 typedef struct FieldMember                  FieldMember;
@@ -366,6 +368,7 @@ struct PackageUnit {
 
     std::vector<ClassDefinition*>   class_definition_list;
     std::vector<Function*>          function_list;
+    std::vector<EnumDeclaration*>   enum_declaration_list;
 
     Block*                          current_block;
 
@@ -1121,6 +1124,29 @@ typedef struct {
     BuildinFuncFix              buildin_func_fix;
 
 } Ring_Buildin_Func;
+
+struct EnumDeclaration {
+    std::string          source_file;
+    unsigned int         start_line_number; // 源码的开始行
+    unsigned int         end_line_number;   // 源码的结束行
+
+    unsigned int         enum_index; // UPDATED_BY_FIX_AST
+    TypeSpecifier*       type_specifier;
+    char*                identifier;
+
+    unsigned int         enum_item_size;
+    EnumItemDeclaration* enum_item_list;
+};
+
+struct EnumItemDeclaration {
+    unsigned int         line_number;
+
+    unsigned int         index_of_enum; // UPDATED_BY_FIX_AST
+    TypeSpecifier*       type_specifier;
+    char*                identifier;
+
+    EnumItemDeclaration* next;
+};
 
 
 struct ClassDefinition {
@@ -1928,6 +1954,7 @@ typedef enum {
 
 
     ERROR_CODE_GRAMMAR_ERROR                  = 100000, // 语法错误
+    ERROR_CODE_UNKNOW_PACKAGE                 = 100001, // 找不到 package
 
 
     ERROR_UNDEFINITE_VARIABLE                 = 200000,
@@ -2266,6 +2293,8 @@ void           package_unit_reset_line_content();
 char*          package_unit_get_current_line_content();
 void           package_unit_reset_column_number();
 std::string    package_unit_get_line_content(unsigned int line_number);
+
+int            package_unit_add_enum_definition(EnumDeclaration* enum_decl);
 int            package_unit_add_class_definition(ClassDefinition* class_definition);
 
 void           ring_grammar_error(RING_GRAMMAR_ID grammar_id);
@@ -2373,6 +2402,13 @@ Parameter*                    parameter_list_add_statement(Parameter* head, Para
 
 Package*                      create_package_info(char* package_name);
 void                          import_package_list_add_item(char* package_name, char* rename);
+
+EnumDeclaration*              start_enum_declaration(TypeSpecifier* type_specifier, char* class_identifier);
+EnumDeclaration*              finish_enum_declaration(EnumDeclaration*     enum_decl,
+                                                      EnumItemDeclaration* enum_item_decl);
+EnumItemDeclaration*          enum_item_declaration_list_add_item(EnumItemDeclaration* list,
+                                                                  EnumItemDeclaration* decl);
+EnumItemDeclaration*          create_enum_item_declaration(char* identifier);
 
 ClassDefinition*              start_class_definition(char* class_identifier);
 ClassDefinition*              finish_class_definition(ClassDefinition* class_def, ClassMemberDeclaration* class_member_declar);

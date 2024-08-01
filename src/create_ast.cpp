@@ -1254,10 +1254,78 @@ void import_package_list_add_item(char* package_name, char* rename) {
     get_package_unit()->import_package_list.push_back(import_package_info);
 }
 
+EnumDeclaration* start_enum_declaration(TypeSpecifier* type_specifier, char* identifier) {
+    debug_ast_info_with_yellow("\t");
 
-// -------------
-// class define
-// -------------
+    EnumDeclaration* enum_decl   = (EnumDeclaration*)mem_alloc(get_front_mem_pool(), sizeof(EnumDeclaration));
+    enum_decl->source_file       = package_unit_get_file_name();
+    enum_decl->start_line_number = package_unit_get_line_number();
+    enum_decl->end_line_number   = package_unit_get_line_number();
+    enum_decl->enum_index        = 0; // UPDATED_BY_FIX_AST
+    enum_decl->type_specifier    = type_specifier;
+    enum_decl->identifier        = identifier;
+    enum_decl->enum_item_size    = 0;
+    enum_decl->enum_item_list    = nullptr;
+
+
+    package_unit_add_enum_definition(enum_decl);
+
+    return enum_decl;
+}
+
+EnumDeclaration* finish_enum_declaration(EnumDeclaration*     enum_decl,
+                                         EnumItemDeclaration* enum_item_decl) {
+    debug_ast_info_with_yellow("\t");
+
+    assert(enum_decl != nullptr);
+
+    unsigned int item_size = 0;
+
+    // 分别存储在 field_list 和 method_list
+    for (EnumItemDeclaration* pos = enum_item_decl; pos != nullptr; pos = pos->next) {
+        item_size++;
+    }
+
+    enum_decl->end_line_number = package_unit_get_line_number();
+    enum_decl->enum_item_size  = item_size;
+    enum_decl->enum_item_list  = enum_item_decl;
+
+
+    return enum_decl;
+}
+
+EnumItemDeclaration* enum_item_declaration_list_add_item(EnumItemDeclaration* list,
+                                                         EnumItemDeclaration* decl) {
+
+    assert(decl != nullptr);
+
+    if (list == nullptr) {
+        return decl;
+    }
+
+    EnumItemDeclaration* pos = list;
+    for (; pos->next != nullptr; pos = pos->next) {
+    }
+
+    pos->next = decl;
+
+    return list;
+}
+
+// TODO: 完善参数
+EnumItemDeclaration* create_enum_item_declaration(char* identifier) {
+    debug_ast_info_with_yellow("\t");
+
+    EnumItemDeclaration* enum_item_decl = (EnumItemDeclaration*)mem_alloc(get_front_mem_pool(), sizeof(EnumItemDeclaration));
+    enum_item_decl->line_number         = package_unit_get_line_number();
+    enum_item_decl->index_of_enum       = 0;       // UPDATED_BY_FIX_AST
+    enum_item_decl->type_specifier      = nullptr; // FIXME:
+    enum_item_decl->identifier          = identifier;
+    enum_item_decl->next                = nullptr;
+
+    return enum_item_decl;
+}
+
 
 ClassDefinition* start_class_definition(char* class_identifier) {
     debug_ast_info_with_yellow("\t");

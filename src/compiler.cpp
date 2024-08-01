@@ -501,6 +501,14 @@ std::string package_unit_get_line_content(unsigned int line_number) {
     return std::string(buffer);
 }
 
+int package_unit_add_enum_definition(EnumDeclaration* enum_decl) {
+    assert(g_package_unit != nullptr);
+    assert(enum_decl != nullptr);
+
+    g_package_unit->enum_declaration_list.push_back(enum_decl);
+    return 0;
+}
+
 int package_unit_add_class_definition(ClassDefinition* class_definition) {
     assert(g_package_unit != nullptr);
     assert(class_definition != nullptr);
@@ -668,6 +676,7 @@ std::string trans_flex_token_to_human_char(std::string str) {
         {"`defer`", "TOKEN_DEFER"},
         {"`range`", "TOKEN_RANGE"},
         {"`in`", "TOKEN_IN"},
+        {"`enum`", "TOKEN_ENUM"},
         {"`class`", "TOKEN_CLASS"},
         {"`private`", "TOKEN_PRIVATE"},
         {"`public`", "TOKEN_PUBLIC"},

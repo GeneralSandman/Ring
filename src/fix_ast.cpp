@@ -2283,8 +2283,30 @@ Declaration* search_declaration(char* package_posit, char* identifier, Block* bl
     }
     CompilerEntry* compiler_entry = get_compiler_entry();
     Package*       package        = search_package(compiler_entry, package_posit);
+
+    // Ring-Compiler-Error-Report ERROR_CODE_UNKNOW_PACKAGE
     if (package == nullptr) {
-        printf("can't find package:%s\n", package_posit);
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, sizeof(compile_err_buf),
+                 "unknow package `%s`; E:%d.",
+                 package_posit,
+                 ERROR_CODE_UNKNOW_PACKAGE);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(1), // FIXME:
+            .line_number             = 1,                                // FIXME:
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
 
     for (; block; block = block->parent_block) {
@@ -2307,8 +2329,30 @@ Function* search_function(char* package_posit, char* identifier) {
     if (package_posit != nullptr) {
         CompilerEntry* compiler_entry = get_compiler_entry();
         Package*       package        = search_package(compiler_entry, package_posit);
+
+        // Ring-Compiler-Error-Report ERROR_CODE_UNKNOW_PACKAGE
         if (package == nullptr) {
-            printf("can't find package:%s\n", package_posit);
+            DEFINE_ERROR_REPORT_STR;
+
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "unknow package `%s`; E:%d.",
+                     package_posit,
+                     ERROR_CODE_UNKNOW_PACKAGE);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(1), // FIXME:
+                .line_number             = 1,                                // FIXME:
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
         }
 
         // TODO: 封装成函数

@@ -64,6 +64,9 @@ int yylex();
 
     Package*                            m_package;
 
+    EnumDeclaration*                    m_enum_declaration;
+    EnumItemDeclaration*                m_enum_item_declaration;
+
     ClassDefinition*                    m_class_definition;
     ClassMemberDeclaration*             m_class_member_declaration;
     FieldMember*                        m_field_member;
@@ -92,6 +95,7 @@ int yylex();
 %token TOKEN_RANGE
 %token TOKEN_IN
 
+%token TOKEN_ENUM
 %token TOKEN_CLASS
 %token TOKEN_PRIVATE
 %token TOKEN_PUBLIC
@@ -229,10 +233,13 @@ int yylex();
 
 %type <m_package> package_definition
 
-%type <m_class_definition> class_definition
+%type <m_enum_declaration>      enum_declaration
+%type <m_enum_item_declaration> enum_item_declaration_list enum_item_declaration
+
+%type <m_class_definition>         class_definition
 %type <m_class_member_declaration> class_member_declaration_list class_member_declaration
-%type <m_field_member> field_member
-%type <m_method_member> method_member
+%type <m_field_member>             field_member
+%type <m_method_member>            method_member
 
 %type <m_attribute_info> attribute_list attribute
 
@@ -351,6 +358,10 @@ definition_or_statement
     {
         debug_bison_info_with_green("[RULE::statement:class_definition]\t ");
     }
+    | enum_declaration
+    {
+        debug_bison_info_with_green("[RULE::statement:enum_declaration]\t ");
+    }
     ;
 
 class_definition
@@ -451,6 +462,31 @@ attribute
     : TOKEN_ATTRIBUTE IDENTIFIER
     {
         $$ = create_attribute_info($2);
+    }
+    ;
+
+enum_declaration
+    : TOKEN_ENUM type_specifier IDENTIFIER TOKEN_LC { $<m_enum_declaration>$ = start_enum_declaration($2, $3); } enum_item_declaration_list TOKEN_RC
+    {
+        $<m_enum_declaration>$ = finish_enum_declaration($<m_enum_declaration>5, $6);
+    }
+    ;
+
+enum_item_declaration_list
+    : enum_item_declaration
+    {
+        $$ = $1;
+    }
+    | enum_item_declaration_list enum_item_declaration
+    {
+        $$ = enum_item_declaration_list_add_item($1, $2);
+    }
+    ;
+
+enum_item_declaration
+    : IDENTIFIER TOKEN_ASSIGN expression TOKEN_SEMICOLON
+    {
+        $$ = create_enum_item_declaration($1);
     }
     ;
 
