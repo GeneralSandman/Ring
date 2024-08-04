@@ -1,7 +1,11 @@
 #include "ring.hpp"
 #include <cstring>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
 #include <vector>
-
 
 /*
  * make install 安装标准库
@@ -9,12 +13,12 @@
  * 通过 更改Makefile 编译宏 DEBUG_STD_LIB 来控制调试标准库路径
  */
 #ifdef DEBUG_STD_LIB
-char RING_PACKAGE_STD_PATH_OS[]      = "/Users/bytedance/Desktop/Ring/std/os/";
-char RING_PACKAGE_STD_PATH_IO[]      = "/Users/bytedance/Desktop/Ring/std/io/";
-char RING_PACKAGE_STD_PATH_FMT[]     = "/Users/bytedance/Desktop/Ring/std/fmt/";
-char RING_PACKAGE_STD_PATH_DEBUG[]   = "/Users/bytedance/Desktop/Ring/std/debug/";
-char RING_PACKAGE_STD_PATH_VM[]      = "/Users/bytedance/Desktop/Ring/std/vm/";
-char RING_PACKAGE_STD_PATH_REFLECT[] = "/Users/bytedance/Desktop/Ring/std/reflect/";
+char RING_PACKAGE_STD_PATH_OS[]      = "/Users/zhenhuli/Desktop/Ring/std/os/";
+char RING_PACKAGE_STD_PATH_IO[]      = "/Users/zhenhuli/Desktop/Ring/std/io/";
+char RING_PACKAGE_STD_PATH_FMT[]     = "/Users/zhenhuli/Desktop/Ring/std/fmt/";
+char RING_PACKAGE_STD_PATH_DEBUG[]   = "/Users/zhenhuli/Desktop/Ring/std/debug/";
+char RING_PACKAGE_STD_PATH_VM[]      = "/Users/zhenhuli/Desktop/Ring/std/vm/";
+char RING_PACKAGE_STD_PATH_REFLECT[] = "/Users/zhenhuli/Desktop/Ring/std/reflect/";
 #else
 char RING_PACKAGE_STD_PATH_OS[]      = "/usr/local/lib/ring/std/os/";
 char RING_PACKAGE_STD_PATH_IO[]      = "/usr/local/lib/ring/std/io/";
@@ -34,6 +38,10 @@ char RING_PACKAGE_STD_PATH_REFLECT[] = "/usr/local/lib/ring/std/reflect/";
  *  debug
  *  vm
  *  reflect
+ *
+ * TODO: 在编译过程中, 同样需要对std函数调用做详细的语义检查, 包括: 参数数量/类型, 返回值
+ * 其中函数详细的定义 必须用 ring文件表明
+ * 这里 std函数调用过程中不需要在做语义检查
  */
 std::vector<StdPackageInfo> Std_Lib_List = {
     {
@@ -48,7 +56,14 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         (char*)"io",
         RING_PACKAGE_STD_PATH_IO,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"write", std_lib_io_write, 1, 0},
+            {(char*)"exist", std_lib_io_exist, 1, 1},
+            {(char*)"open", std_lib_io_open, 1, 1},
+            {(char*)"create", std_lib_io_create, 1, 1},
+            {(char*)"seek", std_lib_io_seek, 1, 1},
+            {(char*)"read_all", std_lib_io_read_all, 1, 1},
+            {(char*)"write", std_lib_io_write, 2, 0},
+            {(char*)"close", std_lib_io_close, 1, 0},
+            {(char*)"remove", std_lib_io_remove, 1, 0},
         },
     },
 
@@ -168,6 +183,164 @@ RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
     return ret;
 }
 
+/*
+ * Package: io
+ * Function: exist
+ * Type: @native
+ */
+RVM_Value std_lib_io_exist(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        // TODO:
+        ring_error_report("std_lib_io_exist only one arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_STRING) {
+        // TODO:
+        ring_error_report("std_lib_io_exist only one arguement\n");
+    }
+
+    RVM_String* str = args[0].u.string_value;
+
+    int         res;
+    res = access(str->data, F_OK);
+
+
+    RVM_Value ret;
+    ret.type         = RVM_VALUE_TYPE_BOOL;
+    ret.u.bool_value = ((res == 0) ? RVM_TRUE : RVM_FALSE);
+    return ret;
+}
+
+/*
+ * Package: io
+ * Function: open
+ * Type: @native
+ */
+RVM_Value std_lib_io_open(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        // TODO:
+        ring_error_report("std_lib_io_open only one arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_STRING) {
+        // TODO:
+        ring_error_report("std_lib_io_open only one arguement\n");
+    }
+
+    int       fid = open(args[0].u.string_value->data, O_RDONLY);
+
+    RVM_Value ret;
+    ret.type        = RVM_VALUE_TYPE_INT;
+    ret.u.int_value = fid;
+    return ret;
+}
+
+/*
+ * Package: io
+ * Function: create
+ * Type: @native
+ */
+RVM_Value std_lib_io_create(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        // TODO:
+        ring_error_report("std_lib_io_create only one arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_STRING) {
+        // TODO:
+        ring_error_report("std_lib_io_create only one arguement\n");
+    }
+
+    int       fid = open(args[0].u.string_value->data, O_CREAT | O_RDWR, 0666);
+
+    RVM_Value ret;
+    ret.type        = RVM_VALUE_TYPE_INT;
+    ret.u.int_value = fid;
+    return ret;
+}
+
+/*
+ * Package: io
+ * Function: seek
+ * Type: @native
+ */
+RVM_Value std_lib_io_seek(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 3) {
+        // TODO:
+        ring_error_report("std_lib_io_seek only one arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_INT) {
+        // TODO:
+        ring_error_report("std_lib_io_seek only one arguement\n");
+    }
+    if (args[1].type != RVM_VALUE_TYPE_INT64) {
+        // TODO:
+        ring_error_report("std_lib_io_seek only one arguement\n");
+    }
+    if (args[2].type != RVM_VALUE_TYPE_INT) {
+        // TODO:
+        ring_error_report("std_lib_io_seek only one arguement\n");
+    }
+
+    int       fid    = args[0].u.int_value;
+    long long offset = args[1].u.int64_value;
+    int       whence = args[2].u.int_value;
+
+    lseek(fid, offset, whence);
+
+    RVM_Value ret;
+    ret.type        = RVM_VALUE_TYPE_INT;
+    ret.u.int_value = fid;
+    return ret;
+}
+
+/*
+ * Package: io
+ * Function: read_all
+ * Type: @native
+ */
+RVM_Value std_lib_io_read_all(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        // TODO:
+        ring_error_report("std_lib_io_read_all only one arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_INT) {
+        // TODO:
+        ring_error_report("std_lib_io_read_all only one arguement\n");
+    }
+
+    std::string result;
+
+    char        buffer[1024];
+
+    int         fid    = args[0].u.int_value;
+    int         read_n = 0;
+
+    while ((read_n = read(fid, buffer, 1024)) > 0) {
+        std::string tmp = std::string(buffer, read_n);
+        result += tmp;
+
+        memset(buffer, 0, 1024);
+    }
+
+    // FIXME:  这里写的实在是太丑了
+    RVM_String* str_val = new_string(rvm);
+    init_string(rvm, str_val, ROUND_UP8(result.size()));
+
+    memcpy(str_val->data, result.c_str(), result.size());
+
+    str_val->length              = result.size();
+    str_val->capacity            = ROUND_UP8(result.size());
+    str_val->data[result.size()] = '\0';
+
+
+    RVM_Value ret;
+    ret.type           = RVM_VALUE_TYPE_STRING;
+    ret.u.string_value = str_val;
+    return ret;
+}
 
 /*
  * Package: io
@@ -175,39 +348,77 @@ RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
  * Type: @native
  */
 RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    std::string str = "";
-
-    switch (args->type) {
-    case RVM_VALUE_TYPE_BOOL:
-        str = "bool";
-        break;
-    case RVM_VALUE_TYPE_INT:
-        str = "int";
-        break;
-    case RVM_VALUE_TYPE_INT64:
-        str = "int64";
-        break;
-    case RVM_VALUE_TYPE_DOUBLE:
-        str = "double";
-        break;
-    case RVM_VALUE_TYPE_STRING:
-        str = "string";
-        break;
-    case RVM_VALUE_TYPE_CLASS_OB:
-        str = "class";
-        break;
-    case RVM_VALUE_TYPE_ARRAY:
-        str = "array";
-        break;
-
-    default:
-        break;
+    if (arg_count != 2) {
+        // TODO:
+        ring_error_report("std_lib_io_write only two arguement\n");
     }
 
-    RVM_Value ret;
-    ret.type           = RVM_VALUE_TYPE_STRING;
-    ret.u.string_value = string_literal_to_rvm_string(rvm, str.c_str());
+    if (args[0].type != RVM_VALUE_TYPE_INT) {
+        // TODO:
+        ring_error_report("std_lib_io_write only one arguement\n");
+    }
 
+    if (args[1].type != RVM_VALUE_TYPE_STRING) {
+        // TODO:
+        ring_error_report("std_lib_io_write only one arguement\n");
+    }
+
+    int         fid    = args[0].u.int_value;
+    RVM_String* buffer = args[1].u.string_value;
+
+    write(fid, buffer->data, buffer->length);
+
+    RVM_Value ret;
+    return ret;
+}
+
+/*
+ * Package: io
+ * Function: close
+ * Type: @native
+ */
+RVM_Value std_lib_io_close(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        // TODO:
+        ring_error_report("std_lib_io_read_all only one arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_INT) {
+        // TODO:
+        ring_error_report("std_lib_io_read_all only one arguement\n");
+    }
+
+    int fid = args[0].u.int_value;
+
+    close(fid);
+
+    RVM_Value ret;
+    return ret;
+}
+
+/*
+ * Package: io
+ * Function: remove
+ * Type: @native
+ */
+RVM_Value std_lib_io_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        // TODO:
+        ring_error_report("std_lib_io_remove only one arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_STRING) {
+        // TODO:
+        ring_error_report("std_lib_io_remove only one arguement\n");
+    }
+
+    RVM_String* str = args[0].u.string_value;
+
+    // FIXME:
+    str->data[str->length] = '\0';
+    remove(str->data);
+
+    RVM_Value ret;
     return ret;
 }
 
