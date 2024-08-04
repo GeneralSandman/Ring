@@ -12,7 +12,7 @@
             "args": [
                 "-O0",
                 "run",
-                "${workspaceFolder}/test/021-array-int64/three-dimen-access-001.ring"
+                "${workspaceFolder}/test/065-std-package-io/000.ring"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

@@ -2809,6 +2809,10 @@ void ring_bytecode_load(Package_Executer* executer, FILE* input);
 void      register_lib(Package_Executer* package_executer, char* func_name, RVM_NativeFuncProc* func_proc, int arg_count, int return_list_count);
 
 RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_os_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_os_rename(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_os_getenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_os_setenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value std_lib_io_exist(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_io_open(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);

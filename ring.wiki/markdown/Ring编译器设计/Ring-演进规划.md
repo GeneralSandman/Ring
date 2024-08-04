@@ -731,14 +731,53 @@ Circle::new() 是一个关联函数,用于创建新的 Circle 实例。circle.ar
 ### G. 枚举需要在语义上支持
 
 
-### I. 实现 std io package
+### I. 实现 std io/os/time package
 
 分几步走：
 
 1. 只通过文件描述符（int）实现文件的打开，读写
 2. 抽象出 io::File 类，通过类进行读写，目前类缺失的功能有：
-   1. 
+   1. std-package 中 import 别的 std-package
+   2. 在main package中使用 std-package 中的类
+   3. 需要实现 Enum
 
+
+io package 需要实现的功能:
+1. exist
+2. open
+3. create
+4. seek
+5. read_all
+6. read
+7. write
+8. close
+9. remove (这里需要移到os-package中)
+
+os package 需要实现的功能:
+1. exit
+2. remove
+3. rename
+4. getenv
+5. setenv
+
+
+runtime package 需要实现的功能:
+1. getlocal()
+2. getglobal()
+
+vm package:
+1. heap_size() // TODO: 返回值应该为 int64
+
+
+debug package:
+1. debug_assert() // TODO: 应该改为 assert
+
+
+time package
+1. sleep
+
+fmt package
+1. sprintf
 
 ### K. RVM_String 便利的API
 

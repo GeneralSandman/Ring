@@ -49,6 +49,10 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         RING_PACKAGE_STD_PATH_OS,
         std::vector<StdPackageNativeFunction>{
             {(char*)"exit", std_lib_os_exit, 1, 0},
+            {(char*)"remove", std_lib_os_remove, 1, 0},
+            {(char*)"rename", std_lib_os_rename, 1, 0},
+            {(char*)"getenv", std_lib_os_getenv, 1, 0},
+            {(char*)"setenv", std_lib_os_setenv, 1, 0},
         },
     },
 
@@ -180,6 +184,50 @@ RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
     // TODO: 暂时只打印int, 以后都强制转换成int_value
     exit(args->u.int_value);
 
+    return ret;
+}
+
+/*
+ * Package: os
+ * Function: remove
+ * Type: @native
+ */
+RVM_Value std_lib_os_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    RVM_Value ret;
+    ret.u.int_value = 0;
+    return ret;
+}
+
+/*
+ * Package: os
+ * Function: rename
+ * Type: @native
+ */
+RVM_Value std_lib_os_rename(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    RVM_Value ret;
+    ret.u.int_value = 0;
+    return ret;
+}
+
+/*
+ * Package: os
+ * Function: getenv
+ * Type: @native
+ */
+RVM_Value std_lib_os_getenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    RVM_Value ret;
+    ret.u.int_value = 0;
+    return ret;
+}
+
+/*
+ * Package: os
+ * Function: setenv
+ * Type: @native
+ */
+RVM_Value std_lib_os_setenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    RVM_Value ret;
+    ret.u.int_value = 0;
     return ret;
 }
 
