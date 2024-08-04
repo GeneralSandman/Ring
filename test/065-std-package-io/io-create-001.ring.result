@@ -1,0 +1,27 @@
+test case [0][exist]----------
+file exist: false
+debug_assert PASS
+
+test case [1][create]----------
+fileid: 24
+debug_assert PASS
+
+test case [2][exist]----------
+file exist: true
+debug_assert PASS
+
+test case [4][read_all]----------
+content=
+debug_assert PASS
+
+test case [5][write]----------
+
+test case [6][read_all]----------
+content=test-write-content
+debug_assert PASS
+
+test case [7][read_all]----------
+content=
+debug_assert PASS
+file exist: false
+debug_assert PASS

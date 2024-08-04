@@ -91,6 +91,7 @@ TEST_MODELS=(
     "062-std-package-reflect"
     "063-std-package-os"
     "064-std-package-vm"
+    "065-std-package-io"
     )
 
 # 跳过测试的case
@@ -119,6 +120,8 @@ NOT_TEST_FILES=(
 
   "./test/002-int64/default-value-003.ring"
   # 暂时还没啥用
+
+  "./test/065-std-package-io/000.ring"
 
   )
 
