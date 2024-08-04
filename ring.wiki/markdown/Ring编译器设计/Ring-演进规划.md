@@ -408,6 +408,12 @@ Usetime  = 1S
 
 ## 开发专项-语义报错
 
+第一轮分析主要构建语法树
+第二轮分析主要对相关的标识符号进行解析
+第三轮主要进行进一步分析
+第四轮主要进行 ast的剪枝优化
+第五轮主要进行代码的生成
+
 1. 变量名称重复
    1. block中定义的 局部变量重复(函数没有参数)
    2. block中定义的 局部变量和 函数参数中的变量 名称重复
@@ -693,6 +699,103 @@ println!("Area: {}", circle.area());
 ```
 
 Circle::new() 是一个关联函数,用于创建新的 Circle 实例。circle.area() 则是一个成员函数,用于计算圆的面积
+
+
+
+
+### C. 如何优化 ConstPool
+
+1. 想string能够去重
+2. 对于 false/0/0L/"" 都够处理，他们不在占着一个 常量，
+   1. 在实现的时候应该特例化字节码
+   2. 如 应该提供 push_bool_false push_int_0 push_int64_0 push_string_empty 等字节码, 这样单独处理有助于优化字节码的执行流程
+3. 对于 ConstPool来说，他应该是全局的，不是一个 package中内的
+
+
+
+### D. 支持解析 16进制常量
+
+
+### E. 支持通过debug模式展示语法树，语法树的展示可以尽量简单，但是一定要有区分度，能够展示层级关系
+
+
+
+### F. 一个package中 import-package的名称/enum的名称/class的名称/函数的名称  均不能相同，不然语义分析会产生错误，后续可以考虑优化
+
+
+### G. 考虑一下类型推导
+
+
+### H. 枚举需要在语法上支持
+
+### G. 枚举需要在语义上支持
+
+
+### I. 实现 std io package
+
+分几步走：
+
+1. 只通过文件描述符（int）实现文件的打开，读写
+2. 抽象出 io::File 类，通过类进行读写，目前类缺失的功能有：
+   1. 
+
+
+### K. RVM_String 便利的API
+
+1. 创建一个string, 指定capacity
+2. 创建一个string, 通过std::string 指定
+3. memcpy 函数 copy到 string中. 需要自动append内存
+4. strcpy 函数 copy到 string中. 需要自动append内存
+5. 需要自动append内存
+
+
+### M. 在调用 标准库中的函数时候, 需要根据 标准库中的函数定义做一个详细的 语义检查, 跟derive函数一样
+
+1. 函数参数的数量是否正确
+2. 函数参数的类型是否正确
+3. 包括可变参数
+4. 函数的返回值
+
+
+
+### N. Fix: 这里有个重大bug
+
+
+```ring
+
+package main
+
+import {
+    fmt;
+    debug;
+    vm;
+    os;
+    io;
+}
+
+
+typedef class File {
+    field int fd;
+}
+
+@main
+function main() {
+    var int fileid = io::open("/Users/zhenhuli/Desktop/Ring/test/065-std-package-io/000.ring", "");
+
+    // var string content = io::read_all(fileid);  // FIXME: 这样写存在bug, 会调用两次
+
+    var string content;
+    content = io::read_all(fileid);
+
+    fmt::println_string(content);
+
+    io::close(fileid);
+}
+
+```
+
+
+var string content 初始化会调用两次, 需要修正.
 
 -----------------------------
 
