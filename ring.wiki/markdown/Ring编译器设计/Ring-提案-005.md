@@ -20,22 +20,6 @@ Discussion at https://github.com/GeneralSandman/Ring/issue/NNNNN.
 
 ## Proposal
 
-1. 先给出几个例子定义枚举
-
-```ring
-enum {
-    string stdin = "stdin";
-    string stdout = "stdout";
-    string stderr = "stderr";
-};
-```
-
-
-枚举需要能被这样使用：
-1. 支持用户定义
-2. 支持用户formate输出
-3. 只用通过package导出和访问
-4. 支持比较
 
 ## Rationale
 
@@ -48,6 +32,17 @@ enum {
 enum <basic-type> <Enum-Type> {
     <Enum-Name> = <value>;
     <Enum-Name> = <value>;
+}
+```
+
+例如：int 类型的枚举
+
+```ring
+enum int AccessMode {
+    O_RDONLY  = 0;
+    O_WRONLY  = 1;
+    O_RDWR    = 2;
+    O_ACCMODE = 3;
 }
 ```
 
@@ -68,6 +63,20 @@ fn main() {
 }
 ```
 
+2. 如何使用 import package的 enum
+
+```ring
+package main
+
+import {
+    job;
+}
+
+function main() {
+    fmt::println(job::Color::Red);
+}
+```
+
 3. 最终参数传递函数的时候，会转换成对应的底层基础类型 bool/int/int64/double/string
 
 
@@ -77,6 +86,8 @@ fn main() {
    1. 因为需要在编译过程就就能确定常量的值
 3. enum 的值必须是唯一的
 4. enum 最终的类型 为 基础类型
+5. 需要思考的一个问题是，enum是不是使用的成本过于高，相对于golang来说
+6. 一个package中 import-package的名称/enum的名称/class的名称/函数的名称  均不能相同，不然语义分析会产生错误，后续可以考虑优化
 
 ## Compatibility
 
