@@ -22,11 +22,11 @@ $doit1()    <./test/004-derive-function/function-001.ring:11,14>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   0                   12                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     516                                   
+ ├──2       push_func                     260                                   
  ├──3       invoke_func_native                                                  
  ├──4       push_string                   1                   13                
  ├──5       argument_num                  1                                     
- ├──6       push_func                     516                                   
+ ├──6       push_func                     260                                   
  ├──7       invoke_func_native                                                  
  ├──8       function_finish                                   14                
 
@@ -37,14 +37,14 @@ $doit2()    <./test/004-derive-function/function-001.ring:16,22>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   2                   17                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     516                                   
+ ├──2       push_func                     260                                   
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   19                
- ├──5       push_func                     1536                                  
+ ├──5       push_func                     2048                                  
  ├──6       invoke_func                                                         
  ├──7       push_string                   3                   21                
  ├──8       argument_num                  1                                     
- ├──9       push_func                     516                                   
+ ├──9       push_func                     260                                   
  ├──10      invoke_func_native                                                  
  ├──11      function_finish                                   22                
 
@@ -55,14 +55,14 @@ $doit3()    <./test/004-derive-function/function-001.ring:24,30>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   4                   25                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     516                                   
+ ├──2       push_func                     260                                   
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   27                
- ├──5       push_func                     1537                                  
+ ├──5       push_func                     2049                                  
  ├──6       invoke_func                                                         
  ├──7       push_string                   5                   29                
  ├──8       argument_num                  1                                     
- ├──9       push_func                     516                                   
+ ├──9       push_func                     260                                   
  ├──10      invoke_func_native                                                  
  ├──11      function_finish                                   30                
 
@@ -73,14 +73,14 @@ $doit4()    <./test/004-derive-function/function-001.ring:32,38>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   6                   33                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     516                                   
+ ├──2       push_func                     260                                   
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   35                
- ├──5       push_func                     1538                                  
+ ├──5       push_func                     2050                                  
  ├──6       invoke_func                                                         
  ├──7       push_string                   7                   37                
  ├──8       argument_num                  1                                     
- ├──9       push_func                     516                                   
+ ├──9       push_func                     260                                   
  ├──10      invoke_func_native                                                  
  ├──11      function_finish                                   38                
 
@@ -91,14 +91,14 @@ $doit5()    <./test/004-derive-function/function-001.ring:40,46>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   8                   41                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     516                                   
+ ├──2       push_func                     260                                   
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   43                
- ├──5       push_func                     1539                                  
+ ├──5       push_func                     2051                                  
  ├──6       invoke_func                                                         
  ├──7       push_string                   9                   45                
  ├──8       argument_num                  1                                     
- ├──9       push_func                     516                                   
+ ├──9       push_func                     260                                   
  ├──10      invoke_func_native                                                  
  ├──11      function_finish                                   46                
 
@@ -109,14 +109,14 @@ $doit6()    <./test/004-derive-function/function-001.ring:48,54>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   10                  49                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     516                                   
+ ├──2       push_func                     260                                   
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   51                
- ├──5       push_func                     1540                                  
+ ├──5       push_func                     2052                                  
  ├──6       invoke_func                                                         
  ├──7       push_string                   11                  53                
  ├──8       argument_num                  1                                     
- ├──9       push_func                     516                                   
+ ├──9       push_func                     260                                   
  ├──10      invoke_func_native                                                  
  ├──11      function_finish                                   54                
 
@@ -126,7 +126,7 @@ $main()    <./test/004-derive-function/function-001.ring:57,61>
 +Instructions:
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       argument_num                  0                   59                
- ├──1       push_func                     1541                                  
+ ├──1       push_func                     2053                                  
  ├──2       invoke_func                                                         
  ├──3       function_finish                                   61                
 

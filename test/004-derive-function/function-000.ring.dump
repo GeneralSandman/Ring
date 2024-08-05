@@ -22,7 +22,7 @@ $doit1()    <./test/004-derive-function/function-000.ring:11,13>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   0                   12                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     516                                   
+ ├──2       push_func                     260                                   
  ├──3       invoke_func_native                                                  
  ├──4       function_finish                                   13                
 
@@ -33,7 +33,7 @@ $doit2()    <./test/004-derive-function/function-000.ring:15,17>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   1                   16                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     516                                   
+ ├──2       push_func                     260                                   
  ├──3       invoke_func_native                                                  
  ├──4       function_finish                                   17                
 
@@ -44,7 +44,7 @@ $doit3()    <./test/004-derive-function/function-000.ring:19,21>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   2                   20                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     516                                   
+ ├──2       push_func                     260                                   
  ├──3       invoke_func_native                                                  
  ├──4       function_finish                                   21                
 
@@ -55,20 +55,20 @@ $doit4()    <./test/004-derive-function/function-000.ring:24,32>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   3                   25                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     516                                   
+ ├──2       push_func                     260                                   
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   27                
- ├──5       push_func                     1536                                  
+ ├──5       push_func                     2048                                  
  ├──6       invoke_func                                                         
  ├──7       argument_num                  0                   28                
- ├──8       push_func                     1537                                  
+ ├──8       push_func                     2049                                  
  ├──9       invoke_func                                                         
  ├──10      argument_num                  0                   29                
- ├──11      push_func                     1538                                  
+ ├──11      push_func                     2050                                  
  ├──12      invoke_func                                                         
  ├──13      push_string                   4                   31                
  ├──14      argument_num                  1                                     
- ├──15      push_func                     516                                   
+ ├──15      push_func                     260                                   
  ├──16      invoke_func_native                                                  
  ├──17      function_finish                                   32                
 
@@ -79,43 +79,43 @@ $main()    <./test/004-derive-function/function-000.ring:35,60>
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_string                   5                   37                
  ├──1       argument_num                  1                                     
- ├──2       push_func                     516                                   
+ ├──2       push_func                     260                                   
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   38                
- ├──5       push_func                     1536                                  
+ ├──5       push_func                     2048                                  
  ├──6       invoke_func                                                         
  ├──7       push_string                   6                   41                
  ├──8       argument_num                  1                                     
- ├──9       push_func                     516                                   
+ ├──9       push_func                     260                                   
  ├──10      invoke_func_native                                                  
  ├──11      push_string                   7                   44                
  ├──12      argument_num                  1                                     
- ├──13      push_func                     516                                   
+ ├──13      push_func                     260                                   
  ├──14      invoke_func_native                                                  
  ├──15      argument_num                  0                   45                
- ├──16      push_func                     1537                                  
+ ├──16      push_func                     2049                                  
  ├──17      invoke_func                                                         
  ├──18      push_string                   8                   48                
  ├──19      argument_num                  1                                     
- ├──20      push_func                     516                                   
+ ├──20      push_func                     260                                   
  ├──21      invoke_func_native                                                  
  ├──22      push_string                   9                   51                
  ├──23      argument_num                  1                                     
- ├──24      push_func                     516                                   
+ ├──24      push_func                     260                                   
  ├──25      invoke_func_native                                                  
  ├──26      argument_num                  0                   52                
- ├──27      push_func                     1538                                  
+ ├──27      push_func                     2050                                  
  ├──28      invoke_func                                                         
  ├──29      push_string                   10                  54                
  ├──30      argument_num                  1                                     
- ├──31      push_func                     516                                   
+ ├──31      push_func                     260                                   
  ├──32      invoke_func_native                                                  
  ├──33      push_string                   11                  57                
  ├──34      argument_num                  1                                     
- ├──35      push_func                     516                                   
+ ├──35      push_func                     260                                   
  ├──36      invoke_func_native                                                  
  ├──37      argument_num                  0                   58                
- ├──38      push_func                     1539                                  
+ ├──38      push_func                     2051                                  
  ├──39      invoke_func                                                         
  ├──40      function_finish                                   60                
 
