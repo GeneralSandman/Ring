@@ -11,7 +11,7 @@ git checkout -
 
 # start ubuntu docker
 docker run --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
-    -it -v /Users/bytedance/Desktop/Ring:/home/Ring --name test-ring-ubuntu ubuntu bash
+    -it -v /Users/lizhenhu/Desktop/Ring:/home/Ring --name test-ring-ubuntu ubuntu bash
 
 # install ubuntu build dependicy
 apt-get update && \
@@ -31,7 +31,7 @@ make cleandeps && make clean && make && make install && make testall && make tes
 #  -------------------------------------------
 
 # start centos docker
-docker run -it -v /Users/bytedance/Desktop/Ring:/home/Ring --name test-ring-centos centos bash
+docker run -it -v /Users/lizhenhu/Desktop/Ring:/home/Ring --name test-ring-centos centos bash
 
 # install centos build dependicy
 cd /etc/yum.repos.d/ && \

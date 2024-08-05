@@ -2632,7 +2632,7 @@ rdb命令:
 
 最后显示: 
 ```
-The program '/Users/bytedance/Desktop/Ring/bin/ring' has exited with code 0 (0x00000000).
+The program '/Users/lizhenhu/Desktop/Ring/bin/ring' has exited with code 0 (0x00000000).
 ```
 
 
