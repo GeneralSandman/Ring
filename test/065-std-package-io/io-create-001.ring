@@ -33,7 +33,6 @@ function main() {
 
     fmt::printf("\ntest case [1][create]----------\n");
     fileid = io::create(file_name);
-    fmt::printf("fileid: {}\n", fileid);
 	debug::debug_assert(fileid != -1);
 
 

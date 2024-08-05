@@ -92,6 +92,7 @@ TEST_MODELS=(
     "063-std-package-os"
     "064-std-package-vm"
     "065-std-package-io"
+    "066-std-package-time"
     )
 
 # 跳过测试的case

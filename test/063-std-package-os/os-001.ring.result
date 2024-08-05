@@ -1,0 +1,9 @@
+test case [0][getenv]----------
+env value: RING_TEST_ENV=
+debug_assert PASS
+
+test case [1][setenv]----------
+
+test case [1][getenv]----------
+env value: RING_TEST_ENV=VALUE_1_2_3
+debug_assert PASS

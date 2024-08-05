@@ -3,7 +3,6 @@ file exist: false
 debug_assert PASS
 
 test case [1][create]----------
-fileid: 24
 debug_assert PASS
 
 test case [2][exist]----------
