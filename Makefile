@@ -12,7 +12,7 @@ CMD_INSTALL_DATA= $(CMD_INSTALL) -m 0644
 CMD_MKDIR= mkdir -p
 CMD_RM= rm -rf
 
-T_STD_PACKS= os io debug fmt vm math strings reflect
+T_STD_PACKS= buildin debug fmt io math os reflect time vm
 
 
 PLATS= linux macosx windows Darwim
@@ -85,9 +85,9 @@ echo:
 	@echo "[+]Support plats    = \033[32m$(PLATS)\033[0m"
 	@echo "[+]Plat             = \033[32m"`$(UNAME)` "\033[0m"
 	@echo "\n"
-	@echo "[+]Std package path = \033[32m$(INSTALL_BIN)\033[0m"
-	@echo "[+]Bin install path = \033[32m$(INSTALL_PACK_STD)\033[0m"
-	@echo "[+]Std package      = \033[32m$(T_STD_PACKS)\033[0m"
+	@echo "[+]Bin install path = \033[32m$(INSTALL_BIN)\033[0m"
+	@echo "[+]Std package path = \033[32m$(INSTALL_PACK_STD)\033[0m"
+	@echo "[+]Std packages     = \033[32m$(T_STD_PACKS)\033[0m"
 	@echo "\n"
 	@cd src && $(MAKE) $@
 
@@ -97,27 +97,11 @@ compile_commands: .git
 
 
 define install_package_std
-	$(call func_install_package_std,os)
-	$(call func_install_package_std,io)
-	$(call func_install_package_std,debug)
-	$(call func_install_package_std,fmt)
-	$(call func_install_package_std,vm)
-	$(call func_install_package_std,math)
-	$(call func_install_package_std,strings)
-	$(call func_install_package_std,reflect)
-	$(call func_install_package_std,buildin)
+	$(foreach PACK, $(T_STD_PACKS), $(call func_install_package_std,$(PACK)))
 endef
 	
 define uninstall_package_std
-	$(call func_uninstall_package_std,os)
-	$(call func_uninstall_package_std,io)
-	$(call func_uninstall_package_std,debug)
-	$(call func_uninstall_package_std,fmt)
-	$(call func_install_package_std,vm)
-	$(call func_uninstall_package_std,math)
-	$(call func_uninstall_package_std,strings)
-	$(call func_uninstall_package_std,reflect)
-	$(call func_uninstall_package_std,buildin)
+	$(foreach PACK, $(T_STD_PACKS), $(call func_uninstall_package_std,$(PACK)))
 endef
 
 
