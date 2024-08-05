@@ -17,3 +17,12 @@ global {
 
 @native
 function exit(var int int_value);
+
+@native
+function remove(var string name);
+
+@native
+function getenv(var string name) -> (string);
+
+@native
+function setenv(var string name, var string value);
