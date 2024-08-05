@@ -13,19 +13,23 @@
  * 通过 更改Makefile 编译宏 DEBUG_STD_LIB 来控制调试标准库路径
  */
 #ifdef DEBUG_STD_LIB
-char RING_PACKAGE_STD_PATH_OS[]      = "/Users/zhenhuli/Desktop/Ring/std/os/";
-char RING_PACKAGE_STD_PATH_IO[]      = "/Users/zhenhuli/Desktop/Ring/std/io/";
-char RING_PACKAGE_STD_PATH_FMT[]     = "/Users/zhenhuli/Desktop/Ring/std/fmt/";
-char RING_PACKAGE_STD_PATH_DEBUG[]   = "/Users/zhenhuli/Desktop/Ring/std/debug/";
-char RING_PACKAGE_STD_PATH_VM[]      = "/Users/zhenhuli/Desktop/Ring/std/vm/";
-char RING_PACKAGE_STD_PATH_REFLECT[] = "/Users/zhenhuli/Desktop/Ring/std/reflect/";
+char RING_PACKAGE_STD_PATH_DEBUG[]   = "/Users/bytedance/Desktop/Ring/std/debug/";
+char RING_PACKAGE_STD_PATH_FMT[]     = "/Users/bytedance/Desktop/Ring/std/fmt/";
+char RING_PACKAGE_STD_PATH_IO[]      = "/Users/bytedance/Desktop/Ring/std/io/";
+char RING_PACKAGE_STD_PATH_MATH[]    = "/Users/bytedance/Desktop/Ring/std/math/";
+char RING_PACKAGE_STD_PATH_OS[]      = "/Users/bytedance/Desktop/Ring/std/os/";
+char RING_PACKAGE_STD_PATH_REFLECT[] = "/Users/bytedance/Desktop/Ring/std/reflect/";
+char RING_PACKAGE_STD_PATH_TIME[]    = "/Users/bytedance/Desktop/Ring/std/time/";
+char RING_PACKAGE_STD_PATH_VM[]      = "/Users/bytedance/Desktop/Ring/std/vm/";
 #else
-char RING_PACKAGE_STD_PATH_OS[]      = "/usr/local/lib/ring/std/os/";
-char RING_PACKAGE_STD_PATH_IO[]      = "/usr/local/lib/ring/std/io/";
-char RING_PACKAGE_STD_PATH_FMT[]     = "/usr/local/lib/ring/std/fmt/";
 char RING_PACKAGE_STD_PATH_DEBUG[]   = "/usr/local/lib/ring/std/debug/";
-char RING_PACKAGE_STD_PATH_VM[]      = "/usr/local/lib/ring/std/vm/";
+char RING_PACKAGE_STD_PATH_FMT[]     = "/usr/local/lib/ring/std/fmt/";
+char RING_PACKAGE_STD_PATH_IO[]      = "/usr/local/lib/ring/std/io/";
+char RING_PACKAGE_STD_PATH_MATH[]    = "/usr/local/lib/ring/std/math/";
+char RING_PACKAGE_STD_PATH_OS[]      = "/usr/local/lib/ring/std/os/";
 char RING_PACKAGE_STD_PATH_REFLECT[] = "/usr/local/lib/ring/std/reflect/";
+char RING_PACKAGE_STD_PATH_TIME[]    = "/usr/local/lib/ring/std/time/";
+char RING_PACKAGE_STD_PATH_VM[]      = "/usr/local/lib/ring/std/vm/";
 #endif
 
 /*
@@ -44,26 +48,13 @@ char RING_PACKAGE_STD_PATH_REFLECT[] = "/usr/local/lib/ring/std/reflect/";
  * 这里 std函数调用过程中不需要在做语义检查
  */
 std::vector<StdPackageInfo> Std_Lib_List = {
-    {
-        (char*)"os",
-        RING_PACKAGE_STD_PATH_OS,
-        std::vector<StdPackageNativeFunction>{
-            {(char*)"exit", std_lib_os_exit, 1, 0},
-        },
-    },
 
     {
-        (char*)"io",
-        RING_PACKAGE_STD_PATH_IO,
+        (char*)"debug",
+        RING_PACKAGE_STD_PATH_DEBUG,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"exist", std_lib_io_exist, 1, 1},
-            {(char*)"open", std_lib_io_open, 1, 1},
-            {(char*)"create", std_lib_io_create, 1, 1},
-            {(char*)"seek", std_lib_io_seek, 1, 1},
-            {(char*)"read_all", std_lib_io_read_all, 1, 1},
-            {(char*)"write", std_lib_io_write, 2, 0},
-            {(char*)"close", std_lib_io_close, 1, 0},
-            {(char*)"remove", std_lib_io_remove, 1, 0},
+            {(char*)"debug_assert", std_lib_debug_debug_assert, 1, 0},
+            {(char*)"print_call_stack", std_lib_debug_print_call_stack, 0, 0},
         },
     },
 
@@ -83,11 +74,53 @@ std::vector<StdPackageInfo> Std_Lib_List = {
     },
 
     {
-        (char*)"debug",
-        RING_PACKAGE_STD_PATH_DEBUG,
+        (char*)"io",
+        RING_PACKAGE_STD_PATH_IO,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"debug_assert", std_lib_debug_debug_assert, 1, 0},
-            {(char*)"print_call_stack", std_lib_debug_print_call_stack, 0, 0},
+            {(char*)"exist", std_lib_io_exist, 1, 1},
+            {(char*)"open", std_lib_io_open, 1, 1},
+            {(char*)"create", std_lib_io_create, 1, 1},
+            {(char*)"seek", std_lib_io_seek, 1, 1},
+            {(char*)"read_all", std_lib_io_read_all, 1, 1},
+            {(char*)"write", std_lib_io_write, 2, 0},
+            {(char*)"close", std_lib_io_close, 1, 0},
+            {(char*)"remove", std_lib_io_remove, 1, 0},
+        },
+    },
+
+    {
+        (char*)"math",
+        RING_PACKAGE_STD_PATH_MATH,
+        std::vector<StdPackageNativeFunction>{
+            {(char*)"exist", std_lib_io_exist, 1, 1},
+        },
+    },
+
+    {
+        (char*)"os",
+        RING_PACKAGE_STD_PATH_OS,
+        std::vector<StdPackageNativeFunction>{
+            {(char*)"exit", std_lib_os_exit, 1, 0},
+            {(char*)"remove", std_lib_io_remove, 1, 0},
+            {(char*)"getenv", std_lib_os_getenv, 1, 1},
+            {(char*)"setenv", std_lib_os_setenv, 2, 0},
+        },
+    },
+
+    {
+        (char*)"reflect",
+        RING_PACKAGE_STD_PATH_REFLECT,
+        std::vector<StdPackageNativeFunction>{
+            {(char*)"typeof", std_lib_reflect_typeof, 0, 1},
+        },
+    },
+
+    {
+        (char*)"time",
+        RING_PACKAGE_STD_PATH_TIME,
+        std::vector<StdPackageNativeFunction>{
+            {(char*)"time", std_lib_time_time, 0, 1},
+            {(char*)"sleep", std_lib_time_sleep, 0, 0},
         },
     },
 
@@ -100,13 +133,6 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         },
     },
 
-    {
-        (char*)"reflect",
-        RING_PACKAGE_STD_PATH_REFLECT,
-        std::vector<StdPackageNativeFunction>{
-            {(char*)"typeof", std_lib_reflect_typeof, 0, 1},
-        },
-    },
 };
 
 /*
@@ -180,6 +206,113 @@ RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
     // TODO: 暂时只打印int, 以后都强制转换成int_value
     exit(args->u.int_value);
 
+    return ret;
+}
+
+/*
+ * Package: os
+ * Function: remove
+ * Type: @native
+ */
+RVM_Value std_lib_os_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        // TODO:
+        ring_error_report("std_lib_os_remove only one arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_STRING) {
+        // TODO:
+        ring_error_report("std_lib_os_remove only one arguement\n");
+    }
+
+    RVM_String* str = args[0].u.string_value;
+
+    // FIXME:
+    str->data[str->length] = '\0';
+    remove(str->data);
+
+    RVM_Value ret;
+    ret.u.int_value = 0;
+    return ret;
+}
+
+/*
+ * Package: os
+ * Function: rename
+ * Type: @native
+ */
+RVM_Value std_lib_os_rename(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    RVM_Value ret;
+    ret.u.int_value = 0;
+    return ret;
+}
+
+/*
+ * Package: os
+ * Function: getenv
+ * Type: @native
+ */
+RVM_Value std_lib_os_getenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        // TODO:
+        ring_error_report("std_lib_os_getenv only one arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_STRING) {
+        // TODO:
+        ring_error_report("std_lib_os_getenv only one arguement\n");
+    }
+
+    RVM_String* str = args[0].u.string_value;
+    // FIXME:
+    str->data[str->length] = '\0';
+
+    char* res              = getenv(str->data);
+    if (res == nullptr) {
+        res = "";
+    }
+
+    RVM_String* str_val = new_string(rvm);
+    init_string(rvm, str_val, ROUND_UP8(strlen(res)));
+    memcpy(str_val->data, res, strlen(res));
+    str_val->length            = strlen(res);
+    str_val->data[strlen(res)] = '\0';
+
+    // TODO: 这里应该是浅copy 还是深度copy
+    RVM_Value ret;
+    ret.type           = RVM_VALUE_TYPE_STRING;
+    ret.u.string_value = str_val;
+    return ret;
+}
+
+/*
+ * Package: os
+ * Function: setenv
+ * Type: @native
+ */
+RVM_Value std_lib_os_setenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 2) {
+        // TODO:
+        ring_error_report("std_lib_os_getenv only one arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_STRING) {
+        // TODO:
+        ring_error_report("std_lib_os_getenv only one arguement\n");
+    }
+    if (args[1].type != RVM_VALUE_TYPE_STRING) {
+        // TODO:
+        ring_error_report("std_lib_os_getenv only one arguement\n");
+    }
+
+    int         res;
+    RVM_String* name  = args[0].u.string_value;
+    RVM_String* value = args[1].u.string_value;
+
+    res               = setenv(name->data, value->data, 1);
+
+    RVM_Value ret;
+    ret.u.int_value = res;
     return ret;
 }
 
@@ -332,7 +465,6 @@ RVM_Value std_lib_io_read_all(Ring_VirtualMachine* rvm, unsigned int arg_count, 
     memcpy(str_val->data, result.c_str(), result.size());
 
     str_val->length              = result.size();
-    str_val->capacity            = ROUND_UP8(result.size());
     str_val->data[result.size()] = '\0';
 
 
@@ -829,6 +961,66 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
     RVM_Value ret;
     ret.type           = RVM_VALUE_TYPE_STRING;
     ret.u.string_value = string_literal_to_rvm_string(rvm, str.c_str());
+
+    return ret;
+}
+
+/*
+ * Package: time
+ * Function: time
+ * Type: @native
+ * 返回 10位Unix时间戳
+ */
+RVM_Value std_lib_time_time(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 0) {
+        // TODO:
+        ring_error_report("std_lib_time_time only empty arguement\n");
+    }
+
+    time_t res;
+
+    res = time(nullptr);
+
+    RVM_Value ret;
+    ret.type          = RVM_VALUE_TYPE_INT64;
+    ret.u.int64_value = res;
+
+    return ret;
+}
+
+/*
+ * Package: time
+ * Function: sleep
+ * Type: @native
+ *
+ * // 单位纳秒
+ */
+RVM_Value std_lib_time_sleep(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    if (arg_count != 1) {
+        // TODO:
+        ring_error_report("std_lib_time_sleep only empty arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_INT64) {
+        // TODO:
+        ring_error_report("std_lib_time_sleep only one arguement\n");
+    }
+
+
+    long long       ns = args[0].u.int64_value;
+
+
+    struct timespec ts;
+    ts.tv_sec  = ns / 1000000000;
+    ts.tv_nsec = ns % 1000000000;
+
+
+    nanosleep(&ts, NULL);
+
+
+    RVM_Value ret;
+    ret.type        = RVM_VALUE_TYPE_INT;
+    ret.u.int_value = 0;
 
     return ret;
 }
