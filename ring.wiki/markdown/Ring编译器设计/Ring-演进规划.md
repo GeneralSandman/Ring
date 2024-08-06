@@ -2,14 +2,15 @@
 
 
 > [!TIP|label:tip]
-> 
+>
 > 世界上哪有不枯燥的事情呀。
 > 
-> 研究和学习一定要不甘寂寞，如果要是累了，就可以放天假呀。
->
-> 静下心来，不要着急，人生是一个漫长的过程，造编译器也是一个漫长的过程，慢慢思考就好。
+> 但最重要的是：要善于将枯燥的东西转换成正反馈，不断的刺激自己向前做。
 > 
-> Ring还是非常有必要研究好的，虽然世界上有很多类似的语言，只要集中精力发展，Ring的未来还是会让现在的自己吃惊的！
+> 研究编译器本身就是一个比较枯燥的， 只要有忍住寂寞的态度， 等一段时间之后，回头不禁感叹：Ring的功能竟然这样丰富了！
+>
+>
+> 耐住寂寞。
 > 
 
 
@@ -49,13 +50,14 @@
 
 ### function & method
 
-1. 函数调用
+1. 函数调用/方法调用
 2. 参数、局部变量、返回值、self关键字
 3. 可变参数+any类型
 4. 参数的深度copy, 浅copy
 5. 匿名函数
 6. 闭包
 7. 函数作为变量/参数
+8. 类中的静态方法和非静态方法
 
 
 ### 语义分析
@@ -68,6 +70,9 @@
 
 1. 实现了最简单的STW Mark&Sweep GC算法
 2. 实现进阶版GC: 三色标记的 Incremental Mark and Sweep 算法
+
+
+### 协程
 
 ### 项目组织
 
@@ -731,14 +736,67 @@ Circle::new() 是一个关联函数,用于创建新的 Circle 实例。circle.ar
 ### G. 枚举需要在语义上支持
 
 
-### I. 实现 std io package
+### I. 实现 std io/os/time/math package
 
 分几步走：
 
 1. 只通过文件描述符（int）实现文件的打开，读写
 2. 抽象出 io::File 类，通过类进行读写，目前类缺失的功能有：
-   1. 
+   1. std-package 中 import 别的 std-package
+   2. 在main package中使用 std-package 中的类
+   3. 需要实现 Enum
 
+
+io package 需要实现的功能:
+1. exist
+2. open
+3. create
+4. seek
+5. read_all
+6. read
+7. write
+8. close
+9. remove (这里需要移到os-package中)
+
+os package 需要实现的功能:
+1. exit
+2. remove
+3. rename
+4. getenv
+5. setenv
+
+
+runtime package 需要实现的功能:
+1. getlocal()  // 通过变量名称获取值，值可能是 bool/int/int64/double/string
+2. getglobal() // 通过变量名称获取值，值可能是 bool/int/int64/double/string
+
+vm package:
+1. heap_size() // TODO: 返回值应该为 int64
+
+
+debug package:
+1. debug_assert() // TODO: 应该改为 assert
+
+
+time package
+1. sleep()
+2. time()
+3. time formate
+
+fmt package
+1. sprintf
+
+math package
+1. sqrt
+2. abs
+3. log
+
+
+
+Fix: 需要在语义分析的时候检查，std package lib
+1. 如果 std/os/*.ring 定义了，但是 std_lib.cpp 中没有定义，这里会报错
+2. 如果 std/os/*.ring 没有报错，报错：找不到函数定义
+3. 需要精确的匹配函数调用的参数是否一致
 
 ### K. RVM_String 便利的API
 
@@ -796,6 +854,88 @@ function main() {
 
 
 var string content 初始化会调用两次, 需要修正.
+初始化的时机不对
+
+
+### U. 关于 rdb（ring debugger）不成熟的想法
+
+1. rdb断点停止的时候，可以通过  `printf a` 命令打印变量的名称
+   1. 当然printf 后边的表达式也可以复杂一点， `printf a+1+2*3`，功能有点类似于 repl
+   2. 基于目前ring的编译方式，如果要实现这个功能的话，实现会比较复杂：编译，生成字节码，运行字节码
+   3. 而且，字节码还比较重：需要有 func，调用func
+2. 为了实现这个功能：
+   1. 思路1: 能够提供一个解释执行的方式，在 repl/rdb （包括交互式调试RVM行为） 中，能够调用解释执行的能力，能够更简单的实现。
+   2. 思路2: 
+3. 但是解析执行，有很多行为应该不太容易支持
+
+
+### Y. 整理一下 ring历史版本 文档和功能
+
+v0.2.15
+v0.2.16
+
+
+
+### Q. make testall 支持指定 module
+
+
+### L. Fix int64 算术运算bug
+
+5L*1000000000L 存在bug
+
+
+### P. Feature: 重新考虑一下 ring链接过程
+
+1. 全局变量的分配
+2. 每个package中函数的分布
+3. enum的分布
+
+### Z. 一个不成熟的想法
+
+
+
+应该有一个比较好的生态工具链
+
+1. 函数调用图
+2. 性能分析
+3. 代码格式化工具
+4. 调试器
+5. IDE
+6. LSP
+7. Playground
+8. 在线Playground能够看对应的虚拟机字节码
+
+还有一些调试工具
+1. 能够展示 global_init 函数调用顺序
+2. 展示gc的流程
+3. 动态展示当前所有协程图
+
+
+#### ring 支持原生的函数调用图/调用性能
+
+目前golang有这几种实现方式
+
+1. pprof
+2. go-callvis
+3. Graphviz
+
+关于调用图，我有这两种想法：
+1. 静态生成，
+2. 通过调用链动态生成，比如说我执行一个函数，然后展示运行的调用链
+
+
+流程
+1. 拉启一个进行
+2. 运行过程中记录函数的调用记录
+3. 把函数调用记录生成 dot语言
+4. 通过 Graphviz 生成调用图
+
+
+
+
+
+
+#### ring支持原生的代码格式化工具
 
 -----------------------------
 
