@@ -29,26 +29,22 @@ succ_num=0
 fail_num=0
 all_num=0
 
+WORK_SPACE_FOLDER=$(dirname "$0")
 
 
-# 测试的可执行文件
-# 可通过第1个参数指定 TEST_RING_BIN
+
+# 测试的Ring可执行二进制文件
 TEST_RING_BIN="./bin/ring"
-if [[ "$1" != "" ]]; then
-    TEST_RING_BIN="$1"
-fi
-
 # ring 命令行 option
 TEST_RING_OPTION="-O1"
-
 # 测试功能 ring run xxx.ring
 TEST_RING_COMMAND="run"
-
 
 TEST_COMMAND="${TEST_RING_BIN} ${TEST_RING_OPTION} ${TEST_RING_COMMAND}"
 
 # 要测试的文件夹
 TEST_PATH="./test"
+# 要测试的模块
 TEST_MODELS=(
     "001-bool"
     "002-int"
@@ -93,7 +89,25 @@ TEST_MODELS=(
     "064-std-package-vm"
     "065-std-package-io"
     "066-std-package-time"
+    "067-std-package-math"
     )
+
+
+# TEST_RING_BIN 可通过命令行指定
+# TEST_MODELS   可通过命令行指定
+source "${WORK_SPACE_FOLDER}/parse_args.sh"
+parse_args "$@"
+echo "ARG_TEST_RING_BIN: $ARG_TEST_RING_BIN"
+echo "ARG_TEST_MODELS:"
+for model in "${ARG_TEST_MODELS[@]}"; do
+    echo " - $model"
+done
+if [[ $ARG_TEST_RING_BIN != "" ]]; then
+    TEST_RING_BIN="$ARG_TEST_RING_BIN"
+fi
+if [[ $ARG_TEST_MODELS != "" ]]; then
+    TEST_MODELS=("${ARG_TEST_MODELS[@]}")
+fi
 
 # 跳过测试的case
 NOT_TEST_FILES=(
