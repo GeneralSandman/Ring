@@ -1,4 +1,5 @@
 #include "ring.hpp"
+#include <cmath>
 #include <cstring>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -92,7 +93,9 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         (char*)"math",
         RING_PACKAGE_STD_PATH_MATH,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"exist", std_lib_io_exist, 1, 1},
+            {(char*)"abs", std_lib_math_abs, 1, 1},
+            {(char*)"sqrt", std_lib_math_sqrt, 1, 1},
+            {(char*)"pow", std_lib_math_pow, 2, 1},
         },
     },
 
@@ -269,7 +272,7 @@ RVM_Value std_lib_os_getenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
 
     char* res              = getenv(str->data);
     if (res == nullptr) {
-        res = "";
+        res = (char*)"";
     }
 
     RVM_String* str_val = new_string(rvm);
@@ -1025,6 +1028,33 @@ RVM_Value std_lib_time_sleep(Ring_VirtualMachine* rvm, unsigned int arg_count, R
     return ret;
 }
 
+/*
+ * Package: math
+ * Function: abs
+ * Type: @native
+ */
+RVM_Value std_lib_math_abs(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+
+    if (arg_count != 1) {
+        // TODO:
+        ring_error_report("std_lib_math_abs only empty arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_DOUBLE) {
+        // TODO:
+        ring_error_report("std_lib_math_abs only one arguement\n");
+    }
+
+    double    double_val = args[0].u.double_value;
+
+    double    res        = fabs(double_val);
+
+    RVM_Value ret;
+    ret.type           = RVM_VALUE_TYPE_DOUBLE;
+    ret.u.double_value = res;
+    return ret;
+}
+
 
 /*
  * Package: math
@@ -1033,7 +1063,52 @@ RVM_Value std_lib_time_sleep(Ring_VirtualMachine* rvm, unsigned int arg_count, R
  */
 RVM_Value std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
 
+    if (arg_count != 1) {
+        // TODO:
+        ring_error_report("std_lib_math_sqrt only empty arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_DOUBLE) {
+        // TODO:
+        ring_error_report("std_lib_math_sqrt only one arguement\n");
+    }
+
+    double    double_val = args[0].u.double_value;
+
+    double    res        = sqrt(double_val);
+
     RVM_Value ret;
-    ret.u.int_value = 0;
+    ret.type           = RVM_VALUE_TYPE_DOUBLE;
+    ret.u.double_value = res;
+    return ret;
+}
+
+/*
+ * Package: math
+ * Function: pow
+ * Type: @native
+ */
+RVM_Value std_lib_math_pow(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+
+    if (arg_count != 2) {
+        // TODO:
+        ring_error_report("std_lib_math_pow only empty arguement\n");
+    }
+
+    if (args[0].type != RVM_VALUE_TYPE_DOUBLE) {
+        ring_error_report("std_lib_math_pow only one arguement\n");
+    }
+    if (args[1].type != RVM_VALUE_TYPE_DOUBLE) {
+        ring_error_report("std_lib_math_pow only one arguement\n");
+    }
+
+    double    x   = args[0].u.double_value;
+    double    y   = args[1].u.double_value;
+
+    double    res = pow(x, y);
+
+    RVM_Value ret;
+    ret.type           = RVM_VALUE_TYPE_DOUBLE;
+    ret.u.double_value = res;
     return ret;
 }
