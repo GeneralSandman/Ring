@@ -15,6 +15,7 @@
 
 typedef struct Ring_Command_Arg             Ring_Command_Arg;
 typedef struct Ring_VirtualMachine          Ring_VirtualMachine;
+typedef struct RingCoroutine                RingCoroutine;
 typedef struct ImportPackageInfo            ImportPackageInfo;
 typedef struct CompilerEntry                CompilerEntry;
 typedef struct ExecuterEntry                ExecuterEntry;
@@ -213,6 +214,8 @@ struct Ring_VirtualMachine {
 
     RVM_CallInfo*        call_info;
 
+    RingCoroutine*       current_coroutine; // TODO: 初始化
+
     RVM_ClassDefinition* class_list;
     unsigned int         class_size;
 
@@ -220,6 +223,27 @@ struct Ring_VirtualMachine {
     MemPool*             data_pool;
 
     RVM_DebugConfig*     debug_config;
+};
+
+typedef enum {
+    CO_STAT_INIT,
+    CO_STAT_RUNNING,
+    CO_STAT_SUSPENDED,
+    CO_STAT_DEAD,
+} CO_STAT;
+
+typedef unsigned long long CO_ID;
+
+struct RingCoroutine {
+    CO_ID             id;
+    CO_ID             pid; // 父协程ID, 谁唤醒它，他就是它的父协程
+    CO_ID             last_run_time;
+
+    CO_STAT           status;
+
+    RVM_RuntimeStack* runtime_stack; // 运行堆栈
+    RVM_CallInfo*     call_info;     // 函数调用栈
+    unsigned int      pc;
 };
 
 struct ImportPackageInfo {
@@ -403,6 +427,8 @@ typedef enum {
     RING_BASIC_TYPE_ARRAY,
 
     RING_BASIC_TYPE_ANY,
+
+    RING_BASIC_TYPE_FUNC,
 
 } Ring_BasicType;
 
@@ -954,6 +980,11 @@ typedef enum {
     RVM_CODE_DOUBLE_2_STRING,
     RVM_CODE_INT_2_INT64,
 
+    // coroutine
+    RVM_CODE_LAUNCH,
+    RVM_CODE_RESUME,
+    RVM_CODE_YIELD,
+
     // 不对应实际的字节码, 不能在生成代码的时候使用
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
 } RVM_Opcode;
@@ -962,13 +993,10 @@ typedef enum {
 typedef enum {
     IDENTIFIER_TYPE_UNKNOW = 0,
     IDENTIFIER_TYPE_VARIABLE,
-    IDENTIFIER_TYPE_VARIABLE_ARRAY,
     IDENTIFIER_TYPE_FUNCTION,
 } IdentifierType;
 
 struct RVM_CallInfo {
-    unsigned int     magic_number;
-
     RVM_ClassObject* caller_object;
     RVM_Function*    caller_function;
     unsigned int     caller_pc; // 调用者的返回地址
@@ -1110,6 +1138,10 @@ typedef enum {
     RING_BUILD_IN_FNC_POP,
     RING_BUILD_IN_FNC_TO_STRING,
     RING_BUILD_IN_FNC_TO_INT64,
+
+    RING_BUILD_IN_FNC_LAUNCH,
+    RING_BUILD_IN_FNC_RESUME,
+    RING_BUILD_IN_FNC_YIELD,
 } RING_BUILD_IN_FUNC_ID;
 
 typedef struct {
@@ -1304,6 +1336,7 @@ struct Expression {
 typedef enum {
     IDENTIFIER_EXPRESSION_TYPE_UNKNOW,
     IDENTIFIER_EXPRESSION_TYPE_VARIABLE,
+    IDENTIFIER_EXPRESSION_TYPE_FUNC,
 } IdentifierExpressionType;
 
 struct IdentifierExpression {
@@ -2593,7 +2626,6 @@ void              copy_field(Package_Executer* executer, RVM_Field* dst, FieldMe
 void              add_top_level_code(Package* package, Package_Executer* executer);
 void              generate_code_from_function_definition(Package_Executer* executer, RVM_Function* dst, Function* src);
 void              generate_code_from_method_definition(Package_Executer* executer, RVM_Method* dst, MethodMember* src);
-void              vm_executer_dump(Package_Executer* executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
 
 void              generate_vmcode_from_block(Package_Executer* executer, Block* block, RVM_OpcodeBuffer* opcode_buffer);
@@ -3035,6 +3067,19 @@ void                  fix_buildin_func_to_int64(Expression*             expressi
                                                 Block*                  block,
                                                 Function*               func);
 
+void                  fix_buildin_func_to_launch(Expression*             expression,
+                                                 FunctionCallExpression* function_call_expression,
+                                                 Block*                  block,
+                                                 Function*               func);
+void                  fix_buildin_func_to_resume(Expression*             expression,
+                                                 FunctionCallExpression* function_call_expression,
+                                                 Block*                  block,
+                                                 Function*               func);
+void                  fix_buildin_func_to_yield(Expression*             expression,
+                                                FunctionCallExpression* function_call_expression,
+                                                Block*                  block,
+                                                Function*               func);
+
 RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* identifier);
 void                  fix_buildin_func(Expression*             expression,
                                        FunctionCallExpression* function_call_expression,
@@ -3059,6 +3104,19 @@ std::string fmt_class(RVM_Value* value);
 std::string fmt_class(RVM_ClassObject* class_object);
 std::string fmt_array(RVM_Value* value);
 std::string fmt_array(RVM_Array* array_value);
+
+// --------------------
+
+
+/* --------------------
+ * coroutine.cpp
+ * function definition
+ *
+ */
+CO_ID launch_coroutine(Ring_VirtualMachine* rvm);
+void  resume_coroutine(Ring_VirtualMachine* rvm, CO_ID co_id);
+void  yield_coroutine(Ring_VirtualMachine* rvm);
+void  finish_coroutine(Ring_VirtualMachine* rvm, CO_ID co_id);
 
 // --------------------
 

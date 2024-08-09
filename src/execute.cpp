@@ -351,6 +351,9 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int         dimension              = 0;
     unsigned int*        dimension_list         = (unsigned int*)calloc(1, sizeof(unsigned int) * MAX_DIMENSION_NUM);
 
+    // main 函数执行的时候，初始化一个 RootCoroutine
+    CO_ID root_coroutine_id = 0;
+    root_coroutine_id       = launch_coroutine(rvm);
 
     for (; rvm->pc < code_size; prev_opcde = opcode) {
         opcode = code_list[rvm->pc];
@@ -1832,6 +1835,29 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm->pc += 1;
             break;
 
+        // coroutine
+        case RVM_CODE_LAUNCH:
+            argument_list_size = 0; // TODO: 不支持传递函数
+            oper_num           = STACK_GET_INT_OFFSET(rvm, -1);
+            package_index      = oper_num >> 8;
+            func_index         = oper_num & 0XFF;
+
+            runtime_stack->top_index -= 1;
+
+            assert(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index].type == RVM_FUNCTION_TYPE_DERIVE);
+
+            launch_coroutine(rvm);
+
+            rvm->pc += 1;
+            break;
+        case RVM_CODE_RESUME:
+            runtime_stack->top_index -= 1;
+            rvm->pc += 1;
+            break;
+        case RVM_CODE_YIELD:
+            rvm->pc += 1;
+            break;
+
         default:
             ring_error_report("Vitual machine execute vmcode error: invalid opcode(%d), pc(%d)\n",
                               opcode, rvm->pc);
@@ -1912,7 +1938,6 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
                             unsigned int  argument_list_size) {
 
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
-    callinfo->magic_number         = CALL_INFO_MAGIC_NUMBER;
     callinfo->caller_object        = *caller_object;
     callinfo->caller_function      = *caller_function;
     callinfo->caller_pc            = *pc;
@@ -1973,7 +1998,6 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     rvm->runtime_stack->top_index -= local_variable_size;
 
     restore_callinfo(rvm, &callinfo);
-    assert(callinfo->magic_number == CALL_INFO_MAGIC_NUMBER);
 
     *caller_object     = callinfo->caller_object;
     *caller_function   = callinfo->caller_function;
