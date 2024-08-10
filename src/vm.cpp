@@ -275,9 +275,16 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_INT_2_STRING, "int_2_string", OPCODE_OPERAND_TYPE_0BYTE, 0, "convert int to string", "[int]->[string]", "So(-1).string = So(-1).int"},
     {RVM_CODE_INT64_2_STRING, "int64_2_string", OPCODE_OPERAND_TYPE_0BYTE, 0, "convert int64 to string", "[int]->[string]", "So(-1).string = So(-1).int64"},
     {RVM_CODE_DOUBLE_2_STRING, "double_2_string", OPCODE_OPERAND_TYPE_0BYTE, 0, "convert double to string", "[double]->[string]", "So(-1).string = So(-1).double"},
+    {RVM_CODE_INT_2_INT64, "int_2_int64", OPCODE_OPERAND_TYPE_0BYTE, 0, "convert int to int64", "[int]->[int64]", "So(-1).int64 = So(-1).int"},
 
 
-    {RVM_CODES_NUM, "num", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
+    // coroutine
+    {RVM_CODE_LAUNCH, "launch", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
+    {RVM_CODE_RESUME, "resume", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
+    {RVM_CODE_YIELD, "yield", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
+
+
+    {RVM_CODES_NUM, "num", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
 };
 
 // TODO: 这里直接使用Cpp::string, 后续需要改成 Ring_String

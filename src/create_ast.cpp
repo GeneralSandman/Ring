@@ -73,7 +73,7 @@ Expression* create_expression_identifier(char* identifier) {
     IdentifierExpression* identifier_expression = (IdentifierExpression*)mem_alloc(get_front_mem_pool(), sizeof(IdentifierExpression));
     identifier_expression->line_number          = package_unit_get_line_number();
     identifier_expression->package_posit        = nullptr;
-    identifier_expression->type                 = IDENTIFIER_EXPRESSION_TYPE_VARIABLE;
+    identifier_expression->type                 = IDENTIFIER_EXPRESSION_TYPE_VARIABLE; // TODO: 这里应该是 Unknow UPDATED_BY_FIX_AST
     identifier_expression->identifier           = identifier;
     identifier_expression->u.declaration        = nullptr;
 

@@ -22,8 +22,8 @@ Package_Executer* package_executer_create(ExecuterEntry* executer_entry,
     executer->global_variable_list            = nullptr;
     executer->function_size                   = 0;
     executer->function_list                   = nullptr;
-    executer->code_size                       = 0;
-    executer->code_list                       = nullptr;
+    executer->bootloader_code_size            = 0;
+    executer->bootloader_code_list            = nullptr;
     executer->exist_main_func                 = false;
     executer->main_func_index                 = 0;
     executer->exist_global_init_func          = false;
@@ -487,8 +487,8 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT_2BYTE, exit_code, 0);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
 
-    executer->code_list = opcode_buffer->code_list;
-    executer->code_size = opcode_buffer->code_size;
+    executer->bootloader_code_list = opcode_buffer->code_list;
+    executer->bootloader_code_size = opcode_buffer->code_size;
 }
 
 void generate_code_from_function_definition(Package_Executer* executer,
@@ -538,12 +538,6 @@ void generate_code_from_method_definition(Package_Executer* executer,
     // TODO: dump method detail
 }
 
-void vm_executer_dump(Package_Executer* executer) {
-    debug_generate_info_with_darkgreen("\t");
-    // CLEAR_SCREEN;
-    ring_vm_constantpool_dump(executer);
-    ring_vm_code_dump(nullptr, executer->code_list, executer->code_size, 0, 60, 1);
-}
 
 RVM_OpcodeBuffer* new_opcode_buffer() {
     debug_generate_info_with_darkgreen("\t");
@@ -1633,6 +1627,19 @@ void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
         generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
         break;
 
+    case IDENTIFIER_EXPRESSION_TYPE_FUNC: {
+        Function*    function       = identifier_expression->u.function;
+        unsigned int package_offset = 0;
+        unsigned int offset         = 0;
+        unsigned int operand        = 0;
+
+        package_offset              = function->package->package_index;
+        offset                      = function->func_index;
+        operand                     = (package_offset << 8) | offset;
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, identifier_expression->line_number);
+
+    } break;
+
 
     default:
         break;
@@ -1864,6 +1871,28 @@ void generate_vmcode_from_native_function_call_expression(Package_Executer*     
         } else {
             ring_error_report("error: to_int64() only be used by int\n");
         }
+    } else if (str_eq(function_identifier, "launch")) {
+        // push_func as argument
+        // push_func's arguments as argument
+        // push launch args_list
+        // launch
+
+        pos = function_call_expression->argument_list;
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH, 0, function_call_expression->line_number);
+
+    } else if (str_eq(function_identifier, "resume")) {
+        pos = function_call_expression->argument_list;
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+
+        if (pos->expression->convert_type[0]->kind == RING_BASIC_TYPE_INT64) {
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_RESUME, 0, function_call_expression->line_number);
+        } else {
+            ring_error_report("error: resume() 's argument is int64\n");
+        }
+    } else if (str_eq(function_identifier, "yield")) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_YIELD, 0, function_call_expression->line_number);
     }
 }
 

@@ -757,7 +757,7 @@ std::string format_rvm_value(RVM_Value* value) {
 std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
 
     unsigned int  offset = 0;
-    RVM_CallInfo* pos    = rvm->call_info;
+    RVM_CallInfo* pos    = VM_CUR_CO_CALLINFO;
     std::string   result;
     std::string   item;
 
@@ -780,7 +780,7 @@ std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
             }
 
             source_file        = pos->callee_function->source_file;
-            source_line_number = get_source_line_number_by_pc(pos->callee_function, rvm->pc);
+            source_line_number = get_source_line_number_by_pc(pos->callee_function, VM_CUR_CO_PC);
 
             //
             item = prefix + func_name + "\n"
@@ -820,7 +820,7 @@ std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
 }
 
 std::string format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int source_line_number) {
-    RVM_CallInfo* pos = rvm->call_info;
+    RVM_CallInfo* pos = VM_CUR_CO_CALLINFO;
     std::string   result;
 
     assert(pos != nullptr);
@@ -841,7 +841,7 @@ std::string format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int sourc
 
     if (source_line_number == 0) {
         // 当前正在执行的函数
-        source_line_number = get_source_line_number_by_pc(pos->callee_function, rvm->pc);
+        source_line_number = get_source_line_number_by_pc(pos->callee_function, VM_CUR_CO_PC);
     }
 
 

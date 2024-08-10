@@ -15,6 +15,7 @@
 
 typedef struct Ring_Command_Arg             Ring_Command_Arg;
 typedef struct Ring_VirtualMachine          Ring_VirtualMachine;
+typedef struct RingCoroutine                RingCoroutine;
 typedef struct ImportPackageInfo            ImportPackageInfo;
 typedef struct CompilerEntry                CompilerEntry;
 typedef struct ExecuterEntry                ExecuterEntry;
@@ -207,11 +208,8 @@ struct Ring_VirtualMachine {
     ExecuterEntry*       executer_entry;
 
     RVM_RuntimeStatic*   runtime_static; // TODO: 暂时只支持main包的 全局变量
-    RVM_RuntimeStack*    runtime_stack;
     RVM_RuntimeHeap*     runtime_heap;
-    unsigned int         pc;
 
-    RVM_CallInfo*        call_info;
 
     RVM_ClassDefinition* class_list;
     unsigned int         class_size;
@@ -220,6 +218,52 @@ struct Ring_VirtualMachine {
     MemPool*             data_pool;
 
     RVM_DebugConfig*     debug_config;
+
+    RingCoroutine*       current_coroutine;
+};
+
+#define VM_STATIC_DATA (rvm->runtime_static->data)
+
+
+// virtual machine current coroutine
+#define VM_CUR_CO (rvm->current_coroutine)
+
+// virtual machine current coroutine's runtime_stack
+#define VM_CUR_CO_STACK (rvm->current_coroutine->runtime_stack)
+#define VM_CUR_CO_STACK_DATA (rvm->current_coroutine->runtime_stack->data)
+#define VM_CUR_CO_STACK_TOP_INDEX (rvm->current_coroutine->runtime_stack->top_index)
+
+// virtual machine current coroutine's call_info
+#define VM_CUR_CO_CALLINFO (rvm->current_coroutine->call_info)
+
+// virtual machine current coroutine's pc
+#define VM_CUR_CO_PC (rvm->current_coroutine->pc)
+
+#define VM_CUR_CO_CSB (rvm->current_coroutine->caller_stack_base)
+
+typedef enum {
+    CO_STAT_INIT,
+    CO_STAT_RUNNING,
+    CO_STAT_SUSPENDED,
+    CO_STAT_DEAD,
+} CO_STAT;
+
+typedef unsigned long long CO_ID;
+
+struct RingCoroutine {
+    CO_ID             co_id;   // TODO: 名字改一下
+    CO_ID             p_co_id; // TODO: 名字改一下  父协程ID, 谁唤醒它，他就是它的父协程
+    CO_ID             last_run_time;
+
+    CO_STAT           status;
+
+    RVM_RuntimeStack* runtime_stack; // 运行堆栈
+    RVM_CallInfo*     call_info;     // 函数调用栈
+    RVM_Byte*         code_list;
+    unsigned int      code_size;
+    unsigned int      pc;
+
+    unsigned int      caller_stack_base;
 };
 
 struct ImportPackageInfo {
@@ -275,8 +319,8 @@ struct Package_Executer {
     unsigned int         class_size;
     RVM_ClassDefinition* class_list;
 
-    unsigned int         code_size;
-    RVM_Byte*            code_list;
+    unsigned int         bootloader_code_size;
+    RVM_Byte*            bootloader_code_list;
 
     bool                 exist_main_func;
     unsigned int         main_func_index;
@@ -403,6 +447,8 @@ typedef enum {
     RING_BASIC_TYPE_ARRAY,
 
     RING_BASIC_TYPE_ANY,
+
+    RING_BASIC_TYPE_FUNC,
 
 } Ring_BasicType;
 
@@ -954,6 +1000,11 @@ typedef enum {
     RVM_CODE_DOUBLE_2_STRING,
     RVM_CODE_INT_2_INT64,
 
+    // coroutine
+    RVM_CODE_LAUNCH,
+    RVM_CODE_RESUME,
+    RVM_CODE_YIELD,
+
     // 不对应实际的字节码, 不能在生成代码的时候使用
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
 } RVM_Opcode;
@@ -962,17 +1013,16 @@ typedef enum {
 typedef enum {
     IDENTIFIER_TYPE_UNKNOW = 0,
     IDENTIFIER_TYPE_VARIABLE,
-    IDENTIFIER_TYPE_VARIABLE_ARRAY,
     IDENTIFIER_TYPE_FUNCTION,
 } IdentifierType;
 
 struct RVM_CallInfo {
-    unsigned int     magic_number;
-
     RVM_ClassObject* caller_object;
     RVM_Function*    caller_function;
     unsigned int     caller_pc; // 调用者的返回地址
     unsigned int     caller_stack_base;
+    RVM_Byte*        caller_code_list;
+    unsigned int     caller_code_size;
 
     RVM_ClassObject* callee_object;
     RVM_Function*    callee_function;
@@ -1110,6 +1160,10 @@ typedef enum {
     RING_BUILD_IN_FNC_POP,
     RING_BUILD_IN_FNC_TO_STRING,
     RING_BUILD_IN_FNC_TO_INT64,
+
+    RING_BUILD_IN_FNC_LAUNCH,
+    RING_BUILD_IN_FNC_RESUME,
+    RING_BUILD_IN_FNC_YIELD,
 } RING_BUILD_IN_FUNC_ID;
 
 typedef struct {
@@ -1304,6 +1358,7 @@ struct Expression {
 typedef enum {
     IDENTIFIER_EXPRESSION_TYPE_UNKNOW,
     IDENTIFIER_EXPRESSION_TYPE_VARIABLE,
+    IDENTIFIER_EXPRESSION_TYPE_FUNC,
 } IdentifierExpressionType;
 
 struct IdentifierExpression {
@@ -2593,7 +2648,6 @@ void              copy_field(Package_Executer* executer, RVM_Field* dst, FieldMe
 void              add_top_level_code(Package* package, Package_Executer* executer);
 void              generate_code_from_function_definition(Package_Executer* executer, RVM_Function* dst, Function* src);
 void              generate_code_from_method_definition(Package_Executer* executer, RVM_Method* dst, MethodMember* src);
-void              vm_executer_dump(Package_Executer* executer);
 RVM_OpcodeBuffer* new_opcode_buffer();
 
 void              generate_vmcode_from_block(Package_Executer* executer, Block* block, RVM_OpcodeBuffer* opcode_buffer);
@@ -2694,23 +2748,20 @@ void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_ClassObject* callee_object, RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
-                                            unsigned int* caller_stack_base,
                                             unsigned int  argument_list_size);
 void                 derive_function_return(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
-                                            unsigned int* caller_stack_base,
                                             unsigned int  return_value_list_size);
 void                 derive_function_finish(Ring_VirtualMachine* rvm,
                                             RVM_ClassObject** caller_object, RVM_Function** caller_function,
                                             RVM_Function* callee_function,
                                             RVM_Byte** code_list, unsigned int* code_size,
                                             unsigned int* pc,
-                                            unsigned int* caller_stack_base,
                                             unsigned int  return_value_list_size);
-void                 store_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo* call_info);
-void                 restore_callinfo(Ring_VirtualMachine* rvm, RVM_CallInfo** call_info);
+RVM_CallInfo*        store_callinfo(RVM_CallInfo* head, RVM_CallInfo* call_info);
+RVM_CallInfo*        restore_callinfo(RVM_CallInfo** head_);
 void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                                          RVM_ClassObject*     callee_object,
                                                          RVM_Function*        function,
@@ -3035,6 +3086,19 @@ void                  fix_buildin_func_to_int64(Expression*             expressi
                                                 Block*                  block,
                                                 Function*               func);
 
+void                  fix_buildin_func_to_launch(Expression*             expression,
+                                                 FunctionCallExpression* function_call_expression,
+                                                 Block*                  block,
+                                                 Function*               func);
+void                  fix_buildin_func_to_resume(Expression*             expression,
+                                                 FunctionCallExpression* function_call_expression,
+                                                 Block*                  block,
+                                                 Function*               func);
+void                  fix_buildin_func_to_yield(Expression*             expression,
+                                                FunctionCallExpression* function_call_expression,
+                                                Block*                  block,
+                                                Function*               func);
+
 RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* identifier);
 void                  fix_buildin_func(Expression*             expression,
                                        FunctionCallExpression* function_call_expression,
@@ -3059,6 +3123,37 @@ std::string fmt_class(RVM_Value* value);
 std::string fmt_class(RVM_ClassObject* class_object);
 std::string fmt_array(RVM_Value* value);
 std::string fmt_array(RVM_Array* array_value);
+
+// --------------------
+
+
+/* --------------------
+ * coroutine.cpp
+ * function definition
+ *
+ */
+
+RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm);
+RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
+                                RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function,
+                                RVM_Byte** code_list, unsigned int* code_size,
+                                unsigned int* pc);
+void           resume_coroutine(Ring_VirtualMachine* rvm,
+                                CO_ID                co_id,
+                                RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function,
+                                RVM_Byte** code_list, unsigned int* code_size,
+                                unsigned int* pc);
+void           yield_coroutine(Ring_VirtualMachine* rvm,
+                               RVM_Byte** code_list, unsigned int* code_size,
+                               unsigned int* pc);
+void           finish_coroutine(Ring_VirtualMachine* rvm,
+                                CO_ID                co_id,
+                                RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                                RVM_Function* callee_function,
+                                RVM_Byte** code_list, unsigned int* code_size,
+                                unsigned int* pc);
 
 // --------------------
 

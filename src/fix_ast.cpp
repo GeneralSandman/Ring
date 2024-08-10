@@ -60,6 +60,13 @@ TypeSpecifier string_type_specifier = TypeSpecifier{
     .dimension   = 0,
     .sub         = 0,
 };
+TypeSpecifier func_type_specifier = TypeSpecifier{
+    .line_number = 0,
+    .kind        = RING_BASIC_TYPE_FUNC,
+    .u           = {.array_type = nullptr},
+    .dimension   = 0,
+    .sub         = 0,
+};
 
 extern Ring_Command_Arg ring_command_arg;
 
@@ -685,51 +692,65 @@ void fix_identifier_expression(Expression*           expression,
 
     assert(identifier_expression != nullptr);
 
+    // 一个identifier 有可能是 一个变量，也有可能是函数
     Declaration*   declaration    = nullptr;
+    Function*      function       = nullptr;
     TypeSpecifier* type_specifier = nullptr;
 
-    switch (identifier_expression->type) {
-    case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
-        declaration = search_declaration(identifier_expression->package_posit, identifier_expression->identifier, block);
-
-        // Ring-Compiler-Error-Report ERROR_UNDEFINITE_VARIABLE
-        if (declaration == nullptr) {
-            DEFINE_ERROR_REPORT_STR;
-            snprintf(compile_err_buf, 1024,
-                     "use undeclared identifier `%s`; E:%d.",
-                     identifier_expression->identifier,
-                     ERROR_UNDEFINITE_VARIABLE);
-            snprintf(compile_adv_buf, 1024,
-                     "definite variable `%s` like: `var bool|int|double|string %s;` before use it.",
-                     identifier_expression->identifier,
-                     identifier_expression->identifier);
-
-            ErrorReportContext context = {
-                .package                 = nullptr,
-                .package_unit            = nullptr,
-                .source_file_name        = get_package_unit()->current_file_name,
-                .line_content            = package_unit_get_line_content(identifier_expression->line_number),
-                .line_number             = identifier_expression->line_number,
-                .column_number           = 0,
-                .error_message           = std::string(compile_err_buf),
-                .advice                  = std::string(compile_adv_buf),
-                .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
-                .ring_compiler_file      = (char*)__FILE__,
-                .ring_compiler_file_line = __LINE__,
-            };
-            ring_compile_error_report(&context);
-        }
+    //
+    declaration = search_declaration(identifier_expression->package_posit, identifier_expression->identifier, block);
+    if (declaration != nullptr) {
+        // is a variable
+        identifier_expression->type          = IDENTIFIER_EXPRESSION_TYPE_VARIABLE;
         identifier_expression->u.declaration = declaration;
         type_specifier                       = declaration->type_specifier;
-        break;
 
-
-    default:
-        break;
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier);
+        return;
     }
 
-    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-    EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier);
+    function = search_function(identifier_expression->package_posit, identifier_expression->identifier);
+    if (function != nullptr) {
+        // is a function
+        identifier_expression->type       = IDENTIFIER_EXPRESSION_TYPE_FUNC;
+        identifier_expression->u.function = function;
+        type_specifier                    = &func_type_specifier;
+
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier);
+        return;
+    }
+
+    // not a variable and not a function
+    // TODO: 修改一下错误码
+    // Ring-Compiler-Error-Report ERROR_UNDEFINITE_VARIABLE
+    {
+        DEFINE_ERROR_REPORT_STR;
+        snprintf(compile_err_buf, 1024,
+                 "use undeclared identifier `%s`; E:%d.",
+                 identifier_expression->identifier,
+                 ERROR_UNDEFINITE_VARIABLE);
+        snprintf(compile_adv_buf, 1024,
+                 "definite variable `%s` like: `var bool|int|double|string %s;` before use it.",
+                 identifier_expression->identifier,
+                 identifier_expression->identifier);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = nullptr,
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(identifier_expression->line_number),
+            .line_number             = identifier_expression->line_number,
+            .column_number           = 0,
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
 }
 
 /*
@@ -2364,10 +2385,12 @@ Function* search_function(char* package_posit, char* identifier) {
 
         return nullptr;
     }
+
     for (Function* pos : get_package_unit()->function_list) {
         if (str_eq(identifier, pos->identifier)) {
             return pos;
         }
     }
+
     return nullptr;
 }

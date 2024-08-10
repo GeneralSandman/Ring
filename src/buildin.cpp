@@ -58,6 +58,30 @@ Ring_Buildin_Func Ring_Buildin_Funcs[] = {
         .return_types     = std::vector<TypeSpecifier*>{},
         .buildin_func_fix = fix_buildin_func_to_int64,
     },
+    {
+        .identifier       = "launch",
+        .param_size       = 1,
+        .param_types      = std::vector<TypeSpecifier*>{},
+        .return_size      = 1,
+        .return_types     = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix = fix_buildin_func_to_launch,
+    },
+    {
+        .identifier       = "resume",
+        .param_size       = 1,
+        .param_types      = std::vector<TypeSpecifier*>{},
+        .return_size      = 1,
+        .return_types     = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix = fix_buildin_func_to_resume,
+    },
+    {
+        .identifier       = "yield",
+        .param_size       = 1,
+        .param_types      = std::vector<TypeSpecifier*>{},
+        .return_size      = 1,
+        .return_types     = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix = fix_buildin_func_to_yield,
+    },
 };
 
 void fix_buildin_func_len(Expression*             expression,
@@ -155,7 +179,36 @@ void fix_buildin_func_to_int64(Expression*             expression,
     EXPRESSION_ADD_CONVERT_TYPE(expression, &int64_type_specifier);
 }
 
+void fix_buildin_func_to_launch(Expression*             expression,
+                                FunctionCallExpression* function_call_expression,
+                                Block*                  block,
+                                Function*               func) {
 
+    TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
+
+    if (type_specifier->kind != RING_BASIC_TYPE_FUNC) {
+        // TODO:
+        // Ring-Compiler-Error-Report pop array
+        ring_error_report("only apply a function to launch()");
+    }
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    extern TypeSpecifier int64_type_specifier;
+    EXPRESSION_ADD_CONVERT_TYPE(expression, &int64_type_specifier);
+}
+
+void fix_buildin_func_to_resume(Expression*             expression,
+                                FunctionCallExpression* function_call_expression,
+                                Block*                  block,
+                                Function*               func) {
+}
+void fix_buildin_func_to_yield(Expression*             expression,
+                               FunctionCallExpression* function_call_expression,
+                               Block*                  block,
+                               Function*               func) {
+}
+
+// TODO:  需要优化一下
 RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* identifier) {
     if (package_posit != nullptr) {
         return RING_BUILD_IN_FNC_UNKNOW;
@@ -173,6 +226,12 @@ RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* 
         return RING_BUILD_IN_FNC_TO_STRING;
     } else if (str_eq(identifier, "to_int64")) {
         return RING_BUILD_IN_FNC_TO_INT64;
+    } else if (str_eq(identifier, "launch")) {
+        return RING_BUILD_IN_FNC_LAUNCH;
+    } else if (str_eq(identifier, "resume")) {
+        return RING_BUILD_IN_FNC_RESUME;
+    } else if (str_eq(identifier, "yield")) {
+        return RING_BUILD_IN_FNC_YIELD;
     }
 
     return RING_BUILD_IN_FNC_UNKNOW;

@@ -22,6 +22,7 @@ OBJS   = \
 	gc.o\
 	debug.o\
 	vm-debug.o\
+	coroutine.o\
 	../deps/linenoise/linenoise.o\
 	fmt.o\
 	main.o
@@ -203,6 +204,7 @@ mem_pool.o: mem_pool.cpp ring.hpp
 gc.o: gc.cpp ring.hpp
 debug.o: debug.cpp ring.hpp
 vm-debug.o: vm-debug.cpp ring.hpp
+coroutine.o: coroutine.cpp ring.hpp
 thread_pool.o: thread_pool.cpp ring.hpp
 thread_pool_test.o: thread_pool_test.cpp ring.hpp
 main.o: main.cpp ring.hpp

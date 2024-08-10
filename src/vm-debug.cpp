@@ -36,7 +36,7 @@ int debug_rvm_interactive(Ring_VirtualMachine* rvm,
     }
 
     STDERR_CLEAR_SCREEN;
-    ring_vm_dump_runtime_stack(rvm->runtime_stack, caller_stack_base, 1, 0);
+    ring_vm_dump_runtime_stack(VM_CUR_CO_STACK, caller_stack_base, 1, 0);
     ring_vm_code_dump(function, code_list, code_size, pc, 1, 70);
 
     STDERR_MOVE_CURSOR(terminal_size.ws_row - 10, 0);
@@ -149,7 +149,7 @@ int vm_debugger_cli(Ring_VirtualMachine* rvm) {
 
             fprintf(stderr, "stack: %u-%u\n", begin_index, end_index);
             for (unsigned int index = begin_index; index < end_index; index++) {
-                RVM_Value*  value     = &(rvm->runtime_stack->data[index]);
+                RVM_Value*  value     = &(VM_CUR_CO_STACK_DATA[index]);
                 std::string type_str  = format_rvm_type(value);
                 std::string value_str = format_rvm_value(value);
                 std::string format    = type_str + "(" + value_str + ")";

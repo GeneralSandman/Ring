@@ -29,7 +29,7 @@ void gc(Ring_VirtualMachine* rvm) {
 void gc_summary(Ring_VirtualMachine* rvm) {
     printf("%sStatic:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
     for (unsigned int i = 0; i < rvm->runtime_static->size; i++) {
-        RVM_Value*  value = &(rvm->runtime_static->data[i]);
+        RVM_Value*  value = &(VM_STATIC_DATA[i]);
 
         std::string type;
         switch (value->type) {
@@ -76,8 +76,8 @@ void gc_summary(Ring_VirtualMachine* rvm) {
     }
 
     printf("%sStack:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
-    for (unsigned int stack_index = 0; stack_index < rvm->runtime_stack->top_index; stack_index++) {
-        RVM_Value*  value = &(rvm->runtime_stack->data[stack_index]);
+    for (unsigned int stack_index = 0; stack_index < VM_CUR_CO_STACK_TOP_INDEX; stack_index++) {
+        RVM_Value*  value = &(VM_CUR_CO_STACK_DATA[stack_index]);
         std::string type;
         switch (value->type) {
         case RVM_VALUE_TYPE_BOOL:
@@ -120,7 +120,7 @@ void gc_summary(Ring_VirtualMachine* rvm) {
 void gc_mark(Ring_VirtualMachine* rvm) {
     // 1. static 变量指向的位置 需要标记
     for (unsigned int i = 0; i < rvm->runtime_static->size; i++) {
-        RVM_Value* value = &(rvm->runtime_static->data[i]);
+        RVM_Value* value = &(VM_STATIC_DATA[i]);
         // TODO:
         switch (value->type) {
         case RVM_VALUE_TYPE_STRING:
@@ -141,8 +141,8 @@ void gc_mark(Ring_VirtualMachine* rvm) {
     }
 
     //  2. runtime stack 变量 指向的位置 需要标记
-    for (unsigned int stack_index = 0; stack_index < rvm->runtime_stack->top_index; stack_index++) {
-        RVM_Value* value = &(rvm->runtime_stack->data[stack_index]);
+    for (unsigned int stack_index = 0; stack_index < VM_CUR_CO_STACK_TOP_INDEX; stack_index++) {
+        RVM_Value* value = &(VM_CUR_CO_STACK_DATA[stack_index]);
         // TODO:
         switch (value->type) {
         case RVM_VALUE_TYPE_STRING:
