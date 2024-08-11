@@ -43,4 +43,9 @@ function main() {
 	fmt::println("main::3");
 
 	resume(co_id);
+
+	fmt::println("main::4");
+
+	resume(co_id);
+
 }

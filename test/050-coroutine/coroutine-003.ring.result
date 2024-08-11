@@ -1,0 +1,33 @@
+consumer_1 start work
+consumer_2 start work
+producer start work
+producer   0
+consumer_1 0
+consumer_2 0
+producer   1
+consumer_1 1
+consumer_2 1
+producer   2
+consumer_1 2
+consumer_2 2
+producer   3
+consumer_1 3
+consumer_2 3
+producer   4
+consumer_1 4
+consumer_2 4
+producer   5
+consumer_1 5
+consumer_2 5
+producer   6
+consumer_1 6
+consumer_2 6
+producer   7
+consumer_1 7
+consumer_2 7
+producer   8
+consumer_1 8
+consumer_2 8
+producer   9
+consumer_1 9
+consumer_2 9
