@@ -13,15 +13,15 @@ import {
 
 
 function job_action1() {
-	fmt::println("job_action1::1");
+	fmt::println("            job_action1::1");
 	job_action2();
-	fmt::println("job_action1::2");
+	fmt::println("            job_action1::2");
 }
 
 function job_action2() {
-	fmt::println("job_action2::1");
+	fmt::println("            job_action2::1");
 	yield();
-	fmt::println("job_action2::2");
+	fmt::println("            job_action2::2");
 }
 
 @main
@@ -46,6 +46,6 @@ function main() {
 
 	fmt::println("main::4");
 
-	resume(co_id);
+	resume(co_id); // 无效果
 
 }
