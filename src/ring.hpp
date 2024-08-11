@@ -261,7 +261,7 @@ struct RingCoroutine {
     RVM_CallInfo*     call_info;     // 函数调用栈
     RVM_Byte*         code_list;
     unsigned int      code_size;
-    unsigned int      pc;
+    unsigned int      pc; // pc 保存的上一条执行的指令, 在协程被重新调度时, 应该+1
 
     unsigned int      caller_stack_base;
 };
@@ -3139,13 +3139,13 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
                                 RVM_ClassObject* callee_object, RVM_Function* callee_function,
                                 RVM_Byte** code_list, unsigned int* code_size,
                                 unsigned int* pc);
-void           resume_coroutine(Ring_VirtualMachine* rvm,
+int            resume_coroutine(Ring_VirtualMachine* rvm,
                                 CO_ID                co_id,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,
                                 RVM_ClassObject* callee_object, RVM_Function* callee_function,
                                 RVM_Byte** code_list, unsigned int* code_size,
                                 unsigned int* pc);
-void           yield_coroutine(Ring_VirtualMachine* rvm,
+int            yield_coroutine(Ring_VirtualMachine* rvm,
                                RVM_Byte** code_list, unsigned int* code_size,
                                unsigned int* pc);
 void           finish_coroutine(Ring_VirtualMachine* rvm,

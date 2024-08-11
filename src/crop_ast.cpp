@@ -18,7 +18,7 @@ void crop_for_statement(ForStatement* for_statement, Block* block, FunctionTuple
     if (for_statement->type == FOR_STATEMENT_TYPE_TERNARY) {
         Expression* condition = for_statement->u.ternary_statement->condition_expression;
 
-        if (condition->type == EXPRESSION_TYPE_LITERAL_BOOL) {
+        if (condition != nullptr && condition->type == EXPRESSION_TYPE_LITERAL_BOOL) {
             if (condition->u.bool_literal == false) {
                 for_statement->block = nullptr;
             }

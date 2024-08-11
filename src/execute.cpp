@@ -340,6 +340,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Byte             prev_opcde             = 0;
     RVM_Byte             opcode                 = 0;
     unsigned int         prev_code_line_number  = 0;
+    int                  res                    = 0;
 
     unsigned int         dimension              = 0;
     unsigned int*        dimension_list         = (unsigned int*)calloc(1, sizeof(unsigned int) * MAX_DIMENSION_NUM);
@@ -1499,7 +1500,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                    &pc,
                                    //    &caller_stack_base,
                                    return_value_list_size);
-            pc += 1;
+            // pc += 1;
             return_value_list_size = 0;
             break;
 
@@ -1874,20 +1875,24 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_RESUME:
             co_id = STACK_GET_INT64_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            resume_coroutine(rvm,
-                             co_id,
-                             &caller_class_ob, &caller_function,
-                             nullptr, nullptr,
-                             &code_list, &code_size,
-                             &pc);
-            // pc += 1;
+            res = resume_coroutine(rvm,
+                                   co_id,
+                                   &caller_class_ob, &caller_function,
+                                   nullptr, nullptr,
+                                   &code_list, &code_size,
+                                   &pc);
+            if (res != 0) {
+                pc += 1;
+            }
             break;
         case RVM_CODE_YIELD:
             // yield
-            yield_coroutine(rvm,
-                            &code_list, &code_size,
-                            &pc);
-            // pc += 1;
+            res = yield_coroutine(rvm,
+                                  &code_list, &code_size,
+                                  &pc);
+            if (res != 0) {
+                pc += 1;
+            }
             break;
 
         default:
@@ -2037,7 +2042,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
 
     *caller_object   = callinfo->caller_object;
     *caller_function = callinfo->caller_function;
-    *pc              = callinfo->caller_pc; // 调用完成之后, caller_pc + 1, 在 execute 中统一update
+    *pc              = callinfo->caller_pc + 1; // 调用完成之后, caller_pc + 1, 在 execute 中统一update
     *code_list       = callinfo->caller_code_list;
     *code_size       = callinfo->caller_code_size;
 
