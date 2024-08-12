@@ -927,6 +927,21 @@ std::string format_function_arguments(ArgumentList* argument) {
     return str;
 }
 
+std::vector<std::string> split(const std::string& str, const std::string& delimiters) {
+    std::vector<std::string> result;
+    std::string::size_type   start = 0;
+    std::string::size_type   end   = str.find_first_of(delimiters);
+
+    while (end != std::string::npos) {
+        result.push_back(str.substr(start, end - start));
+        start = end + 1;
+        end   = str.find_first_of(delimiters, start);
+    }
+
+    result.push_back(str.substr(start));
+    return result;
+}
+
 
 /* Split a line into arguments, where every argument can be in the
  * following programming-language REPL-alike form:

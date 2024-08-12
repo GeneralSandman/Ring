@@ -2946,6 +2946,8 @@ std::string              format_type_specifier(TypeSpecifier* type_specifier);
 std::string              format_function_parameters(Parameter* parameter);
 std::string              format_function_arguments(ArgumentList* argument);
 
+std::vector<std::string> split(const std::string& str, const std::string& delimiters);
+
 std::vector<std::string> splitargs(const char* line);
 static int               hex_digit_to_int(char c);
 
@@ -3148,7 +3150,7 @@ int            resume_coroutine(Ring_VirtualMachine* rvm,
 int            yield_coroutine(Ring_VirtualMachine* rvm,
                                RVM_Byte** code_list, unsigned int* code_size,
                                unsigned int* pc);
-void           finish_coroutine(Ring_VirtualMachine* rvm,
+int            finish_coroutine(Ring_VirtualMachine* rvm,
                                 CO_ID                co_id,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,
                                 RVM_Function* callee_function,

@@ -1,6 +1,9 @@
 #include "ring.hpp"
 
 
+extern int RING_DEBUG_TRACE_COROUTINE_SCHED;
+
+
 //
 static std::unordered_map<CO_ID, RingCoroutine*> coroutine_map;
 
@@ -15,10 +18,6 @@ static CO_ID get_next_coroutine_id() {
     return global_coroutine_id++;
 }
 
-//
-RingCoroutine* get_current_coroutine(Ring_VirtualMachine* rvm) {
-    return rvm->current_coroutine;
-}
 
 RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
     RingCoroutine* co     = (RingCoroutine*)mem_alloc(nullptr, sizeof(RingCoroutine));
@@ -71,11 +70,6 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
     co->pc                = 0;
     co->caller_stack_base = 0;
 
-    coroutine_map.insert(std::make_pair(co->co_id, co));
-
-
-    // TODO: 添加debug 宏
-    // printf("[DEBUG::Coroutine] launch_coroutine co_id:%llu\n", co->co_id);
 
     // step-1: new and stroe callinfo
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
@@ -85,34 +79,31 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
     callinfo->caller_stack_base    = 0;
     callinfo->caller_code_list     = *code_list;
     callinfo->caller_code_size     = *code_size;
-
     callinfo->callee_object        = nullptr;
     callinfo->callee_function      = nullptr;
     callinfo->callee_argument_size = 0;
     callinfo->prev                 = nullptr;
     callinfo->next                 = nullptr;
 
-    co->call_info                  = store_callinfo(co->call_info, callinfo);
 
-    co->code_list                  = callee_function->u.derive_func->code_list;
-    co->code_size                  = callee_function->u.derive_func->code_size;
-    co->pc                         = -1; // 还没有指令被执行
+    //
+    co->call_info = store_callinfo(co->call_info, callinfo);
+    co->code_list = callee_function->u.derive_func->code_list;
+    co->code_size = callee_function->u.derive_func->code_size;
+    co->pc        = -1; // 还没有指令被执行
+
+    coroutine_map.insert(std::make_pair(co->co_id, co));
+
+
+    if (RING_DEBUG_TRACE_COROUTINE_SCHED == 1) {
+        printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [create::] co_id:%llu\n", co->co_id);
+    }
+
     return co;
 
-    // step-2: 协程上下文切换
 
-    VM_CUR_CO->code_list = *code_list;
-    VM_CUR_CO->code_size = *code_size;
-    VM_CUR_CO->pc        = *pc;
-
-    *code_list           = callee_function->u.derive_func->code_list;
-    *code_size           = callee_function->u.derive_func->code_size;
-    *pc                  = 0;
-
+    // TODO:
     // step-3: 初始化匿名函数的局部变量
-
-    // step-4:
-    rvm->current_coroutine = co;
 
     return co;
 }
@@ -133,50 +124,45 @@ int resume_coroutine(Ring_VirtualMachine* rvm,
 
     // 目标协程记录pid
 
-    if (coroutine_map.end() == coroutine_map.find(co_id)) {
-        // not found co_id
-        return -1;
-    }
-
-
-    // TODO: 添加debug 宏
-    // printf("[DEBUG::Coroutine] resume_coroutine co_id:%llu\n", co_id);
-
 
     RingCoroutine* p_co = rvm->current_coroutine;
-    RingCoroutine* co   = coroutine_map[co_id];
 
+    RingCoroutine* co   = coroutine_map[co_id];
+    if (co == nullptr) {
+        // TODO: error-report
+        return -1;
+    }
     if (co->status == CO_STAT_DEAD) {
         return -1;
     }
 
-    co->p_co_id = p_co->co_id;
-    co->status  = CO_STAT_RUNNING;
 
     // step-2: 协程上下文切换
-
-    p_co->code_list = *code_list;
-    p_co->code_size = *code_size;
-    p_co->pc        = *pc;
-
-    // TODO: 添加debug 宏
-    // printf("[DEBUG::Coroutine] resume_coroutine p_co\n");
-    // printf("[DEBUG::Coroutine] resume_coroutine p_co->co_id:%lld\n", p_co->co_id);
-    // printf("[DEBUG::Coroutine] resume_coroutine p_co->code_list:%p\n", p_co->code_list);
-    // printf("[DEBUG::Coroutine] resume_coroutine p_co->code_size:%u\n", p_co->code_size);
-    // printf("[DEBUG::Coroutine] resume_coroutine p_co->pc:%u\n", p_co->pc);
+    p_co->status           = CO_STAT_SUSPENDED;
+    p_co->code_list        = *code_list;
+    p_co->code_size        = *code_size;
+    p_co->pc               = *pc;
 
     *code_list             = co->code_list;
     *code_size             = co->code_size;
     *pc                    = co->pc + 1;
-
-
     rvm->current_coroutine = co;
+    co->status             = CO_STAT_RUNNING;
+    co->p_co_id            = p_co->co_id;
 
-    // 直接切换 current_coroutine 即可完成
-    //  切换PC
-    //  切换栈
-    //  切换call_info
+
+    if (RING_DEBUG_TRACE_COROUTINE_SCHED == 1) {
+        printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [resume::] "
+                            "co_id:%lld->%lld\n",
+                            p_co->co_id, co->co_id);
+
+        printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [resume::  store-old] "
+                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
+                            p_co->co_id, p_co->status, p_co->code_list, p_co->code_size, p_co->pc);
+        printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [resume::restore-new] "
+                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
+                            co->co_id, co->status, co->code_list, co->code_size, co->pc);
+    }
 
     return 0;
 }
@@ -197,81 +183,95 @@ int yield_coroutine(Ring_VirtualMachine* rvm,
     // 4. save call info;
     // 5. switch to parent coroutine
 
-    RingCoroutine* co = get_current_coroutine(rvm);
+    RingCoroutine* co      = rvm->current_coroutine;
 
-    co->status        = CO_STAT_SUSPENDED;
-    co->code_list     = *code_list;
-    co->code_size     = *code_size;
-    co->pc            = *pc;
-
-    CO_ID p_co_id     = co->p_co_id;
-    if (coroutine_map.find(p_co_id) == coroutine_map.end()) {
-        printf("[DEBUG::Coroutine] parent coroutine not found p_co_id:%llu\n", p_co_id);
+    CO_ID          p_co_id = co->p_co_id;
+    RingCoroutine* p_co    = coroutine_map[p_co_id];
+    if (p_co == nullptr) {
+        // TODO: error-report
         return -1;
     }
-    RingCoroutine* p_co = coroutine_map[p_co_id];
-    p_co->status        = CO_STAT_RUNNING;
-
-    *code_list          = p_co->code_list;
-    *code_size          = p_co->code_size;
-    *pc                 = p_co->pc + 1;
-
-    // TODO: 添加debug 宏
-    // printf("[DEBUG::Coroutine] yield_coroutine p_co\n");
-    // printf("[DEBUG::Coroutine] yield_coroutine p_co->co_id:%lld\n", p_co->co_id);
-    // printf("[DEBUG::Coroutine] yield_coroutine p_co->code_list:%p\n", p_co->code_list);
-    // printf("[DEBUG::Coroutine] yield_coroutine p_co->code_size:%u\n", p_co->code_size);
-    // printf("[DEBUG::Coroutine] yield_coroutine p_co->pc:%u\n", p_co->pc);
 
 
+    // 上下文切换
+    co->status             = CO_STAT_SUSPENDED;
+    co->code_list          = *code_list;
+    co->code_size          = *code_size;
+    co->pc                 = *pc;
+
+    *code_list             = p_co->code_list;
+    *code_size             = p_co->code_size;
+    *pc                    = p_co->pc + 1;
     rvm->current_coroutine = p_co;
+    p_co->status           = CO_STAT_RUNNING;
+
+
+    if (RING_DEBUG_TRACE_COROUTINE_SCHED == 1) {
+        printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [yield::] "
+                            "co_id:%lld<-%lld\n",
+                            p_co->co_id, co->co_id);
+
+        printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [yield::  store-old] "
+                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
+                            co->co_id, co->status, co->code_list, co->code_size, co->pc);
+        printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [yield::restore-new] "
+                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
+                            p_co->co_id, p_co->status, p_co->code_list, p_co->code_size, p_co->pc);
+    }
+
+
     return 0;
 }
 
 
 //
-void finish_coroutine(Ring_VirtualMachine* rvm,
-                      CO_ID                co_id,
-                      RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                      RVM_Function* callee_function,
-                      RVM_Byte** code_list, unsigned int* code_size,
-                      unsigned int* pc) {
+int finish_coroutine(Ring_VirtualMachine* rvm,
+                     CO_ID                co_id,
+                     RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                     RVM_Function* callee_function,
+                     RVM_Byte** code_list, unsigned int* code_size,
+                     unsigned int* pc) {
 
     if (co_id == 0) {
-        return;
+        // RootCoroutine finish
+        // do nothing
+        return 0;
     }
-    // TODO: 添加debug 宏
-    // printf("[DEBUG::Coroutine] finish_coroutine co_id:%llu\n", co_id);
 
 
-    RingCoroutine* co = get_current_coroutine(rvm);
-    co->status        = CO_STAT_DEAD;
+    RingCoroutine* co      = rvm->current_coroutine;
 
-    CO_ID p_co_id     = co->p_co_id;
-    // FIXME: 判断是否存在
-    if (coroutine_map.find(p_co_id) == coroutine_map.end()) {
+    CO_ID          p_co_id = co->p_co_id;
+    RingCoroutine* p_co    = coroutine_map[p_co_id];
+    if (p_co == nullptr) {
+        // TODO: error-report
         printf("parent coroutine not found p_co_id:%llu\n", p_co_id);
-        return;
+        return -1;
     }
-    RingCoroutine* p_co = coroutine_map[p_co_id];
-
-    // 恢复一个协程
-    // TODO: 添加debug 宏
-    // printf("[DEBUG::Coroutine] coroutine change from %llu->%llu\n", co->co_id, p_co->co_id);
 
 
-    *code_list = p_co->code_list;
-    *code_size = p_co->code_size;
-    *pc        = p_co->pc + 1;
+    // 上下文切换
+    co->status             = CO_STAT_DEAD;
 
-
-    // TODO: 添加debug 宏
-    // printf("[DEBUG::Coroutine] finish_coroutine p_co\n");
-    // printf("[DEBUG::Coroutine] finish_coroutine p_co->co_id:%lld\n", p_co->co_id);
-    // printf("[DEBUG::Coroutine] finish_coroutine p_co->code_list:%p\n", p_co->code_list);
-    // printf("[DEBUG::Coroutine] finish_coroutine p_co->code_size:%u\n", p_co->code_size);
-    // printf("[DEBUG::Coroutine] finish_coroutine p_co->pc:%u\n", p_co->pc);
-
-
+    *code_list             = p_co->code_list;
+    *code_size             = p_co->code_size;
+    *pc                    = p_co->pc + 1;
     rvm->current_coroutine = p_co;
+    p_co->status           = CO_STAT_RUNNING;
+
+
+    if (RING_DEBUG_TRACE_COROUTINE_SCHED == 1) {
+        printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [dead::] "
+                            "co_id:%lld<-%lld\n",
+                            p_co->co_id, co->co_id);
+
+        printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [dead::    destory] "
+                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
+                            co->co_id, co->status, co->code_list, co->code_size, co->pc);
+        printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [dead::restore-new] "
+                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
+                            p_co->co_id, p_co->status, p_co->code_list, p_co->code_size, p_co->pc);
+    }
+
+    return 0;
 }

@@ -34,6 +34,35 @@ std::string command_help_message =
 // "        repl                                           :start interactive program\n"
 
 
+int RING_DEBUG_TRACE_COROUTINE_SCHED = 0;
+
+// RING_DEBUG=trace_coroutine_sched=1,debug_vm_inter=1 ./bin/ring run ./test/050-coroutine/coroutine-002.ring
+void ring_parse_env() {
+    char* ring_debug_str = getenv("RING_DEBUG");
+    if (ring_debug_str == nullptr) {
+        return;
+    }
+
+    std::vector<std::string> key_values = split(ring_debug_str, ",");
+    for (const std::string& str : key_values) {
+        std::string              key;
+        std::string              value;
+
+        std::vector<std::string> tmp = split(str, "=");
+        if (tmp.size() != 2) {
+            continue;
+        }
+        key   = tmp[0];
+        value = tmp[1];
+
+        // printf("key: %s, value: %s\n", key.c_str(), value.c_str());
+
+        if (str_eq(key.c_str(), "trace_coroutine_sched") && str_eq(value.c_str(), "1")) {
+            RING_DEBUG_TRACE_COROUTINE_SCHED = 1;
+        }
+    }
+}
+
 Ring_Command_Arg ring_parse_command(int argc, char** argv) {
     Ring_Command_Arg         args;
     RING_COMMAND_TYPE        cmd = RING_COMMAND_UNKNOW;
@@ -134,6 +163,7 @@ int main(int argc, char** argv) {
 #endif
 
     // parse and switch ring command
+    ring_parse_env();
     ring_command_arg = ring_parse_command(argc, argv);
     switch (ring_command_arg.cmd) {
     case RING_COMMAND_UNKNOW:
