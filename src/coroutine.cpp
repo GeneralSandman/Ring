@@ -20,7 +20,7 @@ static CO_ID get_next_coroutine_id() {
 
 
 RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
-    RingCoroutine* co     = (RingCoroutine*)mem_alloc(nullptr, sizeof(RingCoroutine));
+    RingCoroutine* co     = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
     co->co_id             = get_next_coroutine_id();
     co->p_co_id           = -1;
     co->last_run_time     = -1;
@@ -58,7 +58,7 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
                                 RVM_Byte** code_list, unsigned int* code_size,
                                 unsigned int* pc) {
 
-    RingCoroutine* co     = (RingCoroutine*)mem_alloc(nullptr, sizeof(RingCoroutine));
+    RingCoroutine* co     = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
     co->co_id             = get_next_coroutine_id();
     co->p_co_id           = VM_CUR_CO->co_id;
     co->last_run_time     = -1;
@@ -113,7 +113,7 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
  * @co_id: Which coroutine to resume
  */
 int resume_coroutine(Ring_VirtualMachine* rvm,
-                     CO_ID                co_id,
+                     CO_ID                target_co_id,
                      RVM_ClassObject** caller_object, RVM_Function** caller_function,
                      RVM_ClassObject* callee_object, RVM_Function* callee_function,
                      RVM_Byte** code_list, unsigned int* code_size,
@@ -125,43 +125,44 @@ int resume_coroutine(Ring_VirtualMachine* rvm,
     // 目标协程记录pid
 
 
-    RingCoroutine* p_co = rvm->current_coroutine;
+    RingCoroutine* curr_co   = rvm->current_coroutine;
 
-    RingCoroutine* co   = coroutine_map[co_id];
-    if (co == nullptr) {
+    RingCoroutine* target_co = coroutine_map[target_co_id];
+    if (target_co == nullptr) {
         // TODO: error-report
         return -1;
     }
-    if (co->status == CO_STAT_DEAD) {
+    if (target_co->status == CO_STAT_DEAD) {
         return -1;
     }
 
 
     // step-2: 协程上下文切换
-    p_co->status           = CO_STAT_SUSPENDED;
-    p_co->code_list        = *code_list;
-    p_co->code_size        = *code_size;
-    p_co->pc               = *pc;
+    curr_co->status        = CO_STAT_SUSPENDED;
+    curr_co->code_list     = *code_list;
+    curr_co->code_size     = *code_size;
+    curr_co->pc            = *pc;
 
-    *code_list             = co->code_list;
-    *code_size             = co->code_size;
-    *pc                    = co->pc + 1;
-    rvm->current_coroutine = co;
-    co->status             = CO_STAT_RUNNING;
-    co->p_co_id            = p_co->co_id;
+    *code_list             = target_co->code_list;
+    *code_size             = target_co->code_size;
+    *pc                    = target_co->pc + 1;
+
+    target_co->status      = CO_STAT_RUNNING;
+    target_co->p_co_id     = curr_co->co_id;
+    rvm->current_coroutine = target_co;
 
 
     if (RING_DEBUG_TRACE_COROUTINE_SCHED == 1) {
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [resume::] "
                             "co_id:%lld->%lld\n",
-                            p_co->co_id, co->co_id);
+                            curr_co->co_id, target_co->co_id);
 
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [resume::  store-old] "
                             "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            p_co->co_id, p_co->status, p_co->code_list, p_co->code_size, p_co->pc);
+                            curr_co->co_id, curr_co->status, curr_co->code_list, curr_co->code_size, curr_co->pc);
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [resume::restore-new] "
                             "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            co->co_id, co->status, co->code_list, co->code_size, co->pc);
+                            target_co->co_id, target_co->status, target_co->code_list, target_co->code_size, target_co->pc);
     }
 
     return 0;
@@ -183,40 +184,42 @@ int yield_coroutine(Ring_VirtualMachine* rvm,
     // 4. save call info;
     // 5. switch to parent coroutine
 
-    RingCoroutine* co      = rvm->current_coroutine;
+    RingCoroutine* curr_co      = rvm->current_coroutine;
 
-    CO_ID          p_co_id = co->p_co_id;
-    RingCoroutine* p_co    = coroutine_map[p_co_id];
-    if (p_co == nullptr) {
+    CO_ID          target_co_id = curr_co->p_co_id;
+    RingCoroutine* target_co    = coroutine_map[target_co_id];
+    if (target_co == nullptr) {
         // TODO: error-report
         return -1;
     }
 
 
     // 上下文切换
-    co->status             = CO_STAT_SUSPENDED;
-    co->code_list          = *code_list;
-    co->code_size          = *code_size;
-    co->pc                 = *pc;
+    curr_co->status        = CO_STAT_SUSPENDED;
+    curr_co->code_list     = *code_list;
+    curr_co->code_size     = *code_size;
+    curr_co->pc            = *pc;
 
-    *code_list             = p_co->code_list;
-    *code_size             = p_co->code_size;
-    *pc                    = p_co->pc + 1;
-    rvm->current_coroutine = p_co;
-    p_co->status           = CO_STAT_RUNNING;
+    *code_list             = target_co->code_list;
+    *code_size             = target_co->code_size;
+    *pc                    = target_co->pc + 1;
+
+    target_co->status      = CO_STAT_RUNNING;
+
+    rvm->current_coroutine = target_co;
 
 
     if (RING_DEBUG_TRACE_COROUTINE_SCHED == 1) {
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [yield::] "
                             "co_id:%lld<-%lld\n",
-                            p_co->co_id, co->co_id);
+                            target_co->co_id, curr_co->co_id);
 
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [yield::  store-old] "
                             "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            co->co_id, co->status, co->code_list, co->code_size, co->pc);
+                            curr_co->co_id, curr_co->status, curr_co->code_list, curr_co->code_size, curr_co->pc);
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [yield::restore-new] "
                             "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            p_co->co_id, p_co->status, p_co->code_list, p_co->code_size, p_co->pc);
+                            target_co->co_id, target_co->status, target_co->code_list, target_co->code_size, target_co->pc);
     }
 
 
@@ -226,51 +229,60 @@ int yield_coroutine(Ring_VirtualMachine* rvm,
 
 //
 int finish_coroutine(Ring_VirtualMachine* rvm,
-                     CO_ID                co_id,
                      RVM_ClassObject** caller_object, RVM_Function** caller_function,
                      RVM_Function* callee_function,
                      RVM_Byte** code_list, unsigned int* code_size,
                      unsigned int* pc) {
 
-    if (co_id == 0) {
+
+    CO_ID curr_co_id = rvm->current_coroutine->co_id;
+    if (curr_co_id == 0) {
         // RootCoroutine finish
         // do nothing
+        // TODO: 但是还得要销毁资源
         return 0;
     }
 
 
-    RingCoroutine* co      = rvm->current_coroutine;
+    RingCoroutine* curr_co      = rvm->current_coroutine;
 
-    CO_ID          p_co_id = co->p_co_id;
-    RingCoroutine* p_co    = coroutine_map[p_co_id];
-    if (p_co == nullptr) {
+    CO_ID          target_co_id = curr_co->p_co_id;
+    RingCoroutine* target_co    = coroutine_map[target_co_id];
+    if (target_co == nullptr) {
         // TODO: error-report
-        printf("parent coroutine not found p_co_id:%llu\n", p_co_id);
+        printf("parent coroutine not found p_co_id:%llu\n", target_co_id);
         return -1;
     }
 
 
     // 上下文切换
-    co->status             = CO_STAT_DEAD;
+    curr_co->status        = CO_STAT_DEAD;
 
-    *code_list             = p_co->code_list;
-    *code_size             = p_co->code_size;
-    *pc                    = p_co->pc + 1;
-    rvm->current_coroutine = p_co;
-    p_co->status           = CO_STAT_RUNNING;
+    *code_list             = target_co->code_list;
+    *code_size             = target_co->code_size;
+    *pc                    = target_co->pc + 1;
+
+    target_co->status      = CO_STAT_RUNNING;
+
+    rvm->current_coroutine = target_co;
+
+    coroutine_map.erase(curr_co_id);
+    // TODO: 销毁协程对应的资源
+    // runtime_stack是不是可以服用
+    mem_free(rvm->meta_pool, curr_co, sizeof(RingCoroutine));
 
 
     if (RING_DEBUG_TRACE_COROUTINE_SCHED == 1) {
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [dead::] "
                             "co_id:%lld<-%lld\n",
-                            p_co->co_id, co->co_id);
+                            target_co->co_id, curr_co->co_id);
 
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [dead::    destory] "
                             "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            co->co_id, co->status, co->code_list, co->code_size, co->pc);
+                            curr_co->co_id, curr_co->status, curr_co->code_list, curr_co->code_size, curr_co->pc);
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [dead::restore-new] "
                             "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            p_co->co_id, p_co->status, p_co->code_list, p_co->code_size, p_co->pc);
+                            target_co->co_id, target_co->status, target_co->code_list, target_co->code_size, target_co->pc);
     }
 
     return 0;

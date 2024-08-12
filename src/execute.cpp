@@ -2070,7 +2070,6 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
         // printf("coroutine dead\n");
 
         finish_coroutine(rvm,
-                         VM_CUR_CO->co_id,
                          caller_object, caller_function,
                          callee_function,
                          code_list, code_size,
