@@ -576,6 +576,26 @@ quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
 -----------------------------
 
 
+## 2024-08-12周
+
+### A. 添加 RING_DEUBG=trace_func_backtrace=1 : 在函数调用时能够输出调用栈的变化
+
+
+### B. 添加 RING_DEBUG=trace_coroutine_sched=1 : 关于打印Coroutine切换详情
+
+
+### C. launch 调用的第一个函数，支持 传递参数 & block中支持局部变量
+
+
+### D. 修正引入协程之后，debug::print_call_stack() 代码函数不正确
+
+
+### E. 修正引入协程之后，rdb 不太好用
+
+
+-----------------------------
+
+
 ## 2024-07-29周
 
 ### A. 关于Ring的限定符号
