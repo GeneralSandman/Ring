@@ -250,20 +250,31 @@ typedef enum {
 
 typedef unsigned long long CO_ID;
 
-struct RingCoroutine {
-    CO_ID             co_id;   // TODO: 名字改一下
-    CO_ID             p_co_id; // TODO: 名字改一下  父协程ID, 谁唤醒它，他就是它的父协程
-    CO_ID             last_run_time;
 
+/*
+ * RingCoroutine 为一个用户协程
+ * 用户通过 launch() 创建一个协程
+ *
+ * co_id:          协程唯一ID
+ * p_co_id:        父协程ID, 谁唤醒它，他就是它的父协程
+ * last_run_time: 上次运行时间
+ * status:         协程状态
+ *
+ * pc:             保存协程最后被调度时执行的指令, 在协程被重新调度时, 应该+1, 继续执行
+ */
+struct RingCoroutine {
+    CO_ID             co_id;
+    CO_ID             p_co_id;
+    CO_ID             last_run_time;
     CO_STAT           status;
 
     RVM_RuntimeStack* runtime_stack; // 运行堆栈
-    RVM_CallInfo*     call_info;     // 函数调用栈
+    unsigned int      caller_stack_base;
+
+    RVM_CallInfo*     call_info; // 函数调用栈
     RVM_Byte*         code_list;
     unsigned int      code_size;
-    unsigned int      pc; // pc 保存的上一条执行的指令, 在协程被重新调度时, 应该+1
-
-    unsigned int      caller_stack_base;
+    unsigned int      pc;
 };
 
 struct ImportPackageInfo {

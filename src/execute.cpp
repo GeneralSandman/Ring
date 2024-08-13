@@ -132,6 +132,7 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     (((p)[0] = (value) >> 8), ((p)[1] = value & 0xff))
 
 
+// TODO: 这里的栈空间应该可以指定
 RVM_RuntimeStack* new_runtime_stack() {
     RVM_RuntimeStack* stack = (RVM_RuntimeStack*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_RuntimeStack));
     stack->top_index        = 0;

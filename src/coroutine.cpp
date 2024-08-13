@@ -25,12 +25,12 @@ RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
     co->p_co_id           = -1;
     co->last_run_time     = -1;
     co->status            = CO_STAT_INIT;
-    co->runtime_stack     = new_runtime_stack(); // FIXME: 这里的栈空间应该小一点
+    co->runtime_stack     = new_runtime_stack();
+    co->caller_stack_base = 0;
     co->call_info         = nullptr;
     co->code_list         = nullptr;
     co->code_size         = 0;
     co->pc                = 0;
-    co->caller_stack_base = 0;
 
     coroutine_map.insert(std::make_pair(co->co_id, co));
 
@@ -64,11 +64,11 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
     co->last_run_time     = -1;
     co->status            = CO_STAT_INIT;
     co->runtime_stack     = new_runtime_stack();
+    co->caller_stack_base = 0;
     co->call_info         = nullptr;
     co->code_list         = nullptr;
     co->code_size         = 0;
     co->pc                = 0;
-    co->caller_stack_base = 0;
 
 
     // step-1: new and stroe callinfo
