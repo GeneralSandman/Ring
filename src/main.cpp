@@ -29,14 +29,22 @@ std::string command_help_message =
     "Options:\n"
     "\n"
     "        -O1                                            :optimize bytecode with level 1\n"
-    "\n";
-// "        build  <filename>                              :compile and generate bytecode\n"
-// "        repl                                           :start interactive program\n"
+    "\n"
+    "\n"
+    "Ring Debug Env Usage: \n"
+    "\n"
+    "        RING_DEBUG=<value>\n"
+    "                  Enable various debugging facilities.\n"
+    "                  <value> can hold a comma-separated list of these settings.\n"
+    "                  e.g. RING_DEBUG=trace_func_backtrace=1,trace_coroutine_sched=1\n"
+    "                  See https://ring.wiki/ for details.\n"
+    "";
 
 
+int RING_DEBUG_TRACE_FUNC_BACKTRACE  = 0;
 int RING_DEBUG_TRACE_COROUTINE_SCHED = 0;
 
-// RING_DEBUG=trace_coroutine_sched=1,debug_vm_inter=1 ./bin/ring run ./test/050-coroutine/coroutine-002.ring
+// RING_DEBUG=trace_func_backtrace=1,trace_coroutine_sched=1 ./bin/ring run ./test/050-coroutine/coroutine-002.ring
 void ring_parse_env() {
     char* ring_debug_str = getenv("RING_DEBUG");
     if (ring_debug_str == nullptr) {
@@ -57,7 +65,9 @@ void ring_parse_env() {
 
         // printf("key: %s, value: %s\n", key.c_str(), value.c_str());
 
-        if (str_eq(key.c_str(), "trace_coroutine_sched") && str_eq(value.c_str(), "1")) {
+        if (str_eq(key.c_str(), "trace_func_backtrace") && str_eq(value.c_str(), "1")) {
+            RING_DEBUG_TRACE_FUNC_BACKTRACE = 1;
+        } else if (str_eq(key.c_str(), "trace_coroutine_sched") && str_eq(value.c_str(), "1")) {
             RING_DEBUG_TRACE_COROUTINE_SCHED = 1;
         }
     }

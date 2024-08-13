@@ -7,6 +7,8 @@
 #include <unistd.h>
 
 
+extern int             RING_DEBUG_TRACE_FUNC_BACKTRACE;
+
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 
@@ -1988,6 +1990,13 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     callinfo->prev                 = nullptr;
     callinfo->next                 = nullptr;
 
+    if (RING_DEBUG_TRACE_FUNC_BACKTRACE) {
+        printf_witch_red("[Debug CallInfo] "
+                         "CallInfo{caller_function:%s, callee_function:%s}\n",
+                         callinfo->caller_function != nullptr ? callinfo->caller_function->identifier : "",
+                         callinfo->callee_function != nullptr ? callinfo->callee_function->identifier : "");
+    }
+
     // store callinfo
     VM_CUR_CO_CALLINFO = store_callinfo(VM_CUR_CO_CALLINFO, callinfo);
 
@@ -2030,15 +2039,16 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     unsigned int old_return_value_list_index;
 
     VM_CUR_CO_STACK_TOP_INDEX -= return_value_list_size;
-    old_return_value_list_index       = VM_CUR_CO_STACK_TOP_INDEX;
+    old_return_value_list_index      = VM_CUR_CO_STACK_TOP_INDEX;
 
 
-    RVM_CallInfo* callinfo            = nullptr;
-    unsigned int  local_variable_size = (*caller_function)->local_variable_size;
+    RVM_CallInfo* callinfo           = nullptr;
+    callinfo                         = restore_callinfo(&VM_CUR_CO_CALLINFO);
+
+    unsigned int local_variable_size = callinfo->callee_function->local_variable_size;
     VM_CUR_CO_STACK_TOP_INDEX -= local_variable_size;
 
     // restore callinfo
-    callinfo         = restore_callinfo(&VM_CUR_CO_CALLINFO);
 
     *caller_object   = callinfo->caller_object;
     *caller_function = callinfo->caller_function;
