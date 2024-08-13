@@ -10,7 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
-#define RING_VERSION "ring-v0.2.15-beta Copyright (C) 2021-2024 ring.wiki, ZhenhuLi"
+#define RING_VERSION "ring-v0.2.16-beta Copyright (C) 2021-2024 ring.wiki, ZhenhuLi"
 
 
 typedef struct Ring_Command_Arg             Ring_Command_Arg;
