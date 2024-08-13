@@ -754,6 +754,10 @@ std::string format_rvm_value(RVM_Value* value) {
 }
 
 
+// TODO: 这里有一个棘手的问题
+// 那就是 ring_execute_vm_code 在执行过程中
+// code_list code_size pc 是局部变量
+// pc在更新的过程未 写入到 CallInfo中，所以这里获取的 pc 是不准确的
 std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
 
     unsigned int  offset = 0;
@@ -772,8 +776,10 @@ std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
             prefix = "#" + std::to_string(offset) + " $ring!";
 
             if (pos->callee_object == nullptr) {
+                // 普通方法的调用
                 func_name = format_rvm_function(rvm->executer, pos->callee_function);
             } else {
+                // method调用
                 func_name = std::string(pos->callee_object->class_ref->identifier)
                     + "."
                     + format_rvm_function(rvm->executer, pos->callee_function);

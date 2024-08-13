@@ -1019,10 +1019,10 @@ typedef enum {
 struct RVM_CallInfo {
     RVM_ClassObject* caller_object;
     RVM_Function*    caller_function;
-    unsigned int     caller_pc; // 调用者的返回地址
     unsigned int     caller_stack_base;
     RVM_Byte*        caller_code_list;
     unsigned int     caller_code_size;
+    unsigned int     caller_pc; // 调用者的返回地址
 
     RVM_ClassObject* callee_object;
     RVM_Function*    callee_function;
