@@ -21,32 +21,27 @@ static CO_ID get_next_coroutine_id() {
 
 // FIXME: 这里写的不太好，rvm->executer 有可能还是 nullptr，需要确定初始化时机
 RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
-    RingCoroutine* co     = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
-    co->co_id             = get_next_coroutine_id();
-    co->p_co_id           = -1;
-    co->last_run_time     = -1;
-    co->status            = CO_STAT_INIT;
-    co->runtime_stack     = new_runtime_stack();
-    co->caller_stack_base = 0;
-    co->call_info         = nullptr;
+    RingCoroutine* co = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
+    co->co_id         = get_next_coroutine_id();
+    co->p_co_id       = -1;
+    co->last_run_time = -1;
+    co->status        = CO_STAT_INIT;
+    co->runtime_stack = new_runtime_stack();
+    co->call_info     = nullptr;
 
     // step-1: new and stroe callinfo
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->caller_object        = nullptr;
     callinfo->caller_function      = nullptr;
-    callinfo->caller_pc            = 0;
     callinfo->caller_stack_base    = 0;
-    callinfo->caller_code_list     = nullptr;
-    callinfo->caller_code_size     = 0;
     callinfo->callee_object        = nullptr;
     callinfo->callee_function      = nullptr;
     callinfo->callee_argument_size = 0;
-    callinfo->prev                 = nullptr;
-    callinfo->next                 = nullptr;
     callinfo->code_list            = rvm->executer->bootloader_code_list;
     callinfo->code_size            = rvm->executer->bootloader_code_size;
     callinfo->pc                   = 0;
-
+    callinfo->prev                 = nullptr;
+    callinfo->next                 = nullptr;
 
     co->call_info                  = store_callinfo(co->call_info, callinfo);
 
@@ -75,33 +70,28 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,
                                 RVM_ClassObject* callee_object, RVM_Function* callee_function) {
 
-    RingCoroutine* co     = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
-    co->co_id             = get_next_coroutine_id();
-    co->p_co_id           = VM_CUR_CO->co_id;
-    co->last_run_time     = -1;
-    co->status            = CO_STAT_INIT;
-    co->runtime_stack     = new_runtime_stack();
-    co->caller_stack_base = 0;
-    co->call_info         = nullptr;
+    RingCoroutine* co = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
+    co->co_id         = get_next_coroutine_id();
+    co->p_co_id       = VM_CUR_CO->co_id;
+    co->last_run_time = -1;
+    co->status        = CO_STAT_INIT;
+    co->runtime_stack = new_runtime_stack();
+    co->call_info     = nullptr;
 
 
     // step-1: new and stroe callinfo
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->caller_object        = *caller_object;
     callinfo->caller_function      = *caller_function;
-    callinfo->caller_pc            = 0;
     callinfo->caller_stack_base    = 0;
-    callinfo->caller_code_list     = nullptr;
-    callinfo->caller_code_size     = 0;
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
     callinfo->callee_argument_size = 0;
-    callinfo->prev                 = nullptr;
-    callinfo->next                 = nullptr;
     callinfo->code_list            = callee_function->u.derive_func->code_list;
     callinfo->code_size            = callee_function->u.derive_func->code_size;
     callinfo->pc                   = -1;
-
+    callinfo->prev                 = nullptr;
+    callinfo->next                 = nullptr;
 
     //
     co->call_info = store_callinfo(co->call_info, callinfo);

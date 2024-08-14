@@ -242,7 +242,7 @@ struct Ring_VirtualMachine {
 #define VM_CUR_CO_PC (rvm->current_coroutine->call_info->pc)
 
 
-#define VM_CUR_CO_CSB (rvm->current_coroutine->caller_stack_base)
+#define VM_CUR_CO_CSB (rvm->current_coroutine->call_info->caller_stack_base)
 
 typedef enum {
     CO_STAT_INIT,
@@ -271,8 +271,7 @@ struct RingCoroutine {
     CO_ID             last_run_time;
     CO_STAT           status;
 
-    RVM_RuntimeStack* runtime_stack;     // 运行堆栈
-    unsigned int      caller_stack_base; // TODO: 删除
+    RVM_RuntimeStack* runtime_stack; // 运行堆栈
 
     RVM_CallInfo*     call_info; // 函数调用栈
 };
@@ -1031,9 +1030,6 @@ struct RVM_CallInfo {
     RVM_ClassObject* caller_object;
     RVM_Function*    caller_function;
     unsigned int     caller_stack_base;
-    RVM_Byte*        caller_code_list;
-    unsigned int     caller_code_size;
-    unsigned int     caller_pc; // 调用者的返回地址
 
     RVM_ClassObject* callee_object;
     RVM_Function*    callee_function;

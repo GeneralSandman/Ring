@@ -1961,29 +1961,23 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->caller_object        = *caller_object;
     callinfo->caller_function      = *caller_function;
-    callinfo->caller_stack_base    = VM_CUR_CO_CSB;
-    callinfo->caller_code_list     = nullptr;
-    callinfo->caller_code_size     = 0;
-    callinfo->caller_pc            = 0;
+    callinfo->caller_stack_base    = VM_CUR_CO_STACK_TOP_INDEX;
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
     callinfo->callee_argument_size = argument_list_size;
-    callinfo->prev                 = nullptr;
-    callinfo->next                 = nullptr;
     callinfo->code_list            = callee_function->u.derive_func->code_list;
     callinfo->code_size            = callee_function->u.derive_func->code_size;
     callinfo->pc                   = 0;
+    callinfo->prev                 = nullptr;
+    callinfo->next                 = nullptr;
 
     if (RING_DEBUG_TRACE_FUNC_BACKTRACE) {
         printf_witch_red("[RING_DEBUG::trace_coroutine_sched] [invoke_func::] "
-                         "CallInfo{caller_object:%p, caller_function:%s, caller_pc:%u, caller_stack_base:%u, caller_code_list:%p, caller_code_size:%u, \n"
+                         "CallInfo{caller_object:%p, caller_function:%s, caller_stack_base:%u, \n"
                          "%*scallee_object:%p, callee_function:%s, callee_argument_size:%u}\n",
                          callinfo->caller_object,
                          callinfo->caller_function != nullptr ? callinfo->caller_function->identifier : "",
-                         callinfo->caller_pc,
                          callinfo->caller_stack_base,
-                         callinfo->caller_code_list,
-                         callinfo->caller_code_size,
 
                          61, "", // 输出 61个空格，保持格式
 
@@ -2002,7 +1996,6 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     // 思考设计是否会冗余，这个会影响 std-package-debug
     *caller_object   = callee_object;
     *caller_function = callee_function;
-    VM_CUR_CO_CSB    = VM_CUR_CO_STACK_TOP_INDEX;
 
 
     init_derive_function_local_variable(rvm, callee_object, callee_function, argument_list_size);
@@ -2042,14 +2035,11 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
 
     if (RING_DEBUG_TRACE_FUNC_BACKTRACE) {
         printf_witch_red("[RING_DEBUG::trace_coroutine_sched] [finish_func::] "
-                         "CallInfo{caller_object:%p, caller_function:%s, caller_pc:%u, caller_stack_base:%u, caller_code_list:%p, caller_code_size:%u, \n"
+                         "CallInfo{caller_object:%p, caller_function:%s, caller_stack_base:%u, \n"
                          "%*scallee_object:%p, callee_function:%s, callee_argument_size:%u}\n",
                          callinfo->caller_object,
                          callinfo->caller_function != nullptr ? callinfo->caller_function->identifier : "",
-                         callinfo->caller_pc,
                          callinfo->caller_stack_base,
-                         callinfo->caller_code_list,
-                         callinfo->caller_code_size,
 
                          61, "", // 输出 61个空格，保持格式
 
@@ -2079,8 +2069,6 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
         return;
     }
     VM_CUR_CO_PC += 1; // 调用完成之后，上层的函数 pc + 1
-
-    VM_CUR_CO_CSB = callinfo->caller_stack_base;
 
 
     // 释放arguement
