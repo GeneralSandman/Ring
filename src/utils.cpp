@@ -1,5 +1,6 @@
 #include "ring.hpp"
 #include <cassert>
+#include <cstdarg>
 #include <cstdio>
 #include <cstring>
 #include <dirent.h>
@@ -754,72 +755,46 @@ std::string format_rvm_value(RVM_Value* value) {
 }
 
 
-// TODO: 这里有一个棘手的问题
-// 那就是 ring_execute_vm_code 在执行过程中
-// code_list code_size pc 是局部变量
-// pc在更新的过程未 写入到 CallInfo中，所以这里获取的 pc 是不准确的
 std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
+
+    std::string   result;
+    std::string   call_info_s;
 
     unsigned int  offset = 0;
     RVM_CallInfo* pos    = VM_CUR_CO_CALLINFO;
-    std::string   result;
-    std::string   item;
 
-    std::string   prefix;
     std::string   func_name;
     std::string   source_file;
     unsigned int  source_line_number = 0;
 
     for (; pos != nullptr; pos = pos->next, offset++) {
 
-        if (offset == 0) {
-            prefix = "#" + std::to_string(offset) + " $ring!";
+        if (pos->callee_function != nullptr) {
 
-            if (pos->callee_object == nullptr) {
-                // 普通方法的调用
-                func_name = format_rvm_function(rvm->executer, pos->callee_function);
+            if (pos->callee_object != nullptr) {
+                func_name = sprintf_string("%s.%s",
+                                           pos->callee_object->class_ref->identifier,
+                                           format_rvm_function(rvm->executer, pos->callee_function).c_str());
             } else {
-                // method调用
-                func_name = std::string(pos->callee_object->class_ref->identifier)
-                    + "."
-                    + format_rvm_function(rvm->executer, pos->callee_function);
+                func_name = sprintf_string("%s", format_rvm_function(rvm->executer, pos->callee_function).c_str());
             }
 
             source_file        = pos->callee_function->source_file;
-            source_line_number = get_source_line_number_by_pc(pos->callee_function, VM_CUR_CO_PC);
+            source_line_number = get_source_line_number_by_pc(pos->callee_function, pos->pc);
+
 
             //
-            item = prefix + func_name + "\n"
-                + "    " + source_file + ":" + std::to_string(source_line_number) + "\n";
+            call_info_s = sprintf_string("#%d $ring!%s\n"
+                                         "    %s:%d\n",
+                                         offset, func_name.c_str(),
+                                         source_file.c_str(), source_line_number);
 
-            result += item;
-
-            offset++;
-        }
-
-        prefix = "#" + std::to_string(offset) + " $ring!";
-
-        if (pos->caller_function == nullptr) {
-            item = prefix + "start()\n";
         } else {
-
-            if (pos->caller_object == nullptr) {
-                func_name = format_rvm_function(rvm->executer, pos->caller_function);
-            } else {
-                func_name = std::string(pos->caller_object->class_ref->identifier)
-                    + "."
-                    + format_rvm_function(rvm->executer, pos->caller_function);
-            }
-
-            source_file        = pos->caller_function->source_file;
-            source_line_number = get_source_line_number_by_pc(pos->caller_function, pos->caller_pc);
-
-            //
-            item = prefix + func_name + "\n"
-                + "    " + source_file + ":" + std::to_string(source_line_number) + "\n";
+            // bootloader callinfo
+            call_info_s = sprintf_string("#%d $ring!%s\n", offset, "start()");
         }
 
-        result += item;
+        result += call_info_s;
     }
 
     return result;
@@ -1163,4 +1138,24 @@ std::string formate_array_item_type(RVM_Array* array_value) {
     }
 
     return str;
+}
+
+std::string sprintf_string(const char* format, ...) {
+    // 首先计算所需的缓冲区大小
+    va_list args;
+    va_start(args, format);
+    int len = std::vsnprintf(nullptr, 0, format, args);
+    va_end(args);
+
+    // 分配足够大的缓冲区
+    std::string result(len, '\0');
+
+    // 使用 std::vsnprintf() 填充缓冲区
+    va_start(args, format);
+    std::vsnprintf(&result[0], len + 1, format, args);
+    va_end(args);
+
+    // 移除多余的空字符
+    result.resize(len);
+    return result;
 }

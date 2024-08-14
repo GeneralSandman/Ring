@@ -19,6 +19,7 @@ static CO_ID get_next_coroutine_id() {
 }
 
 
+// FIXME: 这里写的不太好，rvm->executer 有可能还是 nullptr，需要确定初始化时机
 RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
     RingCoroutine* co     = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
     co->co_id             = get_next_coroutine_id();
@@ -28,9 +29,27 @@ RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
     co->runtime_stack     = new_runtime_stack();
     co->caller_stack_base = 0;
     co->call_info         = nullptr;
-    co->code_list         = nullptr;
-    co->code_size         = 0;
-    co->pc                = 0;
+
+    // step-1: new and stroe callinfo
+    RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
+    callinfo->caller_object        = nullptr;
+    callinfo->caller_function      = nullptr;
+    callinfo->caller_pc            = 0;
+    callinfo->caller_stack_base    = 0;
+    callinfo->caller_code_list     = nullptr;
+    callinfo->caller_code_size     = 0;
+    callinfo->callee_object        = nullptr;
+    callinfo->callee_function      = nullptr;
+    callinfo->callee_argument_size = 0;
+    callinfo->prev                 = nullptr;
+    callinfo->next                 = nullptr;
+    callinfo->code_list            = rvm->executer->bootloader_code_list;
+    callinfo->code_size            = rvm->executer->bootloader_code_size;
+    callinfo->pc                   = 0;
+
+
+    co->call_info                  = store_callinfo(co->call_info, callinfo);
+
 
     coroutine_map.insert(std::make_pair(co->co_id, co));
 
@@ -54,9 +73,7 @@ RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
 // TODO: 还需要什么参数
 RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                                RVM_ClassObject* callee_object, RVM_Function* callee_function,
-                                RVM_Byte** code_list, unsigned int* code_size,
-                                unsigned int* pc) {
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function) {
 
     RingCoroutine* co     = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
     co->co_id             = get_next_coroutine_id();
@@ -66,9 +83,6 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
     co->runtime_stack     = new_runtime_stack();
     co->caller_stack_base = 0;
     co->call_info         = nullptr;
-    co->code_list         = nullptr;
-    co->code_size         = 0;
-    co->pc                = 0;
 
 
     // step-1: new and stroe callinfo
@@ -77,20 +91,20 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
     callinfo->caller_function      = *caller_function;
     callinfo->caller_pc            = 0;
     callinfo->caller_stack_base    = 0;
-    callinfo->caller_code_list     = *code_list;
-    callinfo->caller_code_size     = *code_size;
+    callinfo->caller_code_list     = nullptr;
+    callinfo->caller_code_size     = 0;
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
     callinfo->callee_argument_size = 0;
     callinfo->prev                 = nullptr;
     callinfo->next                 = nullptr;
+    callinfo->code_list            = callee_function->u.derive_func->code_list;
+    callinfo->code_size            = callee_function->u.derive_func->code_size;
+    callinfo->pc                   = -1;
 
 
     //
     co->call_info = store_callinfo(co->call_info, callinfo);
-    co->code_list = callee_function->u.derive_func->code_list;
-    co->code_size = callee_function->u.derive_func->code_size;
-    co->pc        = -1; // 还没有指令被执行
 
     coroutine_map.insert(std::make_pair(co->co_id, co));
 
@@ -115,9 +129,7 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
 int resume_coroutine(Ring_VirtualMachine* rvm,
                      CO_ID                target_co_id,
                      RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                     RVM_ClassObject* callee_object, RVM_Function* callee_function,
-                     RVM_Byte** code_list, unsigned int* code_size,
-                     unsigned int* pc) {
+                     RVM_ClassObject* callee_object, RVM_Function* callee_function) {
     // 1. get coroutine by coID;
     // 2. 当前协程挂起
     // 3. 目标协程拉起
@@ -144,14 +156,9 @@ int resume_coroutine(Ring_VirtualMachine* rvm,
 
 
     // step-2: 协程上下文切换
-    curr_co->status        = CO_STAT_SUSPENDED;
-    curr_co->code_list     = *code_list;
-    curr_co->code_size     = *code_size;
-    curr_co->pc            = *pc;
+    curr_co->status = CO_STAT_SUSPENDED;
 
-    *code_list             = target_co->code_list;
-    *code_size             = target_co->code_size;
-    *pc                    = target_co->pc + 1;
+    target_co->call_info->pc += 1;
 
     target_co->status      = CO_STAT_RUNNING;
     target_co->p_co_id     = curr_co->co_id;
@@ -164,15 +171,15 @@ int resume_coroutine(Ring_VirtualMachine* rvm,
                             curr_co->co_id, target_co->co_id);
 
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [resume::  store-old] "
-                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            curr_co->co_id, curr_co->status, curr_co->code_list, curr_co->code_size, curr_co->pc);
+                            "Coroutine{co_id:%lld, status:%d}\n",
+                            curr_co->co_id, curr_co->status);
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [resume::  store-old] "
                             "RuntimeStack{data:%p, top_index:%u, size:%u, capacity:%u}\n",
                             curr_co->runtime_stack->data, curr_co->runtime_stack->top_index, curr_co->runtime_stack->size, curr_co->runtime_stack->capacity);
 
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [resume::restore-new] "
-                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            target_co->co_id, target_co->status, target_co->code_list, target_co->code_size, target_co->pc);
+                            "Coroutine{co_id:%lld, status:%d}\n",
+                            target_co->co_id, target_co->status);
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [resume::restore-new] "
                             "RuntimeStack{data:%p, top_index:%u, size:%u, capacity:%u}\n",
                             target_co->runtime_stack->data, target_co->runtime_stack->top_index, target_co->runtime_stack->size, target_co->runtime_stack->capacity);
@@ -188,9 +195,7 @@ int resume_coroutine(Ring_VirtualMachine* rvm,
  * 如果 他没有parent，也就是 RootCoroutine，那么没有效果
  * TODO: 完善一下注释
  */
-int yield_coroutine(Ring_VirtualMachine* rvm,
-                    RVM_Byte** code_list, unsigned int* code_size,
-                    unsigned int* pc) {
+int yield_coroutine(Ring_VirtualMachine* rvm) {
     // 1. get coroutine by coID;
     // 2. set status to CO_STAT_SUSPENDED;
     // 3. save runtime stack;
@@ -203,19 +208,15 @@ int yield_coroutine(Ring_VirtualMachine* rvm,
     RingCoroutine* target_co    = coroutine_map[target_co_id];
     if (target_co == nullptr) {
         // TODO: error-report
+        printf("yield_coroutine error\n");
         return -1;
     }
 
 
     // 上下文切换
-    curr_co->status        = CO_STAT_SUSPENDED;
-    curr_co->code_list     = *code_list;
-    curr_co->code_size     = *code_size;
-    curr_co->pc            = *pc;
+    curr_co->status = CO_STAT_SUSPENDED;
 
-    *code_list             = target_co->code_list;
-    *code_size             = target_co->code_size;
-    *pc                    = target_co->pc + 1;
+    target_co->call_info->pc += 1;
 
     target_co->status      = CO_STAT_RUNNING;
 
@@ -228,15 +229,15 @@ int yield_coroutine(Ring_VirtualMachine* rvm,
                             target_co->co_id, curr_co->co_id);
 
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [yield::  store-old] "
-                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            curr_co->co_id, curr_co->status, curr_co->code_list, curr_co->code_size, curr_co->pc);
+                            "Coroutine{co_id:%lld, status:%d}\n",
+                            curr_co->co_id, curr_co->status);
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [yield::  store-old] "
                             "RuntimeStack{data:%p, top_index:%u, size:%u, capacity:%u}\n",
                             curr_co->runtime_stack->data, curr_co->runtime_stack->top_index, curr_co->runtime_stack->size, curr_co->runtime_stack->capacity);
 
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [yield::restore-new] "
-                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            target_co->co_id, target_co->status, target_co->code_list, target_co->code_size, target_co->pc);
+                            "Coroutine{co_id:%lld, status:%d}\n",
+                            target_co->co_id, target_co->status);
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [yield::restore-new] "
                             "RuntimeStack{data:%p, top_index:%u, size:%u, capacity:%u}\n",
                             target_co->runtime_stack->data, target_co->runtime_stack->top_index, target_co->runtime_stack->size, target_co->runtime_stack->capacity);
@@ -250,9 +251,7 @@ int yield_coroutine(Ring_VirtualMachine* rvm,
 //
 int finish_coroutine(Ring_VirtualMachine* rvm,
                      RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                     RVM_Function* callee_function,
-                     RVM_Byte** code_list, unsigned int* code_size,
-                     unsigned int* pc) {
+                     RVM_Function* callee_function) {
 
 
     CO_ID curr_co_id = rvm->current_coroutine->co_id;
@@ -276,12 +275,10 @@ int finish_coroutine(Ring_VirtualMachine* rvm,
 
 
     // 上下文切换
-    curr_co->status        = CO_STAT_DEAD;
+    curr_co->status = CO_STAT_DEAD;
 
-    *code_list             = target_co->code_list;
-    *code_size             = target_co->code_size;
-    *pc                    = target_co->pc + 1;
 
+    target_co->call_info->pc += 1;
     target_co->status      = CO_STAT_RUNNING;
 
     rvm->current_coroutine = target_co;
@@ -293,16 +290,16 @@ int finish_coroutine(Ring_VirtualMachine* rvm,
                             target_co->co_id, curr_co->co_id);
 
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [dead::    destory] "
-                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            curr_co->co_id, curr_co->status, curr_co->code_list, curr_co->code_size, curr_co->pc);
+                            "Coroutine{co_id:%lld, status:%d}\n",
+                            curr_co->co_id, curr_co->status);
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [dead::    destory] "
                             "RuntimeStack{data:%p, top_index:%u, size:%u, capacity:%u}\n",
                             curr_co->runtime_stack->data, curr_co->runtime_stack->top_index, curr_co->runtime_stack->size, curr_co->runtime_stack->capacity);
 
 
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [dead::restore-new] "
-                            "Coroutine{co_id:%lld, status:%d, code_list:%p, code_size:%u, pc:%u}\n",
-                            target_co->co_id, target_co->status, target_co->code_list, target_co->code_size, target_co->pc);
+                            "Coroutine{co_id:%lld, status:%d}\n",
+                            target_co->co_id, target_co->status);
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [dead::restore-new] "
                             "RuntimeStack{data:%p, top_index:%u, size:%u, capacity:%u}\n",
                             target_co->runtime_stack->data, target_co->runtime_stack->top_index, target_co->runtime_stack->size, target_co->runtime_stack->capacity);

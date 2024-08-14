@@ -236,8 +236,11 @@ struct Ring_VirtualMachine {
 // virtual machine current coroutine's call_info
 #define VM_CUR_CO_CALLINFO (rvm->current_coroutine->call_info)
 
-// virtual machine current coroutine's pc
-#define VM_CUR_CO_PC (rvm->current_coroutine->pc)
+// virtual machine current coroutine's code/pc
+#define VM_CUR_CO_CODE_LIST (rvm->current_coroutine->call_info->code_list)
+#define VM_CUR_CO_CODE_SIZE (rvm->current_coroutine->call_info->code_size)
+#define VM_CUR_CO_PC (rvm->current_coroutine->call_info->pc)
+
 
 #define VM_CUR_CO_CSB (rvm->current_coroutine->caller_stack_base)
 
@@ -268,13 +271,10 @@ struct RingCoroutine {
     CO_ID             last_run_time;
     CO_STAT           status;
 
-    RVM_RuntimeStack* runtime_stack; // 运行堆栈
-    unsigned int      caller_stack_base;
+    RVM_RuntimeStack* runtime_stack;     // 运行堆栈
+    unsigned int      caller_stack_base; // TODO: 删除
 
     RVM_CallInfo*     call_info; // 函数调用栈
-    RVM_Byte*         code_list;
-    unsigned int      code_size;
-    unsigned int      pc;
 };
 
 struct ImportPackageInfo {
@@ -1038,6 +1038,10 @@ struct RVM_CallInfo {
     RVM_ClassObject* callee_object;
     RVM_Function*    callee_function;
     unsigned int     callee_argument_size; // 函数调用的参数数量，可变参数
+
+    RVM_Byte*        code_list;
+    unsigned int     code_size;
+    unsigned int     pc;
 
     RVM_CallInfo*    prev;
     RVM_CallInfo*    next;
@@ -2757,19 +2761,13 @@ void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Functi
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_ClassObject** caller_object, RVM_Function** caller_function,
                                             RVM_ClassObject* callee_object, RVM_Function* callee_function,
-                                            RVM_Byte** code_list, unsigned int* code_size,
-                                            unsigned int* pc,
-                                            unsigned int  argument_list_size);
+                                            unsigned int argument_list_size);
 void                 derive_function_return(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
-                                            RVM_Byte** code_list, unsigned int* code_size,
-                                            unsigned int* pc,
-                                            unsigned int  return_value_list_size);
+                                            unsigned int return_value_list_size);
 void                 derive_function_finish(Ring_VirtualMachine* rvm,
                                             RVM_ClassObject** caller_object, RVM_Function** caller_function,
                                             RVM_Function* callee_function,
-                                            RVM_Byte** code_list, unsigned int* code_size,
-                                            unsigned int* pc,
                                             unsigned int  return_value_list_size);
 RVM_CallInfo*        store_callinfo(RVM_CallInfo* head, RVM_CallInfo* call_info);
 RVM_CallInfo*        restore_callinfo(RVM_CallInfo** head_);
@@ -2967,6 +2965,8 @@ int                      string_compare(const char* str1, unsigned int str1_len,
 
 std::string              formate_array_type(RVM_Array* array_value);
 std::string              formate_array_item_type(RVM_Array* array_value);
+
+std::string              sprintf_string(const char* format, ...);
 // --------------------
 
 
@@ -3149,23 +3149,15 @@ std::string fmt_array(RVM_Array* array_value);
 RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm);
 RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                                RVM_ClassObject* callee_object, RVM_Function* callee_function,
-                                RVM_Byte** code_list, unsigned int* code_size,
-                                unsigned int* pc);
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function);
 int            resume_coroutine(Ring_VirtualMachine* rvm,
                                 CO_ID                target_co_id,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                                RVM_ClassObject* callee_object, RVM_Function* callee_function,
-                                RVM_Byte** code_list, unsigned int* code_size,
-                                unsigned int* pc);
-int            yield_coroutine(Ring_VirtualMachine* rvm,
-                               RVM_Byte** code_list, unsigned int* code_size,
-                               unsigned int* pc);
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function);
+int            yield_coroutine(Ring_VirtualMachine* rvm);
 int            finish_coroutine(Ring_VirtualMachine* rvm,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                                RVM_Function* callee_function,
-                                RVM_Byte** code_list, unsigned int* code_size,
-                                unsigned int* pc);
+                                RVM_Function* callee_function);
 
 // --------------------
 

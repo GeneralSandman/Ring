@@ -168,7 +168,7 @@ Ring_VirtualMachine* ring_virtualmachine_create() {
     rvm->meta_pool           = create_mem_pool((char*)"RVM-Meta-Memory-Pool");
     rvm->data_pool           = create_mem_pool((char*)"RVM-Data-Memory-Pool");
     rvm->debug_config        = nullptr;
-    rvm->current_coroutine   = launch_root_coroutine(rvm); // TODO: 初始化 RootCoroutine
+    rvm->current_coroutine   = nullptr;
 
     return rvm;
 }
@@ -209,6 +209,8 @@ void ring_virtualmachine_load_executer(Ring_VirtualMachine* rvm,
  */
 void ring_virtualmachine_init(Ring_VirtualMachine* rvm) {
     rvm_init_static_variable(rvm, rvm->executer, rvm->runtime_static);
+
+    rvm->current_coroutine = launch_root_coroutine(rvm);
 }
 
 /*
@@ -355,13 +357,9 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Function*        callee_function        = nullptr;
     RVM_Method*          callee_method          = nullptr;
 
-    RVM_Byte*            code_list              = rvm->executer->bootloader_code_list;
-    unsigned int         code_size              = rvm->executer->bootloader_code_size;
-    unsigned int         pc                     = 0;
 
-
-    for (; pc < code_size; prev_opcde = opcode) {
-        opcode = code_list[pc];
+    for (; VM_CUR_CO_PC < VM_CUR_CO_CODE_SIZE; prev_opcde = opcode) {
+        opcode = VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC];
 
 #ifdef DEBUG_RVM_INTERACTIVE
         int debug_rvm_res = 0;
@@ -434,7 +432,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             unsigned int source_line_number = 0;
             if (VM_CUR_CO_CALLINFO != nullptr
                 && VM_CUR_CO_CALLINFO->callee_function != nullptr) {
-                source_line_number = get_source_line_number_by_pc(VM_CUR_CO_CALLINFO->callee_function, pc);
+                source_line_number = get_source_line_number_by_pc(VM_CUR_CO_CALLINFO->callee_function, VM_CUR_CO_PC);
             }
 
             if (source_line_number != 0
@@ -449,7 +447,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             frame = RVM_Frame{
                 .rvm                = rvm,
                 .call_info          = VM_CUR_CO_CALLINFO,
-                .next_pc            = pc,
+                .next_pc            = VM_CUR_CO_PC,
                 .next_opcode        = (RVM_Opcode)opcode,
                 .source_line_number = source_line_number,
                 .globals            = globals,
@@ -461,190 +459,190 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         switch (opcode) {
         // push int/int64/double/string const to stack
         case RVM_CODE_PUSH_BOOL:
-            STACK_SET_BOOL_OFFSET(0, (RVM_Bool)OPCODE_GET_1BYTE(&code_list[pc + 1]));
+            STACK_SET_BOOL_OFFSET(0, (RVM_Bool)OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 2;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_PUSH_INT_1BYTE:
-            STACK_SET_INT_OFFSET(0, OPCODE_GET_1BYTE(&code_list[pc + 1]));
+            STACK_SET_INT_OFFSET(0, OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 2;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_PUSH_INT_2BYTE:
-            STACK_SET_INT_OFFSET(0, OPCODE_GET_2BYTE(&code_list[pc + 1]));
+            STACK_SET_INT_OFFSET(0, OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_INT:
-            const_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            const_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT_OFFSET(0, constant_pool_list[const_index].u.int_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_INT64:
-            const_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            const_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT64_OFFSET(0, constant_pool_list[const_index].u.int64_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_DOUBLE:
-            const_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            const_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_DOUBLE_OFFSET(0, constant_pool_list[const_index].u.double_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STRING:
-            const_index  = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            const_index  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             string_value = string_literal_to_rvm_string(rvm, constant_pool_list[const_index].u.string_value);
             STACK_SET_STRING_OFFSET(0, string_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
 
 
         // static
         case RVM_CODE_POP_STATIC_BOOL:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STATIC_SET_BOOL_INDEX(runtime_static_index, STACK_GET_BOOL_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STATIC_INT:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STATIC_SET_INT_INDEX(runtime_static_index, STACK_GET_INT_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STATIC_INT64:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STATIC_SET_INT64_INDEX(runtime_static_index, STACK_GET_INT64_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STATIC_DOUBLE:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STATIC_SET_DOUBLE_INDEX(runtime_static_index, STACK_GET_DOUBLE_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STATIC_STRING:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STATIC_SET_STRING_INDEX(runtime_static_index, STACK_GET_STRING_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STATIC_CLASS_OB:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STATIC_SET_CLASS_OB_INDEX(runtime_static_index, STACK_GET_CLASS_OB_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STATIC_ARRAY:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             // This is shallow copy
             // array_value = STACK_GET_OBJECT_OFFSET(rvm, -1);
             // This is deep copy
             array_value = rvm_deep_copy_array(rvm, STACK_GET_ARRAY_OFFSET(-1));
             STATIC_SET_ARRAY_INDEX(runtime_static_index, array_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
 
         case RVM_CODE_PUSH_STATIC_BOOL:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_BOOL_OFFSET(0, VM_STATIC_DATA[runtime_static_index].u.bool_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STATIC_INT:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT_OFFSET(0, VM_STATIC_DATA[runtime_static_index].u.int_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STATIC_INT64:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT64_OFFSET(0, VM_STATIC_DATA[runtime_static_index].u.int64_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STATIC_DOUBLE:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_DOUBLE_OFFSET(0, VM_STATIC_DATA[runtime_static_index].u.double_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STATIC_STRING:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_STRING_OFFSET(0, VM_STATIC_DATA[runtime_static_index].u.string_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STATIC_CLASS_OB:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_CLASS_OB_OFFSET(0, VM_STATIC_DATA[runtime_static_index].u.class_ob_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STATIC_ARRAY:
-            runtime_static_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            runtime_static_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_ARRAY_OFFSET(0, VM_STATIC_DATA[runtime_static_index].u.array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
 
 
         // stack
         case RVM_CODE_POP_STACK_BOOL:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_BOOL_INDEX(
                 VM_CUR_CO_CSB + caller_stack_offset,
                 STACK_GET_BOOL_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STACK_INT:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT_INDEX(
                 VM_CUR_CO_CSB + caller_stack_offset,
                 STACK_GET_INT_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STACK_INT64:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT64_INDEX(
                 VM_CUR_CO_CSB + caller_stack_offset,
                 STACK_GET_INT64_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STACK_DOUBLE:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_DOUBLE_INDEX(
                 VM_CUR_CO_CSB + caller_stack_offset,
                 STACK_GET_DOUBLE_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STACK_STRING:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_STRING_INDEX(
                 VM_CUR_CO_CSB + caller_stack_offset,
                 STACK_GET_STRING_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STACK_CLASS_OB:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_CLASS_OB_INDEX(
                 VM_CUR_CO_CSB + caller_stack_offset,
                 STACK_GET_CLASS_OB_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_STACK_ARRAY:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             // This is shallow copy
             // array_value         = STACK_GET_ARRAY_OFFSET(-1);
             // This is deep copy
@@ -653,57 +651,57 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 VM_CUR_CO_CSB + caller_stack_offset,
                 array_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
 
         case RVM_CODE_PUSH_STACK_BOOL:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_BOOL_OFFSET(0,
                                   STACK_GET_BOOL_INDEX(VM_CUR_CO_CSB + caller_stack_offset));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STACK_INT:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT_OFFSET(0,
                                  STACK_GET_INT_INDEX(VM_CUR_CO_CSB + caller_stack_offset));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STACK_INT64:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT64_OFFSET(0,
                                    STACK_GET_INT64_INDEX(VM_CUR_CO_CSB + caller_stack_offset));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STACK_DOUBLE:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_DOUBLE_OFFSET(0,
                                     STACK_GET_DOUBLE_INDEX(VM_CUR_CO_CSB + caller_stack_offset));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STACK_STRING:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_STRING_OFFSET(0,
                                     STACK_GET_STRING_INDEX(VM_CUR_CO_CSB + caller_stack_offset));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STACK_CLASS_OB:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_CLASS_OB_OFFSET(0,
                                       STACK_GET_CLASS_OB_INDEX(VM_CUR_CO_CSB + caller_stack_offset));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STACK_ARRAY:
-            caller_stack_offset = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_ARRAY_OFFSET(0,
                                    STACK_GET_ARRAY_INDEX(VM_CUR_CO_CSB + caller_stack_offset));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
 
 
@@ -715,7 +713,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_PUSH_ARRAY_BOOL:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
@@ -724,7 +722,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             STACK_SET_BOOL_OFFSET(0, (RVM_Bool)((int)bool_value));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_PUSH_ARRAY_INT:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
@@ -733,7 +731,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             STACK_SET_INT_OFFSET(0, int_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_PUSH_ARRAY_INT64:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
@@ -742,7 +740,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             STACK_SET_INT64_OFFSET(0, int64_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_PUSH_ARRAY_DOUBLE:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
@@ -751,7 +749,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             STACK_SET_DOUBLE_OFFSET(0, double_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_PUSH_ARRAY_STRING:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
@@ -760,7 +758,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             STACK_SET_STRING_OFFSET(0, string_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_PUSH_ARRAY_CLASS_OB:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
@@ -769,7 +767,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             STACK_SET_CLASS_OB_OFFSET(0, class_ob_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_POP_ARRAY_A:
@@ -778,7 +776,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value   = STACK_GET_ARRAY_OFFSET(-3);
             rvm_array_set_array(rvm, array_c_value, array_index, array_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_POP_ARRAY_BOOL:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
@@ -786,42 +784,42 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             bool_value  = (bool)STACK_GET_BOOL_OFFSET(-3);
             rvm_array_set_bool(rvm, array_value, array_index, &bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_POP_ARRAY_INT:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
             rvm_array_set_int(rvm, array_value, array_index, &STACK_GET_INT_OFFSET(-3));
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_POP_ARRAY_INT64:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
             rvm_array_set_int64(rvm, array_value, array_index, &STACK_GET_INT64_OFFSET(-3));
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_POP_ARRAY_DOUBLE:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
             rvm_array_set_double(rvm, array_value, array_index, &STACK_GET_DOUBLE_OFFSET(-3));
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_POP_ARRAY_STRING:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
             rvm_array_set_string(rvm, array_value, array_index, &STACK_GET_STRING_OFFSET(-3));
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_POP_ARRAY_CLASS_OB:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
             rvm_array_set_class_object(rvm, array_value, array_index, &STACK_GET_CLASS_OB_OFFSET(-3));
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
 
@@ -831,42 +829,42 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             bool_value  = (bool)STACK_GET_BOOL_OFFSET(-1);
             rvm_array_append_bool(rvm, array_value, &bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ARRAY_APPEND_INT:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             int_value   = STACK_GET_INT_OFFSET(-1);
             rvm_array_append_int(rvm, array_value, &int_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ARRAY_APPEND_INT64:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             int64_value = STACK_GET_INT64_OFFSET(-1);
             rvm_array_append_int64(rvm, array_value, &int64_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ARRAY_APPEND_DOUBLE:
             array_value  = STACK_GET_ARRAY_OFFSET(-2);
             double_value = STACK_GET_DOUBLE_OFFSET(-1);
             rvm_array_append_double(rvm, array_value, &double_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ARRAY_APPEND_STRING:
             array_value  = STACK_GET_ARRAY_OFFSET(-2);
             string_value = STACK_GET_STRING_OFFSET(-1);
             rvm_array_append_string(rvm, array_value, &string_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ARRAY_APPEND_CLASS_OB:
             array_value    = STACK_GET_ARRAY_OFFSET(-2);
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
             rvm_array_append_class_object(rvm, array_value, &class_ob_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         // array pop
@@ -877,7 +875,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_BOOL_OFFSET(0, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ARRAY_POP_INT:
             array_value = STACK_GET_ARRAY_OFFSET(-1);
@@ -886,7 +884,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_INT_OFFSET(0, int_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ARRAY_POP_INT64:
             array_value = STACK_GET_ARRAY_OFFSET(-1);
@@ -895,7 +893,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_INT64_OFFSET(0, int64_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ARRAY_POP_DOUBLE:
             array_value  = STACK_GET_ARRAY_OFFSET(-1);
@@ -904,7 +902,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_DOUBLE_OFFSET(0, double_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ARRAY_POP_STRING:
             array_value  = STACK_GET_ARRAY_OFFSET(-1);
@@ -913,7 +911,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_STRING_OFFSET(0, string_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ARRAY_POP_CLASS_OB:
             array_value = STACK_GET_ARRAY_OFFSET(-1);
@@ -921,71 +919,71 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_CLASS_OB_OFFSET(0, class_ob_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
 
         // class
         case RVM_CODE_POP_FIELD_BOOL:
             class_ob_value                                  = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                     = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index                                     = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             class_ob_value->field[field_index].type         = RVM_VALUE_TYPE_BOOL;
             class_ob_value->field[field_index].u.bool_value = STACK_GET_BOOL_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_INT:
             class_ob_value                                 = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                    = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index                                    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             class_ob_value->field[field_index].type        = RVM_VALUE_TYPE_INT;
             class_ob_value->field[field_index].u.int_value = STACK_GET_INT_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_INT64:
             class_ob_value                                   = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                      = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index                                      = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             class_ob_value->field[field_index].type          = RVM_VALUE_TYPE_INT64;
             class_ob_value->field[field_index].u.int64_value = STACK_GET_INT64_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_DOUBLE:
             class_ob_value                                    = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                       = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index                                       = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             class_ob_value->field[field_index].type           = RVM_VALUE_TYPE_DOUBLE;
             class_ob_value->field[field_index].u.double_value = STACK_GET_DOUBLE_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_STRING:
             class_ob_value                                    = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                       = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index                                       = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             class_ob_value->field[field_index].type           = RVM_VALUE_TYPE_STRING;
             class_ob_value->field[field_index].u.string_value = STACK_GET_STRING_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_CLASS_OB:
             class_ob_value                                      = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                         = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index                                         = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             class_ob_value->field[field_index].type             = RVM_VALUE_TYPE_CLASS_OB;
             class_ob_value->field[field_index].u.class_ob_value = STACK_GET_CLASS_OB_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_ARRAY:
             class_ob_value                                   = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                      = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index                                      = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             class_ob_value->field[field_index].type          = RVM_VALUE_TYPE_ARRAY;
             class_ob_value->field[field_index].u.array_value = STACK_GET_ARRAY_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
 
         case RVM_CODE_PUSH_FIELD_BOOL:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index    = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             // TODO:
             // 在 Ring VM 崩溃的时候，应该抛出详细信息，方便编译器的开发者定位问题
             // 是通过宏控制，还是通过ring 执行时命令行控制
@@ -997,43 +995,43 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             //     ring_exec_err_report("Runtime Stack:\n%s\n", tmp.c_str());
             // }
             STACK_SET_BOOL_OFFSET(-1, class_ob_value->field[field_index].u.bool_value);
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_INT:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index    = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT_OFFSET(-1, class_ob_value->field[field_index].u.int_value);
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_INT64:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index    = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT64_OFFSET(-1, class_ob_value->field[field_index].u.int64_value);
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_DOUBLE:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index    = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_DOUBLE_OFFSET(-1, class_ob_value->field[field_index].u.double_value);
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_STRING:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index    = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_STRING_OFFSET(-1, class_ob_value->field[field_index].u.string_value);
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_CLASS_OB:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index    = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_CLASS_OB_OFFSET(-1, class_ob_value->field[field_index].u.class_ob_value);
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_ARRAY:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index    = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_ARRAY_OFFSET(-1, class_ob_value->field[field_index].u.array_value);
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
 
 
@@ -1041,146 +1039,146 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_ADD_INT:
             STACK_GET_INT_OFFSET(-2) = STACK_GET_INT_OFFSET(-2) + STACK_GET_INT_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ADD_INT64:
             STACK_GET_INT64_OFFSET(-2) = STACK_GET_INT64_OFFSET(-2) + STACK_GET_INT64_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_ADD_DOUBLE:
             STACK_GET_DOUBLE_OFFSET(-2) = STACK_GET_DOUBLE_OFFSET(-2) + STACK_GET_DOUBLE_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_SUB_INT:
             STACK_GET_INT_OFFSET(-2) = STACK_GET_INT_OFFSET(-2) - STACK_GET_INT_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_SUB_INT64:
             STACK_GET_INT64_OFFSET(-2) = STACK_GET_INT64_OFFSET(-2) - STACK_GET_INT64_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_SUB_DOUBLE:
             STACK_GET_DOUBLE_OFFSET(-2) = STACK_GET_DOUBLE_OFFSET(-2) - STACK_GET_DOUBLE_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_MUL_INT:
             STACK_GET_INT_OFFSET(-2) = STACK_GET_INT_OFFSET(-2) * STACK_GET_INT_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_MUL_INT64:
             STACK_GET_INT64_OFFSET(-2) = STACK_GET_INT64_OFFSET(-2) * STACK_GET_INT64_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_MUL_DOUBLE:
             STACK_GET_DOUBLE_OFFSET(-2) = STACK_GET_DOUBLE_OFFSET(-2) * STACK_GET_DOUBLE_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_DIV_INT:
             STACK_GET_INT_OFFSET(-2) = STACK_GET_INT_OFFSET(-2) / STACK_GET_INT_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_DIV_INT64:
             STACK_GET_INT64_OFFSET(-2) = STACK_GET_INT64_OFFSET(-2) / STACK_GET_INT64_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_DIV_DOUBLE:
             STACK_GET_DOUBLE_OFFSET(-2) = STACK_GET_DOUBLE_OFFSET(-2) / STACK_GET_DOUBLE_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_MOD_INT:
             STACK_GET_INT_OFFSET(-2) = STACK_GET_INT_OFFSET(-2) % STACK_GET_INT_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_MOD_INT64:
             STACK_GET_INT64_OFFSET(-2) = STACK_GET_INT64_OFFSET(-2) % STACK_GET_INT64_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_MOD_DOUBLE:
             STACK_GET_DOUBLE_OFFSET(-2) = fmod(STACK_GET_DOUBLE_OFFSET(-2), STACK_GET_DOUBLE_OFFSET(-1));
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_MINUS_INT:
             STACK_GET_INT_OFFSET(-1) = -STACK_GET_INT_OFFSET(-1);
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_MINUS_INT64:
             STACK_GET_INT64_OFFSET(-1) = -STACK_GET_INT64_OFFSET(-1);
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_MINUS_DOUBLE:
             STACK_GET_DOUBLE_OFFSET(-1) = -STACK_GET_DOUBLE_OFFSET(-1);
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_SELF_INCREASE_INT:
             STACK_GET_INT_OFFSET(-1) += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_SELF_INCREASE_INT64:
             STACK_GET_INT64_OFFSET(-1) += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_SELF_INCREASE_DOUBLE:
             STACK_GET_DOUBLE_OFFSET(-1) += 1.0;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_SELF_DECREASE_INT:
             STACK_GET_INT_OFFSET(-1) -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_SELF_DECREASE_INT64:
             STACK_GET_INT64_OFFSET(-1) -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_SELF_DECREASE_DOUBLE:
             STACK_GET_DOUBLE_OFFSET(-1) -= 1.0;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_CONCAT:
             string_value = concat_string(rvm, STACK_GET_STRING_OFFSET(-2), STACK_GET_STRING_OFFSET(-1));
             STACK_SET_STRING_OFFSET(-2, string_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         // type cast
         case RVM_CODE_CAST_BOOL_TO_INT:
             STACK_SET_INT_OFFSET(-1, STACK_GET_BOOL_OFFSET(-1));
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_CAST_INT_TO_DOUBLE:
             STACK_SET_DOUBLE_OFFSET(-1, STACK_GET_INT_OFFSET(-1));
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_CAST_INT_TO_BOOL:
             STACK_SET_BOOL_OFFSET(-1, (RVM_Bool)STACK_GET_INT_OFFSET(-1));
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_CAST_DOUBLE_TO_INT:
             STACK_SET_INT_OFFSET(-1, (int)STACK_GET_DOUBLE_OFFSET(-1));
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         // logical
@@ -1188,17 +1186,17 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             bool_value = (STACK_GET_INT_OFFSET(-2) && STACK_GET_INT_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_LOGICAL_OR:
             bool_value = (STACK_GET_INT_OFFSET(-2) || STACK_GET_INT_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_LOGICAL_NOT:
             STACK_GET_INT_OFFSET(-1) = !(STACK_GET_INT_OFFSET(-1));
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
 
@@ -1207,170 +1205,170 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             bool_value = (STACK_GET_INT_OFFSET(-2) == STACK_GET_INT_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_EQ_INT64:
             bool_value = (STACK_GET_INT64_OFFSET(-2) == STACK_GET_INT64_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_EQ_DOUBLE:
             bool_value = (STACK_GET_DOUBLE_OFFSET(-2) == STACK_GET_DOUBLE_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_EQ_STRING:
             bool_value = (rvm_string_cmp(STACK_GET_STRING_OFFSET(-2), STACK_GET_STRING_OFFSET(-1)) == 0);
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_RELATIONAL_NE_INT:
             bool_value = (STACK_GET_INT_OFFSET(-2) != STACK_GET_INT_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_NE_INT64:
             bool_value = (STACK_GET_INT64_OFFSET(-2) != STACK_GET_INT64_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_NE_DOUBLE:
             bool_value = (STACK_GET_DOUBLE_OFFSET(-2) != STACK_GET_DOUBLE_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_NE_STRING:
             bool_value = (RVM_Bool)(rvm_string_cmp(STACK_GET_STRING_OFFSET(-2), STACK_GET_STRING_OFFSET(-1)) != 0);
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_RELATIONAL_GT_INT:
             bool_value = (STACK_GET_INT_OFFSET(-2) > STACK_GET_INT_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_GT_INT64:
             bool_value = (STACK_GET_INT64_OFFSET(-2) > STACK_GET_INT64_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_GT_DOUBLE:
             bool_value = (STACK_GET_DOUBLE_OFFSET(-2) > STACK_GET_DOUBLE_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_GT_STRING:
             bool_value = (rvm_string_cmp(STACK_GET_STRING_OFFSET(-2), STACK_GET_STRING_OFFSET(-1)) > 0);
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_RELATIONAL_GE_INT:
             bool_value = (STACK_GET_INT_OFFSET(-2) >= STACK_GET_INT_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_GE_INT64:
             bool_value = (STACK_GET_INT64_OFFSET(-2) >= STACK_GET_INT64_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_GE_DOUBLE:
             bool_value = (STACK_GET_DOUBLE_OFFSET(-2) >= STACK_GET_DOUBLE_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_GE_STRING:
             bool_value = (rvm_string_cmp(STACK_GET_STRING_OFFSET(-2), STACK_GET_STRING_OFFSET(-1)) >= 0);
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_RELATIONAL_LT_INT:
             bool_value = (STACK_GET_INT_OFFSET(-2) < STACK_GET_INT_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_LT_INT64:
             bool_value = (STACK_GET_INT64_OFFSET(-2) < STACK_GET_INT64_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_LT_DOUBLE:
             bool_value = (STACK_GET_DOUBLE_OFFSET(-2) < STACK_GET_DOUBLE_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_LT_STRING:
             bool_value = (rvm_string_cmp(STACK_GET_STRING_OFFSET(-2), STACK_GET_STRING_OFFSET(-1)) < 0);
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         case RVM_CODE_RELATIONAL_LE_INT:
             bool_value = (STACK_GET_INT_OFFSET(-2) <= STACK_GET_INT_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_LE_INT64:
             bool_value = (STACK_GET_INT64_OFFSET(-2) <= STACK_GET_INT64_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_LE_DOUBLE:
             bool_value = (STACK_GET_DOUBLE_OFFSET(-2) <= STACK_GET_DOUBLE_OFFSET(-1));
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RELATIONAL_LE_STRING:
             bool_value = (rvm_string_cmp(STACK_GET_STRING_OFFSET(-2), STACK_GET_STRING_OFFSET(-1)) <= 0);
             STACK_SET_BOOL_OFFSET(-2, (RVM_Bool)bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
 
         // jump
         case RVM_CODE_JUMP:
-            pc = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             break;
         case RVM_CODE_JUMP_IF_FALSE:
             if (!STACK_GET_INT_OFFSET(-1)) {
-                pc = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+                VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             } else {
-                pc += 3;
+                VM_CUR_CO_PC += 3;
             }
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             break;
         case RVM_CODE_JUMP_IF_TRUE:
             if (STACK_GET_INT_OFFSET(-1)) {
-                pc = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+                VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             } else {
-                pc += 3;
+                VM_CUR_CO_PC += 3;
             }
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             break;
@@ -1378,19 +1376,19 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // duplicate
         case RVM_CODE_SHALLOW_COPY:
-            dst_offset = OPCODE_GET_1BYTE(&code_list[pc + 1]);
-            src_offset = OPCODE_GET_1BYTE(&code_list[pc + 2]);
+            dst_offset = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            src_offset = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
             STACK_COPY_OFFSET(-dst_offset, -src_offset);
             if (dst_offset == 0)
                 VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_DEEP_COPY:
             // TODO: 这里有个不足
             // 就是 deep_copy 没有区分数据的类型,
             // 所以说需要进入函数内部进行选择处理 deep_copy, 后续需要进行优化
-            dst_offset = OPCODE_GET_1BYTE(&code_list[pc + 1]);
-            src_offset = OPCODE_GET_1BYTE(&code_list[pc + 2]);
+            dst_offset = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            src_offset = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
 
             if (STACK_GET_TYPE_OFFSET(-src_offset) == RVM_VALUE_TYPE_CLASS_OB) {
                 RVM_ClassObject* src_class_object = STACK_GET_CLASS_OB_OFFSET(-src_offset);
@@ -1406,29 +1404,29 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             if (dst_offset == 0)
                 VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
 
 
         // func
         case RVM_CODE_ARGUMENT_NUM:
-            argument_list_size = OPCODE_GET_1BYTE(&code_list[pc + 1]);
+            argument_list_size = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT_OFFSET(0, argument_list_size);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 2;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_PUSH_FUNC:
             // 这里设计的不太好
-            func_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            func_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT_OFFSET(0, func_index);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_METHOD:
-            method_index = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            method_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT_OFFSET(0, method_index);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_INVOKE_FUNC_NATIVE:
             argument_list_size = STACK_GET_INT_OFFSET(-2);
@@ -1445,7 +1443,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             invoke_native_function(rvm,
                                    callee_function,
                                    argument_list_size);
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_INVOKE_FUNC:
             // TODO:
@@ -1463,8 +1461,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function,
                                    nullptr, callee_function,
-                                   &code_list, &code_size,
-                                   &pc,
                                    argument_list_size);
 
             break;
@@ -1485,22 +1481,18 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function,
                                    callee_class_ob, callee_function,
-                                   &code_list, &code_size,
-                                   &pc,
                                    argument_list_size);
             break;
         case RVM_CODE_RETURN:
-            return_value_list_size = OPCODE_GET_2BYTE(&code_list[pc + 1]);
-            pc += 3;
+            return_value_list_size = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            VM_CUR_CO_PC += 3;
             [[fallthrough]]; // make g++ happy
         case RVM_CODE_FUNCTION_FINISH:
             derive_function_finish(rvm,
                                    &caller_class_ob, &caller_function,
                                    nullptr,
-                                   &code_list, &code_size,
-                                   &pc,
                                    return_value_list_size);
-            // pc += 1;
+            // VM_CUR_CO_PC += 1;
             return_value_list_size = 0;
             break;
 
@@ -1513,7 +1505,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // array
         case RVM_CODE_NEW_ARRAY_BOOL:
-            dimension = OPCODE_GET_1BYTE(&code_list[pc + 1]);
+            dimension = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
             for (unsigned int i = 0; i < dimension; i++) {
                 dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(-(i + 1));
@@ -1522,10 +1514,10 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL, nullptr);
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 2;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_NEW_ARRAY_INT:
-            dimension = OPCODE_GET_1BYTE(&code_list[pc + 1]);
+            dimension = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
             for (unsigned int i = 0; i < dimension; i++) {
                 dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(-(i + 1));
@@ -1534,10 +1526,10 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT, nullptr);
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 2;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_NEW_ARRAY_INT64:
-            dimension = OPCODE_GET_1BYTE(&code_list[pc + 1]);
+            dimension = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
             for (unsigned int i = 0; i < dimension; i++) {
                 dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(-(i + 1));
@@ -1546,10 +1538,10 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT64, nullptr);
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 2;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_NEW_ARRAY_DOUBLE:
-            dimension = OPCODE_GET_1BYTE(&code_list[pc + 1]);
+            dimension = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
             for (unsigned int i = 0; i < dimension; i++) {
                 dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(-(i + 1));
@@ -1558,10 +1550,10 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE, nullptr);
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 2;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_NEW_ARRAY_STRING:
-            dimension = OPCODE_GET_1BYTE(&code_list[pc + 1]);
+            dimension = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
             for (unsigned int i = 0; i < dimension; i++) {
                 dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(-(i + 1));
@@ -1570,84 +1562,84 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING, nullptr);
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 2;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_NEW_ARRAY_CLASS_OB:
-            dimension = OPCODE_GET_1BYTE(&code_list[pc + 1]);
+            dimension = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
             for (unsigned int i = 0; i < dimension; i++) {
                 dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(-(i + 1));
             }
             VM_CUR_CO_STACK_TOP_INDEX -= dimension;
 
-            class_index          = OPCODE_GET_1BYTE(&code_list[pc + 2]);
+            class_index          = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
             rvm_class_definition = &(rvm->class_list[class_index]);
 
             array_value          = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLASS_OBJECT, rvm_class_definition);
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
 
         case RVM_CODE_NEW_ARRAY_LITERAL_BOOL:
-            array_size  = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            array_size  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             array_value = rvm_new_array_literal_bool(rvm, array_size);
             VM_CUR_CO_STACK_TOP_INDEX -= array_size;
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_INT:
-            array_size  = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            array_size  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             array_value = rvm_new_array_literal_int(rvm, array_size);
             VM_CUR_CO_STACK_TOP_INDEX -= array_size;
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_INT64:
-            array_size  = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            array_size  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             array_value = rvm_new_array_literal_int64(rvm, array_size);
             VM_CUR_CO_STACK_TOP_INDEX -= array_size;
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE:
-            array_size  = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            array_size  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             array_value = rvm_new_array_literal_double(rvm, array_size);
             VM_CUR_CO_STACK_TOP_INDEX -= array_size;
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_STRING:
-            array_size  = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+            array_size  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             array_value = rvm_new_array_literal_string(rvm, array_size);
             VM_CUR_CO_STACK_TOP_INDEX -= array_size;
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB:
-            class_index          = OPCODE_GET_1BYTE(&code_list[pc + 1]);
+            class_index          = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             rvm_class_definition = &(rvm->class_list[class_index]);
-            array_size           = OPCODE_GET_2BYTE(&code_list[pc + 2]);
+            array_size           = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
             array_value          = rvm_new_array_literal_class_object(rvm, array_size, rvm_class_definition);
             VM_CUR_CO_STACK_TOP_INDEX -= array_size;
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 4;
+            VM_CUR_CO_PC += 4;
             break;
 
         case RVM_CODE_NEW_ARRAY_LITERAL_A:
-            dimension   = OPCODE_GET_1BYTE(&code_list[pc + 1]);
-            array_size  = OPCODE_GET_2BYTE(&code_list[pc + 2]);
+            dimension   = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            array_size  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
             array_value = rvm_new_array_literal_a(rvm, dimension, array_size);
             VM_CUR_CO_STACK_TOP_INDEX -= array_size;
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 4;
+            VM_CUR_CO_PC += 4;
             break;
 
         case RVM_CODE_PUSH_ARRAY_LEN:
@@ -1656,7 +1648,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_INT_OFFSET(0, int_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_PUSH_ARRAY_CAPACITY:
             array_value = STACK_GET_ARRAY_OFFSET(-1);
@@ -1664,7 +1656,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_INT_OFFSET(0, int_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_PUSH_STRING_LEN:
             string_value = STACK_GET_STRING_OFFSET(-1);
@@ -1672,7 +1664,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_INT_OFFSET(0, int_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_PUSH_STRING_CAPACITY:
             string_value = STACK_GET_STRING_OFFSET(-1);
@@ -1680,19 +1672,19 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_INT_OFFSET(0, int_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
 
             // class
         case RVM_CODE_NEW_CLASS_OB_LITERAL:
-            class_index          = OPCODE_GET_1BYTE(&code_list[pc + 1]);
+            class_index          = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             rvm_class_definition = &(rvm->class_list[class_index]);
 
             class_ob_value       = rvm_new_class_object(rvm, rvm_class_definition);
             STACK_SET_CLASS_OB_OFFSET(0, class_ob_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 2;
+            VM_CUR_CO_PC += 2;
             break;
 
 
@@ -1702,13 +1694,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_index = STACK_GET_INT_OFFSET(-1);
             error_code  = rvm_array_get_array(rvm, array_value, array_index, &array_value);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
-                pc = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+                VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_A 的不同点 区别
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
 
             // increase iter of range
             STACK_GET_INT_OFFSET(-2) += 1;
@@ -1718,13 +1710,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_index = STACK_GET_INT_OFFSET(-1);
             error_code  = rvm_array_get_bool(rvm, array_value, array_index, &bool_value);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
-                pc = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+                VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_BOOL 的不同点 区别
             STACK_SET_BOOL_OFFSET(0, (RVM_Bool)((int)bool_value));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
 
             // increase iter of range
             STACK_GET_INT_OFFSET(-2) += 1;
@@ -1734,13 +1726,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_index = STACK_GET_INT_OFFSET(-1);
             error_code  = rvm_array_get_int(rvm, array_value, array_index, &int_value);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
-                pc = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+                VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_INT 的不同点 区别
             STACK_SET_INT_OFFSET(0, int_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
 
             // increase iter of range
             STACK_GET_INT_OFFSET(-2) += 1;
@@ -1750,13 +1742,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_index = STACK_GET_INT_OFFSET(-1);
             error_code  = rvm_array_get_int64(rvm, array_value, array_index, &int64_value);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
-                pc = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+                VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_INT 的不同点 区别
             STACK_SET_INT64_OFFSET(0, int64_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
 
             // increase iter of range
             STACK_GET_INT_OFFSET(-2) += 1;
@@ -1766,13 +1758,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_index = STACK_GET_INT_OFFSET(-1);
             error_code  = rvm_array_get_double(rvm, array_value, array_index, &double_value);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
-                pc = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+                VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_DOUBLE 的不同点 区别
             STACK_SET_DOUBLE_OFFSET(0, double_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
 
             // increase iter of range
             STACK_GET_INT_OFFSET(-2) += 1;
@@ -1782,13 +1774,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_index = STACK_GET_INT_OFFSET(-1);
             error_code  = rvm_array_get_string(rvm, array_value, array_index, &string_value);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
-                pc = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+                VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_STRING 的不同点 区别
             STACK_SET_STRING_OFFSET(0, string_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
 
             // increase iter of range
             STACK_GET_INT_OFFSET(-2) += 1;
@@ -1798,13 +1790,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_index = STACK_GET_INT_OFFSET(-1);
             error_code  = rvm_array_get_class_object(rvm, array_value, array_index, &class_ob_value);
             if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
-                pc = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+                VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_OBJECT 的不同点 区别
             STACK_SET_CLASS_OB_OFFSET(0, class_ob_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
 
             // increase iter of range
             STACK_GET_INT_OFFSET(-2) += 1;
@@ -1813,7 +1805,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_FOR_RANGE_FINISH:
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            pc += 3;
+            VM_CUR_CO_PC += 3;
             break;
 
 
@@ -1822,30 +1814,30 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             bool_value   = STACK_GET_BOOL_OFFSET(-1);
             string_value = rvm_bool_2_string(rvm, bool_value);
             STACK_SET_STRING_OFFSET(-1, string_value);
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_INT_2_STRING:
             int_value    = STACK_GET_INT_OFFSET(-1);
             string_value = rvm_int_2_string(rvm, int_value);
             STACK_SET_STRING_OFFSET(-1, string_value);
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_INT64_2_STRING:
             int64_value  = STACK_GET_INT64_OFFSET(-1);
             string_value = rvm_int64_2_string(rvm, int64_value);
             STACK_SET_STRING_OFFSET(-1, string_value);
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_DOUBLE_2_STRING:
             double_value = STACK_GET_DOUBLE_OFFSET(-1);
             string_value = rvm_double_2_string(rvm, double_value);
             STACK_SET_STRING_OFFSET(-1, string_value);
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_INT_2_INT64:
             int_value = STACK_GET_INT_OFFSET(-1);
             STACK_SET_INT64_OFFSET(-1, int_value);
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
 
         // coroutine
@@ -1863,14 +1855,12 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             new_coroutine = launch_coroutine(rvm,
                                              &caller_class_ob, &caller_function,
-                                             nullptr, callee_function,
-                                             &code_list, &code_size,
-                                             &pc);
+                                             nullptr, callee_function);
 
             STACK_SET_INT64_OFFSET(0, new_coroutine->co_id);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
 
-            pc += 1;
+            VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_RESUME:
             co_id = STACK_GET_INT64_OFFSET(-1);
@@ -1878,26 +1868,22 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             res = resume_coroutine(rvm,
                                    co_id,
                                    &caller_class_ob, &caller_function,
-                                   nullptr, nullptr,
-                                   &code_list, &code_size,
-                                   &pc);
+                                   nullptr, nullptr);
             if (res != 0) {
-                pc += 1;
+                VM_CUR_CO_PC += 1;
             }
             break;
         case RVM_CODE_YIELD:
             // yield
-            res = yield_coroutine(rvm,
-                                  &code_list, &code_size,
-                                  &pc);
+            res = yield_coroutine(rvm);
             if (res != 0) {
-                pc += 1;
+                VM_CUR_CO_PC += 1;
             }
             break;
 
         default:
             ring_error_report("Vitual machine execute vmcode error: invalid opcode(%d), pc(%d)\n",
-                              opcode, pc);
+                              opcode, VM_CUR_CO_PC);
             break;
         }
     }
@@ -1970,23 +1956,23 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
 void invoke_derive_function(Ring_VirtualMachine* rvm,
                             RVM_ClassObject** caller_object, RVM_Function** caller_function,
                             RVM_ClassObject* callee_object, RVM_Function* callee_function,
-                            RVM_Byte** code_list, unsigned int* code_size,
-                            unsigned int* pc,
-                            unsigned int  argument_list_size) {
+                            unsigned int argument_list_size) {
 
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->caller_object        = *caller_object;
     callinfo->caller_function      = *caller_function;
     callinfo->caller_stack_base    = VM_CUR_CO_CSB;
-    callinfo->caller_code_list     = *code_list;
-    callinfo->caller_code_size     = *code_size;
-    callinfo->caller_pc            = *pc;
-
+    callinfo->caller_code_list     = nullptr;
+    callinfo->caller_code_size     = 0;
+    callinfo->caller_pc            = 0;
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
     callinfo->callee_argument_size = argument_list_size;
     callinfo->prev                 = nullptr;
     callinfo->next                 = nullptr;
+    callinfo->code_list            = callee_function->u.derive_func->code_list;
+    callinfo->code_size            = callee_function->u.derive_func->code_size;
+    callinfo->pc                   = 0;
 
     if (RING_DEBUG_TRACE_FUNC_BACKTRACE) {
         printf_witch_red("[RING_DEBUG::trace_coroutine_sched] [invoke_func::] "
@@ -2016,9 +2002,6 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     // 思考设计是否会冗余，这个会影响 std-package-debug
     *caller_object   = callee_object;
     *caller_function = callee_function;
-    *code_list       = callee_function->u.derive_func->code_list;
-    *code_size       = callee_function->u.derive_func->code_size;
-    *pc              = 0;
     VM_CUR_CO_CSB    = VM_CUR_CO_STACK_TOP_INDEX;
 
 
@@ -2030,9 +2013,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
 
 void derive_function_return(Ring_VirtualMachine* rvm,
                             RVM_Function** caller_function, RVM_Function* callee_function,
-                            RVM_Byte** code_list, unsigned int* code_size,
-                            unsigned int* pc,
-                            unsigned int  return_list_size) {
+                            unsigned int return_list_size) {
     debug_exec_info_with_white("\t");
 }
 
@@ -2048,8 +2029,6 @@ void derive_function_return(Ring_VirtualMachine* rvm,
 void derive_function_finish(Ring_VirtualMachine* rvm,
                             RVM_ClassObject** caller_object, RVM_Function** caller_function,
                             RVM_Function* callee_function,
-                            RVM_Byte** code_list, unsigned int* code_size,
-                            unsigned int* pc,
                             unsigned int  return_value_list_size) {
 
     unsigned int old_return_value_list_index;
@@ -2089,18 +2068,20 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     // 思考设计是否会冗余，这个会影响 std-package-debug
     *caller_object   = callinfo->caller_object;
     *caller_function = callinfo->caller_function;
-    *code_list       = callinfo->caller_code_list;
-    *code_size       = callinfo->caller_code_size;
-    *pc              = callinfo->caller_pc + 1; // 调用完成之后, caller_pc + 1, 在 execute 中统一update
 
-    VM_CUR_CO_CSB    = callinfo->caller_stack_base;
-    // if (*caller_function == nullptr) {
-    //     *code_list = rvm->executer->bootloader_code_list;
-    //     *code_size = rvm->executer->bootloader_code_size;
-    // } else {
-    //     *code_list = (*caller_function)->u.derive_func->code_list;
-    //     *code_size = (*caller_function)->u.derive_func->code_size;
-    // }
+    // 如果 callinfo 为空, 则一个协程消亡了
+    // 需要切换/销毁 协程
+    if (VM_CUR_CO_CALLINFO == nullptr) {
+        // printf("coroutine dead\n");
+        finish_coroutine(rvm,
+                         caller_object, caller_function,
+                         callee_function);
+        return;
+    }
+    VM_CUR_CO_PC += 1; // 调用完成之后，上层的函数 pc + 1
+
+    VM_CUR_CO_CSB = callinfo->caller_stack_base;
+
 
     // 释放arguement
     VM_CUR_CO_STACK_TOP_INDEX -= callinfo->callee_argument_size;
@@ -2109,18 +2090,6 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     // copy return value to top of stack.
     for (unsigned int i = 0; i < return_value_list_size; i++) {
         VM_CUR_CO_STACK_DATA[VM_CUR_CO_STACK_TOP_INDEX++] = VM_CUR_CO_STACK_DATA[old_return_value_list_index + i];
-    }
-
-    // 如果 callinfo 为空, 则一个协程消亡了
-    // 需要切换 协程
-    if (VM_CUR_CO_CALLINFO == nullptr) {
-        // printf("coroutine dead\n");
-
-        finish_coroutine(rvm,
-                         caller_object, caller_function,
-                         callee_function,
-                         code_list, code_size,
-                         pc);
     }
 }
 
