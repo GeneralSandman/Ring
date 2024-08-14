@@ -1971,6 +1971,12 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     callinfo->prev                 = nullptr;
     callinfo->next                 = nullptr;
 
+    // TODO:
+    // caller_object, caller_function 感觉没必要更新
+    // 思考设计是否会冗余
+    *caller_object   = callee_object;
+    *caller_function = callee_function;
+
     if (RING_DEBUG_TRACE_FUNC_BACKTRACE) {
         printf_witch_red("[RING_DEBUG::trace_coroutine_sched] [invoke_func::] "
                          "CallInfo{caller_object:%p, caller_function:%s, caller_stack_base:%u, \n"
@@ -1986,16 +1992,8 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
                          callinfo->callee_argument_size);
     }
 
-    // store callinfo
-    VM_CUR_CO_CALLINFO = store_callinfo(VM_CUR_CO_CALLINFO, callinfo);
-
     // 函数上下文切换
-
-    // TODO:
-    // caller_object, caller_function 感觉没必要更新
-    // 思考设计是否会冗余，这个会影响 std-package-debug
-    *caller_object   = callee_object;
-    *caller_function = callee_function;
+    VM_CUR_CO_CALLINFO = store_callinfo(VM_CUR_CO_CALLINFO, callinfo);
 
 
     init_derive_function_local_variable(rvm, callee_object, callee_function, argument_list_size);
@@ -2024,10 +2022,13 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
                             RVM_Function* callee_function,
                             unsigned int  return_value_list_size) {
 
+    // FIXME:
+    // 不应该直接操作 VM_CUR_CO_STACK_TOP_INDEX
+    // 应该根据 VM_CUR_CO_STACK_TOP_INDEX 来进行操作
+
     unsigned int old_return_value_list_index;
 
-    VM_CUR_CO_STACK_TOP_INDEX -= return_value_list_size;
-    old_return_value_list_index = VM_CUR_CO_STACK_TOP_INDEX;
+    old_return_value_list_index = VM_CUR_CO_STACK_TOP_INDEX - return_value_list_size;
 
 
     RVM_CallInfo* callinfo      = nullptr;
@@ -2049,9 +2050,11 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     }
 
     unsigned int local_variable_size = callinfo->callee_function->local_variable_size;
+
+    // 销毁 return_value_list local_variable
+    VM_CUR_CO_STACK_TOP_INDEX -= return_value_list_size;
     VM_CUR_CO_STACK_TOP_INDEX -= local_variable_size;
 
-    // restore callinfo
 
     // TODO:
     // caller_object, caller_function 感觉没必要更新
@@ -2071,13 +2074,19 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     VM_CUR_CO_PC += 1; // 调用完成之后，上层的函数 pc + 1
 
 
+    // TODO: 为了安全性，需要进行检查
+    if (VM_CUR_CO_STACK_TOP_INDEX != callinfo->caller_stack_base) {
+        // printf("ERROR----------\n");
+    }
+
     // 释放arguement
     VM_CUR_CO_STACK_TOP_INDEX -= callinfo->callee_argument_size;
 
 
     // copy return value to top of stack.
     for (unsigned int i = 0; i < return_value_list_size; i++) {
-        VM_CUR_CO_STACK_DATA[VM_CUR_CO_STACK_TOP_INDEX++] = VM_CUR_CO_STACK_DATA[old_return_value_list_index + i];
+        VM_CUR_CO_STACK_DATA[VM_CUR_CO_STACK_TOP_INDEX++] =
+            VM_CUR_CO_STACK_DATA[old_return_value_list_index + i];
     }
 }
 
