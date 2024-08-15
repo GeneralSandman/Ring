@@ -501,9 +501,12 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
     int         fid    = args[0].u.int_value;
     RVM_String* buffer = args[1].u.string_value;
 
-    write(fid, buffer->data, buffer->length);
+    ssize_t     ws     = write(fid, buffer->data, buffer->length);
+    (void)ws;
 
     RVM_Value ret;
+    ret.type        = RVM_VALUE_TYPE_INT;
+    ret.u.int_value = 0;
     return ret;
 }
 
@@ -528,6 +531,8 @@ RVM_Value std_lib_io_close(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
     close(fid);
 
     RVM_Value ret;
+    ret.type        = RVM_VALUE_TYPE_INT;
+    ret.u.int_value = 0;
     return ret;
 }
 
@@ -554,6 +559,8 @@ RVM_Value std_lib_io_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
     remove(str->data);
 
     RVM_Value ret;
+    ret.type        = RVM_VALUE_TYPE_INT;
+    ret.u.int_value = 0;
     return ret;
 }
 

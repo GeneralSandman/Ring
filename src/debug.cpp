@@ -348,7 +348,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
 
         if (hit_breakpoint_num != -1) {
             location = format_rvm_current_func(frame->rvm, frame->source_line_number);
-            printf("[@]hit breakpoint num:%d, stop at:\n    %s\n", hit_breakpoint_num, location.c_str());
+            printf("[@]hit breakpoint[%d], stop at:\n    %s\n", hit_breakpoint_num, location.c_str());
         } else {
             goto END_DISPATH_LINE;
         }

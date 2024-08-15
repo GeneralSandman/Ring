@@ -1027,8 +1027,8 @@ typedef enum {
 } IdentifierType;
 
 struct RVM_CallInfo {
-    RVM_ClassObject* caller_object;
-    RVM_Function*    caller_function;
+    RVM_ClassObject* caller_object;   // TODO: 考虑是否有必要删除
+    RVM_Function*    caller_function; // TODO: 考虑是否有必要删除
     unsigned int     caller_stack_base;
 
     RVM_ClassObject* callee_object;
