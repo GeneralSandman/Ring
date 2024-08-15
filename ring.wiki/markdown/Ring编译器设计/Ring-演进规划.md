@@ -130,6 +130,19 @@
 - ⭕️ : 重点关注代办
 - ✅ : 完成
 
+- Background: 调研相关工作
+- Proposal: 提案相关工作
+- Feature:
+- Fix:
+- Update:
+- Refactor:
+- Optimize:
+- Test:
+- Doc:
+- Other:
+
+
+
 
 
 -----------------------------
@@ -578,19 +591,90 @@ quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
 
 ## 2024-08-12周
 
-### A. 添加 RING_DEUBG=trace_func_backtrace=1 : 在函数调用时能够输出调用栈的变化
+### A. Feature: ring执行的时候，支持 `RING_DEBUG` 环境变量  ✅ 
 
 
-### B. 添加 RING_DEBUG=trace_coroutine_sched=1 : 关于打印Coroutine切换详情
+为了更好的开发调试Ring，有的时候需要展示虚拟机内部的运行状态，如：
+- 在函数调用时，能够展示`CallInfo`的切换
+- 在协程切换时，能够展示 协程切换详情
 
 
-### C. launch 调用的第一个函数，支持 传递参数 & block中支持局部变量
+目前有两种方式可以实现：
+1. 在编译Ring编译器的时候，指定编译参数宏，如果 `g++ -DEBUG_XX`
+   - 缺点：需要重复编译 Ring编译器源码，浪费时间
+2. 提供一个命令行参数，e.g. `ring -print_call_info=true run test.ring`
+   - 缺点：后续如果有很多需要打印的信息，参数会很多，不方便使用，ring命令参数会变复杂
+3. 提供 环境变量，如Golang：`GODEBUG=inittrace=1 go run test.go`
+
+最终所以决定采用 环境变量的方式：
+
+1. 展示函数调用栈的变化：`RING_DEBUG=trace_func_backtrace=1`
+2. 展示协程切换详情：`RING_DEBUG=trace_coroutine_sched=1`
+3. 可以同时指定多个：`RING_DEBUG=trace_func_backtrace=1,trace_coroutine_sched=1`
 
 
-### D. 修正引入协程之后，debug::print_call_stack() 代码函数不正确
+e.g. 
+
+```shell
+RING_DEBUG=trace_func_backtrace=1,trace_coroutine_sched=1 ring run test.ring
+```
 
 
-### E. 修正引入协程之后，rdb 不太好用
+### C. Feature: launch 调用的第一个函数，支持 传递参数 & block中支持局部变量
+
+
+
+### G. Optimize: invoke/finish derive-function in VM execution ✅ 
+
+#### 现状：
+
+`ring_execute_vm_code()` 函数中 通过局部变量 `code_list/code_size/pc` 来表明当前的指令和PC
+1. 在调用函数/函数返回 & resume/yield 的时候 都需要更新 `code_list/code_size/pc`
+   - 问题：所以在实现的时候，`code_list/code_size/pc` 都是把指针左右函数参数的
+2. 在`CallInfo` 和 `RingCoroutine` 中也维护了 `code_list/code_size/pc`
+   - 问题：信息冗余，不能很好的确定什么时候更新
+
+问题：引入协程之后，debug::print_call_stack() 显示的代码所在的行数不正确
+
+#### 改进：
+
+1. `ring_execute_vm_code()` 函数 不在维护局部变量 `code_list/code_size/pc`
+2. 统一直接访问 当前线程+当前CallInfo 的 `code_list/code_size/pc`
+
+
+### H. Test: `debug::print_call_stack()` ✅ 
+
+
+完善一下测试用例，看看展示的 函数和行数 是否正确
+
+1. 函数中 应该有一些空行
+2. 函数中 应该多一下不相关的空语句
+
+
+
+### I. Feature: RVM-Cmd-Interactive-Tool
+
+1. 协程相关：
+   - 能够展示当前的协程ID
+2. 函数调用相关：
+   - 调用derive函数的时候，能够实时展示当前CallInfo List，更直观的展示当前Opcode所在的位置;有点类似于 `debug::print_call_stack()` 函数的功能
+3. 展现 当前Opcode 对应Ring源码的所在行和源码内容
+4. 如果能够设置端点就更好了
+
+
+
+
+
+### M. 测试在 在 runtime_stack 中不 pop, 会影响当前的栈空间么
+
+
+### N. Update: debug::print_call_stack() 
+
+1. 这个函数应该直接返回一个string，而不是直接打印
+2. 应该还有更强的函数，能够以列表的形式展返回当前的 CallInfo List
+   - std pacakge 定义 这个类型
+   - 用户可以更加方便的通过 index 获取
+
 
 
 -----------------------------
@@ -889,17 +973,21 @@ var string content 初始化会调用两次, 需要修正.
 3. 但是解析执行，有很多行为应该不太容易支持
 
 
-### Y. 整理一下 ring历史版本 文档和功能
+### Y. Doc: 整理Ring历史版本相关文档  ✅
 
-v0.2.15
-v0.2.16
-
-
-
-### Q. make testall 支持指定 module
+1. v0.2.15
+2. v0.2.16
 
 
-### L. Fix int64 算术运算bug
+
+### Q. Test: make testall 支持指定 module
+
+1. 脚本支持 
+
+2. make testall 支持传递参数
+
+
+### L. Fix: int64 算术运算bug
 
 5L*1000000000L 存在bug
 

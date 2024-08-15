@@ -36,22 +36,89 @@
 
 ### Features
 
-1. 支持了 easy协程
-2. std 标准库丰富了一下
-
+1. 支持 Easy协程
+   1. 创建协程 `coroutine_id = launch(func_);`
+   2. 唤醒协程 `resume(coroutine_id);`
+   3. 挂起协程 `yield();`
+   4. 限制：
+      1. 创建的协程入口函数中不能存在局部变量
+      2. launch 中不能传递 func_ 函数的参数
+      3. resume() yield() 不能传递数据
+2. 丰富 std标准库
+   1. debug
+      1. debug::debug_assert()
+      2. debug::print_call_stack()
+   2. fmt
+      1. fmt::println_bool()
+      2. fmt::println_int()
+      3. fmt::println_double()
+      4. fmt::println_string()
+      5. fmt::println_pointer()
+      6. fmt::println()
+      7. fmt::printf()
+   3. io
+      1. io::exist()
+      2. io::open()
+      3. io::create()
+      4. io::seek()
+      5. io::read_all()
+      6. io::write()
+      7. io::close()
+      8. io::remove()
+   4. math
+      1. math::abs()
+      2. math::sqrt()
+      3. math::pow()
+   5. os
+      1. os::exit()
+      2. os::remove()
+      3. os::getenv()
+      4. os::setenv()
+   6. reflect
+      1. reflect::typeof()
+   7. time
+      1. time::time()
+      2. time::sleep()
+   8. vm
+      1. vm::heap_size()
+      2. vm::garbage_collect()
 
 ---------------------
 
 
 ## v0.2.15
 
-> Date: 2024-03-26
+> Date: 2024-07-18
 
 ### Features
 
-1. 新增基础数据类型 int64 (当前基础数据类型有：bool,int,int64,double,string)
-2. 对运算符的操作数做了更加细致的语义检查。
-3. fmt package 函数 `fmt::printf()` 和 `fmt::println()` 可以打印 数组和类详情
+
+1. 支持在main函数中获取命令行参数
+   1. main函数原型：`main(var string[] args)`
+2. 优化全局变量的初始化时机
+3. 新增基础数据类型 int64 (当前基础数据类型有：bool,int,int64,double,string)
+4. 对运算符的操作数做了更加细致的语义检查。
+5. 编译器代码优化：
+   1. 实现了常量折叠和死代码消除
+   2. 可通过命令 `ring -O1 run test.ring`
+6. 继续完善 ring 原生 debugger
+   1. 设置/清除/列出 断点
+   2. 打印函数调用栈
+   3. 打印全局变量, 局部变量
+   4. 支持 step-into/step-over/step-out
+7. std fmt package
+   1. `fmt::printf()` 和 `fmt::println()` 可以打印 数组和类详情
+8. std reflect package
+   1. `typeof()`优化完善获取多维数组类型
+
+
+### Changed
+
+
+### Fixs
+
+1. for-range 访问多维数组会崩溃
+2. 打印函数调用栈 代码行数显示不正确
 
 ---------------------
 
