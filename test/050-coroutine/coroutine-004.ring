@@ -33,16 +33,16 @@ function job_action2() {
 }
 
 function job_action3() {
-	fmt::println("            job_action3::1");
+	fmt::println("                job_action3::1");
 	job_action4();
-	fmt::println("            job_action3::2");
+	fmt::println("                job_action3::2");
 
 }
 
 function job_action4() {
-	fmt::println("            job_action4::1");
+	fmt::println("                job_action4::1");
 	yield();
-	fmt::println("            job_action4::2");
+	fmt::println("                job_action4::2");
 }
 
 @main

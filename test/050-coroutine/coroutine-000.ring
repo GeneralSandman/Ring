@@ -27,13 +27,15 @@ function job_action2() {
 @main
 function main() {
 
-	// job_action();
 
 	launch(job_action1);
 
 	fmt::println("main::1");
-
 	fmt::println("main::2");
-
 	fmt::println("main::3");
+
+
+	fmt::println("-----------");
+
+	job_action1();
 }

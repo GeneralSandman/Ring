@@ -4,10 +4,10 @@ main::1
             job_action2::1
 main::2
 main::3
-            job_action3::1
-            job_action4::1
+                job_action3::1
+                job_action4::1
             job_action2::2
-            job_action4::2
-            job_action3::2
+                job_action4::2
+                job_action3::2
             job_action1::2
 main::4

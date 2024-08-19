@@ -31,6 +31,11 @@ function main() {
 	fmt::println("main()::1");
 	test1();
 	fmt::println("main()::2");
+
+
+	fmt::printf(""); // 空指令，无意义，用于占行
+	fmt::printf(""); // 空指令，无意义，用于占行
+
 	fmt::println("main()::3");
 
 }
@@ -38,12 +43,23 @@ function main() {
 function test1() {
 	fmt::println("test1()::0");
 	fmt::println("test1()::1");
+	fmt::printf(""); // 空指令，无意义，用于占行
+	fmt::printf(""); // 空指令，无意义，用于占行
+	fmt::printf(""); // 空指令，无意义，用于占行
+	fmt::printf(""); // 空指令，无意义，用于占行
 	test2();
+	fmt::printf(""); // 空指令，无意义，用于占行
 	fmt::println("test1()::2");
 	fmt::println("test1()::3");
 }
 
 function test2() {
+
+
+
+
+
+	fmt::printf(""); // 空指令，无意义，用于占行
 	fmt::println("test2()::0");
 	fmt::println("test2()::1");
 	test3();
@@ -57,4 +73,10 @@ function test3() {
 	fmt::println("test3()::2");
 	fmt::println("test3()::3");
 	debug::print_call_stack();
+
+
+
+
+	fmt::printf(""); // 空指令，无意义，用于占行
+	fmt::printf(""); // 空指令，无意义，用于占行
 }

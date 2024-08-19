@@ -1,0 +1,36 @@
+----launch&resume job_action1----
+            job_action1::1
+            local_bool_value_0:   false
+            local_int_value_0:    0
+            local_int64_value_0:  0
+            local_double_value_0: 0.000000
+            local_string_value_0: 
+            local_job1_value_0:   {Bool:false Int:0 Int64:0 Double:0.000000 String:}
+            job_action1::2
+----invoke job_action1----
+            job_action1::1
+            local_bool_value_0:   false
+            local_int_value_0:    0
+            local_int64_value_0:  0
+            local_double_value_0: 0.000000
+            local_string_value_0: 
+            local_job1_value_0:   {Bool:false Int:0 Int64:0 Double:0.000000 String:}
+            job_action1::2
+----launch&resume job_action2----
+            job_action2::1
+            local_bool_value_0:   true
+            local_int_value_0:    1
+            local_int64_value_0:  2
+            local_double_value_0: 2.340000
+            local_string_value_0: ring
+            local_job1_value_0:   {Bool:true Int:1 Int64:2 Double:2.340000 String:ring}
+            job_action2::2
+----invoke job_action2----
+            job_action2::1
+            local_bool_value_0:   true
+            local_int_value_0:    1
+            local_int64_value_0:  2
+            local_double_value_0: 2.340000
+            local_string_value_0: ring
+            local_job1_value_0:   {Bool:true Int:1 Int64:2 Double:2.340000 String:ring}
+            job_action2::2
