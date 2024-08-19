@@ -260,15 +260,19 @@ typedef unsigned long long CO_ID;
  *
  * co_id:          协程唯一ID
  * p_co_id:        父协程ID, 谁唤醒它，他就是它的父协程
- * last_run_time: 上次运行时间
+ * last_run_time:  上次运行时间, ns
  * status:         协程状态
  *
- * pc:             保存协程最后被调度时执行的指令, 在协程被重新调度时, 应该+1, 继续执行
+ * runtime_stack: 运行栈，该协程的独占的栈空间
+ *
+ * call_info:     函数调用栈
+ *
  */
 struct RingCoroutine {
     CO_ID             co_id;
     CO_ID             p_co_id;
-    CO_ID             last_run_time;
+
+    long              last_run_time;
     CO_STAT           status;
 
     RVM_RuntimeStack* runtime_stack; // 运行堆栈
@@ -1026,6 +1030,17 @@ typedef enum {
     IDENTIFIER_TYPE_FUNCTION,
 } IdentifierType;
 
+
+/*
+ * RVM_CallInfo 是用来记录函数调用栈的
+ * 当调用一个 derive 函数时，则会有一个新的 RVM_CallInfo 被创建
+ *
+ * code_list: 当前栈运行的字节码数组
+ * code_size: 字节码数组大小
+ * pc:        PC
+ *            保存协程最后被调度时执行的指令, 在协程被重新调度时, 应该+1, 继续执行
+ *
+ */
 struct RVM_CallInfo {
     RVM_ClassObject* caller_object;   // TODO: 考虑是否有必要删除
     RVM_Function*    caller_function; // TODO: 考虑是否有必要删除
@@ -3146,6 +3161,12 @@ RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm);
 RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,
                                 RVM_ClassObject* callee_object, RVM_Function* callee_function);
+void           init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
+                                                        RingCoroutine*       co,
+                                                        RVM_ClassObject*     callee_object,
+                                                        RVM_Function*        function,
+                                                        unsigned int         argument_list_size);
+
 int            resume_coroutine(Ring_VirtualMachine* rvm,
                                 CO_ID                target_co_id,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,

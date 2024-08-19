@@ -66,7 +66,6 @@ RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
  *
  * meta_pool: 共享
  */
-// TODO: 还需要什么参数
 RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,
                                 RVM_ClassObject* callee_object, RVM_Function* callee_function) {
@@ -99,18 +98,97 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
 
     coroutine_map.insert(std::make_pair(co->co_id, co));
 
+    init_coroutine_entry_func_local_variable(rvm,
+                                             co,
+                                             callee_object,
+                                             callee_function,
+                                             0);
+    // callinfo->caller_stack_base = co->runtime_stack->top_index;
 
     if (RING_DEBUG_TRACE_COROUTINE_SCHED == 1) {
         printf_witch_yellow("[RING_DEBUG::trace_coroutine_sched] [create::] co_id:%llu\n", co->co_id);
     }
 
-    return co;
 
-
-    // TODO:
     // step-3: 初始化匿名函数的局部变量
 
     return co;
+}
+
+void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
+                                              RingCoroutine*       co,
+                                              RVM_ClassObject*     callee_object,
+                                              RVM_Function*        function,
+                                              unsigned int         argument_list_size) {
+    // return;
+    // 如果launch后边还跟着别的参数，那么，还应该将别的参数copy到 目标协程栈中
+    // e.g.  launch(func_, func_arg1, func_arg2, func_arg3);
+    // 需要将 func_arg1/func_arg2/func_arg3 copy到目标协程栈中
+    // 用于初始化目标协程入口函数中的参数
+
+    RVM_TypeSpecifier*   type_specifier            = nullptr;
+    RVM_ClassDefinition* rvm_class_definition      = nullptr;
+    RVM_ClassObject*     class_ob                  = nullptr;
+    RVM_String*          string                    = nullptr;
+    unsigned int         alloc_size                = 0;
+
+    unsigned int         stack_argument_list_index = 0; // arguments list's absolute index in stack.
+    unsigned int         block_local_var_offset    = 0;
+
+    if (callee_object != nullptr) {
+        // 不支持 launch(obj.method) 这种调用方式
+        // TODO: error-report
+        return;
+    }
+
+    for (unsigned int i = 0; i < function->local_variable_size;
+         i++, block_local_var_offset++) {
+
+        type_specifier = function->local_variable_list[i].type_specifier;
+
+        // TODO: 后续抽象成宏
+        switch (type_specifier->kind) {
+        case RING_BASIC_TYPE_BOOL:
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type         = RVM_VALUE_TYPE_BOOL;
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.bool_value = RVM_FALSE;
+            break;
+
+        case RING_BASIC_TYPE_INT:
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type        = RVM_VALUE_TYPE_INT;
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.int_value = 0;
+            break;
+
+        case RING_BASIC_TYPE_INT64:
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type          = RVM_VALUE_TYPE_INT64;
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.int64_value = 0;
+            break;
+
+        case RING_BASIC_TYPE_DOUBLE:
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type           = RVM_VALUE_TYPE_DOUBLE;
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.double_value = 0.0;
+            break;
+
+        case RING_BASIC_TYPE_STRING:
+            string     = new_string(rvm);
+            alloc_size = init_string(rvm, string, ROUND_UP8(1));
+            rvm_heap_list_add_object(rvm, (RVM_GC_Object*)string);
+            rvm_heap_alloc_size_incr(rvm, alloc_size);
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type           = RVM_VALUE_TYPE_STRING;
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.string_value = string;
+            break;
+
+        case RING_BASIC_TYPE_CLASS:
+            rvm_class_definition                                                                            = &(rvm->class_list[type_specifier->u.class_def_index]);
+            class_ob                                                                                        = rvm_new_class_object(rvm, rvm_class_definition);
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type             = RVM_VALUE_TYPE_CLASS_OB;
+            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.class_ob_value = class_ob;
+            break;
+
+        default: break;
+        }
+    }
+
+    co->runtime_stack->top_index += function->local_variable_size;
 }
 
 /*
@@ -121,12 +199,6 @@ int resume_coroutine(Ring_VirtualMachine* rvm,
                      CO_ID                target_co_id,
                      RVM_ClassObject** caller_object, RVM_Function** caller_function,
                      RVM_ClassObject* callee_object, RVM_Function* callee_function) {
-    // 1. get coroutine by coID;
-    // 2. 当前协程挂起
-    // 3. 目标协程拉起
-
-    // 目标协程记录pid
-
 
     RingCoroutine* curr_co   = rvm->current_coroutine;
 
@@ -138,6 +210,11 @@ int resume_coroutine(Ring_VirtualMachine* rvm,
     if (target_co->status == CO_STAT_DEAD) {
         return -1;
     }
+    if (target_co->co_id == curr_co->co_id) {
+        // TODO: error-report
+        // 不能自己唤醒自己
+        return -1;
+    }
 
     // 第一次被调度
     if (target_co->status == CO_STAT_INIT) {
@@ -146,13 +223,13 @@ int resume_coroutine(Ring_VirtualMachine* rvm,
     }
 
 
-    // step-2: 协程上下文切换
-    curr_co->status = CO_STAT_SUSPENDED;
+    // 协程上下文切换
+    curr_co->status    = CO_STAT_SUSPENDED;
 
+    target_co->p_co_id = curr_co->co_id;
+    target_co->status  = CO_STAT_RUNNING;
     target_co->call_info->pc += 1;
 
-    target_co->status      = CO_STAT_RUNNING;
-    target_co->p_co_id     = curr_co->co_id;
     rvm->current_coroutine = target_co;
 
 
@@ -187,11 +264,6 @@ int resume_coroutine(Ring_VirtualMachine* rvm,
  * TODO: 完善一下注释
  */
 int yield_coroutine(Ring_VirtualMachine* rvm) {
-    // 1. get coroutine by coID;
-    // 2. set status to CO_STAT_SUSPENDED;
-    // 3. save runtime stack;
-    // 4. save call info;
-    // 5. switch to parent coroutine
 
     RingCoroutine* curr_co      = rvm->current_coroutine;
 
@@ -204,12 +276,12 @@ int yield_coroutine(Ring_VirtualMachine* rvm) {
     }
 
 
-    // 上下文切换
-    curr_co->status = CO_STAT_SUSPENDED;
+    // 协程上下文切换
+    curr_co->status          = CO_STAT_SUSPENDED;
 
+    target_co->last_run_time = time(nullptr); // TODO: ns
+    target_co->status        = CO_STAT_RUNNING;
     target_co->call_info->pc += 1;
-
-    target_co->status      = CO_STAT_RUNNING;
 
     rvm->current_coroutine = target_co;
 
@@ -244,17 +316,14 @@ int finish_coroutine(Ring_VirtualMachine* rvm,
                      RVM_ClassObject** caller_object, RVM_Function** caller_function,
                      RVM_Function* callee_function) {
 
-
-    CO_ID curr_co_id = rvm->current_coroutine->co_id;
+    CO_ID          curr_co_id = rvm->current_coroutine->co_id;
+    RingCoroutine* curr_co    = rvm->current_coroutine;
     if (curr_co_id == 0) {
         // RootCoroutine finish
         // do nothing
         // TODO: 但是还得要销毁资源
         return 0;
     }
-
-
-    RingCoroutine* curr_co      = rvm->current_coroutine;
 
     CO_ID          target_co_id = curr_co->p_co_id;
     RingCoroutine* target_co    = coroutine_map[target_co_id];
@@ -266,11 +335,11 @@ int finish_coroutine(Ring_VirtualMachine* rvm,
 
 
     // 上下文切换
-    curr_co->status = CO_STAT_DEAD;
+    curr_co->status          = CO_STAT_DEAD;
 
-
+    target_co->last_run_time = time(nullptr); // TODO: ns
+    target_co->status        = CO_STAT_RUNNING;
     target_co->call_info->pc += 1;
-    target_co->status      = CO_STAT_RUNNING;
 
     rvm->current_coroutine = target_co;
 

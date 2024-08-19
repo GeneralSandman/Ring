@@ -1979,8 +1979,8 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
 
     if (RING_DEBUG_TRACE_FUNC_BACKTRACE) {
         printf_witch_red("[RING_DEBUG::trace_coroutine_sched] [invoke_func::] "
-                         "CallInfo{caller_object:%p, caller_function:%s, caller_stack_base:%u, \n"
-                         "%*scallee_object:%p, callee_function:%s, callee_argument_size:%u}\n",
+                         "CallInfo{caller_object:%p, caller_function:%20s, caller_stack_base:%u, \n"
+                         "%*scallee_object:%p, callee_function:%20s, callee_argument_size:%u}\n",
                          callinfo->caller_object,
                          callinfo->caller_function != nullptr ? callinfo->caller_function->identifier : "",
                          callinfo->caller_stack_base,
@@ -2036,8 +2036,8 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
 
     if (RING_DEBUG_TRACE_FUNC_BACKTRACE) {
         printf_witch_red("[RING_DEBUG::trace_coroutine_sched] [finish_func::] "
-                         "CallInfo{caller_object:%p, caller_function:%s, caller_stack_base:%u, \n"
-                         "%*scallee_object:%p, callee_function:%s, callee_argument_size:%u}\n",
+                         "CallInfo{caller_object:%p, caller_function:%20s, caller_stack_base:%u, \n"
+                         "%*scallee_object:%p, callee_function:%20s, callee_argument_size:%u}\n",
                          callinfo->caller_object,
                          callinfo->caller_function != nullptr ? callinfo->caller_function->identifier : "",
                          callinfo->caller_stack_base,
