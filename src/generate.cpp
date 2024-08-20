@@ -1120,6 +1120,10 @@ void generate_vmcode_from_expression(Package_Executer* executer,
         generate_vmcode_from_ternary_condition_expression(executer, expression->u.ternary_expression, opcode_buffer);
         break;
 
+    case EXPRESSION_TYPE_LAUNCH:
+        generate_vmcode_from_launch_expression(executer, expression->u.launch_expression, opcode_buffer);
+        break;
+
     case EXPRESSION_TYPE_ARRAY_INDEX:
         generate_vmcode_from_array_index_expression(executer, expression->u.array_index_expression, opcode_buffer);
         break;
@@ -2026,6 +2030,85 @@ void generate_vmcode_from_ternary_condition_expression(Package_Executer*  execut
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label, ternary_expression->line_number);
 
     opcode_buffer_set_label(opcode_buffer, if_end_label, opcode_buffer->code_size);
+}
+
+void generate_vmcode_from_launch_expression(Package_Executer* executer,
+                                            LaunchExpression* launch_expression,
+                                            RVM_OpcodeBuffer* opcode_buffer) {
+
+    if (launch_expression->type == LAUNCH_EXPRESSION_TYPE_FUNCTION_CALL) {
+        // TODO: 这里的代码 和 generate_vmcode_from_function_call_expression 重复了
+        // 后续考虑如何复用
+
+        FunctionCallExpression* function_call_expression = launch_expression->u.function_call_expression;
+        if (function_call_expression == nullptr) {
+            return;
+        }
+
+
+        if (is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
+            printf("not support build func(%s) in launch expression now", function_call_expression->func_identifier);
+            return;
+        }
+        if (function_call_expression->function->type != FUNCTION_TYPE_DERIVE) {
+            printf("not support build func(%s) in launch expression now", function_call_expression->func_identifier);
+            return;
+        }
+
+        // TODO: 参数
+        ArgumentList* pos                = function_call_expression->argument_list;
+        unsigned int  argument_list_size = 0;
+        // TODO: 这里实现的不太对，需要考虑某个expression 为 function-call，并且这个 function-call 是多返回值类型的
+        // 需要考虑
+        // 1. 可变参数类型
+        for (; pos != nullptr; pos = pos->next) {
+            generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+            argument_list_size += pos->expression->convert_type_size;
+        }
+
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, function_call_expression->line_number);
+
+        // push funcion
+        unsigned int package_offset = 0;
+        unsigned int offset         = 0;
+        unsigned int operand        = 0;
+
+        package_offset              = function_call_expression->function->package->package_index;
+        offset                      = function_call_expression->function->func_index;
+        operand                     = (package_offset << 8) | offset;
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, function_call_expression->line_number);
+
+
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH, 0, function_call_expression->line_number);
+
+    } else if (launch_expression->type == LAUNCH_EXPRESSION_TYPE_METHOD_CALL) {
+        // TODO: 这里的代码 和 generate_vmcode_from_method_call_expression 重复了
+        // 后续考虑如何复用
+
+        MethodCallExpression* method_call_expression = launch_expression->u.method_call_expression;
+        if (method_call_expression == nullptr) {
+            return;
+        }
+
+        ArgumentList* pos                = method_call_expression->argument_list;
+        unsigned int  argument_list_size = 0;
+        for (; pos != nullptr; pos = pos->next) {
+            generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+            argument_list_size++;
+        }
+
+        // argument
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, method_call_expression->line_number);
+
+        // object
+        generate_vmcode_from_expression(executer, method_call_expression->object_expression, opcode_buffer);
+
+        // generate_vmcode_from_expression(executer, function_call_expression->function_identifier_expression, opcode_buffer, 1);
+        unsigned member_method_index = method_call_expression->method_member->index_of_class;
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_METHOD, member_method_index, method_call_expression->line_number);
+
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_METHOD, 0, method_call_expression->line_number);
+    }
 }
 
 void generate_vmcode_from_new_array_expression(Package_Executer*   executer,

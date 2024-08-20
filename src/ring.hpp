@@ -54,7 +54,6 @@ typedef struct ClassObjectLiteralExpression ClassObjectLiteralExpression;
 typedef struct CastExpression               CastExpression;
 typedef struct KeyExpression                KeyExpression;
 typedef struct MemberExpression             MemberExpression;
-typedef struct MemberExpressionV2           MemberExpressionV2;
 typedef struct DimensionExpression          DimensionExpression;
 typedef struct SubDimensionExpression       SubDimensionExpression;
 typedef struct BinaryExpression             BinaryExpression;
@@ -63,6 +62,7 @@ typedef struct FunctionCallExpression       FunctionCallExpression;
 typedef struct MethodCallExpression         MethodCallExpression;
 typedef struct AssignExpression             AssignExpression;
 typedef struct FieldInitExpression          FieldInitExpression;
+typedef struct LaunchExpression             LaunchExpression;
 typedef struct IdentifierExpression         IdentifierExpression;
 
 typedef struct ArgumentList                 ArgumentList;
@@ -1016,6 +1016,7 @@ typedef enum {
 
     // coroutine
     RVM_CODE_LAUNCH,
+    RVM_CODE_LAUNCH_METHOD,
     RVM_CODE_RESUME,
     RVM_CODE_YIELD,
 
@@ -1139,6 +1140,8 @@ typedef enum {
 
     EXPRESSION_TYPE_CAST,
 
+    EXPRESSION_TYPE_LAUNCH,
+
 
 } ExpressionType;
 
@@ -1187,7 +1190,6 @@ typedef enum {
     RING_BUILD_IN_FNC_TO_STRING,
     RING_BUILD_IN_FNC_TO_INT64,
 
-    RING_BUILD_IN_FNC_LAUNCH,
     RING_BUILD_IN_FNC_RESUME,
     RING_BUILD_IN_FNC_YIELD,
 } RING_BUILD_IN_FUNC_ID;
@@ -1359,6 +1361,7 @@ struct Expression {
         CastExpression*               cast_expression;
         MemberExpression*             member_expression;
         FieldInitExpression*          field_init_expression;
+        LaunchExpression*             launch_expression;
     } u;
 
     Expression* next;
@@ -1537,6 +1540,25 @@ struct FieldInitExpression {
     FieldMember*         field_member; // UPDATED_BY_FIX_AST
     Expression*          init_expression;
     FieldInitExpression* next;
+};
+
+typedef enum {
+    LAUNCH_EXPRESSION_TYPE_UNKNOW = 0,
+    LAUNCH_EXPRESSION_TYPE_FUNCTION_CALL,
+    LAUNCH_EXPRESSION_TYPE_METHOD_CALL,
+    // LAUNCH_EXPRESSION_TYPE_BLOCK,
+} LaunchExpressionType;
+
+struct LaunchExpression {
+    unsigned int         line_number;
+
+    LaunchExpressionType type;
+
+    union {
+        FunctionCallExpression* function_call_expression;
+        MethodCallExpression*   method_call_expression;
+        // Block*                  block; // TODO:
+    } u;
 };
 
 struct BinaryExpression {
@@ -2412,6 +2434,9 @@ Expression*                   create_expression_from_array_literal(ArrayLiteralE
 Expression*                   create_expression_from_class_object_literal(ClassObjectLiteralExpression* object_literal);
 Expression*                   create_expression_assign(AssignExpression* assign_expression);
 Expression*                   create_expression_ternary(Expression* condition, Expression* true_expression, Expression* false_expression);
+Expression*                   create_expression_launch(LaunchExpressionType    type,
+                                                       FunctionCallExpression* function_call_expression,
+                                                       MethodCallExpression*   method_call_expression);
 Expression*                   create_expression_binary(ExpressionType type, Expression* left, Expression* right);
 Expression*                   create_expression_unitary(ExpressionType type, Expression* unitary_expression);
 Expression*                   create_expression_literal(ExpressionType type, char* literal_interface);
@@ -2612,6 +2637,11 @@ void             fix_ternary_condition_expression(Expression*        expression,
                                                   TernaryExpression* ternary_expression,
                                                   Block*             block,
                                                   FunctionTuple*     func);
+void             fix_launch_expression(Expression*       expression,
+                                       LaunchExpression* launch_expression,
+                                       Block*            block,
+                                       FunctionTuple*    func);
+
 void             add_parameter_to_declaration(Parameter* parameter, Block* block);
 Declaration*     search_declaration(char* package_posit, char* identifier, Block* block);
 Function*        search_function(char* package_posit, char* identifier);
@@ -2724,6 +2754,9 @@ void              generate_vmcode_from_method_call_expression(Package_Executer* 
 void              generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_member_expression(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_ternary_condition_expression(Package_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_launch_expression(Package_Executer* executer,
+                                                         LaunchExpression* launch_expression,
+                                                         RVM_OpcodeBuffer* opcode_buffer);
 
 void              generate_vmcode_from_new_array_expression(Package_Executer* executer, NewArrayExpression* new_array_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_class_object_literal_expreesion(Package_Executer* executer, ClassObjectLiteralExpression* literal_expression, RVM_OpcodeBuffer* opcode_buffer);
@@ -3110,10 +3143,6 @@ void                  fix_buildin_func_to_int64(Expression*             expressi
                                                 Block*                  block,
                                                 Function*               func);
 
-void                  fix_buildin_func_to_launch(Expression*             expression,
-                                                 FunctionCallExpression* function_call_expression,
-                                                 Block*                  block,
-                                                 Function*               func);
 void                  fix_buildin_func_to_resume(Expression*             expression,
                                                  FunctionCallExpression* function_call_expression,
                                                  Block*                  block,
@@ -3160,11 +3189,12 @@ std::string fmt_array(RVM_Array* array_value);
 RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm);
 RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                                RVM_ClassObject* callee_object, RVM_Function* callee_function);
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function,
+                                unsigned int argument_list_size);
 void           init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
                                                         RingCoroutine*       co,
                                                         RVM_ClassObject*     callee_object,
-                                                        RVM_Function*        function,
+                                                        RVM_Function*        callee_function,
                                                         unsigned int         argument_list_size);
 
 int            resume_coroutine(Ring_VirtualMachine* rvm,

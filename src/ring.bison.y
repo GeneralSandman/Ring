@@ -94,6 +94,7 @@ int yylex();
 %token TOKEN_DEFER
 %token TOKEN_RANGE
 %token TOKEN_IN
+%token TOKEN_LAUNCH
 
 %token TOKEN_ENUM
 %token TOKEN_CLASS
@@ -190,10 +191,10 @@ int yylex();
 %type <m_expression> postfix_expression
 %type <m_expression> unitary_expression
 %type <m_expression> ternary_expression
+%type <m_expression> launch_expression
 %type <m_expression> primary_not_new_array
 %type <m_expression> primary_new_creation
 %type <m_expression> member_expression
-%type <m_expression> method_call_expression
 %type <m_expression> basic_value_literal_expression
 %type <m_expression> derive_value_literal_expression
 %type <m_expression> primary_expression
@@ -209,7 +210,10 @@ int yylex();
 %type <m_expression> right_value_expression_list
 %type <m_expression> right_value_expression
 %type <m_assign_expression> assign_expression
+
 %type <m_function_call_expression> function_call_expression
+%type <m_method_call_expression>   method_call_expression
+
 %type <m_array_literal_expression> array_literal_expression
 %type <m_class_object_literal_expression> class_object_literal_expression
 %type <m_field_init_expression> class_field_init_element_list class_field_init_element
@@ -248,8 +252,6 @@ int yylex();
 
 %type <m_expression_type>      self_incr_decr_token
 
-
-// %type <m_method_call_expression> method_call_expression
 
 %%
 
@@ -879,6 +881,19 @@ ternary_expression
     }
     ;
 
+launch_expression
+    : TOKEN_LAUNCH function_call_expression
+    {
+        debug_bison_info_with_green("[RULE::launch_expression:function_call_expression]\t ");
+        $$ = create_expression_launch(LAUNCH_EXPRESSION_TYPE_FUNCTION_CALL, $2, nullptr);
+    }
+    | TOKEN_LAUNCH method_call_expression
+    {
+        debug_bison_info_with_green("[RULE::launch_expression:method_call_expression]\t ");
+        $$ = create_expression_launch(LAUNCH_EXPRESSION_TYPE_METHOD_CALL, nullptr, $2);
+    }
+    ;
+
 // left_value_expression 是 right_value_expression的子集
 left_value_expression_list
     : left_value_expression
@@ -926,6 +941,10 @@ right_value_expression
     | ternary_expression
     {
         debug_bison_info_with_green("[RULE::right_value_expression:ternary_expression]\t ");
+    }
+    | launch_expression
+    {
+        debug_bison_info_with_green("[RULE::right_value_expression:launch_expression]\t ");
     }
     ;
 
@@ -1166,24 +1185,27 @@ member_expression
         $$ = create_member_expression($1, $3);
     }
     | method_call_expression
+    {
+        $$ = create_expression_from_method_call($1);
+    }
     ;
 
 method_call_expression
     : primary_not_new_array TOKEN_DOT identifier TOKEN_LP               TOKEN_RP
     {
-        $$ = create_expression_from_method_call(create_method_call_expression($1, $3, nullptr));
+        $$ = create_method_call_expression($1, $3, nullptr);
     }
     | member_expression     TOKEN_DOT identifier TOKEN_LP               TOKEN_RP
     {
-        $$ = create_expression_from_method_call(create_method_call_expression($1, $3, nullptr));
+        $$ = create_method_call_expression($1, $3, nullptr);
     }
     | primary_not_new_array TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
     {
-        $$ = create_expression_from_method_call(create_method_call_expression($1, $3, $5));
+        $$ = create_method_call_expression($1, $3, $5);
     }
     | member_expression     TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
     {
-        $$ = create_expression_from_method_call(create_method_call_expression($1, $3, $5));
+        $$ = create_method_call_expression($1, $3, $5);
     }
     ; 
 

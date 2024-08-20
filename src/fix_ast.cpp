@@ -298,6 +298,10 @@ BEGIN:
         fix_ternary_condition_expression(expression, expression->u.ternary_expression, block, func);
         break;
 
+    case EXPRESSION_TYPE_LAUNCH:
+        fix_launch_expression(expression, expression->u.launch_expression, block, func);
+        break;
+
 
     case EXPRESSION_TYPE_CONCAT:
         fix_binary_concat_expression(expression, expression->u.binary_expression, block, func);
@@ -2248,6 +2252,32 @@ void fix_ternary_condition_expression(Expression*        expression,
 
 
     return;
+}
+
+void fix_launch_expression(Expression*       expression,
+                           LaunchExpression* launch_expression,
+                           Block*            block,
+                           FunctionTuple*    func) {
+
+    if (launch_expression == nullptr) {
+        return;
+    }
+
+    switch (launch_expression->type) {
+    case LAUNCH_EXPRESSION_TYPE_FUNCTION_CALL:
+        fix_function_call_expression(expression, launch_expression->u.function_call_expression, block, func);
+        break;
+
+    case LAUNCH_EXPRESSION_TYPE_METHOD_CALL:
+        fix_method_call_expression(expression, launch_expression->u.method_call_expression, block, func);
+        break;
+
+    default:
+        break;
+    }
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, &int64_type_specifier);
 }
 
 void add_parameter_to_declaration(Parameter* parameter, Block* block) {

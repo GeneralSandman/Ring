@@ -68,7 +68,8 @@ RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
  */
 RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
                                 RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                                RVM_ClassObject* callee_object, RVM_Function* callee_function) {
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function,
+                                unsigned int argument_list_size) {
 
     RingCoroutine* co = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
     co->co_id         = get_next_coroutine_id();
@@ -102,7 +103,7 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
                                              co,
                                              callee_object,
                                              callee_function,
-                                             0);
+                                             argument_list_size);
     // callinfo->caller_stack_base = co->runtime_stack->top_index;
 
     if (RING_DEBUG_TRACE_COROUTINE_SCHED == 1) {
@@ -115,57 +116,115 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
     return co;
 }
 
+/*
+ * init_coroutine_entry_func_local_variable 初始化协程入口函数的局部变量
+ *
+ * Usage:
+ * e.g.  launch func_(func_arg1, func_arg2, func_arg3);
+ * 需要将 func_arg1/func_arg2/func_arg3 copy到目标协程栈中
+ * 用于初始化目标协程入口函数中的参数
+ *
+ * FIXME: 这里的实现和 init_derive_function_local_variable 实现重复了，考虑如何合并
+ *
+ */
 void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
                                               RingCoroutine*       co,
                                               RVM_ClassObject*     callee_object,
-                                              RVM_Function*        function,
+                                              RVM_Function*        callee_function,
                                               unsigned int         argument_list_size) {
-    // return;
-    // 如果launch后边还跟着别的参数，那么，还应该将别的参数copy到 目标协程栈中
-    // e.g.  launch(func_, func_arg1, func_arg2, func_arg3);
-    // 需要将 func_arg1/func_arg2/func_arg3 copy到目标协程栈中
-    // 用于初始化目标协程入口函数中的参数
 
-    RVM_TypeSpecifier*   type_specifier            = nullptr;
-    RVM_ClassDefinition* rvm_class_definition      = nullptr;
-    RVM_ClassObject*     class_ob                  = nullptr;
-    RVM_String*          string                    = nullptr;
-    unsigned int         alloc_size                = 0;
+    RVM_TypeSpecifier*   type_specifier          = nullptr;
+    RVM_ClassDefinition* rvm_class_definition    = nullptr;
+    RVM_ClassObject*     class_ob                = nullptr;
+    RVM_String*          string                  = nullptr;
+    unsigned int         alloc_size              = 0;
 
-    unsigned int         stack_argument_list_index = 0; // arguments list's absolute index in stack.
-    unsigned int         block_local_var_offset    = 0;
+    unsigned int         argument_stack_index    = 0; // argument's abs-index in runtime_stack.
+    unsigned int         local_vari_stack_offset = 0; // callee_function's local variable offset in runtime_stack.
 
+
+    // Step-0: relocate argument's abs-index in runtime_stack.
+    argument_stack_index = VM_CUR_CO_STACK_TOP_INDEX - argument_list_size;
+
+
+    // Step-1: init `self` variable when callee_function is method.
     if (callee_object != nullptr) {
-        // 不支持 launch(obj.method) 这种调用方式
-        // TODO: error-report
-        return;
+        co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type             = RVM_VALUE_TYPE_CLASS_OB;
+        co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.class_ob_value = callee_object;
+        local_vari_stack_offset++;
     }
 
-    for (unsigned int i = 0; i < function->local_variable_size;
-         i++, block_local_var_offset++) {
 
-        type_specifier = function->local_variable_list[i].type_specifier;
+    // Step-2: init parameters by parameters.
+    // if a parameter is variadic, convert arguments to array.
+    // access arguments by array.
+    unsigned int argument_stack_offset = 0;
+    for (unsigned int i = 0;
+         i < callee_function->parameter_size && argument_stack_offset < argument_list_size;
+         i++, local_vari_stack_offset++, argument_stack_offset++) {
+
+        RVM_Parameter* parameter = &callee_function->parameter_list[i];
+
+        if (parameter->is_variadic) {
+            printf("TODO: launch not support variadic parameter\n");
+            break;
+        } else {
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset] =
+                VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset];
+        }
+    }
+
+
+    // Step-3: init local variables which defined in callee_function.
+    for (unsigned int i = 0; i < callee_function->local_variable_size;
+         i++, local_vari_stack_offset++) {
+
+        type_specifier = callee_function->local_variable_list[i].type_specifier;
+
+        // 初始化 self 变量
+        if (callee_object != nullptr && i == 0) {
+            // 如果 callee_object != nullptr
+            // function->local_variable_list[0] 是self 变量
+            // 将 callee_object 初始化给 self
+            // 这个操作 已经在 Step-1 完成了, 该变量需要忽略.
+            continue;
+        }
+
+        // local_variable_list 其实是包含 parameter_list , 避免重复初始化
+        // 看看 是否已经在 Step-2初始化了
+        // TODO: 后续优化一下, 这个试下方式不太好
+        bool already_init = false;
+        for (unsigned int p = 0; p < callee_function->parameter_size; p++) {
+            RVM_Parameter* parameter = &callee_function->parameter_list[p];
+            if (str_eq(callee_function->local_variable_list[i].identifier, parameter->identifier)) {
+                already_init = true;
+                break;
+            }
+        }
+        if (already_init) {
+            continue;
+        }
 
         // TODO: 后续抽象成宏
         switch (type_specifier->kind) {
         case RING_BASIC_TYPE_BOOL:
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type         = RVM_VALUE_TYPE_BOOL;
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.bool_value = RVM_FALSE;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type         = RVM_VALUE_TYPE_BOOL;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.bool_value = RVM_FALSE;
             break;
 
         case RING_BASIC_TYPE_INT:
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type        = RVM_VALUE_TYPE_INT;
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.int_value = 0;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type        = RVM_VALUE_TYPE_INT;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.int_value = 0;
             break;
 
         case RING_BASIC_TYPE_INT64:
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type          = RVM_VALUE_TYPE_INT64;
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.int64_value = 0;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type          = RVM_VALUE_TYPE_INT64;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.int64_value = 0;
             break;
 
         case RING_BASIC_TYPE_DOUBLE:
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type           = RVM_VALUE_TYPE_DOUBLE;
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.double_value = 0.0;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type           = RVM_VALUE_TYPE_DOUBLE;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.double_value = 0.0;
             break;
 
         case RING_BASIC_TYPE_STRING:
@@ -173,22 +232,24 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
             alloc_size = init_string(rvm, string, ROUND_UP8(1));
             rvm_heap_list_add_object(rvm, (RVM_GC_Object*)string);
             rvm_heap_alloc_size_incr(rvm, alloc_size);
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type           = RVM_VALUE_TYPE_STRING;
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.string_value = string;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type           = RVM_VALUE_TYPE_STRING;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.string_value = string;
             break;
 
         case RING_BASIC_TYPE_CLASS:
-            rvm_class_definition                                                                            = &(rvm->class_list[type_specifier->u.class_def_index]);
-            class_ob                                                                                        = rvm_new_class_object(rvm, rvm_class_definition);
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].type             = RVM_VALUE_TYPE_CLASS_OB;
-            co->runtime_stack->data[co->runtime_stack->top_index + block_local_var_offset].u.class_ob_value = class_ob;
+            rvm_class_definition                                                                             = &(rvm->class_list[type_specifier->u.class_def_index]);
+            class_ob                                                                                         = rvm_new_class_object(rvm, rvm_class_definition);
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type             = RVM_VALUE_TYPE_CLASS_OB;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.class_ob_value = class_ob;
             break;
 
         default: break;
         }
     }
 
-    co->runtime_stack->top_index += function->local_variable_size;
+
+    // Step-End: increase top index of runtime_stack.
+    co->runtime_stack->top_index += callee_function->local_variable_size;
 }
 
 /*
