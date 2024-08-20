@@ -1,0 +1,21 @@
+main::1
+            self:{Bool:false Int:0 Int64:0 Double:0.000000 String:}
+            Job1::job_action1 bool_value_0:  true
+            Job1::job_action1 bool_value_1:  false
+            Job1::job_action1 local_bool_value_0:   true
+            Job1::job_action1 local_int_value_0:    1
+            Job1::job_action1 local_int64_value_0:  2
+            Job1::job_action1 local_double_value_0: 2.340000
+            Job1::job_action1 local_string_value_0: ring
+            Job1::job_action1 local_job1_value_0:   {Bool:true Int:1 Int64:2 Double:2.340000 String:ring}
+main::2
+            self:{Bool:true Int:1 Int64:2 Double:2.340000 String:ring}
+            Job1::job_action1 bool_value_0:  false
+            Job1::job_action1 bool_value_1:  true
+main::3
+            Job1::job_action1 local_bool_value_0:   true
+            Job1::job_action1 local_int_value_0:    1
+            Job1::job_action1 local_int64_value_0:  2
+            Job1::job_action1 local_double_value_0: 2.340000
+            Job1::job_action1 local_string_value_0: ring
+            Job1::job_action1 local_job1_value_0:   {Bool:true Int:1 Int64:2 Double:2.340000 String:ring}
