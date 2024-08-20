@@ -120,15 +120,7 @@
 
 ## Ring编译器开发内容流程细分
 
-将工作细化为以下几类工作：
-- 调研: 深度理解某项功能
-- 设计: 需求分析、规划，设计语法，设计功能，设计某项功能, 代码实现
-- 测试: 完善测试用例
-- 重构: 代码逻辑的重构
-- 优化: 优化Ring本身的不足
-
-- ⭕️ : 重点关注代办
-- ✅ : 完成
+工作细化Tag：
 
 - Background: 调研相关工作
 - Proposal: 提案相关工作
@@ -140,6 +132,12 @@
 - Test:
 - Doc:
 - Other:
+
+
+工作完成标记：
+
+- ⭕️ : 重点关注代办
+- ✅ : 完成
 
 
 
@@ -586,6 +584,103 @@ quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
 10. 指针
 
 
+
+-----------------------------
+
+
+## 2024-08-19周
+
+
+### A. Feature: launch 调用的第一个函数，函数block 中支持 定义&初始化 局部变量  ✅ 
+
+能否调用 Method
+
+launch(a.method_);
+
+
+那 static method，支持么：
+
+launch(Job::create);
+
+
+
+### B. Feature: launch 调用一个函数，支持传递函数参数  ✅ 
+
+c语言 pthread_create() 支持通过 void* 来传递函数参数，函数原型是：
+
+```
+#include <pthread.h>
+
+int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
+                   void *(*start_routine)(void *), void *arg);
+```
+
+
+#### Ring launch 对函数该如何设计
+
+
+1. `launch` 是个内置函数，使用方法如下：
+
+```
+    launch(func_, arg1, arg2);
+```
+
+2. 采用golang的方式，形式像调用函数，只不过前面多个一个 `launch` 关键字
+
+```
+    launch func_(arg1, arg2);
+```
+
+
+
+
+方式2有个好处，launch是个关键字，能够在语义检查的时候，方便对参数对合法性进行检查；同时，协程的入口函数可以是普通函数/类方法/类静态方法
+
+```
+    launch func_(arg1, arg2);
+
+    var Job job;
+    launch job.method_(arg1, arg2);
+
+
+    launch Job::method_(arg1, arg2);
+```
+
+
+
+
+当然，launch后续也可以扩展成一个代码块/匿名函数
+
+```
+    launch {
+        // action
+        
+        func_(arg1, arg2);
+    }
+```
+
+
+TODO: 限制，当前launch传递的函数中参数不能是可变参考，后续可以考虑放开
+
+```
+function func_(var int... array_value) {
+
+}
+
+@main
+function main() {
+    launch func_(1, 2, 3);
+    // 编译错误，
+}
+```
+
+
+
+### C. Test: 系统化测试 Coroutine相关
+
+
+
+
 -----------------------------
 
 
@@ -594,7 +689,7 @@ quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
 ### A. Feature: ring执行的时候，支持 `RING_DEBUG` 环境变量  ✅ 
 
 
-为了更好的开发调试Ring，有的时候需要展示虚拟机内部的运行状态，如：
+为更好的开发调试Ring，有的时候需要展示虚拟机内部运行状态，如：
 - 在函数调用时，能够展示`CallInfo`的切换
 - 在协程切换时，能够展示 协程切换详情
 
@@ -619,8 +714,6 @@ e.g.
 RING_DEBUG=trace_func_backtrace=1,trace_coroutine_sched=1 ring run test.ring
 ```
 
-
-### C. Feature: launch 调用的第一个函数，支持 传递参数 & block中支持局部变量
 
 
 
