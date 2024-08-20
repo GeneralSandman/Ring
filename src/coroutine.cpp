@@ -332,7 +332,7 @@ int yield_coroutine(Ring_VirtualMachine* rvm) {
     RingCoroutine* target_co    = coroutine_map[target_co_id];
     if (target_co == nullptr) {
         // TODO: error-report
-        printf("yield_coroutine error\n");
+        // printf("yield_coroutine error\n");
         return -1;
     }
 

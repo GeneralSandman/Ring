@@ -1804,6 +1804,7 @@ void fix_function_call_expression(Expression*             expression,
     }
 }
 
+// TODO: 需要调用 check_function_call
 void fix_method_call_expression(Expression*           expression,
                                 MethodCallExpression* method_call_expression,
                                 Block*                block,

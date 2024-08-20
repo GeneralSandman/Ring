@@ -156,7 +156,7 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
                      function_call_expression->func_identifier,
                      parameter_str.c_str(),
                      argument_str.c_str(),
-                     ERROR_ARGUMENT_MISMATCH_NUM);
+                     ERROR_ARGUMENT_MISMATCH_TYPE);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
