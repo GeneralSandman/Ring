@@ -33,7 +33,7 @@ function main() {
 
 	var int i;
 	for(i = 0; i < co_count; i++) {
-		co_id = launch(job_action1);
+		co_id = launch job_action1();
 		fmt::printf("co_id: {}\n", co_id);
 		co_id_array[i] = co_id;
 	}

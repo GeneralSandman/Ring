@@ -70,7 +70,7 @@ function main() {
 	var int64 co_id;
 
 	fmt::println("----launch&resume job_action1----");
-	resume(launch(job_action1));
+	resume(launch job_action1());
 
 	fmt::println("----invoke job_action1----");
 	job_action1();
@@ -78,7 +78,7 @@ function main() {
 
 
 	fmt::println("----launch&resume job_action2----");
-	resume(launch(job_action2));
+	resume(launch job_action2());
 
 	fmt::println("----invoke job_action2----");
 	job_action2();

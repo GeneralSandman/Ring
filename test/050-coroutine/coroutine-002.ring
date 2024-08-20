@@ -43,7 +43,7 @@ function consumer() {
 @main
 function main() {
 
-	consumerid = launch(consumer);
+	consumerid = launch consumer();
 	resume(consumerid);
 
 	producer();

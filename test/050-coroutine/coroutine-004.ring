@@ -25,7 +25,7 @@ function job_action1() {
 function job_action2() {
 	fmt::println("            job_action2::1");
 	yield();
-	job_action3_co_id = launch(job_action3);
+	job_action3_co_id = launch job_action3();
 	resume(job_action3_co_id);
 	fmt::println("            job_action2::2");
 	resume(job_action3_co_id);
@@ -51,7 +51,7 @@ function main() {
 	var int64 co_id;
 
 
-    co_id = launch(job_action1);
+    co_id = launch job_action1();
 	fmt::printf("co_id: {}\n", co_id);
 
 	fmt::println("main::1");

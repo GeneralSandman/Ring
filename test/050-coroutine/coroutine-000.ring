@@ -28,7 +28,7 @@ function job_action2() {
 function main() {
 
 
-	launch(job_action1);
+	launch job_action1();
 
 	fmt::println("main::1");
 	fmt::println("main::2");

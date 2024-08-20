@@ -55,10 +55,10 @@ function consumer_2() {
 @main
 function main() {
 
-	consumer_1_id = launch(consumer_1);
+	consumer_1_id = launch consumer_1();
 	resume(consumer_1_id);
 
-	consumer_2_id = launch(consumer_2);
+	consumer_2_id = launch consumer_2();
 	resume(consumer_2_id);
 
 	producer();

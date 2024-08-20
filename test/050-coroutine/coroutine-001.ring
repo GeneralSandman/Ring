@@ -30,7 +30,7 @@ function main() {
 	var int64 co_id;
 
 
-    co_id = launch(job_action1);
+    co_id = launch job_action1();
 	fmt::printf("co_id: {}\n", co_id);
 
 	fmt::println("main::1");
