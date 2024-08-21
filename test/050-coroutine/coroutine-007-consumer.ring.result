@@ -1,0 +1,22 @@
+consumer_1 start work
+producer start work
+producer   0
+consumer_1 0
+consumer_1 send:"send a message to consumer_2 0"
+consumer_2 recv:"send a message to consumer_2 0"
+producer   1
+consumer_1 1
+consumer_1 send:"send a message to consumer_2 1"
+consumer_2 recv:"send a message to consumer_2 1"
+producer   2
+consumer_1 2
+consumer_1 send:"send a message to consumer_2 2"
+consumer_2 recv:"send a message to consumer_2 2"
+producer   3
+consumer_1 3
+consumer_1 send:"send a message to consumer_2 3"
+consumer_2 recv:"send a message to consumer_2 3"
+producer   4
+consumer_1 4
+consumer_1 send:"send a message to consumer_2 4"
+consumer_2 recv:"send a message to consumer_2 4"
