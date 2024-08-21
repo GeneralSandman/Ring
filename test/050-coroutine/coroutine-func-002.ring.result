@@ -1,0 +1,14 @@
+main::1
+co_id: 1
+main::2
+            job_action_0::begin
+            job_action_0::bool_arg:   true
+            job_action_0::int_arg:    23
+            job_action_0::int64_arg:  44
+            job_action_0::double_arg: 3.141500
+main::3
+            job_action_0::string_arg: ring-lang
+            job_action_0::job1_arg:   {Bool:true Int:23 Int64:44 Double:3.141500 String:ring-lang}
+            job_action_0::end
+main::4
+main::5
