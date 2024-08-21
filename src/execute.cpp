@@ -1853,6 +1853,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                              &caller_class_ob, &caller_function,
                                              nullptr, callee_function,
                                              argument_list_size);
+            // destory arguments after copy it to new coroutine
             VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
 
             STACK_SET_INT64_OFFSET(0, new_coroutine->co_id);
@@ -1879,6 +1880,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                              &caller_class_ob, &caller_function,
                                              callee_class_ob, callee_function,
                                              argument_list_size);
+            // destory arguments after copy it to new coroutine
             VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
 
             STACK_SET_INT64_OFFSET(0, new_coroutine->co_id);
