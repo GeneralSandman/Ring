@@ -65,30 +65,32 @@ $fibonacci_2(var int)    <./test/004-derive-function/function-020.ring:19,35>
  ├──5       return                        1                                     
  ├──6       jump                          17                  25                
  ├──7       push_int_1byte                1                                     
- ├──8       pop_stack_int                 1                                     
- ├──9       push_int_1byte                1                                     
- ├──10      pop_stack_int                 2                                     
- ├──11      push_int_1byte                3                   28                
- ├──12      pop_stack_int                 3                                     
- ├──13      push_stack_int                3                                     
- ├──14      push_stack_int                0                                     
- ├──15      le_int                                                              
- ├──16      jump_if_false                 74                                    
- ├──17      push_stack_int                1                   29                
- ├──18      push_stack_int                2                                     
- ├──19      add_int                                                             
- ├──20      pop_stack_int                 4                                     
- ├──21      push_stack_int                2                   30                
- ├──22      pop_stack_int                 1                                     
- ├──23      push_stack_int                4                   31                
- ├──24      pop_stack_int                 2                                     
- ├──25      push_stack_int                3                   28                
- ├──26      self_increase_int                                                   
- ├──27      pop_stack_int                 3                                     
- ├──28      jump                          32                  32                
- ├──29      push_stack_int                4                   33                
- ├──30      return                        1                                     
- ├──31      function_finish                                   35                
+ ├──8       push_int_1byte                1                                     
+ ├──9       deep_copy                     1, 1                                  
+ ├──10      deep_copy                     2, 2                                  
+ ├──11      pop_stack_int                 2                                     
+ ├──12      pop_stack_int                 1                                     
+ ├──13      push_int_1byte                3                   28                
+ ├──14      pop_stack_int                 3                                     
+ ├──15      push_stack_int                3                                     
+ ├──16      push_stack_int                0                                     
+ ├──17      le_int                                                              
+ ├──18      jump_if_false                 80                                    
+ ├──19      push_stack_int                1                   29                
+ ├──20      push_stack_int                2                                     
+ ├──21      add_int                                                             
+ ├──22      pop_stack_int                 4                                     
+ ├──23      push_stack_int                2                   30                
+ ├──24      pop_stack_int                 1                                     
+ ├──25      push_stack_int                4                   31                
+ ├──26      pop_stack_int                 2                                     
+ ├──27      push_stack_int                3                   28                
+ ├──28      self_increase_int                                                   
+ ├──29      pop_stack_int                 3                                     
+ ├──30      jump                          38                  32                
+ ├──31      push_stack_int                4                   33                
+ ├──32      return                        1                                     
+ ├──33      function_finish                                   35                
 
 $main()    <./test/004-derive-function/function-020.ring:39,96>
 +Parameter:   0
