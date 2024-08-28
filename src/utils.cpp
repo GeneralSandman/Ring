@@ -249,7 +249,7 @@ void ring_vm_code_dump(RVM_Function* function,
         snprintf(line, sizeof(line),
                  "%-8d | %-30s | %20s | %5s | %-11s\n",
                  opcode_num,
-                 opcode_info.name.c_str(),
+                 opcode_info.name,
                  operand_str.c_str(),
                  pointer.c_str(),
                  ""); // TODO: display sourceLineNo
@@ -267,11 +267,11 @@ void ring_vm_code_dump(RVM_Function* function,
     STDERR_MOVE_CURSOR(screen_row++, screen_col);
     fprintf(stderr, "---------------------------------------------------------------------------------------\n");
     STDERR_MOVE_CURSOR(screen_row++, screen_col);
-    fprintf(stderr, "%s\n", next_opcode_info.name.c_str());
+    fprintf(stderr, "%s\n", next_opcode_info.name);
     STDERR_MOVE_CURSOR(screen_row++, screen_col);
-    fprintf(stderr, "[+]Desc:    %s\n", next_opcode_info.usage_comment.c_str());
+    fprintf(stderr, "[+]Desc:    %s\n", next_opcode_info.usage_comment);
     STDERR_MOVE_CURSOR(screen_row++, screen_col);
-    fprintf(stderr, "[+]Formula: %s\n", next_opcode_info.math_formula.c_str());
+    fprintf(stderr, "[+]Formula: %s\n", next_opcode_info.math_formula);
 }
 
 
@@ -555,12 +555,17 @@ void dump_vm_function(Package_Executer*    package_executer,
                 code_line_map_index++;
             }
 
-            RVM_Byte        opcode      = code_list[i++];
+            RVM_Byte opcode = code_list[i++];
+            if (opcode <= RVM_CODE_UNKNOW || RVM_CODES_NUM <= opcode) {
+                ring_error_report("error: invalid opcode %d in generate\n", opcode);
+            }
             RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
-            std::string     opcode_name = opcode_info.name;
+            std::string     opcode_name = "";
             std::string     operand_str = "";
             int             operand1    = 0;
             int             operand2    = 0;
+
+            opcode_name.assign(opcode_info.name, strlen(opcode_info.name));
 
             switch (opcode_info.operand_type) {
             case OPCODE_OPERAND_TYPE_0BYTE:

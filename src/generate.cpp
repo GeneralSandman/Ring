@@ -601,7 +601,6 @@ void generate_vmcode_from_statement_list(Package_Executer* executer,
             break;
 
         case STATEMENT_TYPE_DECLARATION:
-            generate_vmcode_from_initializer(executer, block, statement->u.declaration_statement, opcode_buffer);
             break;
 
         case STATEMENT_TYPE_TAG_DEFINITION:
@@ -984,32 +983,6 @@ void generate_vmcode_from_return_statement(Package_Executer* executer,
     generate_vmcode(executer, opcode_buffer, RVM_CODE_RETURN, return_statement->return_list_size, return_statement->line_number);
 }
 
-void generate_vmcode_from_initializer(Package_Executer* executer,
-                                      Block*            block,
-                                      Declaration*      declaration,
-                                      RVM_OpcodeBuffer* opcode_buffer) {
-
-    debug_generate_info_with_darkgreen("\t");
-    if (declaration == nullptr) {
-        return;
-    }
-
-    Declaration* pos = declaration;
-    for (; pos; pos = pos->next) {
-        if (pos->initializer) {
-            generate_vmcode_from_expression(executer, pos->initializer, opcode_buffer);
-            RVM_Opcode opcode = RVM_CODE_UNKNOW;
-            if (pos->is_local) {
-                // 局部变量
-                opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STACK_BOOL, pos->type_specifier);
-            } else {
-                // 全局变量
-                opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STATIC_BOOL, pos->type_specifier);
-            }
-            generate_vmcode(executer, opcode_buffer, opcode, pos->variable_index, declaration->line_number);
-        }
-    }
-}
 
 void generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* block, JumpTagStatement* jump_tag_statement, RVM_OpcodeBuffer* opcode_buffer) {
     debug_generate_info_with_darkgreen("\t");
@@ -2317,11 +2290,16 @@ void generate_vmcode(Package_Executer* executer,
                      unsigned int      line_number) {
 
     debug_generate_info_with_darkgreen("\t");
-    if (opcode_buffer->code_capacity == opcode_buffer->code_size) {
+    // TODO: 这里可能会有少量的空间浪费，当前阶段暂不考虑
+    if (opcode_buffer->code_capacity <= opcode_buffer->code_size + 3) {
         size_t old_alloc_size = opcode_buffer->code_capacity * sizeof(RVM_Byte);
-        opcode_buffer->code_capacity += 3000;
+        opcode_buffer->code_capacity += 4096;
         size_t new_alloc_size    = opcode_buffer->code_capacity * sizeof(RVM_Byte);
         opcode_buffer->code_list = (RVM_Byte*)mem_realloc(NULL_MEM_POOL, opcode_buffer->code_list, old_alloc_size, new_alloc_size);
+    }
+
+    if (opcode <= RVM_CODE_UNKNOW || RVM_CODES_NUM <= opcode) {
+        ring_error_report("error: invalid opcode %d in generate\n", opcode);
     }
 
     RVM_Opcode_Info opcode_info                          = RVM_Opcode_Infos[opcode];

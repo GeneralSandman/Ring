@@ -763,7 +763,7 @@ typedef enum {
 
 struct RVM_Opcode_Info {
     RVM_Byte          code;                    // 字节码枚举
-    std::string       name;                    // 字节码字符串
+    const char*       name;                    // 字节码字符串
     OpcodeOperandType operand_type;            // 字节码后边的操作数所占字节数量
     int               runtime_stack_increment; // 对运行时栈空间的增长 可为负值
 
@@ -774,9 +774,9 @@ struct RVM_Opcode_Info {
      * stack_top_change: 对 runtime_stack 的操作变化
      * math_formula:     通过一个数学公式描述字节码操作
      */
-    std::string usage_comment;
-    std::string stack_top_change;
-    std::string math_formula;
+    const char* usage_comment;
+    const char* stack_top_change;
+    const char* math_formula;
 };
 
 typedef enum {
@@ -1598,11 +1598,10 @@ struct Declaration {
 
     TypeSpecifier* type_specifier;
     char*          identifier;
-    Expression*    initializer;
     int            is_const;
     int            is_local;
     int            variable_index;
-    Declaration*   next;
+    Declaration*   next; // TODO: 这里设计的优点混乱了
 };
 
 typedef enum {
@@ -2448,9 +2447,7 @@ Expression*                   create_new_array_expression(TypeSpecifier*       s
 FieldInitExpression*          create_field_init_expression(char* field_identifier, Expression* init_expression);
 FieldInitExpression*          field_init_list_add_item(FieldInitExpression* list, FieldInitExpression* item);
 AssignExpression*             create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
-AssignExpression*             create_multi_assign_expression(Expression* first_left_value_exp,
-                                                             Expression* left_value_exp_list,
-                                                             Expression* operand);
+
 FunctionCallExpression*       create_function_call_expression(char* identifier, ArgumentList* argument_list);
 MethodCallExpression*         create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list);
 ArrayLiteralExpression*       create_array_literal_expression(TypeSpecifier* sub_type, DimensionExpression* dimension_expression, Expression* expression_list);
@@ -2716,7 +2713,6 @@ void              generate_vmcode_from_dofor_statement(Package_Executer* execute
 void              generate_vmcode_from_break_statement(Package_Executer* executer, Block* block, BreakStatement* break_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_continue_statement(Package_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_return_statement(Package_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_initializer(Package_Executer* executer, Block* block, Declaration* declaration, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* block, JumpTagStatement* jump_tag_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_assign_expression(Package_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);

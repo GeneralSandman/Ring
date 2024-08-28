@@ -105,11 +105,17 @@ void ring_compiler_fix_ast(Package* package) {
             Declaration* declaration = global_statement->u.declaration_statement;
             for (; declaration != nullptr; declaration = declaration->next) {
                 fix_type_specfier(declaration->type_specifier);
-                fix_expression(declaration->initializer, nullptr, nullptr);
             }
         } break;
+        case STATEMENT_TYPE_EXPRESSION: {
+            Expression* expression = global_statement->u.expression;
+            if (expression->type != EXPRESSION_TYPE_ASSIGN) {
+                ring_error_report("only support variable definition&init statement in global block. expression->type:%d\n", expression->type);
+            }
+            fix_assign_expression(expression->u.assign_expression, nullptr, nullptr);
+        } break;
         default:
-            // TODO: error-report
+            ring_error_report("only support variable definition&init statement in global block. statement->type:%d\n", global_statement->type);
             break;
         }
     }
@@ -387,8 +393,6 @@ void add_local_declaration(Declaration* declaration, Block* block, FunctionTuple
 
         // fix type specifier
         fix_type_specfier(decl_pos->type_specifier);
-
-        fix_expression(decl_pos->initializer, block, func);
 
 
         // 添加局部变量
@@ -1906,7 +1910,6 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
     self_declaration->line_number    = method->start_line_number;
     self_declaration->type_specifier = type_specifier;
     self_declaration->identifier     = (char*)"self";
-    self_declaration->initializer    = nullptr;
     self_declaration->is_const       = false;
     self_declaration->is_local       = false;
     self_declaration->variable_index = -1;
@@ -2315,7 +2318,6 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
         declaration->line_number    = pos->line_number;
         declaration->type_specifier = type_specifier;
         declaration->identifier     = pos->identifier;
-        declaration->initializer    = nullptr;
         declaration->is_const       = 0;
         declaration->is_local       = 1;
         declaration->variable_index = -1; // fix in add_declaration

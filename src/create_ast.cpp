@@ -418,23 +418,6 @@ AssignExpression* create_assign_expression(AssignExpressionType type,
     return assing_expression;
 }
 
-AssignExpression* create_multi_assign_expression(Expression* first_left_value_exp,
-                                                 Expression* left_value_exp_list,
-                                                 Expression* operand) {
-
-    debug_ast_info_with_yellow("");
-
-    Expression*       left              = expression_list_add_item(first_left_value_exp, left_value_exp_list);
-
-    AssignExpression* assing_expression = (AssignExpression*)mem_alloc(get_front_mem_pool(), sizeof(AssignExpression));
-
-    assing_expression->line_number      = package_unit_get_line_number();
-    assing_expression->type             = ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN;
-    assing_expression->left             = left;
-    assing_expression->operand          = operand;
-    return assing_expression;
-}
-
 
 /*
 function return_3_bool_1() -> (bool,bool,bool) {
@@ -498,6 +481,10 @@ ClassObjectLiteralExpression* create_class_object_literal_expression(TypeSpecifi
 
 Expression* expression_list_add_item(Expression* expression_list, Expression* expression) {
     debug_ast_info_with_yellow("");
+
+    if (expression_list == nullptr) {
+        return expression;
+    }
 
     Expression* pos = expression_list;
     for (; pos->next != nullptr; pos = pos->next)
@@ -1111,7 +1098,6 @@ Declaration* create_declaration(TypeSpecifier* type, char* identifier, Expressio
     declaration->line_number    = package_unit_get_line_number();
     declaration->type_specifier = type;
     declaration->identifier     = identifier;
-    declaration->initializer    = initializer;
     declaration->is_const       = 0;
     declaration->is_local       = 0;
     declaration->variable_index = -1; // UPDATED_BY_FIX_AST
@@ -1135,12 +1121,15 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier,
                                               Identifier*    identifier_list,
                                               Expression*    initializer_list) {
 
-    Declaration* head     = nullptr;
-    Identifier*  pos_ider = identifier_list;
-    Expression*  pos_init = initializer_list;
-    for (pos_ider = identifier_list; pos_ider; pos_ider = pos_ider->next) {
+    Expression*  iden_exp_head = nullptr;
+    Declaration* decl_head     = nullptr;
+
+    Identifier*  identifier    = identifier_list;
+    Expression*  initia        = initializer_list;
+
+    for (identifier = identifier_list; identifier; identifier = identifier->next) {
         // Ring-Compiler-Error-Report ERROR_INVALID_VARIABLE_IDENTIFIER
-        if (str_eq(pos_ider->name, "self")) {
+        if (str_eq(identifier->name, "self")) {
             DEFINE_ERROR_REPORT_STR;
 
             snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -1154,8 +1143,8 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier,
                 .package                 = nullptr,
                 .package_unit            = get_package_unit(),
                 .source_file_name        = get_package_unit()->current_file_name,
-                .line_content            = package_unit_get_line_content(pos_ider->line_number),
-                .line_number             = pos_ider->line_number,
+                .line_content            = package_unit_get_line_content(identifier->line_number),
+                .line_number             = identifier->line_number,
                 .column_number           = package_unit_get_column_number(),
                 .error_message           = std::string(compile_err_buf),
                 .advice                  = std::string(compile_adv_buf),
@@ -1167,21 +1156,37 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier,
         }
 
 
-        Declaration* decl = create_declaration(type_specifier, pos_ider->name, pos_init);
-        if (pos_init) {
-            decl->initializer       = pos_init;
-            pos_init                = pos_init->next;
-            decl->initializer->next = nullptr; // 把initializer_list 拆开
-        }
-        head = declaration_list_add_item(head, decl);
+        Declaration* decl = create_declaration(type_specifier, identifier->name, initia);
+        decl_head         = declaration_list_add_item(decl_head, decl);
+
+
+        Expression* exp   = create_expression_identifier(identifier->name);
+        iden_exp_head     = expression_list_add_item(iden_exp_head, exp);
     }
 
-
+    // 这里有两条语句
+    // 1. declaration  直接插入block所在 declaration列表
+    // 2. multi-assignment  生成 assignment语句
     Statement* statement               = (Statement*)mem_alloc(get_front_mem_pool(), sizeof(Statement));
     statement->line_number             = package_unit_get_line_number();
     statement->type                    = STATEMENT_TYPE_DECLARATION;
-    statement->u.declaration_statement = head;
+    statement->u.declaration_statement = decl_head;
     statement->next                    = nullptr;
+
+    if (initializer_list != nullptr) {
+
+        AssignExpression* assign_exp    = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ASSIGN, iden_exp_head, initializer_list);
+        Expression*       exp           = create_expression_assign(assign_exp);
+
+        Statement*        ass_statement = (Statement*)mem_alloc(get_front_mem_pool(), sizeof(Statement));
+        ass_statement->line_number      = package_unit_get_line_number();
+        ass_statement->type             = STATEMENT_TYPE_EXPRESSION;
+        ass_statement->u.expression     = exp;
+        ass_statement->next             = nullptr;
+
+        statement->next                 = ass_statement;
+    }
+
 
     return statement;
 }

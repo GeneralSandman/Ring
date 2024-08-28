@@ -231,7 +231,6 @@ void package_compile(Package* package) {
                 for (; decl_pos != nullptr; decl_pos = decl_pos->next) {
 
                     fix_type_specfier(decl_pos->type_specifier);
-                    fix_expression(decl_pos->initializer, nullptr, nullptr);
 
 
                     // 添加全局变量
@@ -240,8 +239,15 @@ void package_compile(Package* package) {
                     package->global_declaration_list.push_back(decl_pos);
                 }
             } break;
+            case STATEMENT_TYPE_EXPRESSION: {
+                Expression* expression = statement->u.expression;
+                if (expression->type != EXPRESSION_TYPE_ASSIGN) {
+                    ring_error_report("only support variable definition&init statement in global block. expression->type:%d\n", expression->type);
+                }
+                fix_assign_expression(expression->u.assign_expression, nullptr, nullptr);
+            } break;
             default:
-                ring_error_report("error statement->type:%d in global statement list\n", statement->type);
+                ring_error_report("only support variable definition&init statement in global block. statement->type:%d\n", statement->type);
                 break;
             }
         }
