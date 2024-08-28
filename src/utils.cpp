@@ -196,7 +196,15 @@ void ring_vm_code_dump(RVM_Function* function,
     int                      pc_lines_index = 0; // 当前pc 所在的 lines 的 index
     // 取当前pc 所在的 前后20 行进行展示
 
-    RVM_Opcode_Info next_opcode_info;
+    RVM_Opcode_Info next_opcode_info = RVM_Opcode_Info{
+        .code                    = RVM_CODE_UNKNOW,
+        .name                    = "",
+        .operand_type            = OPCODE_OPERAND_TYPE_0BYTE,
+        .runtime_stack_increment = 0,
+        .usage_comment           = "",
+        .stack_top_change        = "",
+        .math_formula            = "",
+    };
 
     for (unsigned int i = 0; i < code_size; opcode_num++) {
         std::string pointer = "";
