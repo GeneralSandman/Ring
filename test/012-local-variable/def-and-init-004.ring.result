@@ -1,0 +1,19 @@
+invoke get_next_global_count_1
+invoke get_next_global_count_2
+invoke get_next_global_count_3
+main::start
+invoke get_next_global_count_1
+invoke get_next_global_count_2
+invoke get_next_global_count_3
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS
