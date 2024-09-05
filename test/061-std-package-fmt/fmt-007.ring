@@ -49,6 +49,7 @@ function main() {
 	fmt::println("test case 1 -------------");
 	fmt::println(global_job1_value_0);
 	fmt::printf("{}\n", global_job1_value_0);
+	fmt::println(fmt::sprintf("{}", global_job1_value_0));
 
 
 
@@ -56,6 +57,7 @@ function main() {
 	global_string_array_0 = string[]{"1", "2", "3", "4", "5"};
 	fmt::println(global_string_array_0);
 	fmt::printf("{}\n", global_string_array_0);
+	fmt::println(fmt::sprintf("{}", global_string_array_0));
 
 
 	fmt::println("\ntest case 3 -------------");
@@ -93,5 +95,6 @@ function main() {
 	};
 	fmt::println(global_job1_array_0);
 	fmt::printf("{}\n", global_job1_array_0);
+	fmt::println(fmt::sprintf("{}", global_job1_array_0));
 
 }

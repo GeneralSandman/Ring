@@ -1,11 +1,16 @@
 false
 true
+true
 0
 12
+13
 0.000000
 1.234560
+3.140000
 123456789_
 hello world
+ring
 true 1 1.100000 hello world
+true 1 1.100000  hello world
 false 0 0.000000 
 true 1 1.100000 global_job1_value_0

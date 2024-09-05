@@ -32,17 +32,22 @@ function main() {
 
 	fmt::println(false);
 	fmt::println(true);
+	fmt::println(fmt::sprintf("{}", true));
 
 	fmt::println(0);
 	fmt::println(12);
+	fmt::println(fmt::sprintf("{}", 13));
 
 	fmt::println(0.0);
 	fmt::println(1.23456);
+	fmt::println(fmt::sprintf("{}", 3.14));
 
 	fmt::println("123456789_");
 	fmt::println("hello world");
+	fmt::println(fmt::sprintf("{}", "ring"));
 	
 	fmt::println(true, 1, 1.1, "hello world");
+	fmt::println(fmt::sprintf("{} {} {}  {}", true, 1, 1.1, "hello world"));
 
 
 
