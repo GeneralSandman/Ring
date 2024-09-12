@@ -1,24 +1,29 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "(lldb) 启动",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/ring",
-            "args": [
-                "-O0",
-                "run",
-                "${workspaceFolder}/test/021-array-int64/three-dimen-access-001.ring"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${fileDirname}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "lldb"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "(lldb) 启动",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/ring",
+      "args": [
+        "-O0",
+        "run",
+        "${workspaceFolder}/test/040-aonymous-function/test-001.ring"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/bytedance/Desktop/Ring/src",
+      "program": "/Users/bytedance/Desktop/Ring/src/build/Debug/outDebug"
+    }
+  ]
 }
