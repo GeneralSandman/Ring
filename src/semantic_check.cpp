@@ -102,34 +102,8 @@ void ring_compiler_analysis_function(Package* package) {
  */
 void check_function_call(FunctionCallExpression* function_call_expression, Function* function) {
     assert(function_call_expression != nullptr);
+    assert(function != nullptr);
 
-
-    // Ring-Compiler-Error-Report ERROR_UNDEFINITE_FUNCTION
-    if (function == nullptr) {
-        DEFINE_ERROR_REPORT_STR;
-
-        snprintf(compile_err_buf, 1024, "use undeclared function `%s`; E:%d",
-                 function_call_expression->func_identifier,
-                 ERROR_UNDEFINITE_FUNCTION);
-        snprintf(compile_adv_buf, 1024, "definite function `%s` like: `function %s() {}` before use it.",
-                 function_call_expression->func_identifier,
-                 function_call_expression->func_identifier);
-
-        ErrorReportContext context = {
-            .package                 = nullptr,
-            .package_unit            = nullptr,
-            .source_file_name        = get_package_unit()->current_file_name,
-            .line_content            = package_unit_get_line_content(function_call_expression->line_number),
-            .line_number             = function_call_expression->line_number,
-            .column_number           = 0,
-            .error_message           = std::string(compile_err_buf),
-            .advice                  = std::string(compile_adv_buf),
-            .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
-            .ring_compiler_file      = (char*)__FILE__,
-            .ring_compiler_file_line = __LINE__,
-        };
-        ring_compile_error_report(&context);
-    }
 
     ArgumentList* argument_pos  = function_call_expression->argument_list;
     Parameter*    parameter_pos = function->parameter_list;

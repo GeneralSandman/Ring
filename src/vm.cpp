@@ -65,6 +65,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_POP_STACK_STRING, "pop_stack_string", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "string assign to local-variable", "", "Si(FSB+As).string = S(-1).string"},
     {RVM_CODE_POP_STACK_CLASS_OB, "pop_stack_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "class-object assign to local-variable", "", "Si(FSB+As).object = S(-1).object"},
     {RVM_CODE_POP_STACK_ARRAY, "pop_stack_array", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "array assign to local-variable", "", "Si(FSB+As).array = S(-1).array"},
+    {RVM_CODE_POP_STACK_CLOSURE, "pop_stack_closure", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "closure assign to local-variable", "", "Si(FSB+As).func = S(-1).func"},
 
     {RVM_CODE_PUSH_STACK_BOOL, "push_stack_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's bool to stack", "", "So(0).bool = Si(FSB+As).bool"},
     {RVM_CODE_PUSH_STACK_INT, "push_stack_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's int to stack", "", "So(0).int = Si(FSB+As).int"},
@@ -73,6 +74,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_STACK_STRING, "push_stack_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's string to stack", "", "So(0).string = Si(FSB+As).string"},
     {RVM_CODE_PUSH_STACK_CLASS_OB, "push_stack_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's class-object to stack", "", "So(0).object = Si(FSB+As).object"},
     {RVM_CODE_PUSH_STACK_ARRAY, "push_stack_array", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's array to stack", "", "So(0).array = Si(FSB+As).array"},
+    {RVM_CODE_PUSH_STACK_CLOSURE, "push_stack_closure", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's closure to stack", "", "So(0).closure = Si(FSB+As).closure"},
 
 
     // array

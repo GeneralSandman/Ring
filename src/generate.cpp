@@ -1706,6 +1706,9 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
     if (function_call_expression == nullptr) {
         return;
     }
+    if (function_call_expression->type != FUNCTION_CALL_TYPE_FUNC) {
+        ring_error_report("not support anoymous function `%s`", function_call_expression->func_identifier);
+    }
 
     if (is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
         generate_vmcode_from_native_function_call_expression(executer, function_call_expression, opcode_buffer);
@@ -1729,15 +1732,15 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
     unsigned int offset         = 0;
     unsigned int operand        = 0;
 
-    package_offset              = function_call_expression->function->package->package_index;
-    offset                      = function_call_expression->function->func_index;
+    package_offset              = function_call_expression->u.fc.function->package->package_index;
+    offset                      = function_call_expression->u.fc.function->func_index;
     operand                     = (package_offset << 8) | offset;
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, function_call_expression->line_number);
 
 
-    if (function_call_expression->function->type == FUNCTION_TYPE_NATIVE) {
+    if (function_call_expression->u.fc.function->type == FUNCTION_TYPE_NATIVE) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC_NATIVE, 0, function_call_expression->line_number);
-    } else if (function_call_expression->function->type == FUNCTION_TYPE_DERIVE) {
+    } else if (function_call_expression->u.fc.function->type == FUNCTION_TYPE_DERIVE) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, function_call_expression->line_number);
     }
 }
@@ -2017,13 +2020,16 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
         if (function_call_expression == nullptr) {
             return;
         }
+        if (function_call_expression->type != FUNCTION_CALL_TYPE_FUNC) {
+            ring_error_report("not support anoymous function `%s`", function_call_expression->func_identifier);
+        }
 
 
         if (is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
             printf("not support build func(%s) in launch expression now", function_call_expression->func_identifier);
             return;
         }
-        if (function_call_expression->function->type != FUNCTION_TYPE_DERIVE) {
+        if (function_call_expression->u.fc.function->type != FUNCTION_TYPE_DERIVE) {
             printf("not support build func(%s) in launch expression now", function_call_expression->func_identifier);
             return;
         }
@@ -2046,8 +2052,8 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
         unsigned int offset         = 0;
         unsigned int operand        = 0;
 
-        package_offset              = function_call_expression->function->package->package_index;
-        offset                      = function_call_expression->function->func_index;
+        package_offset              = function_call_expression->u.fc.function->package->package_index;
+        offset                      = function_call_expression->u.fc.function->func_index;
         operand                     = (package_offset << 8) | offset;
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, function_call_expression->line_number);
 
@@ -2543,6 +2549,11 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_POP_FIELD_ARRAY
         // RVM_CODE_PUSH_FIELD_ARRAY
         return RVM_Opcode(opcode + 6);
+        break;
+    case RING_BASIC_TYPE_FUNC:
+        // RVM_CODE_POP_STACK_AONY_FUNC
+        // RVM_CODE_PUSH_STACK_AONY_FUNC
+        return RVM_Opcode(opcode + 7);
         break;
 
     default:

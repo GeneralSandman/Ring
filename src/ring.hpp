@@ -63,12 +63,14 @@ typedef struct MethodCallExpression         MethodCallExpression;
 typedef struct AssignExpression             AssignExpression;
 typedef struct FieldInitExpression          FieldInitExpression;
 typedef struct LaunchExpression             LaunchExpression;
+typedef struct ClosureExpression            ClosureExpression;
 typedef struct IdentifierExpression         IdentifierExpression;
 
 typedef struct ArgumentList                 ArgumentList;
 typedef struct Parameter                    Parameter;
 typedef struct Identifier                   Identifier;
 typedef struct FunctionTuple                FunctionTuple;
+typedef struct Closure                      Closure;
 typedef struct Function                     Function;
 typedef struct Block                        Block;
 typedef struct FunctionReturnList           FunctionReturnList;
@@ -85,6 +87,7 @@ typedef struct ContinueStatement            ContinueStatement;
 
 typedef struct Ring_DeriveType_Array        Ring_DeriveType_Array;
 typedef struct Ring_DeriveType_Class        Ring_DeriveType_Class;
+typedef struct Ring_DeriveType_Func         Ring_DeriveType_Func;
 typedef struct Declaration                  Declaration;
 typedef struct TagDefinitionStatement       TagDefinitionStatement;
 typedef struct JumpTagStatement             JumpTagStatement;
@@ -457,12 +460,12 @@ typedef enum {
     RING_BASIC_TYPE_INT64,
     RING_BASIC_TYPE_DOUBLE,
     RING_BASIC_TYPE_STRING,
+
     RING_BASIC_TYPE_CLASS,
     RING_BASIC_TYPE_ARRAY,
+    RING_BASIC_TYPE_FUNC,
 
     RING_BASIC_TYPE_ANY,
-
-    RING_BASIC_TYPE_FUNC,
 
 } Ring_BasicType;
 
@@ -471,6 +474,7 @@ typedef enum {
     RING_DERIVE_TYPE_UNKNOW,
     RING_DERIVE_TYPE_ARRAY,
     RING_DERIVE_TYPE_CLASS,
+    RING_DERIVE_TYPE_FUNC,
 } Ring_DeriveTypeKind;
 
 
@@ -482,6 +486,16 @@ struct Ring_DeriveType_Class {
     ClassDefinition* class_definition; // UPDATED_BY_FIX_AST
 };
 
+// TODO:
+// 函数变量类型
+struct Ring_DeriveType_Func {
+    unsigned int   parameter_list_size;
+    TypeSpecifier* parameter_list;
+
+    unsigned int   return_list_size;
+    TypeSpecifier* return_list;
+};
+
 
 // Only used by front-end of compiler.
 struct TypeSpecifier {
@@ -491,6 +505,7 @@ struct TypeSpecifier {
     union {
         Ring_DeriveType_Array* array_type;
         Ring_DeriveType_Class* class_type;
+        Ring_DeriveType_Func*  func_type;
     } u;
     unsigned int   dimension; // 维度，用来指明sub
     TypeSpecifier* sub;
@@ -816,6 +831,7 @@ typedef enum {
     RVM_CODE_POP_STACK_STRING,
     RVM_CODE_POP_STACK_CLASS_OB,
     RVM_CODE_POP_STACK_ARRAY,
+    RVM_CODE_POP_STACK_CLOSURE,
     RVM_CODE_PUSH_STACK_BOOL,
     RVM_CODE_PUSH_STACK_INT,
     RVM_CODE_PUSH_STACK_INT64,
@@ -823,6 +839,7 @@ typedef enum {
     RVM_CODE_PUSH_STACK_STRING,
     RVM_CODE_PUSH_STACK_CLASS_OB,
     RVM_CODE_PUSH_STACK_ARRAY,
+    RVM_CODE_PUSH_STACK_CLOSURE,
 
     // array
     RVM_CODE_PUSH_ARRAY_A,
@@ -1141,6 +1158,7 @@ typedef enum {
     EXPRESSION_TYPE_CAST,
 
     EXPRESSION_TYPE_LAUNCH,
+    EXPRESSION_TYPE_CLOSURE, // TODO: 这个名字是不是应该该一下
 
 
 } ExpressionType;
@@ -1362,6 +1380,7 @@ struct Expression {
         MemberExpression*             member_expression;
         FieldInitExpression*          field_init_expression;
         LaunchExpression*             launch_expression;
+        ClosureExpression*            closure_expression;
     } u;
 
     Expression* next;
@@ -1493,13 +1512,29 @@ struct SubDimensionExpression {
     // when access array, num_expression is index.
 };
 
+typedef enum {
+    FUNCTION_CALL_TYPE_UNKNOW,
+    FUNCTION_CALL_TYPE_FUNC,
+    FUNCTION_CALL_TYPE_CLOSURE,
+} FunctionCallType;
+
 
 struct FunctionCallExpression {
-    unsigned int  line_number;
+    unsigned int     line_number;
 
-    char*         package_posit;
-    char*         func_identifier;
-    Function*     function;
+    char*            package_posit;
+    char*            func_identifier;
+
+    FunctionCallType type;
+    union {
+        struct {
+            Function* function;
+        } fc; // function-call
+        struct {
+
+        } cc; // closure-call
+
+    } u;
 
     unsigned int  argument_list_size;
     ArgumentList* argument_list;
@@ -1559,6 +1594,12 @@ struct LaunchExpression {
         MethodCallExpression*   method_call_expression;
         // Block*                  block; // TODO:
     } u;
+};
+
+struct ClosureExpression {
+    unsigned int line_number;
+
+    Closure*     closure_definition;
 };
 
 struct BinaryExpression {
@@ -1638,9 +1679,8 @@ struct Block {
     std::string         source_file;       /*ring source file*/                  \
     unsigned int        start_line_number; /*start line no in ring source file*/ \
     unsigned int        end_line_number;   /*end   line no in ring source file*/ \
-    Package*            package;           /*function's package*/                \
     RingFileStat*       ring_file_stat;    /*ring source file stat*/             \
-    char*               identifier;                                              \
+                                                                                 \
     unsigned int        parameter_list_size;                                     \
     Parameter*          parameter_list;                                          \
     unsigned int        return_list_size;                                        \
@@ -1653,17 +1693,27 @@ struct FunctionTuple {
     FUNCTION_TUPLE_HEADER;
 };
 
+struct Closure {
+    FUNCTION_TUPLE_HEADER;
+
+    // upvalue
+};
+
 struct Function {
     FUNCTION_TUPLE_HEADER;
 
-    unsigned int func_index;
+    Package*     package;
+    char*        identifier;
+    unsigned int func_index; // 所在 package 的 index
     FunctionType type;
 };
 
 struct MethodMember {
     FUNCTION_TUPLE_HEADER;
 
-    unsigned int index_of_class; // UPDATED_BY_FIX_AST
+    Package*     package;
+    char*        identifier;
+    unsigned int index_of_class; // 所在类的index UPDATED_BY_FIX_AST
 };
 
 struct FunctionReturnList {
@@ -2095,6 +2145,8 @@ typedef enum {
 
     ERROR_FUNCTION_MAIN_INVALID               = 300006, // main函数定义不合法
 
+    ERROR_CANOT_USE_VAR_LIKE_FUNC             = 300007, // 不能使用变量名作为函数名
+
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
 
@@ -2436,6 +2488,9 @@ Expression*                   create_expression_ternary(Expression* condition, E
 Expression*                   create_expression_launch(LaunchExpressionType    type,
                                                        FunctionCallExpression* function_call_expression,
                                                        MethodCallExpression*   method_call_expression);
+
+Expression*                   create_expression_closure_definition(Closure* func);
+
 Expression*                   create_expression_binary(ExpressionType type, Expression* left, Expression* right);
 Expression*                   create_expression_unitary(ExpressionType type, Expression* unitary_expression);
 Expression*                   create_expression_literal(ExpressionType type, char* literal_interface);
@@ -2460,6 +2515,10 @@ Identifier*                   identifier_list_add_item(Identifier* identifier_li
 FunctionReturnList*           create_function_return_list(TypeSpecifier* type_specifier);
 FunctionReturnList*           function_return_list_add_item(FunctionReturnList* return_list,
                                                             TypeSpecifier*      type_specifier);
+
+FunctionTuple*                create_function_tuple(Parameter*          parameter_list,
+                                                    FunctionReturnList* return_list,
+                                                    Block*              block);
 Function*                     create_function_definition(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
 
 Statement*                    create_statement_from_if(IfStatement* if_statement);
@@ -2493,6 +2552,7 @@ SubDimensionExpression*       sub_dimension_expression_list_add_item(SubDimensio
 TypeSpecifier*                create_type_specifier(Ring_BasicType basic_type);
 TypeSpecifier*                create_type_specifier_array(TypeSpecifier* sub_type, DimensionExpression* dimension);
 TypeSpecifier*                create_class_type_specifier(char* identifier);
+TypeSpecifier*                create_func_type_specifier();
 
 Declaration*                  create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
 Declaration*                  declaration_list_add_item(Declaration* head, Declaration* declaration);
@@ -2638,6 +2698,11 @@ void             fix_launch_expression(Expression*       expression,
                                        LaunchExpression* launch_expression,
                                        Block*            block,
                                        FunctionTuple*    func);
+
+void             fix_closure_expression(Expression*        expression,
+                                        ClosureExpression* closure_expression,
+                                        Block*             block,
+                                        FunctionTuple*     func);
 
 void             add_parameter_to_declaration(Parameter* parameter, Block* block);
 Declaration*     search_declaration(char* package_posit, char* identifier, Block* block);

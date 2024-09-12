@@ -874,6 +874,9 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
     case RING_BASIC_TYPE_ARRAY:
         str = "array";
         break;
+    case RING_BASIC_TYPE_FUNC:
+        str = "func"; // FIXME:
+        break;
 
     case RING_BASIC_TYPE_ANY:
         str = "any";

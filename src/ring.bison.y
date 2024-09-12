@@ -45,7 +45,9 @@ int yylex();
     ClassObjectLiteralExpression*       m_class_object_literal_expression;
     FieldInitExpression*                m_field_init_expression;
     ArgumentList*                       m_argument_list;
+    FunctionTuple*                      m_function_tuple;
     Function*                           m_function_definition;
+    Closure*                            m_closure;
     Parameter*                          m_parameter_list;
     IfStatement*                        m_if_statement;
     ElseIfStatement*                    m_elseif_statement;
@@ -124,6 +126,7 @@ int yylex();
 %token TOKEN_ANY
 %token TOKEN_CONST
 %token TOKEN_FUNCTION
+%token TOKEN_FUNC_TYPE
 %token TOKEN_NEW
 %token TOKEN_DELETE
 %token TOKEN_DOT
@@ -218,8 +221,10 @@ int yylex();
 %type <m_class_object_literal_expression> class_object_literal_expression
 %type <m_field_init_expression> class_field_init_element_list class_field_init_element
 %type <m_argument_list> argument_list argument
+%type <m_function_tuple>      function_tuple
 %type <m_function_definition> function_definition
-%type <m_parameter_list> parameter_list parameter
+%type <m_expression>             closure_definition
+%type <m_parameter_list> parameter_list parameter parameter_list_v2
 %type <m_if_statement> if_statement
 %type <m_for_statement> for_statement
 %type <m_dofor_statement> dofor_statement
@@ -729,9 +734,49 @@ function_definition
     ;
 
 
+closure_definition
+    : TOKEN_FUNCTION function_tuple
+    {
+        debug_bison_info_with_green("[RULE::aonymous_function]\t ");
+        $$ = create_expression_closure_definition((Closure*)($2));
+
+    }
+    ;
+
+// TODO: 后续 closure function method 都使用这个
+function_tuple
+    : TOKEN_LP parameter_list_v2 TOKEN_RP block
+    {
+        debug_bison_info_with_green("[RULE::function_tuple:1]\t ");
+        $$ = create_function_tuple($2, nullptr, $4);
+    }
+    | TOKEN_LP parameter_list_v2 TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    {
+        debug_bison_info_with_green("[RULE::function_tuple:2]\t ");
+        $$ = create_function_tuple($2, $6, $8);
+    }
+    ;
+
 
 parameter_list
     : parameter
+    {
+        debug_bison_info_with_green("[RULE::parameter_list]\t ");
+    }
+    | parameter_list TOKEN_COMMA parameter
+    {
+        debug_bison_info_with_green("[RULE::parameter_list]\t ");
+        $$ = parameter_list_add_statement($1, $3);
+    }
+    ;
+
+// TODO: 后续统一使用这个
+parameter_list_v2
+    : 
+    {
+        $$ = nullptr;
+    }
+    | parameter
     {
         debug_bison_info_with_green("[RULE::parameter_list]\t ");
     }
@@ -842,6 +887,11 @@ class_type_specifier
         debug_bison_info_with_green("[RULE::class_type_specifier]\t variable_type(TOKEN_ANY) ");
         $$ = create_class_type_specifier($1);
     }
+    | TOKEN_FUNC_TYPE
+    {
+        //TODO: 待成熟之后，可以删除
+        $$ = create_func_type_specifier();
+    }
     ;
 
 class_field_init_element_list
@@ -945,6 +995,10 @@ right_value_expression
     | launch_expression
     {
         debug_bison_info_with_green("[RULE::right_value_expression:launch_expression]\t ");
+    }
+    | closure_definition
+    {
+        debug_bison_info_with_green("[RULE::right_value_expression:closure_definition]\t ");
     }
     ;
 

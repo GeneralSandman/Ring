@@ -308,6 +308,10 @@ BEGIN:
         fix_launch_expression(expression, expression->u.launch_expression, block, func);
         break;
 
+    case EXPRESSION_TYPE_CLOSURE:
+        fix_closure_expression(expression, expression->u.closure_expression, block, func);
+        break;
+
 
     case EXPRESSION_TYPE_CONCAT:
         fix_binary_concat_expression(expression, expression->u.binary_expression, block, func);
@@ -1088,7 +1092,8 @@ void fix_binary_math_expression(Expression*       expression,
 
     if (left_type->kind == RING_BASIC_TYPE_BOOL
         || left_type->kind == RING_BASIC_TYPE_ARRAY
-        || left_type->kind == RING_BASIC_TYPE_CLASS) {
+        || left_type->kind == RING_BASIC_TYPE_CLASS
+        || left_type->kind == RING_BASIC_TYPE_FUNC) {
         DEFINE_ERROR_REPORT_STR;
 
         snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -1115,7 +1120,8 @@ void fix_binary_math_expression(Expression*       expression,
 
     if (right_type->kind == RING_BASIC_TYPE_BOOL
         || right_type->kind == RING_BASIC_TYPE_ARRAY
-        || right_type->kind == RING_BASIC_TYPE_CLASS) {
+        || right_type->kind == RING_BASIC_TYPE_CLASS
+        || right_type->kind == RING_BASIC_TYPE_FUNC) {
         DEFINE_ERROR_REPORT_STR;
 
         snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -1768,6 +1774,14 @@ void fix_unitary_increase_decrease_expression(Expression* expression,
     }
 }
 
+/*
+ * 函数有几种可能, 判断优先顺序
+ * ring closure
+ * ring buildin 函数
+ * ring native 函数
+ * ring derive 函数
+ *
+ */
 void fix_function_call_expression(Expression*             expression,
                                   FunctionCallExpression* function_call_expression,
                                   Block*                  block,
@@ -1777,34 +1791,87 @@ void fix_function_call_expression(Expression*             expression,
         return;
     }
 
-    ArgumentList* pos = function_call_expression->argument_list;
-    for (; pos != nullptr; pos = pos->next) {
+    // fix argument list
+    for (ArgumentList* pos = function_call_expression->argument_list;
+         pos != nullptr;
+         pos = pos->next) {
         fix_expression(pos->expression, block, func);
     }
 
+    Declaration* declaration = nullptr;
+    Function*    function    = nullptr;
 
-    Function* function = nullptr;
+
+    // 1. 判断是否为closure
+    declaration = search_declaration(nullptr,
+                                     function_call_expression->func_identifier,
+                                     block);
+    if (declaration != nullptr) {
+
+        if (declaration->type_specifier->kind == RING_BASIC_TYPE_FUNC) {
+            // 是一个变量，并且是一个函数变量，需要继续匹配
+            // 匹配函数调用的语义
+            function_call_expression->type = FUNCTION_CALL_TYPE_CLOSURE;
+            return;
+        } else {
+            // 只是一个普通变量
+            // continue search
+        }
+    }
+
+
+    // 2. 判断是 ring build function
     if (is_buildin_function_identifier(function_call_expression->package_posit,
                                        function_call_expression->func_identifier)) {
 
+        function_call_expression->type = FUNCTION_CALL_TYPE_FUNC;
         fix_buildin_func(expression, function_call_expression, block, func);
 
-    } else {
-
-        function = search_function(function_call_expression->package_posit,
-                                   function_call_expression->func_identifier);
-
-        check_function_call(function_call_expression, function);
-
-        function_call_expression->function = function;
+        return;
+    }
 
 
-        // function_call_expression 的类型取决于 function 返回值的类型
-        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-        FunctionReturnList* pos = function->return_list;
-        for (; pos != nullptr; pos = pos->next) {
-            EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
-        }
+    function = search_function(function_call_expression->package_posit,
+                               function_call_expression->func_identifier);
+    // Ring-Compiler-Error-Report ERROR_UNDEFINITE_FUNCTION
+    if (function == nullptr) {
+        DEFINE_ERROR_REPORT_STR;
+
+        snprintf(compile_err_buf, 1024, "use undeclared function `%s`; E:%d",
+                 function_call_expression->func_identifier,
+                 ERROR_UNDEFINITE_FUNCTION);
+        snprintf(compile_adv_buf, 1024, "definite function `%s` like: `function %s() {}` before use it.",
+                 function_call_expression->func_identifier,
+                 function_call_expression->func_identifier);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = nullptr,
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(function_call_expression->line_number),
+            .line_number             = function_call_expression->line_number,
+            .column_number           = 0,
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+    check_function_call(function_call_expression, function);
+
+    function_call_expression->type          = FUNCTION_CALL_TYPE_FUNC;
+    function_call_expression->u.fc.function = function;
+
+
+    // function_call_expression 的类型取决于 function 返回值的类型
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    for (FunctionReturnList* pos = function->return_list;
+         pos != nullptr;
+         pos = pos->next) {
+        EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
     }
 }
 
@@ -2282,6 +2349,22 @@ void fix_launch_expression(Expression*       expression,
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     EXPRESSION_ADD_CONVERT_TYPE(expression, &int64_type_specifier);
+}
+
+void fix_closure_expression(Expression*        expression,
+                            ClosureExpression* closure_expression,
+                            Block*             block,
+                            FunctionTuple*     func) {
+
+    if (closure_expression == nullptr) {
+        return;
+    }
+
+    Closure* aony_func = closure_expression->closure_definition;
+    // TODO:
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, &func_type_specifier);
 }
 
 void add_parameter_to_declaration(Parameter* parameter, Block* block) {

@@ -216,6 +216,21 @@ Expression* create_expression_launch(LaunchExpressionType    type,
     return expression;
 }
 
+Expression* create_expression_closure_definition(Closure* func) {
+
+    ClosureExpression* closure       = (ClosureExpression*)mem_alloc(get_front_mem_pool(), sizeof(ClosureExpression));
+    closure->line_number             = package_unit_get_line_number();
+    closure->closure_definition      = func;
+
+    Expression* expression           = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
+    expression->line_number          = package_unit_get_line_number();
+    expression->convert_type         = nullptr; // UPDATED_BY_FIX_AST
+    expression->type                 = EXPRESSION_TYPE_CLOSURE;
+    expression->u.closure_expression = closure;
+
+    return expression;
+}
+
 Expression* create_expression_binary(ExpressionType type, Expression* left, Expression* right) {
     debug_ast_info_with_yellow("type:%d", type);
 
@@ -434,6 +449,7 @@ FunctionCallExpression* create_function_call_expression(char*         func_ident
     function_call_expression->line_number            = package_unit_get_line_number();
     function_call_expression->package_posit          = nullptr;
     function_call_expression->func_identifier        = func_identifier;
+    function_call_expression->type                   = FUNCTION_CALL_TYPE_FUNC; // UPDATED_BY_FIX_AST
     function_call_expression->argument_list_size     = 0;
     function_call_expression->argument_list          = argument_list;
 
@@ -550,6 +566,68 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
         ;
     pos->next = create_function_return_list(type_specifier);
     return return_list;
+}
+
+FunctionTuple* create_function_tuple(Parameter*          parameter_list,
+                                     FunctionReturnList* return_list,
+                                     Block*              block) {
+
+    unsigned parameter_list_size = 0;
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
+        parameter_list_size++;
+    }
+
+    unsigned int parameter_index = 0;
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
+
+        // 可变参数只能在函数定义中作为 最后一个参数
+        // Ring-Compiler-Error-Report ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER
+        if (pos->is_variadic && parameter_index != parameter_list_size - 1) {
+            DEFINE_ERROR_REPORT_STR;
+
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "can only use ... with final parameter in function definition; E:%d.",
+                     ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER);
+
+            ErrorReportContext context = {
+                .package          = nullptr,
+                .package_unit     = get_package_unit(),
+                .source_file_name = get_package_unit()->current_file_name,
+                // FIXME:
+                // .line_content            = package_unit_get_line_content(identifier->line_number),
+                // .line_number             = identifier->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+        parameter_index++;
+    }
+
+    unsigned int return_list_size = 0;
+    for (FunctionReturnList* pos = return_list; pos != nullptr; pos = pos->next) {
+        return_list_size++;
+    }
+
+
+    FunctionTuple* function_tup = (FunctionTuple*)mem_alloc(get_front_mem_pool(), sizeof(FunctionTuple));
+    function_tup->source_file   = package_unit_get_file_name();
+    // function_tup->start_line_number   = identifier->line_number; // FIXME:
+    function_tup->end_line_number     = package_unit_get_line_number();
+    function_tup->ring_file_stat      = get_package_unit()->ring_file_stat;
+
+    function_tup->parameter_list_size = parameter_list_size;
+    function_tup->parameter_list      = parameter_list;
+    function_tup->return_list_size    = return_list_size;
+    function_tup->return_list         = return_list;
+    function_tup->block               = block;
+    function_tup->next                = nullptr;
+
+    return function_tup;
 }
 
 Function* create_function_definition(FunctionType        type,
@@ -1087,6 +1165,21 @@ TypeSpecifier* create_class_type_specifier(char* identifier) {
     type_specifier->u.class_type->class_definition = nullptr;
     type_specifier->dimension                      = 0;
     type_specifier->sub                            = nullptr;
+
+    return type_specifier;
+}
+
+TypeSpecifier* create_func_type_specifier() {
+    debug_ast_info_with_yellow("\t");
+
+    TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type_specifier->kind          = RING_BASIC_TYPE_FUNC;
+    type_specifier->line_number   = package_unit_get_line_number();
+    type_specifier->u.func_type   = (Ring_DeriveType_Func*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Func));
+    // TODO: init func_type
+    // type_specifier->u.func_type->parameter_list;
+    type_specifier->dimension = 0;
+    type_specifier->sub       = nullptr;
 
     return type_specifier;
 }
