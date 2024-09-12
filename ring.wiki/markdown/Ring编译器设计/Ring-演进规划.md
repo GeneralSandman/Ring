@@ -3,14 +3,9 @@
 
 > [!TIP|label:tip]
 >
-> 世界上哪有不枯燥的事情呀。
-> 
-> 但最重要的是：要善于将枯燥的东西转换成正反馈，不断的刺激自己向前做。
-> 
-> 研究编译器本身就是一个比较枯燥的， 只要有忍住寂寞的态度， 等一段时间之后，回头不禁感叹：Ring的功能竟然这样丰富了！
->
->
 > 耐住寂寞。
+>
+> 不要觉得自己做的编译器没有气候，编译器是工业软件，不是玩具，需要时间积累。
 > 
 
 
@@ -575,14 +570,35 @@ quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
 1. 匿名函数
 2. 闭包
 3. 协程
-4. 调用C语言，通过 .so共享库或者别的方式
-5. 增量式垃圾回收机制
-6. 支持范型
-7. 支持map
-8. 模式匹配
-9. 类型转换
-10. 指针
+4. 增量式垃圾回收机制
+5. 类型转换
+6. 指针
+7. 规范限定符号
+8. 支持Enum
 
+
+-----------------------------
+
+
+## 2024-09-02周
+
+### A. Proposal: 添加 fmt::sprintf() 函数，用于格式化生成字符串 ✅
+
+usage:
+
+```
+    var string str;
+
+    str = fmt::sprintf("{} {} {}", false, 1, "ring");
+
+```
+
+
+### B. Proposal: 关于函数的可见行
+
+closure function build-function 他们名字相同时，允许覆盖么，
+
+比如说 build-function append, 如果用户自定义了一个 append函数，他们是如何影响的
 
 
 -----------------------------
@@ -647,9 +663,23 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 ```
 
 
+如果入口函数支持可变参数，也能很好的支持：
+
+```
+function func_(var int... array_value) {
+    fmt::printf("len(array_value)      = {}\n", len(array_value));
+    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+}
+
+@main
+function main() {
+    launch func_(1, 2, 3);
+}
+```
 
 
-当然，launch后续也可以扩展成一个代码块/匿名函数
+
+TODO: 当然，launch后续也可以扩展成一个代码块/匿名函数，这里需要后边统一设置匿名函数/闭包
 
 ```
     launch {
@@ -660,19 +690,16 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 ```
 
 
-TODO: 限制，当前launch传递的函数中参数不能是可变参考，后续可以考虑放开
 
-```
-function func_(var int... array_value) {
 
-}
 
-@main
-function main() {
-    launch func_(1, 2, 3);
-    // 编译错误，
-}
-```
+
+### C. Feature: 完善函数调用/方法调用 的语义检查
+
+
+1. `func_();` 函数调用/方法调用：需要强制检查func_函数的参数类型是否一致
+2. `launch func_();` 需要遵循 函数调用/方法调用 相同的语义检查
+
 
 
 
@@ -680,6 +707,144 @@ function main() {
 
 
 
+### D. Fix: 当变量的定义和初始化过程中，如果初始化表达式为函数调用，行为不符合预期 ✅ 
+
+e.g.
+
+```
+    var int a, b = func_();
+```
+
+经排查，是因为 `Declaration::next` 指针混乱，导致在使用的过程中混淆
+
+解决方法：
+1. 将变量的定义+初始化分成两个语句，Declaration + Assignment
+2. 在Declaration阶段，不生成对应的字节码
+3. 在Assignment阶段，生成对应的assign字节码，同时这个阶段方便的对 赋值语句的左值和右值进行语义检查，检查类型是否匹配。
+
+
+### E. Proposal: 关于ring的保留字
+
+#### 1. class 中的 field/method 是否应该改为 var/function
+
+直观的优点是：这样可以少两个关键字
+
+但是我还有几个理由不这样做：
+
+1. var 可以定义
+   - 函数中的局部变量
+   - package中的全局变量
+   - 类中的静态变量（参考cpp）
+2. function 可以定义
+   - 用来声明函数
+   - 类静态方法
+3. field 只能用来定义 类中的非静态成员变量
+4. method 只能用来定义 类中的非静态成员方法
+
+e.g.
+
+```
+typedef class Job {
+    var int count;
+
+    field int Name;
+
+
+    function init() -> (Job) {
+
+    }
+
+    method printInfo() {
+
+    }
+}
+
+global {
+    var int global_int;
+}
+
+function main() {
+    var int a;
+}
+```
+
+
+Job::init() 为静态方法
+Job::printInfo() 为非静态方法
+
+```
+    Job::init(); // 调用镜头方法
+
+
+    var Job job_value;
+
+    job_value.printInfo();
+
+```
+
+
+
+当起Ring还不是 类中的静态field/method，可以后续扩展
+
+
+#### 2. 定义函数 function 关键字精简 为fn
+
+这样的优点是，在定义匿名函数的时候比较迅速：
+
+```
+func_ = fn() {
+
+}
+```
+
+
+#### 3. class定义的方式是不是应该简化一下，目前过于繁琐了
+
+### F. 关于多项赋值
+
+
+这一行是编译不通过的，需要放开限制
+
+```
+var int global_int_value_1, global_int_value_2 = get_next_global_count(), get_next_global_count();
+```
+
+
+
+
+
+### H. Proposal: 协程在launch的时候就应该运行
+
+
+### L. Proposal: ring dump
+
+在dump 某些字节码时，如果字节码的类型是 OPCODE_OPERAND_TYPE_2BYTE_AB/OPCODE_OPERAND_TYPE_2BYTE_ABs，应该分开展示，便于理解
+
+例如， duplicate应该这样展示：
+
+```
+ ├──66      duplicate                     1, 1                               
+```
+
+
+同时还要支持一下 详细模式和精简模式
+- 详细模式下，对于 invoke_func , 能够展示函数名称，这样能提高调试效率
+
+
+### M. Fix: 
+
+
+目前，下面的这行代码应该不会编译报错的
+
+
+```ring
+
+var int a = 1;
+
+b = 3;
+
+var int b = 2;
+```
 
 -----------------------------
 
