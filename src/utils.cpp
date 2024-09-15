@@ -661,6 +661,9 @@ std::string dump_vm_constant(RVM_ConstantPool* constant) {
     case CONSTANTPOOL_TYPE_STRING:
         return "string(" + std::string(constant->u.string_value) + ")";
         break;
+    case CONSTANTPOOL_TYPE_CLOSURE:
+        return "closure()";
+        break;
     default:
         // TODO: error-report
         break;
@@ -675,7 +678,7 @@ std::string dump_vm_constant(RVM_ConstantPool* constant) {
  * binary search
  * 单调性可查看 RVM_SourceCodeLineMap
  */
-unsigned int get_source_line_number_by_pc(RVM_Function* function, unsigned int pc) {
+unsigned int get_source_line_number_by_pc(RVM_Function_Tuple* function, unsigned int pc) {
     DeriveFunction* derive_function = function->u.derive_func;
 
     unsigned int    left            = 0;
@@ -732,6 +735,9 @@ std::string format_rvm_type(RVM_Value* value) {
     case RVM_VALUE_TYPE_ARRAY:
         str = formate_array_type(value->u.array_value);
         break;
+    case RVM_VALUE_TYPE_CLOSURE:
+        str = "closure";
+        break;
     default:
         str = "unknow";
         break;
@@ -787,9 +793,9 @@ std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
             if (pos->callee_object != nullptr) {
                 func_name = sprintf_string("%s.%s",
                                            pos->callee_object->class_ref->identifier,
-                                           format_rvm_function(rvm->executer, pos->callee_function).c_str());
+                                           format_rvm_function(rvm->executer, (RVM_Function*)pos->callee_function).c_str());
             } else {
-                func_name = sprintf_string("%s", format_rvm_function(rvm->executer, pos->callee_function).c_str());
+                func_name = sprintf_string("%s", format_rvm_function(rvm->executer, (RVM_Function*)pos->callee_function).c_str());
             }
 
             source_file        = pos->callee_function->source_file;
@@ -827,9 +833,9 @@ std::string format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int sourc
     result += "$ring!";
     // TODO: 这里想个更好的办法, 减少代码重复
     if (pos->callee_object == nullptr) {
-        result += format_rvm_function(rvm->executer, pos->callee_function);
+        result += format_rvm_function(rvm->executer, (RVM_Function*)pos->callee_function);
     } else {
-        result += std::string(pos->callee_object->class_ref->identifier) + "." + format_rvm_function(rvm->executer, pos->callee_function);
+        result += std::string(pos->callee_object->class_ref->identifier) + "." + format_rvm_function(rvm->executer, (RVM_Function*)pos->callee_function);
     }
 
 

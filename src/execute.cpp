@@ -29,6 +29,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     (VM_CUR_CO_STACK_DATA[(index)].u.class_ob_value)
 #define STACK_GET_ARRAY_INDEX(index) \
     (VM_CUR_CO_STACK_DATA[(index)].u.array_value)
+#define STACK_GET_CLOSURE_INDEX(index) \
+    (VM_CUR_CO_STACK_DATA[(index)].u.closure_value)
 
 // 通过栈顶偏移 offset 获取 VM_CUR_CO_STACK_DATA
 #define STACK_GET_TYPE_OFFSET(offset) \
@@ -47,6 +49,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     STACK_GET_CLASS_OB_INDEX(VM_CUR_CO_STACK_TOP_INDEX + (offset))
 #define STACK_GET_ARRAY_OFFSET(offset) \
     STACK_GET_ARRAY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + (offset))
+#define STACK_GET_CLOSURE_OFFSET(offset) \
+    STACK_GET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + (offset))
 
 
 // 通过绝对索引 设置 VM_CUR_CO_STACK_DATA
@@ -71,7 +75,9 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define STACK_SET_ARRAY_INDEX(index, value)                             \
     VM_CUR_CO_STACK_DATA[(index)].type          = RVM_VALUE_TYPE_ARRAY; \
     VM_CUR_CO_STACK_DATA[(index)].u.array_value = (value);
-
+#define STACK_SET_CLOSURE_INDEX(index, value)                               \
+    VM_CUR_CO_STACK_DATA[(index)].type            = RVM_VALUE_TYPE_CLOSURE; \
+    VM_CUR_CO_STACK_DATA[(index)].u.closure_value = (value);
 
 // 通过栈顶偏移 offset 设置 VM_CUR_CO_STACK_DATA
 #define STACK_SET_BOOL_OFFSET(offset, value) \
@@ -88,6 +94,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     STACK_SET_CLASS_OB_INDEX(VM_CUR_CO_STACK_TOP_INDEX + (offset), (value))
 #define STACK_SET_ARRAY_OFFSET(offset, value) \
     STACK_SET_ARRAY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + (offset), (value))
+#define STACK_SET_CLOSURE_OFFSET(offset, value) \
+    STACK_SET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + (offset), (value))
 
 
 #define STACK_COPY_INDEX(dst_index, src_index) \
@@ -119,6 +127,9 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define STATIC_SET_ARRAY_INDEX(index, value)                      \
     VM_STATIC_DATA[(index)].type          = RVM_VALUE_TYPE_ARRAY; \
     VM_STATIC_DATA[(index)].u.array_value = (value);
+#define STATIC_SET_CLOSURE_INDEX(index, value)                        \
+    VM_STATIC_DATA[(index)].type            = RVM_VALUE_TYPE_CLOSURE; \
+    VM_STATIC_DATA[(index)].u.closure_value = (value);
 
 
 // 从后边获取 1BYTE的操作数
@@ -334,6 +345,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_ClassObject*     class_ob_value         = nullptr;
     RVM_Array*           array_value            = nullptr;
     RVM_Array*           array_c_value          = nullptr;
+    RVM_Closure*         closure_value          = nullptr;
 
     RVM_ClassDefinition* rvm_class_definition   = nullptr;
     RingCoroutine*       new_coroutine          = nullptr;
@@ -498,6 +510,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
+        case RVM_CODE_PUSH_CLOSURE:
+            const_index   = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            closure_value = constant_pool_list[const_index].u.closure_value;
+            STACK_SET_CLOSURE_OFFSET(0, closure_value);
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 3;
+            break;
 
 
         // static
@@ -653,6 +672,15 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             VM_CUR_CO_PC += 3;
             break;
+        case RVM_CODE_POP_STACK_CLOSURE:
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            closure_value       = STACK_GET_CLOSURE_OFFSET(-1);
+            STACK_SET_CLOSURE_INDEX(
+                VM_CUR_CO_CSB + caller_stack_offset,
+                closure_value);
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
+            VM_CUR_CO_PC += 3;
+            break;
 
         case RVM_CODE_PUSH_STACK_BOOL:
             caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
@@ -703,7 +731,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
-
+        case RVM_CODE_PUSH_STACK_CLOSURE:
+            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            STACK_SET_CLOSURE_OFFSET(0,
+                                     STACK_GET_CLOSURE_INDEX(VM_CUR_CO_CSB + caller_stack_offset));
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 3;
+            break;
 
         // array
         case RVM_CODE_PUSH_ARRAY_A:
@@ -1428,6 +1462,17 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
+        case RVM_CODE_INVOKE_CLOSURE:
+            argument_list_size = STACK_GET_INT_OFFSET(-2);
+            closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
+            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+
+            invoke_derive_function(rvm,
+                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
+                                   nullptr, (RVM_Function_Tuple*)closure_value,
+                                   argument_list_size);
+
+            break;
         case RVM_CODE_INVOKE_FUNC_NATIVE:
             argument_list_size = STACK_GET_INT_OFFSET(-2);
 
@@ -1446,7 +1491,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_PC += 1;
             break;
         case RVM_CODE_INVOKE_FUNC:
-            // TODO:
             argument_list_size = STACK_GET_INT_OFFSET(-2);
             oper_num           = STACK_GET_INT_OFFSET(-1);
             package_index      = oper_num >> 8;
@@ -1457,8 +1501,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             invoke_derive_function(rvm,
-                                   &caller_class_ob, &caller_function,
-                                   nullptr, callee_function,
+                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
+                                   nullptr, (RVM_Function_Tuple*)callee_function,
                                    argument_list_size);
 
             break;
@@ -1477,8 +1521,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             callee_function = callee_method->rvm_function;
 
             invoke_derive_function(rvm,
-                                   &caller_class_ob, &caller_function,
-                                   callee_class_ob, callee_function,
+                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
+                                   callee_class_ob, (RVM_Function_Tuple*)callee_function,
                                    argument_list_size);
             break;
         case RVM_CODE_RETURN:
@@ -1487,7 +1531,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             [[fallthrough]]; // make g++ happy
         case RVM_CODE_FUNCTION_FINISH:
             derive_function_finish(rvm,
-                                   &caller_class_ob, &caller_function,
+                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
                                    nullptr,
                                    return_value_list_size);
             // VM_CUR_CO_PC += 1;
@@ -1850,8 +1894,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             new_coroutine = launch_coroutine(rvm,
-                                             &caller_class_ob, &caller_function,
-                                             nullptr, callee_function,
+                                             &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
+                                             nullptr, (RVM_Function_Tuple*)callee_function,
                                              argument_list_size);
             // destory arguments after copy it to new coroutine
             VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
@@ -1877,8 +1921,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             new_coroutine = launch_coroutine(rvm,
-                                             &caller_class_ob, &caller_function,
-                                             callee_class_ob, callee_function,
+                                             &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
+                                             callee_class_ob, (RVM_Function_Tuple*)callee_function,
                                              argument_list_size);
             // destory arguments after copy it to new coroutine
             VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
@@ -1894,7 +1938,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             res = resume_coroutine(rvm,
                                    co_id,
-                                   &caller_class_ob, &caller_function,
+                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
                                    nullptr, nullptr);
             if (res != 0) {
                 VM_CUR_CO_PC += 1;
@@ -1981,8 +2025,8 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
  *
  */
 void invoke_derive_function(Ring_VirtualMachine* rvm,
-                            RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                            RVM_ClassObject* callee_object, RVM_Function* callee_function,
+                            RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
+                            RVM_ClassObject* callee_object, RVM_Function_Tuple* callee_function,
                             unsigned int argument_list_size) {
 
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
@@ -2045,9 +2089,9 @@ void derive_function_return(Ring_VirtualMachine* rvm,
  *
  * */
 void derive_function_finish(Ring_VirtualMachine* rvm,
-                            RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                            RVM_Function* callee_function,
-                            unsigned int  return_value_list_size) {
+                            RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
+                            RVM_Function_Tuple* callee_function,
+                            unsigned int        return_value_list_size) {
 
     // FIXME:
     // 不应该直接操作 VM_CUR_CO_STACK_TOP_INDEX
@@ -2179,7 +2223,7 @@ RVM_CallInfo* restore_callinfo(RVM_CallInfo** head_) {
  */
 void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                          RVM_ClassObject*     callee_object,
-                                         RVM_Function*        function,
+                                         RVM_Function_Tuple*  function,
                                          unsigned int         argument_list_size) {
 
     RVM_TypeSpecifier*   type_specifier          = nullptr;

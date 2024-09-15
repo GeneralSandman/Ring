@@ -1811,7 +1811,10 @@ void fix_function_call_expression(Expression*             expression,
         if (declaration->type_specifier->kind == RING_BASIC_TYPE_FUNC) {
             // 是一个变量，并且是一个函数变量，需要继续匹配
             // 匹配函数调用的语义
-            function_call_expression->type = FUNCTION_CALL_TYPE_CLOSURE;
+            function_call_expression->type              = FUNCTION_CALL_TYPE_CLOSURE;
+            function_call_expression->u.cc.closure_decl = declaration;
+
+            // TODO: 暂时不进行函数调用参数的强制校验
             return;
         } else {
             // 只是一个普通变量
@@ -2360,8 +2363,18 @@ void fix_closure_expression(Expression*        expression,
         return;
     }
 
-    Closure* aony_func = closure_expression->closure_definition;
-    // TODO:
+    Closure* closure = closure_expression->closure_definition;
+
+    // 这里的实现方式和 fix_function_definition 一样
+    FunctionReturnList* return_list = closure->return_list;
+    for (; return_list != nullptr; return_list = return_list->next) {
+        fix_type_specfier(return_list->type_specifier);
+    }
+
+    if (closure->block) {
+        add_parameter_to_declaration(closure->parameter_list, closure->block);
+        fix_statement_list(closure->block->statement_list, closure->block, (FunctionTuple*)closure);
+    }
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     EXPRESSION_ADD_CONVERT_TYPE(expression, &func_type_specifier);

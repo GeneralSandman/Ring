@@ -25,6 +25,9 @@ std::string fmt_any(RVM_Value* value) {
     case RVM_VALUE_TYPE_ARRAY:
         return fmt_array(value);
         break;
+    case RVM_VALUE_TYPE_CLOSURE:
+        return "CLOSURE";
+        break;
     default:
         break;
     }

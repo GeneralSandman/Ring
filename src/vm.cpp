@@ -37,6 +37,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_INT64, "push_int64", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant int64 value to stack", "[]-->[int]", "So(0).int64 = C(As).int64"},
     {RVM_CODE_PUSH_DOUBLE, "push_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant double value to stack", "[]-->[double]", "So(0).double = C(As).double"},
     {RVM_CODE_PUSH_STRING, "push_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant string value to stack", "[]-->[string]", "So(0).string = C(As).string"},
+    {RVM_CODE_PUSH_CLOSURE, "push_closure", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant closure value to stack", "[]-->[closure]", "So(0).closure = C(As).closure"},
 
 
     // static
@@ -225,6 +226,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_ARGUMENT_NUM, "argument_num", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "", "", ""},
     {RVM_CODE_PUSH_FUNC, "push_func", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", "", ""},
     {RVM_CODE_PUSH_METHOD, "push_method", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", "", ""},
+    {RVM_CODE_INVOKE_CLOSURE, "invoke_closure", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "", ""},
     {RVM_CODE_INVOKE_FUNC_NATIVE, "invoke_func_native", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "", ""},
     {RVM_CODE_INVOKE_FUNC, "invoke_func", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "", ""},
     {RVM_CODE_INVOKE_METHOD, "invoke_method", OPCODE_OPERAND_TYPE_0BYTE, -2, "", "", ""},
