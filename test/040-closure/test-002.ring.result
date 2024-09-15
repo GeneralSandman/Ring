@@ -1,0 +1,28 @@
+
+invoke a test1::closure 0
+-local_bool_value_0: false
+-local_int_value_0: 0
+-local_int64_value_0: 0
+-local_double_value_0: 0.000000
+-local_string_value_0: 
+
+invoke a test1::closure 1
+-local_bool_value_0: true
+-local_int_value_0: 1
+-local_int64_value_0: 2
+-local_double_value_0: 3.141593
+-local_string_value_0: hello-world
+
+invoke a test1::closure 0
+-local_bool_value_0: false
+-local_int_value_0: 0
+-local_int64_value_0: 0
+-local_double_value_0: 0.000000
+-local_string_value_0: 
+
+invoke a test1::closure 1
+-local_bool_value_0: true
+-local_int_value_0: 1
+-local_int64_value_0: 2
+-local_double_value_0: 3.141593
+-local_string_value_0: hello-world
