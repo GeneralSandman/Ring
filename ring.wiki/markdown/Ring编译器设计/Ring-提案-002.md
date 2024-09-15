@@ -100,7 +100,14 @@ function main() {
 2. 闭包变量
 
 
-#### 关于匿名函数对应的字节码
+#### 匿名函数 block 也要生成对应的字节码
+
+
+generate block code for closure 
+
+
+
+#### 关于调用匿名函数对应的字节码
 
 
 - push/pop stack_closure
@@ -111,6 +118,46 @@ function main() {
 - new_array_closure
 - new_array_literal_closure
 - range_array_closure
+
+
+像函数调用一样使用closure，对应的字节码该如何设计
+
+```ring
+    func(false, 1);
+```
+
+
+对应函数调用的字节码
+
+```
+    push_false
+    push_int
+    argument_num
+    push_func
+    invoke_func_derive
+```
+
+push_func/push_method
+
+invoke_func_native/invoke_func/invoke_method
+
+是否应该引入 push_closure/invoke_closure 指令，用于调用closure
+
+
+对应closure 调用的字节码
+
+```
+    push_false
+    push_int
+    argument_num
+    push_closure
+    invoke_closure
+```
+
+这样有个好处就是前期方便处理
+
+
+closure 放在一个 constant-pool
 
 
 
