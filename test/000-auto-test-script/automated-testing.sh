@@ -82,6 +82,8 @@ TEST_MODELS=(
     "032-do-for"
     "033-for-range"
 
+    "040-closure"
+
     "050-coroutine"
 
     "060-std-package-debug"
