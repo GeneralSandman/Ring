@@ -1467,6 +1467,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
 
+            if (closure_value == nullptr) {
+                VM_CUR_CO_PC += 1;
+                break;
+            }
+
             invoke_derive_function(rvm,
                                    &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
                                    nullptr, (RVM_Function_Tuple*)closure_value,
