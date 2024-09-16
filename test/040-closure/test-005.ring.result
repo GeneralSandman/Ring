@@ -1,0 +1,8 @@
+pass_closure::begin
+main:: closure block
+pass_closure::end
+
+
+main::begin
+pass_closure:: closure block
+main::end
