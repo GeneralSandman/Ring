@@ -137,6 +137,7 @@ Package* package_create(CompilerEntry* compiler_entry,
 
     package->class_definition_list       = std::vector<ClassDefinition*>{};
     package->function_list               = std::vector<Function*>{};
+    package->type_alias_list             = std::vector<TypeAlias*>{};
 
     package->global_identifier_map       = std::unordered_set<std::string>{};
     package->global_declaration_map      = std::unordered_map<std::string, Declaration*>{};
@@ -173,6 +174,7 @@ Package* package_create_input_file(CompilerEntry* compiler_entry,
 
     package->class_definition_list       = std::vector<ClassDefinition*>{};
     package->function_list               = std::vector<Function*>{};
+    package->type_alias_list             = std::vector<TypeAlias*>{};
 
     package->global_identifier_map       = std::unordered_set<std::string>{};
     package->global_declaration_map      = std::unordered_map<std::string, Declaration*>{};
@@ -224,37 +226,11 @@ void package_compile(Package* package) {
                                                     package_unit->global_block_statement_list));
         }
 
-        for (Statement* statement = package_unit->global_block_statement_list; statement; statement = statement->next) {
-            switch (statement->type) {
-            case STATEMENT_TYPE_DECLARATION: {
-                Declaration* decl_pos = statement->u.declaration_statement;
-                for (; decl_pos != nullptr; decl_pos = decl_pos->next) {
-
-                    fix_type_specfier(decl_pos->type_specifier);
-
-
-                    // 添加全局变量
-                    decl_pos->variable_index = package->global_declaration_list.size();
-                    decl_pos->is_local       = 0;
-                    package->global_declaration_list.push_back(decl_pos);
-                }
-            } break;
-            case STATEMENT_TYPE_EXPRESSION: {
-                Expression* expression = statement->u.expression;
-                if (expression->type != EXPRESSION_TYPE_ASSIGN) {
-                    ring_error_report("only support variable definition&init statement in global block. expression->type:%d\n", expression->type);
-                }
-                fix_assign_expression(expression->u.assign_expression, nullptr, nullptr);
-            } break;
-            default:
-                ring_error_report("only support variable definition&init statement in global block. statement->type:%d\n", statement->type);
-                break;
-            }
-        }
-
-
         for (ClassDefinition* pos : package_unit->class_definition_list) {
             package->class_definition_list.push_back(pos);
+        }
+        for (TypeAlias* pos : package_unit->type_alias_list) {
+            package->type_alias_list.push_back(pos);
         }
         for (Function* pos : package_unit->function_list) {
             package->function_list.push_back(pos);
@@ -301,6 +277,11 @@ void package_dump(Package* package) {
         printf("|\tfunction_name: %s%s%s\n", LOG_COLOR_YELLOW, function->identifier, LOG_COLOR_CLEAR);
     }
 
+    printf("|## TypeAlias:\n");
+    for (auto type_alias : package->type_alias_list) {
+        printf("|\ttype_alias_name: %s%s%s\n", LOG_COLOR_YELLOW, type_alias->identifier, LOG_COLOR_CLEAR);
+    }
+
     printf("|------------------ Package-Dump-end  ------------------\n");
 }
 
@@ -329,6 +310,8 @@ PackageUnit* package_unit_create(Package* parent_package, std::string file_name)
 
     g_package_unit->class_definition_list            = std::vector<ClassDefinition*>{};
     g_package_unit->function_list                    = std::vector<Function*>{};
+    g_package_unit->type_alias_list                  = std::vector<TypeAlias*>{};
+
 
     g_package_unit->current_block                    = nullptr;
 
@@ -401,6 +384,11 @@ void package_unit_dump(PackageUnit* package_unit) {
     printf("|## Function:\n");
     for (auto function : package_unit->function_list) {
         printf("|\tfunction_name: %s%s%s\n", LOG_COLOR_YELLOW, function->identifier, LOG_COLOR_CLEAR);
+    }
+
+    printf("|## TypeAlias:\n");
+    for (auto type_alias : package_unit->type_alias_list) {
+        printf("|\ttype_alias_name: %s%s%s\n", LOG_COLOR_YELLOW, type_alias->identifier, LOG_COLOR_CLEAR);
     }
 
     printf("|------------------ PackageUnit-Dump-end  ------------------\n");
@@ -520,6 +508,14 @@ int package_unit_add_class_definition(ClassDefinition* class_definition) {
     assert(class_definition != nullptr);
 
     g_package_unit->class_definition_list.push_back(class_definition);
+    return 0;
+}
+
+int package_unit_add_type_alias(TypeAlias* type_alias) {
+    assert(g_package_unit != nullptr);
+    assert(type_alias != nullptr);
+
+    g_package_unit->type_alias_list.push_back(type_alias);
     return 0;
 }
 

@@ -91,6 +91,7 @@ typedef struct Ring_DeriveType_Func         Ring_DeriveType_Func;
 typedef struct Declaration                  Declaration;
 typedef struct TagDefinitionStatement       TagDefinitionStatement;
 typedef struct JumpTagStatement             JumpTagStatement;
+typedef struct TypeAlias                    TypeAlias;
 typedef struct TypeSpecifier                TypeSpecifier;
 typedef struct StdPackageNativeFunction     StdPackageNativeFunction;
 
@@ -377,6 +378,7 @@ struct Package {
 
     std::vector<ClassDefinition*>                     class_definition_list;
     std::vector<Function*>                            function_list;
+    std::vector<TypeAlias*>                           type_alias_list;
 
     std::unordered_set<std::string>                   global_identifier_map;
     std::unordered_map<std::string, Declaration*>     global_declaration_map;
@@ -434,6 +436,7 @@ struct PackageUnit {
     std::vector<ClassDefinition*>   class_definition_list;
     std::vector<Function*>          function_list;
     std::vector<EnumDeclaration*>   enum_declaration_list;
+    std::vector<TypeAlias*>         type_alias_list;
 
     Block*                          current_block;
 
@@ -474,14 +477,6 @@ typedef enum {
 } Ring_BasicType;
 
 
-typedef enum {
-    RING_DERIVE_TYPE_UNKNOW,
-    RING_DERIVE_TYPE_ARRAY,
-    RING_DERIVE_TYPE_CLASS,
-    RING_DERIVE_TYPE_FUNC,
-} Ring_DeriveTypeKind;
-
-
 struct Ring_DeriveType_Array {
 };
 
@@ -493,17 +488,28 @@ struct Ring_DeriveType_Class {
 // TODO:
 // 函数变量类型
 struct Ring_DeriveType_Func {
-    unsigned int   parameter_list_size;
-    TypeSpecifier* parameter_list;
+    unsigned int    parameter_list_size;
+    TypeSpecifier** parameter_list;
 
-    unsigned int   return_list_size;
-    TypeSpecifier* return_list;
+    unsigned int    return_list_size;
+    TypeSpecifier** return_list;
 };
 
 
+struct TypeAlias {
+    unsigned int   line_number;
+
+    char*          identifier;
+    TypeSpecifier* type_specifier;
+};
+
 // Only used by front-end of compiler.
 struct TypeSpecifier {
-    unsigned int   line_number;
+    unsigned int line_number;
+
+    // 只有非 bool/int/int64/double/string 时, identifier才会有效
+    // 如类, 函数别名
+    char*          identifier;
 
     Ring_BasicType kind;
     union {
@@ -1464,7 +1470,7 @@ struct MemberExpression {
     unsigned int line_number;
 
     Expression*  object_expression;
-    char*        member_identifier;
+    char*        field_member_identifier;
     FieldMember* field_member; // UPDATED_BY_FIX_AST
 };
 
@@ -2472,6 +2478,7 @@ std::string    package_unit_get_line_content(unsigned int line_number);
 
 int            package_unit_add_enum_definition(EnumDeclaration* enum_decl);
 int            package_unit_add_class_definition(ClassDefinition* class_definition);
+int            package_unit_add_type_alias(TypeAlias* type_alias);
 
 void           ring_grammar_error(RING_GRAMMAR_ID grammar_id);
 int            yyerror(char const* str, ...);
@@ -2573,8 +2580,11 @@ SubDimensionExpression*       sub_dimension_expression_list_add_item(SubDimensio
 
 TypeSpecifier*                create_type_specifier(Ring_BasicType basic_type);
 TypeSpecifier*                create_type_specifier_array(TypeSpecifier* sub_type, DimensionExpression* dimension);
-TypeSpecifier*                create_class_type_specifier(char* identifier);
-TypeSpecifier*                create_func_type_specifier();
+TypeSpecifier*                create_type_specifier_alias(char* identifier);
+
+TypeAlias*                    add_type_alias_func(Parameter*          parameter_list,
+                                                  FunctionReturnList* return_list,
+                                                  Identifier*         identifier);
 
 Declaration*                  create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
 Declaration*                  declaration_list_add_item(Declaration* head, Declaration* declaration);
@@ -2641,6 +2651,7 @@ void ring_compiler_check_exit(Package* package);
 void             ring_compiler_fix_ast(Package* package);
 Function*        create_global_init_func(Package* package);
 void             fix_function_definition(Function* func);
+void             fix_function_block(Function* func);
 void             fix_statement_list(Statement* statement_list, Block* block, FunctionTuple* func);
 void             fix_statement(Statement* statement, Block* block, FunctionTuple* func);
 void             fix_expression(Expression* expression, Block* block, FunctionTuple* func);
@@ -2709,6 +2720,7 @@ void             fix_class_object_literal_expression(Expression* expression, Cla
 void             fix_field_member_expression(Expression* expression, MemberExpression* member_expression, Block* block, FunctionTuple* func);
 void             fix_class_member_expression(MemberExpression* member_expression, Expression* object_expression, char* member_identifier);
 ClassDefinition* search_class_definition(char* class_identifier);
+TypeAlias*       search_type_alias(char* identifier);
 FieldMember*     search_class_field(ClassDefinition* class_definition, char* identifier);
 MethodMember*    search_class_method(ClassDefinition* class_definition, char* identifier);
 

@@ -60,6 +60,7 @@ TypeSpecifier string_type_specifier = TypeSpecifier{
     .dimension   = 0,
     .sub         = 0,
 };
+// TODO: 删除
 TypeSpecifier func_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_FUNC,
@@ -74,11 +75,46 @@ extern Ring_Command_Arg ring_command_arg;
 //
 void ring_compiler_fix_ast(Package* package) {
 
-    // step-1. fix class list
-    unsigned int class_index = 0;
-    for (ClassDefinition* class_def : package->class_definition_list) {
-        class_def->class_index = class_index++;
-        fix_class_definition(class_def);
+
+    // step-3. fix function list
+    unsigned int func_index = 0;
+    for (Function* func : package->function_list) {
+        func->func_index = func_index++;
+        if (str_eq(func->identifier, "__global_init")) {
+            continue;
+        }
+        fix_function_definition(func);
+    }
+
+
+    for (auto tmp : package->global_block_statement_list) {
+        for (Statement* statement = tmp.second; statement; statement = statement->next) {
+            switch (statement->type) {
+            case STATEMENT_TYPE_DECLARATION: {
+
+                for (Declaration* pos = statement->u.declaration_statement; pos != nullptr; pos = pos->next) {
+
+                    fix_type_specfier(pos->type_specifier);
+
+
+                    // 添加全局变量
+                    pos->variable_index = package->global_declaration_list.size();
+                    pos->is_local       = 0;
+                    package->global_declaration_list.push_back(pos);
+                }
+            } break;
+            case STATEMENT_TYPE_EXPRESSION: {
+                Expression* expression = statement->u.expression;
+                if (expression->type != EXPRESSION_TYPE_ASSIGN) {
+                    ring_error_report("only support variable definition&init statement in global block. expression->type:%d\n", expression->type);
+                }
+                fix_assign_expression(expression->u.assign_expression, nullptr, nullptr);
+            } break;
+            default:
+                ring_error_report("only support variable definition&init statement in global block. statement->type:%d\n", statement->type);
+                break;
+            }
+        }
     }
 
     // step-2. fix global init statement
@@ -121,14 +157,20 @@ void ring_compiler_fix_ast(Package* package) {
     }
 
 
-    // step-3. fix function list
-    unsigned int func_index = 0;
+    // step-1. fix class list
+    unsigned int class_index = 0;
+    for (ClassDefinition* class_def : package->class_definition_list) {
+        class_def->class_index = class_index++;
+        fix_class_definition(class_def);
+    }
+
+    func_index = 0;
     for (Function* func : package->function_list) {
         func->func_index = func_index++;
         if (str_eq(func->identifier, "__global_init")) {
             continue;
         }
-        fix_function_definition(func);
+        fix_function_block(func);
     }
 }
 
@@ -193,14 +235,20 @@ Function* create_global_init_func(Package* package) {
     return function;
 }
 
-
 void fix_function_definition(Function* func) {
+    Parameter* pos = func->parameter_list;
+    for (; pos != nullptr; pos = pos->next) {
+        fix_type_specfier(pos->type_specifier);
+    }
 
     FunctionReturnList* return_list = func->return_list;
     for (; return_list != nullptr; return_list = return_list->next) {
         fix_type_specfier(return_list->type_specifier);
     }
+}
 
+
+void fix_function_block(Function* func) {
     if (func->block) {
         add_parameter_to_declaration(func->parameter_list, func->block);
         fix_statement_list(func->block->statement_list, func->block, (FunctionTuple*)func);
@@ -441,27 +489,49 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
 
 
     ClassDefinition* class_definition = nullptr;
-    char*            class_identifier = nullptr;
+    TypeAlias*       type_alias       = nullptr;
 
+    // TODO: var a tmp;
+    // 1. a 是一个类-类型, 从全局类定义中搜索
+    // 2. a 是一个匿名函数类型, 从全局类型定义中搜索
+    if (type_specifier->kind == RING_BASIC_TYPE_UNKNOW) {
 
-    // 如果这个变量是类
-    // 找到类的定义
-    if (type_specifier->kind == RING_BASIC_TYPE_CLASS
-        && type_specifier->u.class_type != nullptr) {
-        class_identifier = type_specifier->u.class_type->class_identifier;
-        class_definition = search_class_definition(class_identifier);
+        assert(type_specifier->identifier != nullptr);
+
+        // step-1. 是个类
+        class_definition = search_class_definition(type_specifier->identifier);
+        if (class_definition != nullptr) {
+            Ring_DeriveType_Class* class_type = (Ring_DeriveType_Class*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Class));
+            class_type->class_identifier      = type_specifier->identifier;
+            class_type->class_definition      = class_definition;
+
+            type_specifier->kind              = RING_BASIC_TYPE_CLASS;
+            type_specifier->u.class_type      = class_type;
+            goto END;
+        }
+
+        // step-2. 是个函数别名
+        type_alias = search_type_alias(type_specifier->identifier);
+        if (type_alias != nullptr) {
+            // TODO: 这个写法需要再优化一下
+            type_specifier->kind      = type_alias->type_specifier->kind;
+            type_specifier->u         = type_alias->type_specifier->u;
+            type_specifier->dimension = type_alias->type_specifier->dimension;
+            type_specifier->sub       = type_alias->type_specifier->sub;
+            goto END;
+        }
 
         // Ring-Compiler-Error-Report ERROR_MISS_CLASS_DEFINITION
-        if (class_definition == nullptr) {
+        if (true) {
             DEFINE_ERROR_REPORT_STR;
 
             snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "miss class `%s` definition; E:%d.",
-                     class_identifier,
+                     "miss type `%s` definition; E:%d.",
+                     type_specifier->identifier,
                      ERROR_MISS_CLASS_DEFINITION);
             snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                     "definite class `%s` before use it.",
-                     class_identifier);
+                     "definite type `%s` before use it.",
+                     type_specifier->identifier);
 
 
             ErrorReportContext context = {
@@ -479,14 +549,26 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
             };
             ring_compile_error_report(&context);
         }
-
-        type_specifier->u.class_type->class_definition = class_definition;
     }
+
+
+END:
 
     // 递归修正数组
     // 其实修正递归数组，只会对 class-object的数组生效
     if (type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
         fix_type_specfier(type_specifier->sub);
+    }
+
+    if (type_specifier->kind == RING_BASIC_TYPE_FUNC) {
+        Ring_DeriveType_Func* func_type = type_specifier->u.func_type;
+        for (unsigned int i = 0; i < func_type->parameter_list_size; i++) {
+            // TODO: 修正 parameter
+        }
+
+        for (unsigned int i = 0; i < func_type->return_list_size; i++) {
+            fix_type_specfier(func_type->return_list[i]);
+        }
     }
 }
 
@@ -1815,6 +1897,13 @@ void fix_function_call_expression(Expression*             expression,
             function_call_expression->u.cc.closure_decl = declaration;
 
             // TODO: 暂时不进行函数调用参数的强制校验
+            EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+            for (unsigned int i = 0;
+                 i < declaration->type_specifier->u.func_type->return_list_size;
+                 i++) {
+                TypeSpecifier* return_type = declaration->type_specifier->u.func_type->return_list[i];
+                EXPRESSION_ADD_CONVERT_TYPE(expression, return_type);
+            }
             return;
         } else {
             // 只是一个普通变量
@@ -1974,7 +2063,7 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
     Block* block = method->block;
 
     // `self` variable
-    TypeSpecifier* type_specifier    = create_class_type_specifier(class_definition->identifier);
+    TypeSpecifier* type_specifier    = create_type_specifier_alias(class_definition->identifier);
 
     Declaration*   self_declaration  = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
     self_declaration->line_number    = method->start_line_number;
@@ -2171,10 +2260,10 @@ void fix_field_member_expression(Expression*       expression,
 
     assert(member_expression != nullptr);
 
-    char*            member_identifier = member_expression->member_identifier;
+    Expression*      object_expression = member_expression->object_expression;
+    char*            member_identifier = member_expression->field_member_identifier;
     ClassDefinition* class_definition  = nullptr;
     FieldMember*     field             = nullptr;
-    Expression*      object_expression = member_expression->object_expression;
 
 
     // 0. fix object expression
@@ -2237,6 +2326,18 @@ ClassDefinition* search_class_definition(char* class_identifier) {
 
     for (ClassDefinition* pos : get_package_unit()->class_definition_list) {
         if (str_eq(pos->identifier, class_identifier)) {
+            return pos;
+        }
+    }
+
+    return nullptr;
+}
+
+TypeAlias* search_type_alias(char* identifier) {
+    assert(identifier != nullptr);
+
+    for (TypeAlias* pos : get_package_unit()->type_alias_list) {
+        if (str_eq(pos->identifier, identifier)) {
             return pos;
         }
     }

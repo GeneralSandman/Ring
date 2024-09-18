@@ -67,7 +67,6 @@ extern "C" int yywrap(){
 <INITIAL>"any"          { package_unit_update_line_content(yytext); return TOKEN_ANY;            }
 <INITIAL>"const"        { package_unit_update_line_content(yytext); return TOKEN_CONST;          }
 <INITIAL>"function"     { package_unit_update_line_content(yytext); return TOKEN_FUNCTION;       }
-<INITIAL>"FuncType"     { package_unit_update_line_content(yytext); return TOKEN_FUNC_TYPE;      }
 <INITIAL>"new"          { package_unit_update_line_content(yytext); return TOKEN_NEW;            }
 <INITIAL>"delete"       { package_unit_update_line_content(yytext); return TOKEN_DELETE;         }
 <INITIAL>"."            { package_unit_update_line_content(yytext); return TOKEN_DOT;            }

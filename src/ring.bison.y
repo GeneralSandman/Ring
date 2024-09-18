@@ -69,6 +69,7 @@ int yylex();
     EnumDeclaration*                    m_enum_declaration;
     EnumItemDeclaration*                m_enum_item_declaration;
 
+    TypeAlias*                          m_type_alias_def;
     ClassDefinition*                    m_class_definition;
     ClassMemberDeclaration*             m_class_member_declaration;
     FieldMember*                        m_field_member;
@@ -126,7 +127,6 @@ int yylex();
 %token TOKEN_ANY
 %token TOKEN_CONST
 %token TOKEN_FUNCTION
-%token TOKEN_FUNC_TYPE
 %token TOKEN_NEW
 %token TOKEN_DELETE
 %token TOKEN_DOT
@@ -246,6 +246,7 @@ int yylex();
 %type <m_enum_item_declaration> enum_item_declaration_list enum_item_declaration
 
 %type <m_class_definition>         class_definition
+%type <m_type_alias_def>           type_alias_def
 %type <m_class_member_declaration> class_member_declaration_list class_member_declaration
 %type <m_field_member>             field_member
 %type <m_method_member>            method_member
@@ -369,6 +370,10 @@ definition_or_statement
     {
         debug_bison_info_with_green("[RULE::statement:enum_declaration]\t ");
     }
+    | type_alias_def TOKEN_SEMICOLON
+    {
+        debug_bison_info_with_green("[RULE::statement:type_definition]\t ");
+    }
     ;
 
 class_definition
@@ -376,6 +381,25 @@ class_definition
     {
         debug_bison_info_with_green("[RULE::class_definition]\t ");
         $<m_class_definition>$ = finish_class_definition($<m_class_definition>5, $6);
+    }
+    ;
+
+/*
+* parameter_list_v2 需要单独需要一个版本
+* 需要兼容 typedef function(var int a) Func1;
+*         typedef function(var int) Func1;
+*         typedef function(int) Func1;
+*/
+type_alias_def
+    : TOKEN_TYPEDEF  TOKEN_FUNCTION TOKEN_LP parameter_list_v2 TOKEN_RP  identifier_v2
+    {
+        debug_bison_info_with_green("[RULE::type_definition]\t ");
+         $<m_type_alias_def>$ = add_type_alias_func($4, nullptr, $6);
+    }
+    | TOKEN_TYPEDEF  TOKEN_FUNCTION TOKEN_LP parameter_list_v2 TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP  identifier_v2
+    {
+        debug_bison_info_with_green("[RULE::type_definition]\t ");
+         $<m_type_alias_def>$ = add_type_alias_func($4, $8, $10);
     }
     ;
 
@@ -885,12 +909,7 @@ class_type_specifier
     : IDENTIFIER
     {
         debug_bison_info_with_green("[RULE::class_type_specifier]\t variable_type(TOKEN_ANY) ");
-        $$ = create_class_type_specifier($1);
-    }
-    | TOKEN_FUNC_TYPE
-    {
-        //TODO: 待成熟之后，可以删除
-        $$ = create_func_type_specifier();
+        $$ = create_type_specifier_alias($1);
     }
     ;
 

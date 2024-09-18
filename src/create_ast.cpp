@@ -108,17 +108,17 @@ Expression* create_expression_identifier_with_index(Expression*          array_e
 
 Expression* create_member_expression(Expression* object_expression, char* member_identifier) {
 
-    MemberExpression* member_expression  = (MemberExpression*)mem_alloc(get_front_mem_pool(), sizeof(MemberExpression));
-    member_expression->line_number       = package_unit_get_line_number();
-    member_expression->object_expression = object_expression;
-    member_expression->member_identifier = member_identifier;
-    member_expression->field_member      = nullptr;
+    MemberExpression* member_expression        = (MemberExpression*)mem_alloc(get_front_mem_pool(), sizeof(MemberExpression));
+    member_expression->line_number             = package_unit_get_line_number();
+    member_expression->object_expression       = object_expression;
+    member_expression->field_member_identifier = member_identifier;
+    member_expression->field_member            = nullptr;
 
-    Expression* expression               = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
-    expression->line_number              = package_unit_get_line_number();
-    expression->convert_type             = nullptr; // UPDATED_BY_FIX_AST
-    expression->type                     = EXPRESSION_TYPE_MEMBER;
-    expression->u.member_expression      = member_expression;
+    Expression* expression                     = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
+    expression->line_number                    = package_unit_get_line_number();
+    expression->convert_type                   = nullptr; // UPDATED_BY_FIX_AST
+    expression->type                           = EXPRESSION_TYPE_MEMBER;
+    expression->u.member_expression            = member_expression;
 
     return expression;
 }
@@ -1154,34 +1154,101 @@ TypeSpecifier* create_type_specifier_array(TypeSpecifier*       sub_type,
 }
 
 
-TypeSpecifier* create_class_type_specifier(char* identifier) {
+// 浪费空间
+// e.g.
+// var a tmp0;
+// var a tmp1;
+// 在这里 两次a 占用了两次相同的空间
+// 在ast的过程中 会认为是类或者是 typedef定义的函数别名
+TypeSpecifier* create_type_specifier_alias(char* identifier) {
     debug_ast_info_with_yellow("\t");
 
-    TypeSpecifier* type_specifier                  = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-    type_specifier->kind                           = RING_BASIC_TYPE_CLASS;
-    type_specifier->line_number                    = package_unit_get_line_number();
-    type_specifier->u.class_type                   = (Ring_DeriveType_Class*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Class));
-    type_specifier->u.class_type->class_identifier = identifier;
-    type_specifier->u.class_type->class_definition = nullptr;
-    type_specifier->dimension                      = 0;
-    type_specifier->sub                            = nullptr;
+    TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type_specifier->line_number   = package_unit_get_line_number();
+    type_specifier->identifier    = identifier;
+    type_specifier->kind          = RING_BASIC_TYPE_UNKNOW;
+    type_specifier->dimension     = 0;
+    type_specifier->sub           = nullptr;
 
     return type_specifier;
 }
 
-TypeSpecifier* create_func_type_specifier() {
+TypeAlias* add_type_alias_func(Parameter*          parameter_list,
+                               FunctionReturnList* return_list,
+                               Identifier*         identifier) {
+
     debug_ast_info_with_yellow("\t");
 
-    TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-    type_specifier->kind          = RING_BASIC_TYPE_FUNC;
-    type_specifier->line_number   = package_unit_get_line_number();
-    type_specifier->u.func_type   = (Ring_DeriveType_Func*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Func));
-    // TODO: init func_type
-    // type_specifier->u.func_type->parameter_list;
-    type_specifier->dimension = 0;
-    type_specifier->sub       = nullptr;
+    unsigned parameter_list_size = 0;
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
+        parameter_list_size++;
+    }
 
-    return type_specifier;
+    unsigned int parameter_index = 0;
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next, parameter_index++) {
+
+        // 可变参数只能在函数定义中作为 最后一个参数
+        // Ring-Compiler-Error-Report ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER
+        if (pos->is_variadic && parameter_index != parameter_list_size - 1) {
+            DEFINE_ERROR_REPORT_STR;
+
+            snprintf(compile_err_buf, sizeof(compile_err_buf),
+                     "can only use ... with final parameter in function %s; E:%d.",
+                     identifier->name,
+                     ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(identifier->line_number),
+                .line_number             = identifier->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+    }
+
+    unsigned int return_list_size = 0;
+    for (FunctionReturnList* pos = return_list; pos != nullptr; pos = pos->next) {
+        return_list_size++;
+    }
+
+    TypeSpecifier** return_list_type = (TypeSpecifier**)mem_alloc(get_front_mem_pool(),
+                                                                  sizeof(TypeSpecifier*) * return_list_size);
+    unsigned int    i                = 0;
+    for (FunctionReturnList* pos = return_list; pos != nullptr; pos = pos->next, i++) {
+        return_list_type[i] = pos->type_specifier;
+    }
+
+
+    Ring_DeriveType_Func* func    = (Ring_DeriveType_Func*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Func));
+    func->parameter_list_size     = parameter_list_size;
+    func->parameter_list          = nullptr; // FIXME:
+    func->return_list_size        = return_list_size;
+    func->return_list             = return_list_type;
+
+    TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type_specifier->line_number   = package_unit_get_line_number();
+    type_specifier->kind          = RING_BASIC_TYPE_FUNC;
+    type_specifier->u.func_type   = func;
+    type_specifier->dimension     = 0;
+    type_specifier->sub           = nullptr;
+
+
+    TypeAlias* type_alias         = (TypeAlias*)mem_alloc(get_front_mem_pool(), sizeof(TypeAlias));
+    type_alias->line_number       = package_unit_get_line_number();
+    type_alias->identifier        = identifier->name;
+    type_alias->type_specifier    = type_specifier;
+
+    package_unit_add_type_alias(type_alias);
+
+    return type_alias;
 }
 
 Declaration* create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer) {
@@ -1568,34 +1635,35 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier,
 
     debug_ast_info_with_yellow("\t");
 
+    // FIXME: 该判断需要再 fix_ast中调整
     // 当前field 的类型只能是 bool int double string
     // Ring-Compiler-Error-Report
-    if (type_specifier->kind == RING_BASIC_TYPE_ANY
-        || type_specifier->kind == RING_BASIC_TYPE_UNKNOW
-        || (type_specifier->kind == RING_BASIC_TYPE_ARRAY
-            && (type_specifier->sub->kind == RING_BASIC_TYPE_ANY
-                || type_specifier->sub->kind == RING_BASIC_TYPE_UNKNOW))) {
-        DEFINE_ERROR_REPORT_STR;
+    // if (type_specifier->kind == RING_BASIC_TYPE_ANY
+    //     || type_specifier->kind == RING_BASIC_TYPE_UNKNOW
+    //     || (type_specifier->kind == RING_BASIC_TYPE_ARRAY
+    //         && (type_specifier->sub->kind == RING_BASIC_TYPE_ANY
+    //             || type_specifier->sub->kind == RING_BASIC_TYPE_UNKNOW))) {
+    //     DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "class field's type only support bool/int/double/string/class bool[]/int[]/double[]/string[]/class[]; E:%d.",
-                 ERROR_INVALID_FIELD_IN_CLASS);
+    //     snprintf(compile_err_buf, sizeof(compile_err_buf),
+    //              "class field's type only support bool/int/double/string/class bool[]/int[]/double[]/string[]/class[]; E:%d.",
+    //              ERROR_INVALID_FIELD_IN_CLASS);
 
-        ErrorReportContext context = {
-            .package                 = nullptr,
-            .package_unit            = get_package_unit(),
-            .source_file_name        = get_package_unit()->current_file_name,
-            .line_content            = package_unit_get_line_content(type_specifier->line_number),
-            .line_number             = type_specifier->line_number,
-            .column_number           = package_unit_get_column_number(),
-            .error_message           = std::string(compile_err_buf),
-            .advice                  = std::string(compile_adv_buf),
-            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
-            .ring_compiler_file      = (char*)__FILE__,
-            .ring_compiler_file_line = __LINE__,
-        };
-        ring_compile_error_report(&context);
-    }
+    //     ErrorReportContext context = {
+    //         .package                 = nullptr,
+    //         .package_unit            = get_package_unit(),
+    //         .source_file_name        = get_package_unit()->current_file_name,
+    //         .line_content            = package_unit_get_line_content(type_specifier->line_number),
+    //         .line_number             = type_specifier->line_number,
+    //         .column_number           = package_unit_get_column_number(),
+    //         .error_message           = std::string(compile_err_buf),
+    //         .advice                  = std::string(compile_adv_buf),
+    //         .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+    //         .ring_compiler_file      = (char*)__FILE__,
+    //         .ring_compiler_file_line = __LINE__,
+    //     };
+    //     ring_compile_error_report(&context);
+    // }
 
     FieldMember* field_member    = (FieldMember*)mem_alloc(get_front_mem_pool(), sizeof(FieldMember));
     field_member->line_number    = package_unit_get_line_number();
