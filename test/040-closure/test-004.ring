@@ -12,6 +12,8 @@ import {
 	fmt;
 }
 
+typedef function() FuncType;
+
 
 @main
 function main() {

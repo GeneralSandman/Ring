@@ -12,6 +12,7 @@ import {
 	fmt;
 }
 
+typedef function() FuncType;
 
 function test1() -> (FuncType, FuncType) {
 

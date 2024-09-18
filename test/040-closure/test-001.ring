@@ -13,6 +13,8 @@ import {
 }
 
 
+typedef function() FuncType;
+
 
 @main
 function main() {

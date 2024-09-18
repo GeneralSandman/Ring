@@ -13,6 +13,9 @@ import {
 }
 
 
+typedef function() FuncType;
+
+
 @main
 function main() {
 	var FuncType tmp0, tmp1;

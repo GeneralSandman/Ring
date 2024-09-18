@@ -12,21 +12,27 @@ import {
 	fmt;
 }
 
-
-typedef function() FuncType;
+typedef function()-> (int) FuncType;
 
 
 @main
 function main() {
-	var FuncType tmp;
-	tmp = return_closure();
-	tmp();
+	var FuncType tmp0;
+
+	tmp0 = return_closure();
+
+	var int int_value;
+	int_value = tmp0();
+
+	fmt::println(int_value);
 }
 
 function return_closure() -> (FuncType) {
-	return function() {
-		fmt::println("return_closure:: closure block");
+	var FuncType tmp;
+	tmp = function() -> (int){
+		return 6456;
 	};
+	return tmp;
 }
 
 
