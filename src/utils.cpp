@@ -285,8 +285,9 @@ void ring_vm_code_dump(RVM_Function* function,
 
 // TODO: caller_stack_base 是不是可以放在 RVM_RuntimeStack 中，考虑
 // TODO:
-void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack,
-                                unsigned int      caller_stack_base,
+void ring_vm_dump_runtime_stack(Ring_VirtualMachine* rvm,
+                                RVM_RuntimeStack*    runtime_stack,
+                                unsigned int         caller_stack_base,
                                 unsigned int screen_row, unsigned int screen_col) {
 
     STDERR_MOVE_CURSOR(screen_row++, screen_col);
@@ -308,7 +309,7 @@ void ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack,
         STDERR_MOVE_CURSOR(screen_row++, screen_col);
 
         RVM_Value*  value     = &runtime_stack->data[i];
-        std::string type_str  = format_rvm_type(value);
+        std::string type_str  = format_rvm_type(rvm, value);
         std::string value_str = format_rvm_value(value);
         std::string format    = type_str + "(" + value_str + ")";
         // 截断，不然命令行排版乱
@@ -526,7 +527,7 @@ void dump_vm_function(Package_Executer*    package_executer,
     // 2. function parameters
     printf("+Parameter:   %d\n", function->parameter_size);
     for (unsigned int i = 0; i < function->parameter_size; i++) {
-        std::string tmp = format_rvm_type_specifier(package_executer, function->parameter_list[i].type_specifier)
+        std::string tmp = format_rvm_type_specifier(package_executer, function->parameter_list[i].type_specifier, "var ")
             + (function->parameter_list[i].is_variadic ? "..." : "");
         printf(" ├──%-20s %-20s\n",
                tmp.c_str(),
@@ -538,7 +539,7 @@ void dump_vm_function(Package_Executer*    package_executer,
     printf("+Local:       %d\n", function->local_variable_size);
     for (unsigned int i = 0; i < function->local_variable_size; i++) {
         printf(" ├──%-20s %-20s\n",
-               format_rvm_type_specifier(package_executer, function->local_variable_list[i].type_specifier).c_str(),
+               format_rvm_type_specifier(package_executer, function->local_variable_list[i].type_specifier, "var ").c_str(),
                function->local_variable_list[i].identifier);
     }
 
@@ -629,7 +630,7 @@ void dump_vm_class(Package_Executer*    package_executer,
     printf("+Field:     %d\n", class_definition->field_size);
     for (unsigned int i = 0; i < class_definition->field_size; i++) {
         printf(" ├──%-30s %-20s\n",
-               format_rvm_type_specifier(package_executer, class_definition->field_list[i].type_specifier).c_str(),
+               format_rvm_type_specifier(package_executer, class_definition->field_list[i].type_specifier, "var ").c_str(),
                class_definition->field_list[i].identifier);
     }
 
@@ -706,7 +707,7 @@ unsigned int get_source_line_number_by_pc(RVM_Function_Tuple* function, unsigned
     return derive_function->code_line_map[left].line_number;
 }
 
-std::string format_rvm_type(RVM_Value* value) {
+std::string format_rvm_type(Ring_VirtualMachine* rvm, RVM_Value* value) {
     std::string str = "";
 
     switch (value->type) {
@@ -736,7 +737,7 @@ std::string format_rvm_type(RVM_Value* value) {
         str = formate_array_type(value->u.array_value);
         break;
     case RVM_VALUE_TYPE_CLOSURE:
-        str = "closure";
+        str = formate_closure_type(rvm->executer, value->u.closure_value);
         break;
     default:
         str = "unknow";
@@ -881,7 +882,7 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
         str = "array";
         break;
     case RING_BASIC_TYPE_FUNC:
-        str = "func"; // FIXME:
+        str = "function"; // FIXME:
         break;
 
     case RING_BASIC_TYPE_ANY:
@@ -926,6 +927,102 @@ std::string format_function_arguments(ArgumentList* argument) {
     }
 
     str = strings_join(strings, ",");
+
+    return str;
+}
+
+
+// TODO: 这里直接使用Cpp::string, 后续需要改成 Ring_String
+std::string format_rvm_function(Package_Executer* package_executer,
+                                RVM_Function*     function) {
+
+    assert(function != nullptr);
+
+    std::string result;
+
+    // 1. funtion identifier
+    if (function->identifier != nullptr) {
+        result += std::string(function->identifier);
+    } else {
+        // TODO: 这里需要更精确的给出函数名字
+        result += "<closure>";
+    }
+    result += "(";
+
+    // 2. function parameters
+    for (unsigned int i = 0; i < function->parameter_size; i++) {
+        if (i != 0) {
+            result += ", ";
+        }
+
+        std::string tmp = format_rvm_type_specifier(package_executer, function->parameter_list[i].type_specifier, "var ")
+            + (function->parameter_list[i].is_variadic ? "..." : "");
+
+        result += tmp;
+    }
+    result += ")";
+
+    // 3. function return values
+    // TODO:
+
+
+    return result;
+}
+
+
+// TODO: 这里直接使用Cpp::string, 后续需要改成 Ring_String
+// TODO: 这里暂时 只能 formate 参数为 bool, int, double, string 其余的类型需要继续支持
+std::string format_rvm_type_specifier(Package_Executer*  package_executer,
+                                      RVM_TypeSpecifier* type_specifier,
+                                      std::string        prefix) {
+
+    assert(type_specifier != nullptr);
+
+    RVM_ClassDefinition* rvm_class_definition = nullptr;
+    std::string          str                  = "";
+
+    switch (type_specifier->kind) {
+    case RING_BASIC_TYPE_BOOL:
+        str = "bool";
+        break;
+    case RING_BASIC_TYPE_INT:
+        str = "int";
+        break;
+    case RING_BASIC_TYPE_INT64:
+        str = "int64";
+        break;
+    case RING_BASIC_TYPE_DOUBLE:
+        str = "double";
+        break;
+    case RING_BASIC_TYPE_STRING:
+        str = "string";
+        break;
+    case RING_BASIC_TYPE_ARRAY:
+        switch (type_specifier->sub->kind) {
+        case RING_BASIC_TYPE_BOOL: str = "bool"; break;
+        case RING_BASIC_TYPE_INT: str = "int"; break;
+        case RING_BASIC_TYPE_INT64: str = "int64"; break;
+        case RING_BASIC_TYPE_DOUBLE: str = "double"; break;
+        case RING_BASIC_TYPE_STRING: str = "string"; break;
+        case RING_BASIC_TYPE_CLASS:
+            rvm_class_definition = &(package_executer->class_list[type_specifier->u.class_def_index]);
+            str                  = std::string(rvm_class_definition->identifier);
+            break;
+        default: str = ".unknow"; break;
+        }
+        str += "[!" + std::to_string(type_specifier->dimension) + "]";
+        break;
+    case RING_BASIC_TYPE_CLASS:
+        rvm_class_definition = &(package_executer->class_list[type_specifier->u.class_def_index]);
+        str                  = std::string(rvm_class_definition->identifier);
+        break;
+    default:
+        // TODO:  后续还要处理 数组
+        str = ".unknow";
+        break;
+    }
+
+    str = prefix + str;
 
     return str;
 }
@@ -1160,6 +1257,39 @@ std::string formate_array_item_type(RVM_Array* array_value) {
     }
 
     return str;
+}
+
+std::string formate_closure_type(Package_Executer* package_executer,
+                                 RVM_Closure*      closure_value) {
+
+    if (closure_value == nullptr) {
+        return "nil-closure";
+    }
+
+    std::string              result = "";
+
+    std::vector<std::string> parameter_list_s;
+    std::string              parameter_s = "";
+    for (unsigned int i = 0; i < closure_value->parameter_size; i++) {
+        std::string tmp = format_rvm_type_specifier(package_executer, closure_value->parameter_list[i].type_specifier, "")
+            + (closure_value->parameter_list[i].is_variadic ? "..." : "");
+        parameter_list_s.push_back(tmp);
+    }
+    parameter_s = strings_join(parameter_list_s, ", ");
+
+    std::vector<std::string> return_list_s;
+    std::string              return_s = "";
+    for (unsigned int i = 0; i < closure_value->return_value_size; i++) {
+        std::string tmp = format_rvm_type_specifier(package_executer, closure_value->return_value_list[i].type_specifier, "");
+        return_list_s.push_back(tmp);
+    }
+    return_s = strings_join(return_list_s, ", ");
+
+
+    //
+    result = sprintf_string("function(%s) -> (%s)", parameter_s.c_str(), return_s.c_str());
+
+    return result;
 }
 
 std::string sprintf_string(const char* format, ...) {

@@ -360,7 +360,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
     if (debug_config->display_globals) {
         printf("[@]globals: %lu\n", frame->globals.size());
         for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
-            std::string type  = format_rvm_type(global.second);
+            std::string type  = format_rvm_type(frame->rvm, global.second);
             std::string value = format_rvm_value(global.second);
             printf("    %20s: %10s %s\n", global.first.c_str(), type.c_str(), value.c_str());
         }
@@ -369,7 +369,7 @@ int dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
     if (debug_config->display_locals) {
         printf("[@]locals: %lu\n", frame->locals.size());
         for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
-            std::string type  = format_rvm_type(local.second);
+            std::string type  = format_rvm_type(frame->rvm, local.second);
             std::string value = format_rvm_value(local.second);
             printf("    %20s: %10s %s\n", local.first.c_str(), type.c_str(), value.c_str());
         }
@@ -488,14 +488,14 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
         } else if (rdb_arg.cmd == RDB_COMMAND_GLOBAL) {
             printf("[@]globals:\n");
             for (std::pair<std::string, RVM_Value*>& global : frame->globals) {
-                std::string type  = format_rvm_type(global.second);
+                std::string type  = format_rvm_type(frame->rvm, global.second);
                 std::string value = format_rvm_value(global.second);
                 printf("    %20s: %10s %s\n", global.first.c_str(), type.c_str(), value.c_str());
             }
         } else if (rdb_arg.cmd == RDB_COMMAND_LOCAL) {
             printf("[@]locals:\n");
             for (std::pair<std::string, RVM_Value*>& local : frame->locals) {
-                std::string type  = format_rvm_type(local.second);
+                std::string type  = format_rvm_type(frame->rvm, local.second);
                 std::string value = format_rvm_value(local.second);
                 printf("    %20s: %10s %s\n", local.first.c_str(), type.c_str(), value.c_str());
             }

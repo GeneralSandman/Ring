@@ -2399,6 +2399,9 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             class_ob             = rvm_new_class_object(rvm, rvm_class_definition);
             STACK_SET_CLASS_OB_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, class_ob);
             break;
+        case RING_BASIC_TYPE_FUNC:
+            STACK_SET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, nullptr);
+            break;
 
         default:
             break;

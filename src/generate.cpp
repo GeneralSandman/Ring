@@ -71,7 +71,8 @@ void package_executer_dump(Package_Executer* package_executer) {
     for (unsigned int i = 0; i < package_executer->global_variable_size; i++) {
         printf(" ├──%-20s %-20s\n",
                format_rvm_type_specifier(package_executer,
-                                         package_executer->global_variable_list[i].type_specifier)
+                                         package_executer->global_variable_list[i].type_specifier,
+                                         "var ")
                    .c_str(),
                package_executer->global_variable_list[i].identifier);
     }
@@ -321,7 +322,9 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
         dst->parameter_size      = src->parameter_list_size;
         dst->parameter_list      = (RVM_Parameter*)mem_alloc(NULL_MEM_POOL,
                                                              sizeof(RVM_Parameter) * dst->parameter_size);
-
+        dst->return_value_size   = src->return_list_size;
+        dst->return_value_list   = (RVM_ReturnValue*)mem_alloc(NULL_MEM_POOL,
+                                                               sizeof(RVM_ReturnValue) * dst->return_value_size);
         dst->local_variable_size = src->block->declaration_list_size;
         dst->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
                                                                  sizeof(RVM_LocalVariable) * dst->local_variable_size);
@@ -341,6 +344,15 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
             type_specifier_deep_copy(dst->parameter_list[i].type_specifier, param->type_specifier);
         }
 
+        // deep copy return value
+        FunctionReturnList* return_value = src->return_list;
+        for (unsigned int i = 0;
+             return_value != nullptr;
+             return_value = return_value->next, i++) {
+            dst->return_value_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                                     sizeof(RVM_TypeSpecifier));
+            type_specifier_deep_copy(dst->return_value_list[i].type_specifier, return_value->type_specifier);
+        }
 
         // deep copy local variable
         // declaration_list 即包括 parameter 也 包括 block中声明的局部变量
@@ -2127,6 +2139,9 @@ void generate_vmcode_from_closure_expreesion(Package_Executer*  executer,
     dst->parameter_size      = src->parameter_list_size;
     dst->parameter_list      = (RVM_Parameter*)mem_alloc(NULL_MEM_POOL,
                                                          sizeof(RVM_Parameter) * dst->parameter_size);
+    dst->return_value_size   = src->return_list_size;
+    dst->return_value_list   = (RVM_ReturnValue*)mem_alloc(NULL_MEM_POOL,
+                                                           sizeof(RVM_ReturnValue) * dst->return_value_size);
     dst->local_variable_size = src->block->declaration_list_size;
     dst->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
                                                              sizeof(RVM_LocalVariable) * dst->local_variable_size);
@@ -2143,6 +2158,16 @@ void generate_vmcode_from_closure_expreesion(Package_Executer*  executer,
                                                                               sizeof(RVM_TypeSpecifier));
 
         type_specifier_deep_copy(dst->parameter_list[i].type_specifier, param->type_specifier);
+    }
+
+    // deep copy return value
+    FunctionReturnList* return_value = src->return_list;
+    for (unsigned int i = 0;
+         return_value != nullptr;
+         return_value = return_value->next, i++) {
+        dst->return_value_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                                 sizeof(RVM_TypeSpecifier));
+        type_specifier_deep_copy(dst->return_value_list[i].type_specifier, return_value->type_specifier);
     }
 
     // deep copy local variable

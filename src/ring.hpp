@@ -115,6 +115,7 @@ typedef struct RVM_BasicTypeSpecifier       RVM_BasicTypeSpecifier;
 typedef struct RVM_TypeSpecifier            RVM_TypeSpecifier;
 
 typedef struct RVM_Parameter                RVM_Parameter;
+typedef struct RVM_ReturnValue              RVM_ReturnValue;
 typedef struct RVM_LocalVariable            RVM_LocalVariable;
 
 typedef struct NativeFunction               NativeFunction;
@@ -543,6 +544,10 @@ struct RVM_Parameter {
     char*              identifier;
 };
 
+struct RVM_ReturnValue {
+    RVM_TypeSpecifier* type_specifier;
+};
+
 struct RVM_LocalVariable {
     RVM_TypeSpecifier* type_specifier;
     char*              identifier;
@@ -571,6 +576,8 @@ struct DeriveFunction {
                                                                                 \
     unsigned int       parameter_size;                                          \
     RVM_Parameter*     parameter_list;                                          \
+    unsigned int       return_value_size;                                       \
+    RVM_ReturnValue*   return_value_list;                                       \
     unsigned int       local_variable_size;                                     \
     RVM_LocalVariable* local_variable_list;                                     \
     unsigned int       estimate_runtime_stack_capacity;                         \
@@ -599,6 +606,9 @@ struct RVM_Closure {
     // TODO: 这里直接将 RVM_Function copy过来
     // TODO: 后续进行优化
     RVM_FUNCTION_TYPLE_HEADER;
+
+    // TODO：
+    // 闭包相关的变量
 };
 
 struct RVM_Field {
@@ -3058,17 +3068,6 @@ RVM_Value std_lib_math_pow(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
 
 
 /* --------------------
- * vm.cpp
- * function definition
- *
- */
-std::string format_rvm_function(Package_Executer* package_executer,
-                                RVM_Function*     function);
-std::string format_rvm_type_specifier(Package_Executer*  package_executer,
-                                      RVM_TypeSpecifier* type_specifier);
-// --------------------
-
-/* --------------------
  * utils.cpp
  * function definition
  *
@@ -3078,7 +3077,10 @@ std::string              formate_expression(Expression* expression);
 void                     ring_compiler_functions_dump(PackageUnit* package_unit);
 void                     ring_vm_constantpool_dump(Package_Executer* executer);
 void                     ring_vm_code_dump(RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int screen_row, unsigned int screen_col);
-void                     ring_vm_dump_runtime_stack(RVM_RuntimeStack* runtime_stack, unsigned int caller_stack_base, unsigned int screen_row, unsigned int screen_col);
+void                     ring_vm_dump_runtime_stack(Ring_VirtualMachine* rvm,
+                                                    RVM_RuntimeStack*    runtime_stack,
+                                                    unsigned int         caller_stack_base,
+                                                    unsigned int screen_row, unsigned int screen_col);
 void                     ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm);
 std::vector<std::string> list_files_of_dir(char* dir);
 RingFileStat*            create_ring_file_stat(std::string& file_name);
@@ -3094,7 +3096,7 @@ std::string              dump_vm_constant(RVM_ConstantPool* constant);
 
 unsigned int             get_source_line_number_by_pc(RVM_Function_Tuple* function, unsigned int pc);
 
-std::string              format_rvm_type(RVM_Value* value);
+std::string              format_rvm_type(Ring_VirtualMachine* rvm, RVM_Value* value);
 std::string              format_rvm_value(RVM_Value* value);
 std::string              format_rvm_call_stack(Ring_VirtualMachine* rvm);
 std::string              format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int source_line_number);
@@ -3102,6 +3104,12 @@ std::string              format_rvm_current_func(Ring_VirtualMachine* rvm, unsig
 std::string              format_type_specifier(TypeSpecifier* type_specifier);
 std::string              format_function_parameters(Parameter* parameter);
 std::string              format_function_arguments(ArgumentList* argument);
+
+std::string              format_rvm_function(Package_Executer* package_executer,
+                                             RVM_Function*     function);
+std::string              format_rvm_type_specifier(Package_Executer*  package_executer,
+                                                   RVM_TypeSpecifier* type_specifier,
+                                                   std::string        prefix);
 
 std::vector<std::string> split(const std::string& str, const std::string& delimiters);
 
@@ -3113,6 +3121,9 @@ int                      string_compare(const char* str1, unsigned int str1_len,
 
 std::string              formate_array_type(RVM_Array* array_value);
 std::string              formate_array_item_type(RVM_Array* array_value);
+
+std::string              formate_closure_type(Package_Executer* package_executer,
+                                              RVM_Closure*      closure_value);
 
 std::string              sprintf_string(const char* format, ...);
 // --------------------

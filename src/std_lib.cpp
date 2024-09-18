@@ -1030,7 +1030,7 @@ RVM_Value std_lib_vm_garbage_collect(Ring_VirtualMachine* rvm, unsigned int arg_
 RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     std::string str = "";
 
-    str             = format_rvm_type(args);
+    str             = format_rvm_type(rvm, args);
 
     RVM_Value ret;
     ret.type           = RVM_VALUE_TYPE_STRING;
