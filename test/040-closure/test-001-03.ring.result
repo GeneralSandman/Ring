@@ -1,0 +1,23 @@
+before init closure==========
+
+nil-closure
+nil-closure
+nil-closure
+nil-closure
+nil-closure
+nil-closure
+nil-closure
+nil-closure
+nil-closure
+
+after init closure===========
+
+function() -> ()
+function(int) -> ()
+function(int, int) -> ()
+function(int, int, int) -> ()
+function() -> (int)
+function(int) -> (int)
+function(int, int) -> (int)
+function(int, int, int) -> (int)
+function(bool, int, int64, double, string) -> (bool, int, int64, double, string)
