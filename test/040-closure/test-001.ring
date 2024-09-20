@@ -31,6 +31,7 @@ function main() {
 	local_func_var();
 
 
+	// FIXME: 这里不应该编译通过
 	local_func_var = function(var bool bool_value, var int int_value, var int64 int64_value, var double double_value, var string string_value) {
 		var bool   local_bool_value_0 = true;
 		var int    local_int_value_0 = 1;

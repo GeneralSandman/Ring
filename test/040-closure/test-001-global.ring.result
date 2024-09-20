@@ -1,0 +1,8 @@
+invoke a closure 1:begin
+invoke a closure 1:end
+main=======
+global_bool_value_1:  true
+global_int_value_1:  1
+global_int64_value_1:  2
+global_double_value_1:  3.141593
+global_string_value_1:  hello-world

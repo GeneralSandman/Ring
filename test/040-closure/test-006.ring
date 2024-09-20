@@ -36,15 +36,15 @@ function main() {
 function return_closure() -> (FuncType2) {
 	fmt::println("return_closure begin");
 
-	var FuncType1 tmp;
-	tmp = function() -> (FuncType1){
+	var FuncType2 tmp2;
+	tmp2 = function() -> (FuncType1){
 		fmt::println("return_closure::level1 begin");
 		return function() {
 			fmt::println("return_closure::level2 begin");
 		};
 	};
 
-	return tmp;
+	return tmp2;
 }
 
 
