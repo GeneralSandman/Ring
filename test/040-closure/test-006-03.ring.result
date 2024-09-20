@@ -1,0 +1,16 @@
+
+main::1
+return_closure:: invoke level3
+tmp_2 type:function(int) -> (function(int64) -> (function(double) -> (string)))
+
+main::2
+return_closure:: invoke level2 int=123
+tmp_1 type:function(int64) -> (function(double) -> (string))
+
+main::3
+return_closure:: invoke level1 int64=456
+tmp_0 type:function(double) -> (string)
+
+main::4
+return_closure:: invoke level0 double=3.141500
+tmp type:string, value:hello ring compiler
