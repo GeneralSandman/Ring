@@ -1,0 +1,5 @@
+pass_closure::begin
+main:: closure block 1
+main:: closure block 2
+return from func_1:"main:: closure return value"
+pass_closure::end
