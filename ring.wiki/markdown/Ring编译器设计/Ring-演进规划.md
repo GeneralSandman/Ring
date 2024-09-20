@@ -5,15 +5,11 @@
 >
 > 耐住寂寞。
 >
-> 不要觉得自己做的编译器没有气候，编译器是工业软件，不是玩具，需要时间积累。
+> 不要觉得自己做的编译器没有气候，编译器是工业软件，需要长时间积累。
 > 
 
 
 ## 总规划
-
-
-完善Ring的基本功能, 争取在2024-12-31之前发布第一个release版本.
-
 
 ### 数据类型
 
@@ -141,155 +137,10 @@
 -----------------------------
 
 
+## Ring一些不成熟的想法
 
-## 参考资料汇总
 
-
-
-### Lua源码分析
-1. Lua的LG结构lua_State和global_State  
-    https://zhuanlan.zhihu.com/p/102415312
-2. Lua设计与实现 基于lua源码对其设计与具体实现进行剖析
-   https://www.zhihu.com/column/c_1097089416010567680
-3. 《自己动手实现Lua：虚拟机、编译器和标准库》代码 
-   https://github.com/GeneralSandman/luago-book
-4. lua学习笔记
-    https://github.com/GeneralSandman/GeneralSandman-lua-learn-node
-5. 构建Lua解释器
-   https://manistein.github.io/blog/tags/let-us-build-a-lua-interpreter/
-
-#### 书籍
-1. 《Lua设计与实现》https://github.com/lichuang/Lua-Source-Internal
-2. 《自己动手实现Lua：虚拟机、编译器和标准库》
-
-
-
-1. 实现自己的编程语言 
-   https://github.com/codecrafters-io/build-your-own-x#build-your-own-programming-language
-
-2. Mark-Sweep垃圾回收机制 
-   https://journal.stuffwithstuff.com/2013/12/08/babys-first-garbage-collector/
-
-3. Lua GC 算法介绍
-   https://manistein.github.io/blog/post/program/let-us-build-a-lua-interpreter/%E6%9E%84%E5%BB%BAlua%E8%A7%A3%E9%87%8A%E5%99%A8part2/
-
-4. https://maplant.com/ 
-   比较喜欢他的网站 特别喜欢那种特别老式的网站布局，人只会聚焦与内容
-
-
-### 其他相关工具链
-
-1. Bison Official Document
-https://www.gnu.org/software/bison/manual/html_node/index.html#SEC_Contents
-
-2. Bison Error Handling
-https://docs.oracle.com/cd/E19504-01/802-5880/6i9k05dh4/index.html
-
-
-
-1. 通读 diksam_v0.4 
-   - https://github.com/GeneralSandman/diksam_v0.4
-   - 里边还是有很多值得借鉴的地方
-2. 通读 Lua 5.x版本
-   1. 好好掌握 Lua的语法用法
-   2. 力求完全掌握设计逻辑、包括协程、table
-   3. 重新读那本 《自己动手实现Lua：虚拟机、编译器和标准库》
-3. 学习 Ocaml
-4. 学习 V8
-
-Golang Plan9 汇编
-https://studygolang.com/articles/21931
-https://xargin.com/plan9-assembly/
-
-深入理解golang汇编
-https://godmelon.com/2021/07/25/golang-plan9-sam/
-
-
-Intel格式和AT&T格式汇编区别
-https://www.cnblogs.com/hdk1993/p/4820353.html
-
-
------------------------------
-
-
-## Lua
-
-
-### 关于研究Lua的方法论和路线图
-
-1. 不能有急于求成的心态, 创建编译器是一个很大的工作量, 需要长时间的付出和规划
-2. 需要集中精力研究 Lua的源代码 和 Ring
-3. 研究的方向主要集中于
-- gc
-- 字节码格式
-
-
-
-
-### 关于研究Lua的哪个版本
-
-lua 所有的版本 https://www.lua.org/versions.html
-
-#### 1. lua 4.0.1  https://github.com/GeneralSandman/lua-4.0.1
-   
-简单, stack-based virtual machine 
-可能方便
-
-时间有点久远, 2002 年发布的, 
-
-gc算法比较老旧
-没有 coroutine
-
-#### 2. lua 5.4.6  https://github.com/GeneralSandman/lua-5.4.6
-
-可能理解起来比较复杂, 
-
-但是相关的设计都是比较现代的
-
-TIP: 推荐 Lua 5.4.6 版本作为研究对象.
-
-### 《自己动手实现Lua：虚拟机、编译器和标准库》
-
-这个书籍有几个地方其实我不太认可, 就是在实现 virtual machine stack 的时候, 使用的golang 的 interface{} 去存储数据,
-不太认可这样的办法, 借用了Golang的特性, 简化了虚拟机的实现方式。
-
-基于 Lua 5.4.4
-
-
-#### 1. 第二章 ———— 二进制chunk格式详解
-
-了解Lua 5.4.4 版本的 bytecode的基本格式, 知道是如何解析的, 并且实现了解析 Lua Bytecode.
-header: 校验码, 如何加载
-body: proto 的基本格式
-
-
-#### 2. 第三章 ———— 指令集
-
-介绍Lua虚拟机指令集和指令编码格式, 对指令进行解码.
-
-TODO: 这里还没通过代码实现
-
-
-#### 3. 第四章 至 第六章
-
-主要介绍如何要实现一个stack-based virtual machine, 可以解释执行大概一半的Lua虚拟机指令.
-
-但是自己在 Ring 已经实现了 stack-based virtual machine, 其实这三章可以暂时略过.
-
-
-#### 4. 第七章 至 第十二章
-
-介绍 表, 函数调用, Closure&Upvalue, 元编程, 迭代器, 异常和错误处理
-
-TODO: Closure&Upvalue
-
-
-
-
-### Ring想要借鉴的一些语法
-
-
-#### 1. lua 索引
+### 1. lua 索引
 ```
 索引
 对 table 的索引使用方括号 []。Lua 也提供了 . 操作。
@@ -308,7 +159,7 @@ www.runoob.com
 ```
 
 
-#### 2. 字符串的format
+### 2. 字符串的format
 
 1. python 的 formate函数比较人性化, 需要自己改造一下
 
@@ -331,6 +182,34 @@ print(txt.format(price = 49))
 int x = 10, y = 20;
 String s = STR."\{x} + \{y} = \{x + y}";
 ```
+
+### 3. 分发方式
+
+目前发展规划主要在 字节码虚拟机执行 OR 机器码二进制执行
+
+关于直接虚拟机还是二进制, 各自的优劣这里不再赘述. 
+在这里我整理一个我认为着重考虑的点:
+1. 虚拟机形式 很难实现自举, 强如Java迄今为止也没能实现.
+2. 虚拟机形式 执行速度太慢, 不然为什么会出现JIT
+
+通过自己对于目前发展方向的判断, 我认为直接生成二进制才是未来的主流, 他有几个极大的优势, 这个优势是虚拟机形式不能解决的:
+1. 直接生成二进制, 可到处分发, 目标机器无需安装任何依赖.
+   - 为什么这一点很重要呢, 我在腾讯和字节跳动都做过后台开发的工作, 其内部的网络访问策略非常严格, 发现在部署阶段, 如果需要遇到通过网络安装依赖, 经常需要寻找各种方案, 所以自己非常痛恨这种部署方式
+2. 后期编译器成熟之后可以实现自举
+3. 没有跟虚拟机一样, 运行时过于繁重, 
+
+
+发展方向讨论到现在已经有了比较大的倾向, 那么接下来有一个非常值得关注的问题:
+
+### 4. 关于 编译生成可执行二进制的工作量
+
+1. 深入了解各个CPU架构的汇编指令: x86-64, arm, 
+
+
+### 5. ring build
+
+构建一个很大的字节码文件，这样在目标机器上也不用安装依赖了。
+
 
 -----------------------------
 
@@ -417,7 +296,9 @@ Usetime  = 1S
 -----------------------------
 
 
-## 开发专项-语义报错
+## 开发专项
+
+### 开发专项-语义报错
 
 第一轮分析主要构建语法树
 第二轮分析主要对相关的标识符号进行解析
@@ -463,10 +344,9 @@ Usetime  = 1S
 9. package
    1.  一个package中的数量不能超过 255
 
------------------------------
 
 
-## 开发专项-类
+### 开发专项-类
 
 1. field类型
    1. bool ✅ 
@@ -476,10 +356,9 @@ Usetime  = 1S
    5. class (class的嵌套定义与引用)
 
 
------------------------------
 
 
-## 开发专项-数组
+### 开发专项-数组
 
 1. 数组 new 支持动态，e.g.  `array = new int[a,b,c];`
 
@@ -500,66 +379,20 @@ class-object  ✅
    不然继续访问 jobs[0].Running 还是老的Value。
 
 
------------------------------
 
 
-## 开发专项-关于编译速度
+### 开发专项-关于编译速度
 
  348444 行代码的ring, 都放在一个main函数中, 编译+运行 总共耗时 2346.94s.  但是编译没有报错.
 
 
+
+
+### 开发专项-丰富标准库
+
+
 -----------------------------
 
-
-## 开发专项-丰富标准库
-
-
------------------------------
-
-
-## 关于Ring后续的发展规划
-
-目前发展规划主要在 字节码虚拟机执行 OR 机器码二进制执行
-
-关于直接虚拟机还是二进制, 各自的优劣这里不再赘述. 
-在这里我整理一个我认为着重考虑的点:
-1. 虚拟机形式 很难实现自举, 强如Java迄今为止也没能实现.
-2. 虚拟机形式 执行速度太慢, 不然为什么会出现JIT
-
-通过自己对于目前发展方向的判断, 我认为直接生成二进制才是未来的主流, 他有几个极大的优势, 这个优势是虚拟机形式不能解决的:
-1. 直接生成二进制, 可到处分发, 目标机器无需安装任何依赖.
-   - 为什么这一点很重要呢, 我在腾讯和字节跳动都做过后台开发的工作, 其内部的网络访问策略非常严格, 发现在部署阶段, 如果需要遇到通过网络安装依赖, 经常需要寻找各种方案, 所以自己非常痛恨这种部署方式
-2. 后期编译器成熟之后可以实现自举
-3. 没有跟虚拟机一样, 运行时过于繁重, 
-
-
-发展方向讨论到现在已经有了比较大的倾向, 那么接下来有一个非常值得关注的问题:
-
-### 关于 编译生成可执行二进制的工作量
-
-1. 深入了解各个CPU架构的汇编指令: x86-64, arm, 
-
-
-### 参考资料
-
-
-1. QuickJS
-
-官方
-https://bellard.org/quickjs/
-
-中文
-https://github.com/quickjs-zh/QuickJS
-
-推荐:
-https://github.com/quickjs-ng/quickjs
-Forked: https://github.com/GeneralSandman/quickjs
-
-
-2. QuciJS 需要参考的地方
-
-
-quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
 
 
 -----------------------------
@@ -567,15 +400,52 @@ quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
 
 ## 2024下半年发展大规划
 
+完善Ring的基本功能, 争取在2024-12-31之前发布第一个release版本.
+
+
 1. 匿名函数
 2. 闭包
 3. 协程
 4. 增量式垃圾回收机制
-5. 类型转换
-6. 指针
-7. 规范限定符号
-8. 支持Enum
+5. 规范限定符号
+6. 完善标准库
 
+
+-----------------------------
+
+
+## 2024-09-16周
+
+
+### A. 支持简单的匿名函数 ✅
+
+
+### B. 匿名函数要支持传递函数参数 支持返回值
+
+
+### C. 调用闭包的时候，要支持像函数调用一样的参数校验
+
+
+### D. check匿名函数是否可以被调试 ✅
+
+
+### E. reflect::typeof() 支持获取匿名函数变量的类型 ✅
+
+TODO: 如果一个匿名函数变量没有被初始化，会得到 `nil-closure`
+
+```
+typedef function() FuncType0;
+
+
+var FuncType0  local_func_var0;
+fmt::println(reflect::typeof(local_func_var0)); // nil-closure
+
+```
+
+
+### F. Proposal: reflect::typeof() 应该进行优化
+
+1. 如果一个 变量没有分配内存，array/closure，typeof 也能获取到对应的值
 
 -----------------------------
 
@@ -599,6 +469,43 @@ usage:
 closure function build-function 他们名字相同时，允许覆盖么，
 
 比如说 build-function append, 如果用户自定义了一个 append函数，他们是如何影响的
+
+
+
+### D. Proposal: 支持typedef 定义类型别名
+
+当前只支持 typedef function() FuncType;
+
+后续还要支持，基础类型和嵌套类型别名
+```
+typedef int intType1;
+typedef intType1 intType2;
+
+typedef string  JobID:
+```
+
+
+### E. Proposal: typedef 定义的类型别名需要通过语义检查
+
+
+e.g. 该测试用例不应该通过
+
+```
+typedef function(var bool a, var bool b) -> (string) FuncType;
+
+@main
+function main() {
+	var FuncType local_func_var;
+
+	local_func_var = function(var bool a, var int b) -> (string) {
+		fmt::println("invoke a closure 1");
+		return fmt::sprintf("ring {} {}", a, b);
+	};
+}
+```
+
+
+### F. Proposal: 在编译阶段，产生了很多 的 TypeSpecifier，如何节省内存空间。
 
 
 -----------------------------
