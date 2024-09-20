@@ -1016,8 +1016,31 @@ std::string format_rvm_type_specifier(Package_Executer*  package_executer,
         rvm_class_definition = &(package_executer->class_list[type_specifier->u.class_def_index]);
         str                  = std::string(rvm_class_definition->identifier);
         break;
+    case RING_BASIC_TYPE_FUNC: {
+        RVM_TypeSpecifier_Func* func_type = type_specifier->u.func_type;
+
+        // 与 formate_closure_type 重复了
+        std::vector<std::string> parameter_list_s;
+        std::string              parameter_s = "";
+        for (unsigned int i = 0; i < func_type->parameter_list_size; i++) {
+            std::string tmp = format_rvm_type_specifier(package_executer, &func_type->parameter_list[i], "");
+            // FIXME: 没有 variadic
+            parameter_list_s.push_back(tmp);
+        }
+        parameter_s = strings_join(parameter_list_s, ", ");
+
+        std::vector<std::string> return_list_s;
+        std::string              return_s = "";
+        for (unsigned int i = 0; i < func_type->return_list_size; i++) {
+            std::string tmp = format_rvm_type_specifier(package_executer, &func_type->return_list[i], "");
+            return_list_s.push_back(tmp);
+        }
+        return_s = strings_join(return_list_s, ", ");
+
+        //
+        str = sprintf_string("function(%s) -> (%s)", parameter_s.c_str(), return_s.c_str());
+    } break;
     default:
-        // TODO:  后续还要处理 数组
         str = ".unknow";
         break;
     }

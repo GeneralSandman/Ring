@@ -1214,14 +1214,20 @@ TypeAlias* add_type_alias_func(Parameter*          parameter_list,
         }
     }
 
+    TypeSpecifier** parameter_list_type = (TypeSpecifier**)mem_alloc(get_front_mem_pool(),
+                                                                     sizeof(TypeSpecifier*) * parameter_list_size);
+    unsigned int    i                   = 0;
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next, i++) {
+        parameter_list_type[i] = pos->type_specifier;
+    }
+
     unsigned int return_list_size = 0;
     for (FunctionReturnList* pos = return_list; pos != nullptr; pos = pos->next) {
         return_list_size++;
     }
-
     TypeSpecifier** return_list_type = (TypeSpecifier**)mem_alloc(get_front_mem_pool(),
                                                                   sizeof(TypeSpecifier*) * return_list_size);
-    unsigned int    i                = 0;
+    i                                = 0;
     for (FunctionReturnList* pos = return_list; pos != nullptr; pos = pos->next, i++) {
         return_list_type[i] = pos->type_specifier;
     }
@@ -1229,7 +1235,7 @@ TypeAlias* add_type_alias_func(Parameter*          parameter_list,
 
     Ring_DeriveType_Func* func    = (Ring_DeriveType_Func*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Func));
     func->parameter_list_size     = parameter_list_size;
-    func->parameter_list          = nullptr; // FIXME:
+    func->parameter_list          = parameter_list_type;
     func->return_list_size        = return_list_size;
     func->return_list             = return_list_type;
 

@@ -2742,4 +2742,27 @@ void type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier* src) {
             type_specifier_deep_copy(dst->sub, src->sub);
         }
     }
+
+    if (src->kind == RING_BASIC_TYPE_FUNC) {
+        RVM_TypeSpecifier_Func* func_type = (RVM_TypeSpecifier_Func*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_TypeSpecifier_Func));
+
+        func_type->parameter_list_size    = src->u.func_type->parameter_list_size;
+        func_type->parameter_list         = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                          func_type->parameter_list_size
+                                                                              * sizeof(RVM_TypeSpecifier));
+        for (unsigned int i = 0; i < src->u.func_type->parameter_list_size; i++) {
+            type_specifier_deep_copy(&(func_type->parameter_list[i]), src->u.func_type->parameter_list[i]);
+        }
+
+        func_type->return_list_size = src->u.func_type->return_list_size;
+        func_type->return_list      = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                    func_type->return_list_size
+                                                                        * sizeof(RVM_TypeSpecifier));
+        for (unsigned int i = 0; i < src->u.func_type->return_list_size; i++) {
+            type_specifier_deep_copy(&(func_type->return_list[i]), src->u.func_type->return_list[i]);
+        }
+
+        dst->kind        = RING_BASIC_TYPE_FUNC;
+        dst->u.func_type = func_type;
+    }
 }

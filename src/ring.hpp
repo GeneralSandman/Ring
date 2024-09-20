@@ -111,7 +111,7 @@ typedef struct RVM_Array                    RVM_Array;
 typedef struct RVM_Closure                  RVM_Closure;
 typedef struct RVM_ClassObject              RVM_ClassObject;
 typedef struct RVM_GC_Object                RVM_GC_Object;
-typedef struct RVM_BasicTypeSpecifier       RVM_BasicTypeSpecifier;
+typedef struct RVM_TypeSpecifier_Func       RVM_TypeSpecifier_Func;
 typedef struct RVM_TypeSpecifier            RVM_TypeSpecifier;
 
 typedef struct RVM_Parameter                RVM_Parameter;
@@ -745,13 +745,22 @@ struct RVM_ClassObject {
     RVM_Value*           field;
 };
 
+struct RVM_TypeSpecifier_Func {
+    unsigned int       parameter_list_size;
+    RVM_TypeSpecifier* parameter_list;
+
+    unsigned int       return_list_size;
+    RVM_TypeSpecifier* return_list;
+};
+
 
 // Only used by back-end of compiler.
 struct RVM_TypeSpecifier {
     Ring_BasicType kind;
 
     union {
-        unsigned int class_def_index;
+        unsigned int            class_def_index;
+        RVM_TypeSpecifier_Func* func_type;
     } u;
 
     unsigned int       dimension; // 维度，用来指明sub
