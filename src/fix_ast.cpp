@@ -360,6 +360,10 @@ BEGIN:
         fix_closure_expression(expression, expression->u.closure_expression, block, func);
         break;
 
+    case EXPRESSION_TYPE_IIFE:
+        fix_iife_expression(expression, expression->u.iife, block, func);
+        break;
+
 
     case EXPRESSION_TYPE_CONCAT:
         fix_binary_concat_expression(expression, expression->u.binary_expression, block, func);
@@ -2479,6 +2483,49 @@ void fix_closure_expression(Expression*        expression,
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     EXPRESSION_ADD_CONVERT_TYPE(expression, &func_type_specifier);
+}
+
+void fix_iife_expression(Expression*                   expression,
+                         ImmediateInvokFuncExpression* iife,
+                         Block*                        block,
+                         FunctionTuple*                func) {
+
+    if (iife == nullptr) {
+        return;
+    }
+
+    Closure*   closure        = iife->closure_definition;
+
+    Parameter* parameter_list = closure->parameter_list;
+    for (; parameter_list != nullptr; parameter_list = parameter_list->next) {
+        fix_type_specfier(parameter_list->type_specifier);
+    }
+
+    // 这里的实现方式和 fix_function_definition 一样
+    FunctionReturnList* return_list = closure->return_list;
+    for (; return_list != nullptr; return_list = return_list->next) {
+        fix_type_specfier(return_list->type_specifier);
+    }
+
+    if (closure->block) {
+        add_parameter_to_declaration(closure->parameter_list, closure->block);
+        fix_statement_list(closure->block->statement_list, closure->block, (FunctionTuple*)closure);
+    }
+
+    for (ArgumentList* pos = iife->argument_list;
+         pos != nullptr;
+         pos = pos->next) {
+        fix_expression(pos->expression, block, func);
+    }
+
+
+    // FIXME: 应该是函数的返回值类型
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    for (FunctionReturnList* pos = closure->return_list;
+         pos != nullptr;
+         pos = pos->next) {
+        EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
+    }
 }
 
 void add_parameter_to_declaration(Parameter* parameter, Block* block) {

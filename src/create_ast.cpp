@@ -231,6 +231,28 @@ Expression* create_expression_closure_definition(Closure* func) {
     return expression;
 }
 
+Expression* create_expression_iife(Closure*      closure,
+                                   ArgumentList* argument_list) {
+
+    unsigned int argument_list_size = 0;
+    for (ArgumentList* pos = argument_list; pos != nullptr; pos = pos->next) {
+        argument_list_size++;
+    }
+    ImmediateInvokFuncExpression* iife = (ImmediateInvokFuncExpression*)mem_alloc(get_front_mem_pool(), sizeof(ImmediateInvokFuncExpression));
+    iife->line_number                  = package_unit_get_line_number();
+    iife->argument_list_size           = argument_list_size;
+    iife->argument_list                = argument_list;
+    iife->closure_definition           = closure;
+
+    Expression* expression             = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
+    expression->line_number            = package_unit_get_line_number();
+    expression->convert_type           = nullptr; // UPDATED_BY_FIX_AST
+    expression->type                   = EXPRESSION_TYPE_IIFE;
+    expression->u.iife                 = iife;
+
+    return expression;
+}
+
 Expression* create_expression_binary(ExpressionType type, Expression* left, Expression* right) {
     debug_ast_info_with_yellow("type:%d", type);
 
@@ -445,17 +467,18 @@ fmt::println(return_3_bool_1());
 FunctionCallExpression* create_function_call_expression(char*         func_identifier,
                                                         ArgumentList* argument_list) {
 
+    unsigned int argument_list_size = 0;
+    for (ArgumentList* pos = argument_list; pos != nullptr; pos = pos->next) {
+        argument_list_size++;
+    }
     FunctionCallExpression* function_call_expression = (FunctionCallExpression*)mem_alloc(get_front_mem_pool(), sizeof(FunctionCallExpression));
     function_call_expression->line_number            = package_unit_get_line_number();
     function_call_expression->package_posit          = nullptr;
     function_call_expression->func_identifier        = func_identifier;
     function_call_expression->type                   = FUNCTION_CALL_TYPE_FUNC; // UPDATED_BY_FIX_AST
-    function_call_expression->argument_list_size     = 0;
+    function_call_expression->argument_list_size     = argument_list_size;
     function_call_expression->argument_list          = argument_list;
 
-    for (ArgumentList* pos = argument_list; pos != nullptr; pos = pos->next) {
-        function_call_expression->argument_list_size++;
-    }
 
     return function_call_expression;
 }

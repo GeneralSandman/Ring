@@ -64,6 +64,7 @@ typedef struct AssignExpression             AssignExpression;
 typedef struct FieldInitExpression          FieldInitExpression;
 typedef struct LaunchExpression             LaunchExpression;
 typedef struct ClosureExpression            ClosureExpression;
+typedef struct ImmediateInvokFuncExpression ImmediateInvokFuncExpression;
 typedef struct IdentifierExpression         IdentifierExpression;
 
 typedef struct ArgumentList                 ArgumentList;
@@ -1206,7 +1207,7 @@ typedef enum {
 
     EXPRESSION_TYPE_LAUNCH,
     EXPRESSION_TYPE_CLOSURE, // TODO: 这个名字是不是应该该一下
-
+    EXPRESSION_TYPE_IIFE,
 
 } ExpressionType;
 
@@ -1428,6 +1429,7 @@ struct Expression {
         FieldInitExpression*          field_init_expression;
         LaunchExpression*             launch_expression;
         ClosureExpression*            closure_expression;
+        ImmediateInvokFuncExpression* iife;
     } u;
 
     Expression* next;
@@ -1575,11 +1577,11 @@ struct FunctionCallExpression {
     FunctionCallType type;
     union {
         struct {
-            Function* function;
-        } fc; // function-call
+            Function* function; // UPDATED_BY_FIX_AST
+        } fc;                   // function-call
         struct {
-            Declaration* closure_decl;
-        } cc; // closure-call
+            Declaration* closure_decl; // UPDATED_BY_FIX_AST
+        } cc;                          // closure-call
 
     } u;
 
@@ -1647,6 +1649,14 @@ struct ClosureExpression {
     unsigned int line_number;
 
     Closure*     closure_definition;
+};
+
+struct ImmediateInvokFuncExpression {
+    unsigned int  line_number;
+
+    Closure*      closure_definition;
+    unsigned int  argument_list_size;
+    ArgumentList* argument_list;
 };
 
 struct BinaryExpression {
@@ -2539,6 +2549,9 @@ Expression*                   create_expression_launch(LaunchExpressionType    t
 
 Expression*                   create_expression_closure_definition(Closure* func);
 
+Expression*                   create_expression_iife(Closure*      closure,
+                                                     ArgumentList* argument_list);
+
 Expression*                   create_expression_binary(ExpressionType type, Expression* left, Expression* right);
 Expression*                   create_expression_unitary(ExpressionType type, Expression* unitary_expression);
 Expression*                   create_expression_literal(ExpressionType type, char* literal_interface);
@@ -2756,6 +2769,10 @@ void             fix_closure_expression(Expression*        expression,
                                         ClosureExpression* closure_expression,
                                         Block*             block,
                                         FunctionTuple*     func);
+void             fix_iife_expression(Expression*                   expression,
+                                     ImmediateInvokFuncExpression* iife,
+                                     Block*                        block,
+                                     FunctionTuple*                func);
 
 void             add_parameter_to_declaration(Parameter* parameter, Block* block);
 Declaration*     search_declaration(char* package_posit, char* identifier, Block* block);
@@ -2873,9 +2890,13 @@ void              generate_vmcode_from_launch_expression(Package_Executer* execu
                                                          LaunchExpression* launch_expression,
                                                          RVM_OpcodeBuffer* opcode_buffer);
 
+void              deep_copy_closure(RVM_Closure* dst, Closure* src);
 void              generate_vmcode_from_closure_expreesion(Package_Executer*  executer,
                                                           ClosureExpression* closure_expression,
                                                           RVM_OpcodeBuffer*  opcode_buffer);
+void              generate_vmcode_from_iife_expreesion(Package_Executer*             executer,
+                                                       ImmediateInvokFuncExpression* iife,
+                                                       RVM_OpcodeBuffer*             opcode_buffer);
 
 void              generate_vmcode_from_new_array_expression(Package_Executer*   executer,
                                                             NewArrayExpression* new_array_expression,

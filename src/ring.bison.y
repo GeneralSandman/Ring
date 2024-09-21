@@ -224,6 +224,7 @@ int yylex();
 %type <m_function_tuple>      function_tuple
 %type <m_function_definition> function_definition
 %type <m_expression>             closure_definition
+%type <m_expression>             iife_expression
 %type <m_parameter_list> parameter_list parameter parameter_list_v2
 %type <m_if_statement> if_statement
 %type <m_for_statement> for_statement
@@ -763,7 +764,6 @@ closure_definition
     {
         debug_bison_info_with_green("[RULE::aonymous_function]\t ");
         $$ = create_expression_closure_definition((Closure*)($2));
-
     }
     ;
 
@@ -1245,6 +1245,7 @@ primary_not_new_array
     {
         $$ = expression_add_package_posit($3, $1);
     }
+    | iife_expression
     ;
 
 
@@ -1338,6 +1339,17 @@ function_call_expression
     {
         debug_bison_info_with_green("[RULE::function_call_expression]\t ");
         $$ = create_function_call_expression($1, nullptr);
+    }
+    ;
+
+iife_expression
+    : TOKEN_FUNCTION function_tuple TOKEN_LP argument_list TOKEN_RP
+    {
+        $$ = create_expression_iife((Closure*)($2), $4);
+    }
+    | TOKEN_FUNCTION function_tuple TOKEN_LP               TOKEN_RP
+    {
+        $$ = create_expression_iife((Closure*)($2), nullptr);
     }
     ;
 
