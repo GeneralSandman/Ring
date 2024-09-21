@@ -1,0 +1,17 @@
+closure block
+closure bool_value: true
+closure int_value: 123
+closure int64_value: 456
+closure double_value: 3.141500
+closure string_value: ring-hello-world
+
+invoke closure 1
+invoke closure 2
+invoke closure 3
+invoke closure 4
+invoke closure 5
+main bool_value: true
+main int_value: 2
+main int64_value: 6
+main double_value: 66.660000
+main string_value: ring-compiler
