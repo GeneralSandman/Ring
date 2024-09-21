@@ -426,7 +426,64 @@ class-object  ✅
 ### C. 调用闭包的时候，要支持像函数调用一样的参数校验
 
 
-### D. check匿名函数是否可以被调试 ✅
+### D. Proposal: check匿名函数是否可以被调试 ✅
+
+### E. Proposal: 不需要将匿名函数复制给一个函数变量
+
+
+1. 可以直接返回  ✅
+```
+return function() {
+
+};
+```
+
+2. 不用命名变量, 直接通过函数传递参数  ✅
+
+```
+pass_closure(function() {
+		fmt::println("main:: closure block 1");
+	}, function() -> (string) {
+		fmt::println("main:: closure block 2");
+		return "main:: closure return value";
+	});
+```
+
+3. 支持 Immediately invoked function expression ✅
+
+```
+function() {
+
+}();
+```
+
+对应的字节码
+
+```
+argument_num
+push_closure
+invoke_closures
+```
+
+
+
+
+### F. Proposal: typedef 定义函数变量类型别名的时候，需要简化
+
+目前
+
+```
+typedef function(var int a, var int b) -> (int) FuncType;
+```
+
+应该简化成：
+
+```
+typedef function(int, int) -> (int) FuncType;
+```
+
+
+这样写起来更舒服
 
 
 ### E. reflect::typeof() 支持获取匿名函数变量的类型 ✅
@@ -446,6 +503,19 @@ fmt::println(reflect::typeof(local_func_var0)); // nil-closure
 ### F. Proposal: reflect::typeof() 应该进行优化
 
 1. 如果一个 变量没有分配内存，array/closure，typeof 也能获取到对应的值
+
+### G. Proposal: 丰富标准库
+
+string 要支持切片
+string_value[a:b];
+
+array 要支持切片
+array_value[a:b];
+
+切片返回新的数组/string
+
+strings 相关的标准库, 
+fmt 相关的标准库
 
 -----------------------------
 
