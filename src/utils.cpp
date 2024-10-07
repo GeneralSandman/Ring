@@ -291,11 +291,11 @@ void ring_vm_dump_runtime_stack(Ring_VirtualMachine* rvm,
                                 unsigned int screen_row, unsigned int screen_col) {
 
     STDERR_MOVE_CURSOR(screen_row++, screen_col);
-    fprintf(stderr, "******************** runtime_stack *********************\n");
+    fprintf(stderr, "*********************** runtime_stack ************************\n");
 
     STDERR_MOVE_CURSOR(screen_row++, screen_col);
     // width 49
-    fprintf(stderr, "%7s | %20s | %10s | %10s\n", "*Index", "*Value", "*CallSpace", "*StackTop");
+    fprintf(stderr, "%7s | %25s | %10s | %10s\n", "*Index", "*Value", "*CallSpace", "*StackTop");
     for (unsigned int i = 0; i < runtime_stack->top_index; i++) {
         std::string space   = "";
         std::string pointer = "";
@@ -314,9 +314,9 @@ void ring_vm_dump_runtime_stack(Ring_VirtualMachine* rvm,
         std::string format    = type_str + "(" + value_str + ")";
         // 截断，不然命令行排版乱
         // 如果要是全部都展示的话，请使用 stack 命令
-        format = format.substr(0, 20);
+        format = format.substr(0, 25);
 
-        fprintf(stderr, "%7d | %20s | %10s | %10s\n",
+        fprintf(stderr, "%7d | %25s | %10s | %10s\n",
                 i, format.c_str(),
                 space.c_str(), pointer.c_str());
     }
