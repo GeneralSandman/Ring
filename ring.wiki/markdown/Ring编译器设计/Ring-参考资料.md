@@ -171,7 +171,12 @@ https://github.com/quickjs-ng/quickjs
 Forked: https://github.com/GeneralSandman/quickjs
 
 
-2. QuciJS 需要参考的地方
+2. quickjs介绍
+
+https://www.cnblogs.com/lsgxeva/p/17226032.html
+
+
+3. QuciJS 需要参考的地方
 
 
 quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9

@@ -15,16 +15,16 @@ import {
 typedef function() FuncType;
 
 
-@main
-function main() {
-	var FuncType func_var;
+// @main
+// function main() {
+// 	var FuncType func_var;
 
-	func_var = return_closure();
+// 	func_var = return_closure();
 
-	func_var();
+// 	func_var();
 
-	func_var();
-}
+// 	func_var();
+// }
 
 function return_closure() -> (FuncType) {
 
@@ -36,10 +36,10 @@ function return_closure() -> (FuncType) {
 
 	tmp = function() {
 		local_int_value_0 ++;
-		fmt::printf("return_closure::closure::1 local_int_value_0 = {}\n", local_int_value_0);
+		// fmt::printf("return_closure::closure::1 local_int_value_0 = {}\n", local_int_value_0);
 	};
 
-	fmt::printf("return_closure::out:2 local_int_value_0 = {}\n", local_int_value_0);
+	// fmt::printf("return_closure::out:2 local_int_value_0 = {}\n", local_int_value_0);
 
 	return tmp;
 }

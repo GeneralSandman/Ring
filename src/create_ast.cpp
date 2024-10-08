@@ -75,7 +75,7 @@ Expression* create_expression_identifier(char* identifier) {
     identifier_expression->package_posit        = nullptr;
     identifier_expression->type                 = IDENTIFIER_EXPRESSION_TYPE_VARIABLE; // TODO: 这里应该是 Unknow UPDATED_BY_FIX_AST
     identifier_expression->identifier           = identifier;
-    identifier_expression->u.declaration        = nullptr;
+    identifier_expression->u.variable           = nullptr;
 
     Expression* expression                      = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                     = package_unit_get_line_number();
@@ -651,6 +651,10 @@ FunctionTuple* create_function_tuple(Location*           location,
     function_tup->block               = block;
     function_tup->next                = nullptr;
 
+    if (block) {
+        block->type = BLOCK_TYPE_FUNCTION;
+    }
+
     return function_tup;
 }
 
@@ -724,6 +728,10 @@ Function* create_function_definition(FunctionType        type,
 
     function->func_index          = 0; // UPDATED_BY_FIX_AST
     function->type                = type;
+
+    if (block) {
+        block->type = BLOCK_TYPE_FUNCTION;
+    }
 
     // 对于main()函数，检查 参数 和返回值
     if (str_eq(function->identifier, "main")) {

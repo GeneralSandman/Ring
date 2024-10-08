@@ -91,6 +91,7 @@ typedef struct Ring_DeriveType_Array        Ring_DeriveType_Array;
 typedef struct Ring_DeriveType_Class        Ring_DeriveType_Class;
 typedef struct Ring_DeriveType_Func         Ring_DeriveType_Func;
 typedef struct Declaration                  Declaration;
+typedef struct Variable                     Variable;
 typedef struct TagDefinitionStatement       TagDefinitionStatement;
 typedef struct JumpTagStatement             JumpTagStatement;
 typedef struct TypeAlias                    TypeAlias;
@@ -1492,8 +1493,8 @@ struct IdentifierExpression {
     IdentifierExpressionType type;
     char*                    identifier;
     union {
-        Declaration* declaration;
-        Function*    function;
+        Variable* variable;
+        Function* function;
     } u;
 };
 
@@ -1725,6 +1726,11 @@ struct Declaration {
     int            is_local;
     int            variable_index;
     Declaration*   next; // TODO: 这里设计的优点混乱了
+};
+
+struct Variable {
+    Declaration* declaration;
+    bool         is_free_value;
 };
 
 typedef enum {
@@ -2803,7 +2809,7 @@ void             fix_iife_expression(Expression*                   expression,
                                      FunctionTuple*                func);
 
 void             add_parameter_to_declaration(Parameter* parameter, Block* block);
-Declaration*     search_declaration(char* package_posit, char* identifier, Block* block);
+Variable*        resolve_variable(char* package_posit, char* identifier, Block* block);
 Function*        search_function(char* package_posit, char* identifier);
 
 // --------------------
