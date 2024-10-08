@@ -591,7 +591,8 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
     return return_list;
 }
 
-FunctionTuple* create_function_tuple(Parameter*          parameter_list,
+FunctionTuple* create_function_tuple(Location*           location,
+                                     Parameter*          parameter_list,
                                      FunctionReturnList* return_list,
                                      Block*              block) {
 
@@ -637,10 +638,10 @@ FunctionTuple* create_function_tuple(Parameter*          parameter_list,
     }
 
 
-    FunctionTuple* function_tup = (FunctionTuple*)mem_alloc(get_front_mem_pool(), sizeof(FunctionTuple));
-    function_tup->source_file   = package_unit_get_file_name();
-    // function_tup->start_line_number   = identifier->line_number; // FIXME:
-    function_tup->end_line_number     = package_unit_get_line_number();
+    FunctionTuple* function_tup       = (FunctionTuple*)mem_alloc(get_front_mem_pool(), sizeof(FunctionTuple));
+    function_tup->source_file         = package_unit_get_file_name();
+    function_tup->start_line_number   = location->line_number;
+    function_tup->end_line_number     = package_unit_get_line_number(); // FIXME: 如何记录结束行
     function_tup->ring_file_stat      = get_package_unit()->ring_file_stat;
 
     function_tup->parameter_list_size = parameter_list_size;
@@ -1798,4 +1799,10 @@ int attribute_is_constructor(Attribute attribute) {
 
 int attribute_is_destructor(Attribute attribute) {
     return (attribute >> 5) & (0x01);
+}
+
+Location* a_location() {
+    Location* location    = (Location*)mem_alloc(get_front_mem_pool(), sizeof(Location));
+    location->line_number = package_unit_get_line_number();
+    return location;
 }

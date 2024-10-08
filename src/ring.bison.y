@@ -82,6 +82,8 @@ int yylex();
     AttributeType                       m_attribute;
 
     ExpressionType                      m_expression_type;
+
+    Location*                           m_location;
 }
 
 %token TOKEN_TYPEDEF
@@ -769,15 +771,15 @@ closure_definition
 
 // TODO: 后续 closure function method 都使用这个
 function_tuple
-    : TOKEN_LP parameter_list_v2 TOKEN_RP block
+    : TOKEN_LP parameter_list_v2 TOKEN_RP {$<m_location>$ = a_location();} block
     {
         debug_bison_info_with_green("[RULE::function_tuple:1]\t ");
-        $$ = create_function_tuple($2, nullptr, $4);
+        $$ = create_function_tuple($<m_location>4, $2, nullptr, $5);
     }
     | TOKEN_LP parameter_list_v2 TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_tuple:2]\t ");
-        $$ = create_function_tuple($2, $6, $8);
+        $$ = create_function_tuple(nullptr, $2, $6, $8);
     }
     ;
 

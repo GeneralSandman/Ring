@@ -739,6 +739,25 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_PC += 3;
             break;
 
+        // free value
+        case RVM_CODE_POP_FREE_BOOL:
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
+            VM_CUR_CO_PC += 3;
+            break;
+        case RVM_CODE_POP_FREE_INT:
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
+            VM_CUR_CO_PC += 3;
+            break;
+        case RVM_CODE_PUSH_FREE_BOOL:
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 3;
+            break;
+        case RVM_CODE_PUSH_FREE_INT:
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 3;
+            break;
+
+
         // array
         case RVM_CODE_PUSH_ARRAY_A:
             array_c_value = STACK_GET_ARRAY_OFFSET(-2);

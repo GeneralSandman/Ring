@@ -9,7 +9,7 @@
       "args": [
         "-O0",
         "run",
-        "${workspaceFolder}/test/040-aonymous-function/test-001.ring"
+        "${workspaceFolder}/test/040-closure/free-value-000.ring"
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",

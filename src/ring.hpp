@@ -24,6 +24,7 @@ typedef struct Package                      Package;
 typedef struct PackageUnit                  PackageUnit;
 typedef struct RingFileStat                 RingFileStat;
 typedef struct SourceLineInfo               SourceLineInfo;
+typedef struct Location                     Location;
 
 typedef struct RVM_Variable                 RVM_Variable;
 typedef struct RVM_RuntimeStack             RVM_RuntimeStack;
@@ -110,6 +111,8 @@ typedef struct RVM_ConstantPool             RVM_ConstantPool;
 typedef struct RVM_String                   RVM_String;
 typedef struct RVM_Array                    RVM_Array;
 typedef struct RVM_Closure                  RVM_Closure;
+typedef struct FreeValueDesc                FreeValueDesc;
+typedef struct FreeValue                    FreeValue;
 typedef struct RVM_ClassObject              RVM_ClassObject;
 typedef struct RVM_GC_Object                RVM_GC_Object;
 typedef struct RVM_TypeSpecifier_Func       RVM_TypeSpecifier_Func;
@@ -403,6 +406,10 @@ struct SourceLineInfo {
     unsigned int size;         // 某行的字符数量
 };
 
+struct Location {
+    unsigned int line_number;
+};
+
 /*
  * PackageUnit 与 Package 的逻辑关系
  *
@@ -601,15 +608,27 @@ struct RVM_Function {
 
 
 struct RVM_Closure {
-    // TODO:
-    // RVM_GC_Object_Header;
-
-    // TODO: 这里直接将 RVM_Function copy过来
-    // TODO: 后续进行优化
     RVM_FUNCTION_TYPLE_HEADER;
+    unsigned int free_value_size;
+    FreeValue*   free_value_list;
+};
 
-    // TODO：
-    // 闭包相关的变量
+struct FreeValueDesc {
+    const char* identifier;
+    // 1. 索引
+    // 2. 类型
+    // 3. 是否是直接外层函数的局部变量
+};
+
+struct FreeValue {
+    union {
+        RVM_Value* p;
+        // 可指向 open/close value
+        // open时，指向栈空间
+        // close时，指向c_value，是一个拷贝
+    } u;
+
+    RVM_Value c_value; // closed value
 };
 
 struct RVM_Field {
@@ -887,6 +906,12 @@ typedef enum {
     RVM_CODE_PUSH_STACK_CLASS_OB,
     RVM_CODE_PUSH_STACK_ARRAY,
     RVM_CODE_PUSH_STACK_CLOSURE,
+
+    // free value
+    RVM_CODE_POP_FREE_BOOL,
+    RVM_CODE_POP_FREE_INT,
+    RVM_CODE_PUSH_FREE_BOOL,
+    RVM_CODE_PUSH_FREE_INT,
 
     // array
     RVM_CODE_PUSH_ARRAY_A,
@@ -2577,7 +2602,8 @@ FunctionReturnList*           create_function_return_list(TypeSpecifier* type_sp
 FunctionReturnList*           function_return_list_add_item(FunctionReturnList* return_list,
                                                             TypeSpecifier*      type_specifier);
 
-FunctionTuple*                create_function_tuple(Parameter*          parameter_list,
+FunctionTuple*                create_function_tuple(Location*           location,
+                                                    Parameter*          parameter_list,
                                                     FunctionReturnList* return_list,
                                                     Block*              block);
 Function*                     create_function_definition(FunctionType type, Identifier* identifier, Parameter* parameter_list, FunctionReturnList* return_list, Block* block);
@@ -2655,6 +2681,8 @@ int                           attribute_is_public(Attribute attribute);
 int                           attribute_is_private(Attribute attribute);
 int                           attribute_is_constructor(Attribute attribute);
 int                           attribute_is_destructor(Attribute attribute);
+
+Location*                     a_location();
 // --------------------
 
 

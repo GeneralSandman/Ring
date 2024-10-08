@@ -543,6 +543,14 @@ void dump_vm_function(Package_Executer*    package_executer,
                function->local_variable_list[i].identifier);
     }
 
+    // 4. free value
+    printf("+FreeValue:        %d\n", 0);
+    // for (unsigned int i = 0; i < function->free_value_size; i++) {
+    //     printf(" ├──%-20s %-20s\n",
+    //            format_rvm_type_specifier(package_executer, function->free_value_list[i].type_specifier, "var ").c_str(),
+    //            function->free_value_list[i].identifier);
+    // }
+
     printf("+Instructions:\n");
     printf(" ├──%-8s%-30s%-20s%-18s\n",
            "*Num", "*Instruction", "*Operand", "*SourceLineNum");

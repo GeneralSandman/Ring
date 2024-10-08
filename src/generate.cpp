@@ -83,6 +83,13 @@ void package_executer_dump(Package_Executer* package_executer) {
         dump_vm_function(package_executer, nullptr, &(package_executer->function_list[i]));
     }
 
+    // 4. dump const closure
+    for (unsigned int i = 0; i < package_executer->constant_pool_size; i++) {
+        if (package_executer->constant_pool_list[i].type == CONSTANTPOOL_TYPE_CLOSURE) {
+            dump_vm_function(package_executer, nullptr, (RVM_Function*)(package_executer->constant_pool_list[i].u.closure_value));
+        }
+    }
+
     // 4. dump classes
     for (unsigned int i = 0; i < package_executer->class_size; i++) {
         dump_vm_class(package_executer, &(package_executer->class_list[i]));
@@ -2642,6 +2649,8 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STATIC_BOOL
         // RVM_CODE_POP_STACK_BOOL
         // RVM_CODE_PUSH_STACK_BOOL
+        // RVM_CODE_POP_FREE_BOOL
+        // RVM_CODE_PUSH_FREE_BOOL
         // RVM_CODE_POP_FIELD_BOOL
         // RVM_CODE_PUSH_FIELD_BOOL
         return opcode;
@@ -2651,6 +2660,8 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STATIC_INT
         // RVM_CODE_POP_STACK_INT
         // RVM_CODE_PUSH_STACK_INT
+        // RVM_CODE_POP_FREE_INT
+        // RVM_CODE_PUSH_FREE_INT
         // RVM_CODE_POP_FIELD_INT
         // RVM_CODE_PUSH_FIELD_INT
         return RVM_Opcode(opcode + 1);
