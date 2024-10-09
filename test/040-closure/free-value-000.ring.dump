@@ -1,0 +1,51 @@
+#Constants:       4
+ ├──     0: string(return_closure::out:1 local_int_value_0 = {}
+)
+ ├──     1: string(return_closure::closure::1 local_int_value_0 = {}
+)
+ ├──     2: closure()
+ ├──     3: string(return_closure::out:2 local_int_value_0 = {}
+)
+
+#Globals:       0
+
+$return_closure()    <./test/040-closure/free-value-000.ring:29,45>
++Parameter:   0
++Local:       2
+ ├──var int              local_int_value_0   
+ ├──var function() -> () tmp                 
++FreeValue:        0
++Instructions:
+ ├──*Num    *Instruction                  *Operand            *SourceLineNum    
+ ├──0       push_string                   0                   34                
+ ├──1       push_stack_int                0                                     
+ ├──2       argument_num                  2                                     
+ ├──3       push_func                     1, 7                                  
+ ├──4       invoke_func_native                                                  
+ ├──5       push_closure                  2                   40                
+ ├──6       pop_stack_closure             1                   37                
+ ├──7       push_string                   3                   42                
+ ├──8       push_stack_int                0                                     
+ ├──9       argument_num                  2                                     
+ ├──10      push_func                     1, 7                                  
+ ├──11      invoke_func_native                                                  
+ ├──12      push_stack_closure            1                   44                
+ ├──13      return                        1                                     
+ ├──14      function_finish                                   45                
+
+$<closure>()    <./test/040-closure/free-value-000.ring:37,40>
++Parameter:   0
++Local:       0
++FreeValue:        0
++Instructions:
+ ├──*Num    *Instruction                  *Operand            *SourceLineNum    
+ ├──0       push_stack_int                0                   38                
+ ├──1       self_increase_int                                                   
+ ├──2       pop_stack_int                 0                                     
+ ├──3       push_string                   1                   39                
+ ├──4       push_stack_int                0                                     
+ ├──5       argument_num                  2                                     
+ ├──6       push_func                     1, 7                                  
+ ├──7       invoke_func_native                                                  
+ ├──8       function_finish                                   40                
+
