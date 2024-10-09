@@ -19,6 +19,16 @@
 5. 构建Lua解释器
    https://manistein.github.io/blog/tags/let-us-build-a-lua-interpreter/
 
+
+### Lua闭包
+
+1. 《构建Lua解释器Part11：Upvalue》 
+https://manistein.github.io/blog/post/program/let-us-build-a-lua-interpreter/%E6%9E%84%E5%BB%BAlua%E8%A7%A3%E9%87%8A%E5%99%A8part11/
+
+
+2. 《用Rust实现Lua解释器 Upvalue的逃逸和闭包》
+https://wubingzheng.github.io/build-lua-in-rust/zh/ch09-02.escape_and_closure.html
+
 #### 书籍
 1. 《Lua设计与实现》https://github.com/lichuang/Lua-Source-Internal
 2. 《自己动手实现Lua：虚拟机、编译器和标准库》
@@ -161,7 +171,12 @@ https://github.com/quickjs-ng/quickjs
 Forked: https://github.com/GeneralSandman/quickjs
 
 
-2. QuciJS 需要参考的地方
+2. quickjs介绍
+
+https://www.cnblogs.com/lsgxeva/p/17226032.html
+
+
+3. QuciJS 需要参考的地方
 
 
 quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9

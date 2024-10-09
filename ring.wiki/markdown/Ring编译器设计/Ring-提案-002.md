@@ -186,9 +186,25 @@ closure 放在一个 constant-pool
 
 
 
+### 匿名函数v0.2
+
+1. 实现free-value机制
+2. 需要支持多集嵌套
+3. ring dump 需要能够导出upvalue
+
+工作：
+1. 编译器期间：
+   1. 有专门的free-value对应的字节码
+   2. 能够在closure去搜索判断是否为free-Value
+   3. parent-block 的重新设计，支持多级嵌套: 如果是匿名函数引用了外层的局部变量，那么他就是一个free-value
+2. 运行时：
+   1. 能够现实free-value 的open/close
+   2. 能够实现free-value 的 共享和隔离
+   3. 能够debug free-value的详情，提高调试速度
 
 
-
+1. 全局变量/局部变量 取决于变量的定义方式
+2. FreeValue 取决于变量的使用方式，在一个匿名函数内部，使用外部的局部变量
 
 ### 下个版本的匿名函数
 
