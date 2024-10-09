@@ -75,7 +75,7 @@ Expression* create_expression_identifier(char* identifier) {
     identifier_expression->package_posit        = nullptr;
     identifier_expression->type                 = IDENTIFIER_EXPRESSION_TYPE_VARIABLE; // TODO: 这里应该是 Unknow UPDATED_BY_FIX_AST
     identifier_expression->identifier           = identifier;
-    identifier_expression->u.declaration        = nullptr;
+    identifier_expression->u.variable           = nullptr;
 
     Expression* expression                      = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number                     = package_unit_get_line_number();
@@ -591,7 +591,8 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
     return return_list;
 }
 
-FunctionTuple* create_function_tuple(Parameter*          parameter_list,
+FunctionTuple* create_function_tuple(Location*           location,
+                                     Parameter*          parameter_list,
                                      FunctionReturnList* return_list,
                                      Block*              block) {
 
@@ -637,10 +638,10 @@ FunctionTuple* create_function_tuple(Parameter*          parameter_list,
     }
 
 
-    FunctionTuple* function_tup = (FunctionTuple*)mem_alloc(get_front_mem_pool(), sizeof(FunctionTuple));
-    function_tup->source_file   = package_unit_get_file_name();
-    // function_tup->start_line_number   = identifier->line_number; // FIXME:
-    function_tup->end_line_number     = package_unit_get_line_number();
+    FunctionTuple* function_tup       = (FunctionTuple*)mem_alloc(get_front_mem_pool(), sizeof(FunctionTuple));
+    function_tup->source_file         = package_unit_get_file_name();
+    function_tup->start_line_number   = location->line_number;
+    function_tup->end_line_number     = package_unit_get_line_number(); // FIXME: 如何记录结束行
     function_tup->ring_file_stat      = get_package_unit()->ring_file_stat;
 
     function_tup->parameter_list_size = parameter_list_size;
@@ -649,6 +650,10 @@ FunctionTuple* create_function_tuple(Parameter*          parameter_list,
     function_tup->return_list         = return_list;
     function_tup->block               = block;
     function_tup->next                = nullptr;
+
+    if (block) {
+        block->type = BLOCK_TYPE_FUNCTION;
+    }
 
     return function_tup;
 }
@@ -723,6 +728,10 @@ Function* create_function_definition(FunctionType        type,
 
     function->func_index          = 0; // UPDATED_BY_FIX_AST
     function->type                = type;
+
+    if (block) {
+        block->type = BLOCK_TYPE_FUNCTION;
+    }
 
     // 对于main()函数，检查 参数 和返回值
     if (str_eq(function->identifier, "main")) {
@@ -1798,4 +1807,10 @@ int attribute_is_constructor(Attribute attribute) {
 
 int attribute_is_destructor(Attribute attribute) {
     return (attribute >> 5) & (0x01);
+}
+
+Location* a_location() {
+    Location* location    = (Location*)mem_alloc(get_front_mem_pool(), sizeof(Location));
+    location->line_number = package_unit_get_line_number();
+    return location;
 }

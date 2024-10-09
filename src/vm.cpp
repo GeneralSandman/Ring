@@ -17,6 +17,7 @@ std::string math_formula_desc =
     "K(1)  通过index 1 , 来操作 static 空间\n"
     "Si(1) 通过 index 1 , 来操作 stack 空间\n"
     "So(1) 通过 offset 1 , 来操作 stack 空间\n"
+    "Fi(1) 通过 index 1 , 来操作 free-value 空间\n"
     "C(1)  通过index 1, 从ConstantPool  Constant\n"
     "\n"
     "Field(object, As).int 将object的第As个Field作为int\n"
@@ -76,6 +77,13 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_STACK_CLASS_OB, "push_stack_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's class-object to stack", "", "So(0).object = Si(FSB+As).object"},
     {RVM_CODE_PUSH_STACK_ARRAY, "push_stack_array", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's array to stack", "", "So(0).array = Si(FSB+As).array"},
     {RVM_CODE_PUSH_STACK_CLOSURE, "push_stack_closure", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's closure to stack", "", "So(0).closure = Si(FSB+As).closure"},
+
+    // free value
+    {RVM_CODE_POP_FREE_BOOL, "pop_free_bool", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "bool assign to local-variable", "", "Fi(FSB+As).bool = S(-1).bool"},
+    {RVM_CODE_POP_FREE_INT, "pop_free_int", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "int assign to local-variable", "", "Fi(FSB+As).int = S(-1).int"},
+
+    {RVM_CODE_PUSH_FREE_BOOL, "push_free_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's bool to stack", "", "So(0).bool = Fi(FSB+As).bool"},
+    {RVM_CODE_PUSH_FREE_INT, "push_free_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's int to stack", "", "So(0).int = Fi(FSB+As).int"},
 
 
     // array

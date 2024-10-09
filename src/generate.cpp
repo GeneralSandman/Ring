@@ -83,6 +83,13 @@ void package_executer_dump(Package_Executer* package_executer) {
         dump_vm_function(package_executer, nullptr, &(package_executer->function_list[i]));
     }
 
+    // 4. dump const closure
+    for (unsigned int i = 0; i < package_executer->constant_pool_size; i++) {
+        if (package_executer->constant_pool_list[i].type == CONSTANTPOOL_TYPE_CLOSURE) {
+            dump_vm_function(package_executer, nullptr, (RVM_Function*)(package_executer->constant_pool_list[i].u.closure_value));
+        }
+    }
+
     // 4. dump classes
     for (unsigned int i = 0; i < package_executer->class_size; i++) {
         dump_vm_class(package_executer, &(package_executer->class_list[i]));
@@ -805,7 +812,7 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
     //                 range_statement->operand->u.identifier_expression->line_number);
 
 
-    Declaration* declaration = range_statement->operand->u.identifier_expression->u.declaration;
+    Declaration* declaration = range_statement->operand->u.identifier_expression->u.variable->declaration;
     if (declaration == nullptr) {
         ring_error_report("invalid range operand:%s\n", range_statement->operand->u.identifier_expression->identifier);
     }
@@ -1252,10 +1259,13 @@ void generate_pop_to_leftvalue_identifier(Package_Executer*     executer,
     debug_generate_info_with_darkgreen("\t");
     assert(identifier_expression != nullptr);
 
-    Declaration* declaration    = identifier_expression->u.declaration;
+    Declaration* declaration    = identifier_expression->u.variable->declaration;
 
     unsigned int variable_index = declaration->variable_index;
     RVM_Opcode   opcode         = RVM_CODE_UNKNOW;
+    // if (identifier_expression->u.variable->is_free_value) {
+    //     opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_FREE_BOOL, declaration->type_specifier);
+    // } else
     if (declaration->is_local) {
         opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STACK_BOOL, declaration->type_specifier);
     } else {
@@ -1296,7 +1306,7 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
     assert(array_index_expression->array_expression != nullptr);
     assert(array_index_expression->index_expression != nullptr);
 
-    Declaration* declaration = array_index_expression->array_expression->u.identifier_expression->u.declaration;
+    Declaration* declaration = array_index_expression->array_expression->u.identifier_expression->u.variable->declaration;
     if (declaration == nullptr) {
         ring_error_report("invalid operator[] in identifier:%s\n",
                           array_index_expression->array_expression->u.identifier_expression->identifier);
@@ -1617,12 +1627,15 @@ void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
     unsigned int offset = 0;
     switch (identifier_expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
-        if (identifier_expression->u.declaration->is_local) {
-            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_BOOL, identifier_expression->u.declaration->type_specifier);
+        // if (identifier_expression->u.variable->is_free_value) {
+        //     opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FREE_BOOL, identifier_expression->u.variable->declaration->type_specifier);
+        // } else
+        if (identifier_expression->u.variable->declaration->is_local) {
+            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_BOOL, identifier_expression->u.variable->declaration->type_specifier);
         } else {
-            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_BOOL, identifier_expression->u.declaration->type_specifier);
+            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_BOOL, identifier_expression->u.variable->declaration->type_specifier);
         }
-        offset = identifier_expression->u.declaration->variable_index;
+        offset = identifier_expression->u.variable->declaration->variable_index;
         generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
         break;
 
@@ -2376,7 +2389,7 @@ void generate_vmcode_from_array_index_expression(Package_Executer*     executer,
     // 这里暂时只处理数组
     // 暂时只处理一维数组
     // 要通过变量的类型来决定 push_array_int push_array_double push_array_object
-    Declaration* declaration = array_index_expression->array_expression->u.identifier_expression->u.declaration;
+    Declaration* declaration = array_index_expression->array_expression->u.identifier_expression->u.variable->declaration;
     if (declaration == nullptr) {
         ring_error_report("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
     }
@@ -2631,6 +2644,8 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
           || opcode == RVM_CODE_PUSH_STATIC_BOOL
           || opcode == RVM_CODE_POP_STACK_BOOL
           || opcode == RVM_CODE_PUSH_STACK_BOOL
+          || opcode == RVM_CODE_POP_FREE_BOOL
+          || opcode == RVM_CODE_PUSH_FREE_BOOL
           || opcode == RVM_CODE_POP_FIELD_BOOL
           || opcode == RVM_CODE_PUSH_FIELD_BOOL)) {
         ring_error_report("convert_opcode_by_rvm_type error:opcode is valid:%d\n", opcode);
@@ -2642,6 +2657,8 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STATIC_BOOL
         // RVM_CODE_POP_STACK_BOOL
         // RVM_CODE_PUSH_STACK_BOOL
+        // RVM_CODE_POP_FREE_BOOL
+        // RVM_CODE_PUSH_FREE_BOOL
         // RVM_CODE_POP_FIELD_BOOL
         // RVM_CODE_PUSH_FIELD_BOOL
         return opcode;
@@ -2651,6 +2668,8 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STATIC_INT
         // RVM_CODE_POP_STACK_INT
         // RVM_CODE_PUSH_STACK_INT
+        // RVM_CODE_POP_FREE_INT
+        // RVM_CODE_PUSH_FREE_INT
         // RVM_CODE_POP_FIELD_INT
         // RVM_CODE_PUSH_FIELD_INT
         return RVM_Opcode(opcode + 1);

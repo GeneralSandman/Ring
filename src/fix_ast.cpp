@@ -791,17 +791,17 @@ void fix_identifier_expression(Expression*           expression,
     assert(identifier_expression != nullptr);
 
     // 一个identifier 有可能是 一个变量，也有可能是函数
-    Declaration*   declaration    = nullptr;
+    Variable*      variable       = nullptr;
     Function*      function       = nullptr;
     TypeSpecifier* type_specifier = nullptr;
 
     //
-    declaration = search_declaration(identifier_expression->package_posit, identifier_expression->identifier, block);
-    if (declaration != nullptr) {
+    variable = resolve_variable(identifier_expression->package_posit, identifier_expression->identifier, block);
+    if (variable != nullptr) {
         // is a variable
-        identifier_expression->type          = IDENTIFIER_EXPRESSION_TYPE_VARIABLE;
-        identifier_expression->u.declaration = declaration;
-        type_specifier                       = declaration->type_specifier;
+        identifier_expression->type       = IDENTIFIER_EXPRESSION_TYPE_VARIABLE;
+        identifier_expression->u.variable = variable;
+        type_specifier                    = variable->declaration->type_specifier;
 
         EXPRESSION_CLEAR_CONVERT_TYPE(expression);
         EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier);
@@ -1884,28 +1884,28 @@ void fix_function_call_expression(Expression*             expression,
         fix_expression(pos->expression, block, func);
     }
 
-    Declaration* declaration = nullptr;
-    Function*    function    = nullptr;
+    Variable* variable = nullptr;
+    Function* function = nullptr;
 
 
     // 1. 判断是否为closure
-    declaration = search_declaration(nullptr,
-                                     function_call_expression->func_identifier,
-                                     block);
-    if (declaration != nullptr) {
+    variable = resolve_variable(nullptr,
+                                function_call_expression->func_identifier,
+                                block);
+    if (variable != nullptr) {
 
-        if (declaration->type_specifier->kind == RING_BASIC_TYPE_FUNC) {
+        if (variable->declaration->type_specifier->kind == RING_BASIC_TYPE_FUNC) {
             // 是一个变量，并且是一个函数变量，需要继续匹配
             // 匹配函数调用的语义
             function_call_expression->type              = FUNCTION_CALL_TYPE_CLOSURE;
-            function_call_expression->u.cc.closure_decl = declaration;
+            function_call_expression->u.cc.closure_decl = variable->declaration;
 
             // TODO: 暂时不进行函数调用参数的强制校验
             EXPRESSION_CLEAR_CONVERT_TYPE(expression);
             for (unsigned int i = 0;
-                 i < declaration->type_specifier->u.func_type->return_list_size;
+                 i < variable->declaration->type_specifier->u.func_type->return_list_size;
                  i++) {
-                TypeSpecifier* return_type = declaration->type_specifier->u.func_type->return_list[i];
+                TypeSpecifier* return_type = variable->declaration->type_specifier->u.func_type->return_list[i];
                 EXPRESSION_ADD_CONVERT_TYPE(expression, return_type);
             }
             return;
@@ -2099,15 +2099,15 @@ void fix_array_index_expression(Expression*           expression,
 
     assert(array_index_expression != nullptr);
 
-    char*        package_posit    = array_index_expression->array_expression->u.identifier_expression->package_posit;
-    char*        array_identifier = array_index_expression->array_expression->u.identifier_expression->identifier;
-    Declaration* declaration      = nullptr;
+    char*     package_posit    = array_index_expression->array_expression->u.identifier_expression->package_posit;
+    char*     array_identifier = array_index_expression->array_expression->u.identifier_expression->identifier;
+    Variable* variable         = nullptr;
 
-    declaration                   = search_declaration(package_posit,
-                                                       array_identifier,
-                                                       block);
+    variable                   = resolve_variable(package_posit,
+                                                  array_identifier,
+                                                  block);
 
-    if (declaration == nullptr) {
+    if (variable == nullptr) {
         ring_error_report("use undeclared identifier `%s`; E:%d.\n",
                           array_identifier,
                           ERROR_UNDEFINITE_VARIABLE);
@@ -2131,17 +2131,17 @@ void fix_array_index_expression(Expression*           expression,
      * students[0] is a three-dimension array.
      * students[0,0,0] is a int value.
      */
-    if (index_expression->dimension < declaration->type_specifier->dimension) {
-        type->kind = declaration->type_specifier->kind;
-    } else if (index_expression->dimension == declaration->type_specifier->dimension) {
-        type->kind = declaration->type_specifier->sub->kind;
+    if (index_expression->dimension < variable->declaration->type_specifier->dimension) {
+        type->kind = variable->declaration->type_specifier->kind;
+    } else if (index_expression->dimension == variable->declaration->type_specifier->dimension) {
+        type->kind = variable->declaration->type_specifier->sub->kind;
     } else {
         ring_error_report("array index access error; E:%d.\n", ERROR_ARRAY_DIMENSION_INVALID);
     }
 
 
     if (type->kind == RING_BASIC_TYPE_CLASS) {
-        type->u.class_type = declaration->type_specifier->sub->u.class_type;
+        type->u.class_type = variable->declaration->type_specifier->sub->u.class_type;
     }
     fix_type_specfier(type);
 
@@ -2572,7 +2572,7 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
 }
 
 // -----------------
-Declaration* search_declaration(char* package_posit, char* identifier, Block* block) {
+Variable* resolve_variable(char* package_posit, char* identifier, Block* block) {
     Declaration* decl = nullptr;
 
     if (package_posit == nullptr || strlen(package_posit) == 0) {
@@ -2582,6 +2582,7 @@ Declaration* search_declaration(char* package_posit, char* identifier, Block* bl
     CompilerEntry* compiler_entry = get_compiler_entry();
     Package*       package        = search_package(compiler_entry, package_posit);
 
+    // 未找到对应的Package
     // Ring-Compiler-Error-Report ERROR_CODE_UNKNOW_PACKAGE
     if (package == nullptr) {
         DEFINE_ERROR_REPORT_STR;
@@ -2607,20 +2608,49 @@ Declaration* search_declaration(char* package_posit, char* identifier, Block* bl
         ring_compile_error_report(&context);
     }
 
-    for (; block; block = block->parent_block) {
-        for (decl = block->declaration_list; decl; decl = decl->next) {
-            if (str_eq(identifier, decl->identifier)) {
-                return decl;
+    // 递归搜索局部变量
+    // 对于 if for 这种block，搜索到的局部变量依然是局部变量
+    // 对于 匿名函数 这种block，搜索到的局部变量是 free-value
+
+    bool   is_free_value      = false;
+    bool   skip_closure_block = false;
+    Block* find_block         = nullptr;
+    for (find_block = block; find_block; find_block = find_block->parent_block) {
+        if (find_block->type == BLOCK_TYPE_FUNCTION) {
+            // printf("-- this is a function block :%p, identifier:%s\n", block, identifier);
+            skip_closure_block = true;
+        }
+        for (Declaration* pos = find_block->declaration_list; pos; pos = pos->next) {
+            if (str_eq(identifier, pos->identifier)) {
+                decl = pos;
+                goto FOUND;
             }
         }
     }
-    for (Declaration* decl : package->global_declaration_list) {
-        if (str_eq(identifier, decl->identifier)) {
-            return decl;
+
+
+    // 搜索全局变量
+    for (Declaration* pos : package->global_declaration_list) {
+        if (str_eq(identifier, pos->identifier)) {
+            decl = pos;
+            goto FOUND;
         }
     }
 
-    return nullptr;
+FOUND:
+    if (decl == nullptr) {
+        return nullptr;
+    }
+    if (decl != nullptr && skip_closure_block && find_block != block) {
+        is_free_value = true;
+    }
+
+    // DEBUG
+    // printf("block:%p, identifier:%s, is_free_value:%d\n", block, identifier, is_free_value);
+    Variable* variable      = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
+    variable->declaration   = decl;
+    variable->is_free_value = is_free_value;
+    return variable;
 }
 
 Function* search_function(char* package_posit, char* identifier) {
