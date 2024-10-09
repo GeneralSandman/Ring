@@ -296,6 +296,9 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_RESUME, "resume", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
     {RVM_CODE_YIELD, "yield", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
 
+    // closure
+    {RVM_CODE_NEW_CLOSURE_VALUE, "new_closure_value", OPCODE_OPERAND_TYPE_0BYTE, 0, "instantiated a closure by anoymous function", "stack_top_change", "math_formula"},
+
 
     {RVM_CODES_NUM, "num", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
 };

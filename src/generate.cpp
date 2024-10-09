@@ -2133,7 +2133,7 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
     }
 }
 
-void deep_copy_closure(RVM_Closure* dst, Closure* src) {
+void deep_copy_closure(RVM_AnoymousFunc* dst, Closure* src) {
 
     dst->source_file         = src->source_file;
     dst->start_line_number   = src->start_line_number;
@@ -2196,9 +2196,9 @@ void generate_vmcode_from_closure_expreesion(Package_Executer*  executer,
     assert(closure_expression != nullptr);
 
     // 实现方式和 copy_function 类似
-    Closure*     src = closure_expression->closure_definition;
-    RVM_Closure* dst = (RVM_Closure*)mem_alloc(NULL_MEM_POOL,
-                                               sizeof(RVM_Closure));
+    Closure*          src = closure_expression->closure_definition;
+    RVM_AnoymousFunc* dst = (RVM_AnoymousFunc*)mem_alloc(NULL_MEM_POOL,
+                                                         sizeof(RVM_AnoymousFunc));
 
     deep_copy_closure(dst, src);
     generate_code_from_function_definition(executer, (RVM_Function_Tuple*)dst, (FunctionTuple*)src);
@@ -2215,9 +2215,9 @@ void generate_vmcode_from_iife_expreesion(Package_Executer*             executer
     assert(iife != nullptr);
 
     // 实现方式和 copy_function 类似
-    Closure*     src = iife->closure_definition;
-    RVM_Closure* dst = (RVM_Closure*)mem_alloc(NULL_MEM_POOL,
-                                               sizeof(RVM_Closure));
+    Closure*          src = iife->closure_definition;
+    RVM_AnoymousFunc* dst = (RVM_AnoymousFunc*)mem_alloc(NULL_MEM_POOL,
+                                                         sizeof(RVM_AnoymousFunc));
 
     deep_copy_closure(dst, src);
     generate_code_from_function_definition(executer, (RVM_Function_Tuple*)dst, (FunctionTuple*)src);
@@ -2547,7 +2547,7 @@ int constant_pool_add_string(Package_Executer* executer, const char* string_lite
 }
 
 // TODO: 封装成宏
-int constant_pool_add_closure(Package_Executer* executer, RVM_Closure* closure) {
+int constant_pool_add_closure(Package_Executer* executer, RVM_AnoymousFunc* closure) {
     debug_generate_info_with_darkgreen("\t");
     int index                                           = constant_pool_grow(executer, 1);
 

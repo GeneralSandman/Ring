@@ -345,7 +345,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_ClassObject*     class_ob_value         = nullptr;
     RVM_Array*           array_value            = nullptr;
     RVM_Array*           array_c_value          = nullptr;
-    RVM_Closure*         closure_value          = nullptr;
+    RVM_AnoymousFunc*    closure_value          = nullptr;
 
     RVM_ClassDefinition* rvm_class_definition   = nullptr;
     RingCoroutine*       new_coroutine          = nullptr;
@@ -753,6 +753,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FREE_BOOL:
+            // 获取当前的 closure 的 free-value list
+            // 然后通过index定位
             // free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             // FREE_GET_BOOL_INDEX(free_value_index);
             // STACK_SET_BOOL_OFFSET(0,

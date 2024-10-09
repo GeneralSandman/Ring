@@ -1291,7 +1291,7 @@ std::string formate_array_item_type(RVM_Array* array_value) {
 }
 
 std::string formate_closure_type(Package_Executer* package_executer,
-                                 RVM_Closure*      closure_value) {
+                                 RVM_AnoymousFunc* closure_value) {
 
     if (closure_value == nullptr) {
         return "nil-closure";
