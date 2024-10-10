@@ -2647,9 +2647,17 @@ FOUND:
 
     // DEBUG
     // printf("block:%p, identifier:%s, is_free_value:%d\n", block, identifier, is_free_value);
-    Variable* variable      = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
-    variable->declaration   = decl;
-    variable->is_free_value = is_free_value;
+    Variable* variable        = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
+    variable->declaration     = decl;
+    variable->is_free_value   = is_free_value;
+    variable->free_value_desc = nullptr;
+    if (is_free_value) {
+        FreeValueDesc* free_value       = (FreeValueDesc*)mem_alloc(get_front_mem_pool(), sizeof(FreeValueDesc));
+        free_value->outer_local         = true;
+        free_value->u.outer_local_index = decl->variable_index;
+
+        variable->free_value_desc       = free_value;
+    }
     return variable;
 }
 

@@ -1268,10 +1268,11 @@ void generate_pop_to_leftvalue_identifier(Package_Executer*     executer,
     // } else
     if (declaration->is_local) {
         opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STACK_BOOL, declaration->type_specifier);
+        generate_vmcode(executer, opcode_buffer, opcode, variable_index, identifier_expression->line_number);
     } else {
         opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STATIC_BOOL, declaration->type_specifier);
+        generate_vmcode(executer, opcode_buffer, opcode, variable_index, identifier_expression->line_number);
     }
-    generate_vmcode(executer, opcode_buffer, opcode, variable_index, identifier_expression->line_number);
 }
 
 /*
@@ -1632,11 +1633,14 @@ void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
         // } else
         if (identifier_expression->u.variable->declaration->is_local) {
             opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_BOOL, identifier_expression->u.variable->declaration->type_specifier);
+            offset = identifier_expression->u.variable->declaration->variable_index;
+            generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
         } else {
             opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_BOOL, identifier_expression->u.variable->declaration->type_specifier);
+            offset = identifier_expression->u.variable->declaration->variable_index;
+            generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
         }
-        offset = identifier_expression->u.variable->declaration->variable_index;
-        generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
+
         break;
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNC: {

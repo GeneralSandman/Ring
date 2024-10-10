@@ -73,6 +73,7 @@ typedef struct Parameter                    Parameter;
 typedef struct Identifier                   Identifier;
 typedef struct FunctionTuple                FunctionTuple;
 typedef struct Closure                      Closure;
+typedef struct FreeValueDesc                FreeValueDesc;
 typedef struct Function                     Function;
 typedef struct Block                        Block;
 typedef struct FunctionReturnList           FunctionReturnList;
@@ -113,8 +114,8 @@ typedef struct RVM_String                   RVM_String;
 typedef struct RVM_Array                    RVM_Array;
 typedef struct RVM_AnonymousFunc            RVM_AnonymousFunc;
 typedef struct RVM_Closure                  RVM_Closure;
-typedef struct FreeValueDesc                FreeValueDesc;
-typedef struct FreeValue                    FreeValue;
+typedef struct RVM_FreeValueDesc            RVM_FreeValueDesc;
+typedef struct RVM_FreeValue                RVM_FreeValue;
 typedef struct RVM_ClassObject              RVM_ClassObject;
 typedef struct RVM_GC_Object                RVM_GC_Object;
 typedef struct RVM_TypeSpecifier_Func       RVM_TypeSpecifier_Func;
@@ -598,8 +599,8 @@ struct DeriveFunction {
         DeriveFunction* derive_func;                                            \
     } u;                                                                        \
                                                                                 \
-    unsigned int   free_value_size;                                             \
-    FreeValueDesc* free_value_list;
+    unsigned int       free_value_size;                                         \
+    RVM_FreeValueDesc* free_value_list;
 
 
 /*
@@ -628,17 +629,19 @@ struct RVM_AnonymousFunc {
 struct RVM_Closure {
     RVM_AnonymousFunc* anonymous_func;
     unsigned int       free_value_size;
-    FreeValue*         free_value_list;
+    RVM_FreeValue*     free_value_list;
 };
 
-struct FreeValueDesc {
+struct RVM_FreeValueDesc {
     const char* identifier;
+    // 如果引用的直接外围函数定义的局部变量
+    // 索引就是 局部变量的 stack-index
     // 1. 索引
     // 2. 类型
     // 3. 是否是直接外层函数的局部变量
 };
 
-struct FreeValue {
+struct RVM_FreeValue {
     union {
         RVM_Value* p;
         // 可指向 open/close value
@@ -1744,13 +1747,14 @@ struct Declaration {
     char*          identifier;
     int            is_const;
     int            is_local;
-    int            variable_index;
-    Declaration*   next; // TODO: 这里设计的优点混乱了
+    int            variable_index; // 全局变量/局部变量的索引
+    Declaration*   next;           // TODO: 这里设计的优点混乱了
 };
 
 struct Variable {
-    Declaration* declaration;
-    bool         is_free_value;
+    Declaration*   declaration;
+    bool           is_free_value;
+    FreeValueDesc* free_value_desc;
 };
 
 typedef enum {
@@ -1804,7 +1808,16 @@ struct FunctionTuple {
 struct Closure {
     FUNCTION_TUPLE_HEADER;
 
-    // TODO: upvalue
+    unsigned int   free_value_size;
+    FreeValueDesc* free_value_list;
+};
+
+struct FreeValueDesc {
+    bool outer_local; // 直接外层函数的局部变量
+    union {
+        unsigned int   outer_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        FreeValueDesc* outer_free_value;  // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
+    } u;
 };
 
 struct Function {
