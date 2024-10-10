@@ -1263,10 +1263,12 @@ void generate_pop_to_leftvalue_identifier(Package_Executer*     executer,
 
     unsigned int variable_index = declaration->variable_index;
     RVM_Opcode   opcode         = RVM_CODE_UNKNOW;
-    // if (identifier_expression->u.variable->is_free_value) {
-    //     opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_FREE_BOOL, declaration->type_specifier);
-    // } else
-    if (declaration->is_local) {
+    unsigned int offset         = 0;
+    if (identifier_expression->u.variable->is_free_value) {
+        opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_FREE_BOOL, declaration->type_specifier);
+        offset = identifier_expression->u.variable->free_value_desc->free_value_index;
+        generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
+    } else if (declaration->is_local) {
         opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STACK_BOOL, declaration->type_specifier);
         generate_vmcode(executer, opcode_buffer, opcode, variable_index, identifier_expression->line_number);
     } else {
@@ -1628,10 +1630,12 @@ void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
     unsigned int offset = 0;
     switch (identifier_expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
-        // if (identifier_expression->u.variable->is_free_value) {
-        //     opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FREE_BOOL, identifier_expression->u.variable->declaration->type_specifier);
-        // } else
-        if (identifier_expression->u.variable->declaration->is_local) {
+        if (identifier_expression->u.variable->is_free_value) {
+            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FREE_BOOL, identifier_expression->u.variable->declaration->type_specifier);
+            // TODO:free value 的 index，这个索引是不能变的，因为他会生成对应的字节码
+            offset = identifier_expression->u.variable->free_value_desc->free_value_index;
+            generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
+        } else if (identifier_expression->u.variable->declaration->is_local) {
             opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_BOOL, identifier_expression->u.variable->declaration->type_specifier);
             offset = identifier_expression->u.variable->declaration->variable_index;
             generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
@@ -2189,6 +2193,18 @@ void deep_copy_closure(RVM_AnonymousFunc* dst, Closure* src) {
                                                                                    sizeof(RVM_TypeSpecifier));
 
         type_specifier_deep_copy(dst->local_variable_list[i].type_specifier, pos->type_specifier);
+    }
+
+    dst->free_value_size      = src->block->free_value_size;
+    dst->free_value_list      = (RVM_FreeValueDesc*)mem_alloc(NULL_MEM_POOL,
+                                                              dst->free_value_size * sizeof(RVM_FreeValueDesc));
+
+    FreeValueDesc* free_value = src->block->free_value_list;
+    for (unsigned int i = 0; free_value != nullptr; i++, free_value = free_value->next) {
+        // 后续抽象出 deep_copy 方法
+        dst->free_value_list[i].identifier          = free_value->identifier;
+        dst->free_value_list[i].outer_local         = free_value->outer_local;
+        dst->free_value_list[i].u.outer_local_index = free_value->u.outer_local_index;
     }
 }
 

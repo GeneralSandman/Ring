@@ -750,7 +750,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             VM_CUR_CO_PC += 3;
             break;
-        case RVM_CODE_POP_FREE_INT:
+        case RVM_CODE_POP_FREE_INT: {
+            unsigned int free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+
+            //
+            RVM_Closure* c_closure                                        = VM_CUR_CO_CALLINFO->curr_closure;
+            c_closure->free_value_list[free_value_index].u.p->u.int_value = STACK_GET_INT_OFFSET(-1);
+        };
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             VM_CUR_CO_PC += 3;
             break;
@@ -764,7 +770,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
-        case RVM_CODE_PUSH_FREE_INT:
+        case RVM_CODE_PUSH_FREE_INT: {
+            unsigned int free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+
+            //
+            RVM_Closure* c_closure = VM_CUR_CO_CALLINFO->curr_closure;
+            STACK_SET_INT_OFFSET(0,
+                                 c_closure->free_value_list[free_value_index].u.p->u.int_value);
+        }
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
@@ -1506,6 +1519,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             invoke_derive_function(rvm,
                                    &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
                                    nullptr, (RVM_Function_Tuple*)closure_value->anonymous_func,
+                                   closure_value,
                                    argument_list_size);
 
             break;
@@ -1539,6 +1553,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             invoke_derive_function(rvm,
                                    &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
                                    nullptr, (RVM_Function_Tuple*)callee_function,
+                                   nullptr,
                                    argument_list_size);
 
             break;
@@ -1559,6 +1574,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             invoke_derive_function(rvm,
                                    &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
                                    callee_class_ob, (RVM_Function_Tuple*)callee_function,
+                                   nullptr,
                                    argument_list_size);
             break;
         case RVM_CODE_RETURN:
@@ -2073,6 +2089,7 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
 void invoke_derive_function(Ring_VirtualMachine* rvm,
                             RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
                             RVM_ClassObject* callee_object, RVM_Function_Tuple* callee_function,
+                            RVM_Closure* closure,
                             unsigned int argument_list_size) {
 
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
@@ -2082,6 +2099,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
     callinfo->callee_argument_size = argument_list_size;
+    callinfo->curr_closure         = closure;
     callinfo->code_list            = callee_function->u.derive_func->code_list;
     callinfo->code_size            = callee_function->u.derive_func->code_size;
     callinfo->pc                   = 0;
@@ -3218,7 +3236,16 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm, RVM_AnonymousFunc* func) {
     // FIXME: 需要分配在堆上
     RVM_Closure* closure     = (RVM_Closure*)mem_alloc(rvm->meta_pool, sizeof(RVM_Closure));
     closure->anonymous_func  = func;
-    closure->free_value_size = 0;
-    closure->free_value_list = nullptr;
+    closure->free_value_size = func->free_value_size;
+    closure->free_value_list = (RVM_FreeValue*)mem_alloc(rvm->data_pool, func->free_value_size * sizeof(RVM_FreeValue));
+
+    // free value 的指针指向 当前栈的空间 索引位置
+    // 此时为 open
+    for (unsigned int i = 0; i < func->free_value_size; i++) {
+        // TODO: 当前只支持直接外围函数的局部变量 作为FreeValue
+        unsigned int index              = func->free_value_list[i].u.outer_local_index;
+
+        closure->free_value_list[i].u.p = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
+    }
     return closure;
 }

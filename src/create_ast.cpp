@@ -1742,6 +1742,10 @@ MethodMember* create_class_member_method(FunctionType        type,
 
     method_member->index_of_class      = -1;
 
+    if (block) {
+        block->type = BLOCK_TYPE_FUNCTION;
+    }
+
 
     for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
         method_member->parameter_list_size++;

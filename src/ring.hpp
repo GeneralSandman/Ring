@@ -634,6 +634,11 @@ struct RVM_Closure {
 
 struct RVM_FreeValueDesc {
     const char* identifier;
+    bool        outer_local;
+    union {
+        unsigned int outer_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        // FreeValueDesc* outer_free_value;  // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
+    } u;
     // 如果引用的直接外围函数定义的局部变量
     // 索引就是 局部变量的 stack-index
     // 1. 索引
@@ -1164,6 +1169,8 @@ struct RVM_CallInfo {
     RVM_ClassObject*    callee_object;
     RVM_Function_Tuple* callee_function;
     unsigned int        callee_argument_size; // 函数调用的参数数量，可变参数
+
+    RVM_Closure*        curr_closure;
 
     RVM_Byte*           code_list;
     unsigned int        code_size;
@@ -1770,20 +1777,29 @@ typedef struct BlockLabels {
     unsigned int continue_label;
 } BlockLabels;
 
+
+/*
+block 中的 declaration 是不是考虑应该放在外边
+
+为什么：局部变量的初始化时机不太正确。因为局部量只有在函数调用的时候才进行初始化
+*/
 struct Block {
-    unsigned int line_number;
+    unsigned int   line_number;
 
-    BlockType    type;
+    BlockType      type;
 
-    unsigned int declaration_list_size;
-    Declaration* declaration_list;
+    unsigned int   declaration_list_size;
+    Declaration*   declaration_list;
 
-    unsigned int statement_list_size;
-    Statement*   statement_list;
+    unsigned int   free_value_size;
+    FreeValueDesc* free_value_list;
 
-    Block*       parent_block;
+    unsigned int   statement_list_size;
+    Statement*     statement_list;
 
-    BlockLabels  block_labels;
+    Block*         parent_block;
+
+    BlockLabels    block_labels;
 };
 
 
@@ -1808,16 +1824,20 @@ struct FunctionTuple {
 struct Closure {
     FUNCTION_TUPLE_HEADER;
 
-    unsigned int   free_value_size;
-    FreeValueDesc* free_value_list;
+    // unsigned int   free_value_size;
+    // FreeValueDesc* free_value_list;
 };
 
 struct FreeValueDesc {
-    bool outer_local; // 直接外层函数的局部变量
+    char* identifier;
+    bool  outer_local; // 直接外层函数的局部变量
     union {
         unsigned int   outer_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
         FreeValueDesc* outer_free_value;  // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
     } u;
+
+    unsigned       free_value_index; // UPDATED_BY_FIX_AST
+    FreeValueDesc* next;
 };
 
 struct Function {
@@ -2845,6 +2865,7 @@ void             add_parameter_to_declaration(Parameter* parameter, Block* block
 Variable*        resolve_variable(char* package_posit, char* identifier, Block* block);
 Function*        search_function(char* package_posit, char* identifier);
 
+FreeValueDesc*   free_value_list_add_item(FreeValueDesc* head, FreeValueDesc* free_value);
 // --------------------
 
 /* --------------------
@@ -3015,6 +3036,7 @@ void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Functi
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
                                             RVM_ClassObject* callee_object, RVM_Function_Tuple* callee_function,
+                                            RVM_Closure* closure,
                                             unsigned int argument_list_size);
 void                 derive_function_return(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
