@@ -764,7 +764,7 @@ function_definition
 closure_definition
     : TOKEN_FUNCTION function_tuple
     {
-        debug_bison_info_with_green("[RULE::aonymous_function]\t ");
+        debug_bison_info_with_green("[RULE::anonymous_function]\t ");
         $$ = create_expression_closure_definition((Closure*)($2));
     }
     ;
@@ -776,10 +776,10 @@ function_tuple
         debug_bison_info_with_green("[RULE::function_tuple:1]\t ");
         $$ = create_function_tuple($<m_location>4, $2, nullptr, $5);
     }
-    | TOKEN_LP parameter_list_v2 TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_LP parameter_list_v2 TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP {$<m_location>$ = a_location();} block
     {
         debug_bison_info_with_green("[RULE::function_tuple:2]\t ");
-        $$ = create_function_tuple(nullptr, $2, $6, $8);
+        $$ = create_function_tuple($<m_location>8, $2, $6, $9);
     }
     ;
 

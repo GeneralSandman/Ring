@@ -111,7 +111,8 @@ typedef struct AttributeInfo                AttributeInfo;
 typedef struct RVM_ConstantPool             RVM_ConstantPool;
 typedef struct RVM_String                   RVM_String;
 typedef struct RVM_Array                    RVM_Array;
-typedef struct RVM_AnoymousFunc             RVM_AnoymousFunc;
+typedef struct RVM_AnonymousFunc            RVM_AnonymousFunc;
+typedef struct RVM_Closure                  RVM_Closure;
 typedef struct FreeValueDesc                FreeValueDesc;
 typedef struct FreeValue                    FreeValue;
 typedef struct RVM_ClassObject              RVM_ClassObject;
@@ -186,14 +187,14 @@ typedef enum : int {
 typedef struct {
     RVM_Value_Type type;
     union {
-        RVM_Bool          bool_value;
-        int               int_value;
-        long long         int64_value;
-        double            double_value;
-        RVM_String*       string_value;
-        RVM_ClassObject*  class_ob_value;
-        RVM_Array*        array_value;
-        RVM_AnoymousFunc* closure_value;
+        RVM_Bool         bool_value;
+        int              int_value;
+        long long        int64_value;
+        double           double_value;
+        RVM_String*      string_value;
+        RVM_ClassObject* class_ob_value;
+        RVM_Array*       array_value;
+        RVM_Closure*     closure_value;
     } u;
 
 } RVM_Value;
@@ -620,8 +621,14 @@ struct RVM_Function {
 
 // FIXME:
 // RVM_Closure 删掉
-struct RVM_AnoymousFunc {
+struct RVM_AnonymousFunc {
     RVM_FUNCTION_TYPLE_HEADER;
+};
+
+struct RVM_Closure {
+    RVM_AnonymousFunc* anonymous_func;
+    unsigned int       free_value_size;
+    FreeValue*         free_value_list;
 };
 
 struct FreeValueDesc {
@@ -684,11 +691,11 @@ typedef enum {
 struct RVM_ConstantPool {
     ConstantPoolType type;
     union {
-        int               int_value;
-        long long         int64_value;
-        double            double_value;
-        const char*       string_value;
-        RVM_AnoymousFunc* closure_value;
+        int                int_value;
+        long long          int64_value;
+        double             double_value;
+        const char*        string_value;
+        RVM_AnonymousFunc* anonymous_func_value;
     } u;
 };
 
@@ -881,7 +888,7 @@ typedef enum {
     RVM_CODE_PUSH_INT64,     // bigger 65535
     RVM_CODE_PUSH_DOUBLE,
     RVM_CODE_PUSH_STRING,
-    RVM_CODE_PUSH_CLOSURE,
+    RVM_CODE_PUSH_ANOY_FUNC,
 
     // static
     RVM_CODE_POP_STATIC_BOOL,
@@ -1122,7 +1129,7 @@ typedef enum {
     RVM_CODE_YIELD,
 
     // closure
-    RVM_CODE_NEW_CLOSURE_VALUE,
+    RVM_CODE_NEW_CLOSURE,
 
     // 不对应实际的字节码, 不能在生成代码的时候使用
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
@@ -2937,7 +2944,7 @@ void              generate_vmcode_from_launch_expression(Package_Executer* execu
                                                          LaunchExpression* launch_expression,
                                                          RVM_OpcodeBuffer* opcode_buffer);
 
-void              deep_copy_closure(RVM_AnoymousFunc* dst, Closure* src);
+void              deep_copy_closure(RVM_AnonymousFunc* dst, Closure* src);
 void              generate_vmcode_from_closure_expreesion(Package_Executer*  executer,
                                                           ClosureExpression* closure_expression,
                                                           RVM_OpcodeBuffer*  opcode_buffer);
@@ -2959,7 +2966,7 @@ int               constant_pool_add_int(Package_Executer* executer, int int_lite
 int               constant_pool_add_int64(Package_Executer* executer, long long int64_literal);
 int               constant_pool_add_double(Package_Executer* executer, double double_literal);
 int               constant_pool_add_string(Package_Executer* executer, const char* string_literal);
-int               constant_pool_add_closure(Package_Executer* executer, RVM_AnoymousFunc* closure);
+int               constant_pool_add_closure(Package_Executer* executer, RVM_AnonymousFunc* func);
 
 unsigned int      opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer);
 void              opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address);
@@ -3082,6 +3089,8 @@ void                 rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_G
 
 int                  rvm_heap_size(Ring_VirtualMachine* rvm);
 
+RVM_Closure*         new_closure(Ring_VirtualMachine* rvm, RVM_AnonymousFunc* func);
+
 // --------------------
 
 
@@ -3200,7 +3209,7 @@ std::string              formate_array_type(RVM_Array* array_value);
 std::string              formate_array_item_type(RVM_Array* array_value);
 
 std::string              formate_closure_type(Package_Executer* package_executer,
-                                              RVM_AnoymousFunc* closure_value);
+                                              RVM_Closure*      closure_value);
 
 std::string              sprintf_string(const char* format, ...);
 // --------------------
