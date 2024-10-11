@@ -20,7 +20,12 @@ typedef function() FuncType;
 function main() {
 	var FuncType func_var;
 
+	fmt::printf("-------------\n");
 	func_var = return_closure();
+
+	fmt::printf("-------------\n");
+	func_var = return_closure();
+
 }
 
 function return_closure() -> (FuncType) {
@@ -28,6 +33,7 @@ function return_closure() -> (FuncType) {
 	var bool local_bool_value_0;
 	var int local_int_value_0 = 1;
 	var FuncType tmp;
+	var FuncType tmp1;
 
 	fmt::printf("return_closure::out:1 local_int_value_0 = {}\n", local_int_value_0);
 
@@ -48,6 +54,11 @@ function return_closure() -> (FuncType) {
 	fmt::printf("return_closure::out:4 local_int_value_0 = {}\n", local_int_value_0);
 
 	tmp();
+	fmt::printf("return_closure::out:5 local_int_value_0 = {}\n", local_int_value_0);
+
+
+	tmp1 = tmp;
+	tmp1();
 	fmt::printf("return_closure::out:5 local_int_value_0 = {}\n", local_int_value_0);
 
 	return tmp;
