@@ -38,7 +38,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_INT64, "push_int64", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant int64 value to stack", "[]-->[int]", "So(0).int64 = C(As).int64"},
     {RVM_CODE_PUSH_DOUBLE, "push_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant double value to stack", "[]-->[double]", "So(0).double = C(As).double"},
     {RVM_CODE_PUSH_STRING, "push_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant string value to stack", "[]-->[string]", "So(0).string = C(As).string"},
-    {RVM_CODE_PUSH_CLOSURE, "push_closure", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant closure value to stack", "[]-->[closure]", "So(0).closure = C(As).closure"},
+    {RVM_CODE_PUSH_ANOY_FUNC, "push_anony_func", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push constant closure value to stack", "[]-->[closure]", "So(0).closure = C(As).closure"},
 
 
     // static
@@ -295,6 +295,9 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_LAUNCH_METHOD, "launch_method", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
     {RVM_CODE_RESUME, "resume", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
     {RVM_CODE_YIELD, "yield", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
+
+    // closure
+    {RVM_CODE_NEW_CLOSURE, "new_closure", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "instantiated a closure by anonymous function", "stack_top_change", "math_formula"},
 
 
     {RVM_CODES_NUM, "num", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},

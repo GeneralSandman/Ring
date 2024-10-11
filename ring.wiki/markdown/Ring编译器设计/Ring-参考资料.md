@@ -29,6 +29,9 @@ https://manistein.github.io/blog/post/program/let-us-build-a-lua-interpreter/%E6
 2. 《用Rust实现Lua解释器 Upvalue的逃逸和闭包》
 https://wubingzheng.github.io/build-lua-in-rust/zh/ch09-02.escape_and_closure.html
 
+
+3. 《lua深入理解闭包》https://juejin.cn/post/7121555416420450317
+
 #### 书籍
 1. 《Lua设计与实现》https://github.com/lichuang/Lua-Source-Internal
 2. 《自己动手实现Lua：虚拟机、编译器和标准库》

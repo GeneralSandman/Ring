@@ -206,6 +206,38 @@ closure 放在一个 constant-pool
 1. 全局变量/局部变量 取决于变量的定义方式
 2. FreeValue 取决于变量的使用方式，在一个匿名函数内部，使用外部的局部变量
 
+3. 要理清：
+匿名函数 和 闭包不是一个概念
+匿名函数是说，一个函数可以赋值给一个变量
+如果匿名函数捕获了外部的局部变量，那么他就是闭包
+每次调用返回一个匿名函数，都会产生一个新的闭包，这些闭包的变量是隔离的，不是共享的
+
+调用返回一个匿名函数的时候，新建一个闭包，设计闭包捕获的free-value变量
+
+也就是说：匿名函数实例化，变成一个闭包，（闭包有可能没有FreeValue 也有可能有FreeValue）
+
+所以需要 一个 NEW_CLOSURE 指令，用于通过一个函数原型+FreeValue生成一个闭包
+RVM_Closure+FreeValue -> RVM_ClosureValue
+
+RVM_Closure中保存着函数的 FreeValueDesc
+
+
+```
+
+// 产生一个新的闭包
+func_var = return_anonymous_function();
+
+
+// 不会产生一个新的闭包
+// 他本质上是一个函数指针，不是值copy
+func_var_2 = func_var;
+
+
+// 闭包产生的时机只有在 那个anonymous-function 定义的位置 被调用的时候产生
+
+
+```
+
 ### 下个版本的匿名函数
 
 closure function method 都需要函数语义分析

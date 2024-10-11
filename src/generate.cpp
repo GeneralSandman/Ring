@@ -86,7 +86,7 @@ void package_executer_dump(Package_Executer* package_executer) {
     // 4. dump const closure
     for (unsigned int i = 0; i < package_executer->constant_pool_size; i++) {
         if (package_executer->constant_pool_list[i].type == CONSTANTPOOL_TYPE_CLOSURE) {
-            dump_vm_function(package_executer, nullptr, (RVM_Function*)(package_executer->constant_pool_list[i].u.closure_value));
+            dump_vm_function(package_executer, nullptr, (RVM_Function*)(package_executer->constant_pool_list[i].u.anonymous_func_value));
         }
     }
 
@@ -1263,15 +1263,18 @@ void generate_pop_to_leftvalue_identifier(Package_Executer*     executer,
 
     unsigned int variable_index = declaration->variable_index;
     RVM_Opcode   opcode         = RVM_CODE_UNKNOW;
-    // if (identifier_expression->u.variable->is_free_value) {
-    //     opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_FREE_BOOL, declaration->type_specifier);
-    // } else
-    if (declaration->is_local) {
+    unsigned int offset         = 0;
+    if (identifier_expression->u.variable->is_free_value) {
+        opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_FREE_BOOL, declaration->type_specifier);
+        offset = identifier_expression->u.variable->free_value_desc->free_value_index;
+        generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
+    } else if (declaration->is_local) {
         opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STACK_BOOL, declaration->type_specifier);
+        generate_vmcode(executer, opcode_buffer, opcode, variable_index, identifier_expression->line_number);
     } else {
         opcode = convert_opcode_by_rvm_type(RVM_CODE_POP_STATIC_BOOL, declaration->type_specifier);
+        generate_vmcode(executer, opcode_buffer, opcode, variable_index, identifier_expression->line_number);
     }
-    generate_vmcode(executer, opcode_buffer, opcode, variable_index, identifier_expression->line_number);
 }
 
 /*
@@ -1627,16 +1630,21 @@ void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
     unsigned int offset = 0;
     switch (identifier_expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
-        // if (identifier_expression->u.variable->is_free_value) {
-        //     opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FREE_BOOL, identifier_expression->u.variable->declaration->type_specifier);
-        // } else
-        if (identifier_expression->u.variable->declaration->is_local) {
+        if (identifier_expression->u.variable->is_free_value) {
+            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FREE_BOOL, identifier_expression->u.variable->declaration->type_specifier);
+            // TODO:free value 的 index，这个索引是不能变的，因为他会生成对应的字节码
+            offset = identifier_expression->u.variable->free_value_desc->free_value_index;
+            generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
+        } else if (identifier_expression->u.variable->declaration->is_local) {
             opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_BOOL, identifier_expression->u.variable->declaration->type_specifier);
+            offset = identifier_expression->u.variable->declaration->variable_index;
+            generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
         } else {
             opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_BOOL, identifier_expression->u.variable->declaration->type_specifier);
+            offset = identifier_expression->u.variable->declaration->variable_index;
+            generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
         }
-        offset = identifier_expression->u.variable->declaration->variable_index;
-        generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
+
         break;
 
     case IDENTIFIER_EXPRESSION_TYPE_FUNC: {
@@ -2064,7 +2072,7 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
             return;
         }
         if (function_call_expression->type != FUNCTION_CALL_TYPE_FUNC) {
-            ring_error_report("not support anoymous function `%s`", function_call_expression->func_identifier);
+            ring_error_report("not support anonymous function `%s`", function_call_expression->func_identifier);
         }
 
 
@@ -2133,7 +2141,7 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
     }
 }
 
-void deep_copy_closure(RVM_Closure* dst, Closure* src) {
+void deep_copy_closure(RVM_AnonymousFunc* dst, Closure* src) {
 
     dst->source_file         = src->source_file;
     dst->start_line_number   = src->start_line_number;
@@ -2186,6 +2194,18 @@ void deep_copy_closure(RVM_Closure* dst, Closure* src) {
 
         type_specifier_deep_copy(dst->local_variable_list[i].type_specifier, pos->type_specifier);
     }
+
+    dst->free_value_size      = src->block->free_value_size;
+    dst->free_value_list      = (RVM_FreeValueDesc*)mem_alloc(NULL_MEM_POOL,
+                                                              dst->free_value_size * sizeof(RVM_FreeValueDesc));
+
+    FreeValueDesc* free_value = src->block->free_value_list;
+    for (unsigned int i = 0; free_value != nullptr; i++, free_value = free_value->next) {
+        // 后续抽象出 deep_copy 方法
+        dst->free_value_list[i].identifier          = free_value->identifier;
+        dst->free_value_list[i].outer_local         = free_value->outer_local;
+        dst->free_value_list[i].u.outer_local_index = free_value->u.outer_local_index;
+    }
 }
 
 void generate_vmcode_from_closure_expreesion(Package_Executer*  executer,
@@ -2196,15 +2216,15 @@ void generate_vmcode_from_closure_expreesion(Package_Executer*  executer,
     assert(closure_expression != nullptr);
 
     // 实现方式和 copy_function 类似
-    Closure*     src = closure_expression->closure_definition;
-    RVM_Closure* dst = (RVM_Closure*)mem_alloc(NULL_MEM_POOL,
-                                               sizeof(RVM_Closure));
+    Closure*           src = closure_expression->closure_definition;
+    RVM_AnonymousFunc* dst = (RVM_AnonymousFunc*)mem_alloc(NULL_MEM_POOL,
+                                                           sizeof(RVM_AnonymousFunc));
 
     deep_copy_closure(dst, src);
     generate_code_from_function_definition(executer, (RVM_Function_Tuple*)dst, (FunctionTuple*)src);
 
     int constant_index = constant_pool_add_closure(executer, dst);
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_CLOSURE, constant_index, closure_expression->line_number);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLOSURE, constant_index, closure_expression->line_number);
 }
 
 void generate_vmcode_from_iife_expreesion(Package_Executer*             executer,
@@ -2215,9 +2235,9 @@ void generate_vmcode_from_iife_expreesion(Package_Executer*             executer
     assert(iife != nullptr);
 
     // 实现方式和 copy_function 类似
-    Closure*     src = iife->closure_definition;
-    RVM_Closure* dst = (RVM_Closure*)mem_alloc(NULL_MEM_POOL,
-                                               sizeof(RVM_Closure));
+    Closure*           src = iife->closure_definition;
+    RVM_AnonymousFunc* dst = (RVM_AnonymousFunc*)mem_alloc(NULL_MEM_POOL,
+                                                           sizeof(RVM_AnonymousFunc));
 
     deep_copy_closure(dst, src);
     generate_code_from_function_definition(executer, (RVM_Function_Tuple*)dst, (FunctionTuple*)src);
@@ -2233,7 +2253,7 @@ void generate_vmcode_from_iife_expreesion(Package_Executer*             executer
 
     // generate push_closure
     int constant_index = constant_pool_add_closure(executer, dst);
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_CLOSURE, constant_index, iife->line_number);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLOSURE, constant_index, iife->line_number);
 
     // generate invoke_closure
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, 0, iife->line_number);
@@ -2547,12 +2567,12 @@ int constant_pool_add_string(Package_Executer* executer, const char* string_lite
 }
 
 // TODO: 封装成宏
-int constant_pool_add_closure(Package_Executer* executer, RVM_Closure* closure) {
+int constant_pool_add_closure(Package_Executer* executer, RVM_AnonymousFunc* func) {
     debug_generate_info_with_darkgreen("\t");
-    int index                                           = constant_pool_grow(executer, 1);
+    int index                                                  = constant_pool_grow(executer, 1);
 
-    executer->constant_pool_list[index].type            = CONSTANTPOOL_TYPE_CLOSURE;
-    executer->constant_pool_list[index].u.closure_value = closure;
+    executer->constant_pool_list[index].type                   = CONSTANTPOOL_TYPE_CLOSURE;
+    executer->constant_pool_list[index].u.anonymous_func_value = func;
     return index;
 }
 

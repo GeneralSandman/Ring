@@ -73,6 +73,7 @@ typedef struct Parameter                    Parameter;
 typedef struct Identifier                   Identifier;
 typedef struct FunctionTuple                FunctionTuple;
 typedef struct Closure                      Closure;
+typedef struct FreeValueDesc                FreeValueDesc;
 typedef struct Function                     Function;
 typedef struct Block                        Block;
 typedef struct FunctionReturnList           FunctionReturnList;
@@ -111,9 +112,10 @@ typedef struct AttributeInfo                AttributeInfo;
 typedef struct RVM_ConstantPool             RVM_ConstantPool;
 typedef struct RVM_String                   RVM_String;
 typedef struct RVM_Array                    RVM_Array;
+typedef struct RVM_AnonymousFunc            RVM_AnonymousFunc;
 typedef struct RVM_Closure                  RVM_Closure;
-typedef struct FreeValueDesc                FreeValueDesc;
-typedef struct FreeValue                    FreeValue;
+typedef struct RVM_FreeValueDesc            RVM_FreeValueDesc;
+typedef struct RVM_FreeValue                RVM_FreeValue;
 typedef struct RVM_ClassObject              RVM_ClassObject;
 typedef struct RVM_GC_Object                RVM_GC_Object;
 typedef struct RVM_TypeSpecifier_Func       RVM_TypeSpecifier_Func;
@@ -223,7 +225,6 @@ struct Ring_VirtualMachine {
 
     RVM_RuntimeStatic*   runtime_static; // TODO: 暂时只支持main包的 全局变量
     RVM_RuntimeHeap*     runtime_heap;
-
 
     RVM_ClassDefinition* class_list;
     unsigned int         class_size;
@@ -596,7 +597,18 @@ struct DeriveFunction {
     union {                                                                     \
         NativeFunction* native_func;                                            \
         DeriveFunction* derive_func;                                            \
-    } u;
+    } u;                                                                        \
+                                                                                \
+    unsigned int       free_value_size;                                         \
+    RVM_FreeValueDesc* free_value_list;
+
+
+/*
+* closure 没有 identifier
+* closure 有 free-value
+
+* closure 不回事 native_func
+*/
 
 // virtual base structure
 struct RVM_Function_Tuple {
@@ -608,20 +620,33 @@ struct RVM_Function {
 };
 
 
-struct RVM_Closure {
+// FIXME:
+// RVM_Closure 删掉
+struct RVM_AnonymousFunc {
     RVM_FUNCTION_TYPLE_HEADER;
-    unsigned int free_value_size;
-    FreeValue*   free_value_list;
 };
 
-struct FreeValueDesc {
+struct RVM_Closure {
+    RVM_AnonymousFunc* anonymous_func;
+    unsigned int       free_value_size;
+    RVM_FreeValue*     free_value_list;
+};
+
+struct RVM_FreeValueDesc {
     const char* identifier;
+    bool        outer_local;
+    union {
+        unsigned int outer_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        // FreeValueDesc* outer_free_value;  // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
+    } u;
+    // 如果引用的直接外围函数定义的局部变量
+    // 索引就是 局部变量的 stack-index
     // 1. 索引
     // 2. 类型
     // 3. 是否是直接外层函数的局部变量
 };
 
-struct FreeValue {
+struct RVM_FreeValue {
     union {
         RVM_Value* p;
         // 可指向 open/close value
@@ -674,11 +699,11 @@ typedef enum {
 struct RVM_ConstantPool {
     ConstantPoolType type;
     union {
-        int          int_value;
-        long long    int64_value;
-        double       double_value;
-        const char*  string_value;
-        RVM_Closure* closure_value;
+        int                int_value;
+        long long          int64_value;
+        double             double_value;
+        const char*        string_value;
+        RVM_AnonymousFunc* anonymous_func_value;
     } u;
 };
 
@@ -871,7 +896,7 @@ typedef enum {
     RVM_CODE_PUSH_INT64,     // bigger 65535
     RVM_CODE_PUSH_DOUBLE,
     RVM_CODE_PUSH_STRING,
-    RVM_CODE_PUSH_CLOSURE,
+    RVM_CODE_PUSH_ANOY_FUNC,
 
     // static
     RVM_CODE_POP_STATIC_BOOL,
@@ -1111,6 +1136,9 @@ typedef enum {
     RVM_CODE_RESUME,
     RVM_CODE_YIELD,
 
+    // closure
+    RVM_CODE_NEW_CLOSURE,
+
     // 不对应实际的字节码, 不能在生成代码的时候使用
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
 } RVM_Opcode;
@@ -1141,6 +1169,8 @@ struct RVM_CallInfo {
     RVM_ClassObject*    callee_object;
     RVM_Function_Tuple* callee_function;
     unsigned int        callee_argument_size; // 函数调用的参数数量，可变参数
+
+    RVM_Closure*        curr_closure;
 
     RVM_Byte*           code_list;
     unsigned int        code_size;
@@ -1724,13 +1754,14 @@ struct Declaration {
     char*          identifier;
     int            is_const;
     int            is_local;
-    int            variable_index;
-    Declaration*   next; // TODO: 这里设计的优点混乱了
+    int            variable_index; // 全局变量/局部变量的索引
+    Declaration*   next;           // TODO: 这里设计的优点混乱了
 };
 
 struct Variable {
-    Declaration* declaration;
-    bool         is_free_value;
+    Declaration*   declaration;
+    bool           is_free_value;
+    FreeValueDesc* free_value_desc;
 };
 
 typedef enum {
@@ -1746,20 +1777,29 @@ typedef struct BlockLabels {
     unsigned int continue_label;
 } BlockLabels;
 
+
+/*
+block 中的 declaration 是不是考虑应该放在外边
+
+为什么：局部变量的初始化时机不太正确。因为局部量只有在函数调用的时候才进行初始化
+*/
 struct Block {
-    unsigned int line_number;
+    unsigned int   line_number;
 
-    BlockType    type;
+    BlockType      type;
 
-    unsigned int declaration_list_size;
-    Declaration* declaration_list;
+    unsigned int   declaration_list_size;
+    Declaration*   declaration_list;
 
-    unsigned int statement_list_size;
-    Statement*   statement_list;
+    unsigned int   free_value_size;
+    FreeValueDesc* free_value_list;
 
-    Block*       parent_block;
+    unsigned int   statement_list_size;
+    Statement*     statement_list;
 
-    BlockLabels  block_labels;
+    Block*         parent_block;
+
+    BlockLabels    block_labels;
 };
 
 
@@ -1784,7 +1824,20 @@ struct FunctionTuple {
 struct Closure {
     FUNCTION_TUPLE_HEADER;
 
-    // upvalue
+    // unsigned int   free_value_size;
+    // FreeValueDesc* free_value_list;
+};
+
+struct FreeValueDesc {
+    char* identifier;
+    bool  outer_local; // 直接外层函数的局部变量
+    union {
+        unsigned int   outer_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        FreeValueDesc* outer_free_value;  // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
+    } u;
+
+    unsigned       free_value_index; // UPDATED_BY_FIX_AST
+    FreeValueDesc* next;
 };
 
 struct Function {
@@ -2812,6 +2865,7 @@ void             add_parameter_to_declaration(Parameter* parameter, Block* block
 Variable*        resolve_variable(char* package_posit, char* identifier, Block* block);
 Function*        search_function(char* package_posit, char* identifier);
 
+FreeValueDesc*   free_value_list_add_item(FreeValueDesc* head, FreeValueDesc* free_value);
 // --------------------
 
 /* --------------------
@@ -2924,7 +2978,7 @@ void              generate_vmcode_from_launch_expression(Package_Executer* execu
                                                          LaunchExpression* launch_expression,
                                                          RVM_OpcodeBuffer* opcode_buffer);
 
-void              deep_copy_closure(RVM_Closure* dst, Closure* src);
+void              deep_copy_closure(RVM_AnonymousFunc* dst, Closure* src);
 void              generate_vmcode_from_closure_expreesion(Package_Executer*  executer,
                                                           ClosureExpression* closure_expression,
                                                           RVM_OpcodeBuffer*  opcode_buffer);
@@ -2946,7 +3000,7 @@ int               constant_pool_add_int(Package_Executer* executer, int int_lite
 int               constant_pool_add_int64(Package_Executer* executer, long long int64_literal);
 int               constant_pool_add_double(Package_Executer* executer, double double_literal);
 int               constant_pool_add_string(Package_Executer* executer, const char* string_literal);
-int               constant_pool_add_closure(Package_Executer* executer, RVM_Closure* closure);
+int               constant_pool_add_closure(Package_Executer* executer, RVM_AnonymousFunc* func);
 
 unsigned int      opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer);
 void              opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address);
@@ -2982,6 +3036,7 @@ void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Functi
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
                                             RVM_ClassObject* callee_object, RVM_Function_Tuple* callee_function,
+                                            RVM_Closure* closure,
                                             unsigned int argument_list_size);
 void                 derive_function_return(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
@@ -3068,6 +3123,8 @@ void                 rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_G
 
 
 int                  rvm_heap_size(Ring_VirtualMachine* rvm);
+
+RVM_Closure*         new_closure(Ring_VirtualMachine* rvm, RVM_AnonymousFunc* func);
 
 // --------------------
 

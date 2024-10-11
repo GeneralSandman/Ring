@@ -544,12 +544,11 @@ void dump_vm_function(Package_Executer*    package_executer,
     }
 
     // 4. free value
-    printf("+FreeValue:        %d\n", 0);
-    // for (unsigned int i = 0; i < function->free_value_size; i++) {
-    //     printf(" ├──%-20s %-20s\n",
-    //            format_rvm_type_specifier(package_executer, function->free_value_list[i].type_specifier, "var ").c_str(),
-    //            function->free_value_list[i].identifier);
-    // }
+    printf("+FreeValue:        %d\n", function->free_value_size);
+    for (unsigned int i = 0; i < function->free_value_size; i++) {
+        printf(" ├──%-20s\n",
+               function->free_value_list[i].identifier);
+    }
 
     printf("+Instructions:\n");
     printf(" ├──%-8s%-30s%-20s%-18s\n",
@@ -1301,17 +1300,17 @@ std::string formate_closure_type(Package_Executer* package_executer,
 
     std::vector<std::string> parameter_list_s;
     std::string              parameter_s = "";
-    for (unsigned int i = 0; i < closure_value->parameter_size; i++) {
-        std::string tmp = format_rvm_type_specifier(package_executer, closure_value->parameter_list[i].type_specifier, "")
-            + (closure_value->parameter_list[i].is_variadic ? "..." : "");
+    for (unsigned int i = 0; i < closure_value->anonymous_func->parameter_size; i++) {
+        std::string tmp = format_rvm_type_specifier(package_executer, closure_value->anonymous_func->parameter_list[i].type_specifier, "")
+            + (closure_value->anonymous_func->parameter_list[i].is_variadic ? "..." : "");
         parameter_list_s.push_back(tmp);
     }
     parameter_s = strings_join(parameter_list_s, ", ");
 
     std::vector<std::string> return_list_s;
     std::string              return_s = "";
-    for (unsigned int i = 0; i < closure_value->return_value_size; i++) {
-        std::string tmp = format_rvm_type_specifier(package_executer, closure_value->return_value_list[i].type_specifier, "");
+    for (unsigned int i = 0; i < closure_value->anonymous_func->return_value_size; i++) {
+        std::string tmp = format_rvm_type_specifier(package_executer, closure_value->anonymous_func->return_value_list[i].type_specifier, "");
         return_list_s.push_back(tmp);
     }
     return_s = strings_join(return_list_s, ", ");

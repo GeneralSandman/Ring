@@ -21,6 +21,9 @@ function main() {
 	var FuncType func_var;
 
 	func_var = return_closure();
+
+	func_var();
+	func_var();
 }
 
 function return_closure() -> (FuncType) {
@@ -29,26 +32,11 @@ function return_closure() -> (FuncType) {
 	var int local_int_value_0 = 1;
 	var FuncType tmp;
 
-	fmt::printf("return_closure::out:1 local_int_value_0 = {}\n", local_int_value_0);
-
-	local_int_value_0 ++;
-	fmt::printf("return_closure::out:2 local_int_value_0 = {}\n", local_int_value_0);
-
-
-
 	tmp = function() {
 		local_int_value_0 ++;
 		fmt::printf("return_closure::[closure]::1 local_int_value_0 = {}\n", local_int_value_0);
 	};
 
-	tmp();
-	fmt::printf("return_closure::out:3 local_int_value_0 = {}\n", local_int_value_0);
-
-	local_int_value_0++;
-	fmt::printf("return_closure::out:4 local_int_value_0 = {}\n", local_int_value_0);
-
-	tmp();
-	fmt::printf("return_closure::out:5 local_int_value_0 = {}\n", local_int_value_0);
 
 	return tmp;
 }

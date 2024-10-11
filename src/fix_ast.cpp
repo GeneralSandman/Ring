@@ -2611,18 +2611,26 @@ Variable* resolve_variable(char* package_posit, char* identifier, Block* block) 
     // 递归搜索局部变量
     // 对于 if for 这种block，搜索到的局部变量依然是局部变量
     // 对于 匿名函数 这种block，搜索到的局部变量是 free-value
+    Block* curr_func_block     = nullptr;
+    Block* find_var_func_block = nullptr;
+    bool   is_free_value       = false;
 
-    bool   is_free_value      = false;
-    bool   skip_closure_block = false;
-    Block* find_block         = nullptr;
-    for (find_block = block; find_block; find_block = find_block->parent_block) {
-        if (find_block->type == BLOCK_TYPE_FUNCTION) {
-            // printf("-- this is a function block :%p, identifier:%s\n", block, identifier);
-            skip_closure_block = true;
+    for (Block* block_pos = block; block_pos; block_pos = block_pos->parent_block) {
+        // TODO: 当前不支持在非 function 代码块中 定义变量
+        if (block_pos->type != BLOCK_TYPE_FUNCTION) {
+            continue;
         }
-        for (Declaration* pos = find_block->declaration_list; pos; pos = pos->next) {
+        if (curr_func_block == nullptr) {
+            curr_func_block = block_pos;
+        }
+        for (Declaration* pos = block_pos->declaration_list; pos; pos = pos->next) {
             if (str_eq(identifier, pos->identifier)) {
-                decl = pos;
+                find_var_func_block = block_pos;
+                decl                = pos;
+
+                if (curr_func_block != find_var_func_block) {
+                    is_free_value = true;
+                }
                 goto FOUND;
             }
         }
@@ -2637,19 +2645,34 @@ Variable* resolve_variable(char* package_posit, char* identifier, Block* block) 
         }
     }
 
-FOUND:
     if (decl == nullptr) {
         return nullptr;
     }
-    if (decl != nullptr && skip_closure_block && find_block != block) {
-        is_free_value = true;
-    }
 
-    // DEBUG
-    // printf("block:%p, identifier:%s, is_free_value:%d\n", block, identifier, is_free_value);
-    Variable* variable      = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
-    variable->declaration   = decl;
-    variable->is_free_value = is_free_value;
+FOUND:
+
+
+    // TODO: 他是一个FreeValue, 他应该通知给 ParentFuncBlock
+    // 这样在 ParentFuncBlock退出的时候,
+    // 应该关闭他下级的 upvalues
+    Variable* variable        = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
+    variable->declaration     = decl;
+    variable->is_free_value   = is_free_value;
+    variable->free_value_desc = nullptr;
+    if (is_free_value) {
+        FreeValueDesc* free_value       = (FreeValueDesc*)mem_alloc(get_front_mem_pool(), sizeof(FreeValueDesc));
+        free_value->identifier          = identifier;
+        free_value->outer_local         = true;
+        free_value->u.outer_local_index = decl->variable_index;
+        free_value->free_value_index    = block->free_value_size;
+        free_value->next                = nullptr;
+
+        // 将这个 FreeValueDesc 添加到 block 的 free_value_list 中
+        block->free_value_size++;
+        block->free_value_list    = free_value_list_add_item(block->free_value_list, free_value);
+
+        variable->free_value_desc = free_value;
+    }
     return variable;
 }
 
@@ -2700,4 +2723,16 @@ Function* search_function(char* package_posit, char* identifier) {
     }
 
     return nullptr;
+}
+
+FreeValueDesc* free_value_list_add_item(FreeValueDesc* head, FreeValueDesc* free_value) {
+    if (head == nullptr) {
+        return free_value;
+    }
+
+    FreeValueDesc* pos = head;
+    for (; pos->next != nullptr; pos = pos->next) {
+    }
+    pos->next = free_value;
+    return head;
 }
