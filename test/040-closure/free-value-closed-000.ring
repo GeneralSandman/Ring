@@ -28,14 +28,17 @@ function main() {
 
 function return_closure() -> (FuncType) {
 
-	var bool local_bool_value_0;
-	var int local_int_value_0 = 1;
 	var FuncType tmp;
+	var int local_int_value_0 = 101;
+
 
 	tmp = function() {
 		local_int_value_0 ++;
 		fmt::printf("return_closure::[closure]::1 local_int_value_0 = {}\n", local_int_value_0);
 	};
+
+	tmp();
+	tmp();
 
 
 	// 此时应该 close return_closure 被引用的所有 FreeValue，目的是让他逃逸
