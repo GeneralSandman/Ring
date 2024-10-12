@@ -3259,27 +3259,55 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm, RVM_AnonymousFunc* func) {
 // 全局的函数变量，那不就是 函数么，这里没必要提供
 // TODO: 添加debug信息，能够快速可调试
 void close_all_closure(Ring_VirtualMachine* rvm, unsigned int return_value_list_size) {
-    return;
-    unsigned int local_var_count = VM_CUR_CO_STACK_TOP_INDEX - VM_CUR_CO_CSB - return_value_list_size;
-    // printf("close_all_closure local_var_count: %d\n", local_var_count);
+
+    /*
+unsigned int                     local_var_count = VM_CUR_CO_STACK_TOP_INDEX - VM_CUR_CO_CSB - return_value_list_size;
+如果直接将 return_value_list_size 上的closure排除，然后批量close的话，这里有一个场景不太好覆盖
+
+function return_closure() -> (FuncType) {
+    var int local_int_value_0 = 100;
+    return function() {
+        local_int_value_0 ++;
+        fmt::printf("return_closure::[closure]::1 local_int_value_0 = {}\n", local_int_value_0);
+    };
+}
+这个 closure 是个局部变量，这里手动将 return_value_list_size 进行了删除
+    */
+
+    // FIXME: 目前妥协的实现方式
+    // 不能重复 close closure
+    unsigned int                     local_var_count = VM_CUR_CO_STACK_TOP_INDEX - VM_CUR_CO_CSB;
+    std::unordered_set<RVM_Closure*> closed_closures;
+
     for (unsigned int i = 0; i < local_var_count; i++) {
         if (VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i].type == RVM_VALUE_TYPE_CLOSURE) {
-            // printf("[%d]is closure\n", i);
-            close_closure(rvm, VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i].u.closure_value);
+
+            RVM_Closure* closure = VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i].u.closure_value;
+            if (closed_closures.find(closure) != closed_closures.end()) {
+                continue;
+            }
+
+
+            close_closure(rvm, closure);
+            closed_closures.insert(closure);
         }
     }
 }
 
 // TODO: 添加debug信息，能够快速可调试
 void close_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure) {
-    // printf("    close_closure, free_value_size:%d\n", closure->free_value_size);
+    if (closure == nullptr) {
+        return;
+    }
+    // printf("[+]close closure, free_value_size:%d\n", closure->free_value_size);
 
     for (unsigned int i = 0; i < closure->free_value_size; i++) {
         if (closure->free_value_list[i].is_open) {
-            // printf("        close a open free-value:[%d]\n", i);
 
+            // printf("        close free-value:[%d]\n", i);
+
+            // FIXME: 这里只深度copy了 bool/int/int64/double
             // deep copy from stack to free-space
-            // FIXME：这里只深度copy了 bool/int/int64/double
             // string/class/array 为浅copy
             closure->free_value_list[i].c_value = *(closure->free_value_list[i].u.p);
             closure->free_value_list[i].u.p     = &(closure->free_value_list[i].c_value);

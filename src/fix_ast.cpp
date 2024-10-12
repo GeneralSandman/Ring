@@ -2714,6 +2714,7 @@ Variable* resolve_variable_recur(Package* package, char* identifier, Block* bloc
     }
 
     // 因为能走到这里的 都是 BLOCK_TYPE_FUNCTION
+    // 肯定是 Free_Value
     bool      is_free_value   = true;
 
     Variable* variable        = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
@@ -2735,6 +2736,10 @@ Variable* resolve_variable_recur(Package* package, char* identifier, Block* bloc
 
         variable->free_value_desc = free_value;
     }
+    // 添加到 block->visable_var_list 中
+    block->visable_var_size++;
+    block->visable_var_list = variable_list_add_item(block->visable_var_list, variable);
+
     return variable;
 }
 
