@@ -1389,20 +1389,6 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier,
     return statement;
 }
 
-Statement* create_declaration_statement(TypeSpecifier* type,
-                                        char*          identifier,
-                                        Expression*    initializer) {
-
-    debug_ast_info_with_yellow("identifier:%s", identifier);
-
-    Statement* statement               = (Statement*)mem_alloc(get_front_mem_pool(), sizeof(Statement));
-    statement->line_number             = package_unit_get_line_number();
-    statement->type                    = STATEMENT_TYPE_DECLARATION;
-    statement->u.declaration_statement = create_declaration(type, identifier, initializer);
-    statement->next                    = nullptr;
-
-    return statement;
-}
 
 Parameter* create_parameter(TypeSpecifier* type, char* identifier, bool is_variadic) {
     Parameter* parameter      = (Parameter*)mem_alloc(get_front_mem_pool(), sizeof(Parameter));

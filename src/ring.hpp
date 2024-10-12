@@ -647,6 +647,7 @@ struct RVM_FreeValueDesc {
 };
 
 struct RVM_FreeValue {
+    bool is_open; // open/close
     union {
         RVM_Value* p;
         // 可指向 open/close value
@@ -2707,7 +2708,6 @@ Declaration*                  create_declaration(TypeSpecifier* type, char* iden
 Declaration*                  declaration_list_add_item(Declaration* head, Declaration* declaration);
 
 Statement*                    create_multi_declaration_statement(TypeSpecifier* type_specifier, Identifier* identifier_list, Expression* initializer_list);
-Statement*                    create_declaration_statement(TypeSpecifier* type_specifier, char* identifier, Expression* initializer);
 
 Parameter*                    create_parameter(TypeSpecifier* type, char* identifier, bool is_variadic);
 Parameter*                    parameter_list_add_statement(Parameter* head, Parameter* parameter);
@@ -3125,7 +3125,8 @@ void                 rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_G
 int                  rvm_heap_size(Ring_VirtualMachine* rvm);
 
 RVM_Closure*         new_closure(Ring_VirtualMachine* rvm, RVM_AnonymousFunc* func);
-
+void                 close_all_closure(Ring_VirtualMachine* rvm, unsigned int return_value_list_size);
+void                 close_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure);
 // --------------------
 
 

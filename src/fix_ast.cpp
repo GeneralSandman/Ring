@@ -2572,6 +2572,15 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
 }
 
 // -----------------
+/*
+ * resolve_variable 递归搜索一个变量
+ *
+ * 搜索顺序：
+ * 1. 在当前Block搜索定义的局部变量
+ * 2. 在当前Block搜素自由变量
+ * 3. 去上一级搜索... 步骤为1.2
+ * 4. 去全局变量搜索
+ */
 Variable* resolve_variable(char* package_posit, char* identifier, Block* block) {
     Declaration* decl = nullptr;
 
@@ -2623,6 +2632,7 @@ Variable* resolve_variable(char* package_posit, char* identifier, Block* block) 
         if (curr_func_block == nullptr) {
             curr_func_block = block_pos;
         }
+        // 找局部变量
         for (Declaration* pos = block_pos->declaration_list; pos; pos = pos->next) {
             if (str_eq(identifier, pos->identifier)) {
                 find_var_func_block = block_pos;
@@ -2634,6 +2644,12 @@ Variable* resolve_variable(char* package_posit, char* identifier, Block* block) 
                 goto FOUND;
             }
         }
+        // 找FreeValue
+        // for (FreeValueDesc* pos = block_pos->free_value_list; pos; pos = pos->next) {
+        //     if (str_eq(identifier, pos->identifier)) {
+        //         // printf("find a alread free-value -----------\n");
+        //     }
+        // }
     }
 
 
@@ -2653,6 +2669,7 @@ FOUND:
 
 
     // TODO: 他是一个FreeValue, 他应该通知给 ParentFuncBlock
+    // 目前是重复添加FreeValue，
     // 这样在 ParentFuncBlock退出的时候,
     // 应该关闭他下级的 upvalues
     Variable* variable        = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
@@ -2670,6 +2687,7 @@ FOUND:
         // 将这个 FreeValueDesc 添加到 block 的 free_value_list 中
         block->free_value_size++;
         block->free_value_list    = free_value_list_add_item(block->free_value_list, free_value);
+
 
         variable->free_value_desc = free_value;
     }

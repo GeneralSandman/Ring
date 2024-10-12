@@ -753,7 +753,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_FREE_INT: {
             unsigned int free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
 
-            //
+            // 后续抽象出宏
             RVM_Closure* c_closure                                        = VM_CUR_CO_CALLINFO->curr_closure;
             c_closure->free_value_list[free_value_index].u.p->u.int_value = STACK_GET_INT_OFFSET(-1);
         };
@@ -773,7 +773,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_FREE_INT: {
             unsigned int free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
 
-            //
+            // 后续抽象出宏
             RVM_Closure* c_closure = VM_CUR_CO_CALLINFO->curr_closure;
             STACK_SET_INT_OFFSET(0,
                                  c_closure->free_value_list[free_value_index].u.p->u.int_value);
@@ -1582,6 +1582,10 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_PC += 3;
             [[fallthrough]]; // make g++ happy
         case RVM_CODE_FUNCTION_FINISH:
+            // close all closure free-value
+            // 遍历当前所有的栈空间，找到所有 stack 中是 closure的RVM_Value
+            // 依次对他们执行关闭操作
+            close_all_closure(rvm, return_value_list_size);
             derive_function_finish(rvm,
                                    &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
                                    nullptr,
@@ -3243,9 +3247,43 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm, RVM_AnonymousFunc* func) {
     // 此时为 open
     for (unsigned int i = 0; i < func->free_value_size; i++) {
         // TODO: 当前只支持直接外围函数的局部变量 作为FreeValue
-        unsigned int index              = func->free_value_list[i].u.outer_local_index;
-
-        closure->free_value_list[i].u.p = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
+        unsigned int index                  = func->free_value_list[i].u.outer_local_index;
+        closure->free_value_list[i].is_open = true;
+        closure->free_value_list[i].u.p     = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
     }
     return closure;
+}
+
+// 关闭当前 stack上 所有closure 的所有freevalue
+// 也就是说，不能命名一个全局的函数变量，因为他无法进行close
+// 全局的函数变量，那不就是 函数么，这里没必要提供
+// TODO: 添加debug信息，能够快速可调试
+void close_all_closure(Ring_VirtualMachine* rvm, unsigned int return_value_list_size) {
+    return;
+    unsigned int local_var_count = VM_CUR_CO_STACK_TOP_INDEX - VM_CUR_CO_CSB - return_value_list_size;
+    // printf("close_all_closure local_var_count: %d\n", local_var_count);
+    for (unsigned int i = 0; i < local_var_count; i++) {
+        if (VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i].type == RVM_VALUE_TYPE_CLOSURE) {
+            // printf("[%d]is closure\n", i);
+            close_closure(rvm, VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i].u.closure_value);
+        }
+    }
+}
+
+// TODO: 添加debug信息，能够快速可调试
+void close_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure) {
+    // printf("    close_closure, free_value_size:%d\n", closure->free_value_size);
+
+    for (unsigned int i = 0; i < closure->free_value_size; i++) {
+        if (closure->free_value_list[i].is_open) {
+            // printf("        close a open free-value:[%d]\n", i);
+
+            // deep copy from stack to free-space
+            // FIXME：这里只深度copy了 bool/int/int64/double
+            // string/class/array 为浅copy
+            closure->free_value_list[i].c_value = *(closure->free_value_list[i].u.p);
+            closure->free_value_list[i].u.p     = &(closure->free_value_list[i].c_value);
+            closure->free_value_list[i].is_open = false;
+        }
+    }
 }
