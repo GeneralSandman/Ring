@@ -11,36 +11,48 @@
 #include <sys/select.h>
 
 
-std::string command_help_message =
-    "Ring Command Usage: \n"
-    "\n"
-    "        ring [options] <command> [arguments]\n"
-    "\n"
-    "All Commands:\n"
-    "\n"
-    "        run    <filename>                              :compile and run Ring program\n"
-    "        dump   <filename>                              :dump bytecode detail after compile\n"
-    "        rdb    <filename>                              :debug interactive\n"
-    "        \n"
-    "        man    <keyword>                               :get prompt of ring by keyword\n"
-    "        version                                        :get Ring version\n"
-    "        help                                           :get Ring version\n"
-    "\n"
-    "Options:\n"
-    "\n"
-    "        -O1                                            :optimize bytecode with level 1\n"
-    "\n"
-    "\n"
-    "Ring Debug Env Usage: \n"
-    "\n"
-    "        RING_DEBUG=<value>\n"
-    "                  Enable various debugging facilities.\n"
-    "                  <value> can hold a comma-separated list of these settings.\n"
-    "                  e.g. RING_DEBUG=trace_func_backtrace=1,trace_coroutine_sched=1\n"
-    "                  See https://ring.wiki/ for details.\n"
-    "";
+std::string command_help_message = R"(
+B|Ring Command Usage:|B
+
+        ring [options] <command> [arguments]
+
+B|All Commands:|B
+
+        B|run    <filename>                              |B:compile and run Ring program
+        B|dump   <filename>                              |B:dump bytecode detail after compile
+        B|rdb    <filename>                              |B:debug interactive
+
+        B|man    <keyword>                               |B:get prompt of ring by keyword
+        B|version                                        |B:get Ring version
+        B|help                                           |B:get Ring version
+
+B|Options:|B
+
+        B|-O1                                            |B:optimize bytecode with level 1
 
 
+B|Ring Debug Environment Usage:|B
+
+        B|RING_DEBUG=<debug_value>                       |B:enable various debugging facilities.
+
+        <debug_value> are available:
+            trace_func_backtrace=1
+                    Enable trace function backtrace
+            trace_coroutine_sched=1
+                    Enable trace coroutine scheduler
+            trace_closure_free_value=1
+                    Enable trace closure free value
+
+        <debug_value> also can hold a comma-separated list of these settings:
+                  trace_func_backtrace=1,trace_coroutine_sched=1
+
+
+        e.g. RING_DEBUG=trace_func_backtrace=1,trace_coroutine_sched=1,trace_closure_free_value=1 ring run test.ring
+
+)";
+
+
+//
 int RING_DEBUG_TRACE_FUNC_BACKTRACE  = 0;
 int RING_DEBUG_TRACE_COROUTINE_SCHED = 0;
 
@@ -195,6 +207,7 @@ int main(int argc, char** argv) {
         exit(ERROR_CODE_SUCCESS);
         break;
     case RING_COMMAND_HELP:
+        command_help_message = convert_troff_string_2_c_control(command_help_message);
         fprintf(stderr, "%s", command_help_message.c_str());
         exit(ERROR_CODE_SUCCESS);
         break;

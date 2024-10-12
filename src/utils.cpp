@@ -1341,3 +1341,47 @@ std::string sprintf_string(const char* format, ...) {
     result.resize(len);
     return result;
 }
+
+/*
+ * 在 Linux 的 man 手册中，加粗文本通常是通过使用宏和格式控制字符实现的。
+ * 这些宏和字符会在手册页被格式化时转换为适当的输出格式，例如加粗或斜体。
+ *
+ * .B 宏来表示加粗文本
+ *
+ * --------
+ * 在这里为了实现方便：
+ * B| 宏来表示加粗文本 |B 宏来表示加粗文本的结束
+ * 将 B|  替换为 \033[1m
+ * 将 |B 替换为 \033[0m
+ */
+std::string convert_troff_string_2_c_control(const std::string& input) {
+    std::string output;
+    size_t      pos = 0;
+
+    // 在输入字符串中查找加粗开始和结束的标记
+    while (pos < input.length()) {
+        // 查找加粗开始标记 B|
+        size_t start = input.find("B|", pos);
+        if (start == std::string::npos) {
+            output += input.substr(pos); // 如果没有找到，添加剩余文本
+            break;
+        }
+
+        // 添加 B| 之前的文本
+        output += input.substr(pos, start - pos);
+        pos = start + 2; // 移动到 B| 之后的位置
+
+        // 查找加粗结束标记 |B
+        size_t end = input.find("|B", pos);
+        if (end == std::string::npos) {
+            output += input.substr(start); // 如果没有找到结束标记，添加剩余文本
+            break;
+        }
+
+        // 添加加粗文本
+        output += "\033[1m" + input.substr(pos, end - pos) + "\033[0m";
+        pos = end + 2; // 移动到 |B 之后的位置
+    }
+
+    return output;
+}

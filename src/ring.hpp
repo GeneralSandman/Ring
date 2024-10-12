@@ -3259,6 +3259,8 @@ std::string              formate_closure_type(Package_Executer* package_executer
                                               RVM_Closure*      closure_value);
 
 std::string              sprintf_string(const char* format, ...);
+
+std::string              convert_troff_string_2_c_control(const std::string& input);
 // --------------------
 
 
