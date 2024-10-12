@@ -1763,6 +1763,8 @@ struct Variable {
     VarDecl*       decl;
     bool           is_free_value;
     FreeValueDesc* free_value_desc;
+
+    Variable*      next;
 };
 
 typedef enum {
@@ -1785,15 +1787,19 @@ block 中的 declaration 是不是考虑应该放在外边
 为什么：局部变量的初始化时机不太正确。因为局部量只有在函数调用的时候才进行初始化
 */
 struct Block {
-    unsigned int   line_number;
+    unsigned int line_number;
+    // TODO: start_line_number, end_line_number
 
     BlockType      type;
 
     unsigned int   var_decl_list_size;
-    VarDecl*       var_decl_list;
+    VarDecl*       var_decl_list; // 代码块中定义的局部变量
 
     unsigned int   free_value_size;
-    FreeValueDesc* free_value_list;
+    FreeValueDesc* free_value_list; // 自由变量
+
+    unsigned int   visable_var_size;
+    Variable*      visable_var_list; // 可见的变量, 搜索过的，用于提高fix_ast 的速度
 
     unsigned int   statement_list_size;
     Statement*     statement_list;
@@ -2862,10 +2868,15 @@ void             fix_iife_expression(Expression*                   expression,
                                      FunctionTuple*                func);
 
 void             add_parameter_to_declaration(Parameter* parameter, Block* block);
+
 Variable*        resolve_variable(char* package_posit, char* identifier, Block* block);
+Variable*        resolve_variable_global(Package* package, char* identifier, Block* block);
+Variable*        resolve_variable_recur(Package* package, char* identifier, Block* block);
+
 Function*        search_function(char* package_posit, char* identifier);
 
 FreeValueDesc*   free_value_list_add_item(FreeValueDesc* head, FreeValueDesc* free_value);
+Variable*        variable_list_add_item(Variable* head, Variable* variable);
 // --------------------
 
 /* --------------------

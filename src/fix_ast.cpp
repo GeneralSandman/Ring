@@ -2582,14 +2582,12 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
  * 4. 去全局变量搜索
  */
 Variable* resolve_variable(char* package_posit, char* identifier, Block* block) {
-    VarDecl* decl = nullptr;
 
     if (package_posit == nullptr || strlen(package_posit) == 0) {
         // FIXME: 应该是在当前 package中查找, 而不是 main package
         package_posit = (char*)"main";
     }
-    CompilerEntry* compiler_entry = get_compiler_entry();
-    Package*       package        = search_package(compiler_entry, package_posit);
+    Package* package = search_package(get_compiler_entry(), package_posit);
 
     // 未找到对应的Package
     // Ring-Compiler-Error-Report ERROR_CODE_UNKNOW_PACKAGE
@@ -2617,70 +2615,116 @@ Variable* resolve_variable(char* package_posit, char* identifier, Block* block) 
         ring_compile_error_report(&context);
     }
 
-    // 递归搜索局部变量
-    // 对于 if for 这种block，搜索到的局部变量依然是局部变量
-    // 对于 匿名函数 这种block，搜索到的局部变量是 free-value
-    Block* curr_func_block     = nullptr;
-    Block* find_var_func_block = nullptr;
-    bool   is_free_value       = false;
+    Variable* var = nullptr;
 
-    for (Block* block_pos = block; block_pos; block_pos = block_pos->parent_block) {
-        // TODO: 当前不支持在非 function 代码块中 定义变量
-        if (block_pos->type != BLOCK_TYPE_FUNCTION) {
-            continue;
-        }
-        if (curr_func_block == nullptr) {
-            curr_func_block = block_pos;
-        }
-        // 找局部变量
-        for (VarDecl* pos = block_pos->var_decl_list; pos; pos = pos->next) {
-            if (str_eq(identifier, pos->identifier)) {
-                find_var_func_block = block_pos;
-                decl                = pos;
-
-                if (curr_func_block != find_var_func_block) {
-                    is_free_value = true;
-                }
-                goto FOUND;
-            }
-        }
-        // 找FreeValue
-        // for (FreeValueDesc* pos = block_pos->free_value_list; pos; pos = pos->next) {
-        //     if (str_eq(identifier, pos->identifier)) {
-        //         // printf("find a alread free-value -----------\n");
-        //     }
-        // }
+    var           = resolve_variable_recur(package, identifier, block);
+    if (var != nullptr) {
+        return var;
     }
 
+    var = resolve_variable_global(package, identifier, block);
+    return var;
+}
+
+Variable* resolve_variable_global(Package* package, char* identifier, Block* block) {
+    if (package == nullptr) {
+        return nullptr;
+    }
+
+
+    VarDecl* var_decl = nullptr;
 
     // 搜索全局变量
     for (VarDecl* pos : package->global_var_decl_list) {
         if (str_eq(identifier, pos->identifier)) {
-            decl = pos;
-            goto FOUND;
+            var_decl = pos;
+            break;
         }
     }
-
-    if (decl == nullptr) {
+    if (var_decl == nullptr) {
         return nullptr;
     }
 
-FOUND:
-
-
-    // TODO: 他是一个FreeValue, 他应该通知给 ParentFuncBlock
-    // 目前是重复添加FreeValue，
-    // 这样在 ParentFuncBlock退出的时候,
-    // 应该关闭他下级的 upvalues
+    // TODO: 注意，这里没有重复利用，占用了很多内存
     Variable* variable        = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
-    variable->decl            = decl;
+    variable->decl            = var_decl;
+    variable->is_free_value   = false;
+    variable->free_value_desc = nullptr;
+
+    // variable 添加到 block 中，方便后续直接跳过
+    if (block != nullptr) {
+        block->visable_var_size++;
+        block->visable_var_list = variable_list_add_item(block->visable_var_list, variable);
+    }
+
+    return variable;
+}
+
+Variable* resolve_variable_recur(Package* package, char* identifier, Block* block) {
+
+    if (block == nullptr) {
+        return nullptr;
+    }
+
+    // 只有在 function直属的代码块中允许定义局部变量
+    // if/for 这种代码块中，不允许自定义局部变量
+    // 只能去上一级找
+    // 同时 visable_var_list 只有在 BLOCK_TYPE_FUNCTION 中才有效
+    if (block->type != BLOCK_TYPE_FUNCTION) {
+        return resolve_variable_recur(package, identifier, block->parent_block);
+    }
+
+    VarDecl* decl = nullptr;
+
+    // Step-0. 先看看是否已经直接resolve过
+    // 可直接返回，不用再次递归查找一遍了
+    for (Variable* pos = block->visable_var_list; pos != nullptr; pos = pos->next) {
+        if (str_eq(pos->decl->identifier, identifier)) {
+            return pos;
+        }
+    }
+
+
+    // Step-1. 先找局部定义的变量
+    for (VarDecl* pos = block->var_decl_list; pos; pos = pos->next) {
+        if (str_eq(identifier, pos->identifier)) {
+            decl = pos;
+            {
+                Variable* variable        = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
+                variable->decl            = decl;
+                variable->is_free_value   = false;
+                variable->free_value_desc = nullptr;
+
+                // 添加到 block->visable_var_list 中
+                block->visable_var_size++;
+                block->visable_var_list = variable_list_add_item(block->visable_var_list, variable);
+
+                return variable;
+            }
+        }
+    }
+
+    // Step-2.
+    // 继续向 block上搜索
+    // 如果跨了 function-block, 那就是个FreeValue
+    // 如果搜索到了，就添加到 parent_block 的 visable_var_list中
+    Variable* par_var = resolve_variable_recur(package, identifier, block->parent_block);
+    if (par_var == nullptr) {
+        return nullptr;
+    }
+
+    // 因为能走到这里的 都是 BLOCK_TYPE_FUNCTION
+    bool      is_free_value   = true;
+
+    Variable* variable        = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
+    variable->decl            = par_var->decl;
     variable->is_free_value   = is_free_value;
     variable->free_value_desc = nullptr;
     if (is_free_value) {
         FreeValueDesc* free_value       = (FreeValueDesc*)mem_alloc(get_front_mem_pool(), sizeof(FreeValueDesc));
         free_value->identifier          = identifier;
         free_value->outer_local         = true;
-        free_value->u.outer_local_index = decl->variable_index;
+        free_value->u.outer_local_index = par_var->decl->variable_index;
         free_value->free_value_index    = block->free_value_size;
         free_value->next                = nullptr;
 
@@ -2693,6 +2737,7 @@ FOUND:
     }
     return variable;
 }
+
 
 Function* search_function(char* package_posit, char* identifier) {
     if (package_posit != nullptr) {
@@ -2752,5 +2797,17 @@ FreeValueDesc* free_value_list_add_item(FreeValueDesc* head, FreeValueDesc* free
     for (; pos->next != nullptr; pos = pos->next) {
     }
     pos->next = free_value;
+    return head;
+}
+
+Variable* variable_list_add_item(Variable* head, Variable* variable) {
+    if (head == nullptr) {
+        return variable;
+    }
+
+    Variable* pos = head;
+    for (; pos->next != nullptr; pos = pos->next) {
+    }
+    pos->next = variable;
     return head;
 }
