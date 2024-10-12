@@ -23,16 +23,6 @@ function main() {
 	fmt::printf("------------------ [main] ------------------\n");
 	func_var = return_closure();
 	func_var();
-	func_var();
-	func_var();
-	func_var();
-
-	fmt::printf("------------------ [main] ------------------\n");
-	func_var = return_closure();
-	func_var();
-	func_var();
-	func_var();
-	func_var();
 }
 
 function return_closure() -> (FuncType) {

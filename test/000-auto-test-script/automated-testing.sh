@@ -143,10 +143,6 @@ NOT_TEST_FILES=(
   "./test/065-std-package-io/000.ring"
 
 
-  "./test/040-closure/free-value-closed-000.ring"
-  # 2024-10-12
-  # 暂时还没有实现
-
   )
 
 # 测试的结果文件, 主要用于存放本次测试的失败结果

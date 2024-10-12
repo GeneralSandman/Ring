@@ -20,15 +20,9 @@ typedef function() FuncType;
 function main() {
 	var FuncType func_var;
 
-	fmt::printf("------------------ [main] ------------------\n");
 	func_var = return_closure();
-	func_var();
-	func_var();
-	func_var();
-	func_var();
 
 	fmt::printf("------------------ [main] ------------------\n");
-	func_var = return_closure();
 	func_var();
 	func_var();
 	func_var();
@@ -36,14 +30,29 @@ function main() {
 }
 
 function return_closure() -> (FuncType) {
+	fmt::printf("------------------ [return_closure] ------------------\n");
 
+	var FuncType tmp;
 	var int local_int_value_0 = 100;
+	var int local_int_value_1 = 200;
 
-	return function() {
+
+	tmp = function() {
 		local_int_value_0 ++;
+		local_int_value_1 += 2;
+
 		fmt::printf("return_closure::[closure]::1 local_int_value_0 = {}\n", local_int_value_0);
+		fmt::printf("return_closure::[closure]::1 local_int_value_1 = {}\n", local_int_value_1);
 	};
 
+	tmp();
+	tmp();
+	tmp();
+	tmp();
+
+
+	// 此时应该 close return_closure 被引用的所有 FreeValue，目的是让他逃逸
+	return tmp;
 }
 
 

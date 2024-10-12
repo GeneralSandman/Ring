@@ -1,0 +1,18 @@
+------------------ [return_closure] ------------------
+return_closure::[closure]::1 local_int_value_0 = 101
+return_closure::[closure]::1 local_int_value_1 = 202
+return_closure::[closure]::1 local_int_value_0 = 102
+return_closure::[closure]::1 local_int_value_1 = 204
+return_closure::[closure]::1 local_int_value_0 = 103
+return_closure::[closure]::1 local_int_value_1 = 206
+return_closure::[closure]::1 local_int_value_0 = 104
+return_closure::[closure]::1 local_int_value_1 = 208
+------------------ [main] ------------------
+return_closure::[closure]::1 local_int_value_0 = 105
+return_closure::[closure]::1 local_int_value_1 = 210
+return_closure::[closure]::1 local_int_value_0 = 106
+return_closure::[closure]::1 local_int_value_1 = 212
+return_closure::[closure]::1 local_int_value_0 = 107
+return_closure::[closure]::1 local_int_value_1 = 214
+return_closure::[closure]::1 local_int_value_0 = 108
+return_closure::[closure]::1 local_int_value_1 = 216
