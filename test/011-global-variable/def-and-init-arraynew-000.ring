@@ -6,12 +6,12 @@ import {
 }
 
 global {
-	var bool[]   local_bool_array_0   = new bool[4];
-	var int[]    local_int_array_0    = new int[4];
-	var int64[]  local_int64_array_0  = new int64[4];
-	var double[] local_double_array_0 = new double[4];
-	var string[] local_string_array_0 = new string[4];
-	var Job1[]   local_job1_array_0   = new Job1[4];
+	var bool[]   global_bool_array_0   = new bool[4];
+	var int[]    global_int_array_0    = new int[4];
+	var int64[]  global_int64_array_0  = new int64[4];
+	var double[] global_double_array_0 = new double[4];
+	var string[] global_string_array_0 = new string[4];
+	var Job1[]   global_job1_array_0   = new Job1[4];
 }
 
 typedef class Job1 {
@@ -29,10 +29,10 @@ typedef class Job1 {
 @main
 function main() {
 
-	fmt::println(local_bool_array_0);
-	fmt::println(local_int_array_0);
-	fmt::println(local_int64_array_0);
-	fmt::println(local_double_array_0);
-	fmt::println(local_string_array_0);
-	fmt::println(local_job1_array_0);
+	fmt::println(global_bool_array_0);
+	fmt::println(global_int_array_0);
+	fmt::println(global_int64_array_0);
+	fmt::println(global_double_array_0);
+	fmt::println(global_string_array_0);
+	fmt::println(global_job1_array_0);
 }
