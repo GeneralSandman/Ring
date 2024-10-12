@@ -133,14 +133,14 @@ Package* package_create(CompilerEntry* compiler_entry,
     package->source_file_list            = list_files_of_dir(package_path);
 
     package->global_block_statement_list = std::vector<std::pair<unsigned int, Statement*>>{};
-    package->global_declaration_list     = std::vector<Declaration*>{};
+    package->global_var_decl_list        = std::vector<VarDecl*>{};
 
     package->class_definition_list       = std::vector<ClassDefinition*>{};
     package->function_list               = std::vector<Function*>{};
     package->type_alias_list             = std::vector<TypeAlias*>{};
 
     package->global_identifier_map       = std::unordered_set<std::string>{};
-    package->global_declaration_map      = std::unordered_map<std::string, Declaration*>{};
+    package->global_var_decl_map         = std::unordered_map<std::string, VarDecl*>{};
     package->class_definition_map        = std::unordered_map<std::string, ClassDefinition*>{};
     package->function_map                = std::unordered_map<std::string, Function*>{};
     package->import_package_map          = std::unordered_map<std::string, std::string>{};
@@ -170,14 +170,14 @@ Package* package_create_input_file(CompilerEntry* compiler_entry,
     package->source_file_list            = std::vector<std::string>{std::string(input_main_file)};
 
     package->global_block_statement_list = std::vector<std::pair<unsigned int, Statement*>>{};
-    package->global_declaration_list     = std::vector<Declaration*>{};
+    package->global_var_decl_list        = std::vector<VarDecl*>{};
 
     package->class_definition_list       = std::vector<ClassDefinition*>{};
     package->function_list               = std::vector<Function*>{};
     package->type_alias_list             = std::vector<TypeAlias*>{};
 
     package->global_identifier_map       = std::unordered_set<std::string>{};
-    package->global_declaration_map      = std::unordered_map<std::string, Declaration*>{};
+    package->global_var_decl_map         = std::unordered_map<std::string, VarDecl*>{};
     package->class_definition_map        = std::unordered_map<std::string, ClassDefinition*>{};
     package->function_map                = std::unordered_map<std::string, Function*>{};
     package->import_package_map          = std::unordered_map<std::string, std::string>{};
@@ -263,7 +263,7 @@ void package_dump(Package* package) {
     }
 
     printf("|## Declaration:\n");
-    for (auto declaration : package->global_declaration_list) {
+    for (auto declaration : package->global_var_decl_list) {
         printf("|\tdeclaration identifier:%s\n", declaration->identifier);
     }
 

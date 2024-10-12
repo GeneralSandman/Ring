@@ -90,17 +90,17 @@ void ring_compiler_fix_ast(Package* package) {
     for (auto tmp : package->global_block_statement_list) {
         for (Statement* statement = tmp.second; statement; statement = statement->next) {
             switch (statement->type) {
-            case STATEMENT_TYPE_DECLARATION: {
+            case STATEMENT_TYPE_VAR_DECL: {
 
-                for (Declaration* pos = statement->u.declaration_statement; pos != nullptr; pos = pos->next) {
+                for (VarDecl* pos = statement->u.var_decl_statement; pos != nullptr; pos = pos->next) {
 
                     fix_type_specfier(pos->type_specifier);
 
 
                     // 添加全局变量
-                    pos->variable_index = package->global_declaration_list.size();
+                    pos->variable_index = package->global_var_decl_list.size();
                     pos->is_local       = 0;
-                    package->global_declaration_list.push_back(pos);
+                    package->global_var_decl_list.push_back(pos);
                 }
             } break;
             case STATEMENT_TYPE_EXPRESSION: {
@@ -137,8 +137,8 @@ void ring_compiler_fix_ast(Package* package) {
     // 因为他没有对应的 initilizer, 所以不需要生成
     for (; global_statement; global_statement = global_statement->next) {
         switch (global_statement->type) {
-        case STATEMENT_TYPE_DECLARATION: {
-            Declaration* declaration = global_statement->u.declaration_statement;
+        case STATEMENT_TYPE_VAR_DECL: {
+            VarDecl* declaration = global_statement->u.var_decl_statement;
             for (; declaration != nullptr; declaration = declaration->next) {
                 fix_type_specfier(declaration->type_specifier);
             }
@@ -183,8 +183,8 @@ Function* create_global_init_func(Package* package) {
     Block* block                       = (Block*)mem_alloc(get_front_mem_pool(), sizeof(Block));
     block->line_number                 = 0;
     block->type                        = BLOCK_TYPE_UNKNOW;
-    block->declaration_list_size       = 0;
-    block->declaration_list            = nullptr;
+    block->var_decl_list_size          = 0;
+    block->var_decl_list               = nullptr;
     block->statement_list_size         = 0;
     block->statement_list              = nullptr;
     block->parent_block                = nullptr;
@@ -270,8 +270,8 @@ void fix_statement(Statement* statement, Block* block, FunctionTuple* func) {
     case STATEMENT_TYPE_EXPRESSION:
         fix_expression(statement->u.expression, block, func);
         break;
-    case STATEMENT_TYPE_DECLARATION:
-        add_local_declaration(statement->u.declaration_statement, block, func);
+    case STATEMENT_TYPE_VAR_DECL:
+        add_local_declaration(statement->u.var_decl_statement, block, func);
         break;
 
     case STATEMENT_TYPE_IF:
@@ -437,12 +437,12 @@ BEGIN:
     goto BEGIN;
 }
 
-void add_local_declaration(Declaration* declaration, Block* block, FunctionTuple* func) {
+void add_local_declaration(VarDecl* declaration, Block* block, FunctionTuple* func) {
     assert(declaration != nullptr);
     assert(block != nullptr);
 
-    Declaration* decl_pos  = declaration;
-    Declaration* decl_next = decl_pos->next;
+    VarDecl* decl_pos  = declaration;
+    VarDecl* decl_next = decl_pos->next;
     for (; decl_pos != nullptr; decl_pos = decl_next) {
         decl_next      = decl_pos->next;
         decl_pos->next = nullptr;
@@ -452,14 +452,14 @@ void add_local_declaration(Declaration* declaration, Block* block, FunctionTuple
 
 
         // 添加局部变量
-        block->declaration_list =
-            declaration_list_add_item(block->declaration_list, decl_pos);
+        block->var_decl_list =
+            declaration_list_add_item(block->var_decl_list, decl_pos);
 
-        decl_pos->variable_index = block->declaration_list_size++;
+        decl_pos->variable_index = block->var_decl_list_size++;
         decl_pos->is_local       = 1;
 
         // Ring-Compiler-Error-Report ERROR_TOO_MANY_LOCAL_VARIABLE
-        if (block->declaration_list_size > 255) {
+        if (block->var_decl_list_size > 255) {
             DEFINE_ERROR_REPORT_STR;
 
             snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -801,7 +801,7 @@ void fix_identifier_expression(Expression*           expression,
         // is a variable
         identifier_expression->type       = IDENTIFIER_EXPRESSION_TYPE_VARIABLE;
         identifier_expression->u.variable = variable;
-        type_specifier                    = variable->declaration->type_specifier;
+        type_specifier                    = variable->decl->type_specifier;
 
         EXPRESSION_CLEAR_CONVERT_TYPE(expression);
         EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier);
@@ -1894,18 +1894,18 @@ void fix_function_call_expression(Expression*             expression,
                                 block);
     if (variable != nullptr) {
 
-        if (variable->declaration->type_specifier->kind == RING_BASIC_TYPE_FUNC) {
+        if (variable->decl->type_specifier->kind == RING_BASIC_TYPE_FUNC) {
             // 是一个变量，并且是一个函数变量，需要继续匹配
             // 匹配函数调用的语义
             function_call_expression->type              = FUNCTION_CALL_TYPE_CLOSURE;
-            function_call_expression->u.cc.closure_decl = variable->declaration;
+            function_call_expression->u.cc.closure_decl = variable->decl;
 
             // TODO: 暂时不进行函数调用参数的强制校验
             EXPRESSION_CLEAR_CONVERT_TYPE(expression);
             for (unsigned int i = 0;
-                 i < variable->declaration->type_specifier->u.func_type->return_list_size;
+                 i < variable->decl->type_specifier->u.func_type->return_list_size;
                  i++) {
-                TypeSpecifier* return_type = variable->declaration->type_specifier->u.func_type->return_list[i];
+                TypeSpecifier* return_type = variable->decl->type_specifier->u.func_type->return_list[i];
                 EXPRESSION_ADD_CONVERT_TYPE(expression, return_type);
             }
             return;
@@ -2069,7 +2069,7 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
     // `self` variable
     TypeSpecifier* type_specifier    = create_type_specifier_alias(class_definition->identifier);
 
-    Declaration*   self_declaration  = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
+    VarDecl*       self_declaration  = (VarDecl*)mem_alloc(get_front_mem_pool(), sizeof(VarDecl));
     self_declaration->line_number    = method->start_line_number;
     self_declaration->type_specifier = type_specifier;
     self_declaration->identifier     = (char*)"self";
@@ -2131,17 +2131,17 @@ void fix_array_index_expression(Expression*           expression,
      * students[0] is a three-dimension array.
      * students[0,0,0] is a int value.
      */
-    if (index_expression->dimension < variable->declaration->type_specifier->dimension) {
-        type->kind = variable->declaration->type_specifier->kind;
-    } else if (index_expression->dimension == variable->declaration->type_specifier->dimension) {
-        type->kind = variable->declaration->type_specifier->sub->kind;
+    if (index_expression->dimension < variable->decl->type_specifier->dimension) {
+        type->kind = variable->decl->type_specifier->kind;
+    } else if (index_expression->dimension == variable->decl->type_specifier->dimension) {
+        type->kind = variable->decl->type_specifier->sub->kind;
     } else {
         ring_error_report("array index access error; E:%d.\n", ERROR_ARRAY_DIMENSION_INVALID);
     }
 
 
     if (type->kind == RING_BASIC_TYPE_CLASS) {
-        type->u.class_type = variable->declaration->type_specifier->sub->u.class_type;
+        type->u.class_type = variable->decl->type_specifier->sub->u.class_type;
     }
     fix_type_specfier(type);
 
@@ -2558,7 +2558,7 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
         }
 
 
-        Declaration* declaration    = (Declaration*)mem_alloc(get_front_mem_pool(), sizeof(Declaration));
+        VarDecl* declaration        = (VarDecl*)mem_alloc(get_front_mem_pool(), sizeof(VarDecl));
         declaration->line_number    = pos->line_number;
         declaration->type_specifier = type_specifier;
         declaration->identifier     = pos->identifier;
@@ -2582,7 +2582,7 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
  * 4. 去全局变量搜索
  */
 Variable* resolve_variable(char* package_posit, char* identifier, Block* block) {
-    Declaration* decl = nullptr;
+    VarDecl* decl = nullptr;
 
     if (package_posit == nullptr || strlen(package_posit) == 0) {
         // FIXME: 应该是在当前 package中查找, 而不是 main package
@@ -2633,7 +2633,7 @@ Variable* resolve_variable(char* package_posit, char* identifier, Block* block) 
             curr_func_block = block_pos;
         }
         // 找局部变量
-        for (Declaration* pos = block_pos->declaration_list; pos; pos = pos->next) {
+        for (VarDecl* pos = block_pos->var_decl_list; pos; pos = pos->next) {
             if (str_eq(identifier, pos->identifier)) {
                 find_var_func_block = block_pos;
                 decl                = pos;
@@ -2654,7 +2654,7 @@ Variable* resolve_variable(char* package_posit, char* identifier, Block* block) 
 
 
     // 搜索全局变量
-    for (Declaration* pos : package->global_declaration_list) {
+    for (VarDecl* pos : package->global_var_decl_list) {
         if (str_eq(identifier, pos->identifier)) {
             decl = pos;
             goto FOUND;
@@ -2673,7 +2673,7 @@ FOUND:
     // 这样在 ParentFuncBlock退出的时候,
     // 应该关闭他下级的 upvalues
     Variable* variable        = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
-    variable->declaration     = decl;
+    variable->decl            = decl;
     variable->is_free_value   = is_free_value;
     variable->free_value_desc = nullptr;
     if (is_free_value) {

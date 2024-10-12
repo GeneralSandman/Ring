@@ -18,12 +18,12 @@ void ring_compiler_analysis_import_package(Package* package) {
 }
 
 void ring_compiler_analysis_global_variable(Package* package) {
-    for (Declaration* decl : package->global_declaration_list) {
+    for (VarDecl* decl : package->global_var_decl_list) {
         std::string identifier = std::string(decl->identifier);
-        auto        iter       = package->global_declaration_map.find(identifier);
+        auto        iter       = package->global_var_decl_map.find(identifier);
 
         // Ring-Compiler-Error-Report ERROR_REDEFINITE_GLOBAL_VARIABLE
-        if (iter != package->global_declaration_map.end()) {
+        if (iter != package->global_var_decl_map.end()) {
             DEFINE_ERROR_REPORT_STR;
 
             snprintf(compile_err_buf, sizeof(compile_err_buf),
@@ -50,7 +50,7 @@ void ring_compiler_analysis_global_variable(Package* package) {
             ring_compile_error_report(&context);
             continue;
         }
-        package->global_declaration_map[identifier] = decl;
+        package->global_var_decl_map[identifier] = decl;
     }
 }
 

@@ -91,7 +91,7 @@ typedef struct ContinueStatement            ContinueStatement;
 typedef struct Ring_DeriveType_Array        Ring_DeriveType_Array;
 typedef struct Ring_DeriveType_Class        Ring_DeriveType_Class;
 typedef struct Ring_DeriveType_Func         Ring_DeriveType_Func;
-typedef struct Declaration                  Declaration;
+typedef struct VarDecl                      VarDecl;
 typedef struct Variable                     Variable;
 typedef struct TagDefinitionStatement       TagDefinitionStatement;
 typedef struct JumpTagStatement             JumpTagStatement;
@@ -381,14 +381,14 @@ struct Package {
     // pair.first 是 size
     // pair.second 就是 global_statement_list
     std::vector<std::pair<unsigned int, Statement*>>  global_block_statement_list;
-    std::vector<Declaration*>                         global_declaration_list;
+    std::vector<VarDecl*>                             global_var_decl_list;
 
     std::vector<ClassDefinition*>                     class_definition_list;
     std::vector<Function*>                            function_list;
     std::vector<TypeAlias*>                           type_alias_list;
 
     std::unordered_set<std::string>                   global_identifier_map;
-    std::unordered_map<std::string, Declaration*>     global_declaration_map;
+    std::unordered_map<std::string, VarDecl*>         global_var_decl_map;
     std::unordered_map<std::string, ClassDefinition*> class_definition_map;
     std::unordered_map<std::string, Function*>        function_map;
     std::unordered_map<std::string, std::string>      import_package_map;
@@ -1212,7 +1212,7 @@ typedef enum {
     STATEMENT_TYPE_BREAK,
     STATEMENT_TYPE_CONTINUE,
     STATEMENT_TYPE_RETURN,
-    STATEMENT_TYPE_DECLARATION,
+    STATEMENT_TYPE_VAR_DECL,
     STATEMENT_TYPE_TAG_DEFINITION,
     STATEMENT_TYPE_JUMP_TAG,
 } StatementType;
@@ -1433,7 +1433,7 @@ struct Statement {
         BreakStatement*         break_statement;
         ContinueStatement*      continue_statement;
         ReturnStatement*        return_statement;
-        Declaration*            declaration_statement;
+        VarDecl*                var_decl_statement;
         TagDefinitionStatement* tag_definition_statement;
         JumpTagStatement*       jump_tag_statement;
     } u;
@@ -1637,8 +1637,8 @@ struct FunctionCallExpression {
             Function* function; // UPDATED_BY_FIX_AST
         } fc;                   // function-call
         struct {
-            Declaration* closure_decl; // UPDATED_BY_FIX_AST
-        } cc;                          // closure-call
+            VarDecl* closure_decl; // UPDATED_BY_FIX_AST
+        } cc;                      // closure-call
 
     } u;
 
@@ -1748,7 +1748,7 @@ struct Parameter {
     Parameter*     next;
 };
 
-struct Declaration {
+struct VarDecl {
     unsigned int   line_number;
 
     TypeSpecifier* type_specifier;
@@ -1756,11 +1756,11 @@ struct Declaration {
     int            is_const;
     int            is_local;
     int            variable_index; // 全局变量/局部变量的索引
-    Declaration*   next;           // TODO: 这里设计的优点混乱了
+    VarDecl*       next;           // TODO: 这里设计的优点混乱了
 };
 
 struct Variable {
-    Declaration*   declaration;
+    VarDecl*       decl;
     bool           is_free_value;
     FreeValueDesc* free_value_desc;
 };
@@ -1789,8 +1789,8 @@ struct Block {
 
     BlockType      type;
 
-    unsigned int   declaration_list_size;
-    Declaration*   declaration_list;
+    unsigned int   var_decl_list_size;
+    VarDecl*       var_decl_list;
 
     unsigned int   free_value_size;
     FreeValueDesc* free_value_list;
@@ -2704,8 +2704,8 @@ TypeAlias*                    add_type_alias_func(Parameter*          parameter_
                                                   FunctionReturnList* return_list,
                                                   Identifier*         identifier);
 
-Declaration*                  create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
-Declaration*                  declaration_list_add_item(Declaration* head, Declaration* declaration);
+VarDecl*                      create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
+VarDecl*                      declaration_list_add_item(VarDecl* head, VarDecl* declaration);
 
 Statement*                    create_multi_declaration_statement(TypeSpecifier* type_specifier, Identifier* identifier_list, Expression* initializer_list);
 
@@ -2774,7 +2774,7 @@ void             fix_function_block(Function* func);
 void             fix_statement_list(Statement* statement_list, Block* block, FunctionTuple* func);
 void             fix_statement(Statement* statement, Block* block, FunctionTuple* func);
 void             fix_expression(Expression* expression, Block* block, FunctionTuple* func);
-void             add_local_declaration(Declaration* declaration, Block* block, FunctionTuple* func);
+void             add_local_declaration(VarDecl* declaration, Block* block, FunctionTuple* func);
 void             fix_type_specfier(TypeSpecifier* type_specifier);
 void             fix_block(Block* block, FunctionTuple* func);
 void             fix_if_statement(IfStatement* if_statement, Block* block, FunctionTuple* func);

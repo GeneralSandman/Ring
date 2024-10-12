@@ -126,9 +126,9 @@ std::string formate_expression(Expression* expression) {
 // dump function by PackageUnit
 void ring_compiler_functions_dump(PackageUnit* package_unit) {
     printf(" ************  compiler functions dump ****\n");
-    Declaration* decl;
-    int          i = 0;
-    int          j = 0;
+    VarDecl* decl;
+    int      i = 0;
+    int      j = 0;
 
     // for (Declaration* decl : package_unit->global_declaration_list) {
     //     printf("global-variable: name:%s\n", decl->identifier);
@@ -138,8 +138,8 @@ void ring_compiler_functions_dump(PackageUnit* package_unit) {
     for (Function* func : package_unit->function_list) {
         printf("function[%d]: name:%s\n", i, func->identifier);
         if (func->block) {
-            decl = func->block->declaration_list;
-            for (j = 0, decl = func->block->declaration_list; decl; decl = decl->next, j++) {
+            decl = func->block->var_decl_list;
+            for (j = 0, decl = func->block->var_decl_list; decl; decl = decl->next, j++) {
                 printf("\tlocal-variable[%d]: name:%s\n", j, decl->identifier);
             }
         }

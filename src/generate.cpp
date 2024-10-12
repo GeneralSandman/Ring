@@ -151,19 +151,19 @@ void add_global_variable(Package* package, Package_Executer* executer) {
     debug_generate_info_with_darkgreen("\t");
     // FIXME: 在 Compiler 中大部分是链表：因为在编译的时候不确定存储空间
     // 在 Executer 中 大部分是数组，因为编译完成，存储空间的数量都已经确认了。
-    if (package->global_declaration_list.empty()) {
+    if (package->global_var_decl_list.empty()) {
         return;
     }
 
-    executer->global_variable_size = package->global_declaration_list.size();
+    executer->global_variable_size = package->global_var_decl_list.size();
     executer->global_variable_list = (RVM_Variable*)mem_alloc(NULL_MEM_POOL,
                                                               executer->global_variable_size * sizeof(RVM_Variable));
 
-    Declaration* pos               = nullptr;
+    VarDecl*     pos               = nullptr;
     unsigned int i                 = 0;
-    for (pos = package->global_declaration_list[i];
-         i < package->global_declaration_list.size();
-         i++, pos = package->global_declaration_list[i]) {
+    for (pos = package->global_var_decl_list[i];
+         i < package->global_var_decl_list.size();
+         i++, pos = package->global_var_decl_list[i]) {
         executer->global_variable_list[i].identifier     = pos->identifier;
         executer->global_variable_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
                                                                                          sizeof(RVM_TypeSpecifier));
@@ -332,7 +332,7 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
         dst->return_value_size   = src->return_list_size;
         dst->return_value_list   = (RVM_ReturnValue*)mem_alloc(NULL_MEM_POOL,
                                                                sizeof(RVM_ReturnValue) * dst->return_value_size);
-        dst->local_variable_size = src->block->declaration_list_size;
+        dst->local_variable_size = src->block->var_decl_list_size;
         dst->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
                                                                  sizeof(RVM_LocalVariable) * dst->local_variable_size);
         dst->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
@@ -363,7 +363,7 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
 
         // deep copy local variable
         // declaration_list 即包括 parameter 也 包括 block中声明的局部变量
-        Declaration* pos = src->block->declaration_list;
+        VarDecl* pos = src->block->var_decl_list;
         for (unsigned int i = 0; pos != nullptr; pos = pos->next, i++) {
             dst->local_variable_list[i].identifier     = pos->identifier;
             dst->local_variable_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
@@ -396,7 +396,7 @@ void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src)
     dst->rvm_function->parameter_list      = (RVM_Parameter*)mem_alloc(NULL_MEM_POOL,
                                                                        sizeof(RVM_Parameter) * dst->rvm_function->parameter_size);
 
-    dst->rvm_function->local_variable_size = src->block->declaration_list_size;
+    dst->rvm_function->local_variable_size = src->block->var_decl_list_size;
     dst->rvm_function->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
                                                                            sizeof(RVM_LocalVariable) * dst->rvm_function->local_variable_size);
 
@@ -415,8 +415,8 @@ void copy_method(Package_Executer* executer, RVM_Method* dst, MethodMember* src)
     }
 
     // deep copy local variable
-    Declaration* pos = src->block->declaration_list;
-    i                = 0;
+    VarDecl* pos = src->block->var_decl_list;
+    i            = 0;
     for (; pos != nullptr; pos = pos->next, i++) {
         dst->rvm_function->local_variable_list[i].identifier     = pos->identifier;
         dst->rvm_function->local_variable_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
@@ -621,7 +621,7 @@ void generate_vmcode_from_statement_list(Package_Executer* executer,
             generate_vmcode_from_return_statement(executer, block, statement->u.return_statement, opcode_buffer);
             break;
 
-        case STATEMENT_TYPE_DECLARATION:
+        case STATEMENT_TYPE_VAR_DECL:
             break;
 
         case STATEMENT_TYPE_TAG_DEFINITION:
@@ -812,7 +812,7 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
     //                 range_statement->operand->u.identifier_expression->line_number);
 
 
-    Declaration* declaration = range_statement->operand->u.identifier_expression->u.variable->declaration;
+    VarDecl* declaration = range_statement->operand->u.identifier_expression->u.variable->decl;
     if (declaration == nullptr) {
         ring_error_report("invalid range operand:%s\n", range_statement->operand->u.identifier_expression->identifier);
     }
@@ -1259,7 +1259,7 @@ void generate_pop_to_leftvalue_identifier(Package_Executer*     executer,
     debug_generate_info_with_darkgreen("\t");
     assert(identifier_expression != nullptr);
 
-    Declaration* declaration    = identifier_expression->u.variable->declaration;
+    VarDecl*     declaration    = identifier_expression->u.variable->decl;
 
     unsigned int variable_index = declaration->variable_index;
     RVM_Opcode   opcode         = RVM_CODE_UNKNOW;
@@ -1309,7 +1309,7 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
     assert(array_index_expression->array_expression != nullptr);
     assert(array_index_expression->index_expression != nullptr);
 
-    Declaration* declaration = array_index_expression->array_expression->u.identifier_expression->u.variable->declaration;
+    VarDecl* declaration = array_index_expression->array_expression->u.identifier_expression->u.variable->decl;
     if (declaration == nullptr) {
         ring_error_report("invalid operator[] in identifier:%s\n",
                           array_index_expression->array_expression->u.identifier_expression->identifier);
@@ -1631,17 +1631,17 @@ void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
     switch (identifier_expression->type) {
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
         if (identifier_expression->u.variable->is_free_value) {
-            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FREE_BOOL, identifier_expression->u.variable->declaration->type_specifier);
+            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FREE_BOOL, identifier_expression->u.variable->decl->type_specifier);
             // TODO:free value 的 index，这个索引是不能变的，因为他会生成对应的字节码
             offset = identifier_expression->u.variable->free_value_desc->free_value_index;
             generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
-        } else if (identifier_expression->u.variable->declaration->is_local) {
-            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_BOOL, identifier_expression->u.variable->declaration->type_specifier);
-            offset = identifier_expression->u.variable->declaration->variable_index;
+        } else if (identifier_expression->u.variable->decl->is_local) {
+            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_BOOL, identifier_expression->u.variable->decl->type_specifier);
+            offset = identifier_expression->u.variable->decl->variable_index;
             generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
         } else {
-            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_BOOL, identifier_expression->u.variable->declaration->type_specifier);
-            offset = identifier_expression->u.variable->declaration->variable_index;
+            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_BOOL, identifier_expression->u.variable->decl->type_specifier);
+            offset = identifier_expression->u.variable->decl->variable_index;
             generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
         }
 
@@ -1790,7 +1790,7 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
         // 判断函数名称变量 是 global 还是 local
         // push_stack_closure
         // push_static_closure
-        Declaration* closure = function_call_expression->u.cc.closure_decl;
+        VarDecl*     closure = function_call_expression->u.cc.closure_decl;
         RVM_Opcode   opcode  = RVM_CODE_UNKNOW;
         unsigned int offset  = 0;
 
@@ -2156,7 +2156,7 @@ void deep_copy_closure(RVM_AnonymousFunc* dst, Closure* src) {
     dst->return_value_size   = src->return_list_size;
     dst->return_value_list   = (RVM_ReturnValue*)mem_alloc(NULL_MEM_POOL,
                                                            sizeof(RVM_ReturnValue) * dst->return_value_size);
-    dst->local_variable_size = src->block->declaration_list_size;
+    dst->local_variable_size = src->block->var_decl_list_size;
     dst->local_variable_list = (RVM_LocalVariable*)mem_alloc(NULL_MEM_POOL,
                                                              sizeof(RVM_LocalVariable) * dst->local_variable_size);
     dst->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
@@ -2186,7 +2186,7 @@ void deep_copy_closure(RVM_AnonymousFunc* dst, Closure* src) {
 
     // deep copy local variable
     // declaration_list 即包括 parameter 也 包括 block中声明的局部变量
-    Declaration* pos = src->block->declaration_list;
+    VarDecl* pos = src->block->var_decl_list;
     for (unsigned int i = 0; pos != nullptr; pos = pos->next, i++) {
         dst->local_variable_list[i].identifier     = pos->identifier;
         dst->local_variable_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
@@ -2409,7 +2409,7 @@ void generate_vmcode_from_array_index_expression(Package_Executer*     executer,
     // 这里暂时只处理数组
     // 暂时只处理一维数组
     // 要通过变量的类型来决定 push_array_int push_array_double push_array_object
-    Declaration* declaration = array_index_expression->array_expression->u.identifier_expression->u.variable->declaration;
+    VarDecl* declaration = array_index_expression->array_expression->u.identifier_expression->u.variable->decl;
     if (declaration == nullptr) {
         ring_error_report("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
     }
