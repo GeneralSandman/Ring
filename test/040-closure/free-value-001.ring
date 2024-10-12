@@ -18,27 +18,44 @@ typedef function() FuncType;
 // TestDetail: 测试见的FreeValue , 不支持逃逸
 @main
 function main() {
-	var FuncType func_var;
 
-	func_var = return_closure();
+	fmt::printf("-------------\n");
+	use_closure();
 
-	func_var();
-	func_var();
+	fmt::printf("-------------\n");
+	use_closure();
+
 }
 
-function return_closure() -> (FuncType) {
+function use_closure() {
 
 	var bool local_bool_value_0;
 	var int local_int_value_0 = 1;
 	var FuncType tmp;
+	var FuncType tmp1;
 
-	tmp = function() {
+	fmt::printf("return_closure::out:1 local_int_value_0 = {}\n", local_int_value_0);
+
+	local_int_value_0 ++;
+	fmt::printf("return_closure::out:2 local_int_value_0 = {}\n", local_int_value_0);
+
+
+
+	function() {
 		local_int_value_0 ++;
 		fmt::printf("return_closure::[closure]::1 local_int_value_0 = {}\n", local_int_value_0);
-	};
+	}();
+
+	function() {
+		local_int_value_0 ++;
+		fmt::printf("return_closure::[closure]::2 local_int_value_0 = {}\n", local_int_value_0);
+	}();
 
 
-	return tmp;
+	local_int_value_0 ++;
+	fmt::printf("return_closure::out:3 local_int_value_0 = {}\n", local_int_value_0);
+
+
 }
 
 

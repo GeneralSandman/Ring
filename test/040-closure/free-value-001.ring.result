@@ -1,0 +1,12 @@
+-------------
+return_closure::out:1 local_int_value_0 = 1
+return_closure::out:2 local_int_value_0 = 2
+return_closure::[closure]::1 local_int_value_0 = 3
+return_closure::[closure]::2 local_int_value_0 = 4
+return_closure::out:3 local_int_value_0 = 5
+-------------
+return_closure::out:1 local_int_value_0 = 1
+return_closure::out:2 local_int_value_0 = 2
+return_closure::[closure]::1 local_int_value_0 = 3
+return_closure::[closure]::2 local_int_value_0 = 4
+return_closure::out:3 local_int_value_0 = 5
