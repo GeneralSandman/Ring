@@ -97,6 +97,27 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define STACK_SET_CLOSURE_OFFSET(offset, value) \
     STACK_SET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + (offset), (value))
 
+#define FREE_SET_BOOL_INDEX(index, value) \
+    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.bool_value = (value);
+#define FREE_SET_INT_INDEX(index, value) \
+    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.int_value = (value);
+#define FREE_SET_INT64_INDEX(index, value) \
+    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.int64_value = (value);
+#define FREE_SET_DOUBLE_INDEX(index, value) \
+    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.double_value = (value);
+#define FREE_SET_STRING_INDEX(index, value) \
+    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.string_value = (value);
+
+#define FREE_GET_BOOL_INDEX(index) \
+    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.bool_value;
+#define FREE_GET_INT_INDEX(index) \
+    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.int_value;
+#define FREE_GET_INT64_INDEX(index) \
+    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.int64_value;
+#define FREE_GET_DOUBLE_INDEX(index) \
+    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.double_value;
+#define FREE_GET_STRING_INDEX(index) \
+    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.string_value;
 
 #define STACK_COPY_INDEX(dst_index, src_index) \
     (VM_CUR_CO_STACK_DATA[(dst_index)] = VM_CUR_CO_STACK_DATA[(src_index)])
@@ -144,7 +165,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 
 // TODO: 这里的栈空间应该可以指定
-RVM_RuntimeStack* new_runtime_stack() {
+RVM_RuntimeStack*
+new_runtime_stack() {
     RVM_RuntimeStack* stack = (RVM_RuntimeStack*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_RuntimeStack));
     stack->top_index        = 0;
     stack->capacity         = 1024 * 1024; // FIXME: 先开辟一个大的空间
@@ -333,6 +355,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     unsigned int         argument_list_size     = 0;
     unsigned int         caller_stack_offset    = 0;
     unsigned int         return_value_list_size = 0;
+    unsigned int         free_value_index       = 0;
 
     unsigned int         dst_offset             = 0;
     unsigned int         src_offset             = 0;
@@ -743,41 +766,83 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // free value
         case RVM_CODE_POP_FREE_BOOL:
-            // free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            // FREE_SET_BOOL_INDEX(
-            //     free_value_index,
-            //     STACK_GET_BOOL_OFFSET(-1));
-            VM_CUR_CO_STACK_TOP_INDEX -= 1;
-            VM_CUR_CO_PC += 3;
-            break;
-        case RVM_CODE_POP_FREE_INT: {
-            unsigned int free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            bool_value       = STACK_GET_BOOL_OFFSET(-1);
+            FREE_SET_BOOL_INDEX(free_value_index, (RVM_Bool)((int)bool_value));
 
-            // 后续抽象出宏
-            RVM_Closure* c_closure                                        = VM_CUR_CO_CALLINFO->curr_closure;
-            c_closure->free_value_list[free_value_index].u.p->u.int_value = STACK_GET_INT_OFFSET(-1);
-        };
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             VM_CUR_CO_PC += 3;
             break;
+        case RVM_CODE_POP_FREE_INT:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            int_value        = STACK_GET_INT_OFFSET(-1);
+            FREE_SET_INT_INDEX(free_value_index, int_value);
+
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
+            VM_CUR_CO_PC += 3;
+            break;
+        case RVM_CODE_POP_FREE_INT64:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            int64_value      = STACK_GET_INT64_OFFSET(-1);
+            FREE_SET_INT64_INDEX(free_value_index, int64_value);
+
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
+            VM_CUR_CO_PC += 3;
+            break;
+        case RVM_CODE_POP_FREE_DOUBLE:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            double_value     = STACK_GET_DOUBLE_OFFSET(-1);
+            FREE_SET_DOUBLE_INDEX(free_value_index, double_value);
+
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
+            VM_CUR_CO_PC += 3;
+            break;
+        case RVM_CODE_POP_FREE_STRING:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            string_value     = STACK_GET_STRING_OFFSET(-1);
+            FREE_SET_STRING_INDEX(free_value_index, string_value);
+
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
+            VM_CUR_CO_PC += 3;
+            break;
+
         case RVM_CODE_PUSH_FREE_BOOL:
-            // 获取当前的 closure 的 free-value list
-            // 然后通过index定位
-            // free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            // FREE_GET_BOOL_INDEX(free_value_index);
-            // STACK_SET_BOOL_OFFSET(0,
-            //                       STACK_GET_BOOL_INDEX(VM_CUR_CO_CSB + caller_stack_offset));
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            bool_value       = FREE_GET_BOOL_INDEX(free_value_index);
+            STACK_SET_BOOL_OFFSET(0, (RVM_Bool)((int)bool_value));
+
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
-        case RVM_CODE_PUSH_FREE_INT: {
-            unsigned int free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+        case RVM_CODE_PUSH_FREE_INT:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            int_value        = FREE_GET_INT_INDEX(free_value_index);
+            STACK_SET_INT_OFFSET(0, int_value);
 
-            // 后续抽象出宏
-            RVM_Closure* c_closure = VM_CUR_CO_CALLINFO->curr_closure;
-            STACK_SET_INT_OFFSET(0,
-                                 c_closure->free_value_list[free_value_index].u.p->u.int_value);
-        }
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 3;
+            break;
+        case RVM_CODE_PUSH_FREE_INT64:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            int64_value      = FREE_GET_INT64_INDEX(free_value_index);
+            STACK_SET_INT64_OFFSET(0, int64_value);
+
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 3;
+            break;
+        case RVM_CODE_PUSH_FREE_DOUBLE:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            double_value     = FREE_GET_DOUBLE_INDEX(free_value_index);
+            STACK_SET_DOUBLE_OFFSET(0, double_value);
+
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 3;
+            break;
+        case RVM_CODE_PUSH_FREE_STRING:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            string_value     = FREE_GET_STRING_INDEX(free_value_index);
+            STACK_SET_STRING_OFFSET(0, string_value);
+
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
@@ -3276,7 +3341,9 @@ function return_closure() -> (FuncType) {
 
     // FIXME: 目前妥协的实现方式
     // 不能重复 close closure
-    unsigned int                     local_var_count = VM_CUR_CO_STACK_TOP_INDEX - VM_CUR_CO_CSB;
+    unsigned int local_var_count = VM_CUR_CO_STACK_TOP_INDEX - VM_CUR_CO_CSB;
+
+    // FIXME: 最后不要用map, 感觉会浪费空间
     std::unordered_set<RVM_Closure*> closed_closures;
 
     for (unsigned int i = 0; i < local_var_count; i++) {

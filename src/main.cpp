@@ -11,6 +11,7 @@
 #include <sys/select.h>
 
 
+// B| 为加粗开始  |B 为加粗结束
 std::string command_help_message = R"(
 B|Ring Command Usage:|B
 

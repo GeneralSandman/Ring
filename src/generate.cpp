@@ -2699,6 +2699,8 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STATIC_INT64
         // RVM_CODE_POP_STACK_INT64
         // RVM_CODE_PUSH_STACK_INT64
+        // RVM_CODE_POP_FREE_INT64
+        // RVM_CODE_PUSH_FREE_INT64
         // RVM_CODE_POP_FIELD_INT64
         // RVM_CODE_PUSH_FIELD_INT64
         return RVM_Opcode(opcode + 2);
@@ -2708,6 +2710,8 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STATIC_DOUBLE
         // RVM_CODE_POP_STACK_DOUBLE
         // RVM_CODE_PUSH_STACK_DOUBLE
+        // RVM_CODE_POP_FREE_DOUBLE
+        // RVM_CODE_PUSH_FREE_DOUBLE
         // RVM_CODE_POP_FIELD_DOUBLE
         // RVM_CODE_PUSH_FIELD_DOUBLE
         return RVM_Opcode(opcode + 3);
@@ -2717,6 +2721,8 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STATIC_STRING
         // RVM_CODE_POP_STACK_STRING
         // RVM_CODE_PUSH_STACK_STRING
+        // RVM_CODE_POP_FREE_STRING
+        // RVM_CODE_PUSH_FREE_STRING
         // RVM_CODE_POP_FIELD_STRING
         // RVM_CODE_PUSH_FIELD_STRING
         return RVM_Opcode(opcode + 4);
