@@ -64,7 +64,7 @@ typedef struct MethodCallExpression         MethodCallExpression;
 typedef struct AssignExpression             AssignExpression;
 typedef struct FieldInitExpression          FieldInitExpression;
 typedef struct LaunchExpression             LaunchExpression;
-typedef struct ClosureExpression            ClosureExpression;
+typedef struct AnonymousFuncExpression      AnonymousFuncExpression;
 typedef struct ImmediateInvokFuncExpression ImmediateInvokFuncExpression;
 typedef struct IdentifierExpression         IdentifierExpression;
 
@@ -72,7 +72,7 @@ typedef struct ArgumentList                 ArgumentList;
 typedef struct Parameter                    Parameter;
 typedef struct Identifier                   Identifier;
 typedef struct FunctionTuple                FunctionTuple;
-typedef struct Closure                      Closure;
+typedef struct AnonymousFunc                AnonymousFunc;
 typedef struct FreeValueDesc                FreeValueDesc;
 typedef struct Function                     Function;
 typedef struct Block                        Block;
@@ -1269,7 +1269,7 @@ typedef enum {
     EXPRESSION_TYPE_CAST,
 
     EXPRESSION_TYPE_LAUNCH,
-    EXPRESSION_TYPE_CLOSURE, // TODO: 这个名字是不是应该该一下
+    EXPRESSION_TYPE_ANONYMOUS_FUNC, // TODO: 这个名字是不是应该该一下
     EXPRESSION_TYPE_IIFE,
 
 } ExpressionType;
@@ -1491,7 +1491,7 @@ struct Expression {
         MemberExpression*             member_expression;
         FieldInitExpression*          field_init_expression;
         LaunchExpression*             launch_expression;
-        ClosureExpression*            closure_expression;
+        AnonymousFuncExpression*      anonymous_func_expression;
         ImmediateInvokFuncExpression* iife;
     } u;
 
@@ -1708,18 +1708,18 @@ struct LaunchExpression {
     } u;
 };
 
-struct ClosureExpression {
-    unsigned int line_number;
+struct AnonymousFuncExpression {
+    unsigned int   line_number;
 
-    Closure*     closure_definition;
+    AnonymousFunc* anonymous_func;
 };
 
 struct ImmediateInvokFuncExpression {
-    unsigned int  line_number;
+    unsigned int   line_number;
 
-    Closure*      closure_definition;
-    unsigned int  argument_list_size;
-    ArgumentList* argument_list;
+    AnonymousFunc* anonymous_func;
+    unsigned int   argument_list_size;
+    ArgumentList*  argument_list;
 };
 
 struct BinaryExpression {
@@ -1757,6 +1757,8 @@ struct Parameter {
 struct VarDecl {
     unsigned int   line_number;
 
+    Block*         blong_block;
+
     TypeSpecifier* type_specifier;
     char*          identifier;
     int            is_const;
@@ -1793,8 +1795,8 @@ block 中的 declaration 是不是考虑应该放在外边
 为什么：局部变量的初始化时机不太正确。因为局部量只有在函数调用的时候才进行初始化
 */
 struct Block {
-    unsigned int line_number;
-    // TODO: start_line_number, end_line_number
+    unsigned int   start_line_number;
+    unsigned int   end_line_number;
 
     BlockType      type;
 
@@ -1802,7 +1804,7 @@ struct Block {
     VarDecl*       var_decl_list; // 代码块中定义的局部变量
 
     unsigned int   free_value_size;
-    FreeValueDesc* free_value_list; // 自由变量
+    FreeValueDesc* free_value_list; // 自由变量, 直接或者间接
 
     unsigned int   visable_var_size;
     Variable*      visable_var_list; // 可见的变量, 搜索过的，用于提高fix_ast 的速度
@@ -1834,7 +1836,7 @@ struct FunctionTuple {
     FUNCTION_TUPLE_HEADER;
 };
 
-struct Closure {
+struct AnonymousFunc {
     FUNCTION_TUPLE_HEADER;
 
     // unsigned int   free_value_size;
@@ -1843,10 +1845,10 @@ struct Closure {
 
 struct FreeValueDesc {
     char* identifier;
-    bool  outer_local; // 直接外层函数的局部变量
+    bool  is_curr_local; // 是本层函数定义的局部变量
     union {
-        unsigned int   outer_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
-        FreeValueDesc* outer_free_value;  // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
+        unsigned int   curr_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        FreeValueDesc* outer_free_value; // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
     } u;
 
     unsigned       free_value_index; // UPDATED_BY_FIX_AST
@@ -2644,10 +2646,10 @@ Expression*                   create_expression_launch(LaunchExpressionType    t
                                                        FunctionCallExpression* function_call_expression,
                                                        MethodCallExpression*   method_call_expression);
 
-Expression*                   create_expression_closure_definition(Closure* func);
+Expression*                   create_expression_anonymous_func(AnonymousFunc* func);
 
-Expression*                   create_expression_iife(Closure*      closure,
-                                                     ArgumentList* argument_list);
+Expression*                   create_expression_iife(AnonymousFunc* closure,
+                                                     ArgumentList*  argument_list);
 
 Expression*                   create_expression_binary(ExpressionType type, Expression* left, Expression* right);
 Expression*                   create_expression_unitary(ExpressionType type, Expression* unitary_expression);
@@ -2864,10 +2866,10 @@ void             fix_launch_expression(Expression*       expression,
                                        Block*            block,
                                        FunctionTuple*    func);
 
-void             fix_closure_expression(Expression*        expression,
-                                        ClosureExpression* closure_expression,
-                                        Block*             block,
-                                        FunctionTuple*     func);
+void             fix_anonymous_func_expression(Expression*              expression,
+                                               AnonymousFuncExpression* closure_expression,
+                                               Block*                   block,
+                                               FunctionTuple*           func);
 void             fix_iife_expression(Expression*                   expression,
                                      ImmediateInvokFuncExpression* iife,
                                      Block*                        block,
@@ -2995,10 +2997,10 @@ void              generate_vmcode_from_launch_expression(Package_Executer* execu
                                                          LaunchExpression* launch_expression,
                                                          RVM_OpcodeBuffer* opcode_buffer);
 
-void              deep_copy_closure(RVM_AnonymousFunc* dst, Closure* src);
-void              generate_vmcode_from_closure_expreesion(Package_Executer*  executer,
-                                                          ClosureExpression* closure_expression,
-                                                          RVM_OpcodeBuffer*  opcode_buffer);
+void              deep_copy_closure(RVM_AnonymousFunc* dst, AnonymousFunc* src);
+void              generate_vmcode_from_anonymous_func_expreesion(Package_Executer*        executer,
+                                                                 AnonymousFuncExpression* closure_expression,
+                                                                 RVM_OpcodeBuffer*        opcode_buffer);
 void              generate_vmcode_from_iife_expreesion(Package_Executer*             executer,
                                                        ImmediateInvokFuncExpression* iife,
                                                        RVM_OpcodeBuffer*             opcode_buffer);
@@ -3144,6 +3146,8 @@ int                  rvm_heap_size(Ring_VirtualMachine* rvm);
 RVM_Closure*         new_closure(Ring_VirtualMachine* rvm, RVM_AnonymousFunc* func);
 void                 close_all_closure(Ring_VirtualMachine* rvm, unsigned int return_value_list_size);
 void                 close_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure);
+
+void                 debug_generate_closure_dot_file(RVM_Closure* closure);
 // --------------------
 
 

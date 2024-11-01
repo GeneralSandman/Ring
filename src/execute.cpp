@@ -8,6 +8,7 @@
 
 
 extern int             RING_DEBUG_TRACE_FUNC_BACKTRACE;
+extern int             RING_DEBUG_TRACE_CLOSURE_FREE_VALUE;
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
@@ -3146,6 +3147,7 @@ RVM_String* rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value) {
     string                  = new_string(rvm);
     alloc_size              = init_string(rvm, string, ROUND_UP8(1));
 
+
     if (value) {
         string->length = 4;
         memcpy(string->data, "true", 4);
@@ -3316,6 +3318,13 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm, RVM_AnonymousFunc* func) {
         closure->free_value_list[i].is_open = true;
         closure->free_value_list[i].u.p     = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
     }
+
+    if (RING_DEBUG_TRACE_CLOSURE_FREE_VALUE) {
+#ifdef DEBUG_TRACE_CLOSURE_FREE_VALUE
+        debug_generate_closure_dot_file(closure);
+#endif
+    }
+
     return closure;
 }
 
@@ -3368,9 +3377,16 @@ void close_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure) {
     }
     // printf("[+]close closure, free_value_size:%d\n", closure->free_value_size);
 
+    if (RING_DEBUG_TRACE_CLOSURE_FREE_VALUE) {
+        printf_witch_red("[RING_DEBUG::trace_closure_free_value] +closure:%p\n", closure);
+    }
+
     for (unsigned int i = 0; i < closure->free_value_size; i++) {
         if (closure->free_value_list[i].is_open) {
 
+            if (RING_DEBUG_TRACE_CLOSURE_FREE_VALUE) {
+                printf_witch_red("[RING_DEBUG::trace_closure_free_value] close free_value:%p\n", &(closure->free_value_list[i]));
+            }
             // printf("        close free-value:[%d]\n", i);
 
             // FIXME: 这里只深度copy了 bool/int/int64/double
@@ -3381,4 +3397,41 @@ void close_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure) {
             closure->free_value_list[i].is_open = false;
         }
     }
+}
+
+void debug_generate_closure_dot_file(RVM_Closure* closure) {
+    // 找到所有的closure
+    // closure找到所有的free——value
+    // 生成一个点图
+
+    //
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    char       filename[100];
+    struct tm* t = localtime(&ts.tv_sec);
+    snprintf(filename, sizeof(filename), "tmp/%04d%02d%02d_%02d%02d%02d_%09ld.d2",
+             t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+             t->tm_hour, t->tm_min, t->tm_sec, ts.tv_nsec);
+
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        ring_error_report("open file failed:%s, filename:%s", strerror(errno), filename);
+        exit(1);
+    }
+
+    //
+    for (unsigned int i = 0; i < closure->free_value_size; i++) {
+        RVM_FreeValue* value = &(closure->free_value_list[i]);
+
+        fprintf(file, "Closure(%p) -> FreeValue(%p)\n", closure, value);
+
+        if (value->is_open) {
+            fprintf(file, "FreeValue(%p) -> Open\n", value);
+        }
+    }
+
+
+    //
+    fclose(file);
+    printf("====Generate Dot File====: %s\n", filename);
 }

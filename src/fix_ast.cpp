@@ -181,7 +181,8 @@ Function* create_global_init_func(Package* package) {
     }
 
     Block* block                       = (Block*)mem_alloc(get_front_mem_pool(), sizeof(Block));
-    block->line_number                 = 0;
+    block->start_line_number           = 0;
+    block->end_line_number             = 0;
     block->type                        = BLOCK_TYPE_UNKNOW;
     block->var_decl_list_size          = 0;
     block->var_decl_list               = nullptr;
@@ -356,8 +357,8 @@ BEGIN:
         fix_launch_expression(expression, expression->u.launch_expression, block, func);
         break;
 
-    case EXPRESSION_TYPE_CLOSURE:
-        fix_closure_expression(expression, expression->u.closure_expression, block, func);
+    case EXPRESSION_TYPE_ANONYMOUS_FUNC:
+        fix_anonymous_func_expression(expression, expression->u.anonymous_func_expression, block, func);
         break;
 
     case EXPRESSION_TYPE_IIFE:
@@ -2071,6 +2072,7 @@ void fix_class_method(ClassDefinition* class_definition, MethodMember* method) {
 
     VarDecl*       self_declaration  = (VarDecl*)mem_alloc(get_front_mem_pool(), sizeof(VarDecl));
     self_declaration->line_number    = method->start_line_number;
+    self_declaration->blong_block    = method->block;
     self_declaration->type_specifier = type_specifier;
     self_declaration->identifier     = (char*)"self";
     self_declaration->is_const       = false;
@@ -2459,16 +2461,16 @@ void fix_launch_expression(Expression*       expression,
     EXPRESSION_ADD_CONVERT_TYPE(expression, &int64_type_specifier);
 }
 
-void fix_closure_expression(Expression*        expression,
-                            ClosureExpression* closure_expression,
-                            Block*             block,
-                            FunctionTuple*     func) {
+void fix_anonymous_func_expression(Expression*              expression,
+                                   AnonymousFuncExpression* closure_expression,
+                                   Block*                   block,
+                                   FunctionTuple*           func) {
 
     if (closure_expression == nullptr) {
         return;
     }
 
-    Closure* closure = closure_expression->closure_definition;
+    AnonymousFunc* closure = closure_expression->anonymous_func;
 
     // 这里的实现方式和 fix_function_definition 一样
     FunctionReturnList* return_list = closure->return_list;
@@ -2494,22 +2496,22 @@ void fix_iife_expression(Expression*                   expression,
         return;
     }
 
-    Closure*   closure        = iife->closure_definition;
+    AnonymousFunc* anonymous_func = iife->anonymous_func;
 
-    Parameter* parameter_list = closure->parameter_list;
+    Parameter*     parameter_list = anonymous_func->parameter_list;
     for (; parameter_list != nullptr; parameter_list = parameter_list->next) {
         fix_type_specfier(parameter_list->type_specifier);
     }
 
     // 这里的实现方式和 fix_function_definition 一样
-    FunctionReturnList* return_list = closure->return_list;
+    FunctionReturnList* return_list = anonymous_func->return_list;
     for (; return_list != nullptr; return_list = return_list->next) {
         fix_type_specfier(return_list->type_specifier);
     }
 
-    if (closure->block) {
-        add_parameter_to_declaration(closure->parameter_list, closure->block);
-        fix_statement_list(closure->block->statement_list, closure->block, (FunctionTuple*)closure);
+    if (anonymous_func->block) {
+        add_parameter_to_declaration(anonymous_func->parameter_list, anonymous_func->block);
+        fix_statement_list(anonymous_func->block->statement_list, anonymous_func->block, (FunctionTuple*)anonymous_func);
     }
 
     for (ArgumentList* pos = iife->argument_list;
@@ -2521,7 +2523,7 @@ void fix_iife_expression(Expression*                   expression,
 
     // FIXME: 应该是函数的返回值类型
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-    for (FunctionReturnList* pos = closure->return_list;
+    for (FunctionReturnList* pos = anonymous_func->return_list;
          pos != nullptr;
          pos = pos->next) {
         EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
@@ -2560,6 +2562,7 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
 
         VarDecl* declaration        = (VarDecl*)mem_alloc(get_front_mem_pool(), sizeof(VarDecl));
         declaration->line_number    = pos->line_number;
+        declaration->blong_block    = block;
         declaration->type_specifier = type_specifier;
         declaration->identifier     = pos->identifier;
         declaration->is_const       = 0;
@@ -2713,6 +2716,38 @@ Variable* resolve_variable_recur(Package* package, char* identifier, Block* bloc
         return nullptr;
     }
 
+    // TODO:
+    if (par_var->decl != nullptr) {
+        // printf("-----\n");
+
+        // 定义par_var 的block 需要添加一个free_value, 不能重复
+        Block* par_block = par_var->decl->blong_block;
+
+        bool   duplicate = false;
+
+        for (FreeValueDesc* pos  = par_block->free_value_list;
+             pos != nullptr; pos = pos->next) {
+            if (str_eq(pos->identifier, identifier)) {
+                duplicate = true;
+                break;
+            }
+        }
+
+        if (!duplicate) {
+            // printf("+++\n");
+            FreeValueDesc* free_value      = (FreeValueDesc*)mem_alloc(get_front_mem_pool(), sizeof(FreeValueDesc));
+            free_value->identifier         = identifier;
+            free_value->is_curr_local      = true;
+            free_value->u.curr_local_index = par_var->decl->variable_index;
+            free_value->free_value_index   = par_block->free_value_size;
+            free_value->next               = nullptr;
+
+            // 将这个 FreeValueDesc 添加到 block 的 free_value_list 中
+            par_block->free_value_size++;
+            par_block->free_value_list = free_value_list_add_item(par_block->free_value_list, free_value);
+        }
+    }
+
     // 因为能走到这里的 都是 BLOCK_TYPE_FUNCTION
     // 肯定是 Free_Value
     bool      is_free_value   = true;
@@ -2722,12 +2757,12 @@ Variable* resolve_variable_recur(Package* package, char* identifier, Block* bloc
     variable->is_free_value   = is_free_value;
     variable->free_value_desc = nullptr;
     if (is_free_value) {
-        FreeValueDesc* free_value       = (FreeValueDesc*)mem_alloc(get_front_mem_pool(), sizeof(FreeValueDesc));
-        free_value->identifier          = identifier;
-        free_value->outer_local         = true;
-        free_value->u.outer_local_index = par_var->decl->variable_index;
-        free_value->free_value_index    = block->free_value_size;
-        free_value->next                = nullptr;
+        FreeValueDesc* free_value      = (FreeValueDesc*)mem_alloc(get_front_mem_pool(), sizeof(FreeValueDesc));
+        free_value->identifier         = identifier;
+        free_value->is_curr_local      = true;
+        free_value->u.curr_local_index = par_var->decl->variable_index;
+        free_value->free_value_index   = block->free_value_size;
+        free_value->next               = nullptr;
 
         // 将这个 FreeValueDesc 添加到 block 的 free_value_list 中
         block->free_value_size++;

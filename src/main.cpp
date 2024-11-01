@@ -54,8 +54,9 @@ B|Ring Debug Environment Usage:|B
 
 
 //
-int RING_DEBUG_TRACE_FUNC_BACKTRACE  = 0;
-int RING_DEBUG_TRACE_COROUTINE_SCHED = 0;
+int RING_DEBUG_TRACE_FUNC_BACKTRACE     = 0;
+int RING_DEBUG_TRACE_COROUTINE_SCHED    = 0;
+int RING_DEBUG_TRACE_CLOSURE_FREE_VALUE = 0;
 
 // RING_DEBUG=trace_func_backtrace=1,trace_coroutine_sched=1 ./bin/ring run ./test/050-coroutine/coroutine-002.ring
 void ring_parse_env() {
@@ -82,6 +83,8 @@ void ring_parse_env() {
             RING_DEBUG_TRACE_FUNC_BACKTRACE = 1;
         } else if (str_eq(key.c_str(), "trace_coroutine_sched") && str_eq(value.c_str(), "1")) {
             RING_DEBUG_TRACE_COROUTINE_SCHED = 1;
+        } else if (str_eq(key.c_str(), "trace_closure_free_value") && str_eq(value.c_str(), "1")) {
+            RING_DEBUG_TRACE_CLOSURE_FREE_VALUE = 1;
         }
     }
 }

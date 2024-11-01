@@ -670,7 +670,9 @@ std::string dump_vm_constant(RVM_ConstantPool* constant) {
         return "string(" + std::string(constant->u.string_value) + ")";
         break;
     case CONSTANTPOOL_TYPE_CLOSURE:
-        return "closure()";
+        char buffer[20];
+        snprintf(buffer, sizeof(buffer), "%p", (void*)constant->u.anonymous_func_value);
+        return "closure(" + std::string(buffer) + ")";
         break;
     default:
         // TODO: error-report
@@ -952,7 +954,9 @@ std::string format_rvm_function(Package_Executer* package_executer,
         result += std::string(function->identifier);
     } else {
         // TODO: 这里需要更精确的给出函数名字
-        result += "<closure>";
+        char buffer[20];
+        snprintf(buffer, sizeof(buffer), "%p", (void*)function);
+        result += "<closure " + std::string(buffer) + ">";
     }
     result += "(";
 

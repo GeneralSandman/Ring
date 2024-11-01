@@ -243,11 +243,13 @@ void package_compile(Package* package) {
 
 
 #ifdef DEBUG_COMPILER_SUMMARY
-    package_dump(package);
-    for (PackageUnit* package_unit : package->package_unit_list) {
-        package_unit_dump(package_unit);
+    if (str_eq(package->package_name, "main")) {
+        package_dump(package);
+        for (PackageUnit* package_unit : package->package_unit_list) {
+            package_unit_dump(package_unit);
+        }
+        printf("\n\n");
     }
-    printf("\n\n");
 #endif
 }
 
