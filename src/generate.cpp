@@ -394,9 +394,9 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
         FreeValueDesc* free_value = src->block->free_value_list;
         for (unsigned int i = 0; free_value != nullptr; i++, free_value = free_value->next) {
             // 后续抽象出 deep_copy 方法
-            dst->free_value_list[i].identifier          = free_value->identifier;
-            dst->free_value_list[i].outer_local         = free_value->is_curr_local;
-            dst->free_value_list[i].u.outer_local_index = free_value->u.curr_local_index;
+            dst->free_value_list[i].identifier         = free_value->identifier;
+            dst->free_value_list[i].is_curr_local      = free_value->is_curr_local;
+            dst->free_value_list[i].u.curr_local_index = free_value->u.curr_local_index;
         }
     }
 
@@ -2229,9 +2229,10 @@ void deep_copy_closure(RVM_Function* dst, AnonymousFunc* src) {
     FreeValueDesc* free_value = src->block->free_value_list;
     for (unsigned int i = 0; free_value != nullptr; i++, free_value = free_value->next) {
         // 后续抽象出 deep_copy 方法
-        dst->free_value_list[i].identifier          = free_value->identifier;
-        dst->free_value_list[i].outer_local         = free_value->is_curr_local;
-        dst->free_value_list[i].u.outer_local_index = free_value->u.curr_local_index;
+        dst->free_value_list[i].identifier             = free_value->identifier;
+        dst->free_value_list[i].is_curr_local          = free_value->is_curr_local;
+        dst->free_value_list[i].u.curr_local_index     = free_value->u.curr_local_index;
+        dst->free_value_list[i].u.out_free_value_index = free_value->u.out_free_value_index;
     }
 }
 

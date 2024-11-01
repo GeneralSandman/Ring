@@ -578,10 +578,10 @@ struct DeriveFunction {
 
 
 struct RVM_Function {
-    std::string        source_file;       /*ring source file*/
-    unsigned int       start_line_number; /*start line no in ring source file*/
-    unsigned int       end_line_number;   /*end   line no in ring source file*/
-    RingFileStat*      ring_file_stat;    /*ring source file stat*/
+    std::string        source_file;
+    unsigned int       start_line_number;
+    unsigned int       end_line_number;
+    RingFileStat*      ring_file_stat;
 
     unsigned int       parameter_size;
     RVM_Parameter*     parameter_list;
@@ -589,6 +589,9 @@ struct RVM_Function {
     RVM_ReturnValue*   return_value_list;
     unsigned int       local_variable_size;
     RVM_LocalVariable* local_variable_list;
+    unsigned int       free_value_size;
+    RVM_FreeValueDesc* free_value_list;
+
     unsigned int       estimate_runtime_stack_capacity;
 
     char*              identifier;
@@ -597,9 +600,6 @@ struct RVM_Function {
         NativeFunction* native_func;
         DeriveFunction* derive_func;
     } u;
-
-    unsigned int       free_value_size;
-    RVM_FreeValueDesc* free_value_list;
 };
 
 
@@ -611,9 +611,10 @@ struct RVM_Closure {
 
 struct RVM_FreeValueDesc {
     const char* identifier;
-    bool        outer_local;
+    bool        is_curr_local;
     union {
-        unsigned int outer_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        unsigned int curr_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        unsigned int out_free_value_index;
         // FreeValueDesc* outer_free_value;  // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
     } u;
     // 如果引用的直接外围函数定义的局部变量
@@ -623,17 +624,27 @@ struct RVM_FreeValueDesc {
     // 3. 是否是直接外层函数的局部变量
 };
 
+typedef struct RVM_FreeValue_Pool RVM_FreeValue_Pool;
+struct RVM_FreeValue_Pool {
+    unsigned int size;
+    RVM_Value*   list;
+};
+
 struct RVM_FreeValue {
-    bool is_open; // open/close
+    bool is_recur; // 需要递归
     union {
-        RVM_Value* p;
+        RVM_FreeValue* recur; // is_recur == true
+        RVM_Value*     p;     // is_recur == false
         // 可指向 open/close value
         // open时，指向栈空间
         // close时，指向c_value，是一个拷贝
     } u;
 
+    // is_recur == false
+    bool      is_open; // open/close
     RVM_Value c_value; // closed value
 };
+
 
 struct RVM_Field {
     char*              identifier;
@@ -1148,10 +1159,12 @@ typedef enum {
 struct RVM_CallInfo {
     RVM_ClassObject* caller_object;   // TODO: 考虑是否有必要删除
     RVM_Function*    caller_function; // TODO: 考虑是否有必要删除
+    RVM_Closure*     caller_closure;  // TODO:
     unsigned int     caller_stack_base;
 
     RVM_ClassObject* callee_object;
     RVM_Function*    callee_function;
+    RVM_Closure*     callee_closure;
     unsigned int     callee_argument_size; // 函数调用的参数数量，可变参数
 
     RVM_Closure*     curr_closure;
@@ -1820,12 +1833,13 @@ struct AnonymousFunc {
     // FreeValueDesc* free_value_list;
 };
 
+// TODO:
 struct FreeValueDesc {
     char* identifier;
     bool  is_curr_local; // 是本层函数定义的局部变量
     union {
-        unsigned int   curr_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
-        FreeValueDesc* outer_free_value; // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
+        unsigned int curr_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        unsigned int out_free_value_index;
     } u;
 
     unsigned       free_value_index; // UPDATED_BY_FIX_AST
@@ -3030,15 +3044,14 @@ int                  ring_execute_vm_code(Ring_VirtualMachine* rvm);
 
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
-                                            RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                                            RVM_ClassObject* callee_object, RVM_Function* callee_function,
-                                            RVM_Closure* closure,
+                                            RVM_ClassObject** caller_object, RVM_Function** caller_function, RVM_Closure** caller_closure,
+                                            RVM_ClassObject* callee_object, RVM_Function* callee_function, RVM_Closure* callee_closure,
                                             unsigned int argument_list_size);
 void                 derive_function_return(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
                                             unsigned int return_value_list_size);
 void                 derive_function_finish(Ring_VirtualMachine* rvm,
-                                            RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                                            RVM_ClassObject** caller_object, RVM_Function** caller_function, RVM_Closure** caller_closure,
                                             RVM_Function* callee_function,
                                             unsigned int  return_value_list_size);
 RVM_CallInfo*        store_callinfo(RVM_CallInfo* head, RVM_CallInfo* call_info);
@@ -3120,9 +3133,9 @@ void                 rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_G
 
 int                  rvm_heap_size(Ring_VirtualMachine* rvm);
 
-RVM_Closure*         new_closure(Ring_VirtualMachine* rvm, RVM_Function* func);
-void                 close_all_closure(Ring_VirtualMachine* rvm, unsigned int return_value_list_size);
-void                 close_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure);
+RVM_Closure*         new_closure(Ring_VirtualMachine* rvm,
+                                 RVM_Function* caller_function, RVM_Closure* caller_closure,
+                                 RVM_Function* func);
 
 void                 debug_generate_closure_dot_file(RVM_Closure* closure);
 // --------------------

@@ -2717,10 +2717,13 @@ Variable* resolve_variable_recur(Package* package, char* identifier, Block* bloc
     }
 
     // TODO:
+    // TODO:_______
     if (par_var->decl != nullptr) {
+        // 定义par_var 的block 需要添加一个free_value, 不能重复
+        // par_block 所在的function 在return的时候, 要负责关闭所有的FreeValueAgent
+
         // printf("-----\n");
 
-        // 定义par_var 的block 需要添加一个free_value, 不能重复
         Block* par_block = par_var->decl->blong_block;
 
         bool   duplicate = false;
@@ -2737,37 +2740,41 @@ Variable* resolve_variable_recur(Package* package, char* identifier, Block* bloc
             // printf("+++\n");
             FreeValueDesc* free_value      = (FreeValueDesc*)mem_alloc(get_front_mem_pool(), sizeof(FreeValueDesc));
             free_value->identifier         = identifier;
-            free_value->is_curr_local      = true;
-            free_value->u.curr_local_index = par_var->decl->variable_index;
+            free_value->is_curr_local      = true;                          // 这里很关键
+            free_value->u.curr_local_index = par_var->decl->variable_index; // 这里很关键
             free_value->free_value_index   = par_block->free_value_size;
             free_value->next               = nullptr;
 
             // 将这个 FreeValueDesc 添加到 block 的 free_value_list 中
             par_block->free_value_size++;
             par_block->free_value_list = free_value_list_add_item(par_block->free_value_list, free_value);
+
+            par_var->free_value_desc   = free_value;
         }
     }
 
     // 因为能走到这里的 都是 BLOCK_TYPE_FUNCTION
     // 肯定是 Free_Value
-    bool      is_free_value   = true;
+    bool is_free_value = true;
+
+    assert(par_var->free_value_desc != nullptr);
+
 
     Variable* variable        = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
     variable->decl            = par_var->decl;
     variable->is_free_value   = is_free_value;
     variable->free_value_desc = nullptr;
     if (is_free_value) {
-        FreeValueDesc* free_value      = (FreeValueDesc*)mem_alloc(get_front_mem_pool(), sizeof(FreeValueDesc));
-        free_value->identifier         = identifier;
-        free_value->is_curr_local      = true;
-        free_value->u.curr_local_index = par_var->decl->variable_index;
-        free_value->free_value_index   = block->free_value_size;
-        free_value->next               = nullptr;
+        FreeValueDesc* free_value          = (FreeValueDesc*)mem_alloc(get_front_mem_pool(), sizeof(FreeValueDesc));
+        free_value->identifier             = identifier;
+        free_value->is_curr_local          = false;                                      // 这里很关键
+        free_value->u.out_free_value_index = par_var->free_value_desc->free_value_index; // 这里很关键
+        free_value->free_value_index       = block->free_value_size;
+        free_value->next                   = nullptr;
 
         // 将这个 FreeValueDesc 添加到 block 的 free_value_list 中
         block->free_value_size++;
         block->free_value_list    = free_value_list_add_item(block->free_value_list, free_value);
-
 
         variable->free_value_desc = free_value;
     }

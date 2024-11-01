@@ -544,10 +544,15 @@ void dump_vm_function(Package_Executer*    package_executer,
     }
 
     // 4. free value
-    printf("+FreeValue:        %d\n", function->free_value_size);
+    printf("+FreeValue:        %u\n", function->free_value_size);
     for (unsigned int i = 0; i < function->free_value_size; i++) {
-        printf(" ├──%-20s\n",
-               function->free_value_list[i].identifier);
+        printf(" ├──[%u]%-20s %u %u\n",
+               i,
+               function->free_value_list[i].identifier,
+               function->free_value_list[i].is_curr_local,
+               function->free_value_list[i].is_curr_local ?
+                   function->free_value_list[i].u.curr_local_index :
+                   function->free_value_list[i].u.out_free_value_index);
     }
 
     printf("+Instructions:\n");
