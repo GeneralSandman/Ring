@@ -370,7 +370,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Array*           array_value            = nullptr;
     RVM_Array*           array_c_value          = nullptr;
     RVM_Closure*         closure_value          = nullptr;
-    RVM_AnonymousFunc*   anonymous_func         = nullptr;
+    RVM_Function*        anonymous_func         = nullptr;
 
     RVM_ClassDefinition* rvm_class_definition   = nullptr;
     RingCoroutine*       new_coroutine          = nullptr;
@@ -1583,8 +1583,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             }
 
             invoke_derive_function(rvm,
-                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
-                                   nullptr, (RVM_Function_Tuple*)closure_value->anonymous_func,
+                                   &caller_class_ob, (RVM_Function**)&caller_function,
+                                   nullptr, (RVM_Function*)closure_value->anonymous_func,
                                    closure_value,
                                    argument_list_size);
 
@@ -1617,8 +1617,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             invoke_derive_function(rvm,
-                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
-                                   nullptr, (RVM_Function_Tuple*)callee_function,
+                                   &caller_class_ob, (RVM_Function**)&caller_function,
+                                   nullptr, (RVM_Function*)callee_function,
                                    nullptr,
                                    argument_list_size);
 
@@ -1638,8 +1638,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             callee_function = callee_method->rvm_function;
 
             invoke_derive_function(rvm,
-                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
-                                   callee_class_ob, (RVM_Function_Tuple*)callee_function,
+                                   &caller_class_ob, &caller_function,
+                                   callee_class_ob, callee_function,
                                    nullptr,
                                    argument_list_size);
             break;
@@ -1653,7 +1653,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // 依次对他们执行关闭操作
             close_all_closure(rvm, return_value_list_size);
             derive_function_finish(rvm,
-                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
+                                   &caller_class_ob, &caller_function,
                                    nullptr,
                                    return_value_list_size);
             // VM_CUR_CO_PC += 1;
@@ -2016,8 +2016,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             new_coroutine = launch_coroutine(rvm,
-                                             &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
-                                             nullptr, (RVM_Function_Tuple*)callee_function,
+                                             &caller_class_ob, (RVM_Function**)&caller_function,
+                                             nullptr, (RVM_Function*)callee_function,
                                              argument_list_size);
             // destory arguments after copy it to new coroutine
             VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
@@ -2043,8 +2043,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             new_coroutine = launch_coroutine(rvm,
-                                             &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
-                                             callee_class_ob, (RVM_Function_Tuple*)callee_function,
+                                             &caller_class_ob, &caller_function,
+                                             callee_class_ob, callee_function,
                                              argument_list_size);
             // destory arguments after copy it to new coroutine
             VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
@@ -2060,7 +2060,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             res = resume_coroutine(rvm,
                                    co_id,
-                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
+                                   &caller_class_ob, &caller_function,
                                    nullptr, nullptr);
             if (res != 0) {
                 VM_CUR_CO_PC += 1;
@@ -2157,8 +2157,8 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
  *
  */
 void invoke_derive_function(Ring_VirtualMachine* rvm,
-                            RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                            RVM_ClassObject* callee_object, RVM_Function_Tuple* callee_function,
+                            RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                            RVM_ClassObject* callee_object, RVM_Function* callee_function,
                             RVM_Closure* closure,
                             unsigned int argument_list_size) {
 
@@ -2223,9 +2223,9 @@ void derive_function_return(Ring_VirtualMachine* rvm,
  *
  * */
 void derive_function_finish(Ring_VirtualMachine* rvm,
-                            RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                            RVM_Function_Tuple* callee_function,
-                            unsigned int        return_value_list_size) {
+                            RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                            RVM_Function* callee_function,
+                            unsigned int  return_value_list_size) {
 
     // FIXME:
     // 不应该直接操作 VM_CUR_CO_STACK_TOP_INDEX
@@ -2357,7 +2357,7 @@ RVM_CallInfo* restore_callinfo(RVM_CallInfo** head_) {
  */
 void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                          RVM_ClassObject*     callee_object,
-                                         RVM_Function_Tuple*  function,
+                                         RVM_Function*        function,
                                          unsigned int         argument_list_size) {
 
     RVM_TypeSpecifier*   type_specifier          = nullptr;
@@ -3303,7 +3303,7 @@ int rvm_heap_size(Ring_VirtualMachine* rvm) {
 }
 
 
-RVM_Closure* new_closure(Ring_VirtualMachine* rvm, RVM_AnonymousFunc* func) {
+RVM_Closure* new_closure(Ring_VirtualMachine* rvm, RVM_Function* func) {
     // FIXME: 需要分配在堆上
     RVM_Closure* closure     = (RVM_Closure*)mem_alloc(rvm->meta_pool, sizeof(RVM_Closure));
     closure->anonymous_func  = func;

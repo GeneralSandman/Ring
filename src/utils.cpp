@@ -688,7 +688,7 @@ std::string dump_vm_constant(RVM_ConstantPool* constant) {
  * binary search
  * 单调性可查看 RVM_SourceCodeLineMap
  */
-unsigned int get_source_line_number_by_pc(RVM_Function_Tuple* function, unsigned int pc) {
+unsigned int get_source_line_number_by_pc(RVM_Function* function, unsigned int pc) {
     DeriveFunction* derive_function = function->u.derive_func;
 
     unsigned int    left            = 0;
