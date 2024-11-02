@@ -555,6 +555,9 @@ void dump_vm_function(Package_Executer*    package_executer,
                    function->free_value_list[i].u.out_free_value_index);
     }
 
+    printf("\n");
+    return;
+
     printf("+Instructions:\n");
     printf(" ├──%-8s%-30s%-20s%-18s\n",
            "*Num", "*Instruction", "*Operand", "*SourceLineNum");

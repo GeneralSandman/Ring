@@ -1604,8 +1604,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
-                                   nullptr, closure_value->anonymous_func,
-                                   closure_value,
+                                   nullptr, closure_value->anonymous_func, closure_value,
                                    argument_list_size);
 
             break;
@@ -2244,21 +2243,44 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
             } else {
                 // 其实走不到这个逻辑
                 assert(caller_closure != nullptr);
-                unsigned int index                   = callee_function->free_value_list[i].u.out_free_value_index;
-
-                closure->free_value_list[i].is_recur = true;
+                unsigned int index = callee_function->free_value_list[i].u.out_free_value_index;
 
                 // 通过调用链向上递归查找, 知道找到直接指向的agent
                 RVM_FreeValue* parent = &((*caller_closure)->free_value_list[index]);
                 while (parent->is_recur) {
                     parent = parent->u.recur;
                 }
-                closure->free_value_list[i].u.recur = parent;
+                closure->free_value_list[i].is_recur = true;
+                closure->free_value_list[i].u.recur  = parent;
             }
         }
 
         callee_closure = closure;
+
+        if (RING_DEBUG_TRACE_CLOSURE_FREE_VALUE) {
+#ifdef DEBUG_TRACE_CLOSURE_FREE_VALUE
+            debug_generate_closure_dot_file(closure);
+#endif
+        }
     }
+
+    // FIXME: 需要优化这种写法
+    // 需要重新绑定值
+    if (callee_closure != nullptr) {
+
+        for (unsigned int i = 0; i < callee_function->free_value_size; i++) {
+            // 需要重新绑定值
+            if (callee_function->free_value_list[i].is_curr_local) {
+                unsigned int index                          = callee_function->free_value_list[i].u.curr_local_index;
+
+                callee_closure->free_value_list[i].is_recur = false;
+                callee_closure->free_value_list[i].u.p      = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
+                callee_closure->free_value_list[i].is_open  = true;
+                callee_closure->free_value_list[i].c_value  = RVM_Value{};
+            }
+        }
+    }
+
     callinfo->callee_closure = callee_closure;
 
     // TODO:
@@ -2348,6 +2370,12 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
                 closure->free_value_list[i].u.p     = &(closure->free_value_list[i].c_value);
                 closure->free_value_list[i].is_open = false;
             }
+        }
+
+        if (RING_DEBUG_TRACE_CLOSURE_FREE_VALUE) {
+#ifdef DEBUG_TRACE_CLOSURE_FREE_VALUE
+            debug_generate_closure_dot_file(closure);
+#endif
         }
     }
 
@@ -3408,6 +3436,7 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
         // TODO: 当前只支持直接外围函数的局部变量 作为FreeValue
 
         if (callee_function->free_value_list[i].is_curr_local) {
+            // FIXME: 这里有问题  VM_CUR_CO_CSB 不正确
             unsigned int index                   = callee_function->free_value_list[i].u.curr_local_index;
 
             closure->free_value_list[i].is_recur = false;
@@ -3419,14 +3448,13 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
             unsigned int index = callee_function->free_value_list[i].u.out_free_value_index;
             // printf("out_free_value_index:%u\n", index);
 
-            closure->free_value_list[i].is_recur = true;
-
             // 通过调用链向上递归查找, 知道找到直接指向的agent
             RVM_FreeValue* parent = &(caller_closure->free_value_list[index]);
             while (parent->is_recur) {
                 parent = parent->u.recur;
             }
-            closure->free_value_list[i].u.recur = parent;
+            closure->free_value_list[i].is_recur = true;
+            closure->free_value_list[i].u.recur  = parent;
         }
     }
 
@@ -3437,42 +3465,4 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
     }
 
     return closure;
-}
-
-
-void debug_generate_closure_dot_file(RVM_Closure* closure) {
-    // 找到所有的closure
-    // closure找到所有的free——value
-    // 生成一个点图
-
-    //
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    char       filename[100];
-    struct tm* t = localtime(&ts.tv_sec);
-    snprintf(filename, sizeof(filename), "tmp/%04d%02d%02d_%02d%02d%02d_%09ld.d2",
-             t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
-             t->tm_hour, t->tm_min, t->tm_sec, ts.tv_nsec);
-
-    FILE* file = fopen(filename, "w");
-    if (file == NULL) {
-        ring_error_report("open file failed:%s, filename:%s", strerror(errno), filename);
-        exit(1);
-    }
-
-    //
-    for (unsigned int i = 0; i < closure->free_value_size; i++) {
-        RVM_FreeValue* value = &(closure->free_value_list[i]);
-
-        fprintf(file, "Closure(%p) -> FreeValue(%p)\n", closure, value);
-
-        if (value->is_open) {
-            fprintf(file, "FreeValue(%p) -> Open\n", value);
-        }
-    }
-
-
-    //
-    fclose(file);
-    printf("====Generate Dot File====: %s\n", filename);
 }

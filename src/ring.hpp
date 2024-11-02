@@ -3137,7 +3137,6 @@ RVM_Closure*         new_closure(Ring_VirtualMachine* rvm,
                                  RVM_Function* caller_function, RVM_Closure* caller_closure,
                                  RVM_Function* func);
 
-void                 debug_generate_closure_dot_file(RVM_Closure* closure);
 // --------------------
 
 
@@ -3358,6 +3357,14 @@ char*   rdb_input_hints(const char* buf, int* color, int* bold);
 int       debug_rvm_interactive(Ring_VirtualMachine* rvm, RVM_Function* function, RVM_Byte* code_list, unsigned int code_size, unsigned int pc, unsigned int caller_stack_base);
 int       vm_debugger_cli(Ring_VirtualMachine* rvm);
 VM_DB_Arg vm_db_parse_command(const char* line);
+// --------------------
+
+/* --------------------
+ * debug-free-value.cpp
+ * function definition
+ *
+ */
+void debug_generate_closure_dot_file(RVM_Closure* closure);
 // --------------------
 
 
