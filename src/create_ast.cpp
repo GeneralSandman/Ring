@@ -216,23 +216,23 @@ Expression* create_expression_launch(LaunchExpressionType    type,
     return expression;
 }
 
-Expression* create_expression_closure_definition(Closure* func) {
+Expression* create_expression_anonymous_func(AnonymousFunc* func) {
 
-    ClosureExpression* closure       = (ClosureExpression*)mem_alloc(get_front_mem_pool(), sizeof(ClosureExpression));
-    closure->line_number             = package_unit_get_line_number();
-    closure->closure_definition      = func;
+    AnonymousFuncExpression* anony_func     = (AnonymousFuncExpression*)mem_alloc(get_front_mem_pool(), sizeof(AnonymousFuncExpression));
+    anony_func->line_number                 = package_unit_get_line_number();
+    anony_func->anonymous_func              = func;
 
-    Expression* expression           = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
-    expression->line_number          = package_unit_get_line_number();
-    expression->convert_type         = nullptr; // UPDATED_BY_FIX_AST
-    expression->type                 = EXPRESSION_TYPE_CLOSURE;
-    expression->u.closure_expression = closure;
+    Expression* expression                  = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
+    expression->line_number                 = package_unit_get_line_number();
+    expression->convert_type                = nullptr; // UPDATED_BY_FIX_AST
+    expression->type                        = EXPRESSION_TYPE_ANONYMOUS_FUNC;
+    expression->u.anonymous_func_expression = anony_func;
 
     return expression;
 }
 
-Expression* create_expression_iife(Closure*      closure,
-                                   ArgumentList* argument_list) {
+Expression* create_expression_iife(AnonymousFunc* anony_func,
+                                   ArgumentList*  argument_list) {
 
     unsigned int argument_list_size = 0;
     for (ArgumentList* pos = argument_list; pos != nullptr; pos = pos->next) {
@@ -242,7 +242,7 @@ Expression* create_expression_iife(Closure*      closure,
     iife->line_number                  = package_unit_get_line_number();
     iife->argument_list_size           = argument_list_size;
     iife->argument_list                = argument_list;
-    iife->closure_definition           = closure;
+    iife->anonymous_func               = anony_func;
 
     Expression* expression             = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number            = package_unit_get_line_number();
@@ -1054,7 +1054,8 @@ Block* start_new_block() {
 
 
     Block* block                       = (Block*)mem_alloc(get_front_mem_pool(), sizeof(Block));
-    block->line_number                 = package_unit_get_line_number();
+    block->start_line_number           = package_unit_get_line_number();
+    block->end_line_number             = package_unit_get_line_number();
     block->type                        = BLOCK_TYPE_UNKNOW;
     block->var_decl_list_size          = 0;
     block->var_decl_list               = nullptr;
@@ -1073,7 +1074,9 @@ Block* finish_block(Block* block, Statement* statement_list) {
     debug_ast_info_with_yellow("\t");
     assert(block == get_package_unit()->current_block);
 
-    block->statement_list = statement_list;
+    block->end_line_number = package_unit_get_line_number();
+
+    block->statement_list  = statement_list;
     for (Statement* pos = statement_list; pos; pos = pos->next) {
         block->statement_list_size++;
     }
@@ -1294,6 +1297,7 @@ VarDecl* create_declaration(TypeSpecifier* type, char* identifier, Expression* i
 
     VarDecl* declaration        = (VarDecl*)mem_alloc(get_front_mem_pool(), sizeof(VarDecl));
     declaration->line_number    = package_unit_get_line_number();
+    declaration->blong_block    = get_package_unit()->current_block;
     declaration->type_specifier = type;
     declaration->identifier     = identifier;
     declaration->is_const       = 0;

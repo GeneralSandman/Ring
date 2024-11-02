@@ -106,7 +106,9 @@ void ring_generate_vm_code(Package* package, Package_Executer* package_executer)
     add_top_level_code(package, package_executer);
 
 #ifdef DEBUG_GENERATE_SUMMARY
-    package_executer_dump(package_executer);
+    if (str_eq(package->package_name, "main")) {
+        package_executer_dump(package_executer);
+    }
 #endif
 }
 
@@ -320,9 +322,23 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
     if (src->type == FUNCTION_TYPE_NATIVE) {
         dst->type                = RVM_FUNCTION_TYPE_NATIVE;
         dst->parameter_size      = src->parameter_list_size;
-        dst->parameter_list      = nullptr; // TODO:
+        dst->parameter_list      = (RVM_Parameter*)mem_alloc(NULL_MEM_POOL,
+                                                             sizeof(RVM_Parameter) * dst->parameter_size);
         dst->local_variable_size = 0;
         dst->local_variable_list = nullptr; // TODO:
+
+        // deep copy function parameters
+        Parameter* param = src->parameter_list;
+        for (unsigned int i = 0;
+             param != nullptr;
+             param = param->next, i++) {
+            dst->parameter_list[i].identifier     = param->identifier;
+            dst->parameter_list[i].is_variadic    = param->is_variadic;
+            dst->parameter_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                                  sizeof(RVM_TypeSpecifier));
+
+            type_specifier_deep_copy(dst->parameter_list[i].type_specifier, param->type_specifier);
+        }
     } else if (src->type == FUNCTION_TYPE_DERIVE) {
         dst->type                = RVM_FUNCTION_TYPE_DERIVE;
 
@@ -338,7 +354,6 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
         dst->u.derive_func       = (DeriveFunction*)mem_alloc(NULL_MEM_POOL, sizeof(DeriveFunction));
 
         // deep copy function parameters
-
         Parameter* param = src->parameter_list;
         for (unsigned int i = 0;
              param != nullptr;
@@ -371,9 +386,21 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
 
             type_specifier_deep_copy(dst->local_variable_list[i].type_specifier, pos->type_specifier);
         }
+
+        dst->free_value_size      = src->block->free_value_size;
+        dst->free_value_list      = (RVM_FreeValueDesc*)mem_alloc(NULL_MEM_POOL,
+                                                                  dst->free_value_size * sizeof(RVM_FreeValueDesc));
+
+        FreeValueDesc* free_value = src->block->free_value_list;
+        for (unsigned int i = 0; free_value != nullptr; i++, free_value = free_value->next) {
+            // 后续抽象出 deep_copy 方法
+            dst->free_value_list[i].identifier         = free_value->identifier;
+            dst->free_value_list[i].is_curr_local      = free_value->is_curr_local;
+            dst->free_value_list[i].u.curr_local_index = free_value->u.curr_local_index;
+        }
     }
 
-    generate_code_from_function_definition(executer, (RVM_Function_Tuple*)dst, (FunctionTuple*)src);
+    generate_code_from_function_definition(executer, dst, (FunctionTuple*)src);
 
     dst->estimate_runtime_stack_capacity = 0;
 }
@@ -512,8 +539,8 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
     executer->bootloader_code_size = opcode_buffer->code_size;
 }
 
-void generate_code_from_function_definition(Package_Executer*   executer,
-                                            RVM_Function_Tuple* dst, FunctionTuple* src) {
+void generate_code_from_function_definition(Package_Executer* executer,
+                                            RVM_Function* dst, FunctionTuple* src) {
 
     debug_generate_info_with_darkgreen("\t");
     if (src->block == nullptr) {
@@ -681,7 +708,7 @@ void generate_vmcode_from_if_statement(Package_Executer* executer,
     // handle else
     if (if_statement->else_block != nullptr) {
         generate_vmcode_from_block(executer, if_statement->else_block, opcode_buffer);
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label, if_statement->else_block->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label, if_statement->else_block->start_line_number);
     }
 
 
@@ -1134,8 +1161,8 @@ void generate_vmcode_from_expression(Package_Executer* executer,
         generate_vmcode_from_class_object_literal_expreesion(executer, expression->u.class_object_literal_expression, opcode_buffer);
         break;
 
-    case EXPRESSION_TYPE_CLOSURE:
-        generate_vmcode_from_closure_expreesion(executer, expression->u.closure_expression, opcode_buffer);
+    case EXPRESSION_TYPE_ANONYMOUS_FUNC:
+        generate_vmcode_from_anonymous_func_expreesion(executer, expression->u.anonymous_func_expression, opcode_buffer);
         break;
 
     case EXPRESSION_TYPE_IIFE:
@@ -2141,7 +2168,7 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
     }
 }
 
-void deep_copy_closure(RVM_AnonymousFunc* dst, Closure* src) {
+void deep_copy_closure(RVM_Function* dst, AnonymousFunc* src) {
 
     dst->source_file         = src->source_file;
     dst->start_line_number   = src->start_line_number;
@@ -2202,26 +2229,27 @@ void deep_copy_closure(RVM_AnonymousFunc* dst, Closure* src) {
     FreeValueDesc* free_value = src->block->free_value_list;
     for (unsigned int i = 0; free_value != nullptr; i++, free_value = free_value->next) {
         // 后续抽象出 deep_copy 方法
-        dst->free_value_list[i].identifier          = free_value->identifier;
-        dst->free_value_list[i].outer_local         = free_value->outer_local;
-        dst->free_value_list[i].u.outer_local_index = free_value->u.outer_local_index;
+        dst->free_value_list[i].identifier             = free_value->identifier;
+        dst->free_value_list[i].is_curr_local          = free_value->is_curr_local;
+        dst->free_value_list[i].u.curr_local_index     = free_value->u.curr_local_index;
+        dst->free_value_list[i].u.out_free_value_index = free_value->u.out_free_value_index;
     }
 }
 
-void generate_vmcode_from_closure_expreesion(Package_Executer*  executer,
-                                             ClosureExpression* closure_expression,
-                                             RVM_OpcodeBuffer*  opcode_buffer) {
+void generate_vmcode_from_anonymous_func_expreesion(Package_Executer*        executer,
+                                                    AnonymousFuncExpression* closure_expression,
+                                                    RVM_OpcodeBuffer*        opcode_buffer) {
 
     debug_generate_info_with_darkgreen("\t");
     assert(closure_expression != nullptr);
 
     // 实现方式和 copy_function 类似
-    Closure*           src = closure_expression->closure_definition;
-    RVM_AnonymousFunc* dst = (RVM_AnonymousFunc*)mem_alloc(NULL_MEM_POOL,
-                                                           sizeof(RVM_AnonymousFunc));
+    AnonymousFunc* src = closure_expression->anonymous_func;
+    RVM_Function*  dst = (RVM_Function*)mem_alloc(NULL_MEM_POOL,
+                                                  sizeof(RVM_Function));
 
     deep_copy_closure(dst, src);
-    generate_code_from_function_definition(executer, (RVM_Function_Tuple*)dst, (FunctionTuple*)src);
+    generate_code_from_function_definition(executer, dst, (FunctionTuple*)src);
 
     int constant_index = constant_pool_add_closure(executer, dst);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLOSURE, constant_index, closure_expression->line_number);
@@ -2235,12 +2263,12 @@ void generate_vmcode_from_iife_expreesion(Package_Executer*             executer
     assert(iife != nullptr);
 
     // 实现方式和 copy_function 类似
-    Closure*           src = iife->closure_definition;
-    RVM_AnonymousFunc* dst = (RVM_AnonymousFunc*)mem_alloc(NULL_MEM_POOL,
-                                                           sizeof(RVM_AnonymousFunc));
+    AnonymousFunc* src = iife->anonymous_func;
+    RVM_Function*  dst = (RVM_Function*)mem_alloc(NULL_MEM_POOL,
+                                                  sizeof(RVM_Function));
 
     deep_copy_closure(dst, src);
-    generate_code_from_function_definition(executer, (RVM_Function_Tuple*)dst, (FunctionTuple*)src);
+    generate_code_from_function_definition(executer, (RVM_Function*)dst, (FunctionTuple*)src);
 
     // generate argument_num
     ArgumentList* pos                = iife->argument_list;
@@ -2567,7 +2595,7 @@ int constant_pool_add_string(Package_Executer* executer, const char* string_lite
 }
 
 // TODO: 封装成宏
-int constant_pool_add_closure(Package_Executer* executer, RVM_AnonymousFunc* func) {
+int constant_pool_add_closure(Package_Executer* executer, RVM_Function* func) {
     debug_generate_info_with_darkgreen("\t");
     int index                                                  = constant_pool_grow(executer, 1);
 

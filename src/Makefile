@@ -22,6 +22,7 @@ OBJS   = \
 	gc.o\
 	debug.o\
 	vm-debug.o\
+	debug-free-value.o\
 	coroutine.o\
 	../deps/linenoise/linenoise.o\
 	fmt.o\
@@ -90,6 +91,7 @@ CFLAGS = -c -static -O2 -std=c++17 \
 				 -DDEBUG_RVM_INTERACTIVE1 \
 				 -DDEBUG_RVM_MEM_POOL_DETAIL1 \
 				 -DDEBUG_RVM_GC_DETAIL1 \
+				 -DDEBUG_TRACE_CLOSURE_FREE_VALUE1 \
 				 -DDEBUG_RDB_TRACE_DISPATH_DETAIL1
 
 CFLAGS+= -I../deps/linenoise
@@ -204,6 +206,7 @@ mem_pool.o: mem_pool.cpp ring.hpp
 gc.o: gc.cpp ring.hpp
 debug.o: debug.cpp ring.hpp
 vm-debug.o: vm-debug.cpp ring.hpp
+debug-free-value.o: debug-free-value.cpp ring.hpp
 coroutine.o: coroutine.cpp ring.hpp
 thread_pool.o: thread_pool.cpp ring.hpp
 thread_pool_test.o: thread_pool_test.cpp ring.hpp

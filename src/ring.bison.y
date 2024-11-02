@@ -47,7 +47,7 @@ int yylex();
     ArgumentList*                       m_argument_list;
     FunctionTuple*                      m_function_tuple;
     Function*                           m_function_definition;
-    Closure*                            m_closure;
+    AnonymousFunc*                      m_anonymous_func;
     Parameter*                          m_parameter_list;
     IfStatement*                        m_if_statement;
     ElseIfStatement*                    m_elseif_statement;
@@ -765,7 +765,7 @@ closure_definition
     : TOKEN_FUNCTION function_tuple
     {
         debug_bison_info_with_green("[RULE::anonymous_function]\t ");
-        $$ = create_expression_closure_definition((Closure*)($2));
+        $$ = create_expression_anonymous_func((AnonymousFunc*)($2));
     }
     ;
 
@@ -1347,11 +1347,11 @@ function_call_expression
 iife_expression
     : TOKEN_FUNCTION function_tuple TOKEN_LP argument_list TOKEN_RP
     {
-        $$ = create_expression_iife((Closure*)($2), $4);
+        $$ = create_expression_iife((AnonymousFunc*)($2), $4);
     }
     | TOKEN_FUNCTION function_tuple TOKEN_LP               TOKEN_RP
     {
-        $$ = create_expression_iife((Closure*)($2), nullptr);
+        $$ = create_expression_iife((AnonymousFunc*)($2), nullptr);
     }
     ;
 

@@ -34,9 +34,11 @@ RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->caller_object        = nullptr;
     callinfo->caller_function      = nullptr;
+    callinfo->caller_closure       = nullptr;
     callinfo->caller_stack_base    = 0;
     callinfo->callee_object        = nullptr;
     callinfo->callee_function      = nullptr;
+    callinfo->callee_closure       = nullptr;
     callinfo->callee_argument_size = 0;
     callinfo->code_list            = rvm->executer->bootloader_code_list;
     callinfo->code_size            = rvm->executer->bootloader_code_size;
@@ -67,8 +69,8 @@ RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
  * meta_pool: 共享
  */
 RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
-                                RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                                RVM_ClassObject* callee_object, RVM_Function_Tuple* callee_function,
+                                RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function,
                                 unsigned int argument_list_size) {
 
     RingCoroutine* co = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
@@ -84,9 +86,11 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->caller_object        = *caller_object;
     callinfo->caller_function      = *caller_function;
+    callinfo->caller_closure       = nullptr;
     callinfo->caller_stack_base    = 0;
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
+    callinfo->callee_closure       = nullptr;
     callinfo->callee_argument_size = 0;
     callinfo->code_list            = callee_function->u.derive_func->code_list;
     callinfo->code_size            = callee_function->u.derive_func->code_size;
@@ -130,7 +134,7 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
 void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
                                               RingCoroutine*       co,
                                               RVM_ClassObject*     callee_object,
-                                              RVM_Function_Tuple*  callee_function,
+                                              RVM_Function*        callee_function,
                                               unsigned int         argument_list_size) {
 
     RVM_TypeSpecifier*   type_specifier          = nullptr;
@@ -331,8 +335,8 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
  */
 int resume_coroutine(Ring_VirtualMachine* rvm,
                      CO_ID                target_co_id,
-                     RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                     RVM_ClassObject* callee_object, RVM_Function_Tuple* callee_function) {
+                     RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                     RVM_ClassObject* callee_object, RVM_Function* callee_function) {
 
     RingCoroutine* curr_co   = rvm->current_coroutine;
 
@@ -447,8 +451,8 @@ int yield_coroutine(Ring_VirtualMachine* rvm) {
 
 //
 int finish_coroutine(Ring_VirtualMachine* rvm,
-                     RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                     RVM_Function_Tuple* callee_function) {
+                     RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                     RVM_Function* callee_function) {
 
     CO_ID          curr_co_id = rvm->current_coroutine->co_id;
     RingCoroutine* curr_co    = rvm->current_coroutine;

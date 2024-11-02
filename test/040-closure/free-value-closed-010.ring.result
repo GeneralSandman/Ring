@@ -1,0 +1,24 @@
+------------------ [main] ------------------
+invoke return_2_closure
+main:: 1
+Closure-A
+local_int_value_0 = 101
+Closure-B
+local_int_value_0 = 102
+main:: 2
+Closure-C
+local_int_value_0 = 104
+Closure-D
+local_int_value_0 = 106
+------------------ [main] ------------------
+invoke return_2_closure
+main:: 1
+Closure-A
+local_int_value_0 = 101
+Closure-B
+local_int_value_0 = 102
+main:: 2
+Closure-C
+local_int_value_0 = 104
+Closure-D
+local_int_value_0 = 106

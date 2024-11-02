@@ -1,0 +1,16 @@
+-------------
+[new closure 1] level0_local_int_value_0=1
+[new closure 2] level0_local_int_value_0=2
+[+closure] level0_local_int_value_0=3
+[+closure] level0_local_int_value_0=4
+[new closure 2] level0_local_int_value_0=5
+[+closure] level0_local_int_value_0=6
+[+closure] level0_local_int_value_0=7
+-------------
+[new closure 1] level0_local_int_value_0=1
+[new closure 2] level0_local_int_value_0=2
+[+closure] level0_local_int_value_0=3
+[+closure] level0_local_int_value_0=4
+[new closure 2] level0_local_int_value_0=5
+[+closure] level0_local_int_value_0=6
+[+closure] level0_local_int_value_0=7

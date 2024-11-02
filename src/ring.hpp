@@ -64,7 +64,7 @@ typedef struct MethodCallExpression         MethodCallExpression;
 typedef struct AssignExpression             AssignExpression;
 typedef struct FieldInitExpression          FieldInitExpression;
 typedef struct LaunchExpression             LaunchExpression;
-typedef struct ClosureExpression            ClosureExpression;
+typedef struct AnonymousFuncExpression      AnonymousFuncExpression;
 typedef struct ImmediateInvokFuncExpression ImmediateInvokFuncExpression;
 typedef struct IdentifierExpression         IdentifierExpression;
 
@@ -72,7 +72,7 @@ typedef struct ArgumentList                 ArgumentList;
 typedef struct Parameter                    Parameter;
 typedef struct Identifier                   Identifier;
 typedef struct FunctionTuple                FunctionTuple;
-typedef struct Closure                      Closure;
+typedef struct AnonymousFunc                AnonymousFunc;
 typedef struct FreeValueDesc                FreeValueDesc;
 typedef struct Function                     Function;
 typedef struct Block                        Block;
@@ -112,7 +112,6 @@ typedef struct AttributeInfo                AttributeInfo;
 typedef struct RVM_ConstantPool             RVM_ConstantPool;
 typedef struct RVM_String                   RVM_String;
 typedef struct RVM_Array                    RVM_Array;
-typedef struct RVM_AnonymousFunc            RVM_AnonymousFunc;
 typedef struct RVM_Closure                  RVM_Closure;
 typedef struct RVM_FreeValueDesc            RVM_FreeValueDesc;
 typedef struct RVM_FreeValue                RVM_FreeValue;
@@ -127,7 +126,6 @@ typedef struct RVM_LocalVariable            RVM_LocalVariable;
 
 typedef struct NativeFunction               NativeFunction;
 typedef struct DeriveFunction               DeriveFunction;
-typedef struct RVM_Function_Tuple           RVM_Function_Tuple;
 typedef struct RVM_Function                 RVM_Function;
 typedef struct RVM_Field                    RVM_Field;
 typedef struct RVM_Method                   RVM_Method;
@@ -578,65 +576,45 @@ struct DeriveFunction {
     // RVM_SourceCodeLineMap.opcode_begin_index 是单调递增的
 };
 
-#define RVM_FUNCTION_TYPLE_HEADER                                               \
-    std::string        source_file;       /*ring source file*/                  \
-    unsigned int       start_line_number; /*start line no in ring source file*/ \
-    unsigned int       end_line_number;   /*end   line no in ring source file*/ \
-    RingFileStat*      ring_file_stat;    /*ring source file stat*/             \
-                                                                                \
-    unsigned int       parameter_size;                                          \
-    RVM_Parameter*     parameter_list;                                          \
-    unsigned int       return_value_size;                                       \
-    RVM_ReturnValue*   return_value_list;                                       \
-    unsigned int       local_variable_size;                                     \
-    RVM_LocalVariable* local_variable_list;                                     \
-    unsigned int       estimate_runtime_stack_capacity;                         \
-                                                                                \
-    char*              identifier;                                              \
-    RVMFunctionType    type;                                                    \
-    union {                                                                     \
-        NativeFunction* native_func;                                            \
-        DeriveFunction* derive_func;                                            \
-    } u;                                                                        \
-                                                                                \
-    unsigned int       free_value_size;                                         \
-    RVM_FreeValueDesc* free_value_list;
-
-
-/*
-* closure 没有 identifier
-* closure 有 free-value
-
-* closure 不回事 native_func
-*/
-
-// virtual base structure
-struct RVM_Function_Tuple {
-    RVM_FUNCTION_TYPLE_HEADER;
-};
 
 struct RVM_Function {
-    RVM_FUNCTION_TYPLE_HEADER;
+    std::string        source_file;
+    unsigned int       start_line_number;
+    unsigned int       end_line_number;
+    RingFileStat*      ring_file_stat;
+
+    unsigned int       parameter_size;
+    RVM_Parameter*     parameter_list;
+    unsigned int       return_value_size;
+    RVM_ReturnValue*   return_value_list;
+    unsigned int       local_variable_size;
+    RVM_LocalVariable* local_variable_list;
+    unsigned int       free_value_size;
+    RVM_FreeValueDesc* free_value_list;
+
+    unsigned int       estimate_runtime_stack_capacity;
+
+    char*              identifier;
+    RVMFunctionType    type;
+    union {
+        NativeFunction* native_func;
+        DeriveFunction* derive_func;
+    } u;
 };
 
-
-// FIXME:
-// RVM_Closure 删掉
-struct RVM_AnonymousFunc {
-    RVM_FUNCTION_TYPLE_HEADER;
-};
 
 struct RVM_Closure {
-    RVM_AnonymousFunc* anonymous_func;
-    unsigned int       free_value_size;
-    RVM_FreeValue*     free_value_list;
+    RVM_Function*  anonymous_func;
+    unsigned int   free_value_size;
+    RVM_FreeValue* free_value_list;
 };
 
 struct RVM_FreeValueDesc {
     const char* identifier;
-    bool        outer_local;
+    bool        is_curr_local;
     union {
-        unsigned int outer_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        unsigned int curr_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        unsigned int out_free_value_index;
         // FreeValueDesc* outer_free_value;  // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
     } u;
     // 如果引用的直接外围函数定义的局部变量
@@ -646,17 +624,27 @@ struct RVM_FreeValueDesc {
     // 3. 是否是直接外层函数的局部变量
 };
 
+typedef struct RVM_FreeValue_Pool RVM_FreeValue_Pool;
+struct RVM_FreeValue_Pool {
+    unsigned int size;
+    RVM_Value*   list;
+};
+
 struct RVM_FreeValue {
-    bool is_open; // open/close
+    bool is_recur; // 需要递归
     union {
-        RVM_Value* p;
+        RVM_FreeValue* recur; // is_recur == true
+        RVM_Value*     p;     // is_recur == false
         // 可指向 open/close value
         // open时，指向栈空间
         // close时，指向c_value，是一个拷贝
     } u;
 
+    // is_recur == false
+    bool      is_open; // open/close
     RVM_Value c_value; // closed value
 };
+
 
 struct RVM_Field {
     char*              identifier;
@@ -700,11 +688,11 @@ typedef enum {
 struct RVM_ConstantPool {
     ConstantPoolType type;
     union {
-        int                int_value;
-        long long          int64_value;
-        double             double_value;
-        const char*        string_value;
-        RVM_AnonymousFunc* anonymous_func_value;
+        int           int_value;
+        long long     int64_value;
+        double        double_value;
+        const char*   string_value;
+        RVM_Function* anonymous_func_value;
     } u;
 };
 
@@ -1169,22 +1157,24 @@ typedef enum {
  *
  */
 struct RVM_CallInfo {
-    RVM_ClassObject*    caller_object;   // TODO: 考虑是否有必要删除
-    RVM_Function_Tuple* caller_function; // TODO: 考虑是否有必要删除
-    unsigned int        caller_stack_base;
+    RVM_ClassObject* caller_object;   // TODO: 考虑是否有必要删除
+    RVM_Function*    caller_function; // TODO: 考虑是否有必要删除
+    RVM_Closure*     caller_closure;  // TODO:
+    unsigned int     caller_stack_base;
 
-    RVM_ClassObject*    callee_object;
-    RVM_Function_Tuple* callee_function;
-    unsigned int        callee_argument_size; // 函数调用的参数数量，可变参数
+    RVM_ClassObject* callee_object;
+    RVM_Function*    callee_function;
+    RVM_Closure*     callee_closure;
+    unsigned int     callee_argument_size; // 函数调用的参数数量，可变参数
 
-    RVM_Closure*        curr_closure;
+    RVM_Closure*     curr_closure;
 
-    RVM_Byte*           code_list;
-    unsigned int        code_size;
-    unsigned int        pc;
+    RVM_Byte*        code_list;
+    unsigned int     code_size;
+    unsigned int     pc;
 
-    RVM_CallInfo*       prev;
-    RVM_CallInfo*       next;
+    RVM_CallInfo*    prev;
+    RVM_CallInfo*    next;
 };
 
 #define CALL_INFO_MAGIC_NUMBER (0x8421) // 33852
@@ -1269,7 +1259,7 @@ typedef enum {
     EXPRESSION_TYPE_CAST,
 
     EXPRESSION_TYPE_LAUNCH,
-    EXPRESSION_TYPE_CLOSURE, // TODO: 这个名字是不是应该该一下
+    EXPRESSION_TYPE_ANONYMOUS_FUNC, // TODO: 这个名字是不是应该该一下
     EXPRESSION_TYPE_IIFE,
 
 } ExpressionType;
@@ -1491,7 +1481,7 @@ struct Expression {
         MemberExpression*             member_expression;
         FieldInitExpression*          field_init_expression;
         LaunchExpression*             launch_expression;
-        ClosureExpression*            closure_expression;
+        AnonymousFuncExpression*      anonymous_func_expression;
         ImmediateInvokFuncExpression* iife;
     } u;
 
@@ -1708,18 +1698,18 @@ struct LaunchExpression {
     } u;
 };
 
-struct ClosureExpression {
-    unsigned int line_number;
+struct AnonymousFuncExpression {
+    unsigned int   line_number;
 
-    Closure*     closure_definition;
+    AnonymousFunc* anonymous_func;
 };
 
 struct ImmediateInvokFuncExpression {
-    unsigned int  line_number;
+    unsigned int   line_number;
 
-    Closure*      closure_definition;
-    unsigned int  argument_list_size;
-    ArgumentList* argument_list;
+    AnonymousFunc* anonymous_func;
+    unsigned int   argument_list_size;
+    ArgumentList*  argument_list;
 };
 
 struct BinaryExpression {
@@ -1757,6 +1747,8 @@ struct Parameter {
 struct VarDecl {
     unsigned int   line_number;
 
+    Block*         blong_block;
+
     TypeSpecifier* type_specifier;
     char*          identifier;
     int            is_const;
@@ -1793,8 +1785,8 @@ block 中的 declaration 是不是考虑应该放在外边
 为什么：局部变量的初始化时机不太正确。因为局部量只有在函数调用的时候才进行初始化
 */
 struct Block {
-    unsigned int line_number;
-    // TODO: start_line_number, end_line_number
+    unsigned int   start_line_number;
+    unsigned int   end_line_number;
 
     BlockType      type;
 
@@ -1802,7 +1794,7 @@ struct Block {
     VarDecl*       var_decl_list; // 代码块中定义的局部变量
 
     unsigned int   free_value_size;
-    FreeValueDesc* free_value_list; // 自由变量
+    FreeValueDesc* free_value_list; // 自由变量, 直接或者间接
 
     unsigned int   visable_var_size;
     Variable*      visable_var_list; // 可见的变量, 搜索过的，用于提高fix_ast 的速度
@@ -1834,19 +1826,20 @@ struct FunctionTuple {
     FUNCTION_TUPLE_HEADER;
 };
 
-struct Closure {
+struct AnonymousFunc {
     FUNCTION_TUPLE_HEADER;
 
     // unsigned int   free_value_size;
     // FreeValueDesc* free_value_list;
 };
 
+// TODO:
 struct FreeValueDesc {
     char* identifier;
-    bool  outer_local; // 直接外层函数的局部变量
+    bool  is_curr_local; // 是本层函数定义的局部变量
     union {
-        unsigned int   outer_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
-        FreeValueDesc* outer_free_value;  // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
+        unsigned int curr_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        unsigned int out_free_value_index;
     } u;
 
     unsigned       free_value_index; // UPDATED_BY_FIX_AST
@@ -2644,10 +2637,10 @@ Expression*                   create_expression_launch(LaunchExpressionType    t
                                                        FunctionCallExpression* function_call_expression,
                                                        MethodCallExpression*   method_call_expression);
 
-Expression*                   create_expression_closure_definition(Closure* func);
+Expression*                   create_expression_anonymous_func(AnonymousFunc* func);
 
-Expression*                   create_expression_iife(Closure*      closure,
-                                                     ArgumentList* argument_list);
+Expression*                   create_expression_iife(AnonymousFunc* closure,
+                                                     ArgumentList*  argument_list);
 
 Expression*                   create_expression_binary(ExpressionType type, Expression* left, Expression* right);
 Expression*                   create_expression_unitary(ExpressionType type, Expression* unitary_expression);
@@ -2864,10 +2857,10 @@ void             fix_launch_expression(Expression*       expression,
                                        Block*            block,
                                        FunctionTuple*    func);
 
-void             fix_closure_expression(Expression*        expression,
-                                        ClosureExpression* closure_expression,
-                                        Block*             block,
-                                        FunctionTuple*     func);
+void             fix_anonymous_func_expression(Expression*              expression,
+                                               AnonymousFuncExpression* closure_expression,
+                                               Block*                   block,
+                                               FunctionTuple*           func);
 void             fix_iife_expression(Expression*                   expression,
                                      ImmediateInvokFuncExpression* iife,
                                      Block*                        block,
@@ -2939,8 +2932,8 @@ void              copy_method(Package_Executer* executer, RVM_Method* dst, Metho
 void              copy_field(Package_Executer* executer, RVM_Field* dst, FieldMember* src);
 
 void              add_top_level_code(Package* package, Package_Executer* executer);
-void              generate_code_from_function_definition(Package_Executer*   executer,
-                                                         RVM_Function_Tuple* dst, FunctionTuple* src);
+void              generate_code_from_function_definition(Package_Executer* executer,
+                                                         RVM_Function* dst, FunctionTuple* src);
 void              generate_code_from_method_definition(Package_Executer* executer, RVM_Method* dst, MethodMember* src);
 RVM_OpcodeBuffer* new_opcode_buffer();
 
@@ -2995,10 +2988,10 @@ void              generate_vmcode_from_launch_expression(Package_Executer* execu
                                                          LaunchExpression* launch_expression,
                                                          RVM_OpcodeBuffer* opcode_buffer);
 
-void              deep_copy_closure(RVM_AnonymousFunc* dst, Closure* src);
-void              generate_vmcode_from_closure_expreesion(Package_Executer*  executer,
-                                                          ClosureExpression* closure_expression,
-                                                          RVM_OpcodeBuffer*  opcode_buffer);
+void              deep_copy_closure(RVM_Function* dst, AnonymousFunc* src);
+void              generate_vmcode_from_anonymous_func_expreesion(Package_Executer*        executer,
+                                                                 AnonymousFuncExpression* closure_expression,
+                                                                 RVM_OpcodeBuffer*        opcode_buffer);
 void              generate_vmcode_from_iife_expreesion(Package_Executer*             executer,
                                                        ImmediateInvokFuncExpression* iife,
                                                        RVM_OpcodeBuffer*             opcode_buffer);
@@ -3017,7 +3010,7 @@ int               constant_pool_add_int(Package_Executer* executer, int int_lite
 int               constant_pool_add_int64(Package_Executer* executer, long long int64_literal);
 int               constant_pool_add_double(Package_Executer* executer, double double_literal);
 int               constant_pool_add_string(Package_Executer* executer, const char* string_literal);
-int               constant_pool_add_closure(Package_Executer* executer, RVM_AnonymousFunc* func);
+int               constant_pool_add_closure(Package_Executer* executer, RVM_Function* func);
 
 unsigned int      opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer);
 void              opcode_buffer_set_label(RVM_OpcodeBuffer* opcode_buffer, unsigned int label, unsigned int label_address);
@@ -3051,22 +3044,21 @@ int                  ring_execute_vm_code(Ring_VirtualMachine* rvm);
 
 void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Function* function, unsigned int argument_list_size);
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
-                                            RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                                            RVM_ClassObject* callee_object, RVM_Function_Tuple* callee_function,
-                                            RVM_Closure* closure,
+                                            RVM_ClassObject** caller_object, RVM_Function** caller_function, RVM_Closure** caller_closure,
+                                            RVM_ClassObject* callee_object, RVM_Function* callee_function, RVM_Closure* callee_closure,
                                             unsigned int argument_list_size);
 void                 derive_function_return(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
                                             unsigned int return_value_list_size);
 void                 derive_function_finish(Ring_VirtualMachine* rvm,
-                                            RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                                            RVM_Function_Tuple* callee_function,
-                                            unsigned int        return_value_list_size);
+                                            RVM_ClassObject** caller_object, RVM_Function** caller_function, RVM_Closure** caller_closure,
+                                            RVM_Function* callee_function,
+                                            unsigned int  return_value_list_size);
 RVM_CallInfo*        store_callinfo(RVM_CallInfo* head, RVM_CallInfo* call_info);
 RVM_CallInfo*        restore_callinfo(RVM_CallInfo** head_);
 void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                                          RVM_ClassObject*     callee_object,
-                                                         RVM_Function_Tuple*  function,
+                                                         RVM_Function*        function,
                                                          unsigned int         argument_list_size);
 
 RVM_String*          string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal);
@@ -3141,9 +3133,10 @@ void                 rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_G
 
 int                  rvm_heap_size(Ring_VirtualMachine* rvm);
 
-RVM_Closure*         new_closure(Ring_VirtualMachine* rvm, RVM_AnonymousFunc* func);
-void                 close_all_closure(Ring_VirtualMachine* rvm, unsigned int return_value_list_size);
-void                 close_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure);
+RVM_Closure*         new_closure(Ring_VirtualMachine* rvm,
+                                 RVM_Function* caller_function, RVM_Closure* caller_closure,
+                                 RVM_Function* func);
+
 // --------------------
 
 
@@ -3233,7 +3226,7 @@ void                     dump_vm_class(Package_Executer*    package_executer,
                                        RVM_ClassDefinition* class_definition);
 std::string              dump_vm_constant(RVM_ConstantPool* constant);
 
-unsigned int             get_source_line_number_by_pc(RVM_Function_Tuple* function, unsigned int pc);
+unsigned int             get_source_line_number_by_pc(RVM_Function* function, unsigned int pc);
 
 std::string              format_rvm_type(Ring_VirtualMachine* rvm, RVM_Value* value);
 std::string              format_rvm_value(RVM_Value* value);
@@ -3366,6 +3359,14 @@ int       vm_debugger_cli(Ring_VirtualMachine* rvm);
 VM_DB_Arg vm_db_parse_command(const char* line);
 // --------------------
 
+/* --------------------
+ * debug-free-value.cpp
+ * function definition
+ *
+ */
+void debug_generate_closure_dot_file(RVM_Closure* closure);
+// --------------------
+
 
 /* --------------------
  * buildin.cpp
@@ -3444,23 +3445,23 @@ std::string fmt_array(RVM_Array* array_value);
 
 RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm);
 RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
-                                RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                                RVM_ClassObject* callee_object, RVM_Function_Tuple* callee_function,
+                                RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function,
                                 unsigned int argument_list_size);
 void           init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
                                                         RingCoroutine*       co,
                                                         RVM_ClassObject*     callee_object,
-                                                        RVM_Function_Tuple*  callee_function,
+                                                        RVM_Function*        callee_function,
                                                         unsigned int         argument_list_size);
 
 int            resume_coroutine(Ring_VirtualMachine* rvm,
                                 CO_ID                target_co_id,
-                                RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                                RVM_ClassObject* callee_object, RVM_Function_Tuple* callee_function);
+                                RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function);
 int            yield_coroutine(Ring_VirtualMachine* rvm);
 int            finish_coroutine(Ring_VirtualMachine* rvm,
-                                RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                                RVM_Function_Tuple* callee_function);
+                                RVM_ClassObject** caller_object, RVM_Function** caller_function,
+                                RVM_Function* callee_function);
 
 // --------------------
 

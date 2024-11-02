@@ -8,6 +8,7 @@
 
 
 extern int             RING_DEBUG_TRACE_FUNC_BACKTRACE;
+extern int             RING_DEBUG_TRACE_CLOSURE_FREE_VALUE;
 
 extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
@@ -369,7 +370,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Array*           array_value            = nullptr;
     RVM_Array*           array_c_value          = nullptr;
     RVM_Closure*         closure_value          = nullptr;
-    RVM_AnonymousFunc*   anonymous_func         = nullptr;
+    RVM_Function*        anonymous_func         = nullptr;
 
     RVM_ClassDefinition* rvm_class_definition   = nullptr;
     RingCoroutine*       new_coroutine          = nullptr;
@@ -389,6 +390,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
     RVM_ClassObject*     caller_class_ob        = nullptr;
     RVM_Function*        caller_function        = nullptr;
+    RVM_Closure*         caller_closure         = nullptr;
+
     RVM_ClassObject*     callee_class_ob        = nullptr;
     RVM_Function*        callee_function        = nullptr;
     RVM_Method*          callee_method          = nullptr;
@@ -776,7 +779,16 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_FREE_INT:
             free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             int_value        = STACK_GET_INT_OFFSET(-1);
-            FREE_SET_INT_INDEX(free_value_index, int_value);
+            // FREE_SET_INT_INDEX(free_value_index, int_value);
+            {
+                RVM_Value* p = nullptr;
+                if (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].is_recur) {
+                    p = (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.recur->u.p);
+                } else {
+                    p = VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.p;
+                }
+                p->u.int_value = int_value;
+            }
 
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             VM_CUR_CO_PC += 3;
@@ -816,7 +828,16 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_PUSH_FREE_INT:
             free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            int_value        = FREE_GET_INT_INDEX(free_value_index);
+            // int_value        = FREE_GET_INT_INDEX(free_value_index);
+            {
+                RVM_Value* p = nullptr;
+                if (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].is_recur) {
+                    p = (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.recur->u.p);
+                } else {
+                    p = VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.p;
+                }
+                int_value = p->u.int_value;
+            }
             STACK_SET_INT_OFFSET(0, int_value);
 
             VM_CUR_CO_STACK_TOP_INDEX += 1;
@@ -1582,9 +1603,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             }
 
             invoke_derive_function(rvm,
-                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
-                                   nullptr, (RVM_Function_Tuple*)closure_value->anonymous_func,
-                                   closure_value,
+                                   &caller_class_ob, &caller_function, &caller_closure,
+                                   nullptr, closure_value->anonymous_func, closure_value,
                                    argument_list_size);
 
             break;
@@ -1616,9 +1636,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             invoke_derive_function(rvm,
-                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
-                                   nullptr, (RVM_Function_Tuple*)callee_function,
-                                   nullptr,
+                                   &caller_class_ob, &caller_function, &caller_closure,
+                                   nullptr, callee_function, nullptr,
                                    argument_list_size);
 
             break;
@@ -1637,9 +1656,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             callee_function = callee_method->rvm_function;
 
             invoke_derive_function(rvm,
-                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
-                                   callee_class_ob, (RVM_Function_Tuple*)callee_function,
-                                   nullptr,
+                                   &caller_class_ob, &caller_function, &caller_closure,
+                                   callee_class_ob, callee_function, nullptr,
                                    argument_list_size);
             break;
         case RVM_CODE_RETURN:
@@ -1650,9 +1668,9 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             // close all closure free-value
             // 遍历当前所有的栈空间，找到所有 stack 中是 closure的RVM_Value
             // 依次对他们执行关闭操作
-            close_all_closure(rvm, return_value_list_size);
+            // close_all_closure(rvm, return_value_list_size);
             derive_function_finish(rvm,
-                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
+                                   &caller_class_ob, &caller_function, &caller_closure,
                                    nullptr,
                                    return_value_list_size);
             // VM_CUR_CO_PC += 1;
@@ -2015,8 +2033,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             new_coroutine = launch_coroutine(rvm,
-                                             &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
-                                             nullptr, (RVM_Function_Tuple*)callee_function,
+                                             &caller_class_ob, (RVM_Function**)&caller_function,
+                                             nullptr, (RVM_Function*)callee_function,
                                              argument_list_size);
             // destory arguments after copy it to new coroutine
             VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
@@ -2042,8 +2060,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             new_coroutine = launch_coroutine(rvm,
-                                             &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
-                                             callee_class_ob, (RVM_Function_Tuple*)callee_function,
+                                             &caller_class_ob, &caller_function,
+                                             callee_class_ob, callee_function,
                                              argument_list_size);
             // destory arguments after copy it to new coroutine
             VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
@@ -2059,7 +2077,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             res = resume_coroutine(rvm,
                                    co_id,
-                                   &caller_class_ob, (RVM_Function_Tuple**)&caller_function,
+                                   &caller_class_ob, &caller_function,
                                    nullptr, nullptr);
             if (res != 0) {
                 VM_CUR_CO_PC += 1;
@@ -2077,7 +2095,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_NEW_CLOSURE:
             const_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             anonymous_func = constant_pool_list[const_index].u.anonymous_func_value;
-            closure_value  = new_closure(rvm, anonymous_func);
+            closure_value  = new_closure(rvm, caller_function, caller_closure, anonymous_func);
             STACK_SET_CLOSURE_OFFSET(0, closure_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
@@ -2156,30 +2174,26 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
  *
  */
 void invoke_derive_function(Ring_VirtualMachine* rvm,
-                            RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                            RVM_ClassObject* callee_object, RVM_Function_Tuple* callee_function,
-                            RVM_Closure* closure,
+                            RVM_ClassObject** caller_object, RVM_Function** caller_function, RVM_Closure** caller_closure,
+                            RVM_ClassObject* callee_object, RVM_Function* callee_function, RVM_Closure* callee_closure,
                             unsigned int argument_list_size) {
 
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->caller_object        = *caller_object;
     callinfo->caller_function      = *caller_function;
+    callinfo->caller_closure       = *caller_closure; // TODO:
     callinfo->caller_stack_base    = VM_CUR_CO_STACK_TOP_INDEX;
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
+    callinfo->callee_closure       = callee_closure; // TODO:
     callinfo->callee_argument_size = argument_list_size;
-    callinfo->curr_closure         = closure;
+    callinfo->curr_closure         = callee_closure;
     callinfo->code_list            = callee_function->u.derive_func->code_list;
     callinfo->code_size            = callee_function->u.derive_func->code_size;
     callinfo->pc                   = 0;
     callinfo->prev                 = nullptr;
     callinfo->next                 = nullptr;
 
-    // TODO:
-    // caller_object, caller_function 感觉没必要更新
-    // 思考设计是否会冗余
-    *caller_object   = callee_object;
-    *caller_function = callee_function;
 
     if (RING_DEBUG_TRACE_FUNC_BACKTRACE) {
         printf_witch_red("[RING_DEBUG::trace_coroutine_sched] [invoke_func::] "
@@ -2202,6 +2216,80 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
 
     init_derive_function_local_variable(rvm, callee_object, callee_function, argument_list_size);
 
+
+    if (callee_closure == nullptr && callee_function->free_value_size) {
+        // 初始化一个闭包
+
+        RVM_Closure* closure     = (RVM_Closure*)mem_alloc(rvm->meta_pool, sizeof(RVM_Closure));
+        closure->anonymous_func  = callee_function;
+        closure->free_value_size = callee_function->free_value_size;
+        closure->free_value_list = (RVM_FreeValue*)mem_alloc(rvm->data_pool,
+                                                             closure->free_value_size * sizeof(RVM_FreeValue));
+
+        // printf("[Debug][New Closure]init free-value function(%p) closure(%p), free_value_size:%u\n",
+        //        callee_function, closure,
+        //        callee_function->free_value_size);
+
+        for (unsigned int i = 0; i < callee_function->free_value_size; i++) {
+
+            if (callee_function->free_value_list[i].is_curr_local) {
+                unsigned int index                   = callee_function->free_value_list[i].u.curr_local_index;
+
+                closure->free_value_list[i].is_recur = false;
+                closure->free_value_list[i].u.p      = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
+                closure->free_value_list[i].is_open  = true;
+                closure->free_value_list[i].c_value  = RVM_Value{};
+
+            } else {
+                // 其实走不到这个逻辑
+                assert(caller_closure != nullptr);
+                unsigned int index = callee_function->free_value_list[i].u.out_free_value_index;
+
+                // 通过调用链向上递归查找, 知道找到直接指向的agent
+                RVM_FreeValue* parent = &((*caller_closure)->free_value_list[index]);
+                while (parent->is_recur) {
+                    parent = parent->u.recur;
+                }
+                closure->free_value_list[i].is_recur = true;
+                closure->free_value_list[i].u.recur  = parent;
+            }
+        }
+
+        callee_closure = closure;
+
+        if (RING_DEBUG_TRACE_CLOSURE_FREE_VALUE) {
+#ifdef DEBUG_TRACE_CLOSURE_FREE_VALUE
+            debug_generate_closure_dot_file(closure);
+#endif
+        }
+    }
+
+    // FIXME: 需要优化这种写法
+    // 需要重新绑定值
+    if (callee_closure != nullptr) {
+
+        for (unsigned int i = 0; i < callee_function->free_value_size; i++) {
+            // 需要重新绑定值
+            if (callee_function->free_value_list[i].is_curr_local) {
+                unsigned int index                          = callee_function->free_value_list[i].u.curr_local_index;
+
+                callee_closure->free_value_list[i].is_recur = false;
+                callee_closure->free_value_list[i].u.p      = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
+                callee_closure->free_value_list[i].is_open  = true;
+                callee_closure->free_value_list[i].c_value  = RVM_Value{};
+            }
+        }
+    }
+
+    callinfo->callee_closure = callee_closure;
+
+    // TODO:
+    // caller_object, caller_function 感觉没必要更新
+    // 思考设计是否会冗余
+    *caller_object   = callee_object;
+    *caller_function = callee_function;
+    *caller_closure  = callee_closure;
+
     // 注意，在函数调用还未完成时，argument 其实是没有被释放的
     // 这里延后释放，代码逻辑简化了，但是栈空间有浪费
 }
@@ -2222,9 +2310,9 @@ void derive_function_return(Ring_VirtualMachine* rvm,
  *
  * */
 void derive_function_finish(Ring_VirtualMachine* rvm,
-                            RVM_ClassObject** caller_object, RVM_Function_Tuple** caller_function,
-                            RVM_Function_Tuple* callee_function,
-                            unsigned int        return_value_list_size) {
+                            RVM_ClassObject** caller_object, RVM_Function** caller_function, RVM_Closure** caller_closure,
+                            RVM_Function* callee_function,
+                            unsigned int  return_value_list_size) {
 
     // FIXME:
     // 不应该直接操作 VM_CUR_CO_STACK_TOP_INDEX
@@ -2265,7 +2353,34 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     // 思考设计是否会冗余，这个会影响 std-package-debug
     *caller_object   = callinfo->caller_object;
     *caller_function = callinfo->caller_function;
+    *caller_closure  = callinfo->caller_closure;
 
+    //
+    // 关闭 free value
+    RVM_Closure* closure = callinfo->callee_closure;
+    if (closure != nullptr) {
+
+
+        for (unsigned int i = 0; i < closure->free_value_size; i++) {
+            if (!closure->free_value_list[i].is_recur
+                && closure->free_value_list[i].is_open) {
+                // printf("[Debug][Close Closure] closure(%p) index:%u\n",
+                //        closure, i);
+                closure->free_value_list[i].c_value = *(closure->free_value_list[i].u.p);
+                closure->free_value_list[i].u.p     = &(closure->free_value_list[i].c_value);
+                closure->free_value_list[i].is_open = false;
+            }
+        }
+
+        if (RING_DEBUG_TRACE_CLOSURE_FREE_VALUE) {
+#ifdef DEBUG_TRACE_CLOSURE_FREE_VALUE
+            debug_generate_closure_dot_file(closure);
+#endif
+        }
+    }
+
+
+    //
     // 如果 callinfo 为空, 则一个协程消亡了
     // 需要切换/销毁 协程
     if (VM_CUR_CO_CALLINFO == nullptr) {
@@ -2356,7 +2471,7 @@ RVM_CallInfo* restore_callinfo(RVM_CallInfo** head_) {
  */
 void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                          RVM_ClassObject*     callee_object,
-                                         RVM_Function_Tuple*  function,
+                                         RVM_Function*        function,
                                          unsigned int         argument_list_size) {
 
     RVM_TypeSpecifier*   type_specifier          = nullptr;
@@ -3146,6 +3261,7 @@ RVM_String* rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value) {
     string                  = new_string(rvm);
     alloc_size              = init_string(rvm, string, ROUND_UP8(1));
 
+
     if (value) {
         string->length = 4;
         memcpy(string->data, "true", 4);
@@ -3301,84 +3417,52 @@ int rvm_heap_size(Ring_VirtualMachine* rvm) {
 }
 
 
-RVM_Closure* new_closure(Ring_VirtualMachine* rvm, RVM_AnonymousFunc* func) {
+RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
+                         RVM_Function* caller_function, RVM_Closure* caller_closure,
+                         RVM_Function* callee_function) {
+
     // FIXME: 需要分配在堆上
     RVM_Closure* closure     = (RVM_Closure*)mem_alloc(rvm->meta_pool, sizeof(RVM_Closure));
-    closure->anonymous_func  = func;
-    closure->free_value_size = func->free_value_size;
-    closure->free_value_list = (RVM_FreeValue*)mem_alloc(rvm->data_pool, func->free_value_size * sizeof(RVM_FreeValue));
+    closure->anonymous_func  = callee_function;
+    closure->free_value_size = callee_function->free_value_size;
+    closure->free_value_list = (RVM_FreeValue*)mem_alloc(rvm->data_pool,
+                                                         closure->free_value_size * sizeof(RVM_FreeValue));
 
+    // printf("[Debug][New Closure] parent:(%p,%p), func:%p, closure(%p)\n",
+    //        caller_function, caller_closure, callee_function, closure);
     // free value 的指针指向 当前栈的空间 索引位置
     // 此时为 open
-    for (unsigned int i = 0; i < func->free_value_size; i++) {
+    for (unsigned int i = 0; i < callee_function->free_value_size; i++) {
         // TODO: 当前只支持直接外围函数的局部变量 作为FreeValue
-        unsigned int index                  = func->free_value_list[i].u.outer_local_index;
-        closure->free_value_list[i].is_open = true;
-        closure->free_value_list[i].u.p     = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
-    }
-    return closure;
-}
 
-// 关闭当前 stack上 所有closure 的所有freevalue
-// 也就是说，不能命名一个全局的函数变量，因为他无法进行close
-// 全局的函数变量，那不就是 函数么，这里没必要提供
-// TODO: 添加debug信息，能够快速可调试
-void close_all_closure(Ring_VirtualMachine* rvm, unsigned int return_value_list_size) {
+        if (callee_function->free_value_list[i].is_curr_local) {
+            // FIXME: 这里有问题  VM_CUR_CO_CSB 不正确
+            unsigned int index                   = callee_function->free_value_list[i].u.curr_local_index;
 
-    /*
-unsigned int                     local_var_count = VM_CUR_CO_STACK_TOP_INDEX - VM_CUR_CO_CSB - return_value_list_size;
-如果直接将 return_value_list_size 上的closure排除，然后批量close的话，这里有一个场景不太好覆盖
+            closure->free_value_list[i].is_recur = false;
+            closure->free_value_list[i].u.p      = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
+            closure->free_value_list[i].is_open  = true;
+            closure->free_value_list[i].c_value  = RVM_Value{};
+        } else {
+            assert(caller_closure != nullptr);
+            unsigned int index = callee_function->free_value_list[i].u.out_free_value_index;
+            // printf("out_free_value_index:%u\n", index);
 
-function return_closure() -> (FuncType) {
-    var int local_int_value_0 = 100;
-    return function() {
-        local_int_value_0 ++;
-        fmt::printf("return_closure::[closure]::1 local_int_value_0 = {}\n", local_int_value_0);
-    };
-}
-这个 closure 是个局部变量，这里手动将 return_value_list_size 进行了删除
-    */
-
-    // FIXME: 目前妥协的实现方式
-    // 不能重复 close closure
-    unsigned int local_var_count = VM_CUR_CO_STACK_TOP_INDEX - VM_CUR_CO_CSB;
-
-    // FIXME: 最后不要用map, 感觉会浪费空间
-    std::unordered_set<RVM_Closure*> closed_closures;
-
-    for (unsigned int i = 0; i < local_var_count; i++) {
-        if (VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i].type == RVM_VALUE_TYPE_CLOSURE) {
-
-            RVM_Closure* closure = VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i].u.closure_value;
-            if (closed_closures.find(closure) != closed_closures.end()) {
-                continue;
+            // 通过调用链向上递归查找, 知道找到直接指向的agent
+            RVM_FreeValue* parent = &(caller_closure->free_value_list[index]);
+            while (parent->is_recur) {
+                parent = parent->u.recur;
             }
-
-
-            close_closure(rvm, closure);
-            closed_closures.insert(closure);
+            closure->free_value_list[i].is_recur = true;
+            closure->free_value_list[i].u.recur  = parent;
         }
     }
-}
 
-// TODO: 添加debug信息，能够快速可调试
-void close_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure) {
-    if (closure == nullptr) {
-        return;
+    if (RING_DEBUG_TRACE_CLOSURE_FREE_VALUE) {
+#ifdef DEBUG_TRACE_CLOSURE_FREE_VALUE
+        debug_generate_closure_dot_file(closure);
+#endif
     }
-    // printf("[+]close closure, free_value_size:%d\n", closure->free_value_size);
 
-    for (unsigned int i = 0; i < closure->free_value_size; i++) {
-        if (closure->free_value_list[i].is_open) {
-
-            // printf("        close free-value:[%d]\n", i);
-
-            // FIXME: 这里只深度copy了 bool/int/int64/double
-            // deep copy from stack to free-space
-            // string/class/array 为浅copy
-            closure->free_value_list[i].c_value = *(closure->free_value_list[i].u.p);
-            closure->free_value_list[i].u.p     = &(closure->free_value_list[i].c_value);
-            closure->free_value_list[i].is_open = false;
-        }
-    }
+    return closure;
 }

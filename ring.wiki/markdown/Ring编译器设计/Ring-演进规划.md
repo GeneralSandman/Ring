@@ -411,6 +411,20 @@ class-object  ✅
 6. 完善标准库
 
 
+
+-----------------------------
+
+
+
+## 2024-10-31周
+
+
+### A. Proposal: 如何更好的调试显示 closure free-value的引用情况
+
+1. 在运行过程中开启 trace_closure_free_value=1 输出 closure 的 trace
+2. 将closure 的 trace生成一个 d2源码文件
+3. 通过 d2 工具将 d2源码文件翻译成图片, 可以更直观的展示 closure的情况
+
 -----------------------------
 
 

@@ -544,11 +544,19 @@ void dump_vm_function(Package_Executer*    package_executer,
     }
 
     // 4. free value
-    printf("+FreeValue:        %d\n", function->free_value_size);
+    printf("+FreeValue:        %u\n", function->free_value_size);
     for (unsigned int i = 0; i < function->free_value_size; i++) {
-        printf(" ├──%-20s\n",
-               function->free_value_list[i].identifier);
+        printf(" ├──[%u]%-20s %u %u\n",
+               i,
+               function->free_value_list[i].identifier,
+               function->free_value_list[i].is_curr_local,
+               function->free_value_list[i].is_curr_local ?
+                   function->free_value_list[i].u.curr_local_index :
+                   function->free_value_list[i].u.out_free_value_index);
     }
+
+    printf("\n");
+    return;
 
     printf("+Instructions:\n");
     printf(" ├──%-8s%-30s%-20s%-18s\n",
@@ -670,7 +678,9 @@ std::string dump_vm_constant(RVM_ConstantPool* constant) {
         return "string(" + std::string(constant->u.string_value) + ")";
         break;
     case CONSTANTPOOL_TYPE_CLOSURE:
-        return "closure()";
+        char buffer[20];
+        snprintf(buffer, sizeof(buffer), "%p", (void*)constant->u.anonymous_func_value);
+        return "closure(" + std::string(buffer) + ")";
         break;
     default:
         // TODO: error-report
@@ -686,7 +696,7 @@ std::string dump_vm_constant(RVM_ConstantPool* constant) {
  * binary search
  * 单调性可查看 RVM_SourceCodeLineMap
  */
-unsigned int get_source_line_number_by_pc(RVM_Function_Tuple* function, unsigned int pc) {
+unsigned int get_source_line_number_by_pc(RVM_Function* function, unsigned int pc) {
     DeriveFunction* derive_function = function->u.derive_func;
 
     unsigned int    left            = 0;
@@ -952,7 +962,9 @@ std::string format_rvm_function(Package_Executer* package_executer,
         result += std::string(function->identifier);
     } else {
         // TODO: 这里需要更精确的给出函数名字
-        result += "<closure>";
+        char buffer[20];
+        snprintf(buffer, sizeof(buffer), "%p", (void*)function);
+        result += "<closure " + std::string(buffer) + ">";
     }
     result += "(";
 
