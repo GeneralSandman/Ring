@@ -408,7 +408,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
 #ifdef DEBUG_RVM_INTERACTIVE
         int debug_rvm_res = 0;
-        debug_rvm_res     = debug_rvm_interactive(rvm, (RVM_Function*)VM_CUR_CO_CALLINFO->callee_function, VM_CUR_CO_CODE_LIST, VM_CUR_CO_CODE_SIZE, VM_CUR_CO_PC, VM_CUR_CO_CSB);
+        debug_rvm_res     = debug_rvm_interactive(rvm, VM_CUR_CO_CALLINFO->callee_function, VM_CUR_CO_CODE_LIST, VM_CUR_CO_CODE_SIZE, VM_CUR_CO_PC, VM_CUR_CO_CSB);
         if (debug_rvm_res != 0) {
             goto EXIT;
         }
@@ -460,23 +460,12 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 event = TRACE_EVENT_SAE;
             }
 
-            // if (VM_CUR_CO_CALLINFO != nullptr
-            //     && VM_CUR_CO_CALLINFO->callee_function != nullptr
-            //     && VM_CUR_CO_CALLINFO->callee_function->type == RVM_FUNCTION_TYPE_DERIVE) {
-            //     std::vector<RVM_SourceCodeLineMap> code_line_map;
-            //     code_line_map = VM_CUR_CO_CALLINFO->callee_function->u.derive_func->code_line_map;
-
-            //     if (pc == code_line_map[code_line_map_index].opcode_begin_index) {
-            //         source_code_line_number = code_line_map[code_line_map_index].line_number;
-            //         code_line_map_index++;
-
-            //         event = "line";
-            //     }
-            // }
 
             unsigned int source_line_number = 0;
             if (VM_CUR_CO_CALLINFO != nullptr
                 && VM_CUR_CO_CALLINFO->callee_function != nullptr) {
+                // TODO: 这里直接通过二分法查找, 这里需要优化一下:
+                //       因为Opcode是一行一行运行的, opcode++, 可以用更快的方式找到对应的函数行数
                 source_line_number = get_source_line_number_by_pc(VM_CUR_CO_CALLINFO->callee_function, VM_CUR_CO_PC);
             }
 
@@ -2039,8 +2028,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             new_coroutine = launch_coroutine(rvm,
-                                             &caller_class_ob, (RVM_Function**)&caller_function,
-                                             nullptr, (RVM_Function*)callee_function,
+                                             &caller_class_ob, &caller_function,
+                                             nullptr, callee_function,
                                              argument_list_size);
             // destory arguments after copy it to new coroutine
             VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;

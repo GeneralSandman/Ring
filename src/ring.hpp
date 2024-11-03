@@ -613,21 +613,10 @@ struct RVM_FreeValueDesc {
     const char* identifier;
     bool        is_curr_local;
     union {
-        unsigned int curr_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
-        unsigned int out_free_value_index;
-        // FreeValueDesc* outer_free_value;  // 是外层函数的FreeValue，还得递归向上找，知道找到 outer_local_index
+        unsigned int curr_local_index;     // 本函数定义的局部变量, 那么本函数return的时候, 需要负责关闭相关的局部变量
+        unsigned int out_free_value_index; // 是外层函数的FreeValue，还得递归向上找，直到找到 curr_local_index
     } u;
-    // 如果引用的直接外围函数定义的局部变量
-    // 索引就是 局部变量的 stack-index
-    // 1. 索引
-    // 2. 类型
-    // 3. 是否是直接外层函数的局部变量
-};
-
-typedef struct RVM_FreeValue_Pool RVM_FreeValue_Pool;
-struct RVM_FreeValue_Pool {
-    unsigned int size;
-    RVM_Value*   list;
+    // curr_local_index function 局部变量的 stack-index
 };
 
 struct RVM_FreeValue {

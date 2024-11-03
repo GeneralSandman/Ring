@@ -2099,7 +2099,7 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
             return;
         }
         if (function_call_expression->type != FUNCTION_CALL_TYPE_FUNC) {
-            ring_error_report("not support anonymous function `%s`", function_call_expression->func_identifier);
+            ring_error_report("`launch` not support anonymous function `%s`", function_call_expression->func_identifier);
         }
 
 
