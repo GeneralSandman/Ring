@@ -100,6 +100,8 @@ TEST_MODELS=(
 # TEST_RING_BIN 可通过命令行指定
 # TEST_MODELS   可通过命令行指定
 source "${WORK_SPACE_FOLDER}/parse_args.sh"
+source "${WORK_SPACE_FOLDER}/show_progress.sh"
+
 parse_args "$@"
 echo "ARG_TEST_RING_BIN: $ARG_TEST_RING_BIN"
 echo "ARG_TEST_MODELS:"
@@ -284,6 +286,10 @@ for((test_loop=1;test_loop<=$TEST_LOOP_NUM;test_loop++)); do {
             if [ $extension == "ring" ]
             then
             autoTestAction $model $source_file_path $file
+
+            # 展示测试进度条
+            # TODO: 需要先计算出所有的测试用例的数量
+            # show_progress "TestProgress" 451 $succ_num
             fi
         done
         # printf "\n"
