@@ -98,27 +98,33 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define STACK_SET_CLOSURE_OFFSET(offset, value) \
     STACK_SET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + (offset), (value))
 
+#define GET_FREE_VALUE(index)                                                        \
+    ((VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].is_recur) ?         \
+         (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.recur->u.p) : \
+         (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p))
+
 #define FREE_SET_BOOL_INDEX(index, value) \
-    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.bool_value = (value);
+    (GET_FREE_VALUE(index))->u.bool_value = (value);
 #define FREE_SET_INT_INDEX(index, value) \
-    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.int_value = (value);
+    (GET_FREE_VALUE(index))->u.int_value = (value);
 #define FREE_SET_INT64_INDEX(index, value) \
-    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.int64_value = (value);
+    (GET_FREE_VALUE(index))->u.int64_value = (value);
 #define FREE_SET_DOUBLE_INDEX(index, value) \
-    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.double_value = (value);
+    (GET_FREE_VALUE(index))->u.double_value = (value);
 #define FREE_SET_STRING_INDEX(index, value) \
-    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.string_value = (value);
+    (GET_FREE_VALUE(index))->u.string_value = (value);
 
 #define FREE_GET_BOOL_INDEX(index) \
-    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.bool_value;
+    (GET_FREE_VALUE(index))->u.bool_value;
 #define FREE_GET_INT_INDEX(index) \
-    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.int_value;
+    (GET_FREE_VALUE(index))->u.int_value;
 #define FREE_GET_INT64_INDEX(index) \
-    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.int64_value;
+    (GET_FREE_VALUE(index))->u.int64_value;
 #define FREE_GET_DOUBLE_INDEX(index) \
-    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.double_value;
+    (GET_FREE_VALUE(index))->u.double_value;
 #define FREE_GET_STRING_INDEX(index) \
-    VM_CUR_CO_CALLINFO->curr_closure->free_value_list[(index)].u.p->u.string_value;
+    (GET_FREE_VALUE(index))->u.string_value;
+
 
 #define STACK_COPY_INDEX(dst_index, src_index) \
     (VM_CUR_CO_STACK_DATA[(dst_index)] = VM_CUR_CO_STACK_DATA[(src_index)])
@@ -779,16 +785,16 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_FREE_INT:
             free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             int_value        = STACK_GET_INT_OFFSET(-1);
-            // FREE_SET_INT_INDEX(free_value_index, int_value);
-            {
-                RVM_Value* p = nullptr;
-                if (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].is_recur) {
-                    p = (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.recur->u.p);
-                } else {
-                    p = VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.p;
-                }
-                p->u.int_value = int_value;
-            }
+            FREE_SET_INT_INDEX(free_value_index, int_value);
+            // {
+            //     RVM_Value* p = nullptr;
+            //     if (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].is_recur) {
+            //         p = (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.recur->u.p);
+            //     } else {
+            //         p = VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.p;
+            //     }
+            //     p->u.int_value = int_value;
+            // }
 
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             VM_CUR_CO_PC += 3;
@@ -828,16 +834,16 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_PUSH_FREE_INT:
             free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            // int_value        = FREE_GET_INT_INDEX(free_value_index);
-            {
-                RVM_Value* p = nullptr;
-                if (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].is_recur) {
-                    p = (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.recur->u.p);
-                } else {
-                    p = VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.p;
-                }
-                int_value = p->u.int_value;
-            }
+            int_value        = FREE_GET_INT_INDEX(free_value_index);
+            // {
+            //     RVM_Value* p = nullptr;
+            //     if (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].is_recur) {
+            //         p = (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.recur->u.p);
+            //     } else {
+            //         p = VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.p;
+            //     }
+            //     int_value = p->u.int_value;
+            // }
             STACK_SET_INT_OFFSET(0, int_value);
 
             VM_CUR_CO_STACK_TOP_INDEX += 1;
