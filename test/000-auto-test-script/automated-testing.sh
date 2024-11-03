@@ -144,6 +144,10 @@ NOT_TEST_FILES=(
 
   "./test/065-std-package-io/000.ring"
 
+  "./test/050-coroutine/coroutine-closure-000.ring"
+  "./test/050-coroutine/coroutine-closure-001.ring"
+  # launch 只支持普通函数/method, 暂时还不支持匿名函数
+
 
   )
 
