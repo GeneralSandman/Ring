@@ -1,0 +1,13 @@
+test begin
+test end
+defer closure
+defer closure
+defer closure
+defer closure
+defer closure
+defer closure
+defer closure
+defer closure
+defer closure
+defer closure
+main end

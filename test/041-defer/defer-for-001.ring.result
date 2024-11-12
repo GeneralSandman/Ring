@@ -1,0 +1,27 @@
+------------
+test1 begin
+test1 end
+test1 defer int_value=10
+test1 defer int_value=10
+test1 defer int_value=10
+test1 defer int_value=10
+test1 defer int_value=10
+test1 defer int_value=10
+test1 defer int_value=10
+test1 defer int_value=10
+test1 defer int_value=10
+test1 defer int_value=10
+------------
+test2 begin
+test2 end
+test1 defer int_value=9
+test1 defer int_value=8
+test1 defer int_value=7
+test1 defer int_value=6
+test1 defer int_value=5
+test1 defer int_value=4
+test1 defer int_value=3
+test1 defer int_value=2
+test1 defer int_value=1
+test1 defer int_value=0
+main end

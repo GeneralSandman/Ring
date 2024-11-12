@@ -680,6 +680,7 @@ std::string trans_flex_token_to_human_char(std::string str) {
         {"`defer`", "TOKEN_DEFER"},
         {"`range`", "TOKEN_RANGE"},
         {"`in`", "TOKEN_IN"},
+        {"`launch`", "TOKEN_LAUNCH"},
         {"`enum`", "TOKEN_ENUM"},
         {"`class`", "TOKEN_CLASS"},
         {"`private`", "TOKEN_PRIVATE"},

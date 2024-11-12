@@ -433,6 +433,36 @@ class-object  ✅
 3. 变量的类型为 bool/int/int64/double/string
 4. 嵌套闭包
 
+
+### C. Proposal: defer机制 ✅
+
+目前 Ring稍微有点成熟了，支持了匿名函数，支持了协程，有必要可以开始考虑defer机制了
+
+```
+function main() {
+    defer function() {
+    }()
+}
+```
+
+1. 作为闭包可以捕获自由变量 （引用传递）
+2. 可以传递参数 （值传递）
+
+
+
+
+### D. 闭包在循环中定义会怎么办 ✅
+
+for(i=0; i<10; i++) {
+    function() {
+    }();
+}
+
+应该会运行10次 defer函数
+
+### E. Test: 系统测试一下defer相关的功能
+
+
 -----------------------------
 
 

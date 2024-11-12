@@ -248,6 +248,10 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_RETURN, "return", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "", ""},
     {RVM_CODE_FUNCTION_FINISH, "function_finish", OPCODE_OPERAND_TYPE_0BYTE, 0, "", "", ""},
 
+    // defer
+    {RVM_CODE_PUSH_DEFER, "push_defer", OPCODE_OPERAND_TYPE_0BYTE, -1, "-", "-", "-"},
+    {RVM_CODE_POP_DEFER, "pop_defer", OPCODE_OPERAND_TYPE_0BYTE, -1, "-", "-", "-"},
+
     {RVM_CODE_EXIT, "exit", OPCODE_OPERAND_TYPE_0BYTE, -1, "", "", ""},
 
 

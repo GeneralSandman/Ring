@@ -1,0 +1,2 @@
+invoke a closure local_int_value_0=100
+invoke a closure string_var=hello world

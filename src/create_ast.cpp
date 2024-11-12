@@ -231,8 +231,8 @@ Expression* create_expression_anonymous_func(AnonymousFunc* func) {
     return expression;
 }
 
-Expression* create_expression_iife(AnonymousFunc* anony_func,
-                                   ArgumentList*  argument_list) {
+ImmediateInvokFuncExpression* create_expression_iife(AnonymousFunc* anony_func,
+                                                     ArgumentList*  argument_list) {
 
     unsigned int argument_list_size = 0;
     for (ArgumentList* pos = argument_list; pos != nullptr; pos = pos->next) {
@@ -244,11 +244,15 @@ Expression* create_expression_iife(AnonymousFunc* anony_func,
     iife->argument_list                = argument_list;
     iife->anonymous_func               = anony_func;
 
-    Expression* expression             = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
-    expression->line_number            = package_unit_get_line_number();
-    expression->convert_type           = nullptr; // UPDATED_BY_FIX_AST
-    expression->type                   = EXPRESSION_TYPE_IIFE;
-    expression->u.iife                 = iife;
+    return iife;
+}
+
+Expression* create_expression_from_iife(ImmediateInvokFuncExpression* iife) {
+    Expression* expression   = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
+    expression->line_number  = package_unit_get_line_number();
+    expression->convert_type = nullptr; // UPDATED_BY_FIX_AST
+    expression->type         = EXPRESSION_TYPE_IIFE;
+    expression->u.iife       = iife;
 
     return expression;
 }
@@ -1036,6 +1040,17 @@ Statement* create_statement_from_jump_tag(JumpTagStatement* jump_tag_statement) 
     return statement;
 }
 
+Statement* create_statement_from_defer(DeferStatement* defer_statement) {
+    debug_ast_info_with_yellow("\t");
+    Statement* statement         = (Statement*)mem_alloc(get_front_mem_pool(), sizeof(Statement));
+    statement->line_number       = package_unit_get_line_number();
+    statement->type              = STATEMENT_TYPE_DEFER;
+    statement->u.defer_statement = defer_statement;
+    statement->next              = nullptr;
+
+    return statement;
+}
+
 ReturnStatement* create_return_statement(Expression* expression) {
     debug_ast_info_with_yellow("expression->type:%d", expression->type);
 
@@ -1781,6 +1796,14 @@ JumpTagStatement* create_jump_tag_statement(char* identifier) {
     jump_tag->identifier       = identifier;
 
     return jump_tag;
+}
+
+DeferStatement* create_defer_statement(ImmediateInvokFuncExpression* iife) {
+    DeferStatement* defer = (DeferStatement*)mem_alloc(get_front_mem_pool(), sizeof(DeferStatement));
+    defer->line_number    = package_unit_get_line_number();
+    defer->iife           = iife;
+
+    return defer;
 }
 
 Attribute add_attribute(Attribute attribute, AttributeType type) {

@@ -402,6 +402,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Function*        callee_function        = nullptr;
     RVM_Method*          callee_method          = nullptr;
 
+    RVM_DeferItem*       defer_item             = nullptr;
+
 
     for (; VM_CUR_CO_PC < VM_CUR_CO_CODE_SIZE; prev_opcde = opcode) {
         opcode = VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC];
@@ -1597,10 +1599,12 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 break;
             }
 
+            // TODO:
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
                                    nullptr, closure_value->anonymous_func, closure_value,
-                                   argument_list_size);
+                                   argument_list_size,
+                                   false);
 
             break;
         case RVM_CODE_INVOKE_FUNC_NATIVE:
@@ -1633,7 +1637,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
                                    nullptr, callee_function, nullptr,
-                                   argument_list_size);
+                                   argument_list_size,
+                                   false);
 
             break;
         case RVM_CODE_INVOKE_METHOD:
@@ -1653,23 +1658,56 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
                                    callee_class_ob, callee_function, nullptr,
-                                   argument_list_size);
+                                   argument_list_size,
+                                   false);
             break;
         case RVM_CODE_RETURN:
             return_value_list_size = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             VM_CUR_CO_PC += 3;
             [[fallthrough]]; // make g++ happy
         case RVM_CODE_FUNCTION_FINISH:
-            // close all closure free-value
-            // 遍历当前所有的栈空间，找到所有 stack 中是 closure的RVM_Value
-            // 依次对他们执行关闭操作
-            // close_all_closure(rvm, return_value_list_size);
             derive_function_finish(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
                                    nullptr,
                                    return_value_list_size);
-            // VM_CUR_CO_PC += 1;
             return_value_list_size = 0;
+            break;
+
+            // defer
+        case RVM_CODE_PUSH_DEFER:
+            argument_list_size = STACK_GET_INT_OFFSET(-2);
+            closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
+            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+
+            defer_item = new_defer_item(rvm, closure_value, argument_list_size);
+            coroutine_push_defer_item(rvm, defer_item);
+
+            VM_CUR_CO_PC += 1;
+            break;
+        case RVM_CODE_POP_DEFER:
+            if (VM_CUR_CO->defer_list_size != 0) {
+
+                RVM_DeferItem* defer_item = coroutine_pop_defer_item(rvm);
+                fill_defer_item_argument_stack(rvm, defer_item);
+
+                if (defer_item != nullptr) {
+                    // RVM_Value*   argument_list      = defer_item->argument_list;
+                    unsigned int argument_list_size = defer_item->argument_size;
+                    RVM_Closure* closure_value      = defer_item->closure;
+
+                    // 这里直接调用会有个问题
+                    // closure return的时候找不到返回地址
+                    // 没有办法继续执行,
+                    // 因为不是在 虚拟机中的的 switch中调用的 invoke_derive_function
+                    invoke_derive_function(rvm,
+                                           &caller_class_ob, &caller_function, &caller_closure,
+                                           nullptr, closure_value->anonymous_func, closure_value,
+                                           argument_list_size,
+                                           true);
+                }
+            } else {
+                VM_CUR_CO_PC += 1;
+            }
             break;
 
         case RVM_CODE_EXIT:
@@ -2167,17 +2205,21 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
  * callee_object != nullptr:
  *      -> 是method调用
  *
+ *
+ * invoke_by_defer 是否有defer发起的
  */
 void invoke_derive_function(Ring_VirtualMachine* rvm,
                             RVM_ClassObject** caller_object, RVM_Function** caller_function, RVM_Closure** caller_closure,
                             RVM_ClassObject* callee_object, RVM_Function* callee_function, RVM_Closure* callee_closure,
-                            unsigned int argument_list_size) {
+                            unsigned int argument_list_size,
+                            bool         invoke_by_defer) {
 
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->caller_object        = *caller_object;
     callinfo->caller_function      = *caller_function;
     callinfo->caller_closure       = *caller_closure; // TODO:
     callinfo->caller_stack_base    = VM_CUR_CO_STACK_TOP_INDEX;
+    callinfo->caller_is_defer      = invoke_by_defer;
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
     callinfo->callee_closure       = callee_closure; // TODO:
@@ -2191,18 +2233,20 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
 
 
     if (RING_DEBUG_TRACE_FUNC_BACKTRACE) {
-        printf_witch_red("[RING_DEBUG::trace_coroutine_sched] [invoke_func::] "
-                         "CallInfo{caller_object:%p, caller_function:%20s, caller_stack_base:%u, \n"
-                         "%*scallee_object:%p, callee_function:%20s, callee_argument_size:%u}\n",
-                         callinfo->caller_object,
-                         callinfo->caller_function != nullptr ? callinfo->caller_function->identifier : "",
-                         callinfo->caller_stack_base,
+        std::string prefix     = "[RING_DEBUG::trace_func_backtrace] [invoke_func::]";
+        std::string callinfo_s = sprintf_string("CallInfo{\n"
+                                                "\tcaller_object:%p,\n"
+                                                "\tcaller_function:%s,\n"
+                                                "\tcaller_closure:%p,\n"
+                                                "\tcaller_stack_base:%u,\n"
+                                                "\tcallee_object:%p,\n"
+                                                "\tcallee_function:%s,\n"
+                                                "\tcallee_closure:%p,\n"
+                                                "\tcallee_argument_size:%u\n"
+                                                "}\n",
+                                                callinfo->caller_object, callinfo->caller_function != nullptr ? callinfo->caller_function->identifier : "", callinfo->caller_closure, callinfo->caller_stack_base, callinfo->callee_object, callinfo->callee_function != nullptr ? callinfo->callee_function->identifier : "", callinfo->callee_closure, callinfo->callee_argument_size);
 
-                         61, "", // 输出 61个空格，保持格式
-
-                         callinfo->callee_object,
-                         callinfo->callee_function != nullptr ? callinfo->callee_function->identifier : "",
-                         callinfo->callee_argument_size);
+        printf_witch_red("%s %s", prefix.c_str(), callinfo_s.c_str());
     }
 
     // 函数上下文切换
@@ -2302,6 +2346,7 @@ void derive_function_return(Ring_VirtualMachine* rvm,
  *      call info: caller_pc
  * 3. change vm code to callee
  * 4. change pc
+ * 5. close all free-value
  *
  * */
 void derive_function_finish(Ring_VirtualMachine* rvm,
@@ -2322,18 +2367,20 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     callinfo                    = restore_callinfo(&VM_CUR_CO_CALLINFO);
 
     if (RING_DEBUG_TRACE_FUNC_BACKTRACE) {
-        printf_witch_red("[RING_DEBUG::trace_coroutine_sched] [finish_func::] "
-                         "CallInfo{caller_object:%p, caller_function:%20s, caller_stack_base:%u, \n"
-                         "%*scallee_object:%p, callee_function:%20s, callee_argument_size:%u}\n",
-                         callinfo->caller_object,
-                         callinfo->caller_function != nullptr ? callinfo->caller_function->identifier : "",
-                         callinfo->caller_stack_base,
+        std::string prefix     = "[RING_DEBUG::trace_func_backtrace] [finish_func::]";
+        std::string callinfo_s = sprintf_string("CallInfo{\n"
+                                                "\tcaller_object:%p,\n"
+                                                "\tcaller_function:%s,\n"
+                                                "\tcaller_closure:%p,\n"
+                                                "\tcaller_stack_base:%u,\n"
+                                                "\tcallee_object:%p,\n"
+                                                "\tcallee_function:%s,\n"
+                                                "\tcallee_closure:%p,\n"
+                                                "\tcallee_argument_size:%u\n"
+                                                "}\n",
+                                                callinfo->caller_object, callinfo->caller_function != nullptr ? callinfo->caller_function->identifier : "", callinfo->caller_closure, callinfo->caller_stack_base, callinfo->callee_object, callinfo->callee_function != nullptr ? callinfo->callee_function->identifier : "", callinfo->callee_closure, callinfo->callee_argument_size);
 
-                         61, "", // 输出 61个空格，保持格式
-
-                         callinfo->callee_object,
-                         callinfo->callee_function != nullptr ? callinfo->callee_function->identifier : "",
-                         callinfo->callee_argument_size);
+        printf_witch_red("%s %s", prefix.c_str(), callinfo_s.c_str());
     }
 
     unsigned int local_variable_size = callinfo->callee_function->local_variable_size;
@@ -2361,6 +2408,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
                 && closure->free_value_list[i].is_open) {
                 // printf("[Debug][Close Closure] closure(%p) index:%u\n",
                 //        closure, i);
+                // TODO: deep_copy string array
                 closure->free_value_list[i].c_value = *(closure->free_value_list[i].u.p);
                 closure->free_value_list[i].u.p     = &(closure->free_value_list[i].c_value);
                 closure->free_value_list[i].is_open = false;
@@ -2386,7 +2434,13 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
                          callee_function);
         return;
     }
-    VM_CUR_CO_PC += 1; // 调用完成之后，上层的函数 pc + 1
+
+    if (!callinfo->caller_is_defer) {
+        // 调用完成之后，上层的函数 pc + 1
+        VM_CUR_CO_PC += 1;
+    } else {
+        // 如果上层是defer，那么他的pc不会+1，需要继续执行 pop_defer指令
+    }
 
 
     // TODO: 为了安全性，需要进行检查
@@ -3460,4 +3514,69 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
     }
 
     return closure;
+}
+
+
+// TODO; deep_copy argument_list
+// 这里暂时没有 deep copy argument_list
+// 为什么还能成功
+// 因为 argument_list 是在栈上分配的，等函数return的时候，他还能向上在stack上找到对应的argument
+RVM_DeferItem* new_defer_item(Ring_VirtualMachine* rvm,
+                              RVM_Closure*         closure,
+                              unsigned int         argument_list_size) {
+
+    RVM_DeferItem* defer_item = (RVM_DeferItem*)mem_alloc(rvm->meta_pool,
+                                                          sizeof(RVM_DeferItem));
+
+    defer_item->argument_size = argument_list_size;
+    defer_item->argument_list = (RVM_Value*)mem_alloc(rvm->meta_pool, defer_item->argument_size * sizeof(RVM_Value));
+    defer_item->closure       = closure;
+    defer_item->next          = nullptr;
+
+    // deep copy argument
+    for (unsigned int i = 0; i < argument_list_size; i++) {
+        // debug
+        std::string value_str = format_rvm_value(&VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i]);
+        debug_exec_info_with_white("new_defer_item deep_copy:%s\n", value_str.c_str());
+        // debug
+        // TODO: 这里还不是 deep copy
+        defer_item->argument_list[i] = VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i];
+    }
+
+    // 释放 runtime_stack 空间
+    VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
+
+    return defer_item;
+}
+
+void coroutine_push_defer_item(Ring_VirtualMachine* rvm, RVM_DeferItem* defer_item) {
+    debug_exec_info_with_white("coroutine_push_defer_item: defer_item:%p argument_list:%u closure:%p\n",
+                               defer_item,
+                               defer_item->argument_size,
+                               defer_item->closure);
+
+    defer_item->next = VM_CUR_CO->defer_list;
+
+    VM_CUR_CO->defer_list_size++;
+    VM_CUR_CO->defer_list = defer_item;
+}
+
+RVM_DeferItem* coroutine_pop_defer_item(Ring_VirtualMachine* rvm) {
+    if (VM_CUR_CO->defer_list_size == 0) {
+        return nullptr;
+    }
+
+    RVM_DeferItem* defer_item = VM_CUR_CO->defer_list;
+    VM_CUR_CO->defer_list_size--;
+    VM_CUR_CO->defer_list = VM_CUR_CO->defer_list->next;
+    return defer_item;
+}
+
+void fill_defer_item_argument_stack(Ring_VirtualMachine* rvm, RVM_DeferItem* defer_item) {
+    for (unsigned int i = 0; i < defer_item->argument_size; i++) {
+        // TODO: 这里还不是 deep copy
+        VM_CUR_CO_STACK_DATA[VM_CUR_CO_STACK_TOP_INDEX + i] = defer_item->argument_list[i];
+    }
+
+    VM_CUR_CO_STACK_TOP_INDEX += defer_item->argument_size;
 }

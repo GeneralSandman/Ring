@@ -297,6 +297,10 @@ void fix_statement(Statement* statement, Block* block, FunctionTuple* func) {
     case STATEMENT_TYPE_JUMP_TAG:
         break;
 
+    case STATEMENT_TYPE_DEFER:
+        fix_defer_statement(statement->u.defer_statement, block, func);
+        break;
+
     default: break;
     }
 }
@@ -783,6 +787,11 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
             ring_compile_error_report(&context);
         }
     }
+}
+
+void fix_defer_statement(DeferStatement* defer_statement, Block* block, FunctionTuple* func) {
+
+    fix_iife_expression(nullptr, defer_statement->iife, block, func);
 }
 
 void fix_identifier_expression(Expression*           expression,
@@ -2522,6 +2531,9 @@ void fix_iife_expression(Expression*                   expression,
 
 
     // FIXME: 应该是函数的返回值类型
+    if (expression == nullptr) {
+        return;
+    }
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     for (FunctionReturnList* pos = anonymous_func->return_list;
          pos != nullptr;

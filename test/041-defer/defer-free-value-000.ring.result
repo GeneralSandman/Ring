@@ -1,0 +1,15 @@
+test begin
+test end
+---------- defer 2 ----------
+defer bool_value=true
+defer int_value=123
+defer int64_value=456
+defer string_value=hello world
+-----------------------------
+---------- defer 1 ----------
+defer bool_value=true
+defer int_value=123
+defer int64_value=456
+defer string_value=hello world
+-----------------------------
+main end
