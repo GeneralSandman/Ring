@@ -1688,10 +1688,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             if (VM_CUR_CO->defer_list_size != 0) {
 
                 RVM_DeferItem* defer_item = coroutine_pop_defer_item(rvm);
+                fill_defer_item_argument_stack(rvm, defer_item);
 
                 if (defer_item != nullptr) {
+                    // RVM_Value*   argument_list      = defer_item->argument_list;
                     unsigned int argument_list_size = defer_item->argument_size;
-                    RVM_Value*   argument_list      = defer_item->argument_list;
                     RVM_Closure* closure_value      = defer_item->closure;
 
                     // 这里直接调用会有个问题
@@ -3517,6 +3518,9 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
 
 
 // TODO; deep_copy argument_list
+// 这里暂时没有 deep copy argument_list
+// 为什么还能成功
+// 因为 argument_list 是在栈上分配的，等函数return的时候，他还能向上在stack上找到对应的argument
 RVM_DeferItem* new_defer_item(Ring_VirtualMachine* rvm,
                               RVM_Closure*         closure,
                               unsigned int         argument_list_size) {
@@ -3524,16 +3528,33 @@ RVM_DeferItem* new_defer_item(Ring_VirtualMachine* rvm,
     RVM_DeferItem* defer_item = (RVM_DeferItem*)mem_alloc(rvm->meta_pool,
                                                           sizeof(RVM_DeferItem));
 
-    // copy argument
     defer_item->argument_size = argument_list_size;
-    defer_item->argument_list = nullptr;
+    defer_item->argument_list = (RVM_Value*)mem_alloc(rvm->meta_pool, defer_item->argument_size * sizeof(RVM_Value));
     defer_item->closure       = closure;
     defer_item->next          = nullptr;
+
+    // deep copy argument
+    for (unsigned int i = 0; i < argument_list_size; i++) {
+        // debug
+        std::string value_str = format_rvm_value(&VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i]);
+        debug_exec_info_with_white("new_defer_item deep_copy:%s\n", value_str.c_str());
+        // debug
+        // TODO: 这里还不是 deep copy
+        defer_item->argument_list[i] = VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i];
+    }
+
+    // 释放 runtime_stack 空间
+    VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
 
     return defer_item;
 }
 
 void coroutine_push_defer_item(Ring_VirtualMachine* rvm, RVM_DeferItem* defer_item) {
+    debug_exec_info_with_white("coroutine_push_defer_item: defer_item:%p argument_list:%u closure:%p\n",
+                               defer_item,
+                               defer_item->argument_size,
+                               defer_item->closure);
+
     defer_item->next = VM_CUR_CO->defer_list;
 
     VM_CUR_CO->defer_list_size++;
@@ -3549,4 +3570,13 @@ RVM_DeferItem* coroutine_pop_defer_item(Ring_VirtualMachine* rvm) {
     VM_CUR_CO->defer_list_size--;
     VM_CUR_CO->defer_list = VM_CUR_CO->defer_list->next;
     return defer_item;
+}
+
+void fill_defer_item_argument_stack(Ring_VirtualMachine* rvm, RVM_DeferItem* defer_item) {
+    for (unsigned int i = 0; i < defer_item->argument_size; i++) {
+        // TODO: 这里还不是 deep copy
+        VM_CUR_CO_STACK_DATA[VM_CUR_CO_STACK_TOP_INDEX + i] = defer_item->argument_list[i];
+    }
+
+    VM_CUR_CO_STACK_TOP_INDEX += defer_item->argument_size;
 }

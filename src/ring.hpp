@@ -3165,9 +3165,9 @@ RVM_Closure*         new_closure(Ring_VirtualMachine* rvm,
                                  RVM_Function* func);
 
 RVM_DeferItem*       new_defer_item(Ring_VirtualMachine* rvm, RVM_Closure* closure, unsigned int argument_list_size);
-
 void                 coroutine_push_defer_item(Ring_VirtualMachine* rvm, RVM_DeferItem* defer_item);
 RVM_DeferItem*       coroutine_pop_defer_item(Ring_VirtualMachine* rvm);
+void                 fill_defer_item_argument_stack(Ring_VirtualMachine* rvm, RVM_DeferItem* defer_item);
 // --------------------
 
 
