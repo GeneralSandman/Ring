@@ -83,6 +83,7 @@ TEST_MODELS=(
     "033-for-range"
 
     "040-closure"
+    "041-defer"
 
     "050-coroutine"
 

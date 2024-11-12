@@ -1,0 +1,5 @@
+test begin
+test end
+defer 2
+defer 1
+main end

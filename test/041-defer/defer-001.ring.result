@@ -1,0 +1,7 @@
+test begin
+test end
+defer 2
+destory_func
+defer 1
+destory_func
+main end
