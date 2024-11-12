@@ -95,6 +95,7 @@ typedef struct VarDecl                      VarDecl;
 typedef struct Variable                     Variable;
 typedef struct TagDefinitionStatement       TagDefinitionStatement;
 typedef struct JumpTagStatement             JumpTagStatement;
+typedef struct DeferStatement               DeferStatement;
 typedef struct TypeAlias                    TypeAlias;
 typedef struct TypeSpecifier                TypeSpecifier;
 typedef struct StdPackageNativeFunction     StdPackageNativeFunction;
@@ -131,6 +132,7 @@ typedef struct RVM_Field                    RVM_Field;
 typedef struct RVM_Method                   RVM_Method;
 typedef struct RVM_ClassDefinition          RVM_ClassDefinition;
 typedef struct RVM_CallInfo                 RVM_CallInfo;
+typedef struct RVM_DeferItem                RVM_DeferItem;
 
 typedef struct RVM_GC_Object                RVM_GC_Object;
 
@@ -291,6 +293,10 @@ struct RingCoroutine {
     RVM_RuntimeStack* runtime_stack; // 运行堆栈
 
     RVM_CallInfo*     call_info; // 函数调用栈
+
+    // defer 调用链
+    unsigned int   defer_list_size;
+    RVM_DeferItem* defer_list;
 };
 
 struct ImportPackageInfo {
@@ -1068,6 +1074,10 @@ typedef enum {
     RVM_CODE_RETURN,
     RVM_CODE_FUNCTION_FINISH,
 
+    // defer
+    RVM_CODE_PUSH_DEFER,
+    RVM_CODE_POP_DEFER,
+
     RVM_CODE_EXIT,
 
     // array
@@ -1150,6 +1160,7 @@ struct RVM_CallInfo {
     RVM_Function*    caller_function; // TODO: 考虑是否有必要删除
     RVM_Closure*     caller_closure;  // TODO:
     unsigned int     caller_stack_base;
+    bool             caller_is_defer;
 
     RVM_ClassObject* callee_object;
     RVM_Function*    callee_function;
@@ -1164,6 +1175,15 @@ struct RVM_CallInfo {
 
     RVM_CallInfo*    prev;
     RVM_CallInfo*    next;
+};
+
+struct RVM_DeferItem {
+
+    RVM_Closure*   closure;
+    unsigned int   argument_size;
+    RVM_Value*     argument_list;
+
+    RVM_DeferItem* next;
 };
 
 #define CALL_INFO_MAGIC_NUMBER (0x8421) // 33852
@@ -1200,6 +1220,7 @@ typedef enum {
     STATEMENT_TYPE_VAR_DECL,
     STATEMENT_TYPE_TAG_DEFINITION,
     STATEMENT_TYPE_JUMP_TAG,
+    STATEMENT_TYPE_DEFER,
 } StatementType;
 
 typedef enum {
@@ -1421,6 +1442,7 @@ struct Statement {
         VarDecl*                var_decl_statement;
         TagDefinitionStatement* tag_definition_statement;
         JumpTagStatement*       jump_tag_statement;
+        DeferStatement*         defer_statement;
     } u;
     Statement* next;
 };
@@ -1957,6 +1979,12 @@ struct JumpTagStatement {
     unsigned int line_number;
 
     char*        identifier;
+};
+
+struct DeferStatement {
+    unsigned int                  line_number;
+
+    ImmediateInvokFuncExpression* iife;
 };
 
 struct ContinueStatement {
@@ -2628,8 +2656,9 @@ Expression*                   create_expression_launch(LaunchExpressionType    t
 
 Expression*                   create_expression_anonymous_func(AnonymousFunc* func);
 
-Expression*                   create_expression_iife(AnonymousFunc* closure,
+ImmediateInvokFuncExpression* create_expression_iife(AnonymousFunc* closure,
                                                      ArgumentList*  argument_list);
+Expression*                   create_expression_from_iife(ImmediateInvokFuncExpression* iife);
 
 Expression*                   create_expression_binary(ExpressionType type, Expression* left, Expression* right);
 Expression*                   create_expression_unitary(ExpressionType type, Expression* unitary_expression);
@@ -2675,11 +2704,14 @@ Statement*                    create_statement_from_break(BreakStatement* break_
 BreakStatement*               create_break_statement(char* literal_interface);
 TagDefinitionStatement*       create_tag_definition_statement(char* identifier);
 JumpTagStatement*             create_jump_tag_statement(char* identifier);
+DeferStatement*               create_defer_statement(ImmediateInvokFuncExpression* iife);
 Statement*                    create_statement_from_continue(ContinueStatement* continue_statement);
 ContinueStatement*            create_continue_statement();
 Statement*                    create_statement_from_return(ReturnStatement* return_statement);
 Statement*                    create_statement_from_tag_definition(TagDefinitionStatement* tag_def);
 Statement*                    create_statement_from_jump_tag(JumpTagStatement* jump_tag_statement);
+Statement*                    create_statement_from_defer(DeferStatement* defer_statement);
+
 ReturnStatement*              create_return_statement(Expression* expression);
 
 Block*                        start_new_block();
@@ -2775,6 +2807,7 @@ void             fix_if_statement(IfStatement* if_statement, Block* block, Funct
 void             fix_for_statement(ForStatement* for_statement, Block* block, FunctionTuple* func);
 void             fix_dofor_statement(DoForStatement* dofor_statement, Block* block, FunctionTuple* func);
 void             fix_return_statement(ReturnStatement* return_statement, Block* block, FunctionTuple* func);
+void             fix_defer_statement(DeferStatement* defer_statement, Block* block, FunctionTuple* func);
 void             fix_identifier_expression(Expression*           expression,
                                            IdentifierExpression* identifier_expression,
                                            Block*                block);
@@ -2937,6 +2970,10 @@ void              generate_vmcode_from_break_statement(Package_Executer* execute
 void              generate_vmcode_from_continue_statement(Package_Executer* executer, Block* block, ContinueStatement* continue_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_return_statement(Package_Executer* executer, Block* block, ReturnStatement* return_statement, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* block, JumpTagStatement* jump_tag_statement, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_defer_statement(Package_Executer* executer,
+                                                       Block*            block,
+                                                       DeferStatement*   defer_statement,
+                                                       RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_expression(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_assign_expression(Package_Executer* executer, AssignExpression* expression, RVM_OpcodeBuffer* new_opcode_buffer);
 void              generate_pop_to_leftvalue_reverse(Package_Executer* executer, Expression* expression, RVM_OpcodeBuffer* opcode_buffer);
@@ -3035,7 +3072,8 @@ void                 invoke_native_function(Ring_VirtualMachine* rvm, RVM_Functi
 void                 invoke_derive_function(Ring_VirtualMachine* rvm,
                                             RVM_ClassObject** caller_object, RVM_Function** caller_function, RVM_Closure** caller_closure,
                                             RVM_ClassObject* callee_object, RVM_Function* callee_function, RVM_Closure* callee_closure,
-                                            unsigned int argument_list_size);
+                                            unsigned int argument_list_size,
+                                            bool         invoke_by_defer);
 void                 derive_function_return(Ring_VirtualMachine* rvm,
                                             RVM_Function** caller_function, RVM_Function* callee_function,
                                             unsigned int return_value_list_size);
@@ -3126,6 +3164,10 @@ RVM_Closure*         new_closure(Ring_VirtualMachine* rvm,
                                  RVM_Function* caller_function, RVM_Closure* caller_closure,
                                  RVM_Function* func);
 
+RVM_DeferItem*       new_defer_item(Ring_VirtualMachine* rvm, RVM_Closure* closure, unsigned int argument_list_size);
+
+void                 coroutine_push_defer_item(Ring_VirtualMachine* rvm, RVM_DeferItem* defer_item);
+RVM_DeferItem*       coroutine_pop_defer_item(Ring_VirtualMachine* rvm);
 // --------------------
 
 

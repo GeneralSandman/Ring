@@ -557,7 +557,8 @@ void dump_vm_function(Package_Executer*    package_executer,
 
 
     // 5. Instructions
-    printf("+Instructions:\n");
+    printf("+Instructions: %u\n",
+           (function->type == RVM_FUNCTION_TYPE_DERIVE) ? (function->u.derive_func->code_size) : 0);
     printf(" ├──%-8s%-30s%-20s%-18s\n",
            "*Num", "*Instruction", "*Operand", "*SourceLineNum");
     if (function->type == RVM_FUNCTION_TYPE_DERIVE) {

@@ -549,6 +549,8 @@ void generate_code_from_function_definition(Package_Executer* executer,
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
     generate_vmcode_from_statement_list(executer, src->block, src->block->statement_list, opcode_buffer);
+
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_DEFER, 0, src->end_line_number);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_FUNCTION_FINISH, 0, src->end_line_number);
 
     opcode_buffer_fix_label(opcode_buffer);
@@ -576,6 +578,8 @@ void generate_code_from_method_definition(Package_Executer* executer,
                                         src->block,
                                         src->block->statement_list,
                                         opcode_buffer);
+
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_POP_DEFER, 0, src->end_line_number);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_FUNCTION_FINISH, 0, src->start_line_number);
 
     opcode_buffer_fix_label(opcode_buffer);
@@ -659,7 +663,13 @@ void generate_vmcode_from_statement_list(Package_Executer* executer,
             break;
 
 
-        default: break;
+        case STATEMENT_TYPE_DEFER:
+            generate_vmcode_from_defer_statement(executer, block, statement->u.defer_statement, opcode_buffer);
+            break;
+
+
+        default:
+            break;
         }
     }
 }
@@ -1037,6 +1047,47 @@ void generate_vmcode_from_jump_tag_statement(Package_Executer* executer, Block* 
     if (jump_tag_statement == nullptr) {
         return;
     }
+}
+
+void generate_vmcode_from_defer_statement(Package_Executer* executer,
+                                          Block*            block,
+                                          DeferStatement*   defer_statement,
+                                          RVM_OpcodeBuffer* opcode_buffer) {
+
+    debug_generate_info_with_darkgreen("\t");
+
+    ImmediateInvokFuncExpression* iife = defer_statement->iife;
+    assert(iife != nullptr);
+
+    // 与 generate_vmcode_from_iife_expreesion 不同的是，字节码不太相同
+    // 但是也有很多相同之处
+    // TODO: 与 generate_vmcode_from_iife_expreesion 代码可合并为一处
+
+    // 实现方式和 copy_function 类似
+    AnonymousFunc* src = iife->anonymous_func;
+    RVM_Function*  dst = (RVM_Function*)mem_alloc(NULL_MEM_POOL,
+                                                  sizeof(RVM_Function));
+
+    // copy func
+    deep_copy_closure(dst, src);
+    generate_code_from_function_definition(executer, dst, (FunctionTuple*)src);
+
+    // opcode: push argument
+    ArgumentList* pos                = iife->argument_list;
+    unsigned int  argument_list_size = 0;
+    for (; pos != nullptr; pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+        argument_list_size += pos->expression->convert_type_size;
+    }
+    // opcode: argument_num
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, iife->line_number);
+
+    // opcode: new_closure
+    int constant_index = constant_pool_add_closure(executer, dst);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLOSURE, constant_index, iife->line_number);
+
+    // opcode: push_defer
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_DEFER, 0, defer_statement->line_number);
 }
 
 void generate_vmcode_from_expression(Package_Executer* executer,
@@ -2266,24 +2317,25 @@ void generate_vmcode_from_iife_expreesion(Package_Executer*             executer
     AnonymousFunc* src = iife->anonymous_func;
     RVM_Function*  dst = (RVM_Function*)mem_alloc(NULL_MEM_POOL,
                                                   sizeof(RVM_Function));
-
+    // copy func
     deep_copy_closure(dst, src);
-    generate_code_from_function_definition(executer, (RVM_Function*)dst, (FunctionTuple*)src);
+    generate_code_from_function_definition(executer, dst, (FunctionTuple*)src);
 
-    // generate argument_num
+    // opcode: push argument
     ArgumentList* pos                = iife->argument_list;
     unsigned int  argument_list_size = 0;
     for (; pos != nullptr; pos = pos->next) {
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
         argument_list_size += pos->expression->convert_type_size;
     }
+    // opcode: argument_num
     generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, iife->line_number);
 
-    // generate push_closure
+    // opcode: new_closure
     int constant_index = constant_pool_add_closure(executer, dst);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLOSURE, constant_index, iife->line_number);
 
-    // generate invoke_closure
+    // opcode: invoke_closure
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, 0, iife->line_number);
 }
 

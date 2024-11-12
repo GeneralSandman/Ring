@@ -44,6 +44,7 @@ int yylex();
     ArrayLiteralExpression*             m_array_literal_expression;
     ClassObjectLiteralExpression*       m_class_object_literal_expression;
     FieldInitExpression*                m_field_init_expression;
+    ImmediateInvokFuncExpression*       m_iife;
     ArgumentList*                       m_argument_list;
     FunctionTuple*                      m_function_tuple;
     Function*                           m_function_definition;
@@ -59,6 +60,7 @@ int yylex();
     BreakStatement*                     m_break_statement;
     TagDefinitionStatement*             m_tag_definition_statement;
     JumpTagStatement*                   m_jump_tag_statement;
+    DeferStatement*                     m_defer_statement;
     ContinueStatement*                  m_continue_statement;
     ReturnStatement*                    m_return_statement;
     DimensionExpression*                m_dimension_expression;
@@ -226,7 +228,7 @@ int yylex();
 %type <m_function_tuple>      function_tuple
 %type <m_function_definition> function_definition
 %type <m_expression>             closure_definition
-%type <m_expression>             iife_expression
+%type <m_iife>             iife_expression
 %type <m_parameter_list> parameter_list parameter parameter_list_v2
 %type <m_if_statement> if_statement
 %type <m_for_statement> for_statement
@@ -238,6 +240,7 @@ int yylex();
 %type <m_break_statement> break_statement
 %type <m_tag_definition_statement> tag_definition_statement
 %type <m_jump_tag_statement> jump_tag_statement
+%type <m_defer_statement> defer_statement
 %type <m_continue_statement> continue_statement
 %type <m_return_statement> return_statement
 %type <m_dimension_expression> dimension_expression
@@ -596,6 +599,11 @@ statement
         debug_bison_info_with_green("[RULE::statement:jump_tag_statement]\t ");
         $$ = create_statement_from_jump_tag($1);
     }
+    | defer_statement
+    {
+        debug_bison_info_with_green("[RULE::statement:defer_statement]\t ");
+        $$ = create_statement_from_defer($1);
+    }
     ;
 
 
@@ -713,6 +721,12 @@ multi_variable_definition_statement
     }
     ;
 
+defer_statement
+    : TOKEN_DEFER iife_expression
+    {
+        debug_bison_info_with_green("[RULE::defer_statement]\t ");
+        $$ = create_defer_statement($2);
+    }
 
 function_definition
     : TOKEN_FUNCTION identifier_v2 TOKEN_LP TOKEN_RP block
@@ -1248,6 +1262,9 @@ primary_not_new_array
         $$ = expression_add_package_posit($3, $1);
     }
     | iife_expression
+    {
+        $$ = create_expression_from_iife($1);
+    }
     ;
 
 
