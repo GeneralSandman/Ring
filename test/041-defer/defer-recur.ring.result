@@ -1,0 +1,10 @@
+main begin
+test begin
+test end
+defer 2 begin
+defer 2 end
+    defer 2 --- defer
+defer 1 begin
+defer 1 end
+    defer 1 --- defer
+main end
