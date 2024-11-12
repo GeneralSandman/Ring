@@ -2,7 +2,7 @@
 
 ![](./media/ring-logo-1.png)
 
-# Ring <small>version: ring-v0.2.16-beta</small>
+# Ring <small>version: ring-v0.2.17-beta</small>
 
 > 轻量级脚本编程语言
 > 
