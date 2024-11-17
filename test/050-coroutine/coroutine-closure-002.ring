@@ -19,13 +19,24 @@ function main() {
 	var int64 co_id;
 
 
+	fmt::println("main::0");
+	
+
 	co_id = launch function() {
-		fmt::println(" coroutine action::1");
+		fmt::println("    coroutine action::1");
 		yield();
-		fmt::println(" coroutine action::2");
+		fmt::println("    coroutine action::2");
 	}();
+	fmt::printf("co_id: {}\n", co_id);
+
+
+	fmt::println("main::1");
 
 	resume(co_id);
 
+	fmt::println("main::2");
+
 	resume(co_id);
+
+	fmt::println("main::3");
 }
