@@ -69,8 +69,8 @@ RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
  * meta_pool: 共享
  */
 RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
-                                RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                                RVM_ClassObject* callee_object, RVM_Function* callee_function,
+                                RVM_ClassObject** caller_object, RVM_Function** caller_function, RVM_Closure** caller_closure,
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function, RVM_Closure* callee_closure,
                                 unsigned int argument_list_size) {
 
     RingCoroutine* co = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
@@ -88,10 +88,12 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
     callinfo->caller_function      = *caller_function;
     callinfo->caller_closure       = nullptr;
     callinfo->caller_stack_base    = 0;
+    callinfo->caller_is_defer      = false;
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
     callinfo->callee_closure       = nullptr;
     callinfo->callee_argument_size = 0;
+    callinfo->curr_closure         = callee_closure;
     callinfo->code_list            = callee_function->u.derive_func->code_list;
     callinfo->code_size            = callee_function->u.derive_func->code_size;
     callinfo->pc                   = -1;

@@ -970,12 +970,17 @@ launch_expression
     : TOKEN_LAUNCH function_call_expression
     {
         debug_bison_info_with_green("[RULE::launch_expression:function_call_expression]\t ");
-        $$ = create_expression_launch(LAUNCH_EXPRESSION_TYPE_FUNCTION_CALL, $2, nullptr);
+        $$ = create_expression_launch(LAUNCH_EXPRESSION_TYPE_FUNCTION_CALL, $2, nullptr, nullptr);
     }
     | TOKEN_LAUNCH method_call_expression
     {
         debug_bison_info_with_green("[RULE::launch_expression:method_call_expression]\t ");
-        $$ = create_expression_launch(LAUNCH_EXPRESSION_TYPE_METHOD_CALL, nullptr, $2);
+        $$ = create_expression_launch(LAUNCH_EXPRESSION_TYPE_METHOD_CALL, nullptr, $2, nullptr);
+    }
+    | TOKEN_LAUNCH iife_expression
+    {
+        debug_bison_info_with_green("[RULE::launch_expression:iife_expression]\t ");
+        $$ = create_expression_launch(LAUNCH_EXPRESSION_TYPE_IIFE, nullptr, nullptr, $2);
     }
     ;
 

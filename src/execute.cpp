@@ -2066,8 +2066,30 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             new_coroutine = launch_coroutine(rvm,
-                                             &caller_class_ob, &caller_function,
-                                             nullptr, callee_function,
+                                             &caller_class_ob, &caller_function, &caller_closure,
+                                             nullptr, callee_function, nullptr,
+                                             argument_list_size);
+            // destory arguments after copy it to new coroutine
+            VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
+
+            STACK_SET_INT64_OFFSET(0, new_coroutine->co_id);
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+
+            VM_CUR_CO_PC += 1;
+            break;
+        case RVM_CODE_LAUNCH_CLOSURE:
+            argument_list_size = STACK_GET_INT_OFFSET(-2);
+            closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
+            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+
+            if (closure_value == nullptr) {
+                VM_CUR_CO_PC += 1;
+                break;
+            }
+
+            new_coroutine = launch_coroutine(rvm,
+                                             &caller_class_ob, &caller_function, &caller_closure,
+                                             nullptr, closure_value->anonymous_func, closure_value,
                                              argument_list_size);
             // destory arguments after copy it to new coroutine
             VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
@@ -2093,8 +2115,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
             new_coroutine = launch_coroutine(rvm,
-                                             &caller_class_ob, &caller_function,
-                                             callee_class_ob, callee_function,
+                                             &caller_class_ob, &caller_function, &caller_closure,
+                                             callee_class_ob, callee_function, nullptr,
                                              argument_list_size);
             // destory arguments after copy it to new coroutine
             VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;

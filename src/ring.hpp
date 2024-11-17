@@ -1126,6 +1126,7 @@ typedef enum {
 
     // coroutine
     RVM_CODE_LAUNCH,
+    RVM_CODE_LAUNCH_CLOSURE,
     RVM_CODE_LAUNCH_METHOD,
     RVM_CODE_RESUME,
     RVM_CODE_YIELD,
@@ -1694,6 +1695,7 @@ typedef enum {
     LAUNCH_EXPRESSION_TYPE_UNKNOW = 0,
     LAUNCH_EXPRESSION_TYPE_FUNCTION_CALL,
     LAUNCH_EXPRESSION_TYPE_METHOD_CALL,
+    LAUNCH_EXPRESSION_TYPE_IIFE,
     // LAUNCH_EXPRESSION_TYPE_BLOCK,
 } LaunchExpressionType;
 
@@ -1703,9 +1705,9 @@ struct LaunchExpression {
     LaunchExpressionType type;
 
     union {
-        FunctionCallExpression* function_call_expression;
-        MethodCallExpression*   method_call_expression;
-        // Block*                  block; // TODO:
+        FunctionCallExpression*       function_call_expression;
+        MethodCallExpression*         method_call_expression;
+        ImmediateInvokFuncExpression* iife;
     } u;
 };
 
@@ -2650,9 +2652,10 @@ Expression*                   create_expression_from_array_literal(ArrayLiteralE
 Expression*                   create_expression_from_class_object_literal(ClassObjectLiteralExpression* object_literal);
 Expression*                   create_expression_assign(AssignExpression* assign_expression);
 Expression*                   create_expression_ternary(Expression* condition, Expression* true_expression, Expression* false_expression);
-Expression*                   create_expression_launch(LaunchExpressionType    type,
-                                                       FunctionCallExpression* function_call_expression,
-                                                       MethodCallExpression*   method_call_expression);
+Expression*                   create_expression_launch(LaunchExpressionType          type,
+                                                       FunctionCallExpression*       function_call_expression,
+                                                       MethodCallExpression*         method_call_expression,
+                                                       ImmediateInvokFuncExpression* iife);
 
 Expression*                   create_expression_anonymous_func(AnonymousFunc* func);
 
@@ -3476,8 +3479,8 @@ std::string fmt_array(RVM_Array* array_value);
 
 RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm);
 RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
-                                RVM_ClassObject** caller_object, RVM_Function** caller_function,
-                                RVM_ClassObject* callee_object, RVM_Function* callee_function,
+                                RVM_ClassObject** caller_object, RVM_Function** caller_function, RVM_Closure** caller_closure,
+                                RVM_ClassObject* callee_object, RVM_Function* callee_function, RVM_Closure* callee_closure,
                                 unsigned int argument_list_size);
 void           init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
                                                         RingCoroutine*       co,

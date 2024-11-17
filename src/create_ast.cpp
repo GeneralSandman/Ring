@@ -194,9 +194,10 @@ Expression* create_expression_ternary(Expression* condition,
     return expression;
 }
 
-Expression* create_expression_launch(LaunchExpressionType    type,
-                                     FunctionCallExpression* function_call_expression,
-                                     MethodCallExpression*   method_call_expression) {
+Expression* create_expression_launch(LaunchExpressionType          type,
+                                     FunctionCallExpression*       function_call_expression,
+                                     MethodCallExpression*         method_call_expression,
+                                     ImmediateInvokFuncExpression* iife) {
 
     LaunchExpression* launch_expression = (LaunchExpression*)mem_alloc(get_front_mem_pool(), sizeof(LaunchExpression));
     launch_expression->line_number      = package_unit_get_line_number();
@@ -205,6 +206,8 @@ Expression* create_expression_launch(LaunchExpressionType    type,
         launch_expression->u.function_call_expression = function_call_expression;
     } else if (type == LAUNCH_EXPRESSION_TYPE_METHOD_CALL) {
         launch_expression->u.method_call_expression = method_call_expression;
+    } else if (type == LAUNCH_EXPRESSION_TYPE_IIFE) {
+        launch_expression->u.iife = iife;
     }
 
     Expression* expression          = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));

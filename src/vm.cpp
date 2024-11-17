@@ -303,6 +303,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
     // coroutine
     {RVM_CODE_LAUNCH, "launch", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
+    {RVM_CODE_LAUNCH_CLOSURE, "launch_closure", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
     {RVM_CODE_LAUNCH_METHOD, "launch_method", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
     {RVM_CODE_RESUME, "resume", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},
     {RVM_CODE_YIELD, "yield", OPCODE_OPERAND_TYPE_0BYTE, 0, "usage_comment", "stack_top_change", "math_formula"},

@@ -2149,19 +2149,6 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
         if (function_call_expression == nullptr) {
             return;
         }
-        if (function_call_expression->type != FUNCTION_CALL_TYPE_FUNC) {
-            ring_error_report("`launch` not support anonymous function `%s`", function_call_expression->func_identifier);
-        }
-
-
-        if (is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
-            printf("not support build func(%s) in launch expression now", function_call_expression->func_identifier);
-            return;
-        }
-        if (function_call_expression->u.fc.function->type != FUNCTION_TYPE_DERIVE) {
-            printf("not support build func(%s) in launch expression now", function_call_expression->func_identifier);
-            return;
-        }
 
         // TODO: 参数
         ArgumentList* pos                = function_call_expression->argument_list;
@@ -2176,18 +2163,48 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, function_call_expression->line_number);
 
-        // push funcion
-        unsigned int package_offset = 0;
-        unsigned int offset         = 0;
-        unsigned int operand        = 0;
+        if (function_call_expression->type == FUNCTION_CALL_TYPE_FUNC) {
 
-        package_offset              = function_call_expression->u.fc.function->package->package_index;
-        offset                      = function_call_expression->u.fc.function->func_index;
-        operand                     = (package_offset << 8) | offset;
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, function_call_expression->line_number);
+            if (is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
+                ring_error_report("not support build func(%s) in launch expression now", function_call_expression->func_identifier);
+                return;
+            }
+            if (function_call_expression->u.fc.function->type != FUNCTION_TYPE_DERIVE) {
+                ring_error_report("not support build func(%s) in launch expression now", function_call_expression->func_identifier);
+                return;
+            }
 
+            // push funcion
+            unsigned int package_offset = 0;
+            unsigned int offset         = 0;
+            unsigned int operand        = 0;
 
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH, 0, function_call_expression->line_number);
+            package_offset              = function_call_expression->u.fc.function->package->package_index;
+            offset                      = function_call_expression->u.fc.function->func_index;
+            operand                     = (package_offset << 8) | offset;
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, function_call_expression->line_number);
+
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH, 0, function_call_expression->line_number);
+        } else if (function_call_expression->type == FUNCTION_CALL_TYPE_CLOSURE) {
+            assert(function_call_expression->u.cc.closure_decl != nullptr);
+            // 判断函数名称变量 是 global 还是 local
+            // push_stack_closure
+            // push_static_closure
+            VarDecl*     closure = function_call_expression->u.cc.closure_decl;
+            RVM_Opcode   opcode  = RVM_CODE_UNKNOW;
+            unsigned int offset  = 0;
+
+            if (closure->is_local) {
+                opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_BOOL, closure->type_specifier);
+            } else {
+                opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_BOOL, closure->type_specifier);
+            }
+            offset = closure->variable_index;
+            generate_vmcode(executer, opcode_buffer, opcode, offset, function_call_expression->line_number);
+
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_CLOSURE, 0, function_call_expression->line_number);
+        }
+
 
     } else if (launch_expression->type == LAUNCH_EXPRESSION_TYPE_METHOD_CALL) {
         // TODO: 这里的代码 和 generate_vmcode_from_method_call_expression 重复了
@@ -2216,6 +2233,38 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_METHOD, member_method_index, method_call_expression->line_number);
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_METHOD, 0, method_call_expression->line_number);
+    } else if (launch_expression->type == LAUNCH_EXPRESSION_TYPE_IIFE) {
+
+        // 与 generate_vmcode_from_iife_expreesion 不同的是，字节码不太相同
+        // 但是也有很多相同之处
+        // TODO: 与 generate_vmcode_from_iife_expreesion 代码可合并为一处
+        ImmediateInvokFuncExpression* iife = launch_expression->u.iife;
+        assert(iife != nullptr);
+
+        // 实现方式和 copy_function 类似
+        AnonymousFunc* src = iife->anonymous_func;
+        RVM_Function*  dst = (RVM_Function*)mem_alloc(NULL_MEM_POOL,
+                                                      sizeof(RVM_Function));
+        // copy func
+        deep_copy_closure(dst, src);
+        generate_code_from_function_definition(executer, dst, (FunctionTuple*)src);
+
+        // opcode: push argument
+        ArgumentList* pos                = iife->argument_list;
+        unsigned int  argument_list_size = 0;
+        for (; pos != nullptr; pos = pos->next) {
+            generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+            argument_list_size += pos->expression->convert_type_size;
+        }
+        // opcode: argument_num
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, iife->line_number);
+
+        // opcode: new_closure
+        int constant_index = constant_pool_add_closure(executer, dst);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLOSURE, constant_index, iife->line_number);
+
+        // opcode: launch_closure
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_CLOSURE, 0, iife->line_number);
     }
 }
 

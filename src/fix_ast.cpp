@@ -2444,6 +2444,10 @@ void fix_ternary_condition_expression(Expression*        expression,
     return;
 }
 
+/*
+ * 是否为 method 在语法分析阶段就能确定
+ * 需要通过语义 判断是否为 function 还是 closure
+ */
 void fix_launch_expression(Expression*       expression,
                            LaunchExpression* launch_expression,
                            Block*            block,
@@ -2460,6 +2464,10 @@ void fix_launch_expression(Expression*       expression,
 
     case LAUNCH_EXPRESSION_TYPE_METHOD_CALL:
         fix_method_call_expression(expression, launch_expression->u.method_call_expression, block, func);
+        break;
+
+    case LAUNCH_EXPRESSION_TYPE_IIFE:
+        fix_iife_expression(expression, launch_expression->u.iife, block, func);
         break;
 
     default:
