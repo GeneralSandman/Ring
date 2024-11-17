@@ -23,27 +23,29 @@ else
 fi
 
 
+VERSION=""
 
-exit
+wget https://ring.wiki/package/ring-v1.0.0-linux-386.tar.gz
 
-# wget https://ring.wiki/Ring.tar.gz
-curl -o Ring.tar.gz https://ring.wiki/Ring.tar.gz
-echo "\033[32m[+]Download Ring Source Code Success\033[0m"
+echo "\033[32m[+]Download Ring Package Success\033[0m"
 
-tar -zxf Ring.tar.gz
-echo "\033[32m[+]Decompression Ring Source Code Success\033[0m"
+tar -zxvf ring-v1.0.0-linux-386.tar.gz
+echo "\033[32m[+]Decompression Ring Package Success\033[0m"
 
 cd Ring
 
-make
-echo "\033[32m[+]Build Success\033[0m"
 
+INSTALL_TOP="/usr/local
+INSTALL_BIN= $(INSTALL_TOP)/bin
+INSTALL_PACK_STD = $(INSTALL_TOP)/lib/ring/std
 
-make install
-echo "\033[32m[+]Install Success\033[0m"
+CMD_INSTALL= install -p
+CMD_INSTALL_EXEC= install -p -m 0755
+CMD_INSTALL_DATA= install -p -m 0644
 
 
 ring version
 echo "\033[32m[+]Check Ring Version Success\033[0m"
 
 
+install -p -m 0755 ring /usr/local/bin

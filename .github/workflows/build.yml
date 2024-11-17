@@ -1,0 +1,51 @@
+name: build
+
+on:
+  release:
+    types: [published] # 当发布新标签时触发
+
+jobs:
+  build:
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # 获取所有标签，以便切换
+
+      - name: Install dependencies(make flex bison g++ coscmd)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make flex bison g++
+          sudo pip install coscmd
+
+
+      - name: Build
+        run: |
+          make
+          ./bin/ring version
+          echo "build success"
+
+      - name: Install
+        run: |
+          make install
+          echo "install success"
+
+      - name: Package
+        run: |
+          mkdir build
+          cp ./bin/ring  ./build/
+          cp -r ./std    ./build
+          tar -zcvf ring-${{ github.event.release.tag_name }}-linux-386.tar.gz build
+
+      - name: Upload Package
+        env:
+          SECRET_ID: ${{ secrets.SECRET_ID }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          BUCKET: ring-1252697766
+          REGION: ap-beijing
+        run: |
+          coscmd config -a $SECRET_ID -s $SECRET_KEY -b $BUCKET -r $REGION
+          coscmd upload -r ring-${{ github.event.release.tag_name }}-linux-386.tar.gz /package/ring-${{ github.event.release.tag_name }}-linux-386.tar.gz
+
