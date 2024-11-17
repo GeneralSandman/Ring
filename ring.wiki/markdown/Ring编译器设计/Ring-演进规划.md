@@ -403,13 +403,59 @@ class-object  ✅
 完善Ring的基本功能, 争取在2024-12-31之前发布第一个release版本.
 
 
-1. 匿名函数
-2. 闭包
-3. 协程
+1. 匿名函数 ✅
+2. 闭包 ✅
+3. 协程 ✅
 4. 增量式垃圾回收机制
 5. 规范限定符号
-6. 完善标准库
+6. 完善标准库 ✅
 
+
+-----------------------------
+
+## 2024-11-13 至 2024-12-31 规划
+
+不进行新功能的开发，聚焦于：
+1. 现有功能的完善，包括各种高级功能的相互叠加
+2. 系统性测试，单简单测试用例，复杂测试用例
+3. 扫清自v0.2.0版本以来的所有TODO项
+4. 完善一下打包、安装 ring的自动化脚本
+   1. 打包目标二进制
+   2. 安装ring二进制
+   3. 和make install的冲突，这里如何处理
+5. 有可能的话，尽量完善一下相关文档
+
+
+### 完善 打包二进制、安装 ring的自动化脚本
+
+1. 打包目标二进制
+
+通过 github action 来打包二进制，需要对以下环境进行支持
+- macos
+- linux
+
+
+brew install act
+act -W .github/workflows/build.yml
+
+os: [ubuntu-latest, macOS-latest, windows-latest]
+
+
+2. 获取 GitHub 个人访问令牌 (Personal Access Token)
+登录到你的 GitHub 账户。
+打开 Settings（设置）。
+选择 Developer settings（开发者设置）。
+点击 Personal access tokens（个人访问令牌）。
+生成一个新令牌，确保勾选必要的权限（例如 repo 权限）。
+
+
+
+act -W .github/workflows/build.yml -e .github/build.event.json
+
+curl -H "Authorization: token xx" https://api.github.com/rate_limit
+
+
+上传到一个 cos 的 bucket桶中，桶中的数据
 
 
 -----------------------------
@@ -463,6 +509,32 @@ for(i=0; i<10; i++) {
 ### E. Test: 系统测试一下defer相关的功能
 
 
+### F. Proposal: 调研 ring在windows上支持，需要什么工作
+
+
+### G. Proposal: 协程关键字支持函数变量 ✅
+
+```
+var functype funcvar;
+funcvar = function() {
+
+};
+co_id = launch funcvar();
+```
+
+
+### H. Proposal: 协程关键字支持匿名函数 ✅
+
+```
+co_id = launch fn() {
+
+}();
+```
+
+
+### I. Proposal: launch 即立即运行,不需要 resume
+
+
 -----------------------------
 
 
@@ -495,48 +567,7 @@ Ring已经支持了匿名函数，如果在匿名函数中支持闭包，
 1. dump 的时候，需要dump出 匿名函数的详情&字节码
 
 
-#### QuickJS 是如何实现闭包相关的变量的
 
-```
-QuickJS 是一个小型且高效的 JavaScript 引擎，它实现了闭包的机制来支持 JavaScript 中的函数作用域和变量访问。以下是 QuickJS 如何实现闭包变量的一些关键点：
-
-### 1. **作用域链**
-
-QuickJS 通过作用域链来实现闭包。当一个函数被定义在另一个函数内部时，内部函数可以访问外部函数的变量。这是通过维护一个作用域链来实现的，内部函数会持有对外部函数作用域的引用。
-
-### 2. **环境记录（Environment Records）**
-
-QuickJS 使用环境记录来存储变量。每当一个函数被调用时，QuickJS 会创建一个新的环境记录，其中包含该函数的局部变量和引用的外部变量。这些环境记录形成了一个链表，内部函数可以通过这条链表访问其外部的变量。
-
-### 3. **闭包的创建**
-
-当一个内部函数被返回并在外部调用时，QuickJS 会保存对环境记录的引用。这样，即使外部函数已经返回，内部函数依然能够访问外部函数的变量。
-
-### 4. **内存管理**
-
-QuickJS 使用垃圾回收机制来管理闭包中的变量。只要闭包仍然被引用，相关的变量就不会被回收。只有在没有引用时，闭包和其相关的变量才会被垃圾回收机制清除。
-
-```
-
-### B. Proposal: 协程关键字支持匿名函数
-
-```
-// 精简写法
-co_id = launch fn() {
-
-}();
-
-
-// 复杂写法
-// 先定义一个函数变量
-// 赋值给一个函数变量
-// launch 一个函数变量
-var functype funcvar;
-funcvar = function() {
-
-};
-co_id = launch funcvar();
-```
 
 
 -----------------------------
