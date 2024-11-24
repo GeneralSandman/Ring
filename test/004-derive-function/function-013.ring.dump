@@ -23,7 +23,8 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──var int              score               
 +Local:       1
  ├──var int              score               
-+Instructions:
++FreeValue:        0
++Instructions: 389
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_int_1byte                0                   13                
  ├──1       push_stack_int                0                                     
@@ -37,7 +38,7 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──9       jump_if_false                 34                  38                
  ├──10      push_string                   0                   14                
  ├──11      argument_num                  1                                     
- ├──12      push_func                     260                                   
+ ├──12      push_func                     1, 4                                  
  ├──13      invoke_func_native                                                  
  ├──14      jump                          378                 38                
  ├──15      push_int_1byte                10                  15                
@@ -52,7 +53,7 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──24      jump_if_false                 68                  17                
  ├──25      push_string                   1                   16                
  ├──26      argument_num                  1                                     
- ├──27      push_func                     260                                   
+ ├──27      push_func                     1, 4                                  
  ├──28      invoke_func_native                                                  
  ├──29      jump                          378                 17                
  ├──30      push_int_1byte                20                                    
@@ -67,7 +68,7 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──39      jump_if_false                 102                 19                
  ├──40      push_string                   2                   18                
  ├──41      argument_num                  1                                     
- ├──42      push_func                     260                                   
+ ├──42      push_func                     1, 4                                  
  ├──43      invoke_func_native                                                  
  ├──44      jump                          378                 19                
  ├──45      push_int_1byte                30                                    
@@ -82,7 +83,7 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──54      jump_if_false                 136                 21                
  ├──55      push_string                   3                   20                
  ├──56      argument_num                  1                                     
- ├──57      push_func                     260                                   
+ ├──57      push_func                     1, 4                                  
  ├──58      invoke_func_native                                                  
  ├──59      jump                          378                 21                
  ├──60      push_int_1byte                40                                    
@@ -97,7 +98,7 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──69      jump_if_false                 170                 23                
  ├──70      push_string                   4                   22                
  ├──71      argument_num                  1                                     
- ├──72      push_func                     260                                   
+ ├──72      push_func                     1, 4                                  
  ├──73      invoke_func_native                                                  
  ├──74      jump                          378                 23                
  ├──75      push_int_1byte                50                                    
@@ -112,7 +113,7 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──84      jump_if_false                 204                 25                
  ├──85      push_string                   5                   24                
  ├──86      argument_num                  1                                     
- ├──87      push_func                     260                                   
+ ├──87      push_func                     1, 4                                  
  ├──88      invoke_func_native                                                  
  ├──89      jump                          378                 25                
  ├──90      push_int_1byte                60                                    
@@ -127,7 +128,7 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──99      jump_if_false                 238                 27                
  ├──100     push_string                   6                   26                
  ├──101     argument_num                  1                                     
- ├──102     push_func                     260                                   
+ ├──102     push_func                     1, 4                                  
  ├──103     invoke_func_native                                                  
  ├──104     jump                          378                 27                
  ├──105     push_int_1byte                70                                    
@@ -142,7 +143,7 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──114     jump_if_false                 272                 29                
  ├──115     push_string                   7                   28                
  ├──116     argument_num                  1                                     
- ├──117     push_func                     260                                   
+ ├──117     push_func                     1, 4                                  
  ├──118     invoke_func_native                                                  
  ├──119     jump                          378                 29                
  ├──120     push_int_1byte                80                                    
@@ -157,7 +158,7 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──129     jump_if_false                 306                 31                
  ├──130     push_string                   8                   30                
  ├──131     argument_num                  1                                     
- ├──132     push_func                     260                                   
+ ├──132     push_func                     1, 4                                  
  ├──133     invoke_func_native                                                  
  ├──134     jump                          378                 31                
  ├──135     push_int_1byte                90                                    
@@ -172,7 +173,7 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──144     jump_if_false                 340                 33                
  ├──145     push_string                   9                   32                
  ├──146     argument_num                  1                                     
- ├──147     push_func                     260                                   
+ ├──147     push_func                     1, 4                                  
  ├──148     invoke_func_native                                                  
  ├──149     jump                          378                 33                
  ├──150     push_stack_int                0                                     
@@ -181,12 +182,12 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──153     jump_if_false                 361                 35                
  ├──154     push_string                   10                  34                
  ├──155     argument_num                  1                                     
- ├──156     push_func                     260                                   
+ ├──156     push_func                     1, 4                                  
  ├──157     invoke_func_native                                                  
  ├──158     jump                          378                 35                
  ├──159     push_string                   11                  36                
  ├──160     argument_num                  1                                     
- ├──161     push_func                     260                                   
+ ├──161     push_func                     1, 4                                  
  ├──162     invoke_func_native                                                  
  ├──163     push_int_1byte                0                   37                
  ├──164     return                        1                                     
@@ -195,14 +196,16 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-013.ring:12
  ├──167     push_int_1byte                10                                    
  ├──168     div_int                                                             
  ├──169     return                        1                                     
- ├──170     function_finish                                   41                
+ ├──170     pop_defer                                         41                
+ ├──171     function_finish                                                     
 
 $main()    <./test/004-derive-function/function-013.ring:45,61>
 +Parameter:   0
 +Local:       2
  ├──var int              score               
  ├──var int              level               
-+Instructions:
++FreeValue:        0
++Instructions: 86
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_int_1byte                9                   50                
  ├──1       minus_int                                                           
@@ -213,33 +216,34 @@ $main()    <./test/004-derive-function/function-013.ring:45,61>
  ├──6       jump_if_false                 84                                    
  ├──7       push_stack_int                0                   51                
  ├──8       argument_num                  1                                     
- ├──9       push_func                     2048                                  
+ ├──9       push_func                     8, 0                                  
  ├──10      invoke_func                                                         
  ├──11      pop_stack_int                 1                                     
  ├──12      push_string                   12                  53                
  ├──13      argument_num                  1                                     
- ├──14      push_func                     260                                   
+ ├──14      push_func                     1, 4                                  
  ├──15      invoke_func_native                                                  
  ├──16      push_stack_int                0                   54                
  ├──17      argument_num                  1                                     
- ├──18      push_func                     257                                   
+ ├──18      push_func                     1, 1                                  
  ├──19      invoke_func_native                                                  
  ├──20      push_stack_int                1                   55                
  ├──21      argument_num                  1                                     
- ├──22      push_func                     257                                   
+ ├──22      push_func                     1, 1                                  
  ├──23      invoke_func_native                                                  
  ├──24      push_string                   13                  56                
  ├──25      argument_num                  1                                     
- ├──26      push_func                     260                                   
+ ├──26      push_func                     1, 4                                  
  ├──27      invoke_func_native                                                  
  ├──28      push_string                   14                  58                
  ├──29      argument_num                  1                                     
- ├──30      push_func                     260                                   
+ ├──30      push_func                     1, 4                                  
  ├──31      invoke_func_native                                                  
  ├──32      push_stack_int                0                   50                
  ├──33      push_int_1byte                10                                    
  ├──34      add_int                                                             
  ├──35      pop_stack_int                 0                                     
  ├──36      jump                          6                   59                
- ├──37      function_finish                                   61                
+ ├──37      pop_defer                                         61                
+ ├──38      function_finish                                                     
 

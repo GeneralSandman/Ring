@@ -9,7 +9,8 @@ $test(var int...)    <./test/004-derive-function/function-021.ring:12,17>
 +Local:       2
  ├──var int[!1]          int_value_list      
  ├──var int              int_value           
-+Instructions:
++FreeValue:        0
++Instructions: 29
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_stack_array              0                   14                
  ├──1       push_int_2byte                0                                     
@@ -17,18 +18,20 @@ $test(var int...)    <./test/004-derive-function/function-021.ring:12,17>
  ├──3       pop_stack_int                 1                   16                
  ├──4       push_stack_int                1                   15                
  ├──5       argument_num                  1                                     
- ├──6       push_func                     262                                   
+ ├──6       push_func                     1, 6                                  
  ├──7       invoke_func_native                                                  
  ├──8       jump                          6                   14                
  ├──9       for_range_finish              0                                     
- ├──10      function_finish                                   17                
+ ├──10      pop_defer                                         17                
+ ├──11      function_finish                                                     
 
 $main()    <./test/004-derive-function/function-021.ring:22,30>
 +Parameter:   0
 +Local:       2
  ├──var int              int_value_0         
  ├──var int              int_value_1         
-+Instructions:
++FreeValue:        0
++Instructions: 24
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_int_1byte                1                   26                
  ├──1       pop_stack_int                 0                                     
@@ -37,7 +40,8 @@ $main()    <./test/004-derive-function/function-021.ring:22,30>
  ├──4       push_stack_int                0                   29                
  ├──5       push_stack_int                1                                     
  ├──6       argument_num                  2                                     
- ├──7       push_func                     2048                                  
+ ├──7       push_func                     8, 0                                  
  ├──8       invoke_func                                                         
- ├──9       function_finish                                   30                
+ ├──9       pop_defer                                         30                
+ ├──10      function_finish                                                     
 

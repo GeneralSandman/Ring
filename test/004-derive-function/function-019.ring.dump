@@ -8,7 +8,8 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-019.ring:11
  ├──var int              score               
 +Local:       1
  ├──var int              score               
-+Instructions:
++FreeValue:        0
++Instructions: 44
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_int_1byte                0                   12                
  ├──1       push_stack_int                0                                     
@@ -28,7 +29,8 @@ $get_level_by_score(var int)    <./test/004-derive-function/function-019.ring:11
  ├──15      push_int_1byte                0                   15                
  ├──16      return                        1                                     
  ├──17      jump                          42                                    
- ├──18      function_finish                                   17                
+ ├──18      pop_defer                                         17                
+ ├──19      function_finish                                                     
 
 $main()    <./test/004-derive-function/function-019.ring:20,42>
 +Parameter:   0
@@ -36,7 +38,8 @@ $main()    <./test/004-derive-function/function-019.ring:20,42>
  ├──var int              sum                 
  ├──var int              score               
  ├──var int              level               
-+Instructions:
++FreeValue:        0
++Instructions: 148
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_int_1byte                0                   26                
  ├──1       pop_stack_int                 0                                     
@@ -49,7 +52,7 @@ $main()    <./test/004-derive-function/function-019.ring:20,42>
  ├──8       jump_if_false                 54                                    
  ├──9       push_stack_int                1                   28                
  ├──10      argument_num                  1                                     
- ├──11      push_func                     2048                                  
+ ├──11      push_func                     8, 0                                  
  ├──12      invoke_func                                                         
  ├──13      pop_stack_int                 2                                     
  ├──14      push_stack_int                0                   29                
@@ -63,13 +66,13 @@ $main()    <./test/004-derive-function/function-019.ring:20,42>
  ├──22      jump                          11                  30                
  ├──23      push_stack_int                0                   31                
  ├──24      argument_num                  1                                     
- ├──25      push_func                     257                                   
+ ├──25      push_func                     1, 1                                  
  ├──26      invoke_func_native                                                  
  ├──27      push_stack_int                0                   32                
  ├──28      push_int_2byte                460                                   
  ├──29      eq_int                                                              
  ├──30      argument_num                  1                                     
- ├──31      push_func                     0                                     
+ ├──31      push_func                     0, 0                                  
  ├──32      invoke_func_native                                                  
  ├──33      push_int_1byte                0                   35                
  ├──34      pop_stack_int                 0                                     
@@ -83,7 +86,7 @@ $main()    <./test/004-derive-function/function-019.ring:20,42>
  ├──42      push_stack_int                0                   37                
  ├──43      push_stack_int                1                                     
  ├──44      argument_num                  1                                     
- ├──45      push_func                     2048                                  
+ ├──45      push_func                     8, 0                                  
  ├──46      invoke_func                                                         
  ├──47      add_int                                                             
  ├──48      pop_stack_int                 0                                     
@@ -94,13 +97,14 @@ $main()    <./test/004-derive-function/function-019.ring:20,42>
  ├──53      jump                          87                  38                
  ├──54      push_stack_int                0                   39                
  ├──55      argument_num                  1                                     
- ├──56      push_func                     257                                   
+ ├──56      push_func                     1, 1                                  
  ├──57      invoke_func_native                                                  
  ├──58      push_stack_int                0                   40                
  ├──59      push_int_2byte                460                                   
  ├──60      eq_int                                                              
  ├──61      argument_num                  1                                     
- ├──62      push_func                     0                                     
+ ├──62      push_func                     0, 0                                  
  ├──63      invoke_func_native                                                  
- ├──64      function_finish                                   42                
+ ├──64      pop_defer                                         42                
+ ├──65      function_finish                                                     
 
