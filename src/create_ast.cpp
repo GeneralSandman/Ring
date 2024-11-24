@@ -327,10 +327,10 @@ Expression* create_expression_literal(ExpressionType type, char* literal_interfa
             // Ring-Compiler-Error-Report ERROR_OVERFLOWS
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "can't use num literal `%s` in expression, raise overflows; E:%d.",
-                     literal_interface,
-                     ERROR_OVERFLOWS);
+            compile_err_buf = sprintf_string(
+                "can't use num literal `%s` in expression, raise overflows; E:%d.",
+                literal_interface,
+                ERROR_OVERFLOWS);
 
 
             ErrorReportContext context = {
@@ -616,9 +616,9 @@ FunctionTuple* create_function_tuple(Location*           location,
         if (pos->is_variadic && parameter_index != parameter_list_size - 1) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "can only use ... with final parameter in function definition; E:%d.",
-                     ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER);
+            compile_err_buf = sprintf_string(
+                "can only use ... with final parameter in function definition; E:%d.",
+                ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER);
 
             ErrorReportContext context = {
                 .package          = nullptr,
@@ -686,10 +686,10 @@ Function* create_function_definition(FunctionType        type,
         if (pos->is_variadic && parameter_index != parameter_list_size - 1) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "can only use ... with final parameter in function %s; E:%d.",
-                     identifier->name,
-                     ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER);
+            compile_err_buf = sprintf_string(
+                "can only use ... with final parameter in function %s; E:%d.",
+                identifier->name,
+                ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -748,11 +748,11 @@ Function* create_function_definition(FunctionType        type,
         if (return_list_size != 0) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "function main() must have no return values; E:%d.",
-                     ERROR_FUNCTION_MAIN_INVALID);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                     "def main like : `function main(var string[] args) {}`.");
+            compile_err_buf = sprintf_string(
+                "function main() must have no return values; E:%d.",
+                ERROR_FUNCTION_MAIN_INVALID);
+            compile_adv_buf = sprintf_string(
+                "def main like : `function main(var string[] args) {}`.");
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -776,11 +776,11 @@ Function* create_function_definition(FunctionType        type,
             || (parameter_list_size == 1 && !TYPE_IS_STRING_ARRAY_1(parameter_list->type_specifier))) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "function main() must be one argument, and must be string[]; E:%d.",
-                     ERROR_FUNCTION_MAIN_INVALID);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                     "def main like : `function main(var string[] args) {}`.");
+            compile_err_buf = sprintf_string(
+                "function main() must be one argument, and must be string[]; E:%d.",
+                ERROR_FUNCTION_MAIN_INVALID);
+            compile_adv_buf = sprintf_string(
+                "def main like : `function main(var string[] args) {}`.");
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -1181,10 +1181,10 @@ TypeSpecifier* create_type_specifier_array(TypeSpecifier*       sub_type,
     if (type_specifier->dimension > MAX_DIMENSION_NUM) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "dimension of array is %d, greater then 8; E:%d.",
-                 type_specifier->dimension,
-                 ERROR_ARRAY_DIMENSION_INVALID);
+        compile_err_buf = sprintf_string(
+            "dimension of array is %d, greater then 8; E:%d.",
+            type_specifier->dimension,
+            ERROR_ARRAY_DIMENSION_INVALID);
 
 
         ErrorReportContext context = {
@@ -1245,10 +1245,10 @@ TypeAlias* add_type_alias_func(Parameter*          parameter_list,
         if (pos->is_variadic && parameter_index != parameter_list_size - 1) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "can only use ... with final parameter in function %s; E:%d.",
-                     identifier->name,
-                     ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER);
+            compile_err_buf = sprintf_string(
+                "can only use ... with final parameter in function %s; E:%d.",
+                identifier->name,
+                ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -1352,11 +1352,11 @@ Statement* create_multi_declaration_statement(TypeSpecifier* type_specifier,
         if (str_eq(identifier->name, "self")) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "forbid definite `self` variable; E:%d.",
-                     ERROR_INVALID_VARIABLE_IDENTIFIER);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                     "`self` only be used to access field of class in method block.");
+            compile_err_buf = sprintf_string(
+                "forbid definite `self` variable; E:%d.",
+                ERROR_INVALID_VARIABLE_IDENTIFIER);
+            compile_adv_buf = sprintf_string(
+                "`self` only be used to access field of class in method block.");
 
 
             ErrorReportContext context = {
@@ -1451,15 +1451,15 @@ void import_package_list_add_item(char* package_name, char* rename) {
         // Ring-Compiler-Error-Report ERROR_DUPLICATE_IMPORT_PACKAGE
         if (str_eq(import_pack->package_name, package_name)) {
             DEFINE_ERROR_REPORT_STR;
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "duplicate import package `%s`; E:%d.",
-                     import_pack->package_name,
-                     ERROR_DUPLICATE_IMPORT_PACKAGE);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                     "the first import package `%s` in %s:%d:%d.",
-                     import_pack->package_name,
-                     get_package_unit()->current_file_name.c_str(),
-                     import_pack->line_number, 0);
+            compile_err_buf = sprintf_string(
+                "duplicate import package `%s`; E:%d.",
+                import_pack->package_name,
+                ERROR_DUPLICATE_IMPORT_PACKAGE);
+            compile_adv_buf = sprintf_string(
+                "the first import package `%s` in %s:%d:%d.",
+                import_pack->package_name,
+                get_package_unit()->current_file_name.c_str(),
+                import_pack->line_number, 0);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -1691,7 +1691,7 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier,
     //             || type_specifier->sub->kind == RING_BASIC_TYPE_UNKNOW))) {
     //     DEFINE_ERROR_REPORT_STR;
 
-    //     snprintf(compile_err_buf, sizeof(compile_err_buf),
+    //     compile_err_buf = sprintf_string(
     //              "class field's type only support bool/int/double/string/class bool[]/int[]/double[]/string[]/class[]; E:%d.",
     //              ERROR_INVALID_FIELD_IN_CLASS);
 

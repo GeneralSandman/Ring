@@ -39,6 +39,7 @@ typedef struct Ring_String                  Ring_String;
 typedef struct Ring_BasicValue              Ring_BasicValue;
 typedef struct Ring_Array                   Ring_Array;
 
+typedef struct Ring_Buildin_Func            Ring_Buildin_Func;
 typedef struct EnumDeclaration              EnumDeclaration;
 typedef struct EnumItemDeclaration          EnumItemDeclaration;
 typedef struct ClassDefinition              ClassDefinition;
@@ -1308,7 +1309,8 @@ typedef enum {
 typedef void (*BuildinFuncFix)(Expression*             expression,
                                FunctionCallExpression* function_call_expression,
                                Block*                  block,
-                               Function*               func);
+                               Function*               func,
+                               Ring_Buildin_Func*      build_func);
 
 
 typedef enum {
@@ -1324,7 +1326,7 @@ typedef enum {
     RING_BUILD_IN_FNC_YIELD,
 } RING_BUILD_IN_FUNC_ID;
 
-typedef struct {
+struct Ring_Buildin_Func {
     const char*                 identifier;
 
     int                         param_size;
@@ -1334,8 +1336,7 @@ typedef struct {
     std::vector<TypeSpecifier*> return_types;
 
     BuildinFuncFix              buildin_func_fix;
-
-} Ring_Buildin_Func;
+};
 
 struct EnumDeclaration {
     std::string          source_file;
@@ -2441,11 +2442,9 @@ struct MemBlock {
  * 1. 目前没有做报错恢复，所以遇到一次错误就退出，不会分配很多次
  * 2. 如果要改成 全局变量，那么在并发编译的时候要考虑这个问题
  */
-#define DEFINE_ERROR_REPORT_STR                          \
-    char compile_err_buf[2048];                          \
-    char compile_adv_buf[2048];                          \
-    memset(compile_err_buf, 0, sizeof(compile_err_buf)); \
-    memset(compile_adv_buf, 0, sizeof(compile_adv_buf));
+#define DEFINE_ERROR_REPORT_STR  \
+    std::string compile_err_buf; \
+    std::string compile_adv_buf;
 
 
 #define str_eq(str1, str2) (strcmp((str1), (str2)) == 0)
@@ -3409,39 +3408,53 @@ void debug_generate_closure_dot_file(RVM_Closure* closure);
  */
 
 
+void                  check_build_func_param_num(Expression*             expression,
+                                                 FunctionCallExpression* function_call_expression,
+                                                 Block*                  block,
+                                                 Function*               func,
+                                                 Ring_Buildin_Func*      build_func);
+
 void                  fix_buildin_func_len(Expression*             expression,
                                            FunctionCallExpression* function_call_expression,
                                            Block*                  block,
-                                           Function*               func);
+                                           Function*               func,
+                                           Ring_Buildin_Func*      build_func);
 void                  fix_buildin_func_capacity(Expression*             expression,
                                                 FunctionCallExpression* function_call_expression,
                                                 Block*                  block,
-                                                Function*               func);
+                                                Function*               func,
+                                                Ring_Buildin_Func*      build_func);
 void                  fix_buildin_func_push(Expression*             expression,
                                             FunctionCallExpression* function_call_expression,
                                             Block*                  block,
-                                            Function*               func);
+                                            Function*               func,
+                                            Ring_Buildin_Func*      build_func);
 void                  fix_buildin_func_pop(Expression*             expression,
                                            FunctionCallExpression* function_call_expression,
                                            Block*                  block,
-                                           Function*               func);
+                                           Function*               func,
+                                           Ring_Buildin_Func*      build_func);
 void                  fix_buildin_func_to_string(Expression*             expression,
                                                  FunctionCallExpression* function_call_expression,
                                                  Block*                  block,
-                                                 Function*               func);
+                                                 Function*               func,
+                                                 Ring_Buildin_Func*      build_func);
 void                  fix_buildin_func_to_int64(Expression*             expression,
                                                 FunctionCallExpression* function_call_expression,
                                                 Block*                  block,
-                                                Function*               func);
+                                                Function*               func,
+                                                Ring_Buildin_Func*      build_func);
 
 void                  fix_buildin_func_to_resume(Expression*             expression,
                                                  FunctionCallExpression* function_call_expression,
                                                  Block*                  block,
-                                                 Function*               func);
+                                                 Function*               func,
+                                                 Ring_Buildin_Func*      build_func);
 void                  fix_buildin_func_to_yield(Expression*             expression,
                                                 FunctionCallExpression* function_call_expression,
                                                 Block*                  block,
-                                                Function*               func);
+                                                Function*               func,
+                                                Ring_Buildin_Func*      build_func);
 
 RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* identifier);
 void                  fix_buildin_func(Expression*             expression,

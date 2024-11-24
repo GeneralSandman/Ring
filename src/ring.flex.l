@@ -272,10 +272,10 @@ extern "C" int yywrap(){
     if(true) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
+        compile_err_buf = sprintf_string(
                  "unclosed string literal, match `\\n` in string literal; E:%d.",
                  ERROR_UNCLOSED_STRING_LITERAL);
-        snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+        compile_adv_buf = sprintf_string(
                 " \"<string-literal>\" only use to definite line string, `<string-literal>` can definite block string.");
 
         ErrorReportContext context = {
@@ -303,10 +303,10 @@ extern "C" int yywrap(){
     if(true) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
+        compile_err_buf = sprintf_string(
                  "unclosed string literal, match `\\r\\n` in string literal; E:%d.",
                  ERROR_UNCLOSED_STRING_LITERAL);
-        snprintf(compile_adv_buf, sizeof(compile_adv_buf),
+        compile_adv_buf = sprintf_string(
                 " \"<string-literal>\" only use to definite line string, `<string-literal>` can definite block string.");
 
         ErrorReportContext context = {

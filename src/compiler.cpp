@@ -558,12 +558,12 @@ extern char linebuf[1024];
 
 //
 void ring_grammar_error(RING_GRAMMAR_ID grammar_id) {
-    char compile_adv_buf[2048];
-    snprintf(compile_adv_buf, sizeof(compile_adv_buf), "%sTip:%s import package grammar",
-             LOG_COLOR_YELLOW,
-             LOG_COLOR_CLEAR);
+    DEFINE_ERROR_REPORT_STR;
+    compile_adv_buf = sprintf_string("%sTip:%s import package grammar",
+                                     LOG_COLOR_YELLOW,
+                                     LOG_COLOR_CLEAR);
 
-    printf("|%s\n", compile_adv_buf);
+    printf("|%s\n", compile_adv_buf.c_str());
     for (std::string grammar : Ring_Grammar_Infos[grammar_id].grammar) {
         printf("|%s\n", grammar.c_str());
     }
@@ -619,7 +619,7 @@ void ring_compile_error_report(ErrorReportContext* context) {
     fprintf(stderr, "|\n");
 
     if (context->error_message.size()) {
-        fprintf(stderr, "|%sError:%s %s\n",
+        fprintf(stderr, "|%sErr:%s %s\n",
                 LOG_COLOR_RED,
                 LOG_COLOR_CLEAR,
                 context->error_message.c_str());

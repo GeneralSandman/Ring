@@ -467,11 +467,11 @@ void add_local_declaration(VarDecl* declaration, Block* block, FunctionTuple* fu
         if (block->var_decl_list_size > 255) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "the number of local variable is greater than 255 in this block; E:%d.",
-                     ERROR_TOO_MANY_LOCAL_VARIABLES);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                     "delete useless local variable in this block.");
+            compile_err_buf = sprintf_string(
+                "the number of local variable is greater than 255 in this block; E:%d.",
+                ERROR_TOO_MANY_LOCAL_VARIABLES);
+            compile_adv_buf = sprintf_string(
+                "delete useless local variable in this block.");
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -534,13 +534,13 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
         if (true) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "miss type `%s` definition; E:%d.",
-                     type_specifier->identifier,
-                     ERROR_MISS_CLASS_DEFINITION);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                     "definite type `%s` before use it.",
-                     type_specifier->identifier);
+            compile_err_buf = sprintf_string(
+                "miss type `%s` definition; E:%d.",
+                type_specifier->identifier,
+                ERROR_MISS_CLASS_DEFINITION);
+            compile_adv_buf = sprintf_string(
+                "definite type `%s` before use it.",
+                type_specifier->identifier);
 
 
             ErrorReportContext context = {
@@ -676,9 +676,9 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
     if (return_exp_num > 1 && has_call) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "function-call/method-call is not allowed in multiple operands; E:%d.",
-                 ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS);
+        compile_err_buf = sprintf_string(
+            "function-call/method-call is not allowed in multiple operands; E:%d.",
+            ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -701,11 +701,11 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
     if (func->return_list_size != return_convert_type.size()) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "the number of return expression list mismatch function definition return value list, expect %d but return %ld; E:%d.",
-                 func->return_list_size,
-                 return_convert_type.size(),
-                 ERROR_FUNCTION_MISMATCH_RETURN_NUM);
+        compile_err_buf = sprintf_string(
+            "the number of return expression list mismatch function definition return value list, expect %d but return %ld; E:%d.",
+            func->return_list_size,
+            return_convert_type.size(),
+            ERROR_FUNCTION_MISMATCH_RETURN_NUM);
 
 
         ErrorReportContext context = {
@@ -765,11 +765,11 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
             DEFINE_ERROR_REPORT_STR;
 
             // TODO:
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "return mismatch: expect %s but return %s; E:%d.",
-                     expect_type_str.c_str(),
-                     actual_type_str.c_str(),
-                     ERROR_ASSIGNMENT_MISMATCH_TYPE);
+            compile_err_buf = sprintf_string(
+                "return mismatch: expect %s but return %s; E:%d.",
+                expect_type_str.c_str(),
+                actual_type_str.c_str(),
+                ERROR_ASSIGNMENT_MISMATCH_TYPE);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -835,14 +835,14 @@ void fix_identifier_expression(Expression*           expression,
     // Ring-Compiler-Error-Report ERROR_UNDEFINITE_VARIABLE
     {
         DEFINE_ERROR_REPORT_STR;
-        snprintf(compile_err_buf, 1024,
-                 "use undeclared identifier `%s`; E:%d.",
-                 identifier_expression->identifier,
-                 ERROR_UNDEFINITE_VARIABLE);
-        snprintf(compile_adv_buf, 1024,
-                 "definite variable `%s` like: `var bool|int|double|string %s;` before use it.",
-                 identifier_expression->identifier,
-                 identifier_expression->identifier);
+        compile_err_buf = sprintf_string(
+            "use undeclared identifier `%s`; E:%d.",
+            identifier_expression->identifier,
+            ERROR_UNDEFINITE_VARIABLE);
+        compile_adv_buf = sprintf_string(
+            "definite variable `%s` like: `var bool|int|double|string %s;` before use it.",
+            identifier_expression->identifier,
+            identifier_expression->identifier);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -915,9 +915,9 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     if (right_expr_num > 1 && has_call) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "function-call/method-call is not allowed in multiple operands; E:%d.",
-                 ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS);
+        compile_err_buf = sprintf_string(
+            "function-call/method-call is not allowed in multiple operands; E:%d.",
+            ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -941,11 +941,11 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     if (left_convert_type.size() != right_convert_type.size()) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "assignment mismatch: %lu variables not match %lu operands; E:%d.",
-                 left_convert_type.size(),
-                 right_convert_type.size(),
-                 ERROR_ASSIGNMENT_MISMATCH_NUM);
+        compile_err_buf = sprintf_string(
+            "assignment mismatch: %lu variables not match %lu operands; E:%d.",
+            left_convert_type.size(),
+            right_convert_type.size(),
+            ERROR_ASSIGNMENT_MISMATCH_NUM);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -996,11 +996,11 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
             DEFINE_ERROR_REPORT_STR;
 
             // TODO:
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "assignment mismatch: expect %s but return %s; E:%d.",
-                     left_type_s.c_str(),
-                     right_type_s.c_str(),
-                     ERROR_ASSIGNMENT_MISMATCH_TYPE);
+            compile_err_buf = sprintf_string(
+                "assignment mismatch: expect %s but return %s; E:%d.",
+                left_type_s.c_str(),
+                right_type_s.c_str(),
+                ERROR_ASSIGNMENT_MISMATCH_TYPE);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -1039,9 +1039,9 @@ void fix_binary_concat_expression(Expression*       expression,
         || right_expression->convert_type_size != 1) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "Type error: string concat operator `..` can only be applied to string; E:%d.",
-                 ERROR_CONCAT_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "Type error: string concat operator `..` can only be applied to string; E:%d.",
+            ERROR_CONCAT_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1064,9 +1064,9 @@ void fix_binary_concat_expression(Expression*       expression,
         || right_expression->convert_type[0]->kind != RING_BASIC_TYPE_STRING) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "Type error: string concat operator `..` can only be applied to string; E:%d.",
-                 ERROR_CONCAT_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "Type error: string concat operator `..` can only be applied to string; E:%d.",
+            ERROR_CONCAT_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1134,11 +1134,11 @@ void fix_binary_math_expression(Expression*       expression,
         || left->convert_type == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: oper `%s`, `%s` return no value; E:%d.",
-                 oper.c_str(),
-                 formate_expression(left).c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: oper `%s`, `%s` return no value; E:%d.",
+            oper.c_str(),
+            formate_expression(left).c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1160,11 +1160,11 @@ void fix_binary_math_expression(Expression*       expression,
         || right->convert_type == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: oper `%s`, `%s` return no value; E:%d.",
-                 oper.c_str(),
-                 formate_expression(right).c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: oper `%s`, `%s` return no value; E:%d.",
+            oper.c_str(),
+            formate_expression(right).c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1192,11 +1192,11 @@ void fix_binary_math_expression(Expression*       expression,
         || left_type->kind == RING_BASIC_TYPE_FUNC) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: oper `%s`, invalid operand `%s`,only apply int/int64/double to math operator; E:%d.",
-                 oper.c_str(),
-                 formate_expression(left).c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: oper `%s`, invalid operand `%s`,only apply int/int64/double to math operator; E:%d.",
+            oper.c_str(),
+            formate_expression(left).c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1220,11 +1220,11 @@ void fix_binary_math_expression(Expression*       expression,
         || right_type->kind == RING_BASIC_TYPE_FUNC) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: oper `%s`, invalid `%s`,only apply int/int64/double to math operator; E:%d.",
-                 oper.c_str(),
-                 formate_expression(right).c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: oper `%s`, invalid `%s`,only apply int/int64/double to math operator; E:%d.",
+            oper.c_str(),
+            formate_expression(right).c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1245,14 +1245,14 @@ void fix_binary_math_expression(Expression*       expression,
     if (left_type->kind != right_type->kind) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: oper `%s`, `%s` is %s, `%s` is %s, type mismatch; E:%d.",
-                 oper.c_str(),
-                 formate_expression(left).c_str(),
-                 format_type_specifier(left_type).c_str(),
-                 formate_expression(right).c_str(),
-                 format_type_specifier(right_type).c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: oper `%s`, `%s` is %s, `%s` is %s, type mismatch; E:%d.",
+            oper.c_str(),
+            formate_expression(left).c_str(),
+            format_type_specifier(left_type).c_str(),
+            formate_expression(right).c_str(),
+            format_type_specifier(right_type).c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1329,11 +1329,11 @@ void fix_binary_logical_expression(Expression*       expression,
         || left->convert_type == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: oper `%s`, `%s` return no value; E:%d.",
-                 oper.c_str(),
-                 formate_expression(left).c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: oper `%s`, `%s` return no value; E:%d.",
+            oper.c_str(),
+            formate_expression(left).c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1356,11 +1356,11 @@ void fix_binary_logical_expression(Expression*       expression,
         || right->convert_type == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: oper `%s`, `%s` return no value; E:%d.",
-                 oper.c_str(),
-                 formate_expression(right).c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: oper `%s`, `%s` return no value; E:%d.",
+            oper.c_str(),
+            formate_expression(right).c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1384,10 +1384,10 @@ void fix_binary_logical_expression(Expression*       expression,
     if (left_type->kind != RING_BASIC_TYPE_BOOL) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: only apply bool to `%s` operator; E:%d.",
-                 oper.c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: only apply bool to `%s` operator; E:%d.",
+            oper.c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1408,10 +1408,10 @@ void fix_binary_logical_expression(Expression*       expression,
     if (right_type->kind != RING_BASIC_TYPE_BOOL) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: only apply bool to `%s` operator; E:%d.",
-                 oper.c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: only apply bool to `%s` operator; E:%d.",
+            oper.c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1488,11 +1488,11 @@ void fix_binary_relational_expression(Expression*       expression,
         || left->convert_type == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: oper `%s`, `%s` return no value; E:%d.",
-                 oper.c_str(),
-                 formate_expression(left).c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: oper `%s`, `%s` return no value; E:%d.",
+            oper.c_str(),
+            formate_expression(left).c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1514,11 +1514,11 @@ void fix_binary_relational_expression(Expression*       expression,
         || right->convert_type == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: oper `%s`, `%s` return no value; E:%d.",
-                 oper.c_str(),
-                 formate_expression(right).c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: oper `%s`, `%s` return no value; E:%d.",
+            oper.c_str(),
+            formate_expression(right).c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1550,10 +1550,10 @@ void fix_binary_relational_expression(Expression*       expression,
             && left_type->kind != RING_BASIC_TYPE_STRING) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "invalid operation: only bool/int/int64/double apply to operator `%s`; E:%d.",
-                     oper.c_str(),
-                     ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+            compile_err_buf = sprintf_string(
+                "invalid operation: only bool/int/int64/double apply to operator `%s`; E:%d.",
+                oper.c_str(),
+                ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -1579,10 +1579,10 @@ void fix_binary_relational_expression(Expression*       expression,
             && right_type->kind != RING_BASIC_TYPE_STRING) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "invalid operation: only bool/int/int64/double apply to operator `%s`; E:%d.",
-                     oper.c_str(),
-                     ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+            compile_err_buf = sprintf_string(
+                "invalid operation: only bool/int/int64/double apply to operator `%s`; E:%d.",
+                oper.c_str(),
+                ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -1607,10 +1607,10 @@ void fix_binary_relational_expression(Expression*       expression,
             && left_type->kind != RING_BASIC_TYPE_STRING) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "invalid operation: only int/int64/double apply to operator `%s`; E:%d.",
-                     oper.c_str(),
-                     ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+            compile_err_buf = sprintf_string(
+                "invalid operation: only int/int64/double apply to operator `%s`; E:%d.",
+                oper.c_str(),
+                ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -1635,10 +1635,10 @@ void fix_binary_relational_expression(Expression*       expression,
             && right_type->kind != RING_BASIC_TYPE_STRING) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "invalid operation: only int/int64/double apply to operator `%s`; E:%d.",
-                     oper.c_str(),
-                     ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+            compile_err_buf = sprintf_string(
+                "invalid operation: only int/int64/double apply to operator `%s`; E:%d.",
+                oper.c_str(),
+                ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -1660,14 +1660,14 @@ void fix_binary_relational_expression(Expression*       expression,
     if (left_type->kind != right_type->kind) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "invalid operation: oper `%s`, `%s` is %s, `%s` is %s, type mismatch; E:%d.",
-                 oper.c_str(),
-                 formate_expression(left).c_str(),
-                 format_type_specifier(left_type).c_str(),
-                 formate_expression(right).c_str(),
-                 format_type_specifier(right_type).c_str(),
-                 ERROR_MATH_OPERATOR_MISMATCH_TYPE);
+        compile_err_buf = sprintf_string(
+            "invalid operation: oper `%s`, `%s` is %s, `%s` is %s, type mismatch; E:%d.",
+            oper.c_str(),
+            formate_expression(left).c_str(),
+            format_type_specifier(left_type).c_str(),
+            formate_expression(right).c_str(),
+            format_type_specifier(right_type).c_str(),
+            ERROR_MATH_OPERATOR_MISMATCH_TYPE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1725,10 +1725,10 @@ void fix_unitary_expression(Expression* expression,
         // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "mismatch typed in operator `%s`; E:%d.",
-                 oper.c_str(),
-                 ERROR_OPER_INVALID_USE);
+        compile_err_buf = sprintf_string(
+            "mismatch typed in operator `%s`; E:%d.",
+            oper.c_str(),
+            ERROR_OPER_INVALID_USE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1763,9 +1763,9 @@ void fix_unitary_minus_expression(Expression* expression,
         // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "operator `-` only be used in int/int64/double; E:%d.",
-                 ERROR_OPER_INVALID_USE);
+        compile_err_buf = sprintf_string(
+            "operator `-` only be used in int/int64/double; E:%d.",
+            ERROR_OPER_INVALID_USE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1806,9 +1806,9 @@ void fix_unitary_not_expression(Expression* expression,
         // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "operator `not` only be used in bool; E:%d.",
-                 ERROR_OPER_INVALID_USE);
+        compile_err_buf = sprintf_string(
+            "operator `not` only be used in bool; E:%d.",
+            ERROR_OPER_INVALID_USE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1845,9 +1845,9 @@ void fix_unitary_increase_decrease_expression(Expression* expression,
         // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "operator `++`/`--` only be used in int/int64/double; E:%d.",
-                 ERROR_OPER_INVALID_USE);
+        compile_err_buf = sprintf_string(
+            "operator `++`/`--` only be used in int/int64/double; E:%d.",
+            ERROR_OPER_INVALID_USE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -1943,12 +1943,12 @@ void fix_function_call_expression(Expression*             expression,
     if (function == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, 1024, "use undeclared function `%s`; E:%d",
-                 function_call_expression->func_identifier,
-                 ERROR_UNDEFINITE_FUNCTION);
-        snprintf(compile_adv_buf, 1024, "definite function `%s` like: `function %s() {}` before use it.",
-                 function_call_expression->func_identifier,
-                 function_call_expression->func_identifier);
+        compile_err_buf            = sprintf_string("use undeclared function `%s`; E:%d",
+                                                    function_call_expression->func_identifier,
+                                                    ERROR_UNDEFINITE_FUNCTION);
+        compile_adv_buf            = sprintf_string("definite function `%s` like: `function %s() {}` before use it.",
+                                                    function_call_expression->func_identifier,
+                                                    function_call_expression->func_identifier);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -2012,10 +2012,10 @@ void fix_method_call_expression(Expression*           expression,
     if (method == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "not found method `%s`; E:%d.",
-                 member_identifier,
-                 ERROR_INVALID_NOT_FOUND_CLASS_METHOD);
+        compile_err_buf = sprintf_string(
+            "not found method `%s`; E:%d.",
+            member_identifier,
+            ERROR_INVALID_NOT_FOUND_CLASS_METHOD);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -2228,15 +2228,15 @@ void fix_class_object_literal_expression(Expression*                   expressio
         if (field_member == nullptr) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "ths class `%s` has not field `%s`; E:%d.",
-                     class_definition->identifier,
-                     field_identifier,
-                     ERROR_ASSIGN_TO_METHOD_OF_CLASS);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                     "the class `%s` definition in %s:%d.",
-                     class_definition->identifier,
-                     class_definition->source_file.c_str(), class_definition->start_line_number);
+            compile_err_buf = sprintf_string(
+                "ths class `%s` has not field `%s`; E:%d.",
+                class_definition->identifier,
+                field_identifier,
+                ERROR_ASSIGN_TO_METHOD_OF_CLASS);
+            compile_adv_buf = sprintf_string(
+                "the class `%s` definition in %s:%d.",
+                class_definition->identifier,
+                class_definition->source_file.c_str(), class_definition->start_line_number);
 
 
             ErrorReportContext context = {
@@ -2298,10 +2298,10 @@ void fix_field_member_expression(Expression*       expression,
     if (field == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "not found field `%s`; E:%d.",
-                 member_identifier,
-                 ERROR_INVALID_NOT_FOUND_CLASS_FIELD);
+        compile_err_buf = sprintf_string(
+            "not found field `%s`; E:%d.",
+            member_identifier,
+            ERROR_INVALID_NOT_FOUND_CLASS_FIELD);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -2617,10 +2617,10 @@ Variable* resolve_variable(char* package_posit, char* identifier, Block* block) 
     if (package == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "unknow package `%s`; E:%d.",
-                 package_posit,
-                 ERROR_CODE_UNKNOW_PACKAGE);
+        compile_err_buf = sprintf_string(
+            "unknow package `%s`; E:%d.",
+            package_posit,
+            ERROR_CODE_UNKNOW_PACKAGE);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -2815,10 +2815,10 @@ Function* search_function(char* package_posit, char* identifier) {
         if (package == nullptr) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "unknow package `%s`; E:%d.",
-                     package_posit,
-                     ERROR_CODE_UNKNOW_PACKAGE);
+            compile_err_buf = sprintf_string(
+                "unknow package `%s`; E:%d.",
+                package_posit,
+                ERROR_CODE_UNKNOW_PACKAGE);
 
             ErrorReportContext context = {
                 .package                 = nullptr,

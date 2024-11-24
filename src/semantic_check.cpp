@@ -26,13 +26,13 @@ void ring_compiler_analysis_global_variable(Package* package) {
         if (iter != package->global_var_decl_map.end()) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "redefinition of global variable `%s`; E:%d.",
-                     decl->identifier,
-                     ERROR_REDEFINITE_GLOBAL_VARIABLE);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                     "the first definition of global variable `%s` is here.",
-                     decl->identifier);
+            compile_err_buf = sprintf_string(
+                "redefinition of global variable `%s`; E:%d.",
+                decl->identifier,
+                ERROR_REDEFINITE_GLOBAL_VARIABLE);
+            compile_adv_buf = sprintf_string(
+                "the first definition of global variable `%s` is here.",
+                decl->identifier);
 
             ErrorReportContext context = {
                 .package                 = package,
@@ -63,15 +63,15 @@ void ring_compiler_analysis_function(Package* package) {
         if (iter != package->function_map.end()) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, sizeof(compile_err_buf),
-                     "redefinition of function `%s`; E:%d.",
+            compile_err_buf = sprintf_string(
+                "redefinition of function `%s`; E:%d.",
 
-                     function->identifier,
-                     ERROR_REDEFINITE_FUNCTION);
-            snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                     "the first definition of function `%s` is here.",
+                function->identifier,
+                ERROR_REDEFINITE_FUNCTION);
+            compile_adv_buf = sprintf_string(
+                "the first definition of function `%s` is here.",
 
-                     function->identifier);
+                function->identifier);
 
             ErrorReportContext context = {
                 .package                 = package,
@@ -126,11 +126,11 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
             && parameter_pos->type_specifier->kind != argument_pos->expression->convert_type[0]->kind) {
             DEFINE_ERROR_REPORT_STR;
 
-            snprintf(compile_err_buf, 1024, "function %s() requires (%s) arguments, but (%s) was provided; E:%d",
-                     function_call_expression->func_identifier,
-                     parameter_str.c_str(),
-                     argument_str.c_str(),
-                     ERROR_ARGUMENT_MISMATCH_TYPE);
+            compile_err_buf            = sprintf_string("function %s() requires (%s) arguments, but (%s) was provided; E:%d",
+                                                        function_call_expression->func_identifier,
+                                                        parameter_str.c_str(),
+                                                        argument_str.c_str(),
+                                                        ERROR_ARGUMENT_MISMATCH_TYPE);
 
             ErrorReportContext context = {
                 .package                 = nullptr,

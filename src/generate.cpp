@@ -240,13 +240,13 @@ void class_def_deep_copy(Package_Executer*    executer,
     if (dst->field_size > 255) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "class `%s` has %d fields, greater than 255; E:%d.",
-                 dst->identifier, dst->field_size,
-                 ERROR_TOO_MANY_FIELDS_IN_CLASS);
-        snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                 "delete useless field of class `%s`.",
-                 dst->identifier);
+        compile_err_buf = sprintf_string(
+            "class `%s` has %d fields, greater than 255; E:%d.",
+            dst->identifier, dst->field_size,
+            ERROR_TOO_MANY_FIELDS_IN_CLASS);
+        compile_adv_buf = sprintf_string(
+            "delete useless field of class `%s`.",
+            dst->identifier);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -268,13 +268,13 @@ void class_def_deep_copy(Package_Executer*    executer,
     if (dst->method_size > 255) {
         DEFINE_ERROR_REPORT_STR;
 
-        snprintf(compile_err_buf, sizeof(compile_err_buf),
-                 "class `%s` has %d methods, greater than 255; E:%d.",
-                 dst->identifier, dst->method_size,
-                 ERROR_TOO_MANY_METHODS_IN_CLASS);
-        snprintf(compile_adv_buf, sizeof(compile_adv_buf),
-                 "delete useless field of class `%s`.",
-                 dst->identifier);
+        compile_err_buf = sprintf_string(
+            "class `%s` has %d methods, greater than 255; E:%d.",
+            dst->identifier, dst->method_size,
+            ERROR_TOO_MANY_METHODS_IN_CLASS);
+        compile_adv_buf = sprintf_string(
+            "delete useless field of class `%s`.",
+            dst->identifier);
 
         ErrorReportContext context = {
             .package                 = nullptr,
