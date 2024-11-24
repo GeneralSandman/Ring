@@ -284,7 +284,6 @@ void ring_vm_code_dump(RVM_Function* function,
 
 
 // TODO: caller_stack_base 是不是可以放在 RVM_RuntimeStack 中，考虑
-// TODO:
 void ring_vm_dump_runtime_stack(Ring_VirtualMachine* rvm,
                                 RVM_RuntimeStack*    runtime_stack,
                                 unsigned int         caller_stack_base,

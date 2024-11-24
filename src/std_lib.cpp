@@ -44,7 +44,7 @@ char RING_PACKAGE_STD_PATH_VM[]      = "/usr/local/lib/ring/std/vm/";
  *  vm
  *  reflect
  *
- * TODO: 在编译过程中, 同样需要对std函数调用做详细的语义检查, 包括: 参数数量/类型, 返回值
+ * 在编译过程中, 同样需要对std函数调用做详细的语义检查, 包括: 参数数量/类型, 返回值
  * 其中函数详细的定义 必须用 ring文件表明
  * 这里 std函数调用过程中不需要在做语义检查
  */
@@ -198,11 +198,8 @@ RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
     assert(arg_count == 1);
 
     RVM_Value ret;
-
     ret.u.int_value = 0;
 
-
-    // TODO: 暂时只打印int, 以后都强制转换成int_value
     exit(args->u.int_value);
 
     return ret;
@@ -516,7 +513,6 @@ RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
 
     char* output_buffer = (char*)mem_alloc(NULL_MEM_POOL, 12 * sizeof(char));
 
-    // TODO: 暂时只打印int, 以后都强制转换成int_value
     snprintf(output_buffer, 13, "%d\n", args->u.int_value);
 
     printf(output_buffer, "");
@@ -687,7 +683,6 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
  * Function: println
  * Type: @native
  */
-// TODO:
 RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     std::string result;
     std::string tmp;

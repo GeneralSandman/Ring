@@ -401,7 +401,6 @@ int resume_coroutine(Ring_VirtualMachine* rvm,
  * @co_id:
  * 协程让出CPU，交出控制权给他的parent
  * 如果 他没有parent，也就是 RootCoroutine，那么没有效果
- * TODO: 完善一下注释
  */
 int yield_coroutine(Ring_VirtualMachine* rvm) {
 
