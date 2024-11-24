@@ -69,11 +69,12 @@ Expression* expression_add_package_posit(Expression* expression, char* package_p
 
 Expression* create_expression_identifier(char* identifier) {
     debug_ast_info_with_yellow("identifier:%s", identifier);
+    // 有可能是个匿名函数, 也有可能是个变量
 
     IdentifierExpression* identifier_expression = (IdentifierExpression*)mem_alloc(get_front_mem_pool(), sizeof(IdentifierExpression));
     identifier_expression->line_number          = package_unit_get_line_number();
     identifier_expression->package_posit        = nullptr;
-    identifier_expression->type                 = IDENTIFIER_EXPRESSION_TYPE_VARIABLE; // TODO: 这里应该是 Unknow UPDATED_BY_FIX_AST
+    identifier_expression->type                 = IDENTIFIER_EXPRESSION_TYPE_UNKNOW;
     identifier_expression->identifier           = identifier;
     identifier_expression->u.variable           = nullptr;
 

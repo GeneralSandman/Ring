@@ -224,7 +224,7 @@ struct Ring_VirtualMachine {
     Package_Executer*    executer;
     ExecuterEntry*       executer_entry;
 
-    RVM_RuntimeStatic*   runtime_static; // TODO: 暂时只支持main包的 全局变量
+    RVM_RuntimeStatic*   runtime_static;
     RVM_RuntimeHeap*     runtime_heap;
 
     RVM_ClassDefinition* class_list;
@@ -882,7 +882,6 @@ typedef enum {
     RVM_CODE_PUSH_INT64,     // bigger 65535
     RVM_CODE_PUSH_DOUBLE,
     RVM_CODE_PUSH_STRING,
-    RVM_CODE_PUSH_ANOY_FUNC,
 
     // static
     RVM_CODE_POP_STATIC_BOOL,
@@ -2275,6 +2274,9 @@ typedef enum {
 
     ERROR_CODE_GRAMMAR_ERROR                  = 100000, // 语法错误
     ERROR_CODE_UNKNOW_PACKAGE                 = 100001, // 找不到 package
+
+    ERROR_INVALID_TERNARY_EXPR_CONDITION      = 100002, // 三目条件运算符 不合法的条件表达式
+    ERROR_INVALID_TERNARY_EXPR_TRUE_OR_FALSE  = 100003, // 三目条件运算符 不合法true/false条件表达式
 
 
     ERROR_UNDEFINITE_VARIABLE                 = 200000,

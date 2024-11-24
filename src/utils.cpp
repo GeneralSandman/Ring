@@ -948,7 +948,6 @@ std::string format_function_arguments(ArgumentList* argument) {
 }
 
 
-// TODO: 这里直接使用Cpp::string, 后续需要改成 Ring_String
 std::string format_rvm_function(Package_Executer* package_executer,
                                 RVM_Function*     function) {
 
@@ -980,16 +979,13 @@ std::string format_rvm_function(Package_Executer* package_executer,
     }
     result += ")";
 
-    // 3. function return values
     // TODO:
-
+    // 3. function return values
 
     return result;
 }
 
 
-// TODO: 这里直接使用Cpp::string, 后续需要改成 Ring_String
-// TODO: 这里暂时 只能 formate 参数为 bool, int, double, string 其余的类型需要继续支持
 std::string format_rvm_type_specifier(Package_Executer*  package_executer,
                                       RVM_TypeSpecifier* type_specifier,
                                       std::string        prefix) {

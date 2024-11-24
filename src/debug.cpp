@@ -513,10 +513,11 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
                        break_points.size(),
                        breakpoint_line);
 
+                // TODO:
                 RVM_BreakPoint breakpoint = RVM_BreakPoint{
-                    .package     = nullptr, // TODO:
-                    .file_name   = nullptr, // TODO:
-                    .func_name   = nullptr, // TODO:
+                    .package     = nullptr,
+                    .file_name   = nullptr,
+                    .func_name   = nullptr,
                     .line_number = breakpoint_line,
                 };
 

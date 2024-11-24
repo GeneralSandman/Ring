@@ -76,7 +76,7 @@ Ring_Buildin_Func Ring_Buildin_Funcs[] = {
     },
 };
 
-// TODO: 统一检查参数类型, 统一检查参数数量
+// 统一检查参数类型, 统一检查参数数量
 void check_build_func_param_num(Expression*             expression,
                                 FunctionCallExpression* function_call_expression,
                                 Block*                  block,

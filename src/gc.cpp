@@ -121,7 +121,6 @@ void gc_mark(Ring_VirtualMachine* rvm) {
     // 1. static 变量指向的位置 需要标记
     for (unsigned int i = 0; i < rvm->runtime_static->size; i++) {
         RVM_Value* value = &(VM_STATIC_DATA[i]);
-        // TODO:
         switch (value->type) {
         case RVM_VALUE_TYPE_STRING:
             value->u.string_value->gc_mark = GC_MARK_COLOR_BLACK;

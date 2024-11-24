@@ -60,7 +60,6 @@ TypeSpecifier string_type_specifier = TypeSpecifier{
     .dimension   = 0,
     .sub         = 0,
 };
-// TODO: 删除
 TypeSpecifier func_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_FUNC,
@@ -500,7 +499,7 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
     ClassDefinition* class_definition = nullptr;
     TypeAlias*       type_alias       = nullptr;
 
-    // TODO: var a tmp;
+    // e.g. var a tmp;
     // 1. a 是一个类-类型, 从全局类定义中搜索
     // 2. a 是一个匿名函数类型, 从全局类型定义中搜索
     if (type_specifier->kind == RING_BASIC_TYPE_UNKNOW) {
@@ -759,12 +758,10 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
         TypeSpecifier* expect = return_value->type_specifier;
         TypeSpecifier* actual = return_convert_type[i];
 
-        // TODO: 深度比较
-        // TODO: 比对 类
+        // TODO: 深度比较, 比对 类
         if (expect->kind != actual->kind) {
             DEFINE_ERROR_REPORT_STR;
 
-            // TODO:
             compile_err_buf = sprintf_string(
                 "return mismatch: expect %s but return %s; E:%d.",
                 expect_type_str.c_str(),
@@ -831,7 +828,6 @@ void fix_identifier_expression(Expression*           expression,
     }
 
     // not a variable and not a function
-    // TODO: 修改一下错误码
     // Ring-Compiler-Error-Report ERROR_UNDEFINITE_VARIABLE
     {
         DEFINE_ERROR_REPORT_STR;
@@ -978,7 +974,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     {
         // formate right to string
         std::vector<std::string> tmp;
-        for (TypeSpecifier* type : left_convert_type) {
+        for (TypeSpecifier* type : right_convert_type) {
             tmp.push_back(format_type_specifier(type));
         }
         right_type_s = "(" + strings_join(tmp, ",") + ")";
@@ -991,11 +987,10 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     for (unsigned int i = 0; i < left_convert_type.size(); i++) {
 
         // TODO: 深度比较
-        // TODO: 比对 类
+        // 比对 类, 比较typedef的类型
         if (left_convert_type[i]->kind != right_convert_type[i]->kind) {
             DEFINE_ERROR_REPORT_STR;
 
-            // TODO:
             compile_err_buf = sprintf_string(
                 "assignment mismatch: expect %s but return %s; E:%d.",
                 left_type_s.c_str(),
@@ -2408,25 +2403,119 @@ void fix_ternary_condition_expression(Expression*        expression,
     fix_expression(true_expression, block, func);
     fix_expression(false_expression, block, func);
 
-    if (condition_expression->convert_type_size != 1) {
-        // TODO: error-report
-    }
-    TypeSpecifier* condition_type = condition_expression->convert_type[0];
-    if (condition_type->kind != RING_BASIC_TYPE_BOOL) {
-        // TODO: error-report
+    // Ring-Compiler-Error-Report ERROR_INVALID_TERNARY_EXPR_CONDITION
+    if (condition_expression->convert_type_size != 1
+        || condition_expression->convert_type[0]->kind != RING_BASIC_TYPE_BOOL) {
+        DEFINE_ERROR_REPORT_STR;
+
+        compile_err_buf = sprintf_string(
+            "requires <bool> in condition of ternary expression; E:%d.",
+            ERROR_INVALID_TERNARY_EXPR_CONDITION);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(condition_expression->line_number), // FIXME:
+            .line_number             = condition_expression->line_number,                                // FIXME:
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
 
+    // true 和 false expression 里边的表达式类型应该一致
+    // 类似于 assign 语句的 left right 的匹配
 
+
+    // Ring-Compiler-Error-Report ERROR_INVALID_TERNARY_EXPR_TRUE_OR_FALSE
     if (true_expression->convert_type_size != false_expression->convert_type_size) {
-        // TODO: error-report
-        ring_error_report("true_expression false_expression type_specifier size invalid\n");
+        DEFINE_ERROR_REPORT_STR;
+
+        compile_err_buf = sprintf_string(
+            "<true_expression> and <false_expression> must same type in ternary expression; E:%d.",
+            ERROR_INVALID_TERNARY_EXPR_CONDITION);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(condition_expression->line_number), // FIXME:
+            .line_number             = condition_expression->line_number,                                // FIXME:
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
 
 
-    // TODO: error-report 类型不匹配
+    // Ring-Compiler-Error-Report ERROR_INVALID_TERNARY_EXPR_TRUE_OR_FALSE
     if (true_expression->convert_type_size) {
-        if (true_expression->convert_type[0]->kind != false_expression->convert_type[0]->kind) {
-            ring_error_report("true_expression false_expression type unmatch\n");
+
+        std::vector<TypeSpecifier*> true_convert_type;
+        for (unsigned int i = 0; i < true_expression->convert_type_size; i++) {
+            true_convert_type.push_back(true_expression->convert_type[i]);
+        }
+        std::vector<TypeSpecifier*> false_convert_type;
+        for (unsigned int i = 0; i < false_expression->convert_type_size; i++) {
+            false_convert_type.push_back(false_expression->convert_type[i]);
+        }
+
+        std::string true_type_s;
+        {
+            // formate left to string
+            std::vector<std::string> tmp;
+            for (TypeSpecifier* type : true_convert_type) {
+                tmp.push_back(format_type_specifier(type));
+            }
+            true_type_s = "(" + strings_join(tmp, ",") + ")";
+        }
+        std::string false_type_s;
+        {
+            // formate left to string
+            std::vector<std::string> tmp;
+            for (TypeSpecifier* type : false_convert_type) {
+                tmp.push_back(format_type_specifier(type));
+            }
+            false_type_s = "(" + strings_join(tmp, ",") + ")";
+        }
+
+        for (unsigned int i = 0; i < true_convert_type.size(); i++) {
+
+            // TODO: 深度比较
+            // 比对 类, 比较typedef的类型
+            if (true_convert_type[i]->kind != false_convert_type[i]->kind) {
+                DEFINE_ERROR_REPORT_STR;
+
+                compile_err_buf = sprintf_string(
+                    "<true_expression> type is %s, <false_expression> type is %s, not match; E:%d.",
+                    true_type_s.c_str(),
+                    false_type_s.c_str(),
+                    ERROR_ASSIGNMENT_MISMATCH_TYPE);
+
+                ErrorReportContext context = {
+                    .package                 = nullptr,
+                    .package_unit            = get_package_unit(),
+                    .source_file_name        = get_package_unit()->current_file_name,
+                    .line_content            = package_unit_get_line_content(expression->line_number),
+                    .line_number             = expression->line_number,
+                    .column_number           = package_unit_get_column_number(),
+                    .error_message           = std::string(compile_err_buf),
+                    .advice                  = std::string(compile_adv_buf),
+                    .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                    .ring_compiler_file      = (char*)__FILE__,
+                    .ring_compiler_file_line = __LINE__,
+                };
+                ring_compile_error_report(&context);
+            }
         }
     }
 
@@ -2736,13 +2825,9 @@ Variable* resolve_variable_recur(Package* package, char* identifier, Block* bloc
         return nullptr;
     }
 
-    // TODO:
-    // TODO:_______
     if (par_var->decl != nullptr) {
         // 定义par_var 的block 需要添加一个free_value, 不能重复
         // par_block 所在的function 在return的时候, 要负责关闭所有的FreeValueAgent
-
-        // printf("-----\n");
 
         Block* par_block = par_var->decl->blong_block;
 

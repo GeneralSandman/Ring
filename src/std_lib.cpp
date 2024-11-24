@@ -891,7 +891,6 @@ RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int 
  * Function: heap_size
  * Type: @native
  *
- * TODO: 需要改成 int64
  */
 RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     assert(arg_count == 0);

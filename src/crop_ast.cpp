@@ -294,7 +294,6 @@ void crop_binary_match_expression(Expression*       expression,
             expression->u.int_literal = left->u.int_literal % right->u.int_literal;
             break;
         default:
-            // TODO: error
             break;
         }
 
@@ -321,7 +320,6 @@ void crop_binary_match_expression(Expression*       expression,
             expression->u.int64_literal = left->u.int64_literal % right->u.int64_literal;
             break;
         default:
-            // TODO: error report
             break;
         }
 
@@ -349,7 +347,6 @@ void crop_binary_match_expression(Expression*       expression,
             // expression->u.double_literal = left->u.double_literal % right->u.double_literal;
             break;
         default:
-            // TODO: error report
             break;
         }
 
@@ -361,10 +358,6 @@ void crop_binary_match_expression(Expression*       expression,
 }
 
 
-/*
- * TODO: 这里需要继续细致的划分
- * 类似于 fix_unitary_minus_expression fix_unitary_not_expression
- */
 void crop_unitary_expression(Expression* expression,
                              Expression* unitary_expression,
                              Block* block, FunctionTuple* func) {

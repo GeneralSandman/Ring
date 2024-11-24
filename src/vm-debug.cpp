@@ -122,8 +122,7 @@ int vm_debugger_cli(Ring_VirtualMachine* rvm) {
         if (vm_db_arg.cmd == VM_DB_COMMAND_HELP) {
             fprintf(stderr, "[@]%s", vm_db_command_help_message.c_str());
         } else if (vm_db_arg.cmd == VM_DB_COMMAND_CLEAR) {
-            // TODO:
-            // STDOUT_CLEAR_SCREEN;
+            STDOUT_CLEAR_SCREEN;
         } else if (vm_db_arg.cmd == VM_DB_COMMAND_QUIT) {
             fprintf(stderr, "[@]CMD: Exit Ring Virtual Machine Debugger...\n");
 

@@ -186,7 +186,6 @@ void add_functions(Package* package, Package_Executer* executer) {
         copy_function(executer, &(executer->function_list[i]), package->function_list[i]);
         // 注册main函数
         if (str_eq(package->function_list[i]->identifier, "main")) {
-            // printf("find main:%d\n", i);
             executer->exist_main_func = true;
             executer->main_func_index = i;
         } else if (str_eq(package->function_list[i]->identifier, "__global_init")) {
@@ -2655,7 +2654,6 @@ int constant_pool_grow(Package_Executer* executer, unsigned int growth_size) {
     return old_size;
 }
 
-// TODO: 封装成宏
 int constant_pool_add_int(Package_Executer* executer, int int_literal) {
     debug_generate_info_with_darkgreen("\t");
     int index                                       = constant_pool_grow(executer, 1);
@@ -2665,7 +2663,6 @@ int constant_pool_add_int(Package_Executer* executer, int int_literal) {
     return index;
 }
 
-// TODO: 封装成宏
 int constant_pool_add_int64(Package_Executer* executer, long long int64_literal) {
     debug_generate_info_with_darkgreen("\t");
     int index                                         = constant_pool_grow(executer, 1);
@@ -2675,7 +2672,6 @@ int constant_pool_add_int64(Package_Executer* executer, long long int64_literal)
     return index;
 }
 
-// TODO: 封装成宏
 int constant_pool_add_double(Package_Executer* executer, double double_literal) {
     debug_generate_info_with_darkgreen("\t");
     int index                                          = constant_pool_grow(executer, 1);
@@ -2685,7 +2681,6 @@ int constant_pool_add_double(Package_Executer* executer, double double_literal) 
     return index;
 }
 
-// TODO: 封装成宏
 int constant_pool_add_string(Package_Executer* executer, const char* string_literal) {
     debug_generate_info_with_darkgreen("\t");
     int index                                          = constant_pool_grow(executer, 1);
@@ -2695,7 +2690,6 @@ int constant_pool_add_string(Package_Executer* executer, const char* string_lite
     return index;
 }
 
-// TODO: 封装成宏
 int constant_pool_add_closure(Package_Executer* executer, RVM_Function* func) {
     debug_generate_info_with_darkgreen("\t");
     int index                                                  = constant_pool_grow(executer, 1);

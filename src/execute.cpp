@@ -172,8 +172,7 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 
 
 // TODO: 这里的栈空间应该可以指定
-RVM_RuntimeStack*
-new_runtime_stack() {
+RVM_RuntimeStack* new_runtime_stack() {
     RVM_RuntimeStack* stack = (RVM_RuntimeStack*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_RuntimeStack));
     stack->top_index        = 0;
     stack->capacity         = 1024 * 1024; // FIXME: 先开辟一个大的空间
@@ -531,14 +530,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             const_index  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             string_value = string_literal_to_rvm_string(rvm, constant_pool_list[const_index].u.string_value);
             STACK_SET_STRING_OFFSET(0, string_value);
-            VM_CUR_CO_STACK_TOP_INDEX += 1;
-            VM_CUR_CO_PC += 3;
-            break;
-        case RVM_CODE_PUSH_ANOY_FUNC:
-            // TODO:
-            // 需要重新考虑一下这个字节码是否还有必要保存
-            // 他和 new_closure 的功能重复了
-            // 目前是没有使用到这个字节码
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
@@ -2239,12 +2230,12 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->caller_object        = *caller_object;
     callinfo->caller_function      = *caller_function;
-    callinfo->caller_closure       = *caller_closure; // TODO:
+    callinfo->caller_closure       = *caller_closure;
     callinfo->caller_stack_base    = VM_CUR_CO_STACK_TOP_INDEX;
     callinfo->caller_is_defer      = invoke_by_defer;
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
-    callinfo->callee_closure       = callee_closure; // TODO:
+    callinfo->callee_closure       = callee_closure;
     callinfo->callee_argument_size = argument_list_size;
     callinfo->curr_closure         = callee_closure;
     callinfo->code_list            = callee_function->u.derive_func->code_list;
@@ -2449,7 +2440,6 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     // 如果 callinfo 为空, 则一个协程消亡了
     // 需要切换/销毁 协程
     if (VM_CUR_CO_CALLINFO == nullptr) {
-        // printf("coroutine dead\n");
         // TODO: 一个协程结束之后，协程的返回值是否要copy到调用者的协程栈中
         finish_coroutine(rvm,
                          caller_object, caller_function,
@@ -2466,9 +2456,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
 
 
     // TODO: 为了安全性，需要进行检查
-    if (VM_CUR_CO_STACK_TOP_INDEX != callinfo->caller_stack_base) {
-        // printf("ERROR----------\n");
-    }
+    // assert(VM_CUR_CO_STACK_TOP_INDEX == callinfo->caller_stack_base);
 
     // 释放arguement
     VM_CUR_CO_STACK_TOP_INDEX -= callinfo->callee_argument_size;
@@ -3482,8 +3470,6 @@ void rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object
 }
 
 long long rvm_heap_size(Ring_VirtualMachine* rvm) {
-    // FIXME: 这里会溢出
-    // TODO: 数据类型不够
     return rvm->runtime_heap->alloc_size;
 }
 
