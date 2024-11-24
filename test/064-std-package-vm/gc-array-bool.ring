@@ -22,7 +22,7 @@ function main() {
      * 之后测试的时候，`vm::heap_size() - init_heap_size` 即为刚刚分配的内存
     */
     vm::garbage_collect();
-    var int init_heap_size = vm::heap_size();
+    var int64 init_heap_size = vm::heap_size();
     //
 
 
@@ -34,7 +34,7 @@ function main() {
     debug::debug_assert(len(local_bool_array_0) == 20);
     debug::debug_assert(capacity(local_bool_array_0) == 24);
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 48);
+    debug::debug_assert(vm::heap_size() - init_heap_size == 48L);
 
 
     vm::garbage_collect();
@@ -43,5 +43,5 @@ function main() {
     debug::debug_assert(len(local_bool_array_0) == 20);
     debug::debug_assert(capacity(local_bool_array_0) == 24);
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 24);
+    debug::debug_assert(vm::heap_size() - init_heap_size == 24L);
 }

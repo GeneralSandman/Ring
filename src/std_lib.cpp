@@ -195,17 +195,12 @@ void register_lib(Package_Executer*   package_executer,
  * Type: @native
  */
 RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    debug_exec_info_with_white("\t");
+    assert(arg_count == 1);
 
     RVM_Value ret;
 
     ret.u.int_value = 0;
 
-
-    if (arg_count != 1) {
-        printf("native_proc_exit only one arguement\n");
-        exit(ERROR_CODE_RUN_VM_ERROR);
-    }
 
     // TODO: 暂时只打印int, 以后都强制转换成int_value
     exit(args->u.int_value);
@@ -219,15 +214,8 @@ RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
  * Type: @native
  */
 RVM_Value std_lib_os_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        // TODO:
-        ring_error_report("std_lib_os_remove only one arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_STRING) {
-        // TODO:
-        ring_error_report("std_lib_os_remove only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
     RVM_String* str = args[0].u.string_value;
 
@@ -257,15 +245,8 @@ RVM_Value std_lib_os_rename(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Type: @native
  */
 RVM_Value std_lib_os_getenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        // TODO:
-        ring_error_report("std_lib_os_getenv only one arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_STRING) {
-        // TODO:
-        ring_error_report("std_lib_os_getenv only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
     RVM_String* str = args[0].u.string_value;
     // FIXME:
@@ -295,19 +276,9 @@ RVM_Value std_lib_os_getenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Type: @native
  */
 RVM_Value std_lib_os_setenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 2) {
-        // TODO:
-        ring_error_report("std_lib_os_getenv only one arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_STRING) {
-        // TODO:
-        ring_error_report("std_lib_os_getenv only one arguement\n");
-    }
-    if (args[1].type != RVM_VALUE_TYPE_STRING) {
-        // TODO:
-        ring_error_report("std_lib_os_getenv only one arguement\n");
-    }
+    assert(arg_count == 2);
+    assert(args[0].type == RVM_VALUE_TYPE_STRING);
+    assert(args[1].type == RVM_VALUE_TYPE_STRING);
 
     int         res;
     RVM_String* name  = args[0].u.string_value;
@@ -326,15 +297,8 @@ RVM_Value std_lib_os_setenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Type: @native
  */
 RVM_Value std_lib_io_exist(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        // TODO:
-        ring_error_report("std_lib_io_exist only one arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_STRING) {
-        // TODO:
-        ring_error_report("std_lib_io_exist only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
     RVM_String* str = args[0].u.string_value;
 
@@ -354,15 +318,8 @@ RVM_Value std_lib_io_exist(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
  * Type: @native
  */
 RVM_Value std_lib_io_open(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        // TODO:
-        ring_error_report("std_lib_io_open only one arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_STRING) {
-        // TODO:
-        ring_error_report("std_lib_io_open only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
     int       fid = open(args[0].u.string_value->data, O_RDONLY);
 
@@ -378,15 +335,8 @@ RVM_Value std_lib_io_open(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
  * Type: @native
  */
 RVM_Value std_lib_io_create(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        // TODO:
-        ring_error_report("std_lib_io_create only one arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_STRING) {
-        // TODO:
-        ring_error_report("std_lib_io_create only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
     int       fid = open(args[0].u.string_value->data, O_CREAT | O_RDWR, 0666);
 
@@ -402,23 +352,10 @@ RVM_Value std_lib_io_create(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Type: @native
  */
 RVM_Value std_lib_io_seek(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 3) {
-        // TODO:
-        ring_error_report("std_lib_io_seek only one arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_INT) {
-        // TODO:
-        ring_error_report("std_lib_io_seek only one arguement\n");
-    }
-    if (args[1].type != RVM_VALUE_TYPE_INT64) {
-        // TODO:
-        ring_error_report("std_lib_io_seek only one arguement\n");
-    }
-    if (args[2].type != RVM_VALUE_TYPE_INT) {
-        // TODO:
-        ring_error_report("std_lib_io_seek only one arguement\n");
-    }
+    assert(arg_count == 3);
+    assert(args[0].type == RVM_VALUE_TYPE_INT);
+    assert(args[1].type == RVM_VALUE_TYPE_INT64);
+    assert(args[2].type == RVM_VALUE_TYPE_INT);
 
     int       fid    = args[0].u.int_value;
     long long offset = args[1].u.int64_value;
@@ -438,15 +375,8 @@ RVM_Value std_lib_io_seek(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
  * Type: @native
  */
 RVM_Value std_lib_io_read_all(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        // TODO:
-        ring_error_report("std_lib_io_read_all only one arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_INT) {
-        // TODO:
-        ring_error_report("std_lib_io_read_all only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_INT);
 
     std::string result;
 
@@ -484,20 +414,9 @@ RVM_Value std_lib_io_read_all(Ring_VirtualMachine* rvm, unsigned int arg_count, 
  * Type: @native
  */
 RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 2) {
-        // TODO:
-        ring_error_report("std_lib_io_write only two arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_INT) {
-        // TODO:
-        ring_error_report("std_lib_io_write only one arguement\n");
-    }
-
-    if (args[1].type != RVM_VALUE_TYPE_STRING) {
-        // TODO:
-        ring_error_report("std_lib_io_write only one arguement\n");
-    }
+    assert(arg_count == 2);
+    assert(args[0].type == RVM_VALUE_TYPE_INT);
+    assert(args[1].type == RVM_VALUE_TYPE_STRING);
 
     int         fid    = args[0].u.int_value;
     RVM_String* buffer = args[1].u.string_value;
@@ -517,15 +436,8 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
  * Type: @native
  */
 RVM_Value std_lib_io_close(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        // TODO:
-        ring_error_report("std_lib_io_read_all only one arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_INT) {
-        // TODO:
-        ring_error_report("std_lib_io_read_all only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_INT);
 
     int fid = args[0].u.int_value;
 
@@ -543,15 +455,8 @@ RVM_Value std_lib_io_close(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
  * Type: @native
  */
 RVM_Value std_lib_io_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        // TODO:
-        ring_error_report("std_lib_io_remove only one arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_STRING) {
-        // TODO:
-        ring_error_report("std_lib_io_remove only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
     RVM_String* str = args[0].u.string_value;
 
@@ -574,9 +479,8 @@ RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm,
                                    unsigned int         arg_count,
                                    RVM_Value*           args) {
 
-    if (arg_count != 1) {
-        ring_error_report("std_lib_fmt_println_bool only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_BOOL);
 
     RVM_Value ret;
     ret.u.int_value     = 0;
@@ -604,9 +508,8 @@ RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm,
  * Type: @native
  */
 RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        ring_error_report("std_lib_fmt_println_int only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_INT);
 
     RVM_Value ret;
     ret.u.int_value     = 0;
@@ -631,9 +534,8 @@ RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
  * Type: @native
  */
 RVM_Value std_lib_fmt_println_int64(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        ring_error_report("std_lib_fmt_println_int64 only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_INT64);
 
     RVM_Value ret;
     ret.u.int_value     = 0;
@@ -657,9 +559,8 @@ RVM_Value std_lib_fmt_println_int64(Ring_VirtualMachine* rvm, unsigned int arg_c
  * Type: @native
  */
 RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        ring_error_report("std_lib_fmt_println_double only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_DOUBLE);
 
     RVM_Value ret;
     ret.u.int_value     = 0;
@@ -683,9 +584,8 @@ RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
  * Type: @native
  */
 RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        ring_error_report("std_lib_fmt_println_string only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
     RVM_Value ret;
     ret.u.int_value            = 0;
@@ -728,9 +628,7 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
  * TODO: 后续废弃
  */
 RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        ring_error_report("std_lib_fmt_println_pointer only one arguement\n");
-    }
+    assert(arg_count == 1);
 
     unsigned int length        = 20;
     char*        output_buffer = (char*)mem_alloc(NULL_MEM_POOL, length * sizeof(char));
@@ -819,12 +717,8 @@ RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, 
  * Type: @native
  */
 RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count < 1) {
-        ring_error_report("std_lib_fmt_printf arguement num less 1\n");
-    }
-    if (args[0].type != RVM_VALUE_TYPE_STRING) {
-        ring_error_report("std_lib_fmt_printf arguement type error, first argument is string\n");
-    }
+    assert(arg_count >= 1);
+    assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
     // FIXME: 这里先留一个坑吧, 先使用 std::string
     // 不太合规, 后续统一优化
@@ -848,14 +742,17 @@ RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, R
             }
         } else if (args[0].u.string_value->data[format_index] == '{') {
             if (args[0].u.string_value->data[format_index + 1] == '}') {
-                if (args_index >= arg_count) {
-                    ring_error_report("std_lib_fmt_printf arguement error\n");
+                // 消费一个{} 和一个参数
+                if (args_index < arg_count) {
+                    result += fmt_any(&args[args_index]);
+
+                    args_index++;
+                    format_index += 2;
+                } else {
+                    result += args[0].u.string_value->data[format_index];
+                    format_index++;
                 }
 
-                result += fmt_any(&args[args_index]);
-
-                args_index++;
-                format_index += 2;
             } else {
                 result += args[0].u.string_value->data[format_index];
                 format_index++;
@@ -881,12 +778,8 @@ RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, R
  * Type: @native
  */
 RVM_Value std_lib_fmt_sprintf(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count < 1) {
-        ring_error_report("std_lib_fmt_sprintf arguement num less 1\n");
-    }
-    if (args[0].type != RVM_VALUE_TYPE_STRING) {
-        ring_error_report("std_lib_fmt_sprintf arguement type error, first argument is string\n");
-    }
+    assert(arg_count >= 1);
+    assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
     // FIXME: 这里先留一个坑吧, 先使用 std::string
     // 不太合规, 后续统一优化
@@ -911,14 +804,17 @@ RVM_Value std_lib_fmt_sprintf(Ring_VirtualMachine* rvm, unsigned int arg_count, 
             }
         } else if (args[0].u.string_value->data[format_index] == '{') {
             if (args[0].u.string_value->data[format_index + 1] == '}') {
-                if (args_index >= arg_count) {
-                    ring_error_report("std_lib_fmt_printf arguement error\n");
+                // 消费一个{} 和一个参数
+                if (args_index < arg_count) {
+                    result += fmt_any(&args[args_index]);
+
+                    args_index++;
+                    format_index += 2;
+                } else {
+                    result += args[0].u.string_value->data[format_index];
+                    format_index++;
                 }
 
-                result += fmt_any(&args[args_index]);
-
-                args_index++;
-                format_index += 2;
             } else {
                 result += args[0].u.string_value->data[format_index];
                 format_index++;
@@ -945,9 +841,8 @@ RVM_Value std_lib_fmt_sprintf(Ring_VirtualMachine* rvm, unsigned int arg_count, 
  * Type: @native
  */
 RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        ring_error_report("std_lib_debug_debug_assert only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_BOOL);
 
     RVM_Value ret;
     ret.u.int_value            = 0;
@@ -978,9 +873,7 @@ RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_
  * Type: @native
  */
 RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 0) {
-        ring_error_report("std_lib_debug_print_call_stack not need arguement\n");
-    }
+    assert(arg_count == 0);
 
     std::string call_stack = format_rvm_call_stack(rvm);
     printf("%s", call_stack.c_str());
@@ -1001,9 +894,11 @@ RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int 
  * TODO: 需要改成 int64
  */
 RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    assert(arg_count == 0);
+
     RVM_Value ret;
-    ret.type        = RVM_VALUE_TYPE_INT;
-    ret.u.int_value = rvm_heap_size(rvm);
+    ret.type          = RVM_VALUE_TYPE_INT64;
+    ret.u.int64_value = rvm_heap_size(rvm);
 
     return ret;
 }
@@ -1014,6 +909,8 @@ RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count,
  * Type: @native
  */
 RVM_Value std_lib_vm_garbage_collect(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    assert(arg_count == 0);
+
     RVM_Value ret;
     ret.u.int_value = 0;
 
@@ -1028,6 +925,8 @@ RVM_Value std_lib_vm_garbage_collect(Ring_VirtualMachine* rvm, unsigned int arg_
  * Type: @native
  */
 RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    assert(arg_count == 1);
+
     std::string str = "";
 
     str             = format_rvm_type(rvm, args);
@@ -1046,10 +945,7 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
  * 返回 10位Unix时间戳
  */
 RVM_Value std_lib_time_time(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 0) {
-        // TODO:
-        ring_error_report("std_lib_time_time only empty arguement\n");
-    }
+    assert(arg_count == 0);
 
     time_t res;
 
@@ -1070,19 +966,10 @@ RVM_Value std_lib_time_time(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * // 单位纳秒
  */
 RVM_Value std_lib_time_sleep(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    if (arg_count != 1) {
-        // TODO:
-        ring_error_report("std_lib_time_sleep only empty arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_INT64) {
-        // TODO:
-        ring_error_report("std_lib_time_sleep only one arguement\n");
-    }
-
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_INT64);
 
     long long       ns = args[0].u.int64_value;
-
 
     struct timespec ts;
     ts.tv_sec  = ns / 1000000000;
@@ -1105,16 +992,8 @@ RVM_Value std_lib_time_sleep(Ring_VirtualMachine* rvm, unsigned int arg_count, R
  * Type: @native
  */
 RVM_Value std_lib_math_abs(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-
-    if (arg_count != 1) {
-        // TODO:
-        ring_error_report("std_lib_math_abs only empty arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_DOUBLE) {
-        // TODO:
-        ring_error_report("std_lib_math_abs only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_DOUBLE);
 
     double    double_val = args[0].u.double_value;
 
@@ -1133,16 +1012,8 @@ RVM_Value std_lib_math_abs(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
  * Type: @native
  */
 RVM_Value std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-
-    if (arg_count != 1) {
-        // TODO:
-        ring_error_report("std_lib_math_sqrt only empty arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_DOUBLE) {
-        // TODO:
-        ring_error_report("std_lib_math_sqrt only one arguement\n");
-    }
+    assert(arg_count == 1);
+    assert(args[0].type == RVM_VALUE_TYPE_DOUBLE);
 
     double    double_val = args[0].u.double_value;
 
@@ -1160,18 +1031,9 @@ RVM_Value std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Type: @native
  */
 RVM_Value std_lib_math_pow(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-
-    if (arg_count != 2) {
-        // TODO:
-        ring_error_report("std_lib_math_pow only empty arguement\n");
-    }
-
-    if (args[0].type != RVM_VALUE_TYPE_DOUBLE) {
-        ring_error_report("std_lib_math_pow only one arguement\n");
-    }
-    if (args[1].type != RVM_VALUE_TYPE_DOUBLE) {
-        ring_error_report("std_lib_math_pow only one arguement\n");
-    }
+    assert(arg_count == 2);
+    assert(args[0].type == RVM_VALUE_TYPE_DOUBLE);
+    assert(args[1].type == RVM_VALUE_TYPE_DOUBLE);
 
     double    x   = args[0].u.double_value;
     double    y   = args[1].u.double_value;

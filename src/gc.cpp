@@ -108,7 +108,7 @@ void gc_summary(Ring_VirtualMachine* rvm) {
     }
 
 
-    printf("%sHead Size:%s %d\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR, rvm->runtime_heap->alloc_size);
+    printf("%sHead Size:%s %lld\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR, rvm->runtime_heap->alloc_size);
 }
 
 /*

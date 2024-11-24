@@ -25,7 +25,7 @@ function main(var string[] args) {
      * 之后测试的时候，`vm::heap_size() - init_heap_size` 即为刚刚分配的内存
     */
     vm::garbage_collect();
-    var int init_heap_size = vm::heap_size() - 8;
+    var int64 init_heap_size = vm::heap_size() - 8L;
     // -8 是因为 global_string_value_0 默认占用 8Byte, 需要算到本次测试用例中
 
 
@@ -36,7 +36,7 @@ function main(var string[] args) {
     // assign string
     global_string_value_0 = "1234567890";
     fmt::println_string(global_string_value_0);
-    fmt::println_int(vm::heap_size() - init_heap_size); 
+    fmt::println(vm::heap_size() - init_heap_size); 
     /*
     * 内存分布
     * global_string_value_0(垃圾)   占用 8Byte
@@ -46,7 +46,7 @@ function main(var string[] args) {
     // gc
     vm::garbage_collect();
     fmt::println_string(global_string_value_0);
-    fmt::println_int(vm::heap_size() - init_heap_size);
+    fmt::println(vm::heap_size() - init_heap_size);
     /*
     * 内存分布
     * global_string_value_0  新增内存 16Byte

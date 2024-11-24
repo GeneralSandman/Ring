@@ -22,7 +22,7 @@ function main() {
      * 之后测试的时候，`vm::heap_size() - init_heap_size` 即为刚刚分配的内存
     */
     vm::garbage_collect();
-    var int init_heap_size = vm::heap_size();
+    var int64 init_heap_size = vm::heap_size();
     //
 
 
@@ -34,7 +34,7 @@ function main() {
     debug::debug_assert(len(local_string_array_0) == 20);
     debug::debug_assert(capacity(local_string_array_0) == 24);
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 320);
+    debug::debug_assert(vm::heap_size() - init_heap_size == 320L);
 
 
     vm::garbage_collect();
@@ -43,7 +43,7 @@ function main() {
     debug::debug_assert(len(local_string_array_0) == 20);
     debug::debug_assert(capacity(local_string_array_0) == 24);
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 160);
+    debug::debug_assert(vm::heap_size() - init_heap_size == 160L);
 
 
 
@@ -51,10 +51,10 @@ function main() {
     local_string_array_0[0] = "12345678";
 
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 176);
+    debug::debug_assert(vm::heap_size() - init_heap_size == 176L);
 
     vm::garbage_collect();
 
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 160);
+    debug::debug_assert(vm::heap_size() - init_heap_size == 160L);
 }

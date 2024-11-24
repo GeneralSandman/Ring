@@ -533,10 +533,11 @@ struct TypeSpecifier {
         Ring_DeriveType_Class* class_type;
         Ring_DeriveType_Func*  func_type;
     } u;
-    unsigned int   dimension; // 维度，用来指明sub
+    unsigned int   dimension;
     TypeSpecifier* sub;
-    // 只有当 kind == array, sub才用了指明数组中元素的类型,
-    // TODO: 后续应该把 sub放在 array_type中
+    // 当 kind == array:
+    //     sub才用了指明数组中元素的类型
+    //     dimension 指明数组的维度
 };
 
 #define TYPE_IS_STRING_ARRAY_1(type_specifier)         \
@@ -813,8 +814,8 @@ struct RVM_RuntimeStatic {
 };
 
 struct RVM_RuntimeHeap {
-    unsigned int   alloc_size;
-    unsigned int   threshold;
+    long long      alloc_size;
+    long long      threshold;
     RVM_GC_Object* list;
 };
 
@@ -2438,9 +2439,6 @@ struct MemBlock {
  * DEFINE_ERROR_REPORT_STR ring 语法报错str
  *
  * 这里使用的局部变量，每次都分配
- * TODO: 这里应该优化一下使用全局变量，不需要每次都分配
- * 1. 目前没有做报错恢复，所以遇到一次错误就退出，不会分配很多次
- * 2. 如果要改成 全局变量，那么在并发编译的时候要考虑这个问题
  */
 #define DEFINE_ERROR_REPORT_STR  \
     std::string compile_err_buf; \
@@ -3160,7 +3158,7 @@ void                 rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_O
 void                 rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
 
 
-int                  rvm_heap_size(Ring_VirtualMachine* rvm);
+long long            rvm_heap_size(Ring_VirtualMachine* rvm);
 
 RVM_Closure*         new_closure(Ring_VirtualMachine* rvm,
                                  RVM_Function* caller_function, RVM_Closure* caller_closure,

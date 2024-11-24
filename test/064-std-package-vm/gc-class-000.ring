@@ -36,27 +36,27 @@ function main() {
      * 之后测试的时候，`vm::heap_size() - init_heap_size` 即为刚刚分配的内存
     */
     vm::garbage_collect();
-    var int init_heap_size = vm::heap_size() - 21;
+    var int64 init_heap_size = vm::heap_size() - 21L;
     // - 21 是因为 job_value_0 局部变量占用内存 21Byte, 需要算到本次的测试用例中
 
 
 
     var Job job_value_0;
 
-    fmt::println_int(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 21); // 1+4+8+8
+    fmt::println_int64(vm::heap_size() - init_heap_size);
+    debug::debug_assert(vm::heap_size() - init_heap_size == 21L); // 1+4+8+8
     vm::garbage_collect();
-    fmt::println_int(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 21); // 1+4+8+8
+    fmt::println_int64(vm::heap_size() - init_heap_size);
+    debug::debug_assert(vm::heap_size() - init_heap_size == 21L); // 1+4+8+8
 
 
     job_value_0.Name = "123456789_123456";
     
-    fmt::println_int(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 37); // 1+4+8+8 + 16
+    fmt::println_int64(vm::heap_size() - init_heap_size);
+    debug::debug_assert(vm::heap_size() - init_heap_size == 37L); // 1+4+8+8 + 16
     vm::garbage_collect();
-    fmt::println_int(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 29); // 1+4+8+16
+    fmt::println_int64(vm::heap_size() - init_heap_size);
+    debug::debug_assert(vm::heap_size() - init_heap_size == 29L); // 1+4+8+16
 
 
 }

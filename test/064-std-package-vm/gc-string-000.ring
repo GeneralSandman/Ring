@@ -29,8 +29,8 @@ function main() {
      * 之后测试的时候，`vm::heap_size() - init_heap_size` 即为刚刚分配的内存
     */
     vm::garbage_collect();
-    var int init_heap_size = vm::heap_size() - 3*8;
-    // - 3*8 是因为 string_value_0 string_value_1 string_value_2 每个变量默认分配 8Byte 内存
+    var int64 init_heap_size = vm::heap_size() - 24L;
+    // - 3*8 是因为 string_value_0 string_value_1 string_value_2 每个变量默认分配 8Byte 内存 总共24Bytes
 
 
 
@@ -46,16 +46,16 @@ function main() {
 
 
     
-    debug::debug_assert(vm::heap_size() - init_heap_size == 88); // 8*3+16*4
+    debug::debug_assert(vm::heap_size() - init_heap_size == 88L); // 8*3+16*4
     vm::garbage_collect();
-    debug::debug_assert(vm::heap_size() - init_heap_size == 40); // 16 + 16 + 8
+    debug::debug_assert(vm::heap_size() - init_heap_size == 40L); // 16 + 16 + 8
 
 
     string_value_2 = string_value_0 .. string_value_1;
 
 
-    debug::debug_assert(vm::heap_size() - init_heap_size == 72); // 16 + 16 + 8 + 32
+    debug::debug_assert(vm::heap_size() - init_heap_size == 72L); // 16 + 16 + 8 + 32
     vm::garbage_collect();
-    debug::debug_assert(vm::heap_size() - init_heap_size == 64); // 16 + 16 + 32
+    debug::debug_assert(vm::heap_size() - init_heap_size == 64L); // 16 + 16 + 32
 
 }

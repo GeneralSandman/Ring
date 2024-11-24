@@ -3481,7 +3481,7 @@ void rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object
     }
 }
 
-int rvm_heap_size(Ring_VirtualMachine* rvm) {
+long long rvm_heap_size(Ring_VirtualMachine* rvm) {
     // FIXME: 这里会溢出
     // TODO: 数据类型不够
     return rvm->runtime_heap->alloc_size;

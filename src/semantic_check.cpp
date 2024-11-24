@@ -112,7 +112,6 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
     std::string   argument_str  = format_function_arguments(argument_pos);
 
 
-    // Ring-Compiler-Error-Report ERROR_ARGUMENT_MISMATCH_TYPE
     // TODO:
     // 这里比对 arguments 和 parameters, 有几个细节需要注意
     // 1. 深度比对派生类型 数组(多维数组)、类
@@ -122,6 +121,7 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
     // TIP. argument 给 parameter copy 数据, 其实就行赋值, 要遵守多项赋值过程中 对于 function_call 的限制.
     for (; argument_pos != nullptr && parameter_pos != nullptr;) {
 
+        // Ring-Compiler-Error-Report ERROR_ARGUMENT_MISMATCH_TYPE
         if (parameter_pos->type_specifier->kind != RING_BASIC_TYPE_ANY
             && parameter_pos->type_specifier->kind != argument_pos->expression->convert_type[0]->kind) {
             DEFINE_ERROR_REPORT_STR;
@@ -153,6 +153,36 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
         if (!parameter_pos->is_variadic) {
             parameter_pos = parameter_pos->next;
         }
+    }
+
+    if (parameter_pos != nullptr && parameter_pos->is_variadic) {
+        parameter_pos = parameter_pos->next;
+    }
+
+    // 没有消费完
+    if (argument_pos != nullptr || parameter_pos != nullptr) {
+        DEFINE_ERROR_REPORT_STR;
+
+        compile_err_buf            = sprintf_string("function %s() requires (%s) arguments, but (%s) was provided; E:%d",
+                                                    function_call_expression->func_identifier,
+                                                    parameter_str.c_str(),
+                                                    argument_str.c_str(),
+                                                    ERROR_ARGUMENT_MISMATCH_TYPE);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = nullptr,
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(function_call_expression->line_number),
+            .line_number             = function_call_expression->line_number,
+            .column_number           = 0,
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
 }
 

@@ -57,7 +57,7 @@ function test_func(var Job1[,] local_job1_array_0) -> (Job1[,]) {
 function main() {
 	
 
-	global_job1_array_0 = test_func();
+	global_job1_array_0 = test_func(global_job1_array_0);
 
 	debug::debug_assert(len(global_job1_array_0) == 2);
 	debug::debug_assert(len(global_job1_array_0[0]) == 10);

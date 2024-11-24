@@ -916,12 +916,11 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
 
 // TODO: 格式化数组类型
 std::string format_function_parameters(Parameter* parameter) {
-    std::string              str = "";
     std::vector<std::string> strings;
 
 
     for (; parameter != nullptr; parameter = parameter->next) {
-        str += format_type_specifier(parameter->type_specifier);
+        std::string str = format_type_specifier(parameter->type_specifier);
         if (parameter->is_variadic) {
             str += "...";
         }
