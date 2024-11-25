@@ -4365,9 +4365,8 @@ ring dump <input-file>
 
 1. 只输出 main package的编译情况  ✅
 2. 输出 package, function, bytecode, 操作数, 对应的源代码, 函数参数的数量, 函数局部变量的数量  ✅
-3. 输出 class-definition  ⭕️
-
-TODO: ring dump 自动化测试如何设计 ⭕️
+3. 输出 class-definition  ✅
+4. ring dump 自动化测试如何设计 ✅
 
 
 
