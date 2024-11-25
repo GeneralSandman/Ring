@@ -1015,6 +1015,11 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     }
 }
 
+
+/*
+ * fix_binary_concat_expression
+ * 修正二元操作符 `..` 的语义检查, 字符串的拼接
+ */
 void fix_binary_concat_expression(Expression*       expression,
                                   BinaryExpression* binary_expression,
                                   Block* block, FunctionTuple* func) {
@@ -1098,28 +1103,7 @@ void fix_binary_math_expression(Expression*       expression,
     Expression* left  = binary_expression->left_expression;
     Expression* right = binary_expression->right_expression;
 
-    // TODO: 用统一的方法实现foramte
-    std::string oper;
-    switch (expression_type) {
-    case EXPRESSION_TYPE_ARITHMETIC_ADD:
-        oper = "+";
-        break;
-    case EXPRESSION_TYPE_ARITHMETIC_SUB:
-        oper = "-";
-        break;
-    case EXPRESSION_TYPE_ARITHMETIC_MUL:
-        oper = "*";
-        break;
-    case EXPRESSION_TYPE_ARITHMETIC_DIV:
-        oper = "/";
-        break;
-    case EXPRESSION_TYPE_ARITHMETIC_MOD:
-        oper = "%";
-        break;
-
-    default:
-        break;
-    }
+    std::string oper  = formate_operator(expression_type);
 
     fix_expression(left, block, func);
     fix_expression(right, block, func);
@@ -1181,10 +1165,7 @@ void fix_binary_math_expression(Expression*       expression,
     TypeSpecifier* left_type  = left->convert_type[0];
     TypeSpecifier* right_type = right->convert_type[0];
 
-    if (left_type->kind == RING_BASIC_TYPE_BOOL
-        || left_type->kind == RING_BASIC_TYPE_ARRAY
-        || left_type->kind == RING_BASIC_TYPE_CLASS
-        || left_type->kind == RING_BASIC_TYPE_FUNC) {
+    if (!TYPE_IS_NUM(left_type)) {
         DEFINE_ERROR_REPORT_STR;
 
         compile_err_buf = sprintf_string(
@@ -1209,10 +1190,7 @@ void fix_binary_math_expression(Expression*       expression,
         ring_compile_error_report(&context);
     }
 
-    if (right_type->kind == RING_BASIC_TYPE_BOOL
-        || right_type->kind == RING_BASIC_TYPE_ARRAY
-        || right_type->kind == RING_BASIC_TYPE_CLASS
-        || right_type->kind == RING_BASIC_TYPE_FUNC) {
+    if (!TYPE_IS_NUM(right_type)) {
         DEFINE_ERROR_REPORT_STR;
 
         compile_err_buf = sprintf_string(
@@ -1301,20 +1279,7 @@ void fix_binary_logical_expression(Expression*       expression,
     Expression* left  = binary_expression->left_expression;
     Expression* right = binary_expression->right_expression;
 
-    // TODO: 用统一的方法实现foramte
-    std::string oper;
-    switch (expression_type) {
-    case EXPRESSION_TYPE_LOGICAL_AND:
-        oper = "and";
-        break;
-    case EXPRESSION_TYPE_LOGICAL_OR:
-        oper = "or";
-        break;
-
-    default:
-        break;
-    }
-
+    std::string oper  = formate_operator(expression_type);
 
     fix_expression(left, block, func);
     fix_expression(right, block, func);
@@ -1449,31 +1414,7 @@ void fix_binary_relational_expression(Expression*       expression,
     Expression* left  = binary_expression->left_expression;
     Expression* right = binary_expression->right_expression;
 
-    // TODO: 用统一的方法实现foramte
-    std::string oper;
-    switch (expression_type) {
-    case EXPRESSION_TYPE_RELATIONAL_EQ:
-        oper = "==";
-        break;
-    case EXPRESSION_TYPE_RELATIONAL_NE:
-        oper = "!=";
-        break;
-    case EXPRESSION_TYPE_RELATIONAL_GT:
-        oper = ">";
-        break;
-    case EXPRESSION_TYPE_RELATIONAL_GE:
-        oper = ">=";
-        break;
-    case EXPRESSION_TYPE_RELATIONAL_LT:
-        oper = "<";
-        break;
-    case EXPRESSION_TYPE_RELATIONAL_LE:
-        oper = "<=";
-        break;
-
-    default:
-        break;
-    }
+    std::string oper  = formate_operator(expression_type);
 
     fix_expression(left, block, func);
     fix_expression(right, block, func);
@@ -1537,12 +1478,7 @@ void fix_binary_relational_expression(Expression*       expression,
     // 检查两遍的类型是否匹配
     if (expression_type == EXPRESSION_TYPE_RELATIONAL_EQ
         || expression_type == EXPRESSION_TYPE_RELATIONAL_NE) {
-        // TODO: 后续写成 宏, 方便复用
-        if (left_type->kind != RING_BASIC_TYPE_BOOL
-            && left_type->kind != RING_BASIC_TYPE_INT
-            && left_type->kind != RING_BASIC_TYPE_INT64
-            && left_type->kind != RING_BASIC_TYPE_DOUBLE
-            && left_type->kind != RING_BASIC_TYPE_STRING) {
+        if (!TYPE_IS_COMPARE_EQ(left_type)) {
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf = sprintf_string(
@@ -1566,12 +1502,7 @@ void fix_binary_relational_expression(Expression*       expression,
             ring_compile_error_report(&context);
         }
 
-        // TODO: 后续写成 宏, 方便复用
-        if (right_type->kind != RING_BASIC_TYPE_BOOL
-            && right_type->kind != RING_BASIC_TYPE_INT
-            && right_type->kind != RING_BASIC_TYPE_INT64
-            && right_type->kind != RING_BASIC_TYPE_DOUBLE
-            && right_type->kind != RING_BASIC_TYPE_STRING) {
+        if (!TYPE_IS_COMPARE_EQ(right_type)) {
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf = sprintf_string(
@@ -1595,11 +1526,7 @@ void fix_binary_relational_expression(Expression*       expression,
             ring_compile_error_report(&context);
         }
     } else {
-        // TODO: 后续写成 宏, 方便复用
-        if (left_type->kind != RING_BASIC_TYPE_INT
-            && left_type->kind != RING_BASIC_TYPE_INT64
-            && left_type->kind != RING_BASIC_TYPE_DOUBLE
-            && left_type->kind != RING_BASIC_TYPE_STRING) {
+        if (!TYPE_IS_COMPARE_REL(left_type)) {
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf = sprintf_string(
@@ -1623,11 +1550,7 @@ void fix_binary_relational_expression(Expression*       expression,
             ring_compile_error_report(&context);
         }
 
-        // TODO: 后续写成 宏, 方便复用
-        if (right_type->kind != RING_BASIC_TYPE_INT
-            && right_type->kind != RING_BASIC_TYPE_INT64
-            && right_type->kind != RING_BASIC_TYPE_DOUBLE
-            && right_type->kind != RING_BASIC_TYPE_STRING) {
+        if (!TYPE_IS_COMPARE_REL(right_type)) {
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf = sprintf_string(
@@ -1695,25 +1618,7 @@ void fix_unitary_expression(Expression* expression,
 
     fix_expression(unitary_expression, block, func);
 
-    // TODO: 用统一的方法实现foramte
-    std::string oper;
-    switch (expression->type) {
-    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
-        oper = "-";
-        break;
-    case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
-        oper = "not";
-        break;
-    case EXPRESSION_TYPE_UNITARY_INCREASE:
-        oper = "++";
-        break;
-    case EXPRESSION_TYPE_UNITARY_DECREASE:
-        oper = "--";
-        break;
-
-    default:
-        break;
-    }
+    std::string oper = formate_operator(expression->type);
 
     if (unitary_expression->convert_type_size != 1
         || unitary_expression->convert_type == nullptr) {
@@ -1752,9 +1657,7 @@ void fix_unitary_minus_expression(Expression* expression,
 
     TypeSpecifier* type_specifier = unitary_expression->convert_type[0];
 
-    if (type_specifier->kind != RING_BASIC_TYPE_INT
-        && type_specifier->kind != RING_BASIC_TYPE_INT64
-        && type_specifier->kind != RING_BASIC_TYPE_DOUBLE) {
+    if (!TYPE_IS_NUM(type_specifier)) {
         // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
         DEFINE_ERROR_REPORT_STR;
 
@@ -1834,9 +1737,7 @@ void fix_unitary_increase_decrease_expression(Expression* expression,
 
     TypeSpecifier* type_specifier = unitary_expression->convert_type[0];
 
-    if (type_specifier->kind != RING_BASIC_TYPE_INT
-        && type_specifier->kind != RING_BASIC_TYPE_INT64
-        && type_specifier->kind != RING_BASIC_TYPE_DOUBLE) {
+    if (!TYPE_IS_NUM(type_specifier)) {
         // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
         DEFINE_ERROR_REPORT_STR;
 

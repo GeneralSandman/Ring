@@ -2335,9 +2335,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
 
     callinfo->callee_closure = callee_closure;
 
-    // TODO:
-    // caller_object, caller_function 感觉没必要更新
-    // 思考设计是否会冗余
+    // 更新外层
     *caller_object   = callee_object;
     *caller_function = callee_function;
     *caller_closure  = callee_closure;

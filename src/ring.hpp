@@ -546,6 +546,26 @@ struct TypeSpecifier {
      && ((type_specifier)->sub != nullptr)             \
      && ((type_specifier)->sub->kind == RING_BASIC_TYPE_STRING))
 
+#define TYPE_IS_NUM(type)                       \
+    (((type)->kind == RING_BASIC_TYPE_INT)      \
+     || ((type)->kind == RING_BASIC_TYPE_INT64) \
+     || ((type)->kind == RING_BASIC_TYPE_DOUBLE))
+
+// 比较运算符 > >= < <= == !=
+#define TYPE_IS_COMPARE_EQ(type)                 \
+    (((type)->kind == RING_BASIC_TYPE_BOOL)      \
+     || ((type)->kind == RING_BASIC_TYPE_INT)    \
+     || ((type)->kind == RING_BASIC_TYPE_INT64)  \
+     || ((type)->kind == RING_BASIC_TYPE_DOUBLE) \
+     || ((type)->kind == RING_BASIC_TYPE_STRING))
+
+// 比较运算符 > >= < <=
+#define TYPE_IS_COMPARE_REL(type)                \
+    (((type)->kind == RING_BASIC_TYPE_INT)       \
+     || ((type)->kind == RING_BASIC_TYPE_INT64)  \
+     || ((type)->kind == RING_BASIC_TYPE_DOUBLE) \
+     || ((type)->kind == RING_BASIC_TYPE_STRING))
+
 typedef RVM_Value RVM_NativeFuncProc(Ring_VirtualMachine* rvm, unsigned int arg_cout, RVM_Value* args);
 
 typedef enum {
@@ -3238,6 +3258,7 @@ RVM_Value std_lib_math_pow(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
  *
  */
 std::string              formate_expression(Expression* expression);
+std::string              formate_operator(ExpressionType expression_type);
 
 void                     ring_compiler_functions_dump(PackageUnit* package_unit);
 void                     ring_vm_constantpool_dump(Package_Executer* executer);

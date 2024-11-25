@@ -122,6 +122,72 @@ std::string formate_expression(Expression* expression) {
     return result;
 }
 
+std::string formate_operator(ExpressionType expression_type) {
+    std::string oper;
+
+    switch (expression_type) {
+    case EXPRESSION_TYPE_LOGICAL_AND:
+        oper = "and";
+        break;
+    case EXPRESSION_TYPE_LOGICAL_OR:
+        oper = "or";
+        break;
+
+    case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
+        oper = "-";
+        break;
+    case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
+        oper = "not";
+        break;
+    case EXPRESSION_TYPE_UNITARY_INCREASE:
+        oper = "++";
+        break;
+    case EXPRESSION_TYPE_UNITARY_DECREASE:
+        oper = "--";
+        break;
+
+
+    case EXPRESSION_TYPE_RELATIONAL_EQ:
+        oper = "==";
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_NE:
+        oper = "!=";
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_GT:
+        oper = ">";
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_GE:
+        oper = ">=";
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_LT:
+        oper = "<";
+        break;
+    case EXPRESSION_TYPE_RELATIONAL_LE:
+        oper = "<=";
+        break;
+
+    case EXPRESSION_TYPE_ARITHMETIC_ADD:
+        oper = "+";
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_SUB:
+        oper = "-";
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_MUL:
+        oper = "*";
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_DIV:
+        oper = "/";
+        break;
+    case EXPRESSION_TYPE_ARITHMETIC_MOD:
+        oper = "%";
+        break;
+
+    default:
+        break;
+    }
+
+    return oper;
+}
 
 // dump function by PackageUnit
 void ring_compiler_functions_dump(PackageUnit* package_unit) {
@@ -328,7 +394,6 @@ void ring_vm_dump_stdout_log(Ring_VirtualMachine* rvm) {
  * List all all source file of ring std package
  * which locates in directory.
  *
- * TODO: need to do same error handling.
  */
 std::vector<std::string> list_files_of_dir(char* dir) {
     std::vector<std::string> file_list;
@@ -339,8 +404,7 @@ std::vector<std::string> list_files_of_dir(char* dir) {
     char                     tmp_name[1024] = {0};
     dp                                      = opendir(dir);
     if (dp == nullptr) {
-        // TODO:
-        printf("open dir error!!\n");
+        ring_error_report("list_files_of_dir::open dir failed, dir:%s, err:%s\n", dir, strerror(errno));
         return file_list;
     }
     while (1) {
@@ -355,8 +419,7 @@ std::vector<std::string> list_files_of_dir(char* dir) {
         strcat(tmp_name, st->d_name); // 新文件路径名
         ret = stat(tmp_name, &sta);   // 查看目录下文件属性
         if (ret < 0) {
-            // TODO:
-            printf("read stat fail\n");
+            ring_error_report("list_files_of_dir::read stat failed, file-name:%s, err:%s\n", tmp_name, strerror(errno));
             return file_list;
         }
 
@@ -432,7 +495,7 @@ RingFileStat* create_ring_file_stat(std::string& file_name) {
     }
 
 
-    RingFileStat* file_stat    = (RingFileStat*)mem_alloc(nullptr, sizeof(RingFileStat)); // TODO: 内存分配在哪里
+    RingFileStat* file_stat    = (RingFileStat*)mem_alloc(get_front_mem_pool(), sizeof(RingFileStat)); // TODO: 内存分配在哪里
     file_stat->dir             = dirname_;
     file_stat->file_name       = basename_;
     file_stat->abs_path        = real_path;
