@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,38 +14,117 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
+//  Action:
+//  对 ./test 所有的测试用例进行自动化测试,
+//  执行 ring run xxx.ring 命令 运行, 得到输出结果 xxx.ring.result.tmp,
+//  与预期结果 xxx.ring.result 进行比对
+//  会输出 测试的详情和测试数量汇总
+
+//  Usage:
+//  1. 触发全部自动化测试
+//     make testall
+//     或者 bash ./test/automated-testing.sh
+//  2. 测试的轮数
+//     默认1轮, 可调整 TEST_LOOP_NUM
+//  3. 控制测试的模块:
+//     调整 TEST_MODELS
+//  4. 控制不测试的case:
+//     调整 NOT_TEST_FILES
+//  5. 是否输出测试用例表:
+//     调整 IS_EXPORT_TEST_DETAIL_SUMMARY
+//     测试描述会从测试文件中导出, 匹配前缀 // TestDetail:
+//     测试用例中导出测试失败的原因，匹配前缀 // Fatal:
+
 var (
-	TEST_LOOP_NUM                        = 2
-	notTestNum, succNum, failNum, allNum int
-	TEST_RING_BIN                        = "./bin/ring"
-	TEST_RING_OPTION                     = "-O1"
-	TEST_RING_COMMAND                    = "run"
-	TEST_RESULT                          = "./automated-testing.sh.result"
-	IS_EXPORT_TEST_DETAIL_SUMMARY        = 0
-	TEST_DETAIL_SUMMARY                  = "./test/ring-测试用例表.md.raw"
-	TEST_PATH                            = "./test"
+	TEST_MODELS = []string{
+		"001-bool",
+		"002-int",
+		"002-int64",
+		"003-double",
+		"004-string",
+
+		"001-basic-type",
+
+		"002-operator",
+		"002-operator/minus",
+
+		"003-native-function",
+		"004-derive-function",
+		"004-derive-function/pass-argument",
+		"004-derive-function/return-value",
+
+		"006-variable",
+		"007-array",
+		"008-class",
+		"010-main-entry",
+		"011-global-variable",
+		"012-local-variable",
+		"013-gc",
+
+		"020-array-bool",
+		"021-array-int",
+		"021-array-int64",
+		"022-array-double",
+		"023-array-string",
+		"024-array-class",
+
+		"030-if",
+		"031-for",
+		"032-do-for",
+		"033-for-range",
+
+		"040-closure",
+		"041-defer",
+
+		"050-coroutine",
+
+		"060-std-package-debug",
+		"061-std-package-fmt",
+		"062-std-package-reflect",
+		"063-std-package-os",
+		"064-std-package-vm",
+		"065-std-package-io",
+		"066-std-package-time",
+		"067-std-package-math",
+	}
 
 	NOT_TEST_FILES = []string{
 		"test/013-gc/gc-000.ring",
+
 		"test/002-operator/arith-oper-002.ring",
+		// double 数值比对, 存在bug
+
 		"test/002-operator/arith-oper-003.ring",
+		// 还没有支持括号运算符
+
 		"test/060-std-package-debug/debug-000.ring",
+		// 只用来测试 ring rdb
+
 		"test/002-int64/default-value-003.ring",
+		// 暂时还没啥用
+
 		"test/065-std-package-io/000.ring",
+
+		// "./test/062-std-package-reflect/reflect-001.ring"
+		// 1. class-object数组，typeof获取不到正确的类型
+		// 2. 针对多维数组，typeof获取不到正确的类型
+		// 2023-01-31
 	}
 
-	TEST_MODELS = []string{
-		"001-bool", "002-int", "002-int64", "003-double", "004-string",
-		"001-basic-type", "002-operator", "002-operator/minus", "003-native-function",
-		"004-derive-function", "004-derive-function/pass-argument", "004-derive-function/return-value",
-		"006-variable", "007-array", "008-class", "010-main-entry", "011-global-variable",
-		"012-local-variable", "013-gc", "020-array-bool", "021-array-int",
-		"021-array-int64", "022-array-double", "023-array-string", "024-array-class",
-		"030-if", "031-for", "032-do-for", "033-for-range", "040-closure", "041-defer",
-		"050-coroutine", "060-std-package-debug", "061-std-package-fmt", "062-std-package-reflect",
-		"063-std-package-os", "064-std-package-vm", "065-std-package-io", "066-std-package-time",
-		"067-std-package-math",
-	}
+	// 测试的轮数, 用于多次执行
+	TEST_LOOP_NUM                        = 100
+	notTestNum, succNum, failNum, allNum int
+	// 测试的Ring可执行二进制文件
+	TEST_RING_BIN = "./bin/ring"
+	// ring 命令行 option
+	TEST_RING_OPTION = "-O1"
+	// 测试功能 ring run xxx.ring
+	TEST_RING_COMMAND             = "run"
+	IS_EXPORT_TEST_DETAIL_SUMMARY = 0
+	TEST_DETAIL_SUMMARY           = "./test/ring-测试用例表.md.raw"
+	TEST_PATH                     = "./test"
+
+	TEST_RESULT = make([]RingTestResult, 0)
 )
 
 func isNotTestFile(filePath string) bool {
@@ -60,7 +138,7 @@ func isNotTestFile(filePath string) bool {
 
 func exportTestCase(num int, model, sourceCodeFile, result string) {
 	if num == 1 {
-		ioutil.WriteFile(TEST_DETAIL_SUMMARY, []byte("# Ring 测试用例表\n\n"), 0644)
+		os.WriteFile(TEST_DETAIL_SUMMARY, []byte("# Ring 测试用例表\n\n"), 0644)
 		f, _ := os.OpenFile(TEST_DETAIL_SUMMARY, os.O_APPEND|os.O_WRONLY, 0644)
 		fmt.Fprintf(f, "- 测试时间: %s\n\n", time.Now().Format("2006-01-02 15:04:05"))
 		fmt.Fprintln(f, "|Num | 模块 | 文件                           | 测试内容 | 通过 |")
@@ -68,7 +146,7 @@ func exportTestCase(num int, model, sourceCodeFile, result string) {
 		f.Close()
 	}
 
-	content, _ := ioutil.ReadFile(sourceCodeFile)
+	content, _ := os.ReadFile(sourceCodeFile)
 	details := extractDetails(string(content))
 	f, _ := os.OpenFile(TEST_DETAIL_SUMMARY, os.O_APPEND|os.O_WRONLY, 0644)
 	fmt.Fprintf(f, "| %-4d | *%-20s | %-80s | %-80s | %-10s |\n", num, model, sourceCodeFile, details, result)
@@ -88,13 +166,17 @@ func extractDetails(source string) string {
 	return strings.Join(details, "<br>")
 }
 
-func autoTestAction(model, sourceCodeFile string) {
-	runResultFile := sourceCodeFile + ".result"
+func autoTestAction(testCase RingTestCase, printDetail bool) {
+	model := testCase.Model
+	sourceCodeFile := testCase.FileName
+	expectResultFile := sourceCodeFile + ".result"
 	runResultFileTmp := sourceCodeFile + ".result.tmp"
 
 	if isNotTestFile(sourceCodeFile) {
 		notTestNum++
-		// fmt.Printf("%-4d %-25s %-80s %-80s [%s]\n", allNum, model, sourceCodeFile, runResultFile, "NOTTEST")
+		if printDetail {
+			fmt.Printf("%-4d %-25s %-80s %-80s [%s]\n", allNum, model, sourceCodeFile, runResultFileTmp, "NOTTEST")
+		}
 		return
 	}
 
@@ -104,85 +186,113 @@ func autoTestAction(model, sourceCodeFile string) {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		failNum++
-		// fmt.Println(string(output))
 		// fmt.Printf("%-4d %-25s %-80s %-80s [%s]\n", allNum, model, sourceCodeFile, runResultFile, "FAILED")
-		appendToFile(TEST_RESULT, sourceCodeFile)
+		TEST_RESULT = append(TEST_RESULT,
+			RingTestResult{
+				RingTestCase: testCase,
+				Status:       "FAILED",
+				Output:       string(output),
+			})
 		return
 	}
 
-	err = ioutil.WriteFile(runResultFileTmp, output, 0644)
+	err = os.WriteFile(runResultFileTmp, output, 0644)
 	if err != nil {
 		return
 	}
+	defer os.Remove(runResultFileTmp)
 
-	originalOutput, _ := ioutil.ReadFile(runResultFile)
+	originalOutput, _ := os.ReadFile(expectResultFile)
 	if string(originalOutput) == string(output) {
-		succNum++
-		// fmt.Printf("%-4d %-25s %-80s %-80s [%s]\n", allNum, model, sourceCodeFile, runResultFile, "PASS")
+		TEST_RESULT = append(TEST_RESULT,
+			RingTestResult{
+				RingTestCase: testCase,
+				Status:       "PASS",
+				Output:       "",
+			})
+		if printDetail {
+			fmt.Printf("%-4d %-25s %-80s %-80s [%s]\n", allNum, model, sourceCodeFile, runResultFileTmp, "PASS")
+		}
 	} else {
-		failNum++
-		// fmt.Printf("%-4d %-25s %-80s %-80s [%s]\n", allNum, model, sourceCodeFile, runResultFile, "FAILED")
-		appendToFile(TEST_RESULT, sourceCodeFile)
+		TEST_RESULT = append(TEST_RESULT,
+			RingTestResult{
+				RingTestCase: testCase,
+				Status:       "FAILED",
+				Output:       string(output),
+			})
+		if printDetail {
+			fmt.Printf("%-4d %-25s %-80s %-80s [%s]\n", allNum, model, sourceCodeFile, runResultFileTmp, "FAILED")
+		}
 	}
 
-	os.Remove(runResultFileTmp)
-
-	if IS_EXPORT_TEST_DETAIL_SUMMARY == 1 {
-		exportTestCase(allNum, model, sourceCodeFile, "RESULT")
-	}
 }
 
-func appendToFile(filename, content string) {
-	f, _ := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-	defer f.Close()
-	f.WriteString(content + "\n")
+type RingTestCase struct {
+	Model    string
+	FileName string
 }
 
-func printNotPassCase() {
-	if _, err := os.Stat(TEST_RESULT); os.IsNotExist(err) {
-		return
+type RingTestResult struct {
+	RingTestCase RingTestCase
+	Status       string // init not_test pass
+	Output       string
+}
+
+func getAllTestCases() []RingTestCase {
+	var result []RingTestCase
+
+	for _, model := range TEST_MODELS {
+		sourceFilePath := filepath.Join(TEST_PATH, model)
+		files, _ := os.ReadDir(sourceFilePath)
+		for _, file := range files {
+			if filepath.Ext(file.Name()) == ".ring" {
+
+				filePath := filepath.Join(TEST_PATH, model, file.Name())
+				if !isNotTestFile(filePath) {
+					result = append(result,
+						RingTestCase{
+							Model:    model,
+							FileName: filePath,
+						})
+				}
+			}
+		}
 	}
-	fmt.Println("[NotPassCase]")
-	data, _ := ioutil.ReadFile(TEST_RESULT)
-	counts := make(map[string]int)
-	for _, line := range strings.Split(string(data), "\n") {
-		counts[line]++
-	}
-	for k, v := range counts {
-		fmt.Printf("%-60s %-60d\n", k, v)
-	}
-	os.Remove(TEST_RESULT)
+
+	return result
 }
 
 func main() {
 	var wg sync.WaitGroup
-	bar := progressbar.Default(1000)
 
-	const maxConcurrent = 10 // 最大并发数
-    sem := make(chan struct{}, maxConcurrent) // 创建信号量通道
+	const maxConcurrent = 10                                   // 最大并发数
+	maxConcurrentChannel := make(chan struct{}, maxConcurrent) // 创建信号量通道
+
+	displayMode := false
+	// flase 只有进度条
+	// true 展示详细进度
+
+	allTestCases := getAllTestCases()
+
+	allNumV2 := int64(len(allTestCases) * TEST_LOOP_NUM)
+	bar := progressbar.Default(allNumV2)
 
 	startTime := time.Now()
-	// fmt.Printf("%-4s %-25s %-80s %-80s %s\n", "Num", "Model", "SourceCodeFile", "ResultFile", "Result")
+	if displayMode {
+		fmt.Printf("%-4s %-25s %-80s %-80s %s\n", "Num", "Model", "SourceCodeFile", "ResultFile", "Result")
+	}
 
-	for testLoop := 1; testLoop <= TEST_LOOP_NUM; testLoop++ {
-		for _, model := range TEST_MODELS {
-			sourceFilePath := filepath.Join(TEST_PATH, model)
-			files, _ := ioutil.ReadDir(sourceFilePath)
-			for _, file := range files {
-				if filepath.Ext(file.Name()) == ".ring" {
-					// fmt.Println(file.Name())
-					// allNum++
-					go func(model_, file_ string) {
-						defer wg.Done()
-						defer bar.Add(1)
-						defer func() { <-sem }()
+	for loop := 0; loop < TEST_LOOP_NUM; loop++ {
+		for _, testCase := range allTestCases {
+			go func(testCase RingTestCase) {
+				defer wg.Done()
+				defer bar.Add(1)
+				defer func() { <-maxConcurrentChannel }()
 
-						wg.Add(1)
-						sem <- struct{}{}
-						autoTestAction(model_, file_)
-					}(model, filepath.Join(sourceFilePath, file.Name()))
-				}
-			}
+				wg.Add(1)
+				maxConcurrentChannel <- struct{}{}
+				autoTestAction(testCase, displayMode)
+			}(testCase)
 		}
 	}
 
@@ -205,5 +315,10 @@ func main() {
 	fmt.Printf("Fail     = %d\n", failNum)
 	fmt.Printf("Usetime  = %dS\n", int(time.Since(startTime).Seconds()))
 
-	printNotPassCase()
+	// fmt.Println("[NotPassCase]")
+	// for _, item := range TEST_RESULT {
+	// 	if item.Status == "FAILED" {
+	// 		fmt.Printf("%s %s\n", item.RingTestCase.FileName, item.Output)
+	// 	}
+	// }
 }
