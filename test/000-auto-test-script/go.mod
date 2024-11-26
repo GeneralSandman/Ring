@@ -2,7 +2,10 @@ module ring-auto-test
 
 go 1.22.5
 
-require github.com/schollz/progressbar/v3 v3.17.1
+require (
+	github.com/schollz/progressbar/v3 v3.17.1
+	github.com/sergi/go-diff v1.3.1
+)
 
 require (
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
