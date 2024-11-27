@@ -115,7 +115,7 @@ var (
 	TEST_CASE_WORKFLOW_PATH = "/Users/bytedance/Desktop/Ring"
 
 	// 测试的轮数, 用于多次执行
-	TEST_LOOP_NUM                = 10
+	TEST_LOOP_NUM                = 1
 	notTestNum, succNum, failNum int
 	// 测试的Ring可执行二进制文件
 	TEST_RING_BIN = "./bin/ring"
@@ -233,7 +233,7 @@ func main() {
 	const maxConcurrent = 50                                   // 最大并发数
 	maxConcurrentChannel := make(chan struct{}, maxConcurrent) // 创建信号量通道
 
-	var results sync.Map
+	var testCaseResultMap sync.Map
 
 	displayMode := false
 	// flase 只有进度条
@@ -241,8 +241,8 @@ func main() {
 
 	allTestCases := getAllTestCases()
 
-	allNumV2 := len(allTestCases) * TEST_LOOP_NUM
-	bar := progressbar.Default(int64(allNumV2))
+	allNum := len(allTestCases) * TEST_LOOP_NUM
+	progressBar := progressbar.Default(int64(allNum))
 
 	startTime := time.Now()
 	if displayMode {
@@ -252,22 +252,26 @@ func main() {
 	for loop := 0; loop < TEST_LOOP_NUM; loop++ {
 		for _, testCase := range allTestCases {
 			go func(testCase RingTestCase) {
-				defer wg.Done()
-				defer bar.Add(1)
-				defer func() { <-maxConcurrentChannel }()
+				defer func() {
+					wg.Done()
+					<-maxConcurrentChannel
+					progressBar.Add(1)
+				}()
 
 				wg.Add(1)
 				maxConcurrentChannel <- struct{}{}
 				testResult := autoTestAction(testCase, displayMode)
-				results.Store(testCase.FileName, testResult)
+				testCaseResultMap.Store(testCase.FileName, testResult)
 			}(testCase)
 		}
 	}
 
 	wg.Wait()
 
-	fmt.Println("[NotPassCase]")
-	results.Range(func(key, value interface{}) bool {
+	fmt.Printf("\n\n\n\n")
+
+	fmt.Printf("[NotPassCase]\n")
+	testCaseResultMap.Range(func(key, value interface{}) bool {
 		testResult := value.(*RingTestResult)
 		if testResult.Status == "FAILED" {
 			failNum++
@@ -280,7 +284,8 @@ func main() {
 		return true
 	})
 
-	fmt.Println("\n[TestInfo]:")
+	fmt.Printf("\n")
+	fmt.Printf("[TestInfo]:")
 	fmt.Printf("TEST_LOOP_NUM     = %d\n", TEST_LOOP_NUM)
 	fmt.Printf("TEST_RING_BIN     = %s\n", TEST_RING_BIN)
 	fmt.Printf("TEST_RING_OPTION  = %s\n", TEST_RING_OPTION)
@@ -291,8 +296,9 @@ func main() {
 	if failNum != 0 {
 		resultColor = "\033[33m"
 	}
-	fmt.Printf("%s[Result]:\n", resultColor)
-	fmt.Printf("Pass/All = %d/%d\n", succNum, allNumV2)
+	fmt.Printf("%s", resultColor)
+	fmt.Printf("[Result]:\n")
+	fmt.Printf("Pass/All = %d/%d\n", succNum, allNum)
 	fmt.Printf("NotTest  = %d\n", notTestNum)
 	fmt.Printf("Fail     = %d\n", failNum)
 	fmt.Printf("Usetime  = %dS\n", int(time.Since(startTime).Seconds()))

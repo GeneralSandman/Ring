@@ -4,6 +4,8 @@ bin/ring
 bin/tool_gen_vmcode_doc
 bin/test_thread_pool
 
+test/000-auto-test-script/auto-test 
+
 build/*
 
 lex.yy.c
