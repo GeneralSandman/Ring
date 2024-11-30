@@ -3,8 +3,10 @@
 #include <cstring>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#include <time.h>
 #include <unistd.h>
 #include <vector>
 
@@ -936,18 +938,23 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
  * Package: time
  * Function: time
  * Type: @native
- * 返回 10位Unix时间戳
+ * 返回 纳秒时间戳
  */
 RVM_Value std_lib_time_time(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     assert(arg_count == 0);
 
-    time_t res;
+    // 10 位时间戳
+    // time_t res;
+    // res = time(nullptr);
 
-    res = time(nullptr);
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    long long timestamp = (long long)(ts.tv_sec) * 1000000000
+        + ts.tv_nsec;
 
     RVM_Value ret;
     ret.type          = RVM_VALUE_TYPE_INT64;
-    ret.u.int64_value = res;
+    ret.u.int64_value = timestamp;
 
     return ret;
 }

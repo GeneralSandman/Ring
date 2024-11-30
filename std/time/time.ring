@@ -11,7 +11,7 @@ import {
 
 }
 
-// unix 10位秒时间戳
+// 返回 纳秒时间戳
 @native
 function time() -> (int64);
 
