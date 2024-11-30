@@ -1502,20 +1502,34 @@ void generate_vmcode_from_binary_expression(Package_Executer* executer,
         goto END;
     }
 
-    if (left->convert_type != nullptr && left->convert_type[0]->kind == RING_BASIC_TYPE_STRING
-        && right->convert_type != nullptr && right->convert_type[0]->kind == RING_BASIC_TYPE_STRING) {
+    if (left->convert_type != nullptr
+        && left->convert_type[0]->kind == RING_BASIC_TYPE_STRING
+        && right->convert_type != nullptr
+        && right->convert_type[0]->kind == RING_BASIC_TYPE_STRING) {
         // TODO: 要在语义检查里严格检查
         // 肯定是eq ne gt ge lt le
         opcode = RVM_Opcode(opcode + 3);
         goto END;
     }
 
+    if (left->type == EXPRESSION_TYPE_LITERAL_INT64
+        || right->type == EXPRESSION_TYPE_LITERAL_INT64) {
+        opcode = RVM_Opcode(opcode + 1);
+    } else if ((left->convert_type != nullptr
+                && left->convert_type[0]->kind == RING_BASIC_TYPE_INT64)
+               || (right->convert_type != nullptr
+                   && right->convert_type[0]->kind == RING_BASIC_TYPE_INT64)) {
+        opcode = RVM_Opcode(opcode + 1);
+    }
+
 
     if (left->type == EXPRESSION_TYPE_LITERAL_DOUBLE
         || right->type == EXPRESSION_TYPE_LITERAL_DOUBLE) {
         opcode = RVM_Opcode(opcode + 2);
-    } else if ((left->convert_type != nullptr && left->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)
-               || (right->convert_type != nullptr && right->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)) {
+    } else if ((left->convert_type != nullptr
+                && left->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)
+               || (right->convert_type != nullptr
+                   && right->convert_type[0]->kind == RING_BASIC_TYPE_DOUBLE)) {
         opcode = RVM_Opcode(opcode + 2);
     }
 
@@ -1659,7 +1673,6 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer,
 
     generate_vmcode_from_expression(executer, expression, opcode_buffer);
 
-    // TODO:
     TypeSpecifier* type_specifier = expression->convert_type[0];
 
     switch (type_specifier->kind) {

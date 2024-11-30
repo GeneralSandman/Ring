@@ -501,7 +501,6 @@ struct Ring_DeriveType_Class {
     ClassDefinition* class_definition; // UPDATED_BY_FIX_AST
 };
 
-// TODO:
 // 函数变量类型
 struct Ring_DeriveType_Func {
     unsigned int    parameter_list_size;
@@ -1178,9 +1177,9 @@ typedef enum {
  *
  */
 struct RVM_CallInfo {
-    RVM_ClassObject* caller_object;   // TODO: 考虑是否有必要删除
-    RVM_Function*    caller_function; // TODO: 考虑是否有必要删除
-    RVM_Closure*     caller_closure;  // TODO:
+    RVM_ClassObject* caller_object;
+    RVM_Function*    caller_function;
+    RVM_Closure*     caller_closure;
     unsigned int     caller_stack_base;
     bool             caller_is_defer;
 
@@ -1867,7 +1866,6 @@ struct AnonymousFunc {
     // FreeValueDesc* free_value_list;
 };
 
-// TODO:
 struct FreeValueDesc {
     char* identifier;
     bool  is_curr_local; // 是本层函数定义的局部变量

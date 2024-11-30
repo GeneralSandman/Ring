@@ -86,12 +86,12 @@ RingCoroutine* launch_coroutine(Ring_VirtualMachine* rvm,
     RVM_CallInfo* callinfo         = (RVM_CallInfo*)mem_alloc(rvm->meta_pool, sizeof(RVM_CallInfo));
     callinfo->caller_object        = *caller_object;
     callinfo->caller_function      = *caller_function;
-    callinfo->caller_closure       = nullptr;
+    callinfo->caller_closure       = *caller_closure;
     callinfo->caller_stack_base    = 0;
     callinfo->caller_is_defer      = false;
     callinfo->callee_object        = callee_object;
     callinfo->callee_function      = callee_function;
-    callinfo->callee_closure       = nullptr;
+    callinfo->callee_closure       = callee_closure;
     callinfo->callee_argument_size = 0;
     callinfo->curr_closure         = callee_closure;
     callinfo->code_list            = callee_function->u.derive_func->code_list;

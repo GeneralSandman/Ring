@@ -171,7 +171,6 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     (((p)[0] = (value) >> 8), ((p)[1] = value & 0xff))
 
 
-// TODO: 这里的栈空间应该可以指定
 RVM_RuntimeStack* new_runtime_stack() {
     RVM_RuntimeStack* stack = (RVM_RuntimeStack*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_RuntimeStack));
     stack->top_index        = 0;
@@ -1590,7 +1589,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 break;
             }
 
-            // TODO:
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
                                    nullptr, closure_value->anonymous_func, closure_value,
@@ -2185,7 +2183,7 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
     VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
 
     // TODO: 需要补齐一个 return 指令
-    // TODO: 如何在这里处理 return 多返回值的问题
+    //       如何在这里处理 return 多返回值的问题
     if (return_list_count == 0) {
     } else if (return_list_count == 1) {
         VM_CUR_CO_STACK_DATA[VM_CUR_CO_STACK_TOP_INDEX++] = ret;
@@ -2401,9 +2399,6 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     VM_CUR_CO_STACK_TOP_INDEX -= local_variable_size;
 
 
-    // TODO:
-    // caller_object, caller_function 感觉没必要更新
-    // 思考设计是否会冗余，这个会影响 std-package-debug
     *caller_object   = callinfo->caller_object;
     *caller_function = callinfo->caller_function;
     *caller_closure  = callinfo->caller_closure;
@@ -2417,8 +2412,6 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
         for (unsigned int i = 0; i < closure->free_value_size; i++) {
             if (!closure->free_value_list[i].is_recur
                 && closure->free_value_list[i].is_open) {
-                // printf("[Debug][Close Closure] closure(%p) index:%u\n",
-                //        closure, i);
                 // TODO: deep_copy string array
                 closure->free_value_list[i].c_value = *(closure->free_value_list[i].u.p);
                 closure->free_value_list[i].u.p     = &(closure->free_value_list[i].c_value);
@@ -3337,7 +3330,7 @@ RVM_String* rvm_int_2_string(Ring_VirtualMachine* rvm, int value) {
     RVM_String*  string     = 0;
     unsigned int alloc_size = 0;
 
-    // TODO:这里直接用的 cpp的函数, 是否需要自己实现?
+    // TODO:这里直接用的 cpp的函数, 内存copy了两次
     std::string tmp = std::to_string(value);
 
     string          = new_string(rvm);
@@ -3356,7 +3349,7 @@ RVM_String* rvm_int64_2_string(Ring_VirtualMachine* rvm, long long value) {
     RVM_String*  string     = 0;
     unsigned int alloc_size = 0;
 
-    // TODO:这里直接用的 cpp的函数, 是否需要自己实现?
+    // TODO:这里直接用的 cpp的函数, 内存copy了两次
     std::string tmp = std::to_string(value);
 
     string          = new_string(rvm);
@@ -3375,7 +3368,7 @@ RVM_String* rvm_double_2_string(Ring_VirtualMachine* rvm, double value) {
     RVM_String*  string     = 0;
     unsigned int alloc_size = 0;
 
-    // TODO:这里直接用的 cpp的函数, 是否需要自己实现?
+    // TODO:这里直接用的 cpp的函数, 内存copy了两次
     std::string tmp = std::to_string(value);
 
     string          = new_string(rvm);
@@ -3393,7 +3386,6 @@ RVM_String* rvm_double_2_string(Ring_VirtualMachine* rvm, double value) {
 
 /*
  * rvm_string_cmp 和 string_compare 实现重复了，后续需要结合到一起
- * TODO: 这里实现的不太优雅
  */
 int rvm_string_cmp(RVM_String* string1, RVM_String* string2) {
     char*        str1     = nullptr;
@@ -3541,10 +3533,6 @@ RVM_DeferItem* new_defer_item(Ring_VirtualMachine* rvm,
 
     // deep copy argument
     for (unsigned int i = 0; i < argument_list_size; i++) {
-        // debug
-        std::string value_str = format_rvm_value(&VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i]);
-        debug_exec_info_with_white("new_defer_item deep_copy:%s\n", value_str.c_str());
-        // debug
         // TODO: 这里还不是 deep copy
         defer_item->argument_list[i] = VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i];
     }
