@@ -726,6 +726,8 @@ void dump_vm_class(Package_Executer*    package_executer,
 }
 
 std::string dump_vm_constant(RVM_ConstantPool* constant) {
+    std::string tmp;
+
     switch (constant->type) {
     case CONSTANTPOOL_TYPE_INT:
         return "int(" + std::to_string(constant->u.int_value) + ")";
@@ -740,9 +742,8 @@ std::string dump_vm_constant(RVM_ConstantPool* constant) {
         return "string(" + std::string(constant->u.string_value) + ")";
         break;
     case CONSTANTPOOL_TYPE_CLOSURE:
-        char buffer[20];
-        snprintf(buffer, sizeof(buffer), "%p", (void*)constant->u.anonymous_func_value);
-        return "closure(" + std::string(buffer) + ")";
+        tmp = sprintf_string("%p", (void*)constant->u.anonymous_func_value);
+        return "closure(" + tmp + ")";
         break;
     default:
         // TODO: error-report
@@ -1021,10 +1022,8 @@ std::string format_rvm_function(Package_Executer* package_executer,
     if (function->identifier != nullptr) {
         result += std::string(function->identifier);
     } else {
-        // TODO: 这里需要更精确的给出函数名字
-        char buffer[20];
-        snprintf(buffer, sizeof(buffer), "%p", (void*)function);
-        result += "<closure " + std::string(buffer) + ">";
+        std::string tmp = sprintf_string("%p", (void*)function);
+        result += "<closure " + tmp + ">";
     }
     result += "(";
 

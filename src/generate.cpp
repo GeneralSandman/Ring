@@ -2552,9 +2552,11 @@ void generate_vmcode_from_array_index_expression(Package_Executer*     executer,
     // 要通过变量的类型来决定 push_array_int push_array_double push_array_object
     VarDecl* declaration = array_index_expression->array_expression->u.identifier_expression->u.variable->decl;
     if (declaration == nullptr) {
+        // TODO: 在编译阶段报错
         ring_error_report("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
     }
     if (declaration->type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
+        // TODO: 在编译阶段报错
         ring_error_report("invalid declaration in operation[] identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
     }
 

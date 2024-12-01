@@ -242,7 +242,7 @@ int main(int argc, char** argv) {
     // 在 main函数中可以通过这种方式获取:
     // func main(var string[] args) { fmt::println(args); }
     main_package->shell_args = ring_command_arg.shell_args;
-    // TODO: optimize the method of set main_package;
+    //
     compiler_entry->main_package = main_package;
 
     /*
@@ -250,7 +250,7 @@ int main(int argc, char** argv) {
      */
     ExecuterEntry*    executer_entry        = executer_entry_create();
     Package_Executer* main_package_executer = package_executer_create(executer_entry, (char*)"main");
-    // TODO: optimize the method of set main_package_executer;
+    //
     executer_entry->main_package_executer = main_package_executer;
 
     /*

@@ -296,7 +296,6 @@ for((test_loop=1;test_loop<=$TEST_LOOP_NUM;test_loop++)); do {
             autoTestAction $model $source_file_path $file
 
             # 展示测试进度条
-            # TODO: 需要先计算出所有的测试用例的数量
             # show_progress "TestProgress" 451 $succ_num
             fi
         done

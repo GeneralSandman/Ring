@@ -1546,7 +1546,6 @@ EnumItemDeclaration* enum_item_declaration_list_add_item(EnumItemDeclaration* li
     return list;
 }
 
-// TODO: 完善参数
 EnumItemDeclaration* create_enum_item_declaration(char* identifier) {
     debug_ast_info_with_yellow("\t");
 
