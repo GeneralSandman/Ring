@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/schollz/progressbar/v3"
+	"github.com/gosuri/uiprogress"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
@@ -111,7 +111,6 @@ var (
 		// 2. 针对多维数组，typeof获取不到正确的类型
 		// 2023-01-31
 
-
 		"test/050-coroutine/sleep-and-yield.ring",
 		// 就是未来死循环验证协程切换, 可以暂时不用测试
 	}
@@ -190,7 +189,7 @@ func autoTestAction(testCase RingTestCase, printDetail bool) *RingTestResult {
 		return &RingTestResult{
 			RingTestCase: testCase,
 			Status:       "FAILED",
-			Detail:       fmt.Sprintf("diff expect&result Diff:%s", detail),
+			Detail:       fmt.Sprintf("diff expect&result Diff:\n%s", detail),
 		}
 	}
 
@@ -246,7 +245,14 @@ func main() {
 	allTestCases := getAllTestCases()
 
 	allNum := len(allTestCases) * TEST_LOOP_NUM
-	progressBar := progressbar.Default(int64(allNum))
+	progressBar := uiprogress.
+		AddBar(allNum).
+		AppendCompleted().
+		PrependElapsed()
+	progressBar.PrependFunc(func(b *uiprogress.Bar) string {
+		return fmt.Sprintf("[Progress] (%d/%d)", b.Current(), allNum)
+	})
+	uiprogress.Start()
 
 	startTime := time.Now()
 	if displayMode {
@@ -259,7 +265,7 @@ func main() {
 				defer func() {
 					wg.Done()
 					<-maxConcurrentChannel
-					progressBar.Add(1)
+					progressBar.Incr()
 				}()
 
 				wg.Add(1)
@@ -271,17 +277,14 @@ func main() {
 	}
 
 	wg.Wait()
+	uiprogress.Stop()
 
-	fmt.Printf("\n\n\n\n")
-
-	fmt.Printf("[NotPassCase]\n")
+	var failedResults []*RingTestResult
 	testCaseResultMap.Range(func(key, value interface{}) bool {
 		testResult := value.(*RingTestResult)
 		if testResult.Status == "FAILED" {
 			failNum++
-			fmt.Printf("******** FileName: %s, Value: %s ********\n", key, testResult.Status)
-			fmt.Printf("Output: %s\n", testResult.Detail)
-			fmt.Printf("\n")
+			failedResults = append(failedResults, testResult)
 		} else if testResult.Status == "PASS" {
 			succNum++
 		}
@@ -301,12 +304,22 @@ func main() {
 		resultColor = "\033[33m"
 	}
 	fmt.Printf("%s", resultColor)
+	fmt.Printf("\n")
 	fmt.Printf("[Result]:\n")
 	fmt.Printf("Pass/All = %d/%d\n", succNum, allNum)
 	fmt.Printf("NotTest  = %d\n", notTestNum)
 	fmt.Printf("Fail     = %d\n", failNum)
 	fmt.Printf("Usetime  = %dS\n", int(time.Since(startTime).Seconds()))
+	fmt.Printf("%s", "\033[0m")
 
+	if failNum != 0 {
+		fmt.Printf("[Failed TestCase]\n")
+		for _, testResult := range failedResults {
+			fmt.Printf("******** FileName: %s********\n", testResult.RingTestCase.FileName)
+			fmt.Printf("Output: %s\n", testResult.Detail)
+			fmt.Printf("\n")
+		}
+	}
 }
 
 func exportTestCase(num int, model, sourceCodeFile, result string) {
