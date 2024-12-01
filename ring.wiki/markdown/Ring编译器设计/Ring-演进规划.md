@@ -261,7 +261,7 @@ Usetime  = 1S
    2. 参数的类型是类       class
    3. 参数的类型是数组     bool[]/int[]/int64[]/double[]/string[]
    4. 参数的类型是类数组   class[]
-   5. TODO:  多维数组（基础类型+类）
+   5. 多维数组（基础类型+类）
 2. 函数返回          (Path: ./test/004-derive-function/return-value/*)
    1. 返回值的类型是基础类型 bool/int/int64/double/string
    2. 返回值的类型是类      class
@@ -425,6 +425,8 @@ class-object  ✅
    3. 和make install的冲突，这里如何处理
 5. 有可能的话，尽量完善一下相关文档
 
+对与多维数据的语义检查要尽可能的详细
+
 
 ### 完善 打包二进制、安装 ring的自动化脚本
 
@@ -457,6 +459,10 @@ curl -H "Authorization: token xx" https://api.github.com/rate_limit
 
 上传到一个 cos 的 bucket桶中，桶中的数据
 
+
+3. Fix: 这个会语法错误
+
+return bool[]{};
 
 -----------------------------
 
