@@ -48,6 +48,7 @@ var (
 
 		"002-operator",
 		"002-operator/minus",
+		"002-operator/string",
 
 		"003-native-function",
 		"004-derive-function",
