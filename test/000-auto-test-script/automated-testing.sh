@@ -150,6 +150,9 @@ NOT_TEST_FILES=(
   # launch 只支持普通函数/method, 暂时还不支持匿名函数
 
 
+  "./test/050-coroutine/sleep-and-yield.ring",
+  # 就是未来死循环验证协程切换, 可以暂时不用测试
+
   )
 
 # 测试的结果文件, 主要用于存放本次测试的失败结果

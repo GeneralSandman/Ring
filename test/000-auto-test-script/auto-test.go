@@ -110,6 +110,10 @@ var (
 		// 1. class-object数组，typeof获取不到正确的类型
 		// 2. 针对多维数组，typeof获取不到正确的类型
 		// 2023-01-31
+
+
+		"test/050-coroutine/sleep-and-yield.ring",
+		// 就是未来死循环验证协程切换, 可以暂时不用测试
 	}
 
 	TEST_CASE_WORKFLOW_PATH = "/Users/bytedance/Desktop/Ring"
@@ -285,7 +289,7 @@ func main() {
 	})
 
 	fmt.Printf("\n")
-	fmt.Printf("[TestInfo]:")
+	fmt.Printf("[TestInfo]:\n")
 	fmt.Printf("TEST_LOOP_NUM     = %d\n", TEST_LOOP_NUM)
 	fmt.Printf("TEST_RING_BIN     = %s\n", TEST_RING_BIN)
 	fmt.Printf("TEST_RING_OPTION  = %s\n", TEST_RING_OPTION)
