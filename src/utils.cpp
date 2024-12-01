@@ -495,7 +495,8 @@ RingFileStat* create_ring_file_stat(std::string& file_name) {
     }
 
 
-    RingFileStat* file_stat    = (RingFileStat*)mem_alloc(get_front_mem_pool(), sizeof(RingFileStat)); // TODO: 内存分配在哪里
+    RingFileStat* file_stat = (RingFileStat*)mem_alloc(nullptr, sizeof(RingFileStat));
+    // TODO: 这个内存后续应该考虑分配在哪里
     file_stat->dir             = dirname_;
     file_stat->file_name       = basename_;
     file_stat->abs_path        = real_path;
