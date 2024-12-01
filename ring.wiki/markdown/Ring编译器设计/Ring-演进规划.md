@@ -1276,7 +1276,7 @@ runtime package 需要实现的功能:
 2. getglobal() // 通过变量名称获取值，值可能是 bool/int/int64/double/string
 
 vm package:
-1. heap_size() // TODO: 返回值应该为 int64
+1. heap_size() // 返回值应该为 int64
 
 
 debug package:
@@ -2742,8 +2742,6 @@ method 中还不能进行强制检查 return 语句
 
 ### B. CentOS Ubuntu 环境coredump ✅ 
 
-TODO: file_stat 对应的 so 没有安装
-
 
 ### C. 可变参数类型 应用到 @derive函数中, 也就是如何访问可变参数类型 ✅ 
 
@@ -2926,9 +2924,8 @@ TODO: 关于类型的比较
 
 1. 显示当前位置 所在的 文件  ✅ 
 2. 显示当前位置 所在的 行数  ✅ 
-3. 显示当前位置 所在的 函数  TODO:
-4. 显示当前位置 所在的 内容  ✅ 
-5. 显示当前位置 前七行 后七行 总共15行内容.  ✅ 
+3. 显示当前位置 所在的 内容  ✅ 
+4. 显示当前位置 前七行 后七行 总共15行内容.  ✅ 
 
 实现: RingFileStat 记录源代码的元信息方便后续访问加载 ✅ 
 
@@ -3594,7 +3591,7 @@ job_1 = Job1{
 
 
 
-### F. 测试 字符串比较的时候, 要转化成 ne_string
+### F. 测试 字符串比较的时候, 要转化成 ne_string ✅ 
 
 FIXME:
 
