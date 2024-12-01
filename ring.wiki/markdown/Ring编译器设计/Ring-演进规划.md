@@ -822,14 +822,14 @@ function main() {
 
 
 
-TODO: 当然，launch后续也可以扩展成一个代码块/匿名函数，这里需要后边统一设置匿名函数/闭包
+当然，launch后续也可以扩展成一个代码块/匿名函数，这里需要后边统一设置匿名函数/闭包
 
 ```
-    launch {
+    launch function() {
         // action
         
         func_(arg1, arg2);
-    }
+    }();
 ```
 
 
@@ -1942,7 +1942,7 @@ ring 需要做一下限制
 ### N. 调研/涉及 switch/match 语法
 
 
-### K. 调研 enum/const 如何实现。
+### K. TODO: 调研 enum/const 如何实现。
 
 
 ### Z. 调用 rust 元组tuple的语法逻辑
@@ -4523,7 +4523,7 @@ ring dump <input-file>
     global_job_array_0[3] = global_job_value_0;
 ```
 
-8. TODO: 
+9. 函数参数/返回值 为类数组 ✅ 
 
 函数参数变量传递
 
