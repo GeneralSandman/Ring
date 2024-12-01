@@ -948,7 +948,7 @@ RVM_Value std_lib_time_time(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
     // res = time(nullptr);
 
     struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
+    clock_gettime(CLOCK_REALTIME, &ts);
     long long timestamp = (long long)(ts.tv_sec) * 1000000000
         + ts.tv_nsec;
 
