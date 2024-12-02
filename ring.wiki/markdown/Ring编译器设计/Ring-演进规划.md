@@ -460,9 +460,11 @@ curl -H "Authorization: token xx" https://api.github.com/rate_limit
 上传到一个 cos 的 bucket桶中，桶中的数据
 
 
-3. Fix: 这个会语法错误
+### E. Fix: 这个会语法错误
 
 return bool[]{};
+
+### F. Optimize: debug::debug_assert() 改成 debug::assert()
 
 -----------------------------
 
@@ -1280,7 +1282,7 @@ vm package:
 
 
 debug package:
-1. debug_assert() // TODO: 应该改为 assert
+1. debug_assert() // 后续已经改为 assert
 
 
 time package
@@ -3172,7 +3174,7 @@ RVM_CODE_DEEP_COPY 是对栈上的数据做深度copy.
 RVM_CODE_SHALLOW_COPY 是对栈上的数据做浅copy.
 
 
-TODO: 以后需要这样规划:
+以后需要这样规划:
 默认字节码是对栈上的数据做shallow-copy
 但是对于 deep-copy的场景(赋值、函数传递), 需要显式生成一个字节码: RVM_CODE_DEEP_COPY , 专门处理数据的deep-copy
 
@@ -3263,9 +3265,8 @@ rdb命令:
 6. bt: 打印堆栈
 7. clear: 清屏
 8. quit/q: 退出 ctrl-c
-9. code list: 打印当前行代码, 当前位置前后12行代码 //TODO: 后续支持, 这个还挺难实现的
-10. step/s: 单步执行, 会进入函数体 //TODO: 后续支持, 
-11. next/n: 单步执行, 不会进入函数体 //TODO: 后续支持, 
+9. code list: 打印当前行代码, 当前位置前后12行代码
+10. step-over step-into step-out
 12. until <line-number>: 则继续执行直至行号大于或等于 line-number
 13. step opcode: 一次执行一个ring虚拟机字节码 //TODO: 后续支持,
 
@@ -4055,17 +4056,15 @@ FIXME: 当class-object的多维数组的时候，就有点问题了。
 2. 多维数组 支持 class-object
 
 
-TODO: for-range引用到多维数组
+需要支持
+
+1. for-range引用到多维数组
+2. 多维数组 literal 初始化
+3. 对多维数组直接进行 fmt::printf()
+4. ring dump 展示是否为多维数组
 
 TODO: 从多维数组中取出一个元素进行 capacity 和 length
-
-TODO: 多维数组 literal 初始化
-
-TODO: 对数组进行 printf, 类型不正确.
-
 TODO: 函数调用是对参数的类型进行报错提示
-
-TODO: ring dump 展示是否为多维数组
 
 
 ```
@@ -4102,8 +4101,6 @@ a[1,2,4] 纬度为3, 大小分别为 1, 2, 4
 new 多维数组的时候, size只能放int常量, 也就是还不能完全动态分配
 a[1,2,4] 访问的时候, 可以放非int常量
 
-
- TODO: array literal 暂时只支持一维数组 
 
 
 ### 应该把 RVM_String 放在基础类型里边
