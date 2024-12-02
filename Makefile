@@ -59,7 +59,8 @@ clean check cleandeps:
 	@cd src && $(MAKE) $@
 
 testall:
-	bash ./test/000-auto-test-script/automated-testing.sh
+	@cd test/000-auto-test-script && go build -o auto-test auto-test.go 
+	./test/000-auto-test-script/auto-test
 
 testdump:
 	bash ./test/000-auto-test-script/automated-testing-dump.sh

@@ -232,7 +232,7 @@ func autoTestAction(testCase RingTestCase, printDetail bool) *RingTestResult {
 	sourceCodeFile := "./" + testCase.FileName
 	expectResultFile := "./" + sourceCodeFile + ".result"
 	runResultFileTmp := "./" + sourceCodeFile + ".result.tmp"
-	dmp := diffmatchpatch.New()
+	diffTool := diffmatchpatch.New()
 
 	expectOutput, err := os.ReadFile(expectResultFile)
 	if err != nil {
@@ -253,8 +253,8 @@ func autoTestAction(testCase RingTestCase, printDetail bool) *RingTestResult {
 		}
 	}
 
-	diffs := dmp.DiffMain(string(expectOutput), string(output), false)
-	diffResult := dmp.DiffPrettyText(diffs)
+	diffs := diffTool.DiffMain(string(expectOutput), string(output), false)
+	diffResult := diffTool.DiffPrettyText(diffs)
 
 	if string(diffResult) == string(expectOutput) {
 		if printDetail {
@@ -274,7 +274,7 @@ func autoTestAction(testCase RingTestCase, printDetail bool) *RingTestResult {
 		return &RingTestResult{
 			RingTestCase: testCase,
 			Status:       Status_Failed,
-			Detail:       fmt.Sprintf("diff expect&result Diff:\n%s", detail),
+			Detail:       fmt.Sprintf("diff expect and result Diff:\n%s", detail),
 		}
 	}
 
@@ -284,9 +284,12 @@ func getAllTestCases() []RingTestCase {
 	var result []RingTestCase
 
 	for _, model := range TEST_MODELS {
+
 		sourceFilePath := filepath.Join(TEST_PATH, model)
 		files, _ := os.ReadDir(sourceFilePath)
+
 		for _, file := range files {
+			
 			if filepath.Ext(file.Name()) == ".ring" {
 
 				filePath := filepath.Join(TEST_PATH, model, file.Name())
