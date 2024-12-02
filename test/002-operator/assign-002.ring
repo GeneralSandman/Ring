@@ -15,8 +15,8 @@ function main() {
 
 	int_value_1 = 1;
 	int_value_2 = 2;
-	debug::debug_assert(int_value_1 == 1);
-	debug::debug_assert(int_value_2 == 2);
+	debug::assert(int_value_1 == 1);
+	debug::assert(int_value_2 == 2);
 	fmt::println_int(int_value_1);
 	fmt::println_int(int_value_2);
 
@@ -25,8 +25,8 @@ function main() {
 	tmp = int_value_1;
 	int_value_1 = int_value_2;
 	int_value_2 = tmp;
-	debug::debug_assert(int_value_1 == 2);
-	debug::debug_assert(int_value_2 == 1);
+	debug::assert(int_value_1 == 2);
+	debug::assert(int_value_2 == 1);
 	fmt::println_int(int_value_1);
 	fmt::println_int(int_value_2);
 
@@ -37,8 +37,8 @@ function main() {
 	int_value_2 = 5;
 
 	int_value_1, int_value_2 = int_value_2, int_value_1;
-	debug::debug_assert(int_value_1 == 5);
-	debug::debug_assert(int_value_2 == 4);
+	debug::assert(int_value_1 == 5);
+	debug::assert(int_value_2 == 4);
 	fmt::println_int(int_value_1);
 	fmt::println_int(int_value_2);
 

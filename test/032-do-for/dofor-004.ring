@@ -36,12 +36,12 @@ function main() {
     }
 
     fmt::println_string("finish for====");
-    debug::debug_assert(count == 10 * 10 * 10 * 10);
+    debug::assert(count == 10 * 10 * 10 * 10);
     fmt::println_int(count);
-    debug::debug_assert(int_value_1 == 10);
-    debug::debug_assert(int_value_2 == 9);
-    debug::debug_assert(int_value_3 == 10);
-    debug::debug_assert(int_value_4 == 9);
+    debug::assert(int_value_1 == 10);
+    debug::assert(int_value_2 == 9);
+    debug::assert(int_value_3 == 10);
+    debug::assert(int_value_4 == 9);
     fmt::println_string("finish for====");
 
 

@@ -31,19 +31,19 @@ function main() {
 
     local_string_array_0 = new string[20];
 
-    debug::debug_assert(len(local_string_array_0) == 20);
-    debug::debug_assert(capacity(local_string_array_0) == 24);
+    debug::assert(len(local_string_array_0) == 20);
+    debug::assert(capacity(local_string_array_0) == 24);
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 320L);
+    debug::assert(vm::heap_size() - init_heap_size == 320L);
 
 
     vm::garbage_collect();
 
 
-    debug::debug_assert(len(local_string_array_0) == 20);
-    debug::debug_assert(capacity(local_string_array_0) == 24);
+    debug::assert(len(local_string_array_0) == 20);
+    debug::assert(capacity(local_string_array_0) == 24);
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 160L);
+    debug::assert(vm::heap_size() - init_heap_size == 160L);
 
 
 
@@ -51,10 +51,10 @@ function main() {
     local_string_array_0[0] = "12345678";
 
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 176L);
+    debug::assert(vm::heap_size() - init_heap_size == 176L);
 
     vm::garbage_collect();
 
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 160L);
+    debug::assert(vm::heap_size() - init_heap_size == 160L);
 }

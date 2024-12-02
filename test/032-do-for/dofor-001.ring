@@ -21,7 +21,7 @@ function main() {
     }for(int_value<10; int_value++);
     
     fmt::println_string("finish for====");
-    debug::debug_assert(int_value == 5);
+    debug::assert(int_value == 5);
     fmt::println_int(int_value);
     fmt::println_string("finish for====");
 }

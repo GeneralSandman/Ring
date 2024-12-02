@@ -26,9 +26,9 @@ function main() {
     fmt::println_bool(global_value_job_0.Bool);
     fmt::println_int(global_value_job_0.Int);
     fmt::println_double(global_value_job_0.Double);
-    debug::debug_assert(global_value_job_0.Bool == false);
-    debug::debug_assert(global_value_job_0.Int == 0);
-    debug::debug_assert(global_value_job_0.Double == 0.0);
+    debug::assert(global_value_job_0.Bool == false);
+    debug::assert(global_value_job_0.Int == 0);
+    debug::assert(global_value_job_0.Double == 0.0);
 
     fmt::println_string("\ntest case 2");
     global_value_job_0.Bool = true;
@@ -37,8 +37,8 @@ function main() {
     fmt::println_bool(global_value_job_0.Bool);
     fmt::println_int(global_value_job_0.Int);
     fmt::println_double(global_value_job_0.Double);
-    debug::debug_assert(global_value_job_0.Bool == true);
-    debug::debug_assert(global_value_job_0.Int == 1);
-    debug::debug_assert(global_value_job_0.Double == 1.1);
+    debug::assert(global_value_job_0.Bool == true);
+    debug::assert(global_value_job_0.Int == 1);
+    debug::assert(global_value_job_0.Double == 1.1);
 
 }

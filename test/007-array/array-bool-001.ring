@@ -28,16 +28,16 @@ function main() {
   fmt::println_bool(bool_array[9]);
 
 
-  debug::debug_assert(bool_array[0] == true);
-  debug::debug_assert(bool_array[1] == false);
-  debug::debug_assert(bool_array[2] == true);
-  debug::debug_assert(bool_array[3] == false);
-  debug::debug_assert(bool_array[4] == true);
-  debug::debug_assert(bool_array[5] == false);
-  debug::debug_assert(bool_array[6] == true);
-  debug::debug_assert(bool_array[7] == false);
-  debug::debug_assert(bool_array[8] == true);
-  debug::debug_assert(bool_array[9] == false);
+  debug::assert(bool_array[0] == true);
+  debug::assert(bool_array[1] == false);
+  debug::assert(bool_array[2] == true);
+  debug::assert(bool_array[3] == false);
+  debug::assert(bool_array[4] == true);
+  debug::assert(bool_array[5] == false);
+  debug::assert(bool_array[6] == true);
+  debug::assert(bool_array[7] == false);
+  debug::assert(bool_array[8] == true);
+  debug::assert(bool_array[9] == false);
 
 
 }

@@ -9,7 +9,7 @@ import {
 @main
 function main() {
 
-	debug::debug_assert(2 > 1);
+	debug::assert(2 > 1);
 	if(2>1) {
 		fmt::println_string("check 2>1 pass");
 	} else {

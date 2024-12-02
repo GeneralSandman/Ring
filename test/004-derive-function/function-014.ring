@@ -27,18 +27,18 @@ function main() {
 
 	fmt::println_string("\ntest case 1");
 	int_value_1 = 5;
-	debug::debug_assert(int_value_1 == 5);
+	debug::assert(int_value_1 == 5);
 
 	int_value_1 = increase_one(4);
-	debug::debug_assert(int_value_1 == 5);
+	debug::assert(int_value_1 == 5);
 
 	int_value_1 = add_two(2, 3);
-	debug::debug_assert(int_value_1 == 5);
+	debug::assert(int_value_1 == 5);
 
 
 	int_value_1 = 5;
 	int_value_1 += int_value_1;
-	debug::debug_assert(int_value_1 == 10);
+	debug::assert(int_value_1 == 10);
 
 
 
@@ -49,11 +49,11 @@ function main() {
 	int_value_1 = 5;
 	int_value_1 += increase_one(4);
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 10);
+	debug::assert(int_value_1 == 10);
 
 	int_value_1 += increase_one(4);
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 15);
+	debug::assert(int_value_1 == 15);
 
 
 
@@ -63,11 +63,11 @@ function main() {
 	int_value_1 = 5;
 	int_value_1 += add_two(13, 12);
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 30);
+	debug::assert(int_value_1 == 30);
 
 	int_value_1 += add_two(13, 12);
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 55);
+	debug::assert(int_value_1 == 55);
 
 
 

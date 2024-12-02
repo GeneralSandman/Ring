@@ -16,6 +16,6 @@ function main() {
   var int index = 0;
   for(index = 0; index < 200; index = index + 1) {
 	  fmt::println_int64(global_int64_array_0[index]);
-	  debug::debug_assert(global_int64_array_0[index] == 0L);
+	  debug::assert(global_int64_array_0[index] == 0L);
   }
 }

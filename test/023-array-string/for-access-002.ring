@@ -18,6 +18,6 @@ function main() {
   var int index = 0;
   for(string_value in range global_string_array_0) {
 	  fmt::println_string(string_value);
-	  debug::debug_assert(string_value == "");
+	  debug::assert(string_value == "");
   }
 }

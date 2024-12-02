@@ -17,6 +17,6 @@ function main() {
 
   for(double_value in range global_double_array_0) {
 	  fmt::println_double(double_value);
-	  debug::debug_assert(double_value == 0.0);
+	  debug::assert(double_value == 0.0);
   }
 }

@@ -26,9 +26,9 @@ function main() {
         fmt::println_bool(global_job_array_0[index].Running);
         fmt::println_int(global_job_array_0[index].JobID);
         fmt::println_double(global_job_array_0[index].Score);
-        debug::debug_assert(global_job_array_0[index].Running == false);
-        debug::debug_assert(global_job_array_0[index].JobID   == 0);
-        debug::debug_assert(global_job_array_0[index].Score   == 0.0);
+        debug::assert(global_job_array_0[index].Running == false);
+        debug::assert(global_job_array_0[index].JobID   == 0);
+        debug::assert(global_job_array_0[index].Score   == 0.0);
     }
 
 
@@ -62,29 +62,29 @@ function main() {
 
 
     fmt::println_string("\ntest cast global_job_array_0[0] ------------------------");
-    debug::debug_assert(global_job_array_0[0].Running == false);
-    debug::debug_assert(global_job_array_0[0].JobID   == 0);
-    debug::debug_assert(global_job_array_0[0].Score   == 0.0);
+    debug::assert(global_job_array_0[0].Running == false);
+    debug::assert(global_job_array_0[0].JobID   == 0);
+    debug::assert(global_job_array_0[0].Score   == 0.0);
 
     fmt::println_string("\ntest cast global_job_array_0[1] ------------------------");
-    debug::debug_assert(global_job_array_0[1].Running == true);
-    debug::debug_assert(global_job_array_0[1].JobID   == 1);
-    debug::debug_assert(global_job_array_0[1].Score   == 11.11);
+    debug::assert(global_job_array_0[1].Running == true);
+    debug::assert(global_job_array_0[1].JobID   == 1);
+    debug::assert(global_job_array_0[1].Score   == 11.11);
 
     fmt::println_string("\ntest cast global_job_array_0[2] ------------------------");
-    debug::debug_assert(global_job_array_0[2].Running == true);
-    debug::debug_assert(global_job_array_0[2].JobID   == 2);
-    debug::debug_assert(global_job_array_0[2].Score   == 22.22);
+    debug::assert(global_job_array_0[2].Running == true);
+    debug::assert(global_job_array_0[2].JobID   == 2);
+    debug::assert(global_job_array_0[2].Score   == 22.22);
 
     fmt::println_string("\ntest cast global_job_array_0[3] ------------------------");
-    debug::debug_assert(global_job_array_0[3].Running == true);
-    debug::debug_assert(global_job_array_0[3].JobID   == 3);
-    debug::debug_assert(global_job_array_0[3].Score   == 33.33);
+    debug::assert(global_job_array_0[3].Running == true);
+    debug::assert(global_job_array_0[3].JobID   == 3);
+    debug::assert(global_job_array_0[3].Score   == 33.33);
 
     fmt::println_string("\ntest cast global_job_array_0[4] ------------------------");
-    debug::debug_assert(global_job_array_0[4].Running == true);
-    debug::debug_assert(global_job_array_0[4].JobID   == 4);
-    debug::debug_assert(global_job_array_0[4].Score   == 44.44);
+    debug::assert(global_job_array_0[4].Running == true);
+    debug::assert(global_job_array_0[4].JobID   == 4);
+    debug::assert(global_job_array_0[4].Score   == 44.44);
 
 
 }

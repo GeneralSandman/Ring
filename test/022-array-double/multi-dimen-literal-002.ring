@@ -30,17 +30,17 @@ function main() {
     };
 
 
-    debug::debug_assert(len(global_double_array_0)    == 10);
-    debug::debug_assert(len(global_double_array_0[0]) == 10);
-    debug::debug_assert(len(global_double_array_0[1]) == 10);
-    debug::debug_assert(len(global_double_array_0[2]) == 10);
-    debug::debug_assert(len(global_double_array_0[3]) == 10);
-    debug::debug_assert(len(global_double_array_0[4]) == 10);
-    debug::debug_assert(len(global_double_array_0[5]) == 10);
-    debug::debug_assert(len(global_double_array_0[6]) == 10);
-    debug::debug_assert(len(global_double_array_0[7]) == 10);
-    debug::debug_assert(len(global_double_array_0[8]) == 10);
-    debug::debug_assert(len(global_double_array_0[9]) == 10);
+    debug::assert(len(global_double_array_0)    == 10);
+    debug::assert(len(global_double_array_0[0]) == 10);
+    debug::assert(len(global_double_array_0[1]) == 10);
+    debug::assert(len(global_double_array_0[2]) == 10);
+    debug::assert(len(global_double_array_0[3]) == 10);
+    debug::assert(len(global_double_array_0[4]) == 10);
+    debug::assert(len(global_double_array_0[5]) == 10);
+    debug::assert(len(global_double_array_0[6]) == 10);
+    debug::assert(len(global_double_array_0[7]) == 10);
+    debug::assert(len(global_double_array_0[8]) == 10);
+    debug::assert(len(global_double_array_0[9]) == 10);
 
     var int i;
     var int j;
@@ -59,7 +59,7 @@ function main() {
         }
     }
 
-    debug::debug_assert(num == 100);
+    debug::assert(num == 100);
 
 
 }

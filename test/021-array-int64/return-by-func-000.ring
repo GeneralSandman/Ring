@@ -30,21 +30,21 @@ function main() {
 	fmt::println_int64(global_int64_array_0[13]);
 	fmt::println_int64(global_int64_array_0[14]);
 
-	debug::debug_assert(global_int64_array_0[0]  ==  0L);
-	debug::debug_assert(global_int64_array_0[1]  ==  1L);
-	debug::debug_assert(global_int64_array_0[2]  ==  2L);
-	debug::debug_assert(global_int64_array_0[3]  ==  3L);
-	debug::debug_assert(global_int64_array_0[4]  ==  4L);
-	debug::debug_assert(global_int64_array_0[5]  ==  5L);
-	debug::debug_assert(global_int64_array_0[6]  ==  6L);
-	debug::debug_assert(global_int64_array_0[7]  ==  7L);
-	debug::debug_assert(global_int64_array_0[8]  ==  8L);
-	debug::debug_assert(global_int64_array_0[9]  ==  9L);
-	debug::debug_assert(global_int64_array_0[10] == 10L);
-	debug::debug_assert(global_int64_array_0[11] == 11L);
-	debug::debug_assert(global_int64_array_0[12] == 12L);
-	debug::debug_assert(global_int64_array_0[13] == 13L);
-	debug::debug_assert(global_int64_array_0[14] == 14L);
+	debug::assert(global_int64_array_0[0]  ==  0L);
+	debug::assert(global_int64_array_0[1]  ==  1L);
+	debug::assert(global_int64_array_0[2]  ==  2L);
+	debug::assert(global_int64_array_0[3]  ==  3L);
+	debug::assert(global_int64_array_0[4]  ==  4L);
+	debug::assert(global_int64_array_0[5]  ==  5L);
+	debug::assert(global_int64_array_0[6]  ==  6L);
+	debug::assert(global_int64_array_0[7]  ==  7L);
+	debug::assert(global_int64_array_0[8]  ==  8L);
+	debug::assert(global_int64_array_0[9]  ==  9L);
+	debug::assert(global_int64_array_0[10] == 10L);
+	debug::assert(global_int64_array_0[11] == 11L);
+	debug::assert(global_int64_array_0[12] == 12L);
+	debug::assert(global_int64_array_0[13] == 13L);
+	debug::assert(global_int64_array_0[14] == 14L);
 }
 
 function func_return_int64_array() -> (int64[]) {
@@ -71,21 +71,21 @@ function func_return_int64_array() -> (int64[]) {
 	fmt::println_int64(int64_array[13]);
 	fmt::println_int64(int64_array[14]);
 
-	debug::debug_assert(int64_array[0]  ==  0L);
-	debug::debug_assert(int64_array[1]  ==  1L);
-	debug::debug_assert(int64_array[2]  ==  2L);
-	debug::debug_assert(int64_array[3]  ==  3L);
-	debug::debug_assert(int64_array[4]  ==  4L);
-	debug::debug_assert(int64_array[5]  ==  5L);
-	debug::debug_assert(int64_array[6]  ==  6L);
-	debug::debug_assert(int64_array[7]  ==  7L);
-	debug::debug_assert(int64_array[8]  ==  8L);
-	debug::debug_assert(int64_array[9]  ==  9L);
-	debug::debug_assert(int64_array[10] == 10L);
-	debug::debug_assert(int64_array[11] == 11L);
-	debug::debug_assert(int64_array[12] == 12L);
-	debug::debug_assert(int64_array[13] == 13L);
-	debug::debug_assert(int64_array[14] == 14L);
+	debug::assert(int64_array[0]  ==  0L);
+	debug::assert(int64_array[1]  ==  1L);
+	debug::assert(int64_array[2]  ==  2L);
+	debug::assert(int64_array[3]  ==  3L);
+	debug::assert(int64_array[4]  ==  4L);
+	debug::assert(int64_array[5]  ==  5L);
+	debug::assert(int64_array[6]  ==  6L);
+	debug::assert(int64_array[7]  ==  7L);
+	debug::assert(int64_array[8]  ==  8L);
+	debug::assert(int64_array[9]  ==  9L);
+	debug::assert(int64_array[10] == 10L);
+	debug::assert(int64_array[11] == 11L);
+	debug::assert(int64_array[12] == 12L);
+	debug::assert(int64_array[13] == 13L);
+	debug::assert(int64_array[14] == 14L);
 
 	return int64_array;
 }

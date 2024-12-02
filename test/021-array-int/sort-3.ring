@@ -26,7 +26,7 @@ function main() {
     // printf
     var int num = 1;
     for(i = 0; i < len(global_int_array_0); i++) {
-        debug::debug_assert(global_int_array_0[i] == num);
+        debug::assert(global_int_array_0[i] == num);
         num++;
     }
 }

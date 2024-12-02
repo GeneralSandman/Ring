@@ -24,11 +24,11 @@ function main() {
 	fmt::println_int(int_value_4);
 	fmt::println_int(int_value_5);
 	fmt::println_int(int_value_6);
-	debug::debug_assert(int_value_1 == 0);
-	debug::debug_assert(int_value_2 == 0);
-	debug::debug_assert(int_value_3 == 0);
-	debug::debug_assert(int_value_4 == 0);
-	debug::debug_assert(int_value_5 == 0);
-	debug::debug_assert(int_value_6 == 0);
+	debug::assert(int_value_1 == 0);
+	debug::assert(int_value_2 == 0);
+	debug::assert(int_value_3 == 0);
+	debug::assert(int_value_4 == 0);
+	debug::assert(int_value_5 == 0);
+	debug::assert(int_value_6 == 0);
 
 }

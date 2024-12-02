@@ -53,10 +53,10 @@ function main() {
 
 
 
-	debug::debug_assert(count == 1048576);
+	debug::assert(count == 1048576);
 	fmt::println_int(count);
 
-	debug::debug_assert(sum == 26214400);
+	debug::assert(sum == 26214400);
 	fmt::println_int(sum);
 
 }

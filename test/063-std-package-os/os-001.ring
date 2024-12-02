@@ -25,7 +25,7 @@ function main() {
     fmt::printf("test case [0][getenv]----------\n");
 	env_value = os::getenv(env_name);
 	fmt::printf("env value: {}={}\n", env_name, env_value);
-	debug::debug_assert(env_value == "");
+	debug::assert(env_value == "");
 
 
     fmt::printf("\ntest case [1][setenv]----------\n");
@@ -36,5 +36,5 @@ function main() {
     fmt::printf("\ntest case [1][getenv]----------\n");
 	env_value = os::getenv(env_name);
 	fmt::printf("env value: {}={}\n", env_name, env_value);
-	debug::debug_assert(env_value == tmp);
+	debug::assert(env_value == tmp);
 }

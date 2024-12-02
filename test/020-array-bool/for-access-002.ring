@@ -18,6 +18,6 @@ function main() {
   var int index = 0;
   for(bool_value in range global_bool_array_0) {
 	  fmt::println_bool(bool_value);
-	  debug::debug_assert(bool_value == false);
+	  debug::assert(bool_value == false);
   }
 }

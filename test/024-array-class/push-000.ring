@@ -30,8 +30,8 @@ function main() {
     global_job_array_0 = new Job[200];
     fmt::println_int(len(global_job_array_0));
     fmt::println_int(capacity(global_job_array_0));
-    debug::debug_assert(len(global_job_array_0) == 200);
-    debug::debug_assert(capacity(global_job_array_0) == 200);
+    debug::assert(len(global_job_array_0) == 200);
+    debug::assert(capacity(global_job_array_0) == 200);
 
 
     fmt::println_string("\ntest cast 2 ------------------------");
@@ -40,14 +40,14 @@ function main() {
     fmt::println_bool(global_job_array_0[200].Running);
     fmt::println_int(global_job_array_0[200].JobID);
     fmt::println_double(global_job_array_0[200].Score);
-    debug::debug_assert(global_job_array_0[200].Running == true);
-    debug::debug_assert(global_job_array_0[200].JobID   == 200);
-    debug::debug_assert(global_job_array_0[200].Score   == 200.1);
+    debug::assert(global_job_array_0[200].Running == true);
+    debug::assert(global_job_array_0[200].JobID   == 200);
+    debug::assert(global_job_array_0[200].Score   == 200.1);
 
     fmt::println_int(len(global_job_array_0));
     fmt::println_int(capacity(global_job_array_0));
-    debug::debug_assert(len(global_job_array_0) == 201);
-    debug::debug_assert(capacity(global_job_array_0) == 400);
+    debug::assert(len(global_job_array_0) == 201);
+    debug::assert(capacity(global_job_array_0) == 400);
 
 
     fmt::println_string("\ntest cast 3 ------------------------");
@@ -60,13 +60,13 @@ function main() {
     fmt::println_bool(global_job_array_0[201].Running);
     fmt::println_int(global_job_array_0[201].JobID);
     fmt::println_double(global_job_array_0[201].Score);
-    debug::debug_assert(global_job_array_0[201].Running == false);
-    debug::debug_assert(global_job_array_0[201].JobID   == 201);
-    debug::debug_assert(global_job_array_0[201].Score   == 201.14);
+    debug::assert(global_job_array_0[201].Running == false);
+    debug::assert(global_job_array_0[201].JobID   == 201);
+    debug::assert(global_job_array_0[201].Score   == 201.14);
 
     fmt::println_int(len(global_job_array_0));
     fmt::println_int(capacity(global_job_array_0));
-    debug::debug_assert(len(global_job_array_0) == 202);
-    debug::debug_assert(capacity(global_job_array_0) == 400);
+    debug::assert(len(global_job_array_0) == 202);
+    debug::assert(capacity(global_job_array_0) == 400);
 
 }

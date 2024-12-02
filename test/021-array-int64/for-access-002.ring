@@ -17,6 +17,6 @@ function main() {
 
   for(value in range global_int64_array_0) {
 	  fmt::println_int64(value);
-	  debug::debug_assert(value == 0L);
+	  debug::assert(value == 0L);
   }
 }

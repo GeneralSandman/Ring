@@ -62,14 +62,14 @@ function main() {
     fmt::println_double(job_0.Runner.UseTime);
     fmt::println_string(job_0.Runner.RName);
 
-    debug::debug_assert(job_0.Running == false);
-    debug::debug_assert(job_0.JobID   == 1);
-    debug::debug_assert(job_0.Score   == 1.1);
-    debug::debug_assert(job_0.Name    == "1.1");
-    debug::debug_assert(job_0.Runner.Valid      == true);
-    debug::debug_assert(job_0.Runner.RunnerID   == 2);
-    debug::debug_assert(job_0.Runner.UseTime    == 2.2);
-    debug::debug_assert(job_0.Runner.RName      == "2.2");
+    debug::assert(job_0.Running == false);
+    debug::assert(job_0.JobID   == 1);
+    debug::assert(job_0.Score   == 1.1);
+    debug::assert(job_0.Name    == "1.1");
+    debug::assert(job_0.Runner.Valid      == true);
+    debug::assert(job_0.Runner.RunnerID   == 2);
+    debug::assert(job_0.Runner.UseTime    == 2.2);
+    debug::assert(job_0.Runner.RName      == "2.2");
 
 
 
@@ -82,10 +82,10 @@ function main() {
     fmt::println_double(global_runner_value_1.UseTime);
     fmt::println_string(global_runner_value_1.RName);
 
-    debug::debug_assert(global_runner_value_1.Valid      == true);
-    debug::debug_assert(global_runner_value_1.RunnerID   == 2);
-    debug::debug_assert(global_runner_value_1.UseTime    == 2.2);
-    debug::debug_assert(global_runner_value_1.RName      == "2.2");
+    debug::assert(global_runner_value_1.Valid      == true);
+    debug::assert(global_runner_value_1.RunnerID   == 2);
+    debug::assert(global_runner_value_1.UseTime    == 2.2);
+    debug::assert(global_runner_value_1.RName      == "2.2");
 
 
 

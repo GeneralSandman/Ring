@@ -33,27 +33,27 @@ function test(var int parameter_1, var int parameter_2, var int parameter_3, var
 	int_value_local_9 = 9;
 	int_value_local_10 = 10;
 
-    debug::debug_assert(int_value_local_1 == 1);
-    debug::debug_assert(int_value_local_2 == 2);
-    debug::debug_assert(int_value_local_3 == 3);
-    debug::debug_assert(int_value_local_4 == 4);
-    debug::debug_assert(int_value_local_5 == 5);
-    debug::debug_assert(int_value_local_6 == 6);
-    debug::debug_assert(int_value_local_7 == 7);
-    debug::debug_assert(int_value_local_8 == 8);
-    debug::debug_assert(int_value_local_9 == 9);
-    debug::debug_assert(int_value_local_10 == 10);
+    debug::assert(int_value_local_1 == 1);
+    debug::assert(int_value_local_2 == 2);
+    debug::assert(int_value_local_3 == 3);
+    debug::assert(int_value_local_4 == 4);
+    debug::assert(int_value_local_5 == 5);
+    debug::assert(int_value_local_6 == 6);
+    debug::assert(int_value_local_7 == 7);
+    debug::assert(int_value_local_8 == 8);
+    debug::assert(int_value_local_9 == 9);
+    debug::assert(int_value_local_10 == 10);
 
-    debug::debug_assert(parameter_1 == 11);
-    debug::debug_assert(parameter_2 == 12);
-    debug::debug_assert(parameter_3 == 13);
-    debug::debug_assert(parameter_4 == 14);
-    debug::debug_assert(parameter_5 == 15);
-    debug::debug_assert(parameter_6 == 16);
-    debug::debug_assert(parameter_7 == 17);
-    debug::debug_assert(parameter_8 == 18);
-    debug::debug_assert(parameter_9 == 19);
-    debug::debug_assert(parameter_10 == 20);
+    debug::assert(parameter_1 == 11);
+    debug::assert(parameter_2 == 12);
+    debug::assert(parameter_3 == 13);
+    debug::assert(parameter_4 == 14);
+    debug::assert(parameter_5 == 15);
+    debug::assert(parameter_6 == 16);
+    debug::assert(parameter_7 == 17);
+    debug::assert(parameter_8 == 18);
+    debug::assert(parameter_9 == 19);
+    debug::assert(parameter_10 == 20);
 
 	return int_value_local_1 +
 	int_value_local_2 +
@@ -86,6 +86,6 @@ function main() {
 
 	fmt::println_string("\ntest case 1 ======");
 	fmt::println_int(result);
-	debug::debug_assert(result == 210);
+	debug::assert(result == 210);
 
 }

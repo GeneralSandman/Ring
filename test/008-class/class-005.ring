@@ -26,9 +26,9 @@ function main() {
     fmt::println_bool(job_0.Running);
     fmt::println_int(job_0.JobID);
     fmt::println_double(job_0.Score);
-    debug::debug_assert(job_0.Running == false);
-    debug::debug_assert(job_0.JobID == 0);
-    debug::debug_assert(job_0.Score == 0.0);
+    debug::assert(job_0.Running == false);
+    debug::assert(job_0.JobID == 0);
+    debug::assert(job_0.Score == 0.0);
 
 
 
@@ -43,9 +43,9 @@ function main() {
     fmt::println_bool(job_0.Running);
     fmt::println_int(job_0.JobID);
     fmt::println_double(job_0.Score);
-    debug::debug_assert(job_0.Running == true);
-    debug::debug_assert(job_0.JobID == 1);
-    debug::debug_assert(job_0.Score == 1.1);
+    debug::assert(job_0.Running == true);
+    debug::assert(job_0.JobID == 1);
+    debug::assert(job_0.Score == 1.1);
 
 
 
@@ -59,9 +59,9 @@ function main() {
     fmt::println_bool(job_0.Running);
     fmt::println_int(job_0.JobID);
     fmt::println_double(job_0.Score);
-    debug::debug_assert(job_0.Running == false);
-    debug::debug_assert(job_0.JobID == 2);
-    debug::debug_assert(job_0.Score == 2.2);
+    debug::assert(job_0.Running == false);
+    debug::assert(job_0.JobID == 2);
+    debug::assert(job_0.Score == 2.2);
 
 
     job_0 = Job{
@@ -73,8 +73,8 @@ function main() {
     fmt::println_bool(job_0.Running);
     fmt::println_int(job_0.JobID);
     fmt::println_double(job_0.Score);
-    debug::debug_assert(job_0.Running == true);
-    debug::debug_assert(job_0.JobID == 3);
-    debug::debug_assert(job_0.Score == 3.1415);
+    debug::assert(job_0.Running == true);
+    debug::assert(job_0.JobID == 3);
+    debug::assert(job_0.Score == 3.1415);
     
 }

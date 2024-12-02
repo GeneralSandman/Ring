@@ -51,7 +51,7 @@ function main() {
         }
     }
 
-    debug::debug_assert(global_job_array_0[199].Running == true);
-    debug::debug_assert(global_job_array_0[199].JobID   == 1);
-    debug::debug_assert(global_job_array_0[199].Score   == 2.34);
+    debug::assert(global_job_array_0[199].Running == true);
+    debug::assert(global_job_array_0[199].JobID   == 1);
+    debug::assert(global_job_array_0[199].Score   == 2.34);
 }

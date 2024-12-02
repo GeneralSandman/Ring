@@ -75,10 +75,10 @@ function main() {
 		}
 	};
 
-	debug::debug_assert(len(global_job1_array_0) == 3);
-	debug::debug_assert(len(global_job1_array_0[0]) == 3);
-	debug::debug_assert(len(global_job1_array_0[1]) == 3);
-	debug::debug_assert(len(global_job1_array_0[2]) == 3);
+	debug::assert(len(global_job1_array_0) == 3);
+	debug::assert(len(global_job1_array_0[0]) == 3);
+	debug::assert(len(global_job1_array_0[1]) == 3);
+	debug::assert(len(global_job1_array_0[2]) == 3);
 
 
 	var int i;
@@ -107,5 +107,5 @@ function main() {
         }
     }
 
-    debug::debug_assert(num == 27);
+    debug::assert(num == 27);
 }

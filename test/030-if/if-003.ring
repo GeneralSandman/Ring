@@ -10,7 +10,7 @@ import {
 function main() {
 
 
-	debug::debug_assert(true and true);
+	debug::assert(true and true);
 	if(true and true) {
 		fmt::println_string("check (true and true) pass");
 	} else {

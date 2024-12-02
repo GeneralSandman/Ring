@@ -14,12 +14,12 @@ function main() {
 	var int int_value;
 
 	int_value = 1;
-	debug::debug_assert(int_value == 1);
+	debug::assert(int_value == 1);
 
 	int_value = 1 + 2*3;
-	debug::debug_assert(int_value == 7);
+	debug::assert(int_value == 7);
 
 	int_value = (1+2) * 3;
-	debug::debug_assert(int_value == 9);
+	debug::assert(int_value == 9);
 
 }

@@ -19,26 +19,26 @@ function main() {
 
 	local_int_value_0 = -1 + -1;
 	fmt::println(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == -2);
+	debug::assert(local_int_value_0 == -2);
 
 	local_int_value_0 = -1 - 1;
 	fmt::println(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == -2);
+	debug::assert(local_int_value_0 == -2);
 
 	local_int_value_0 = -2 * -2;
 	fmt::println(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == 4);
+	debug::assert(local_int_value_0 == 4);
 
 	local_int_value_0 = -2 / -2;
 	fmt::println(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == 1);
+	debug::assert(local_int_value_0 == 1);
 
 	local_int_value_0 = -3 % -2;
 	fmt::println(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == -1);
+	debug::assert(local_int_value_0 == -1);
 
 	local_int_value_0 = 1+2+3+4+5+6+7+8+9+10+4*5+25/5 + 10%3 -3;
 	fmt::println(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == 78);
+	debug::assert(local_int_value_0 == 78);
 
 }

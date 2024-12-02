@@ -29,9 +29,9 @@ function main() {
         fmt::println_int(job_value.JobID);
         fmt::println_double(job_value.Score);
 
-        debug::debug_assert(job_value.Running == false);
-        debug::debug_assert(job_value.JobID   == 0);
-        debug::debug_assert(job_value.Score   == 0.0);
+        debug::assert(job_value.Running == false);
+        debug::assert(job_value.JobID   == 0);
+        debug::assert(job_value.Score   == 0.0);
 
 
         job_value.Running = true;
@@ -43,9 +43,9 @@ function main() {
         fmt::println_int(job_value.JobID);
         fmt::println_double(job_value.Score);
 
-        debug::debug_assert(job_value.Running == true);
-        debug::debug_assert(job_value.JobID   == 1);
-        debug::debug_assert(job_value.Score   == 3.14);
+        debug::assert(job_value.Running == true);
+        debug::assert(job_value.JobID   == 1);
+        debug::assert(job_value.Score   == 3.14);
 
     }
 

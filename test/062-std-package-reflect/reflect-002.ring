@@ -40,12 +40,12 @@ function main() {
 	fmt::println_string(reflect::typeof(job_class_value));
 
 	fmt::println_string("test case 2");
-	debug::debug_assert(reflect::typeof(bool_value)      == "bool");
-	debug::debug_assert(reflect::typeof(int_value)       == "int");
-	debug::debug_assert(reflect::typeof(int64_value)       == "int64");
-	debug::debug_assert(reflect::typeof(double_value)    == "double");
-	debug::debug_assert(reflect::typeof(string_value)    == "string");
-	debug::debug_assert(reflect::typeof(job_class_value) == "Job");
+	debug::assert(reflect::typeof(bool_value)      == "bool");
+	debug::assert(reflect::typeof(int_value)       == "int");
+	debug::assert(reflect::typeof(int64_value)       == "int64");
+	debug::assert(reflect::typeof(double_value)    == "double");
+	debug::assert(reflect::typeof(string_value)    == "string");
+	debug::assert(reflect::typeof(job_class_value) == "Job");
 
 
 }

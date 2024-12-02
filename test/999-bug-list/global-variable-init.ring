@@ -44,22 +44,22 @@ function main(var string[] args) {
 	fmt::println(global_bool_value_15);
 
 
-	debug::debug_assert(global_bool_value_0  == true);
-	debug::debug_assert(global_bool_value_1  == false);
-	debug::debug_assert(global_bool_value_2  == true);
-	debug::debug_assert(global_bool_value_3  == false);
-	debug::debug_assert(global_bool_value_4  == true);
-	debug::debug_assert(global_bool_value_5  == false);
-	debug::debug_assert(global_bool_value_6  == true);
-	debug::debug_assert(global_bool_value_7  == false);
-	debug::debug_assert(global_bool_value_8  == true);
-	debug::debug_assert(global_bool_value_9  == false);
-	debug::debug_assert(global_bool_value_10 == true);	
-	debug::debug_assert(global_bool_value_11 == false);
-	debug::debug_assert(global_bool_value_12 == true);
-	debug::debug_assert(global_bool_value_13 == false);
-	debug::debug_assert(global_bool_value_14 == true);
-	debug::debug_assert(global_bool_value_15 == false);
+	debug::assert(global_bool_value_0  == true);
+	debug::assert(global_bool_value_1  == false);
+	debug::assert(global_bool_value_2  == true);
+	debug::assert(global_bool_value_3  == false);
+	debug::assert(global_bool_value_4  == true);
+	debug::assert(global_bool_value_5  == false);
+	debug::assert(global_bool_value_6  == true);
+	debug::assert(global_bool_value_7  == false);
+	debug::assert(global_bool_value_8  == true);
+	debug::assert(global_bool_value_9  == false);
+	debug::assert(global_bool_value_10 == true);	
+	debug::assert(global_bool_value_11 == false);
+	debug::assert(global_bool_value_12 == true);
+	debug::assert(global_bool_value_13 == false);
+	debug::assert(global_bool_value_14 == true);
+	debug::assert(global_bool_value_15 == false);
 
 
 }

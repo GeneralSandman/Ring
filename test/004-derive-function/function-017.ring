@@ -27,10 +27,10 @@ function main() {
     
     int_value = test(11, 22, 33);
     fmt::println_int(int_value);
-    debug::debug_assert(int_value == 66);
+    debug::assert(int_value == 66);
     
     int_value -= test(11, 22, 33);
     fmt::println_int(int_value);
-    debug::debug_assert(int_value == 0);
+    debug::assert(int_value == 0);
 
 }

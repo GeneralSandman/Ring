@@ -19,7 +19,7 @@ function main() {
 
     fmt::println_string("finish for====");
     fmt::println_int(int_value);
-    debug::debug_assert(int_value == 20);
+    debug::assert(int_value == 20);
     fmt::println_string("finish for====");
 
 
@@ -38,7 +38,7 @@ function main() {
 
     fmt::println_string("finish for====");
     fmt::println_int(int_value);
-    debug::debug_assert(int_value == 10);
+    debug::assert(int_value == 10);
     fmt::println_string("finish for====");
 
 
@@ -60,7 +60,7 @@ function main() {
 
     fmt::println_string("finish for====");
     fmt::println_int(int_value);
-    debug::debug_assert(int_value == 10);
+    debug::assert(int_value == 10);
     fmt::println_string("finish for====");
 
 }

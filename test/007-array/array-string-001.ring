@@ -26,15 +26,15 @@ function main() {
   fmt::println_string(global_string_array_0[8]);
   fmt::println_string(global_string_array_0[9]);
 
-  debug::debug_assert(global_string_array_0[0] == "0-");
-  debug::debug_assert(global_string_array_0[1] == "1-");
-  debug::debug_assert(global_string_array_0[2] == "2-");
-  debug::debug_assert(global_string_array_0[3] == "3-");
-  debug::debug_assert(global_string_array_0[4] == "4-");
-  debug::debug_assert(global_string_array_0[5] == "5-");
-  debug::debug_assert(global_string_array_0[6] == "6-");
-  debug::debug_assert(global_string_array_0[7] == "7-");
-  debug::debug_assert(global_string_array_0[8] == "8-");
-  debug::debug_assert(global_string_array_0[9] == "9-");
+  debug::assert(global_string_array_0[0] == "0-");
+  debug::assert(global_string_array_0[1] == "1-");
+  debug::assert(global_string_array_0[2] == "2-");
+  debug::assert(global_string_array_0[3] == "3-");
+  debug::assert(global_string_array_0[4] == "4-");
+  debug::assert(global_string_array_0[5] == "5-");
+  debug::assert(global_string_array_0[6] == "6-");
+  debug::assert(global_string_array_0[7] == "7-");
+  debug::assert(global_string_array_0[8] == "8-");
+  debug::assert(global_string_array_0[9] == "9-");
 
 }

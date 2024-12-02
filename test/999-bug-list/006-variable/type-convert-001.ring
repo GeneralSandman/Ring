@@ -23,7 +23,7 @@ bool_value = true;
 string_value = <string>bool_value;
 fmt::println_string(string_value);
 
-debug::debug_assert(1==1);
-debug::debug_assert(1!=1);
+debug::assert(1==1);
+debug::assert(1!=1);
 
 }

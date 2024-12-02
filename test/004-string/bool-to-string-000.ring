@@ -21,24 +21,24 @@ function main() {
 	fmt::println_bool(false);
 	string_value = to_string(false);
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "false");
+	debug::assert(string_value == "false");
 
     fmt::println_string("\ntest cast 2 ------------------------");
 	fmt::println_bool(true);
 	string_value = to_string(true);
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "true");
+	debug::assert(string_value == "true");
 
     fmt::println_string("\ntest cast 3 ------------------------");
 	fmt::println_bool(false);
 	string_value = to_string(false);
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "false");
+	debug::assert(string_value == "false");
 
     fmt::println_string("\ntest cast 4 ------------------------");
 	fmt::println_bool(true);
 	string_value = to_string(true);
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "true");
+	debug::assert(string_value == "true");
 
 }

@@ -33,12 +33,12 @@ function main() {
     global_double_array_0[0]++;
     global_double_array_0[9]++;
 
-    debug::debug_assert(global_int_array_0[0] == 1);
-    debug::debug_assert(global_int_array_0[9] == 1);
-    debug::debug_assert(global_int64_array_0[0] == 1L);
-    debug::debug_assert(global_int64_array_0[9] == 1L);
-    debug::debug_assert(global_double_array_0[0] == 1.0);
-    debug::debug_assert(global_double_array_0[9] == 1.0);
+    debug::assert(global_int_array_0[0] == 1);
+    debug::assert(global_int_array_0[9] == 1);
+    debug::assert(global_int64_array_0[0] == 1L);
+    debug::assert(global_int64_array_0[9] == 1L);
+    debug::assert(global_double_array_0[0] == 1.0);
+    debug::assert(global_double_array_0[9] == 1.0);
 
 
     fmt::println_string("\ntest case 1");
@@ -49,12 +49,12 @@ function main() {
     global_double_array_0[0]--;
     global_double_array_0[9]--;
 
-    debug::debug_assert(global_int_array_0[0] == 0);
-    debug::debug_assert(global_int_array_0[9] == 0);
-    debug::debug_assert(global_int64_array_0[0] == 0L);
-    debug::debug_assert(global_int64_array_0[9] == 0L);
-    debug::debug_assert(global_double_array_0[0] == 0.0);
-    debug::debug_assert(global_double_array_0[9] == 0.0);
+    debug::assert(global_int_array_0[0] == 0);
+    debug::assert(global_int_array_0[9] == 0);
+    debug::assert(global_int64_array_0[0] == 0L);
+    debug::assert(global_int64_array_0[9] == 0L);
+    debug::assert(global_double_array_0[0] == 0.0);
+    debug::assert(global_double_array_0[9] == 0.0);
 
 
 }

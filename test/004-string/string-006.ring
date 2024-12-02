@@ -124,7 +124,7 @@ function main() {
 `;
 
     fmt::println_int(len(string_value));
-    debug::debug_assert(len(string_value) == 10100);
+    debug::assert(len(string_value) == 10100);
 
 
     
@@ -233,5 +233,5 @@ function main() {
 `;
 
     fmt::println_int(len(string_value));
-    debug::debug_assert(len(string_value) == 10100);
+    debug::assert(len(string_value) == 10100);
 }

@@ -28,24 +28,24 @@ function main() {
     fmt::printf("test case [0][exist]----------\n");
     exist = io::exist(file_name);
     fmt::printf("file exist: {}\n", exist);
-    debug::debug_assert(exist == false);
+    debug::assert(exist == false);
 
 
     fmt::printf("\ntest case [1][create]----------\n");
     fileid = io::create(file_name);
-	debug::debug_assert(fileid != -1);
+	debug::assert(fileid != -1);
 
 
     fmt::printf("\ntest case [2][exist]----------\n");
     exist = io::exist(file_name);
     fmt::printf("file exist: {}\n", exist);
-    debug::debug_assert(exist == true);
+    debug::assert(exist == true);
 
 
     fmt::printf("\ntest case [4][read_all]----------\n");
     content = io::read_all(fileid);
     fmt::printf("content={}\n", content);
-    debug::debug_assert(content == "");
+    debug::assert(content == "");
 
 
     fmt::printf("\ntest case [5][write]----------\n");
@@ -56,14 +56,14 @@ function main() {
     io::seek(fileid, 0L, 0);
     content = io::read_all(fileid);
     fmt::printf("content={}\n", content);
-    debug::debug_assert(content == content_tmp);
+    debug::assert(content == content_tmp);
 
     
     // 不 seek 读取不到文件内容了
     fmt::printf("\ntest case [7][read_all]----------\n");
     content = io::read_all(fileid);
     fmt::printf("content={}\n", content);
-    debug::debug_assert(content == "");
+    debug::assert(content == "");
 
 
     io::close(fileid);
@@ -72,5 +72,5 @@ function main() {
 	io::remove(file_name);
     exist = io::exist(file_name);
     fmt::printf("file exist: {}\n", exist);
-    debug::debug_assert(exist == false);
+    debug::assert(exist == false);
 }

@@ -24,11 +24,11 @@ function main() {
 	fmt::println_int64(int64_value_4);
 	fmt::println_int64(int64_value_5);
 	fmt::println_int64(int64_value_6);
-	debug::debug_assert(int64_value_1 == 1L);
-	debug::debug_assert(int64_value_2 == 2L);
-	debug::debug_assert(int64_value_3 == 3L);
-	debug::debug_assert(int64_value_4 == 4L);
-	debug::debug_assert(int64_value_5 == 5L);
-	debug::debug_assert(int64_value_6 == 6L);
+	debug::assert(int64_value_1 == 1L);
+	debug::assert(int64_value_2 == 2L);
+	debug::assert(int64_value_3 == 3L);
+	debug::assert(int64_value_4 == 4L);
+	debug::assert(int64_value_5 == 5L);
+	debug::assert(int64_value_6 == 6L);
 
 }

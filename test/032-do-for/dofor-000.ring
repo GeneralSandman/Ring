@@ -18,7 +18,7 @@ function main() {
 	    fmt::println_int(int_value);
 	}
 
-	debug::debug_assert(int_value == 10);
+	debug::assert(int_value == 10);
 	fmt::println_int(int_value);
 
 	fmt::println_string("");
@@ -30,7 +30,7 @@ function main() {
 	    fmt::println_int(int_value);
 	}for(int_value<10; int_value++);
 
-	debug::debug_assert(int_value == 10);
+	debug::assert(int_value == 10);
 	fmt::println_int(int_value);
 
 }

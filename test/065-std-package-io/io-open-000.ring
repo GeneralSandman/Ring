@@ -24,7 +24,7 @@ function main() {
 
     fmt::printf("test case [0][open]----------\n");
     fileid = io::open(file_name);
-	debug::debug_assert(fileid != -1);
+	debug::assert(fileid != -1);
 
     fmt::printf("test case [1][read_all]----------\n");
     content = io::read_all(fileid);

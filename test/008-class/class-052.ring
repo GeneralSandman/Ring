@@ -101,25 +101,25 @@ function main() {
     // 测试 class field的默认值
     fmt::println_string("test case 1-------");
 
-    debug::debug_assert(job_1.Bool                  == false);
-    debug::debug_assert(job_1.Int                   == 0);
-    debug::debug_assert(job_1.Double                == 0.0);
-    debug::debug_assert(job_1.String                == "");
+    debug::assert(job_1.Bool                  == false);
+    debug::assert(job_1.Int                   == 0);
+    debug::assert(job_1.Double                == 0.0);
+    debug::assert(job_1.String                == "");
 
-    debug::debug_assert(job_1.Job2.Bool             == false);
-    debug::debug_assert(job_1.Job2.Int              == 0);
-    debug::debug_assert(job_1.Job2.Double           == 0.0);
-    debug::debug_assert(job_1.Job2.String           == "");
+    debug::assert(job_1.Job2.Bool             == false);
+    debug::assert(job_1.Job2.Int              == 0);
+    debug::assert(job_1.Job2.Double           == 0.0);
+    debug::assert(job_1.Job2.String           == "");
 
-    debug::debug_assert(job_1.Job2.Job3.Bool        == false);
-    debug::debug_assert(job_1.Job2.Job3.Int         == 0);
-    debug::debug_assert(job_1.Job2.Job3.Double      == 0.0);
-    debug::debug_assert(job_1.Job2.Job3.String      == "");
+    debug::assert(job_1.Job2.Job3.Bool        == false);
+    debug::assert(job_1.Job2.Job3.Int         == 0);
+    debug::assert(job_1.Job2.Job3.Double      == 0.0);
+    debug::assert(job_1.Job2.Job3.String      == "");
 
-    debug::debug_assert(job_1.Job2.Job3.Job4.Bool   == false);
-    debug::debug_assert(job_1.Job2.Job3.Job4.Int    == 0);
-    debug::debug_assert(job_1.Job2.Job3.Job4.Double == 0.0);
-    debug::debug_assert(job_1.Job2.Job3.Job4.String == "");
+    debug::assert(job_1.Job2.Job3.Job4.Bool   == false);
+    debug::assert(job_1.Job2.Job3.Job4.Int    == 0);
+    debug::assert(job_1.Job2.Job3.Job4.Double == 0.0);
+    debug::assert(job_1.Job2.Job3.Job4.String == "");
 
 
     // 测试 对象嵌套初始化
@@ -149,25 +149,25 @@ function main() {
         }
     };
 
-    debug::debug_assert(job_1.Bool                  == false);
-    debug::debug_assert(job_1.Int                   == 1);
-    debug::debug_assert(job_1.Double                == 1.1);
-    debug::debug_assert(job_1.String                == "1.1");
+    debug::assert(job_1.Bool                  == false);
+    debug::assert(job_1.Int                   == 1);
+    debug::assert(job_1.Double                == 1.1);
+    debug::assert(job_1.String                == "1.1");
 
-    debug::debug_assert(job_1.Job2.Bool             == true);
-    debug::debug_assert(job_1.Job2.Int              == 2);
-    debug::debug_assert(job_1.Job2.Double           == 2.2);
-    debug::debug_assert(job_1.Job2.String           == "2.2");
+    debug::assert(job_1.Job2.Bool             == true);
+    debug::assert(job_1.Job2.Int              == 2);
+    debug::assert(job_1.Job2.Double           == 2.2);
+    debug::assert(job_1.Job2.String           == "2.2");
 
-    debug::debug_assert(job_1.Job2.Job3.Bool        == false);
-    debug::debug_assert(job_1.Job2.Job3.Int         == 3);
-    debug::debug_assert(job_1.Job2.Job3.Double      == 3.3);
-    debug::debug_assert(job_1.Job2.Job3.String      == "3.3");
+    debug::assert(job_1.Job2.Job3.Bool        == false);
+    debug::assert(job_1.Job2.Job3.Int         == 3);
+    debug::assert(job_1.Job2.Job3.Double      == 3.3);
+    debug::assert(job_1.Job2.Job3.String      == "3.3");
 
-    debug::debug_assert(job_1.Job2.Job3.Job4.Bool   == true);
-    debug::debug_assert(job_1.Job2.Job3.Job4.Int    == 4);
-    debug::debug_assert(job_1.Job2.Job3.Job4.Double == 4.4);
-    debug::debug_assert(job_1.Job2.Job3.Job4.String == "4.4");
+    debug::assert(job_1.Job2.Job3.Job4.Bool   == true);
+    debug::assert(job_1.Job2.Job3.Job4.Int    == 4);
+    debug::assert(job_1.Job2.Job3.Job4.Double == 4.4);
+    debug::assert(job_1.Job2.Job3.Job4.String == "4.4");
 
     fmt::println_string("\ntest case 3-------");
     job_1.printInfo();

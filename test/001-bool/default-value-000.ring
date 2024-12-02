@@ -16,5 +16,5 @@ import {
 function main() {
 	var bool bool_value;
 	fmt::println_bool(bool_value);
-	debug::debug_assert(bool_value == false);
+	debug::assert(bool_value == false);
 }

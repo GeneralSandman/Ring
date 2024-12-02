@@ -36,10 +36,10 @@ function main() {
 
 	fmt::println_string("finish for====");
 	fmt::println_int(num);
-	debug::debug_assert(num == 26);
-	debug::debug_assert(x == 2);
-	debug::debug_assert(y == 2);
-	debug::debug_assert(z == 2);
+	debug::assert(num == 26);
+	debug::assert(x == 2);
+	debug::assert(y == 2);
+	debug::assert(z == 2);
 	fmt::println_string("finish for====");
 
 
@@ -60,10 +60,10 @@ function main() {
 
 	fmt::println_string("finish for====");
 	fmt::println_int(num);
-	debug::debug_assert(num == 101);
-	debug::debug_assert(x == 0);
-	debug::debug_assert(y == 7);
-	debug::debug_assert(z == 9);
+	debug::assert(num == 101);
+	debug::assert(x == 0);
+	debug::assert(y == 7);
+	debug::assert(z == 9);
 	fmt::println_string("finish for====");
 
 }

@@ -27,15 +27,15 @@ function main() {
   fmt::println_string(global_string_array_0[8]);
   fmt::println_string(global_string_array_0[9]);
 
-  debug::debug_assert(global_string_array_0[0] == "");
-  debug::debug_assert(global_string_array_0[1] == "");
-  debug::debug_assert(global_string_array_0[2] == "");
-  debug::debug_assert(global_string_array_0[3] == "");
-  debug::debug_assert(global_string_array_0[4] == "");
-  debug::debug_assert(global_string_array_0[5] == "");
-  debug::debug_assert(global_string_array_0[6] == "");
-  debug::debug_assert(global_string_array_0[7] == "");
-  debug::debug_assert(global_string_array_0[8] == "");
-  debug::debug_assert(global_string_array_0[9] == "");
+  debug::assert(global_string_array_0[0] == "");
+  debug::assert(global_string_array_0[1] == "");
+  debug::assert(global_string_array_0[2] == "");
+  debug::assert(global_string_array_0[3] == "");
+  debug::assert(global_string_array_0[4] == "");
+  debug::assert(global_string_array_0[5] == "");
+  debug::assert(global_string_array_0[6] == "");
+  debug::assert(global_string_array_0[7] == "");
+  debug::assert(global_string_array_0[8] == "");
+  debug::assert(global_string_array_0[9] == "");
 
 }

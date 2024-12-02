@@ -16,6 +16,6 @@ function main() {
   var int index = 0;
   for(index = 0; index < len(global_string_array_0); index = index + 1) {
 	  fmt::println_string(global_string_array_0[index]);
-	  debug::debug_assert(global_string_array_0[index] == "");
+	  debug::assert(global_string_array_0[index] == "");
   }
 }

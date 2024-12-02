@@ -26,34 +26,34 @@ function main() {
     string_value = "1234567890";
     fmt::println_string(string_value);
     fmt::println_int(len(string_value));
-    debug::debug_assert(len(string_value) == 10);
+    debug::assert(len(string_value) == 10);
 
     fmt::println_string("\ntest case 2-----------------------------");
     string_value = "12\t34567890";
     fmt::println_string(string_value);
     fmt::println_int(len(string_value));
-    debug::debug_assert(len(string_value) == 11);
+    debug::assert(len(string_value) == 11);
 
 
     fmt::println_string("\ntest case 3-----------------------------");
     string_value = "12\n34567890";
     fmt::println_string(string_value);
     fmt::println_int(len(string_value));
-    debug::debug_assert(len(string_value) == 11);
+    debug::assert(len(string_value) == 11);
 
 
     fmt::println_string("\ntest case 4-----------------------------");
     string_value = "12\r34567890";
     fmt::println_string(string_value);
     fmt::println_int(len(string_value));
-    debug::debug_assert(len(string_value) == 11);
+    debug::assert(len(string_value) == 11);
 
 
     fmt::println_string("\ntest case 5-----------------------------");
     string_value = "12\s34567890";
     fmt::println_string(string_value);
     fmt::println_int(len(string_value));
-    debug::debug_assert(len(string_value) == 12);
+    debug::assert(len(string_value) == 12);
 
 
     fmt::println_string("\ntest case 5-----------------------------");
@@ -61,5 +61,5 @@ function main() {
     string_value = "123456\"7890";
     fmt::println_string(string_value);
     fmt::println_int(len(string_value));
-    debug::debug_assert(len(string_value) == 11);
+    debug::assert(len(string_value) == 11);
 }

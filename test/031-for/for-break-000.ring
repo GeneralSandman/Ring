@@ -20,13 +20,13 @@ function main() {
       }
     }
 
-    debug::debug_assert(int_value_1 == 10);
+    debug::assert(int_value_1 == 10);
     fmt::println_int(int_value_1);
 
-    debug::debug_assert(int_value_2 == 5);
+    debug::assert(int_value_2 == 5);
     fmt::println_int(int_value_2);
 
-    debug::debug_assert(int_sum == 50);
+    debug::assert(int_sum == 50);
     fmt::println_int(int_sum);
 
 }

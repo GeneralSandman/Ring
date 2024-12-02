@@ -16,6 +16,6 @@ function main() {
   var int index = 0;
   for(index = 0; index < len(global_bool_array_0); index = index + 1) {
 	  fmt::println_bool(global_bool_array_0[index]);
-	  debug::debug_assert(global_bool_array_0[index] == false);
+	  debug::assert(global_bool_array_0[index] == false);
   }
 }

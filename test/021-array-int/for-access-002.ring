@@ -17,6 +17,6 @@ function main() {
 
   for(value in range global_int_array_0) {
 	  fmt::println_int(value);
-	  debug::debug_assert(value == 0);
+	  debug::assert(value == 0);
   }
 }

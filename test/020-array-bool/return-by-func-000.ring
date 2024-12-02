@@ -30,21 +30,21 @@ function main() {
 	fmt::println_bool(global_bool_array_0[13]);
 	fmt::println_bool(global_bool_array_0[14]);
 
-	debug::debug_assert(global_bool_array_0[0] == true);
-	debug::debug_assert(global_bool_array_0[1] == false);
-	debug::debug_assert(global_bool_array_0[2] == false);
-	debug::debug_assert(global_bool_array_0[3] == true);
-	debug::debug_assert(global_bool_array_0[4] == false);
-	debug::debug_assert(global_bool_array_0[5] == false);
-	debug::debug_assert(global_bool_array_0[6] == true);
-	debug::debug_assert(global_bool_array_0[7] == false);
-	debug::debug_assert(global_bool_array_0[8] == false);
-	debug::debug_assert(global_bool_array_0[9] == true);
-	debug::debug_assert(global_bool_array_0[10] == false);
-	debug::debug_assert(global_bool_array_0[11] == false);
-	debug::debug_assert(global_bool_array_0[12] == true);
-	debug::debug_assert(global_bool_array_0[13] == false);
-	debug::debug_assert(global_bool_array_0[14] == false);
+	debug::assert(global_bool_array_0[0] == true);
+	debug::assert(global_bool_array_0[1] == false);
+	debug::assert(global_bool_array_0[2] == false);
+	debug::assert(global_bool_array_0[3] == true);
+	debug::assert(global_bool_array_0[4] == false);
+	debug::assert(global_bool_array_0[5] == false);
+	debug::assert(global_bool_array_0[6] == true);
+	debug::assert(global_bool_array_0[7] == false);
+	debug::assert(global_bool_array_0[8] == false);
+	debug::assert(global_bool_array_0[9] == true);
+	debug::assert(global_bool_array_0[10] == false);
+	debug::assert(global_bool_array_0[11] == false);
+	debug::assert(global_bool_array_0[12] == true);
+	debug::assert(global_bool_array_0[13] == false);
+	debug::assert(global_bool_array_0[14] == false);
 }
 
 function func_return_bool_array() -> (bool[]) {
@@ -71,21 +71,21 @@ function func_return_bool_array() -> (bool[]) {
 	fmt::println_bool(bool_array[13]);
 	fmt::println_bool(bool_array[14]);
 
-	debug::debug_assert(bool_array[0] == true);
-	debug::debug_assert(bool_array[1] == false);
-	debug::debug_assert(bool_array[2] == false);
-	debug::debug_assert(bool_array[3] == true);
-	debug::debug_assert(bool_array[4] == false);
-	debug::debug_assert(bool_array[5] == false);
-	debug::debug_assert(bool_array[6] == true);
-	debug::debug_assert(bool_array[7] == false);
-	debug::debug_assert(bool_array[8] == false);
-	debug::debug_assert(bool_array[9] == true);
-	debug::debug_assert(bool_array[10] == false);
-	debug::debug_assert(bool_array[11] == false);
-	debug::debug_assert(bool_array[12] == true);
-	debug::debug_assert(bool_array[13] == false);
-	debug::debug_assert(bool_array[14] == false);
+	debug::assert(bool_array[0] == true);
+	debug::assert(bool_array[1] == false);
+	debug::assert(bool_array[2] == false);
+	debug::assert(bool_array[3] == true);
+	debug::assert(bool_array[4] == false);
+	debug::assert(bool_array[5] == false);
+	debug::assert(bool_array[6] == true);
+	debug::assert(bool_array[7] == false);
+	debug::assert(bool_array[8] == false);
+	debug::assert(bool_array[9] == true);
+	debug::assert(bool_array[10] == false);
+	debug::assert(bool_array[11] == false);
+	debug::assert(bool_array[12] == true);
+	debug::assert(bool_array[13] == false);
+	debug::assert(bool_array[14] == false);
 
 	return bool_array;
 }

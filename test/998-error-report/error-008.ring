@@ -46,7 +46,7 @@ function main() {
 
 	// os::remove(tmp_file, tmp_file);
 	// os::remove(tmp_file, tmp_file);
-	// debug::debug_assert(true);
+	// debug::assert(true);
 	// fmt::printf();
 
 	// fmt::printf("{} {}", "a");

@@ -17,7 +17,7 @@ function main() {
     var int index = 0;
     for(index = 0; index < 20; index = index + 1) {
 	      fmt::println_bool(global_bool_array_0[index]);
-	      debug::debug_assert(global_bool_array_0[index] == false);
+	      debug::assert(global_bool_array_0[index] == false);
     }
 
 
@@ -44,7 +44,7 @@ function main() {
     global_bool_array_0[19] = true;
     for(index = 0; index < 20; index = index + 1) {
         fmt::println_bool(global_bool_array_0[index]);
-        debug::debug_assert(global_bool_array_0[index] == true);
+        debug::assert(global_bool_array_0[index] == true);
     }
 
 }

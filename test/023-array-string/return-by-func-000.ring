@@ -30,21 +30,21 @@ function main() {
 	fmt::println_string(global_string_array_0[13]);
 	fmt::println_string(global_string_array_0[14]);
 
-	debug::debug_assert(global_string_array_0[0]  == "0.0");
-	debug::debug_assert(global_string_array_0[1]  == "1.0");
-	debug::debug_assert(global_string_array_0[2]  == "2.0");
-	debug::debug_assert(global_string_array_0[3]  == "3.0");
-	debug::debug_assert(global_string_array_0[4]  == "4.0");
-	debug::debug_assert(global_string_array_0[5]  == "5.0");
-	debug::debug_assert(global_string_array_0[6]  == "6.0");
-	debug::debug_assert(global_string_array_0[7]  == "7.0");
-	debug::debug_assert(global_string_array_0[8]  == "8.0");
-	debug::debug_assert(global_string_array_0[9]  == "9.0");
-	debug::debug_assert(global_string_array_0[10] == "10.0");
-	debug::debug_assert(global_string_array_0[11] == "11.0");
-	debug::debug_assert(global_string_array_0[12] == "12.0");
-	debug::debug_assert(global_string_array_0[13] == "13.0");
-	debug::debug_assert(global_string_array_0[14] == "14.0");
+	debug::assert(global_string_array_0[0]  == "0.0");
+	debug::assert(global_string_array_0[1]  == "1.0");
+	debug::assert(global_string_array_0[2]  == "2.0");
+	debug::assert(global_string_array_0[3]  == "3.0");
+	debug::assert(global_string_array_0[4]  == "4.0");
+	debug::assert(global_string_array_0[5]  == "5.0");
+	debug::assert(global_string_array_0[6]  == "6.0");
+	debug::assert(global_string_array_0[7]  == "7.0");
+	debug::assert(global_string_array_0[8]  == "8.0");
+	debug::assert(global_string_array_0[9]  == "9.0");
+	debug::assert(global_string_array_0[10] == "10.0");
+	debug::assert(global_string_array_0[11] == "11.0");
+	debug::assert(global_string_array_0[12] == "12.0");
+	debug::assert(global_string_array_0[13] == "13.0");
+	debug::assert(global_string_array_0[14] == "14.0");
 }
 
 function func_return_string_array() -> (string[]) {
@@ -71,21 +71,21 @@ function func_return_string_array() -> (string[]) {
 	fmt::println_string(string_array[13]);
 	fmt::println_string(string_array[14]);
 
-	debug::debug_assert(string_array[0]  == "0.0");
-	debug::debug_assert(string_array[1]  == "1.0");
-	debug::debug_assert(string_array[2]  == "2.0");
-	debug::debug_assert(string_array[3]  == "3.0");
-	debug::debug_assert(string_array[4]  == "4.0");
-	debug::debug_assert(string_array[5]  == "5.0");
-	debug::debug_assert(string_array[6]  == "6.0");
-	debug::debug_assert(string_array[7]  == "7.0");
-	debug::debug_assert(string_array[8]  == "8.0");
-	debug::debug_assert(string_array[9]  == "9.0");
-	debug::debug_assert(string_array[10] == "10.0");
-	debug::debug_assert(string_array[11] == "11.0");
-	debug::debug_assert(string_array[12] == "12.0");
-	debug::debug_assert(string_array[13] == "13.0");
-	debug::debug_assert(string_array[14] == "14.0");
+	debug::assert(string_array[0]  == "0.0");
+	debug::assert(string_array[1]  == "1.0");
+	debug::assert(string_array[2]  == "2.0");
+	debug::assert(string_array[3]  == "3.0");
+	debug::assert(string_array[4]  == "4.0");
+	debug::assert(string_array[5]  == "5.0");
+	debug::assert(string_array[6]  == "6.0");
+	debug::assert(string_array[7]  == "7.0");
+	debug::assert(string_array[8]  == "8.0");
+	debug::assert(string_array[9]  == "9.0");
+	debug::assert(string_array[10] == "10.0");
+	debug::assert(string_array[11] == "11.0");
+	debug::assert(string_array[12] == "12.0");
+	debug::assert(string_array[13] == "13.0");
+	debug::assert(string_array[14] == "14.0");
 
 	return string_array;
 }

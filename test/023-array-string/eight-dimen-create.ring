@@ -32,13 +32,13 @@ function main() {
 	fmt::println_int(len(global_string_array_0[0,0,0,0,0,0,0]));
 	   
 	   
-    debug::debug_assert(len(global_string_array_0) == a);
-    debug::debug_assert(len(global_string_array_0[0]) == b);
-    debug::debug_assert(len(global_string_array_0[0,0]) == c);
-    debug::debug_assert(len(global_string_array_0[0,0,0]) == d);
-    debug::debug_assert(len(global_string_array_0[0,0,0,0]) == e);
-    debug::debug_assert(len(global_string_array_0[0,0,0,0,0]) == f);
-    debug::debug_assert(len(global_string_array_0[0,0,0,0,0,0]) == g);
-    debug::debug_assert(len(global_string_array_0[0,0,0,0,0,0,0]) == h);
+    debug::assert(len(global_string_array_0) == a);
+    debug::assert(len(global_string_array_0[0]) == b);
+    debug::assert(len(global_string_array_0[0,0]) == c);
+    debug::assert(len(global_string_array_0[0,0,0]) == d);
+    debug::assert(len(global_string_array_0[0,0,0,0]) == e);
+    debug::assert(len(global_string_array_0[0,0,0,0,0]) == f);
+    debug::assert(len(global_string_array_0[0,0,0,0,0,0]) == g);
+    debug::assert(len(global_string_array_0[0,0,0,0,0,0,0]) == h);
 
 }

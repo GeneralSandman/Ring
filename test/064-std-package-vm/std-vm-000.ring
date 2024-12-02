@@ -36,26 +36,26 @@ function main() {
     // before new
     heap_size = vm::heap_size();
     fmt::println(heap_size - init_heap_size);
-    debug::debug_assert(heap_size - init_heap_size == 0L);
+    debug::assert(heap_size - init_heap_size == 0L);
 
     int_array = new int[10];
 
     // after new
     heap_size = vm::heap_size();
     fmt::println(heap_size - init_heap_size);
-    debug::debug_assert(heap_size - init_heap_size == 128L);
+    debug::assert(heap_size - init_heap_size == 128L);
 
     int_array = new int[10];
 
     // after new
     heap_size = vm::heap_size();
     fmt::println(heap_size - init_heap_size);
-    debug::debug_assert(heap_size - init_heap_size == 256L);
+    debug::assert(heap_size - init_heap_size == 256L);
 
 
     // after gc
     vm::garbage_collect();
     heap_size = vm::heap_size();
     fmt::println(heap_size - init_heap_size);
-    debug::debug_assert(heap_size - init_heap_size == 64L);
+    debug::assert(heap_size - init_heap_size == 64L);
 }

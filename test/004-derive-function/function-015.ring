@@ -38,7 +38,7 @@ function main() {
 	fmt::println_string("\ntest case 1");
 	result = max(122, 123);
 	fmt::println_int(result);
-	debug::debug_assert(result == 123);
+	debug::assert(result == 123);
 
 
 
@@ -46,7 +46,7 @@ function main() {
 	fmt::println_string("\ntest case 2");
 	result = min(124, 123);
 	fmt::println_int(result);
-	debug::debug_assert(result == 123);
+	debug::assert(result == 123);
 
 
 
@@ -54,7 +54,7 @@ function main() {
 	fmt::println_string("\ntest case 3");
 	result = add(124, 123);
 	fmt::println_int(result);
-	debug::debug_assert(result == 247);
+	debug::assert(result == 247);
 
 
 
@@ -67,7 +67,7 @@ function main() {
 
 	result = add(max(1, 100), min(1234, 12345));
 	fmt::println_int(result);
-	debug::debug_assert(result == 1334);
+	debug::assert(result == 1334);
 
 
 
@@ -77,7 +77,7 @@ function main() {
 
 	result = add(add(add(add(1,2), 3), 4), 5);
 	fmt::println_int(result);
-	debug::debug_assert(result == 15);
+	debug::assert(result == 15);
 
 
 }

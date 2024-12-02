@@ -46,8 +46,8 @@ function main() {
     fmt::println_int(job_0.JobID);
     fmt::println_double(job_0.Score);
 
-    debug::debug_assert(job_0.Running  == true);
-    debug::debug_assert(job_0.JobID    == 1);
-    debug::debug_assert(job_0.Score    == 1.1);
+    debug::assert(job_0.Running  == true);
+    debug::assert(job_0.JobID    == 1);
+    debug::assert(job_0.Score    == 1.1);
 
 }

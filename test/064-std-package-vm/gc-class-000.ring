@@ -44,19 +44,19 @@ function main() {
     var Job job_value_0;
 
     fmt::println_int64(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 21L); // 1+4+8+8
+    debug::assert(vm::heap_size() - init_heap_size == 21L); // 1+4+8+8
     vm::garbage_collect();
     fmt::println_int64(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 21L); // 1+4+8+8
+    debug::assert(vm::heap_size() - init_heap_size == 21L); // 1+4+8+8
 
 
     job_value_0.Name = "123456789_123456";
     
     fmt::println_int64(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 37L); // 1+4+8+8 + 16
+    debug::assert(vm::heap_size() - init_heap_size == 37L); // 1+4+8+8 + 16
     vm::garbage_collect();
     fmt::println_int64(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 29L); // 1+4+8+16
+    debug::assert(vm::heap_size() - init_heap_size == 29L); // 1+4+8+16
 
 
 }

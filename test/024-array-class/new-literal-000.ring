@@ -34,32 +34,32 @@ function main() {
 		Job1{Bool: false, Int: 9, Double: 9.9, String: "9.9"}
 	};
 
-	debug::debug_assert(len(global_job1_array_0) == 10);
+	debug::assert(len(global_job1_array_0) == 10);
 
-	debug::debug_assert(global_job1_array_0[0].Bool   == true);
-	debug::debug_assert(global_job1_array_0[0].Int    == 0);
-	debug::debug_assert(global_job1_array_0[0].Double == 0.0);
-	debug::debug_assert(global_job1_array_0[0].String == "0.0");
+	debug::assert(global_job1_array_0[0].Bool   == true);
+	debug::assert(global_job1_array_0[0].Int    == 0);
+	debug::assert(global_job1_array_0[0].Double == 0.0);
+	debug::assert(global_job1_array_0[0].String == "0.0");
 
-	debug::debug_assert(global_job1_array_0[1].Bool   == false);
-	debug::debug_assert(global_job1_array_0[1].Int    == 1);
-	debug::debug_assert(global_job1_array_0[1].Double == 1.1);
-	debug::debug_assert(global_job1_array_0[1].String == "1.1");
+	debug::assert(global_job1_array_0[1].Bool   == false);
+	debug::assert(global_job1_array_0[1].Int    == 1);
+	debug::assert(global_job1_array_0[1].Double == 1.1);
+	debug::assert(global_job1_array_0[1].String == "1.1");
 
-	debug::debug_assert(global_job1_array_0[2].Bool   == true);
-	debug::debug_assert(global_job1_array_0[2].Int    == 2);
-	debug::debug_assert(global_job1_array_0[2].Double == 2.2);
-	debug::debug_assert(global_job1_array_0[2].String == "2.2");
+	debug::assert(global_job1_array_0[2].Bool   == true);
+	debug::assert(global_job1_array_0[2].Int    == 2);
+	debug::assert(global_job1_array_0[2].Double == 2.2);
+	debug::assert(global_job1_array_0[2].String == "2.2");
 
-	debug::debug_assert(global_job1_array_0[3].Bool   == false);
-	debug::debug_assert(global_job1_array_0[3].Int    == 3);
-	debug::debug_assert(global_job1_array_0[3].Double == 3.3);
-	debug::debug_assert(global_job1_array_0[3].String == "3.3");
+	debug::assert(global_job1_array_0[3].Bool   == false);
+	debug::assert(global_job1_array_0[3].Int    == 3);
+	debug::assert(global_job1_array_0[3].Double == 3.3);
+	debug::assert(global_job1_array_0[3].String == "3.3");
 
-	debug::debug_assert(global_job1_array_0[9].Bool   == false);
-	debug::debug_assert(global_job1_array_0[9].Int    == 9);
-	debug::debug_assert(global_job1_array_0[9].Double == 9.9);
-	debug::debug_assert(global_job1_array_0[9].String == "9.9");
+	debug::assert(global_job1_array_0[9].Bool   == false);
+	debug::assert(global_job1_array_0[9].Int    == 9);
+	debug::assert(global_job1_array_0[9].Double == 9.9);
+	debug::assert(global_job1_array_0[9].String == "9.9");
 
 	
 

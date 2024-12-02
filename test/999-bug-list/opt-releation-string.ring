@@ -21,19 +21,19 @@ function main() {
 
 	local_bool_value_0 = "1.0" == "1.0";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 	local_bool_value_0 = "2.0" == "1.0";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == false);
+	debug::assert(local_bool_value_0 == false);
 
 	local_bool_value_0 = "1.0" == "2.0";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == false);
+	debug::assert(local_bool_value_0 == false);
 
 	local_bool_value_0 = "2.0" == "2.0";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 
 
@@ -42,19 +42,19 @@ function main() {
 
 	local_bool_value_0 = "1.0" != "1.0";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == false);
+	debug::assert(local_bool_value_0 == false);
 
 	local_bool_value_0 = "2.0" != "1.0";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 	local_bool_value_0 = "1.0" != "2.0";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 	local_bool_value_0 = "2.0" != "2.0";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == false);
+	debug::assert(local_bool_value_0 == false);
 
 
 
@@ -62,36 +62,36 @@ function main() {
 
 	local_bool_value_0 = "12345" > "12345";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == false);
+	debug::assert(local_bool_value_0 == false);
 
 	local_bool_value_0 = "123456" > "12345";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 	local_bool_value_0 = "123456" > "123455";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 	local_bool_value_0 = "123456" > "123457";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == false);
+	debug::assert(local_bool_value_0 == false);
 
 
 	fmt::println("\ntest case 4------------");
 
 	local_bool_value_0 = "12345" >= "12345";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 	local_bool_value_0 = "123456" >= "12345";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 	local_bool_value_0 = "123456" >= "123455";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 	local_bool_value_0 = "123456" >= "123457";
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == false);
+	debug::assert(local_bool_value_0 == false);
 }

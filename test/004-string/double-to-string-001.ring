@@ -23,7 +23,7 @@ function main() {
 	fmt::println_double(double_value);
 	string_value = to_string(double_value);
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "0.000000");
+	debug::assert(string_value == "0.000000");
 
 
     fmt::println_string("\ntest cast 2 ------------------------");
@@ -31,7 +31,7 @@ function main() {
 	fmt::println_double(double_value);
 	string_value = to_string(double_value);
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "3.141500");
+	debug::assert(string_value == "3.141500");
 
 
     fmt::println_string("\ntest cast 3 ------------------------");
@@ -39,7 +39,7 @@ function main() {
 	fmt::println_double(double_value);
 	string_value = to_string(double_value);
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "66.660000");
+	debug::assert(string_value == "66.660000");
 
 
     fmt::println_string("\ntest cast 4 ------------------------");
@@ -47,6 +47,6 @@ function main() {
 	fmt::println_double(double_value);
 	string_value = to_string(double_value);
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "12345.678000");
+	debug::assert(string_value == "12345.678000");
 
 }

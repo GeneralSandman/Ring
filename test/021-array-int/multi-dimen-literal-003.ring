@@ -58,14 +58,14 @@ function main() {
 
 
     fmt::println_string("test cast 1 ------------------------");
-    debug::debug_assert(len(global_int_array_0)    == 3);
-    debug::debug_assert(len(global_int_array_0[0]) == 10);
-    debug::debug_assert(len(global_int_array_0[1]) == 10);
-    debug::debug_assert(len(global_int_array_0[2]) == 10);
+    debug::assert(len(global_int_array_0)    == 3);
+    debug::assert(len(global_int_array_0[0]) == 10);
+    debug::assert(len(global_int_array_0[1]) == 10);
+    debug::assert(len(global_int_array_0[2]) == 10);
 
-    debug::debug_assert(len(global_int_array_0[0,0]) == 10);
-    debug::debug_assert(len(global_int_array_0[1,9]) == 10);
-    debug::debug_assert(len(global_int_array_0[2,9]) == 10);
+    debug::assert(len(global_int_array_0[0,0]) == 10);
+    debug::assert(len(global_int_array_0[1,9]) == 10);
+    debug::assert(len(global_int_array_0[2,9]) == 10);
 
 
 
@@ -90,6 +90,6 @@ function main() {
         }
     }
 
-    debug::debug_assert(num == 300);
+    debug::assert(num == 300);
 
 }

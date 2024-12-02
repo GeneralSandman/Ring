@@ -48,10 +48,10 @@ function main() {
 
 
     // fmt::println_int(vm::heap_size());
-    // debug::debug_assert(vm::heap_size() == 21); // 1+4+8+8
+    // debug::assert(vm::heap_size() == 21); // 1+4+8+8
     // vm::garbage_collect();
     // fmt::println_int(vm::heap_size());
-    // debug::debug_assert(vm::heap_size() == 21); // 1+4+8+8
+    // debug::assert(vm::heap_size() == 21); // 1+4+8+8
 
 
 
@@ -65,16 +65,16 @@ function main() {
 
 
     fmt::println_int64(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 58L); // (1+4+8+8)*2 + 16
+    debug::assert(vm::heap_size() - init_heap_size == 58L); // (1+4+8+8)*2 + 16
     vm::garbage_collect();
     fmt::println_int64(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 29L); //  1+4+8+16
+    debug::assert(vm::heap_size() - init_heap_size == 29L); //  1+4+8+16
 
 
-    debug::debug_assert(job_value_0.Running == true);
-    debug::debug_assert(job_value_0.JobID == 1);
-    debug::debug_assert(job_value_0.Score == 1.0);
-    debug::debug_assert(job_value_0.Name == "123456789_123456");
+    debug::assert(job_value_0.Running == true);
+    debug::assert(job_value_0.JobID == 1);
+    debug::assert(job_value_0.Score == 1.0);
+    debug::assert(job_value_0.Name == "123456789_123456");
 
 
 }

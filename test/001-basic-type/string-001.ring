@@ -29,25 +29,25 @@ function main() {
 	fmt::println_string("\ntest case 1");
 	string_value = "123-";
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "123-");
+	debug::assert(string_value == "123-");
 
 
 
 	fmt::println_string("\ntest case 2");
 	string_value = "123" .. "345";
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "123345");
+	debug::assert(string_value == "123345");
 
 
 	fmt::println_string("\ntest case 3");
 	string_value = "123" .. "345" .. "567";
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "123345567");
+	debug::assert(string_value == "123345567");
 
 
 	fmt::println_string("\ntest case 4");
 	string_value = "123" .. "345" .. "567" .. "789";
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "123345567789");
+	debug::assert(string_value == "123345567789");
 
 }

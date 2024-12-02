@@ -45,16 +45,16 @@ function test() {
     fmt::println_int(int_value_local_9);
     fmt::println_int(int_value_local_10);
 
-    debug::debug_assert(int_value_local_1 == 1);
-    debug::debug_assert(int_value_local_2 == 2);
-    debug::debug_assert(int_value_local_3 == 3);
-    debug::debug_assert(int_value_local_4 == 4);
-    debug::debug_assert(int_value_local_5 == 5);
-    debug::debug_assert(int_value_local_6 == 6);
-    debug::debug_assert(int_value_local_7 == 7);
-    debug::debug_assert(int_value_local_8 == 8);
-    debug::debug_assert(int_value_local_9 == 9);
-    debug::debug_assert(int_value_local_10 == 10);
+    debug::assert(int_value_local_1 == 1);
+    debug::assert(int_value_local_2 == 2);
+    debug::assert(int_value_local_3 == 3);
+    debug::assert(int_value_local_4 == 4);
+    debug::assert(int_value_local_5 == 5);
+    debug::assert(int_value_local_6 == 6);
+    debug::assert(int_value_local_7 == 7);
+    debug::assert(int_value_local_8 == 8);
+    debug::assert(int_value_local_9 == 9);
+    debug::assert(int_value_local_10 == 10);
 }
 
 @main

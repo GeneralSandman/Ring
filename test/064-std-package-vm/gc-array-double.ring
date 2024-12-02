@@ -31,17 +31,17 @@ function main() {
 
     local_double_array_0 = new double[20];
 
-    debug::debug_assert(len(local_double_array_0) == 20);
-    debug::debug_assert(capacity(local_double_array_0) == 24);
+    debug::assert(len(local_double_array_0) == 20);
+    debug::assert(capacity(local_double_array_0) == 24);
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 384L);
+    debug::assert(vm::heap_size() - init_heap_size == 384L);
 
 
     vm::garbage_collect();
 
 
-    debug::debug_assert(len(local_double_array_0) == 20);
-    debug::debug_assert(capacity(local_double_array_0) == 24);
+    debug::assert(len(local_double_array_0) == 20);
+    debug::assert(capacity(local_double_array_0) == 24);
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 192L);
+    debug::assert(vm::heap_size() - init_heap_size == 192L);
 }

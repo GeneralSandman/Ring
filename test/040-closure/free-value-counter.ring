@@ -27,11 +27,11 @@ function main() {
 
 	count = counter0();
 	fmt::printf("count = {}\n", count);
-	debug::debug_assert(count == 15L);
+	debug::assert(count == 15L);
 
 	count = counter0();
 	fmt::printf("count = {}\n", count);
-	debug::debug_assert(count == 20L);
+	debug::assert(count == 20L);
 
 
 
@@ -40,32 +40,32 @@ function main() {
 
 	count = counter1();
 	fmt::printf("count = {}\n", count);
-	debug::debug_assert(count == 15L);
+	debug::assert(count == 15L);
 
 	count = counter1();
 	fmt::printf("count = {}\n", count);
-	debug::debug_assert(count == 20L);
+	debug::assert(count == 20L);
 
 
 	fmt::println("+++++++++++");
 	count = counter0();
 	fmt::printf("count = {}\n", count);
-	debug::debug_assert(count == 25L);
+	debug::assert(count == 25L);
 
 	count = counter0();
 	fmt::printf("count = {}\n", count);
-	debug::debug_assert(count == 30L);
+	debug::assert(count == 30L);
 
 
 
 	fmt::println("+++++++++++");
 	count = counter1();
 	fmt::printf("count = {}\n", count);
-	debug::debug_assert(count == 25L);
+	debug::assert(count == 25L);
 
 	count = counter1();
 	fmt::printf("count = {}\n", count);
-	debug::debug_assert(count == 30L);
+	debug::assert(count == 30L);
 
 }
 

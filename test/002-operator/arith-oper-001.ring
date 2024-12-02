@@ -17,7 +17,7 @@ function main() {
 	fmt::println_string("\ntest case 1");
 	double_value_1 = 1.0 + 2.0*3.0 + 4.0/1.0 - 2.0;
 	fmt::println_double(double_value_1);
-	debug::debug_assert(double_value_1 == 9.0);
+	debug::assert(double_value_1 == 9.0);
 
 
 	fmt::println_string("\ntest case 2");
@@ -31,8 +31,8 @@ function main() {
 	}
 
 	fmt::println_double(double_value_1);
-	debug::debug_assert(double_value_1 == 400.0);
+	debug::assert(double_value_1 == 400.0);
 	fmt::println_double(double_value_2);
-	debug::debug_assert(double_value_2 == 400.0);
+	debug::assert(double_value_2 == 400.0);
 
 }

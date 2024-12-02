@@ -32,10 +32,10 @@ function main() {
     fmt::println_int(global_job_value_0.Int);
     fmt::println_int64(global_job_value_0.Int64);
     fmt::println_double(global_job_value_0.Double);
-    debug::debug_assert(global_job_value_0.Bool   == false);
-    debug::debug_assert(global_job_value_0.Int    == 0);
-    debug::debug_assert(global_job_value_0.Int64  == 0L);
-    debug::debug_assert(global_job_value_0.Double == 0.0);
+    debug::assert(global_job_value_0.Bool   == false);
+    debug::assert(global_job_value_0.Int    == 0);
+    debug::assert(global_job_value_0.Int64  == 0L);
+    debug::assert(global_job_value_0.Double == 0.0);
 
 
 
@@ -46,10 +46,10 @@ function main() {
     fmt::println_int(global_job_value_0.Int);
     fmt::println_int64(global_job_value_0.Int64);
     fmt::println_double(global_job_value_0.Double);
-    debug::debug_assert(global_job_value_0.Bool   == false);
-    debug::debug_assert(global_job_value_0.Int    == 1);
-    debug::debug_assert(global_job_value_0.Int64  == 0L);
-    debug::debug_assert(global_job_value_0.Double == 0.0);
+    debug::assert(global_job_value_0.Bool   == false);
+    debug::assert(global_job_value_0.Int    == 1);
+    debug::assert(global_job_value_0.Int64  == 0L);
+    debug::assert(global_job_value_0.Double == 0.0);
 
 
 
@@ -61,10 +61,10 @@ function main() {
     fmt::println_int(global_job_value_0.Int);
     fmt::println_int64(global_job_value_0.Int64);
     fmt::println_double(global_job_value_0.Double);
-    debug::debug_assert(global_job_value_0.Bool   == false);
-    debug::debug_assert(global_job_value_0.Int    == 2);
-    debug::debug_assert(global_job_value_0.Int64  == 1L);
-    debug::debug_assert(global_job_value_0.Double == 0.0);
+    debug::assert(global_job_value_0.Bool   == false);
+    debug::assert(global_job_value_0.Int    == 2);
+    debug::assert(global_job_value_0.Int64  == 1L);
+    debug::assert(global_job_value_0.Double == 0.0);
 
 
 
@@ -77,10 +77,10 @@ function main() {
     fmt::println_int(global_job_value_0.Int);
     fmt::println_int64(global_job_value_0.Int64);
     fmt::println_double(global_job_value_0.Double);
-    debug::debug_assert(global_job_value_0.Bool   == false);
-    debug::debug_assert(global_job_value_0.Int    == 3);
-    debug::debug_assert(global_job_value_0.Int64  == 2L);
-    debug::debug_assert(global_job_value_0.Double == 1.0);
+    debug::assert(global_job_value_0.Bool   == false);
+    debug::assert(global_job_value_0.Int    == 3);
+    debug::assert(global_job_value_0.Int64  == 2L);
+    debug::assert(global_job_value_0.Double == 1.0);
 
 
 
@@ -93,10 +93,10 @@ function main() {
     fmt::println_int(global_job_value_0.Int);
     fmt::println_int64(global_job_value_0.Int64);
     fmt::println_double(global_job_value_0.Double);
-    debug::debug_assert(global_job_value_0.Bool   == false);
-    debug::debug_assert(global_job_value_0.Int    == 2);
-    debug::debug_assert(global_job_value_0.Int64  == 2L);
-    debug::debug_assert(global_job_value_0.Double == 1.0);
+    debug::assert(global_job_value_0.Bool   == false);
+    debug::assert(global_job_value_0.Int    == 2);
+    debug::assert(global_job_value_0.Int64  == 2L);
+    debug::assert(global_job_value_0.Double == 1.0);
 
 
     fmt::println_string("\ntest case 2-2");
@@ -107,10 +107,10 @@ function main() {
     fmt::println_int(global_job_value_0.Int);
     fmt::println_int64(global_job_value_0.Int64);
     fmt::println_double(global_job_value_0.Double);
-    debug::debug_assert(global_job_value_0.Bool   == false);
-    debug::debug_assert(global_job_value_0.Int    == 1);
-    debug::debug_assert(global_job_value_0.Int64  == 1L);
-    debug::debug_assert(global_job_value_0.Double == 1.0);
+    debug::assert(global_job_value_0.Bool   == false);
+    debug::assert(global_job_value_0.Int    == 1);
+    debug::assert(global_job_value_0.Int64  == 1L);
+    debug::assert(global_job_value_0.Double == 1.0);
 
 
     fmt::println_string("\ntest case 2-3");
@@ -122,10 +122,10 @@ function main() {
     fmt::println_int(global_job_value_0.Int);
     fmt::println_int64(global_job_value_0.Int64);
     fmt::println_double(global_job_value_0.Double);
-    debug::debug_assert(global_job_value_0.Bool   == false);
-    debug::debug_assert(global_job_value_0.Int    == 0);
-    debug::debug_assert(global_job_value_0.Int64  == 0L);
-    debug::debug_assert(global_job_value_0.Double == 0.0);
+    debug::assert(global_job_value_0.Bool   == false);
+    debug::assert(global_job_value_0.Int    == 0);
+    debug::assert(global_job_value_0.Int64  == 0L);
+    debug::assert(global_job_value_0.Double == 0.0);
 
 
 }

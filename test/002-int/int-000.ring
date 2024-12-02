@@ -47,7 +47,7 @@ function main() {
 	
 	var int int_value_1 = 0;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 0);
+	debug::assert(int_value_1 == 0);
 	
 	
 	fmt::println_string("");
@@ -55,7 +55,7 @@ function main() {
 
 	int_value_1 = 1;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 1);
+	debug::assert(int_value_1 == 1);
 	
 
 	fmt::println_string("");
@@ -63,7 +63,7 @@ function main() {
 	
 	int_value_1 = 2;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 2);
+	debug::assert(int_value_1 == 2);
 	
 	
 	fmt::println_string("");
@@ -71,7 +71,7 @@ function main() {
 	
 	int_value_1 = 255;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 255);
+	debug::assert(int_value_1 == 255);
 	
 	
 	fmt::println_string("");
@@ -79,7 +79,7 @@ function main() {
 	
 	int_value_1 = 256;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 256);
+	debug::assert(int_value_1 == 256);
 	
 	
 	fmt::println_string("");
@@ -87,7 +87,7 @@ function main() {
 	
 	int_value_1 = 65535;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 65535);
+	debug::assert(int_value_1 == 65535);
 	
 	
 	fmt::println_string("");
@@ -95,7 +95,7 @@ function main() {
 	
 	int_value_1 = 65536;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 65536);
+	debug::assert(int_value_1 == 65536);
 	
 	
 	fmt::println_string("");
@@ -103,7 +103,7 @@ function main() {
 	
 	int_value_1 = 2147483647;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 2147483647);
+	debug::assert(int_value_1 == 2147483647);
 	
 	
 	fmt::println_string("");
@@ -111,7 +111,7 @@ function main() {
 	
 	int_value_1 = 2147483648;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == -2147483648);
+	debug::assert(int_value_1 == -2147483648);
 	
 	
 	fmt::println_string("");
@@ -119,7 +119,7 @@ function main() {
 	
 	int_value_1 = -0;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == 0);
+	debug::assert(int_value_1 == 0);
 	
 	
 	fmt::println_string("");
@@ -127,7 +127,7 @@ function main() {
 	
 	int_value_1 = -1;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == -1);
+	debug::assert(int_value_1 == -1);
 	
 	
 	fmt::println_string("");
@@ -135,7 +135,7 @@ function main() {
 	
 	int_value_1 = -255;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == -255);
+	debug::assert(int_value_1 == -255);
 	
 	
 	fmt::println_string("");
@@ -143,7 +143,7 @@ function main() {
 	
 	int_value_1 = -256;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == -256);
+	debug::assert(int_value_1 == -256);
 	
 	
 	fmt::println_string("");
@@ -151,7 +151,7 @@ function main() {
 	
 	int_value_1 = -65535;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == -65535);
+	debug::assert(int_value_1 == -65535);
 	
 	
 	fmt::println_string("");
@@ -159,7 +159,7 @@ function main() {
 	
 	int_value_1 = -65536;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == -65536);
+	debug::assert(int_value_1 == -65536);
 	
 	
 	fmt::println_string("");
@@ -167,7 +167,7 @@ function main() {
 	
 	int_value_1 = -2147483647;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == -2147483647);
+	debug::assert(int_value_1 == -2147483647);
 	
 	
 	fmt::println_string("");
@@ -175,7 +175,7 @@ function main() {
 	
 	int_value_1 = -2147483648;
 	fmt::println_int(int_value_1);
-	debug::debug_assert(int_value_1 == -2147483648);
+	debug::assert(int_value_1 == -2147483648);
 	
 	
 	fmt::println_string("");

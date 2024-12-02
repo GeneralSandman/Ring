@@ -24,7 +24,7 @@ function main() {
 
     fmt::println_string("finish for====");
     fmt::println_int(int_value);
-    debug::debug_assert(int_value == 10);
+    debug::assert(int_value == 10);
     fmt::println_string("finish for====");
 
 
@@ -49,10 +49,10 @@ function main() {
     fmt::println_string("finish for====");
     fmt::println_int(int_value);
     fmt::println_bool(int_value == 10);
-    debug::debug_assert(int_value == 10);
+    debug::assert(int_value == 10);
 
     fmt::println_int(count);
-    debug::debug_assert(count == 6);
+    debug::assert(count == 6);
 
     fmt::println_string("finish for====");
 
@@ -78,10 +78,10 @@ function main() {
     fmt::println_string("finish for====");
     fmt::println_int(int_value);
     fmt::println_bool(int_value == 20);
-    debug::debug_assert(int_value == 20);
+    debug::assert(int_value == 20);
 
     fmt::println_int(count);
-    debug::debug_assert(count == 11);
+    debug::assert(count == 11);
 
     fmt::println_string("finish for====");
 
@@ -106,10 +106,10 @@ function main() {
     fmt::println_string("finish for====");
     fmt::println_int(int_value);
     fmt::println_bool(int_value == 100);
-    debug::debug_assert(int_value == 100);
+    debug::assert(int_value == 100);
 
     fmt::println_int(count);
-    debug::debug_assert(count == 21);
+    debug::assert(count == 21);
 
     fmt::println_string("finish for====");
 
@@ -134,10 +134,10 @@ function main() {
     fmt::println_string("finish for====");
     fmt::println_int(int_value);
     fmt::println_bool(int_value == 100);
-    debug::debug_assert(int_value == 100);
+    debug::assert(int_value == 100);
 
     fmt::println_int(count);
-    debug::debug_assert(count == 21);
+    debug::assert(count == 21);
 
     fmt::println_string("finish for====");
 

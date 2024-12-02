@@ -49,13 +49,13 @@ function main() {
 
     result = return_true() ? return_true() : return_false();
     fmt::println_bool(result);
-    debug::debug_assert(result == true);
+    debug::assert(result == true);
 
     fmt::println_string("\ntest case 4-----------");
 
     result = return_false() ? return_true() : return_false();
     fmt::println_bool(result);
-    debug::debug_assert(result == false);
+    debug::assert(result == false);
 
 
 

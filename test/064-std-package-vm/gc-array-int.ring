@@ -31,10 +31,10 @@ function main() {
 
     local_int_array_0 = new int[20];
 
-    debug::debug_assert(len(local_int_array_0) == 20);
-    debug::debug_assert(capacity(local_int_array_0) == 24);
+    debug::assert(len(local_int_array_0) == 20);
+    debug::assert(capacity(local_int_array_0) == 24);
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 192L);
+    debug::assert(vm::heap_size() - init_heap_size == 192L);
     /*
     * 内存分布
     * int[24](垃圾)         占用 4*24 Byte
@@ -44,10 +44,10 @@ function main() {
     vm::garbage_collect();
 
 
-    debug::debug_assert(len(local_int_array_0) == 20);
-    debug::debug_assert(capacity(local_int_array_0) == 24);
+    debug::assert(len(local_int_array_0) == 20);
+    debug::assert(capacity(local_int_array_0) == 24);
     fmt::println(vm::heap_size() - init_heap_size);
-    debug::debug_assert(vm::heap_size() - init_heap_size == 96L);
+    debug::assert(vm::heap_size() - init_heap_size == 96L);
     /*
     * 内存分布
     * local_int_array_0    占用 4*24 16Byte

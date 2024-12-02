@@ -13,6 +13,6 @@ import {
 @main
 function main() {
 
-	debug::debug_assert(true == true);
-	debug::debug_assert(true == false);
+	debug::assert(true == true);
+	debug::assert(true == false);
 }

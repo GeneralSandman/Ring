@@ -25,8 +25,8 @@ function main() {
         fmt::println_int(global_job_array_0[index].JobID);
         fmt::println_double(global_job_array_0[index].Score);
 
-        debug::debug_assert(global_job_array_0[index].Running == false);
-        debug::debug_assert(global_job_array_0[index].JobID   == 0);
-        debug::debug_assert(global_job_array_0[index].Score   == 0.0);
+        debug::assert(global_job_array_0[index].Running == false);
+        debug::assert(global_job_array_0[index].JobID   == 0);
+        debug::assert(global_job_array_0[index].Score   == 0.0);
     }
 }

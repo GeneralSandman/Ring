@@ -29,7 +29,7 @@ function main() {
 		sum += level;
 	}
 	fmt::println_int(sum);
-	debug::debug_assert(sum == 460);
+	debug::assert(sum == 460);
 	
 	
 	sum = 0;
@@ -37,6 +37,6 @@ function main() {
 		sum += get_level_by_score(score); 
 	}
 	fmt::println_int(sum);
-	debug::debug_assert(sum == 460);
+	debug::assert(sum == 460);
 
 }

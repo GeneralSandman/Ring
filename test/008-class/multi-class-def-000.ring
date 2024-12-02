@@ -39,19 +39,19 @@ function main() {
     fmt::println_string("\ntest case 1");
 
     fmt::println_bool(global_job1_value_0.Running1);
-    debug::debug_assert(global_job1_value_0.Running1 == false);
+    debug::assert(global_job1_value_0.Running1 == false);
 
     fmt::println_bool(global_job2_value_0.Running2);
     fmt::println_int(global_job2_value_0.JobID2);
-    debug::debug_assert(global_job2_value_0.Running2 == false);
-    debug::debug_assert(global_job2_value_0.JobID2 == 0);
+    debug::assert(global_job2_value_0.Running2 == false);
+    debug::assert(global_job2_value_0.JobID2 == 0);
 
     fmt::println_bool(global_job3_value_0.Running3);
     fmt::println_int(global_job3_value_0.JobID3);
     fmt::println_double(global_job3_value_0.Score3);
-    debug::debug_assert(global_job3_value_0.Running3 == false);
-    debug::debug_assert(global_job3_value_0.JobID3 == 0);
-    debug::debug_assert(global_job3_value_0.Score3 == 0.0);
+    debug::assert(global_job3_value_0.Running3 == false);
+    debug::assert(global_job3_value_0.JobID3 == 0);
+    debug::assert(global_job3_value_0.Score3 == 0.0);
 
 
 
@@ -73,19 +73,19 @@ function main() {
     };
 
     fmt::println_bool(global_job1_value_0.Running1);
-    debug::debug_assert(global_job1_value_0.Running1 == true);
+    debug::assert(global_job1_value_0.Running1 == true);
 
     fmt::println_bool(global_job2_value_0.Running2);
     fmt::println_int(global_job2_value_0.JobID2);
-    debug::debug_assert(global_job2_value_0.Running2 == true);
-    debug::debug_assert(global_job2_value_0.JobID2 == 2);
+    debug::assert(global_job2_value_0.Running2 == true);
+    debug::assert(global_job2_value_0.JobID2 == 2);
 
     fmt::println_bool(global_job3_value_0.Running3);
     fmt::println_int(global_job3_value_0.JobID3);
     fmt::println_double(global_job3_value_0.Score3);
-    debug::debug_assert(global_job3_value_0.Running3 == true);
-    debug::debug_assert(global_job3_value_0.JobID3 == 3);
-    debug::debug_assert(global_job3_value_0.Score3 == 3.3);
+    debug::assert(global_job3_value_0.Running3 == true);
+    debug::assert(global_job3_value_0.JobID3 == 3);
+    debug::assert(global_job3_value_0.Score3 == 3.3);
 
 
 
@@ -108,19 +108,19 @@ function main() {
     };
 
     fmt::println_bool(global_job1_value_0.Running1);
-    debug::debug_assert(global_job1_value_0.Running1 == false);
+    debug::assert(global_job1_value_0.Running1 == false);
 
     fmt::println_bool(global_job2_value_0.Running2);
     fmt::println_int(global_job2_value_0.JobID2);
-    debug::debug_assert(global_job2_value_0.Running2 == false);
-    debug::debug_assert(global_job2_value_0.JobID2 == 222);
+    debug::assert(global_job2_value_0.Running2 == false);
+    debug::assert(global_job2_value_0.JobID2 == 222);
 
     fmt::println_bool(global_job3_value_0.Running3);
     fmt::println_int(global_job3_value_0.JobID3);
     fmt::println_double(global_job3_value_0.Score3);
-    debug::debug_assert(global_job3_value_0.Running3 == false);
-    debug::debug_assert(global_job3_value_0.JobID3 == 333);
-    debug::debug_assert(global_job3_value_0.Score3 == 333.333);
+    debug::assert(global_job3_value_0.Running3 == false);
+    debug::assert(global_job3_value_0.JobID3 == 333);
+    debug::assert(global_job3_value_0.Score3 == 333.333);
 
 
 

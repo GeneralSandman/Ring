@@ -38,10 +38,10 @@ function main() {
 	fmt::println_string("\ntest case for-range&for --------------------");
 	index = 0;
 	for(value in range local_string_array_0) {
-		debug::debug_assert(value == local_string_array_0[index]);
+		debug::assert(value == local_string_array_0[index]);
 		index++;
 	}
 
 	fmt::println_string("\ntest case range-index --------------------");
-	debug::debug_assert(index == 30);
+	debug::assert(index == 30);
 }

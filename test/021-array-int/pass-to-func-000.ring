@@ -39,19 +39,19 @@ function func_accept_int_array(var int[] int_array) {
 	fmt::println_int(int_array[13]);
 	fmt::println_int(int_array[14]);
 
-	debug::debug_assert(int_array[0]  == 0);
-	debug::debug_assert(int_array[1]  == 1);
-	debug::debug_assert(int_array[2]  == 2);
-	debug::debug_assert(int_array[3]  == 3);
-	debug::debug_assert(int_array[4]  == 4);
-	debug::debug_assert(int_array[5]  == 5);
-	debug::debug_assert(int_array[6]  == 6);
-	debug::debug_assert(int_array[7]  == 7);
-	debug::debug_assert(int_array[8]  == 8);
-	debug::debug_assert(int_array[9]  == 9);
-	debug::debug_assert(int_array[10] == 10);
-	debug::debug_assert(int_array[11] == 11);
-	debug::debug_assert(int_array[12] == 12);
-	debug::debug_assert(int_array[13] == 13);
-	debug::debug_assert(int_array[14] == 14);
+	debug::assert(int_array[0]  == 0);
+	debug::assert(int_array[1]  == 1);
+	debug::assert(int_array[2]  == 2);
+	debug::assert(int_array[3]  == 3);
+	debug::assert(int_array[4]  == 4);
+	debug::assert(int_array[5]  == 5);
+	debug::assert(int_array[6]  == 6);
+	debug::assert(int_array[7]  == 7);
+	debug::assert(int_array[8]  == 8);
+	debug::assert(int_array[9]  == 9);
+	debug::assert(int_array[10] == 10);
+	debug::assert(int_array[11] == 11);
+	debug::assert(int_array[12] == 12);
+	debug::assert(int_array[13] == 13);
+	debug::assert(int_array[14] == 14);
 }

@@ -20,12 +20,12 @@ function main() {
 
 	int_value = 0;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 0);
+	debug::assert(int_value == 0);
 
 	int_value = 123456;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value != 123457);
-	debug::debug_assert(int_value == 123456);
+	debug::assert(int_value != 123457);
+	debug::assert(int_value == 123456);
 
 
 	fmt::println_string("");
@@ -33,22 +33,22 @@ function main() {
 
 	int_value = 123456+234234;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 357690);
+	debug::assert(int_value == 357690);
 
 
 	int_value = 123456-234234;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == -110778);
+	debug::assert(int_value == -110778);
 
 
 	int_value = 2342*2342;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 5484964);
+	debug::assert(int_value == 5484964);
 
 
 	int_value = 2342/2342;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 1);
+	debug::assert(int_value == 1);
 
 
 	fmt::println_string("");
@@ -56,22 +56,22 @@ function main() {
 
 	int_value = 234+2342*100;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 234434);
+	debug::assert(int_value == 234434);
 
 
 	int_value = 234+2342/100;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 257);
+	debug::assert(int_value == 257);
 
 
 	int_value = 234+2342/100-100/1;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 157);
+	debug::assert(int_value == 157);
 
 
 	int_value = 123456+123456*10-100*10+10010;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 1367026);
+	debug::assert(int_value == 1367026);
 
 
 	fmt::println_string("");
@@ -81,24 +81,24 @@ function main() {
 
 	int_value = int_value + 10;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 1367036);
+	debug::assert(int_value == 1367036);
 
 	int_value = int_value - 10;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 1367026);
+	debug::assert(int_value == 1367026);
 
 
 	int_value = int_value * 10;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 13670260);
+	debug::assert(int_value == 13670260);
 
 	int_value = int_value / 10;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 1367026);
+	debug::assert(int_value == 1367026);
 
 	int_value = int_value % 10;
 	fmt::println_int(int_value);
-	debug::debug_assert(int_value == 6);
+	debug::assert(int_value == 6);
 
 	/*
 

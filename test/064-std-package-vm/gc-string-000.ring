@@ -46,16 +46,16 @@ function main() {
 
 
     
-    debug::debug_assert(vm::heap_size() - init_heap_size == 88L); // 8*3+16*4
+    debug::assert(vm::heap_size() - init_heap_size == 88L); // 8*3+16*4
     vm::garbage_collect();
-    debug::debug_assert(vm::heap_size() - init_heap_size == 40L); // 16 + 16 + 8
+    debug::assert(vm::heap_size() - init_heap_size == 40L); // 16 + 16 + 8
 
 
     string_value_2 = string_value_0 .. string_value_1;
 
 
-    debug::debug_assert(vm::heap_size() - init_heap_size == 72L); // 16 + 16 + 8 + 32
+    debug::assert(vm::heap_size() - init_heap_size == 72L); // 16 + 16 + 8 + 32
     vm::garbage_collect();
-    debug::debug_assert(vm::heap_size() - init_heap_size == 64L); // 16 + 16 + 32
+    debug::assert(vm::heap_size() - init_heap_size == 64L); // 16 + 16 + 32
 
 }

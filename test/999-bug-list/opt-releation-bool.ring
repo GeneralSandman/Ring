@@ -19,38 +19,38 @@ function main() {
 
 	local_bool_value_0 = false == false;
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 	local_bool_value_0 = true == false;
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == false);
+	debug::assert(local_bool_value_0 == false);
 
 	local_bool_value_0 = false == true;
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == false);
+	debug::assert(local_bool_value_0 == false);
 
 	local_bool_value_0 = true == true;
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 
 	
 
 	local_bool_value_0 = false != false;
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == false);
+	debug::assert(local_bool_value_0 == false);
 
 	local_bool_value_0 = true != false;
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 	local_bool_value_0 = false != true;
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == true);
+	debug::assert(local_bool_value_0 == true);
 
 	local_bool_value_0 = true != true;
 	fmt::println(local_bool_value_0);
-	debug::debug_assert(local_bool_value_0 == false);
+	debug::assert(local_bool_value_0 == false);
 
 
 

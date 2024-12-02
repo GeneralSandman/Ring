@@ -44,11 +44,11 @@ function main() {
 
 	bool_value = false;
 	fmt::println_bool(bool_value);
-	debug::debug_assert(bool_value == false);
+	debug::assert(bool_value == false);
 
 	bool_value = true;
 	fmt::println_bool(bool_value);
-	debug::debug_assert(bool_value == true);
+	debug::assert(bool_value == true);
 
 
 	fmt::println_string("");
@@ -56,11 +56,11 @@ function main() {
 
 	bool_value = not true;
 	fmt::println_bool(bool_value);
-	debug::debug_assert(bool_value == false);
+	debug::assert(bool_value == false);
 
 	bool_value = not false;
 	fmt::println_bool(bool_value);
-	debug::debug_assert(bool_value == true);
+	debug::assert(bool_value == true);
 
 
 	fmt::println_string("");
@@ -68,11 +68,11 @@ function main() {
 
 	bool_value = not not false;
 	fmt::println_bool(bool_value);
-	debug::debug_assert(bool_value == false);
+	debug::assert(bool_value == false);
 
 	bool_value = not not true;
 	fmt::println_bool(bool_value);
-	debug::debug_assert(bool_value == true);
+	debug::assert(bool_value == true);
 
 
 	fmt::println_string("");
@@ -80,11 +80,11 @@ function main() {
 
 	bool_value = not not not true;
 	fmt::println_bool(bool_value);
-	debug::debug_assert(bool_value == false);
+	debug::assert(bool_value == false);
 
 	bool_value = not not not false;
 	fmt::println_bool(bool_value);
-	debug::debug_assert(bool_value == true);
+	debug::assert(bool_value == true);
 
 
 	fmt::println_string("");
@@ -92,10 +92,10 @@ function main() {
 
 	bool_value = not not not not false;
 	fmt::println_bool(bool_value);
-	debug::debug_assert(bool_value == false);
+	debug::assert(bool_value == false);
 
 	bool_value = not not not not true;
 	fmt::println_bool(bool_value);
-	debug::debug_assert(bool_value == true);
+	debug::assert(bool_value == true);
 
 }

@@ -26,7 +26,7 @@ function main() {
     // printf
     var int64 num = 1L;
     for(i = 0; i < len(global_int64_array_0); i++) {
-        debug::debug_assert(global_int64_array_0[i] == num);
+        debug::assert(global_int64_array_0[i] == num);
         num++;
     }
 }

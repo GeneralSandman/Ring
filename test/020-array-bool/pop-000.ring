@@ -21,9 +21,9 @@ function main() {
     fmt::println_int(len(global_bool_array_0));
     fmt::println_int(capacity(global_bool_array_0));
 
-    debug::debug_assert(global_bool_array_0[199] == false);
-    debug::debug_assert(len(global_bool_array_0) == 200);
-    debug::debug_assert(capacity(global_bool_array_0) == 200);
+    debug::assert(global_bool_array_0[199] == false);
+    debug::assert(len(global_bool_array_0) == 200);
+    debug::assert(capacity(global_bool_array_0) == 200);
 
 
     fmt::println_string("\ntest cast 2 ------------------------");
@@ -34,9 +34,9 @@ function main() {
     fmt::println_int(len(global_bool_array_0));
     fmt::println_int(capacity(global_bool_array_0));
 
-    debug::debug_assert(global_bool_value_0 == true);
-    debug::debug_assert(len(global_bool_array_0) == 199);
-    debug::debug_assert(capacity(global_bool_array_0) == 200);
+    debug::assert(global_bool_value_0 == true);
+    debug::assert(len(global_bool_array_0) == 199);
+    debug::assert(capacity(global_bool_array_0) == 200);
 
 
     fmt::println_string("\ntest cast 3 ------------------------");
@@ -47,7 +47,7 @@ function main() {
     fmt::println_int(len(global_bool_array_0));
     fmt::println_int(capacity(global_bool_array_0));
 
-    debug::debug_assert(global_bool_value_0 == false);
-    debug::debug_assert(len(global_bool_array_0) == 198);
-    debug::debug_assert(capacity(global_bool_array_0) == 200);
+    debug::assert(global_bool_value_0 == false);
+    debug::assert(len(global_bool_array_0) == 198);
+    debug::assert(capacity(global_bool_array_0) == 200);
 }

@@ -16,5 +16,5 @@ import {
 function main() {
 	var string string_value;
 	fmt::println_string(string_value);
-	debug::debug_assert(string_value == "");
+	debug::assert(string_value == "");
 }

@@ -35,9 +35,9 @@ function main() {
     fmt::println_bool(local_bool_value_0);
     fmt::println_int(local_int_value_0);
     fmt::println_double(local_double_value_0);
-    debug::debug_assert(local_bool_value_0   == false);
-    debug::debug_assert(local_int_value_0    == 0);
-    debug::debug_assert(local_double_value_0 == 0.0);
+    debug::assert(local_bool_value_0   == false);
+    debug::assert(local_int_value_0    == 0);
+    debug::assert(local_double_value_0 == 0.0);
 
     
     fmt::println_string("\ntest case 2");
@@ -48,9 +48,9 @@ function main() {
     fmt::println_bool(local_bool_value_0);
     fmt::println_int(local_int_value_0);
     fmt::println_double(local_double_value_0);
-    debug::debug_assert(local_bool_value_0   == true);
-    debug::debug_assert(local_int_value_0    == 1);
-    debug::debug_assert(local_double_value_0 == 1.1);
+    debug::assert(local_bool_value_0   == true);
+    debug::assert(local_int_value_0    == 1);
+    debug::assert(local_double_value_0 == 1.1);
 
 
     fmt::println_string("\ntest case 2");
@@ -63,7 +63,7 @@ function main() {
     fmt::println_bool(local_bool_value_0);
     fmt::println_int(local_int_value_0);
     fmt::println_double(local_double_value_0);
-    debug::debug_assert(local_bool_value_0   == true);
-    debug::debug_assert(local_int_value_0    == 123);
-    debug::debug_assert(local_double_value_0 == 567.89);
+    debug::assert(local_bool_value_0   == true);
+    debug::assert(local_int_value_0    == 123);
+    debug::assert(local_double_value_0 == 567.89);
 }

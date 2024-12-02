@@ -18,57 +18,57 @@ function main() {
     fmt::println_string("test case 1--------");
     sum = sum(1L);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 1L);
+    debug::assert(sum == 1L);
 
 
     fmt::println_string("\ntest case 2--------");
     sum = sum(1L, 2L);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 3L);
+    debug::assert(sum == 3L);
 
 
     fmt::println_string("\ntest case 3--------");
     sum = sum(1L, 2L, 3L);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 6L);
+    debug::assert(sum == 6L);
 
 
     fmt::println_string("\ntest case 4--------");
     sum = sum(1L, 2L, 3L, 4L);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 10L);
+    debug::assert(sum == 10L);
 
 
     fmt::println_string("\ntest case 5--------");
     sum = sum(1L, 2L, 3L, 4L, 5L);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 15L);
+    debug::assert(sum == 15L);
 
     fmt::println_string("\ntest case 6--------");
     sum = sum(1L, 2L, 3L, 4L, 5L, 6L);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 21L);
+    debug::assert(sum == 21L);
 
     fmt::println_string("\ntest case 7--------");
     sum = sum(1L, 2L, 3L, 4L, 5L, 6L, 7L);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 28L);
+    debug::assert(sum == 28L);
 
     fmt::println_string("\ntest case 8--------");
     sum = sum(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 36L);
+    debug::assert(sum == 36L);
 
     fmt::println_string("\ntest case 9--------");
     sum = sum(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 45L);
+    debug::assert(sum == 45L);
 
 
     fmt::println_string("\ntest case 10--------");
     sum = sum(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 55L);
+    debug::assert(sum == 55L);
 
 }
 

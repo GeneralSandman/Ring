@@ -50,10 +50,10 @@ function use_closure() -> (FuncType) {
 	fmt::printf("[user_closure] level0_local_int_value_1={}\n", level0_local_int_value_1);
 	fmt::printf("[user_closure] level0_local_int_value_2={}\n", level0_local_int_value_2);
 	fmt::printf("[user_closure] level0_local_int_value_3={}\n", level0_local_int_value_3);
-	debug::debug_assert(level0_local_int_value_0 == 0);
-	debug::debug_assert(level0_local_int_value_1 == 1);
-	debug::debug_assert(level0_local_int_value_2 == 2);
-	debug::debug_assert(level0_local_int_value_3 == 3);
+	debug::assert(level0_local_int_value_0 == 0);
+	debug::assert(level0_local_int_value_1 == 1);
+	debug::assert(level0_local_int_value_2 == 2);
+	debug::assert(level0_local_int_value_3 == 3);
 
 
 	var FuncType func_var;
@@ -68,12 +68,12 @@ function use_closure() -> (FuncType) {
 		var int level1_local_int_value_1 = 11;
 		fmt::printf("[+closure] level1_local_int_value_0={}\n", level1_local_int_value_0);
 		fmt::printf("[+closure] level1_local_int_value_1={}\n", level1_local_int_value_1);
-		debug::debug_assert(level0_local_int_value_0 == 1);
-		debug::debug_assert(level0_local_int_value_1 == 2);
-		debug::debug_assert(level0_local_int_value_2 == 2);
-		debug::debug_assert(level0_local_int_value_3 == 3);
-		debug::debug_assert(level1_local_int_value_0 == 10);
-		debug::debug_assert(level1_local_int_value_1 == 11);
+		debug::assert(level0_local_int_value_0 == 1);
+		debug::assert(level0_local_int_value_1 == 2);
+		debug::assert(level0_local_int_value_2 == 2);
+		debug::assert(level0_local_int_value_3 == 3);
+		debug::assert(level1_local_int_value_0 == 10);
+		debug::assert(level1_local_int_value_1 == 11);
 		
 		function() {
 			level0_local_int_value_2 ++;
@@ -83,12 +83,12 @@ function use_closure() -> (FuncType) {
 			level1_local_int_value_1 += 2;
 			fmt::printf("[++closure] level1_local_int_value_0={}\n", level1_local_int_value_0);
 			fmt::printf("[++closure] level1_local_int_value_1={}\n", level1_local_int_value_1);
-			debug::debug_assert(level0_local_int_value_0 == 1);
-			debug::debug_assert(level0_local_int_value_1 == 2);
-			debug::debug_assert(level0_local_int_value_2 == 3);
-			debug::debug_assert(level0_local_int_value_3 == 4);
-			debug::debug_assert(level1_local_int_value_0 == 12);
-			debug::debug_assert(level1_local_int_value_1 == 13);
+			debug::assert(level0_local_int_value_0 == 1);
+			debug::assert(level0_local_int_value_1 == 2);
+			debug::assert(level0_local_int_value_2 == 3);
+			debug::assert(level0_local_int_value_3 == 4);
+			debug::assert(level1_local_int_value_0 == 12);
+			debug::assert(level1_local_int_value_1 == 13);
 		}();
 		fmt::printf("[+closure] level0_local_int_value_0={}\n", level0_local_int_value_0);
 		fmt::printf("[+closure] level0_local_int_value_1={}\n", level0_local_int_value_1);
@@ -96,12 +96,12 @@ function use_closure() -> (FuncType) {
 		fmt::printf("[+closure] level0_local_int_value_3={}\n", level0_local_int_value_3);
 		fmt::printf("[+closure] level1_local_int_value_0={}\n", level1_local_int_value_0);
 		fmt::printf("[+closure] level1_local_int_value_1={}\n", level1_local_int_value_1);
-		debug::debug_assert(level0_local_int_value_0 == 1);
-		debug::debug_assert(level0_local_int_value_1 == 2);
-		debug::debug_assert(level0_local_int_value_2 == 3);
-		debug::debug_assert(level0_local_int_value_3 == 4);
-		debug::debug_assert(level1_local_int_value_0 == 12);
-		debug::debug_assert(level1_local_int_value_1 == 13);
+		debug::assert(level0_local_int_value_0 == 1);
+		debug::assert(level0_local_int_value_1 == 2);
+		debug::assert(level0_local_int_value_2 == 3);
+		debug::assert(level0_local_int_value_3 == 4);
+		debug::assert(level1_local_int_value_0 == 12);
+		debug::assert(level1_local_int_value_1 == 13);
 	};
 	
 	func_var();
@@ -110,10 +110,10 @@ function use_closure() -> (FuncType) {
 	fmt::printf("[user_closure] level0_local_int_value_1={}\n", level0_local_int_value_1);
 	fmt::printf("[user_closure] level0_local_int_value_2={}\n", level0_local_int_value_2);
 	fmt::printf("[user_closure] level0_local_int_value_3={}\n", level0_local_int_value_3);
-	debug::debug_assert(level0_local_int_value_0 == 1);
-	debug::debug_assert(level0_local_int_value_1 == 2);
-	debug::debug_assert(level0_local_int_value_2 == 3);
-	debug::debug_assert(level0_local_int_value_3 == 4);
+	debug::assert(level0_local_int_value_0 == 1);
+	debug::assert(level0_local_int_value_1 == 2);
+	debug::assert(level0_local_int_value_2 == 3);
+	debug::assert(level0_local_int_value_3 == 4);
 
 	return func_var;
 

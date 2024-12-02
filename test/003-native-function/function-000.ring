@@ -31,17 +31,17 @@ function main() {
 	fmt::println_string(string_value);
 
 
-	debug::debug_assert(true == true);
-	debug::debug_assert(true != false);
+	debug::assert(true == true);
+	debug::assert(true != false);
 
-	debug::debug_assert(1 == 1);
-	debug::debug_assert(1 != 2);
+	debug::assert(1 == 1);
+	debug::assert(1 != 2);
 
-	debug::debug_assert(1.1 == 1.1);
-	debug::debug_assert(1.1 != 1.2);
+	debug::assert(1.1 == 1.1);
+	debug::assert(1.1 != 1.2);
 
-	debug::debug_assert("hello world" == "hello world");
-	debug::debug_assert("hello world" != "hello world!");
+	debug::assert("hello world" == "hello world");
+	debug::assert("hello world" != "hello world!");
 
 
 	// exit(0);

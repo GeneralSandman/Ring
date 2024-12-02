@@ -20,12 +20,12 @@ function main() {
 	fmt::println_bool(bool_value_4);
 	fmt::println_bool(bool_value_5);
 	fmt::println_bool(bool_value_6);
-	debug::debug_assert(bool_value_1 == true);
-	debug::debug_assert(bool_value_2 == true);
-	debug::debug_assert(bool_value_3 == true);
-	debug::debug_assert(bool_value_4 == true);
-	debug::debug_assert(bool_value_5 == true);
-	debug::debug_assert(bool_value_6 == true);
+	debug::assert(bool_value_1 == true);
+	debug::assert(bool_value_2 == true);
+	debug::assert(bool_value_3 == true);
+	debug::assert(bool_value_4 == true);
+	debug::assert(bool_value_5 == true);
+	debug::assert(bool_value_6 == true);
 
 
 
@@ -43,12 +43,12 @@ function main() {
 	fmt::println_int(int_value_4);
 	fmt::println_int(int_value_5);
 	fmt::println_int(int_value_6);
-	debug::debug_assert(int_value_1 == 1);
-	debug::debug_assert(int_value_2 == 2);
-	debug::debug_assert(int_value_3 == 3);
-	debug::debug_assert(int_value_4 == 4);
-	debug::debug_assert(int_value_5 == 5);
-	debug::debug_assert(int_value_6 == 6);
+	debug::assert(int_value_1 == 1);
+	debug::assert(int_value_2 == 2);
+	debug::assert(int_value_3 == 3);
+	debug::assert(int_value_4 == 4);
+	debug::assert(int_value_5 == 5);
+	debug::assert(int_value_6 == 6);
 
 
 
@@ -66,12 +66,12 @@ function main() {
 	fmt::println_double(double_value_4);
 	fmt::println_double(double_value_5);
 	fmt::println_double(double_value_6);
-	debug::debug_assert(double_value_1 == 1.1);
-	debug::debug_assert(double_value_2 == 2.2);
-	debug::debug_assert(double_value_3 == 3.3);
-	debug::debug_assert(double_value_4 == 4.4);
-	debug::debug_assert(double_value_5 == 5.5);
-	debug::debug_assert(double_value_6 == 6.6);
+	debug::assert(double_value_1 == 1.1);
+	debug::assert(double_value_2 == 2.2);
+	debug::assert(double_value_3 == 3.3);
+	debug::assert(double_value_4 == 4.4);
+	debug::assert(double_value_5 == 5.5);
+	debug::assert(double_value_6 == 6.6);
 
 
 

@@ -55,9 +55,9 @@ function main() {
 
 	fmt::println_string("finish for====");
 	fmt::println_int(count);
-	debug::debug_assert(count == 1048576);
+	debug::assert(count == 1048576);
 	fmt::println_int(sum);
-	debug::debug_assert(sum == 26214400);
+	debug::assert(sum == 26214400);
 	fmt::println_string("finish for====");
 
 
@@ -101,9 +101,9 @@ function main() {
 
 	fmt::println_string("finish for====");
 	fmt::println_int(count);
-	debug::debug_assert(count == 786432);
+	debug::assert(count == 786432);
 	fmt::println_int(sum);
-	debug::debug_assert(sum == 786433);
+	debug::assert(sum == 786433);
 	fmt::println_string("finish for====");
 
 
@@ -149,9 +149,9 @@ function main() {
 
 	fmt::println_string("finish for====");
 	fmt::println_int(count);
-	debug::debug_assert(count == 0);
+	debug::assert(count == 0);
 	fmt::println_int(sum);
-	debug::debug_assert(sum == 0);
+	debug::assert(sum == 0);
 	fmt::println_string("finish for====");
 
 
@@ -192,9 +192,9 @@ function main() {
 
 	fmt::println_string("finish for====");
 	fmt::println_int(count);
-	debug::debug_assert(count == 0);
+	debug::assert(count == 0);
 	fmt::println_int(sum);
-	debug::debug_assert(sum == 0);
+	debug::assert(sum == 0);
 	fmt::println_string("finish for====");
 
 }

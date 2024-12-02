@@ -14,14 +14,14 @@ function main() {
     global_string_array_0 = new string[1,2,3,4,5,6,7,8];
 
     fmt::println_string("test cast 1 ------------------------");
-    debug::debug_assert(len(global_string_array_0) == 1);
-    debug::debug_assert(len(global_string_array_0[0]) == 2);
-    debug::debug_assert(len(global_string_array_0[0,0]) == 3);
-    debug::debug_assert(len(global_string_array_0[0,0,0]) == 4);
-    debug::debug_assert(len(global_string_array_0[0,0,0,0]) == 5);
-    debug::debug_assert(len(global_string_array_0[0,0,0,0,0]) == 6);
-    debug::debug_assert(len(global_string_array_0[0,0,0,0,0,0]) == 7);
-    debug::debug_assert(len(global_string_array_0[0,0,0,0,0,0,0]) == 8);
+    debug::assert(len(global_string_array_0) == 1);
+    debug::assert(len(global_string_array_0[0]) == 2);
+    debug::assert(len(global_string_array_0[0,0]) == 3);
+    debug::assert(len(global_string_array_0[0,0,0]) == 4);
+    debug::assert(len(global_string_array_0[0,0,0,0]) == 5);
+    debug::assert(len(global_string_array_0[0,0,0,0,0]) == 6);
+    debug::assert(len(global_string_array_0[0,0,0,0,0,0]) == 7);
+    debug::assert(len(global_string_array_0[0,0,0,0,0,0,0]) == 8);
     
 
     var int a;
@@ -55,15 +55,15 @@ function main() {
         }
     }
 
-    debug::debug_assert(a == 1);
-    debug::debug_assert(b == 2);
-    debug::debug_assert(c == 3);
-    debug::debug_assert(d == 4);
-    debug::debug_assert(e == 5);
-    debug::debug_assert(f == 6);
-    debug::debug_assert(g == 7);
-    debug::debug_assert(h == 8);
-    debug::debug_assert(num == 40320);
+    debug::assert(a == 1);
+    debug::assert(b == 2);
+    debug::assert(c == 3);
+    debug::assert(d == 4);
+    debug::assert(e == 5);
+    debug::assert(f == 6);
+    debug::assert(g == 7);
+    debug::assert(h == 8);
+    debug::assert(num == 40320);
 
 
 
@@ -91,6 +91,6 @@ function main() {
         }
     }
 
-    debug::debug_assert(num == 40320);
+    debug::assert(num == 40320);
 
 }

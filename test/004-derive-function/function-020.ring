@@ -66,31 +66,31 @@ function main() {
 
 
     fmt::println_string("\ntest case 3");
-    debug::debug_assert(fibonacci_1(1) == fibonacci_2(1));
-    debug::debug_assert(fibonacci_1(2) == fibonacci_2(2));
-    debug::debug_assert(fibonacci_1(3) == fibonacci_2(3));
-    debug::debug_assert(fibonacci_1(4) == fibonacci_2(4));
-    debug::debug_assert(fibonacci_1(5) == fibonacci_2(5));
-    debug::debug_assert(fibonacci_1(6) == fibonacci_2(6));
-    debug::debug_assert(fibonacci_1(7) == fibonacci_2(7));
-    debug::debug_assert(fibonacci_1(8) == fibonacci_2(8));
-    debug::debug_assert(fibonacci_1(9) == fibonacci_2(9));
-    debug::debug_assert(fibonacci_1(10) == fibonacci_2(10));
-    debug::debug_assert(fibonacci_1(11) == fibonacci_2(11));
-    debug::debug_assert(fibonacci_1(12) == fibonacci_2(12));
-    debug::debug_assert(fibonacci_1(13) == fibonacci_2(13));
-    debug::debug_assert(fibonacci_1(14) == fibonacci_2(14));
-    debug::debug_assert(fibonacci_1(15) == fibonacci_2(15));
-    debug::debug_assert(fibonacci_1(16) == fibonacci_2(16));
-    debug::debug_assert(fibonacci_1(17) == fibonacci_2(17));
-    debug::debug_assert(fibonacci_1(18) == fibonacci_2(18));
-    debug::debug_assert(fibonacci_1(19) == fibonacci_2(19));
-    debug::debug_assert(fibonacci_1(20) == fibonacci_2(20));
-    debug::debug_assert(fibonacci_1(21) == fibonacci_2(21));
-    debug::debug_assert(fibonacci_1(22) == fibonacci_2(22));
-    debug::debug_assert(fibonacci_1(23) == fibonacci_2(23));
-    debug::debug_assert(fibonacci_1(24) == fibonacci_2(24));
-    debug::debug_assert(fibonacci_1(25) == fibonacci_2(25));
+    debug::assert(fibonacci_1(1) == fibonacci_2(1));
+    debug::assert(fibonacci_1(2) == fibonacci_2(2));
+    debug::assert(fibonacci_1(3) == fibonacci_2(3));
+    debug::assert(fibonacci_1(4) == fibonacci_2(4));
+    debug::assert(fibonacci_1(5) == fibonacci_2(5));
+    debug::assert(fibonacci_1(6) == fibonacci_2(6));
+    debug::assert(fibonacci_1(7) == fibonacci_2(7));
+    debug::assert(fibonacci_1(8) == fibonacci_2(8));
+    debug::assert(fibonacci_1(9) == fibonacci_2(9));
+    debug::assert(fibonacci_1(10) == fibonacci_2(10));
+    debug::assert(fibonacci_1(11) == fibonacci_2(11));
+    debug::assert(fibonacci_1(12) == fibonacci_2(12));
+    debug::assert(fibonacci_1(13) == fibonacci_2(13));
+    debug::assert(fibonacci_1(14) == fibonacci_2(14));
+    debug::assert(fibonacci_1(15) == fibonacci_2(15));
+    debug::assert(fibonacci_1(16) == fibonacci_2(16));
+    debug::assert(fibonacci_1(17) == fibonacci_2(17));
+    debug::assert(fibonacci_1(18) == fibonacci_2(18));
+    debug::assert(fibonacci_1(19) == fibonacci_2(19));
+    debug::assert(fibonacci_1(20) == fibonacci_2(20));
+    debug::assert(fibonacci_1(21) == fibonacci_2(21));
+    debug::assert(fibonacci_1(22) == fibonacci_2(22));
+    debug::assert(fibonacci_1(23) == fibonacci_2(23));
+    debug::assert(fibonacci_1(24) == fibonacci_2(24));
+    debug::assert(fibonacci_1(25) == fibonacci_2(25));
 
 
 }

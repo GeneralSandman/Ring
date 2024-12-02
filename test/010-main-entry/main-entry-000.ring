@@ -32,11 +32,11 @@ function main() {
         
     local_int_value_1, local_int_value_2, local_int_value_3, local_int_value_4 = test(1, 2);
     
-    debug::debug_assert(local_int_value_1 == 1);
-    debug::debug_assert(local_int_value_2 == 2);
-    debug::debug_assert(local_int_value_3 == 3);
-    debug::debug_assert(local_int_value_4 == 4);
+    debug::assert(local_int_value_1 == 1);
+    debug::assert(local_int_value_2 == 2);
+    debug::assert(local_int_value_3 == 3);
+    debug::assert(local_int_value_4 == 4);
     
     local_int_value_1+=1;
-    debug::debug_assert(local_int_value_1 == 2);
+    debug::assert(local_int_value_1 == 2);
 }

@@ -27,10 +27,10 @@ function main() {
     };
 
     fmt::println_string("finish for====");
-    debug::debug_assert(count == 10 * 6);
+    debug::assert(count == 10 * 6);
     fmt::println_int(count);
-    debug::debug_assert(int_value_1 == 10);
-    debug::debug_assert(int_value_2 == 5);
+    debug::assert(int_value_1 == 10);
+    debug::assert(int_value_2 == 5);
     fmt::println_string("finish for====");
 
 

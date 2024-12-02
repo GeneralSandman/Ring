@@ -49,19 +49,19 @@ function main() {
 	var int local_int_value_1, local_int_value_2                    = get_next_global_count_2();
 	var int local_int_value_3, local_int_value_4, local_int_value_5 = get_next_global_count_3();
 
-	debug::debug_assert(global_int_value_0 == 0);
-	debug::debug_assert(global_int_value_1 == 1);
-	debug::debug_assert(global_int_value_2 == 2);
-	debug::debug_assert(global_int_value_3 == 3);
-	debug::debug_assert(global_int_value_4 == 4);
-	debug::debug_assert(global_int_value_5 == 5);
+	debug::assert(global_int_value_0 == 0);
+	debug::assert(global_int_value_1 == 1);
+	debug::assert(global_int_value_2 == 2);
+	debug::assert(global_int_value_3 == 3);
+	debug::assert(global_int_value_4 == 4);
+	debug::assert(global_int_value_5 == 5);
 
-	debug::debug_assert(local_int_value_0 == 6);
-	debug::debug_assert(local_int_value_1 == 7);
-	debug::debug_assert(local_int_value_2 == 8);
-	debug::debug_assert(local_int_value_3 == 9);
-	debug::debug_assert(local_int_value_4 == 10);
-	debug::debug_assert(local_int_value_5 == 11);
+	debug::assert(local_int_value_0 == 6);
+	debug::assert(local_int_value_1 == 7);
+	debug::assert(local_int_value_2 == 8);
+	debug::assert(local_int_value_3 == 9);
+	debug::assert(local_int_value_4 == 10);
+	debug::assert(local_int_value_5 == 11);
 
 
 }

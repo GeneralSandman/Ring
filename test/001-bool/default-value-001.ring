@@ -24,11 +24,11 @@ function main() {
 	fmt::println_bool(bool_value_4);
 	fmt::println_bool(bool_value_5);
 	fmt::println_bool(bool_value_6);
-	debug::debug_assert(bool_value_1 == false);
-	debug::debug_assert(bool_value_2 == false);
-	debug::debug_assert(bool_value_3 == false);
-	debug::debug_assert(bool_value_4 == false);
-	debug::debug_assert(bool_value_5 == false);
-	debug::debug_assert(bool_value_6 == false);
+	debug::assert(bool_value_1 == false);
+	debug::assert(bool_value_2 == false);
+	debug::assert(bool_value_3 == false);
+	debug::assert(bool_value_4 == false);
+	debug::assert(bool_value_5 == false);
+	debug::assert(bool_value_6 == false);
 
 }

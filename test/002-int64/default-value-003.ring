@@ -19,7 +19,7 @@ function main() {
 
 	fmt::println_int64(int64_value_1);
 	fmt::println_int64(int64_value_2);
-	debug::debug_assert(int64_value_1 == 1L);
-	debug::debug_assert(int64_value_2 == 2L);
+	debug::assert(int64_value_1 == 1L);
+	debug::assert(int64_value_2 == 2L);
 
 }

@@ -18,57 +18,57 @@ function main() {
     fmt::println_string("test case 1--------");
     sum = sum(1);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 1);
+    debug::assert(sum == 1);
 
 
     fmt::println_string("\ntest case 2--------");
     sum = sum(1, 2);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 3);
+    debug::assert(sum == 3);
 
 
     fmt::println_string("\ntest case 3--------");
     sum = sum(1, 2, 3);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 6);
+    debug::assert(sum == 6);
 
 
     fmt::println_string("\ntest case 4--------");
     sum = sum(1, 2, 3, 4);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 10);
+    debug::assert(sum == 10);
 
 
     fmt::println_string("\ntest case 5--------");
     sum = sum(1, 2, 3, 4, 5);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 15);
+    debug::assert(sum == 15);
 
     fmt::println_string("\ntest case 6--------");
     sum = sum(1, 2, 3, 4, 5, 6);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 21);
+    debug::assert(sum == 21);
 
     fmt::println_string("\ntest case 7--------");
     sum = sum(1, 2, 3, 4, 5, 6, 7);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 28);
+    debug::assert(sum == 28);
 
     fmt::println_string("\ntest case 8--------");
     sum = sum(1, 2, 3, 4, 5, 6, 7, 8);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 36);
+    debug::assert(sum == 36);
 
     fmt::println_string("\ntest case 9--------");
     sum = sum(1, 2, 3, 4, 5, 6, 7, 8, 9);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 45);
+    debug::assert(sum == 45);
 
 
     fmt::println_string("\ntest case 10--------");
     sum = sum(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     fmt::printf("sum = {}\n", sum);
-    debug::debug_assert(sum == 55);
+    debug::assert(sum == 55);
 
 }
 

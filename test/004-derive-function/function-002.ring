@@ -17,10 +17,10 @@ function func_use_local_variable() {
     fmt::println_int(int_value_local);
     fmt::println_int(int_value_local);
     fmt::println_int(int_value_local);
-    debug::debug_assert(int_value_local == 123);
-    debug::debug_assert(int_value_local == 123);
-    debug::debug_assert(int_value_local == 123);
-    debug::debug_assert(int_value_local == 123);
+    debug::assert(int_value_local == 123);
+    debug::assert(int_value_local == 123);
+    debug::assert(int_value_local == 123);
+    debug::assert(int_value_local == 123);
 }
 
 // --------------
@@ -33,10 +33,10 @@ function main() {
     fmt::println_int(int_value_global);
     fmt::println_int(int_value_global);
     fmt::println_int(int_value_global);
-    debug::debug_assert(int_value_global == 2);
-    debug::debug_assert(int_value_global == 2);
-    debug::debug_assert(int_value_global == 2);
-    debug::debug_assert(int_value_global == 2);
+    debug::assert(int_value_global == 2);
+    debug::assert(int_value_global == 2);
+    debug::assert(int_value_global == 2);
+    debug::assert(int_value_global == 2);
     fmt::println_string("");
 
     func_use_local_variable();
@@ -46,10 +46,10 @@ function main() {
     fmt::println_int(int_value_global);
     fmt::println_int(int_value_global);
     fmt::println_int(int_value_global);
-    debug::debug_assert(int_value_global == 2);
-    debug::debug_assert(int_value_global == 2);
-    debug::debug_assert(int_value_global == 2);
-    debug::debug_assert(int_value_global == 2);
+    debug::assert(int_value_global == 2);
+    debug::assert(int_value_global == 2);
+    debug::assert(int_value_global == 2);
+    debug::assert(int_value_global == 2);
     fmt::println_string("");
 
 

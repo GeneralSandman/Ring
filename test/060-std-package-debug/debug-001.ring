@@ -12,5 +12,5 @@ import {
 
 @main
 function main() {
-	debug::debug_assert(false);
+	debug::assert(false);
 }

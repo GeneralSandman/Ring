@@ -33,7 +33,7 @@ function main() {
 
 	fmt::println_string("---");
 	fmt::println_int(num);
-	debug::debug_assert(num == 3*3*3);
+	debug::assert(num == 3*3*3);
 	fmt::println_string("---");
 
 
@@ -48,7 +48,7 @@ function main() {
 
 	fmt::println_string("---");
 	fmt::println_int(num);
-	debug::debug_assert(num == 11*120*13);
+	debug::assert(num == 11*120*13);
 	fmt::println_string("---");
 
 }

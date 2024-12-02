@@ -17,7 +17,7 @@ function main() {
   var int index = 0;
   for(index = 0; index < 20; index = index + 1) {
 	  fmt::println_string(global_string_array_0[index]);
-	  debug::debug_assert(global_string_array_0[index] == "");
+	  debug::assert(global_string_array_0[index] == "");
   }
 
 
@@ -44,7 +44,7 @@ function main() {
   global_string_array_0[19] = "3.1415++--";
   for(index = 0; index < 20; index = index + 1) {
 	  fmt::println_string(global_string_array_0[index]);
-	  debug::debug_assert(global_string_array_0[index] == "3.1415++--");
+	  debug::assert(global_string_array_0[index] == "3.1415++--");
   }
 
 }

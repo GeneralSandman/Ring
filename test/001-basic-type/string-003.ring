@@ -40,28 +40,28 @@ function main() {
 
     if(string_value_1 == string_value_2) {
         fmt::println_string("string_value_1 == string_value_2");
-        debug::debug_assert(true);   
+        debug::assert(true);   
     } else {
         fmt::println_string("string_value_1 != string_value_2");
-        debug::debug_assert(false);   
+        debug::assert(false);   
     }
 
 
 
     if("a" == "b") {
         fmt::println_string("a == b");
-        debug::debug_assert(false);   
+        debug::assert(false);   
     } else {
         fmt::println_string("a != b");
-        debug::debug_assert(true);   
+        debug::assert(true);   
     }
 
     if("ab" == "ab") {
         fmt::println_string("ab == ab");
-        debug::debug_assert(true);   
+        debug::assert(true);   
     } else {
         fmt::println_string("ab != ab");
-        debug::debug_assert(false);   
+        debug::assert(false);   
     }
 
 

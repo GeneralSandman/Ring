@@ -59,9 +59,9 @@ function main() {
 
 	global_job1_array_0 = test_func(global_job1_array_0);
 
-	debug::debug_assert(len(global_job1_array_0) == 2);
-	debug::debug_assert(len(global_job1_array_0[0]) == 10);
-	debug::debug_assert(len(global_job1_array_0[1]) == 10);
+	debug::assert(len(global_job1_array_0) == 2);
+	debug::assert(len(global_job1_array_0[0]) == 10);
+	debug::assert(len(global_job1_array_0[1]) == 10);
 
 
 	var int i;
@@ -83,5 +83,5 @@ function main() {
         }
     }
 
-    debug::debug_assert(num == 20);
+    debug::assert(num == 20);
 }

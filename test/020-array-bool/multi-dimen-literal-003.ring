@@ -43,9 +43,9 @@ function main() {
     };
 
 
-    debug::debug_assert(len(global_bool_array_0)      == 4);
-    debug::debug_assert(len(global_bool_array_0[0])   == 4);
-    debug::debug_assert(len(global_bool_array_0[0,0]) == 4);
+    debug::assert(len(global_bool_array_0)      == 4);
+    debug::assert(len(global_bool_array_0[0])   == 4);
+    debug::assert(len(global_bool_array_0[0,0]) == 4);
 
     var int i;
     var int j;
@@ -67,6 +67,6 @@ function main() {
         }
     }
 
-    debug::debug_assert(num == 64);
+    debug::assert(num == 64);
 
 }

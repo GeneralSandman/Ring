@@ -14,19 +14,19 @@ function main() {
 	// -------
 	local_int_value_0 = 1;
 	fmt::println_int(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == 1);
+	debug::assert(local_int_value_0 == 1);
 
 	local_int_value_0++;
 	fmt::println_int(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == 2);
+	debug::assert(local_int_value_0 == 2);
 
 	local_int_value_0++;
 	fmt::println_int(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == 3);
+	debug::assert(local_int_value_0 == 3);
 
 	local_int_value_0++;
 	fmt::println_int(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == 4);
+	debug::assert(local_int_value_0 == 4);
 
 	fmt::println_string("");
 
@@ -34,19 +34,19 @@ function main() {
 	// -------
 	local_int_value_0 = 10;
 	fmt::println_int(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == 10);
+	debug::assert(local_int_value_0 == 10);
 
 	local_int_value_0--;
 	fmt::println_int(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == 9);
+	debug::assert(local_int_value_0 == 9);
 
 	local_int_value_0--;
 	fmt::println_int(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == 8);
+	debug::assert(local_int_value_0 == 8);
 
 	local_int_value_0--;
 	fmt::println_int(local_int_value_0);
-	debug::debug_assert(local_int_value_0 == 7);
+	debug::assert(local_int_value_0 == 7);
 
 	fmt::println_string("");
 
