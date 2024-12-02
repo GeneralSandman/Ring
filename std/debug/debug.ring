@@ -11,7 +11,7 @@ import {
 }
 
 @native
-function debug_assert(var bool bool_value);
+function assert(var bool bool_value);
 
 
 @native

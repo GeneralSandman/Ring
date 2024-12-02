@@ -56,7 +56,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         (char*)"debug",
         RING_PACKAGE_STD_PATH_DEBUG,
         std::vector<StdPackageNativeFunction>{
-            {(char*)"debug_assert", std_lib_debug_debug_assert, 1, 0},
+            {(char*)"assert", std_lib_debug_assert, 1, 0},
             {(char*)"print_call_stack", std_lib_debug_print_call_stack, 0, 0},
         },
     },
@@ -837,7 +837,7 @@ RVM_Value std_lib_fmt_sprintf(Ring_VirtualMachine* rvm, unsigned int arg_count, 
  * Function: debug_assert
  * Type: @native
  */
-RVM_Value std_lib_debug_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+RVM_Value std_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_BOOL);
 
