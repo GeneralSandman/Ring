@@ -131,105 +131,7 @@ var (
 	TEST_DETAIL_SUMMARY           = "./test/ring-测试用例表.md.raw"
 	TEST_PATH                     = "./test"
 
-	TEST_RESULT = make([]RingTestResult, 0)
 )
-
-func isNotTestFile(filePath string) bool {
-	for _, notTestFile := range NOT_TEST_FILES {
-		if filePath == notTestFile {
-			return true
-		}
-	}
-	return false
-}
-
-func autoTestAction(testCase RingTestCase, printDetail bool) *RingTestResult {
-	model := testCase.Model
-	sourceCodeFile := "./" + testCase.FileName
-	expectResultFile := "./" + sourceCodeFile + ".result"
-	runResultFileTmp := "./" + sourceCodeFile + ".result.tmp"
-	dmp := diffmatchpatch.New()
-
-	expectOutput, err := os.ReadFile(expectResultFile)
-	if err != nil {
-		return &RingTestResult{
-			RingTestCase: testCase,
-			Status:       "FAILED",
-			Detail:       fmt.Sprintf("read expect result Error:%s", err.Error()),
-		}
-	}
-
-	cmd := exec.Command(TEST_RING_BIN, TEST_RING_OPTION, TEST_RING_COMMAND, sourceCodeFile)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return &RingTestResult{
-			RingTestCase: testCase,
-			Status:       "FAILED",
-			Detail:       fmt.Sprintf("run test case Error:%s Output:%s", err.Error(), string(output)),
-		}
-	}
-
-	diffs := dmp.DiffMain(string(expectOutput), string(output), false)
-	diffResult := dmp.DiffPrettyText(diffs)
-
-	if string(diffResult) == string(expectOutput) {
-		if printDetail {
-			fmt.Printf("%-25s %-80s %-80s [%s]\n", model, sourceCodeFile, runResultFileTmp, "PASS")
-		}
-		return &RingTestResult{
-			RingTestCase: testCase,
-			Status:       "PASS",
-			Detail:       "",
-		}
-	} else {
-		if printDetail {
-			fmt.Printf("%-25s %-80s %-80s [%s]\n", model, sourceCodeFile, runResultFileTmp, "FAILED")
-		}
-		detail := fmt.Sprintf("<<<<<<<<<<<<<<<<<<<<\n%s<<<<<<<<<<<<<<<<<<<<\n>>>>>>>>>>>>>>>>>>>>\n%s>>>>>>>>>>>>>>>>>>>>\n====================\n%s====================\n", string(expectOutput), string(output), diffResult)
-
-		return &RingTestResult{
-			RingTestCase: testCase,
-			Status:       "FAILED",
-			Detail:       fmt.Sprintf("diff expect&result Diff:\n%s", detail),
-		}
-	}
-
-}
-
-type RingTestCase struct {
-	Model    string
-	FileName string
-}
-
-type RingTestResult struct {
-	RingTestCase RingTestCase
-	Status       string // init not_test pass
-	Detail       string
-}
-
-func getAllTestCases() []RingTestCase {
-	var result []RingTestCase
-
-	for _, model := range TEST_MODELS {
-		sourceFilePath := filepath.Join(TEST_PATH, model)
-		files, _ := os.ReadDir(sourceFilePath)
-		for _, file := range files {
-			if filepath.Ext(file.Name()) == ".ring" {
-
-				filePath := filepath.Join(TEST_PATH, model, file.Name())
-				if !isNotTestFile(filePath) {
-					result = append(result,
-						RingTestCase{
-							Model:    model,
-							FileName: filePath,
-						})
-				}
-			}
-		}
-	}
-
-	return result
-}
 
 func main() {
 	var wg sync.WaitGroup
@@ -246,6 +148,7 @@ func main() {
 	allTestCases := getAllTestCases()
 
 	allNum := len(allTestCases) * TEST_LOOP_NUM
+
 	progressBar := uiprogress.
 		AddBar(allNum).
 		AppendCompleted().
@@ -271,6 +174,7 @@ func main() {
 
 				wg.Add(1)
 				maxConcurrentChannel <- struct{}{}
+				
 				testResult := autoTestAction(testCase, displayMode)
 				testCaseResultMap.Store(testCase.FileName, testResult)
 			}(testCase)
@@ -283,10 +187,10 @@ func main() {
 	var failedResults []*RingTestResult
 	testCaseResultMap.Range(func(key, value interface{}) bool {
 		testResult := value.(*RingTestResult)
-		if testResult.Status == "FAILED" {
+		if testResult.Status == Status_Failed {
 			failNum++
 			failedResults = append(failedResults, testResult)
-		} else if testResult.Status == "PASS" {
+		} else if testResult.Status == Status_Pass {
 			succNum++
 		}
 		return true
@@ -323,6 +227,92 @@ func main() {
 	}
 }
 
+func autoTestAction(testCase RingTestCase, printDetail bool) *RingTestResult {
+	model := testCase.Model
+	sourceCodeFile := "./" + testCase.FileName
+	expectResultFile := "./" + sourceCodeFile + ".result"
+	runResultFileTmp := "./" + sourceCodeFile + ".result.tmp"
+	dmp := diffmatchpatch.New()
+
+	expectOutput, err := os.ReadFile(expectResultFile)
+	if err != nil {
+		return &RingTestResult{
+			RingTestCase: testCase,
+			Status:       Status_Failed,
+			Detail:       fmt.Sprintf("read expect result Error:%s", err.Error()),
+		}
+	}
+
+	cmd := exec.Command(TEST_RING_BIN, TEST_RING_OPTION, TEST_RING_COMMAND, sourceCodeFile)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return &RingTestResult{
+			RingTestCase: testCase,
+			Status:       Status_Failed,
+			Detail:       fmt.Sprintf("run test case Error:%s Output:%s", err.Error(), string(output)),
+		}
+	}
+
+	diffs := dmp.DiffMain(string(expectOutput), string(output), false)
+	diffResult := dmp.DiffPrettyText(diffs)
+
+	if string(diffResult) == string(expectOutput) {
+		if printDetail {
+			fmt.Printf("%-25s %-80s %-80s [%s]\n", model, sourceCodeFile, runResultFileTmp, Status_Pass)
+		}
+		return &RingTestResult{
+			RingTestCase: testCase,
+			Status:       Status_Pass,
+			Detail:       "",
+		}
+	} else {
+		if printDetail {
+			fmt.Printf("%-25s %-80s %-80s [%s]\n", model, sourceCodeFile, runResultFileTmp, Status_Failed)
+		}
+		detail := fmt.Sprintf("<<<<<<<<<<<<<<<<<<<<\n%s<<<<<<<<<<<<<<<<<<<<\n>>>>>>>>>>>>>>>>>>>>\n%s>>>>>>>>>>>>>>>>>>>>\n====================\n%s====================\n", string(expectOutput), string(output), diffResult)
+
+		return &RingTestResult{
+			RingTestCase: testCase,
+			Status:       Status_Failed,
+			Detail:       fmt.Sprintf("diff expect&result Diff:\n%s", detail),
+		}
+	}
+
+}
+
+func getAllTestCases() []RingTestCase {
+	var result []RingTestCase
+
+	for _, model := range TEST_MODELS {
+		sourceFilePath := filepath.Join(TEST_PATH, model)
+		files, _ := os.ReadDir(sourceFilePath)
+		for _, file := range files {
+			if filepath.Ext(file.Name()) == ".ring" {
+
+				filePath := filepath.Join(TEST_PATH, model, file.Name())
+				if !isNotTestFile(filePath) {
+					result = append(result,
+						RingTestCase{
+							Model:    model,
+							FileName: filePath,
+						})
+				}
+			}
+		}
+	}
+
+	return result
+}
+
+func isNotTestFile(filePath string) bool {
+	for _, notTestFile := range NOT_TEST_FILES {
+		if filePath == notTestFile {
+			return true
+		}
+	}
+	return false
+}
+
 func exportTestCase(num int, model, sourceCodeFile, result string) {
 	if num == 1 {
 		os.WriteFile(TEST_DETAIL_SUMMARY, []byte("# Ring 测试用例表\n\n"), 0644)
@@ -352,3 +342,21 @@ func extractDetails(source string) string {
 	}
 	return strings.Join(details, "<br>")
 }
+
+type RingTestCase struct {
+	Model    string
+	FileName string
+}
+
+type RingTestResult struct {
+	RingTestCase RingTestCase
+	Status       RingTestResult_Status
+	Detail       string
+}
+
+type RingTestResult_Status string
+
+const (
+	Status_Pass   RingTestResult_Status = "PASS"
+	Status_Failed RingTestResult_Status = "FAILED"
+)
