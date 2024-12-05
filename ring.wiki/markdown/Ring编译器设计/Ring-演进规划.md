@@ -115,22 +115,14 @@
 
 - Background: 调研相关工作
 - Proposal: 提案相关工作
-- Feature:
-- Fix:
-- Update:
-- Refactor:
-- Optimize:
-- Test:
-- Doc:
-- Other:
-
-
-工作完成标记：
-
-- ⭕️ : 重点关注代办
-- ✅ : 完成
-
-
+- Feature:  新特性
+- Fix:  修正
+- Update: 逻辑更新
+- Refactor: 重构
+- Optimize: 优化
+- Test: 测试
+- Doc: 文档
+- Other: 其他
 
 
 
@@ -140,26 +132,7 @@
 ## Ring一些不成熟的想法
 
 
-### 1. lua 索引
-```
-索引
-对 table 的索引使用方括号 []。Lua 也提供了 . 操作。
-
-t[i]
-t.i                 -- 当索引为字符串类型时的一种简化写法
-gettable_event(t,i) -- 采用索引访问本质上是一个类似这样的函数调用
-
-
-> site = {}
-> site["key"] = "www.runoob.com"
-> print(site["key"])
-www.runoob.com
-> print(site.key)
-www.runoob.com
-```
-
-
-### 2. 字符串的format
+### 1. 字符串的format
 
 1. python 的 formate函数比较人性化, 需要自己改造一下
 
@@ -182,6 +155,15 @@ print(txt.format(price = 49))
 int x = 10, y = 20;
 String s = STR."\{x} + \{y} = \{x + y}";
 ```
+
+
+3. ring 如何实现
+
+f" a {test}"
+
+对应一个 string builder
+
+会处理成 fmt::sprintf(" a {}", test)
 
 ### 3. 分发方式
 
@@ -668,11 +650,11 @@ fmt::println(reflect::typeof(local_func_var0)); // nil-closure
 ```
 
 
-### F. Proposal: reflect::typeof() 应该进行优化
+### F. Proposal: reflect::typeof() 应该进行优化 TODO:
 
 1. 如果一个 变量没有分配内存，array/closure，typeof 也能获取到对应的值
 
-### G. Proposal: 丰富标准库
+### G. Proposal: 丰富标准库 TODO:
 
 string 要支持切片
 string_value[a:b];
@@ -702,7 +684,7 @@ usage:
 ```
 
 
-### B. Proposal: 关于函数的可见行
+### B. Proposal: 关于函数的可见行 TODO:
 
 closure function build-function 他们名字相同时，允许覆盖么，
 
@@ -710,7 +692,7 @@ closure function build-function 他们名字相同时，允许覆盖么，
 
 
 
-### D. Proposal: 支持typedef 定义类型别名
+### D. Proposal: 支持typedef 定义类型别名 TODO:
 
 当前只支持 typedef function() FuncType;
 
@@ -723,7 +705,7 @@ typedef string  JobID:
 ```
 
 
-### E. Proposal: typedef 定义的类型别名需要通过语义检查
+### E. Proposal: typedef 定义的类型别名需要通过语义检查 TODO:
 
 
 e.g. 该测试用例不应该通过
@@ -743,7 +725,7 @@ function main() {
 ```
 
 
-### F. Proposal: 在编译阶段，产生了很多 的 TypeSpecifier，如何节省内存空间。
+### F. Proposal: 在编译阶段，产生了很多 的 TypeSpecifier，如何节省内存空间。 TODO:
 
 
 -----------------------------
@@ -839,7 +821,7 @@ function main() {
 
 
 
-### C. Feature: 完善函数调用/方法调用 的语义检查
+### C. Feature: 完善函数调用/方法调用 的语义检查 TODO:
 
 
 1. `func_();` 函数调用/方法调用：需要强制检查func_函数的参数类型是否一致
@@ -848,7 +830,7 @@ function main() {
 
 
 
-### C. Test: 系统化测试 Coroutine相关
+### C. Test: 系统化测试 Coroutine相关 TODO:
 
 
 
@@ -868,7 +850,7 @@ e.g.
 3. 在Assignment阶段，生成对应的assign字节码，同时这个阶段方便的对 赋值语句的左值和右值进行语义检查，检查类型是否匹配。
 
 
-### E. Proposal: 关于ring的保留字
+### E. Proposal: 关于ring的保留字 TODO:
 
 #### 1. class 中的 field/method 是否应该改为 var/function
 
@@ -932,7 +914,7 @@ Job::printInfo() 为非静态方法
 当起Ring还不是 类中的静态field/method，可以后续扩展
 
 
-#### 2. 定义函数 function 关键字精简 为fn
+#### 2. 定义函数 function 关键字精简 为fn TODO:
 
 这样的优点是，在定义匿名函数的时候比较迅速：
 
@@ -958,10 +940,10 @@ var int global_int_value_1, global_int_value_2 = get_next_global_count(), get_ne
 
 
 
-### H. Proposal: 协程在launch的时候就应该运行
+### H. Proposal: 协程在launch的时候就应该运行 TODO:
 
 
-### L. Proposal: ring dump
+### L. Proposal: ring dump  ✅ 
 
 在dump 某些字节码时，如果字节码的类型是 OPCODE_OPERAND_TYPE_2BYTE_AB/OPCODE_OPERAND_TYPE_2BYTE_ABs，应该分开展示，便于理解
 
@@ -976,7 +958,7 @@ var int global_int_value_1, global_int_value_2 = get_next_global_count(), get_ne
 - 详细模式下，对于 invoke_func , 能够展示函数名称，这样能提高调试效率
 
 
-### M. Fix: 
+### M. Fix: TODO:
 
 
 目前，下面的这行代码应该不会编译报错的
@@ -1062,13 +1044,13 @@ RING_DEBUG=trace_func_backtrace=1,trace_coroutine_sched=1 ring run test.ring
 2. 函数调用相关：
    - 调用derive函数的时候，能够实时展示当前CallInfo List，更直观的展示当前Opcode所在的位置;有点类似于 `debug::print_call_stack()` 函数的功能
 3. 展现 当前Opcode 对应Ring源码的所在行和源码内容
-4. 如果能够设置端点就更好了
+4. 如果能够设置断点就更好了
 
 
 
 
 
-### M. 测试在 在 runtime_stack 中不 pop, 会影响当前的栈空间么
+### M. 测试在 在 runtime_stack 中不 pop, 会影响当前的栈空间么 TODO:
 
 
 ### N. Update: debug::print_call_stack() 
@@ -1225,25 +1207,25 @@ Circle::new() 是一个关联函数,用于创建新的 Circle 实例。circle.ar
 
 
 
-### D. 支持解析 16进制常量
+### D. 支持解析 16进制常量 TODO:
 
 
-### E. 支持通过debug模式展示语法树，语法树的展示可以尽量简单，但是一定要有区分度，能够展示层级关系
+### E. 支持通过debug模式展示语法树，语法树的展示可以尽量简单，但是一定要有区分度，能够展示层级关系 TODO:
 
 
 
 ### F. 一个package中 import-package的名称/enum的名称/class的名称/函数的名称  均不能相同，不然语义分析会产生错误，后续可以考虑优化
 
 
-### G. 考虑一下类型推导
+### G. 考虑一下类型推导 TODO:
 
 
-### H. 枚举需要在语法上支持
+### H. 枚举需要在语法上支持 TODO:
 
-### G. 枚举需要在语义上支持
+### G. 枚举需要在语义上支持 TODO:
 
 
-### I. 实现 std io/os/time/math package
+### I. 实现 std io/os/time/math package ✅
 
 分几步走：
 
@@ -3697,7 +3679,7 @@ int[,,]{
 
 
 
-3. 多维数组常量 TODO:测试
+3. 多维数组常量  ✅ 
 
 
 4. 当然这个也可以是个嵌套的，所以说通过单纯的语法分析是远远不够的，还需要语义分析 TODO:测试
@@ -4797,16 +4779,14 @@ Usage:
 
 13. class-object 的初始化 暂时不用 constructor函数, 使用类似于Golang的 列表初始化
 
-> var Job job_0 = Job{
-> 
->    Running: false,
-> 
->    JobID: 0,
-> 
->    Score: 0.0
-> 
-> };
->
+    ```
+    var Job job_0 = Job{
+       Running: false,
+       JobID: 0,
+       Score: 0.0
+    };
+    ```
+
 
 遗留问题:
     0. 简单测试没有问题  ✅
@@ -4815,8 +4795,10 @@ Usage:
 
 class 内部的 constructor 函数是不是要废弃
 constructor 应该作为默认的初始化函数
-> var Job job_0(); // 这里就是去调用 constructor函数
->
+
+```
+var Job job_0(); // 这里就是去调用 constructor函数
+```
 
 
 ---------------------
@@ -4838,7 +4820,7 @@ constructor 应该作为默认的初始化函数
 > Usage:
 > 
 > var bool[] bool_array_0 = new bool[10];
->
+> 
 > var bool[] bool_array_1 = bool[]{false, true};
 9.  bug  ✅
     - string 的初始化, 默认值, 都要重新审视一下
