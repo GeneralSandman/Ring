@@ -12,7 +12,7 @@ import {
 	fmt;
 }
 
-typedef function(var string message) FuncType1;
+typedef function(string) FuncType1;
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸
 @main

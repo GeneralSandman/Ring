@@ -12,7 +12,7 @@ import {
 	fmt;
 }
 
-typedef function(var bool a, var int b) -> (string) FuncType;
+typedef function(bool, int) -> (string) FuncType;
 
 
 

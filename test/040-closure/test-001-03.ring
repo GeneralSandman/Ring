@@ -14,17 +14,17 @@ import {
 
 
 typedef function() FuncType0;
-typedef function(var int a) FuncType1;
-typedef function(var int a, var int b) FuncType2;
-typedef function(var int a, var int b, var int c) FuncType3;
+typedef function(int) FuncType1;
+typedef function(int, int) FuncType2;
+typedef function(int, int, int) FuncType3;
 
 typedef function() -> (int) FuncType4;
-typedef function(var int a) -> (int) FuncType5;
-typedef function(var int a, var int b) -> (int) FuncType6;
-typedef function(var int a, var int b, var int c) -> (int) FuncType7;
+typedef function(int) -> (int) FuncType5;
+typedef function(int, int) -> (int) FuncType6;
+typedef function(int, int, int) -> (int) FuncType7;
 
 
-typedef function(var bool a, var int b, var int64 c, var double d, var string e) -> (bool, int, int64, double, string) FuncType8;
+typedef function(bool, int, int64, double, string) -> (bool, int, int64, double, string) FuncType8;
 
 
 @main

@@ -13,7 +13,7 @@ import {
 }
 
 
-typedef function(var string string_var) FuncType;
+typedef function(string) FuncType;
 
 
 @main

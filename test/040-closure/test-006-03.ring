@@ -13,9 +13,9 @@ import {
 }
 
 
-typedef function(var double a) -> (string) functype_0;
-typedef function(var int64 a) -> (functype_0) functype_1;
-typedef function(var int  a) -> (functype_1) functype_2;
+typedef function(double) -> (string) functype_0;
+typedef function(int64) -> (functype_0) functype_1;
+typedef function(int) -> (functype_1) functype_2;
 
 
 function return_closure() -> (functype_2) {
