@@ -3515,10 +3515,14 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
 }
 
 
-// TODO; deep_copy argument_list
-// 这里暂时没有 deep copy argument_list
-// 为什么还能成功
-// 因为 argument_list 是在栈上分配的，等函数return的时候，他还能向上在stack上找到对应的argument
+/*
+ * new_defer_item
+ * 1. 初始化 defer_item
+ * 2. 对于 defer function(){}(a,b,c) 语句
+ *    语义逻辑为：值捕获
+ *    需要立即将 a,b,c 参数从栈中deep_copy到 defer_item的存储空间中
+ *    这样在 pop_defer的时候值会保持为捕获时的值
+ */
 RVM_DeferItem* new_defer_item(Ring_VirtualMachine* rvm,
                               RVM_Closure*         closure,
                               unsigned int         argument_list_size) {
@@ -3531,7 +3535,7 @@ RVM_DeferItem* new_defer_item(Ring_VirtualMachine* rvm,
     defer_item->closure       = closure;
     defer_item->next          = nullptr;
 
-    // deep copy argument
+    // deep_copy argument_list from runtime_stack to defer_item->argument_list
     for (unsigned int i = 0; i < argument_list_size; i++) {
         // TODO: 这里还不是 deep copy
         defer_item->argument_list[i] = VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + i];
@@ -3566,7 +3570,14 @@ RVM_DeferItem* coroutine_pop_defer_item(Ring_VirtualMachine* rvm) {
     return defer_item;
 }
 
+/*
+ * fill_defer_item_argument_stack
+ * 在 new_defer_item 中，从runtime_stack 复制到 defer_item 中
+ * 此时：将 defer_item 中的参数 复制回 runtime_stack
+ * defer_item->closure 将用于参数进行函数调用
+ */
 void fill_defer_item_argument_stack(Ring_VirtualMachine* rvm, RVM_DeferItem* defer_item) {
+    // deep_copy argument_list from defer_item->argument_list to runtime_stack
     for (unsigned int i = 0; i < defer_item->argument_size; i++) {
         // TODO: 这里还不是 deep copy
         VM_CUR_CO_STACK_DATA[VM_CUR_CO_STACK_TOP_INDEX + i] = defer_item->argument_list[i];

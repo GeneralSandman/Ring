@@ -933,7 +933,7 @@ std::string format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int sourc
     return result;
 }
 
-// TODO: 格式化数组类型
+
 std::string format_type_specifier(TypeSpecifier* type_specifier) {
     assert(type_specifier != nullptr);
 
@@ -957,13 +957,13 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
         break;
 
     case RING_BASIC_TYPE_CLASS:
-        str = "class";
+        str = "class"; // TODO: 格式化类
         break;
     case RING_BASIC_TYPE_ARRAY:
-        str = "array";
+        str = "array"; // TODO: 格式化数组类型
         break;
     case RING_BASIC_TYPE_FUNC:
-        str = "function"; // FIXME:
+        str = "function"; // TODO:
         break;
 
     case RING_BASIC_TYPE_ANY:
@@ -978,7 +978,6 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
     return str;
 }
 
-// TODO: 格式化数组类型
 std::string format_function_parameters(Parameter* parameter) {
     std::vector<std::string> strings;
 
@@ -996,7 +995,6 @@ std::string format_function_parameters(Parameter* parameter) {
     return strings_join(strings, ",");
 }
 
-// TODO: 格式化数组类型
 std::string format_function_arguments(ArgumentList* argument) {
     std::string              str = "";
     std::vector<std::string> strings;

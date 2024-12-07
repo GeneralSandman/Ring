@@ -229,7 +229,12 @@ int yylex();
 %type <m_function_definition> function_definition
 %type <m_expression>             closure_definition
 %type <m_iife>             iife_expression
-%type <m_parameter_list> parameter_list_not_empty parameter parameter_list
+%type <m_parameter_list> parameter_list 
+                            parameter 
+                            parameter_list_maybe_empty 
+                            simple_parameter_list_maybe_empty 
+                            simple_parameter_list 
+                            simple_parameter
 %type <m_if_statement> if_statement
 %type <m_for_statement> for_statement
 %type <m_dofor_statement> dofor_statement
@@ -391,18 +396,18 @@ class_definition
     ;
 
 /*
-* parameter_list 需要单独需要一个版本
+* parameter_list_maybe_empty 需要单独需要一个版本
 * 需要兼容 typedef function(var int a) Func1;
 *         typedef function(var int) Func1;
 *         typedef function(int) Func1;
 */
 type_alias_def
-    : TOKEN_TYPEDEF  TOKEN_FUNCTION TOKEN_LP parameter_list TOKEN_RP  identifier_v2
+    : TOKEN_TYPEDEF  TOKEN_FUNCTION TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP  identifier_v2
     {
         debug_bison_info_with_green("[RULE::type_definition]\t ");
          $<m_type_alias_def>$ = add_type_alias_func($4, nullptr, $6);
     }
-    | TOKEN_TYPEDEF  TOKEN_FUNCTION TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP  identifier_v2
+    | TOKEN_TYPEDEF  TOKEN_FUNCTION TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP  identifier_v2
     {
         debug_bison_info_with_green("[RULE::type_definition]\t ");
          $<m_type_alias_def>$ = add_type_alias_func($4, $8, $10);
@@ -442,22 +447,22 @@ field_member
     ;
 
 method_member
-    : TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list TOKEN_RP block
+    : TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, nullptr, $6);
     }
-    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, nullptr, nullptr);
     }
-    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, $10);
     }
-    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, nullptr);
@@ -709,22 +714,22 @@ defer_statement
     }
 
 function_definition
-    : TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP block
+    : TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, $6);
     }
-    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, nullptr);
     }
-    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, $10);
     }
-    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, nullptr);
@@ -742,12 +747,12 @@ closure_definition
 
 // TODO: 后续 closure function method 都使用这个
 function_tuple
-    : TOKEN_LP parameter_list TOKEN_RP {$<m_location>$ = a_location();} block
+    : TOKEN_LP parameter_list_maybe_empty TOKEN_RP {$<m_location>$ = a_location();} block
     {
         debug_bison_info_with_green("[RULE::function_tuple:1]\t ");
         $$ = create_function_tuple($<m_location>4, $2, nullptr, $5);
     }
-    | TOKEN_LP parameter_list TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP {$<m_location>$ = a_location();} block
+    | TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP {$<m_location>$ = a_location();} block
     {
         debug_bison_info_with_green("[RULE::function_tuple:2]\t ");
         $$ = create_function_tuple($<m_location>8, $2, $6, $9);
@@ -755,35 +760,32 @@ function_tuple
     ;
 
 
-// 可以是空列表
-parameter_list
+parameter_list_maybe_empty
     : 
     {
         $$ = nullptr;
     }
     | parameter
     {
-        debug_bison_info_with_green("[RULE::parameter_list]\t ");
+        debug_bison_info_with_green("[RULE::parameter_list_maybe_empty]\t ");
     }
-    | parameter_list_not_empty TOKEN_COMMA parameter
+    | parameter_list TOKEN_COMMA parameter
     {
-        debug_bison_info_with_green("[RULE::parameter_list]\t ");
+        debug_bison_info_with_green("[RULE::parameter_list_maybe_empty]\t ");
         $$ = parameter_list_add_statement($1, $3);
     }
     ;
-
-parameter_list_not_empty
+parameter_list
     : parameter
     {
         debug_bison_info_with_green("[RULE::parameter_list]\t ");
     }
-    | parameter_list_not_empty TOKEN_COMMA parameter
+    | parameter_list TOKEN_COMMA parameter
     {
         debug_bison_info_with_green("[RULE::parameter_list]\t ");
         $$ = parameter_list_add_statement($1, $3);
     }
     ;
-
 parameter
     : TOKEN_VAR type_specifier IDENTIFIER
     {
@@ -794,6 +796,42 @@ parameter
     {
         debug_bison_info_with_green("[RULE::parameter:TOKEN_3DOT]\t ");
         $$ = create_parameter($2, $4, true);
+    }
+    ;
+
+simple_parameter_list_maybe_empty
+    : 
+    {
+        $$ = nullptr;
+    }
+    | simple_parameter
+    {
+        debug_bison_info_with_green("[RULE::parameter_list_maybe_empty]\t ");
+    }
+    | simple_parameter_list TOKEN_COMMA simple_parameter
+    {
+        debug_bison_info_with_green("[RULE::parameter_list_maybe_empty]\t ");
+        $$ = parameter_list_add_statement($1, $3);
+    }
+    ;
+simple_parameter_list
+    : simple_parameter
+    {
+
+    }
+    | simple_parameter_list TOKEN_COMMA simple_parameter
+    {
+        $$ = parameter_list_add_statement($1, $3);
+    }
+    ;
+simple_parameter
+    : type_specifier
+    {
+        $$ = create_parameter($1, nullptr, false);
+    }
+    | type_specifier TOKEN_3DOT
+    {
+        $$ = create_parameter($1, nullptr, true);
     }
     ;
 
