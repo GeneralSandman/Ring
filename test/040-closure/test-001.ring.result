@@ -1,13 +1,2 @@
 invoke a closure 1
 invoke a closure 2
-invoke a closure 3
--bool_value: true
--int_value: 123
--int64_value: 65536
--double_value: 3.141593
--string_value: ring-closure
--local_bool_value_0: true
--local_int_value_0: 1
--local_int64_value_0: 2
--local_double_value_0: 3.141593
--local_string_value_0: hello-world
