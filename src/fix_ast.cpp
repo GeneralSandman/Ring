@@ -574,8 +574,10 @@ END:
             // TODO: 修正 parameter
         }
 
-        for (unsigned int i = 0; i < func_type->return_list_size; i++) {
-            fix_type_specfier(func_type->return_list[i]);
+
+        FunctionReturnList* return_pos = nullptr;
+        for (return_pos = func_type->return_list; return_pos != nullptr; return_pos = return_pos->next) {
+            fix_type_specfier(return_pos->type_specifier);
         }
     }
 }
@@ -988,11 +990,11 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
 
         // TODO: 深度比较
         // 比对 类, 比较typedef的类型
-        if (left_convert_type[i]->kind != right_convert_type[i]->kind) {
+        if (!compare_type_specifier(left_convert_type[i], right_convert_type[i])) {
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf = sprintf_string(
-                "assignment mismatch: expect %s but return %s; E:%d.",
+                "assignment mismatch: expect %s but provided %s; E:%d.",
                 left_type_s.c_str(),
                 right_type_s.c_str(),
                 ERROR_ASSIGNMENT_MISMATCH_TYPE);
@@ -1806,13 +1808,12 @@ void fix_function_call_expression(Expression*             expression,
             function_call_expression->type              = FUNCTION_CALL_TYPE_CLOSURE;
             function_call_expression->u.cc.closure_decl = variable->decl;
 
-            // TODO: 暂时不进行函数调用参数的强制校验
+            FunctionReturnList* return_pos              = nullptr;
             EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-            for (unsigned int i = 0;
-                 i < variable->decl->type_specifier->u.func_type->return_list_size;
-                 i++) {
-                TypeSpecifier* return_type = variable->decl->type_specifier->u.func_type->return_list[i];
-                EXPRESSION_ADD_CONVERT_TYPE(expression, return_type);
+            for (return_pos = variable->decl->type_specifier->u.func_type->return_list;
+                 return_pos != nullptr;
+                 return_pos = return_pos->next) {
+                EXPRESSION_ADD_CONVERT_TYPE(expression, return_pos->type_specifier);
             }
             return;
         } else {
@@ -2490,8 +2491,20 @@ void fix_anonymous_func_expression(Expression*              expression,
         fix_statement_list(closure->block->statement_list, closure->block, (FunctionTuple*)closure);
     }
 
+    // 从函数定义中，创建一个 type_specifier , 用于 后续比对 type_specifier 是否一致
+    // 类型为匿名函数的类型
+    // FIXME: 这里不应该每次都要创建，应该共享一份
+    Ring_DeriveType_Func* func_type      = create_derive_type_func(closure->parameter_list, closure->return_list);
+
+    TypeSpecifier*        type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type_specifier->line_number          = closure_expression->line_number;
+    type_specifier->identifier           = nullptr;
+    type_specifier->kind                 = RING_BASIC_TYPE_FUNC;
+    type_specifier->u.func_type          = func_type;
+    type_specifier->dimension            = 0;
+    type_specifier->sub                  = nullptr;
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-    EXPRESSION_ADD_CONVERT_TYPE(expression, &func_type_specifier);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier);
 }
 
 void fix_iife_expression(Expression*                   expression,
@@ -2863,4 +2876,42 @@ Variable* variable_list_add_item(Variable* head, Variable* variable) {
     }
     pos->next = variable;
     return head;
+}
+
+bool compare_type_specifier(TypeSpecifier* a, TypeSpecifier* b) {
+    assert(a != nullptr);
+    assert(b != nullptr);
+
+    if (a->kind != b->kind) {
+        return false;
+    }
+
+    // 深度比较 func_type
+    if (a->kind == RING_BASIC_TYPE_FUNC) {
+        return compare_type_specifier_func(a->u.func_type, b->u.func_type);
+    } else if (a->kind == RING_BASIC_TYPE_ARRAY) {
+        // TODO:
+    } else if (a->kind == RING_BASIC_TYPE_CLASS) {
+        // TODO:
+    }
+
+    return true;
+}
+
+bool compare_type_specifier_func(Ring_DeriveType_Func* a, Ring_DeriveType_Func* b) {
+    assert(a != nullptr);
+    assert(b != nullptr);
+
+
+    std::string a_str, b_str;
+
+    a_str = format_type_specifier_func(a);
+    b_str = format_type_specifier_func(b);
+
+    // TODO: 这里当前使用string去比较，后续应该使用 结构体直接比较
+    if (a_str != b_str) {
+        return false;
+    }
+
+    return true;
 }

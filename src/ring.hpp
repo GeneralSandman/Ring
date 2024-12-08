@@ -503,11 +503,10 @@ struct Ring_DeriveType_Class {
 
 // 函数变量类型
 struct Ring_DeriveType_Func {
-    unsigned int    parameter_list_size;
-    TypeSpecifier** parameter_list;
-
-    unsigned int    return_list_size;
-    TypeSpecifier** return_list;
+    unsigned int        parameter_list_size;
+    Parameter*          parameter_list;
+    unsigned int        return_list_size;
+    FunctionReturnList* return_list;
 };
 
 
@@ -798,7 +797,7 @@ struct RVM_ClassObject {
 
 struct RVM_TypeSpecifier_Func {
     unsigned int       parameter_list_size;
-    RVM_TypeSpecifier* parameter_list;
+    RVM_Parameter*     parameter_list;
 
     unsigned int       return_list_size;
     RVM_TypeSpecifier* return_list;
@@ -2750,6 +2749,9 @@ TypeAlias*                    add_type_alias_func(Parameter*          parameter_
                                                   FunctionReturnList* return_list,
                                                   Identifier*         identifier);
 
+Ring_DeriveType_Func*         create_derive_type_func(Parameter*          parameter_list,
+                                                      FunctionReturnList* return_list);
+
 VarDecl*                      create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer);
 VarDecl*                      declaration_list_add_item(VarDecl* head, VarDecl* declaration);
 
@@ -2918,6 +2920,9 @@ Function*        search_function(char* package_posit, char* identifier);
 
 FreeValueDesc*   free_value_list_add_item(FreeValueDesc* head, FreeValueDesc* free_value);
 Variable*        variable_list_add_item(Variable* head, Variable* variable);
+
+bool             compare_type_specifier(TypeSpecifier* a, TypeSpecifier* b);
+bool             compare_type_specifier_func(Ring_DeriveType_Func* a, Ring_DeriveType_Func* b);
 // --------------------
 
 /* --------------------
@@ -3286,7 +3291,10 @@ std::string              format_rvm_call_stack(Ring_VirtualMachine* rvm);
 std::string              format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int source_line_number);
 
 std::string              format_type_specifier(TypeSpecifier* type_specifier);
+std::string              format_type_specifier_func(Ring_DeriveType_Func* func_type);
 std::string              format_function_parameters(Parameter* parameter);
+
+std::string              format_function_return_list(FunctionReturnList* return_list);
 std::string              format_function_arguments(ArgumentList* argument);
 
 std::string              format_rvm_function(Package_Executer* package_executer,

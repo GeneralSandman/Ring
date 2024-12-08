@@ -963,7 +963,7 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
         str = "array"; // TODO: 格式化数组类型
         break;
     case RING_BASIC_TYPE_FUNC:
-        str = "function"; // TODO:
+        str = format_type_specifier_func(type_specifier->u.func_type);
         break;
 
     case RING_BASIC_TYPE_ANY:
@@ -978,9 +978,26 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
     return str;
 }
 
+std::string format_type_specifier_func(Ring_DeriveType_Func* func_type) {
+    assert(func_type != nullptr);
+
+    std::string res = "";
+    std::string str_par;
+    std::string str_return;
+
+    str_par = format_function_parameters(func_type->parameter_list);
+    res     = sprintf_string("function(%s)", str_par.c_str());
+
+    if (func_type->return_list_size) {
+        str_return = format_function_return_list(func_type->return_list);
+        res += sprintf_string("->(%s)", str_return.c_str());
+    }
+
+    return res;
+}
+
 std::string format_function_parameters(Parameter* parameter) {
     std::vector<std::string> strings;
-
 
     for (; parameter != nullptr; parameter = parameter->next) {
         std::string str = format_type_specifier(parameter->type_specifier);
@@ -991,6 +1008,17 @@ std::string format_function_parameters(Parameter* parameter) {
         strings.push_back(str);
     }
 
+    return strings_join(strings, ",");
+}
+
+std::string format_function_return_list(FunctionReturnList* return_list) {
+    std::vector<std::string> strings;
+
+    for (; return_list != nullptr; return_list = return_list->next) {
+        std::string str = format_type_specifier(return_list->type_specifier);
+
+        strings.push_back(str);
+    }
 
     return strings_join(strings, ",");
 }
@@ -1097,7 +1125,7 @@ std::string format_rvm_type_specifier(Package_Executer*  package_executer,
         std::vector<std::string> parameter_list_s;
         std::string              parameter_s = "";
         for (unsigned int i = 0; i < func_type->parameter_list_size; i++) {
-            std::string tmp = format_rvm_type_specifier(package_executer, &func_type->parameter_list[i], "");
+            std::string tmp = format_rvm_type_specifier(package_executer, func_type->parameter_list[i].type_specifier, "");
             // FIXME: 没有 variadic
             parameter_list_s.push_back(tmp);
         }

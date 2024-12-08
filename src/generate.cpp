@@ -2969,19 +2969,32 @@ void type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier* src) {
         RVM_TypeSpecifier_Func* func_type = (RVM_TypeSpecifier_Func*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_TypeSpecifier_Func));
 
         func_type->parameter_list_size    = src->u.func_type->parameter_list_size;
-        func_type->parameter_list         = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
-                                                                          func_type->parameter_list_size
-                                                                              * sizeof(RVM_TypeSpecifier));
-        for (unsigned int i = 0; i < src->u.func_type->parameter_list_size; i++) {
-            type_specifier_deep_copy(&(func_type->parameter_list[i]), src->u.func_type->parameter_list[i]);
+        func_type->parameter_list         = (RVM_Parameter*)mem_alloc(NULL_MEM_POOL,
+                                                                      func_type->parameter_list_size
+                                                                          * sizeof(RVM_Parameter));
+
+        // deep copy function parameters
+        Parameter* param = src->u.func_type->parameter_list;
+        for (unsigned int i = 0;
+             param != nullptr;
+             param = param->next, i++) {
+            func_type->parameter_list[i].identifier     = param->identifier;
+            func_type->parameter_list[i].is_variadic    = param->is_variadic;
+            func_type->parameter_list[i].type_specifier = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                                        sizeof(RVM_TypeSpecifier));
+
+            type_specifier_deep_copy(func_type->parameter_list[i].type_specifier, param->type_specifier);
         }
 
-        func_type->return_list_size = src->u.func_type->return_list_size;
-        func_type->return_list      = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
-                                                                    func_type->return_list_size
-                                                                        * sizeof(RVM_TypeSpecifier));
-        for (unsigned int i = 0; i < src->u.func_type->return_list_size; i++) {
-            type_specifier_deep_copy(&(func_type->return_list[i]), src->u.func_type->return_list[i]);
+        func_type->return_list_size    = src->u.func_type->return_list_size;
+        func_type->return_list         = (RVM_TypeSpecifier*)mem_alloc(NULL_MEM_POOL,
+                                                                       func_type->return_list_size
+                                                                           * sizeof(RVM_TypeSpecifier));
+        FunctionReturnList* return_pos = src->u.func_type->return_list;
+        for (unsigned int i = 0;
+             return_pos != nullptr;
+             return_pos = return_pos->next, i++) {
+            type_specifier_deep_copy(&(func_type->return_list[i]), return_pos->type_specifier);
         }
 
         dst->kind        = RING_BASIC_TYPE_FUNC;

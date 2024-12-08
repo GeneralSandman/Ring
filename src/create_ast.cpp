@@ -1268,47 +1268,48 @@ TypeAlias* add_type_alias_func(Parameter*          parameter_list,
         }
     }
 
-    TypeSpecifier** parameter_list_type = (TypeSpecifier**)mem_alloc(get_front_mem_pool(),
-                                                                     sizeof(TypeSpecifier*) * parameter_list_size);
-    unsigned int    i                   = 0;
-    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next, i++) {
-        parameter_list_type[i] = pos->type_specifier;
+
+    Ring_DeriveType_Func* func_type      = create_derive_type_func(parameter_list, return_list);
+
+    TypeSpecifier*        type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type_specifier->line_number          = package_unit_get_line_number();
+    type_specifier->kind                 = RING_BASIC_TYPE_FUNC;
+    type_specifier->u.func_type          = func_type;
+    type_specifier->dimension            = 0;
+    type_specifier->sub                  = nullptr;
+
+
+    TypeAlias* type_alias                = (TypeAlias*)mem_alloc(get_front_mem_pool(), sizeof(TypeAlias));
+    type_alias->line_number              = package_unit_get_line_number();
+    type_alias->identifier               = identifier->name;
+    type_alias->type_specifier           = type_specifier;
+
+    package_unit_add_type_alias(type_alias);
+
+    return type_alias;
+}
+
+// FIXME: 这里没有深度copy
+Ring_DeriveType_Func* create_derive_type_func(Parameter*          parameter_list,
+                                              FunctionReturnList* return_list) {
+
+    unsigned parameter_list_size = 0;
+    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
+        parameter_list_size++;
     }
 
     unsigned int return_list_size = 0;
     for (FunctionReturnList* pos = return_list; pos != nullptr; pos = pos->next) {
         return_list_size++;
     }
-    TypeSpecifier** return_list_type = (TypeSpecifier**)mem_alloc(get_front_mem_pool(),
-                                                                  sizeof(TypeSpecifier*) * return_list_size);
-    i                                = 0;
-    for (FunctionReturnList* pos = return_list; pos != nullptr; pos = pos->next, i++) {
-        return_list_type[i] = pos->type_specifier;
-    }
 
+    Ring_DeriveType_Func* func = (Ring_DeriveType_Func*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Func));
+    func->parameter_list_size  = parameter_list_size;
+    func->parameter_list       = parameter_list;
+    func->return_list_size     = return_list_size;
+    func->return_list          = return_list;
 
-    Ring_DeriveType_Func* func    = (Ring_DeriveType_Func*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Func));
-    func->parameter_list_size     = parameter_list_size;
-    func->parameter_list          = parameter_list_type;
-    func->return_list_size        = return_list_size;
-    func->return_list             = return_list_type;
-
-    TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-    type_specifier->line_number   = package_unit_get_line_number();
-    type_specifier->kind          = RING_BASIC_TYPE_FUNC;
-    type_specifier->u.func_type   = func;
-    type_specifier->dimension     = 0;
-    type_specifier->sub           = nullptr;
-
-
-    TypeAlias* type_alias         = (TypeAlias*)mem_alloc(get_front_mem_pool(), sizeof(TypeAlias));
-    type_alias->line_number       = package_unit_get_line_number();
-    type_alias->identifier        = identifier->name;
-    type_alias->type_specifier    = type_specifier;
-
-    package_unit_add_type_alias(type_alias);
-
-    return type_alias;
+    return func;
 }
 
 VarDecl* create_declaration(TypeSpecifier* type, char* identifier, Expression* initializer) {
