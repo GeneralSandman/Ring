@@ -3,111 +3,11 @@
 
 > [!TIP|label:tip]
 >
-> 耐住寂寞。
+> 致开发者：
 >
-> 不要觉得自己做的编译器没有气候，编译器是工业软件，需要长时间积累。
+> 不要觉得自己做的编译器没有气候，编译器是工业软件，需耐住寂寞，长时间积累。
 > 
 
-
-## 总规划
-
-### 数据类型
-
-1. 基本数据类型: bool int int64 double string
-2. 派生数据类型: array class
-3. array: 多维数组
-4. class: field(各种数据类型的嵌套组合, 循环定义), method
-5. tuple 元组
-6. 枚举类型
-7. 用法: 可见范围(全局变量、局部变量)、定义、初始化、赋值、copy、函数传递、gc、heap_size计算、类型转化、(是否要支持auto推断类型)
-8. Any类型
-9. 类型的强制转换 与 隐式转换
-
-### 运算符
-
-1. 运算符: + - * / % += -= *= /= %= ++ -- 
-2. 运算符: == != > < >= <=
-3. 运算符: and or not
-4. 运算符: a?b:c
-5. 用法: 运算符的优先级、操作数的数据类型
-
-
-### 控制语句
-
-1. 语句: if else for do-for break continue return 
-2. 语句: switch-case
-3. 模式匹配 match
-
-
-### function & method
-
-1. 函数调用/方法调用
-2. 参数、局部变量、返回值、self关键字
-3. 可变参数+any类型
-4. 参数的深度copy, 浅copy
-5. 匿名函数
-6. 闭包
-7. 函数作为变量/参数
-8. 类中的静态方法和非静态方法
-
-
-### 语义分析
-
-1. 完善语义分析 报错机制
-2. 完善各种语法限制，争取在编译过程中就报错提示，尽量不允许在运行过程中崩溃
-
-
-### GC
-
-1. 实现了最简单的STW Mark&Sweep GC算法
-2. 实现进阶版GC: 三色标记的 Incremental Mark and Sweep 算法
-
-
-### 协程
-
-### 项目组织
-
-1. package 源代码的组织形式 import/package
-2. 第三方package的安装和下载
-3. 项目编译过程中并发编译
-4. 支持一个package中有多个文件
-
-### 工具链
-
-1. linux man手册
-2. `ring man` 支持快速查看语法
-3. `ring dump` 查看字节码详情
-4. 实现一键安装ring release版本
-5. 能够生成字节码, 加载字节码
-6. 命令行终端调试器 RDB
-7. 交互式编程 REPL
-8. LSP
-9. 开发Ring编译器工具: 命令行交互式调试虚拟机工具
-
-### 标准库
-
-
-1. 更加优化的方式实现 native-lib, ring方便调用c库, 与c库进行交互
-2. 实现相对完善的官方标准库 fmt sys math debug strings reflect
-3. fmt: 完善内置 printf 函数, 支持可变参数, 参考format函数
-4. reflect: 实现反射, 获取变量的类型
-
-
-### 不成熟的想法
-
-1. 支持Ring Eval, e.g.  ./bin/ring eval "fmt::println_string("hello world")";  默认导入所有的std package, 不能指定全局变量, 直接就是main函数中代码
-2. Closure
-3. 函数式编程
-4. 中间代码优化, 死代码消除, 常量折叠
-5. 搭建一个 Ring在线 Playground
-   参考资料:https://studygolang.com/articles/8880
-    启动一个docker去运行 https://github.com/xiam/go-playground
-    通过 Jupyter配置后端编译器内核来实现 https://zhuanlan.zhihu.com/p/431298076
-6. 实现 ring eval函数
-7. 实现交互式编程, 第一种是类似于python lua, 第二种是能够输入一行代码, 能够实时的输出翻译之后的字节码
-8. 实现一个类似于 gdb python-pdb 的交互式调试的工具
-
------------------------------
 
 ## Ring编译器开发内容流程细分
 
@@ -129,73 +29,8 @@
 -----------------------------
 
 
-## Ring一些不成熟的想法
 
-
-### 1. 字符串的format
-
-1. python 的 formate函数比较人性化, 需要自己改造一下
-
-
-```
-language = "Python"
-school = "freeCodeCamp"
-print(f"I'm learning {language} from {school}.")
-```
-
-
-```
-txt = "For only {price:.2f} dollars!"
-print(txt.format(price = 49))
-```
-
-2. java
-
-```
-int x = 10, y = 20;
-String s = STR."\{x} + \{y} = \{x + y}";
-```
-
-
-3. ring 如何实现
-
-f" a {test}"
-
-对应一个 string builder
-
-会处理成 fmt::sprintf(" a {}", test)
-
-### 3. 分发方式
-
-目前发展规划主要在 字节码虚拟机执行 OR 机器码二进制执行
-
-关于直接虚拟机还是二进制, 各自的优劣这里不再赘述. 
-在这里我整理一个我认为着重考虑的点:
-1. 虚拟机形式 很难实现自举, 强如Java迄今为止也没能实现.
-2. 虚拟机形式 执行速度太慢, 不然为什么会出现JIT
-
-通过自己对于目前发展方向的判断, 我认为直接生成二进制才是未来的主流, 他有几个极大的优势, 这个优势是虚拟机形式不能解决的:
-1. 直接生成二进制, 可到处分发, 目标机器无需安装任何依赖.
-   - 为什么这一点很重要呢, 我在腾讯和字节跳动都做过后台开发的工作, 其内部的网络访问策略非常严格, 发现在部署阶段, 如果需要遇到通过网络安装依赖, 经常需要寻找各种方案, 所以自己非常痛恨这种部署方式
-2. 后期编译器成熟之后可以实现自举
-3. 没有跟虚拟机一样, 运行时过于繁重, 
-
-
-发展方向讨论到现在已经有了比较大的倾向, 那么接下来有一个非常值得关注的问题:
-
-### 4. 关于 编译生成可执行二进制的工作量
-
-1. 深入了解各个CPU架构的汇编指令: x86-64, arm, 
-
-
-### 5. ring build
-
-构建一个很大的字节码文件，这样在目标机器上也不用安装依赖了。
-
-
------------------------------
-
-## 测试
+## 关于测试
 
 ### 测试集  ring run
 
@@ -376,10 +211,6 @@ class-object  ✅
 -----------------------------
 
 
-
------------------------------
-
-
 ## 2024下半年发展大规划
 
 完善Ring的基本功能, 争取在2024-12-31之前发布第一个release版本.
@@ -395,7 +226,7 @@ class-object  ✅
 
 -----------------------------
 
-## 2024-11-13 至 2024-12-31 规划
+## 2024-11月/12月 周
 
 不进行新功能的开发，聚焦于：
 1. 现有功能的完善，包括各种高级功能的相互叠加
@@ -446,7 +277,56 @@ curl -H "Authorization: token xx" https://api.github.com/rate_limit
 
 return bool[]{};
 
-### F. Optimize: debug::debug_assert() 改成 debug::assert()
+### F. Optimize: debug::debug_assert() 改成 debug::assert()  ✅
+
+
+### G. 关于匿名函数赋值进行强语义检查+typedef的强检查优化
+
+
+1. typedef 定义函数变量类型别名的时候，需要简化  ✅
+
+目前
+
+```
+typedef function(var int a, var int b) -> (int) FuncType;
+```
+
+应该简化成更舒服的写法：
+
+```
+typedef function(int, int) -> (int) FuncType;
+```
+
+
+2. 对于 匿名函数变量赋值，要细致的比对类型是否一致  ✅
+
+
+e.g. 该测试用例不应该通过
+
+```
+typedef function(bool, bool) -> (string) FuncType;
+
+@main
+function main() {
+	var FuncType local_func_var;
+
+	local_func_var = function(var bool a, var int b) -> (string) {
+		fmt::println("invoke a closure 1");
+		return fmt::sprintf("ring {} {}", a, b);
+	};
+}
+```
+
+报错提示：
+
+```
+./test/040-closure/test-006-02.ring:24:2: 
+|       };
+|  ^......
+|
+|Err: assignment mismatch: expect (function(bool,bool)->(string)) but provided (function(bool,int)->(string)); E:200018.
+|RingDebug: fix_ast.cpp:1013
+```
 
 -----------------------------
 
@@ -498,6 +378,23 @@ for(i=0; i<10; i++) {
 
 ### E. Test: 系统测试一下defer相关的功能
 
+1. defer 通过闭包捕获引用
+   - bool
+   - int
+   - int64
+   - double
+   - string
+
+2. defer 通过参数捕获值
+   - bool
+   - int
+   - int64
+   - double
+   - string
+
+3. defer 参数捕获时，为可变参数
+
+
 
 ### F. Proposal: 调研 ring在windows上支持，需要什么工作
 
@@ -525,10 +422,8 @@ co_id = launch fn() {
 ### I. Proposal: launch 即立即运行,不需要 resume
 
 
------------------------------
 
-
-### A. Proposal: 不支持在 if for 代码块中定义局部变量
+### J. Proposal: 不支持在 if for 代码块中定义局部变量
 
 
 -----------------------------
@@ -618,24 +513,6 @@ invoke_closures
 
 
 
-### F. Proposal: typedef 定义函数变量类型别名的时候，需要简化
-
-目前
-
-```
-typedef function(var int a, var int b) -> (int) FuncType;
-```
-
-应该简化成：
-
-```
-typedef function(int, int) -> (int) FuncType;
-```
-
-
-这样写起来更舒服
-
-
 ### E. reflect::typeof() 支持获取匿名函数变量的类型 ✅
 
 TODO: 如果一个匿名函数变量没有被初始化，会得到 `nil-closure`
@@ -705,24 +582,6 @@ typedef string  JobID:
 ```
 
 
-### E. Proposal: typedef 定义的类型别名需要通过语义检查 TODO:
-
-
-e.g. 该测试用例不应该通过
-
-```
-typedef function(var bool a, var bool b) -> (string) FuncType;
-
-@main
-function main() {
-	var FuncType local_func_var;
-
-	local_func_var = function(var bool a, var int b) -> (string) {
-		fmt::println("invoke a closure 1");
-		return fmt::sprintf("ring {} {}", a, b);
-	};
-}
-```
 
 
 ### F. Proposal: 在编译阶段，产生了很多 的 TypeSpecifier，如何节省内存空间。 TODO:
@@ -2628,7 +2487,7 @@ struct MethodMember {
 
 
 
-## B. return 语句 语义检查的 ✅ 
+### B. return 语句 语义检查的 ✅ 
 
 这个函数检查不过去, 需要优化
 
@@ -4627,17 +4486,17 @@ RVM_CODE_DOUBLE_2_STRING
 ### *B. 设计: 数组/字符串 如何获得数组的长度&容量*  ✅
 
 
-添加四个专业的字节码
+添加四个专用的字节码，分别用于获取数组/字符串的length&capacity：
 
 ```
-    RVM_CODE_PUSH_ARRAY_LEN,
-    RVM_CODE_PUSH_ARRAY_CAPACITY,
-    RVM_CODE_PUSH_STRING_LEN,
-    RVM_CODE_PUSH_STRING_CAPACITY,
+RVM_CODE_PUSH_ARRAY_LEN
+RVM_CODE_PUSH_ARRAY_CAPACITY
+RVM_CODE_PUSH_STRING_LEN
+RVM_CODE_PUSH_STRING_CAPACITY
 ```
 
-usage:    
-```
+Usage:    
+```ring
 len(string_variable)
 capacity(string_variable)
 len(array_variable)
@@ -4646,7 +4505,7 @@ capacity(array_variable)
 
 e.g.
 
-```
+```ring
 var string local_string_value_0;
 
 fmt::println_int(len(local_string_value_0));
@@ -4660,9 +4519,9 @@ fmt::println_int(capacity(local_bool_array_0));
 ```
 
 
-### *C. 设计: 数组/字符串的越界访问*
+### *C. 设计: 数组/字符串的越界访问* TODO:
 
-1. 以下这几个函数在vm调用的时候, 如果超过数组的边界, 应该抛出异常, 在这里返回一个错误码, RUNTIME_ERR_OUT_OF_ARRAY_RANGE
+1. 以下这几个函数在vm调用的时候，如果超过数组的边界，应该抛出异常，在这里返回一个错误码：RUNTIME_ERR_OUT_OF_ARRAY_RANGE
 
 - rvm_array_get_bool
 - rvm_array_get_int
@@ -4674,7 +4533,7 @@ fmt::println_int(capacity(local_bool_array_0));
 - rvm_array_set_double
 - rvm_array_set_string
 
-2. 需要在访问数组的时候做一下处理, 报错要人性化, 能够打印出当时的调用栈信息
+2. 需要在访问数组的时候做一下处理，报错要人性化，能够打印出当时的调用栈信息
 
 
 ### *D. 设计: 数组/字符串的 for range 访问*  ✅
@@ -4695,25 +4554,24 @@ for(value = range bool_array_0) {
 }
 ```
 
-Output
-
+Output:
 ```
 false
 true
 false
 ```
 
-3. VM层面添加几个专用的字节码: 
+3. VM层面添加几个专用的字节码
 
 ```
-    RVM_CODE_FOR_RANGE_ARRAY_BOOL,
-    RVM_CODE_FOR_RANGE_ARRAY_INT,
-    RVM_CODE_FOR_RANGE_ARRAY_DOUBLE,
-    RVM_CODE_FOR_RANGE_ARRAY_STRING,
-    RVM_CODE_FOR_RANGE_ARRAY_OBJECT,
-    RVM_CODE_FOR_RANGE_STRING,
-    RVM_CODE_FOR_RANGE,
-    RVM_CODE_FOR_RANGE_FINISH,
+RVM_CODE_FOR_RANGE_ARRAY_BOOL
+RVM_CODE_FOR_RANGE_ARRAY_INT
+RVM_CODE_FOR_RANGE_ARRAY_DOUBLE
+RVM_CODE_FOR_RANGE_ARRAY_STRING
+RVM_CODE_FOR_RANGE_ARRAY_OBJECT
+RVM_CODE_FOR_RANGE_STRING
+RVM_CODE_FOR_RANGE
+RVM_CODE_FOR_RANGE_FINISH
 ```
 
 ### *E. 支持给数组中的元素赋值*  ✅
@@ -4725,27 +4583,9 @@ false
 
 Usage:
 ```
-  var bool[] global_bool_array_0  = new bool[20];
+var bool[] global_bool_array_0  = new bool[20];
 
-  global_bool_array_0[0] = true;
-```
-
-### *F. 修正*  ✅
-
-改回去
-```
-    if (declaration->type->next->kind == RING_BASIC_TYPE_BOOL) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_BOOL, (2 << 8) | (1), array_index_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_INT) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_INT, (2 << 8) | (1), array_index_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_DOUBLE) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_DOUBLE, (2 << 8) | (1), array_index_expression->line_number);
-    } else if (declaration->type->next->kind == RING_BASIC_TYPE_STRING) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_STRING, (2 << 8) | (1), array_index_expression->line_number);
-    } else {
-        printf("error: array index expression only support bool[] int[] double[] string[]\n");
-        exit(1);
-    }
+global_bool_array_0[0] = true;
 ```
 
 ---------------------
