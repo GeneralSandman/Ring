@@ -1837,6 +1837,8 @@ struct Block {
     Block*         parent_block;
 
     BlockLabels    block_labels;
+
+    PackageUnit*   package_unit; // 所属的package_unit
 };
 
 

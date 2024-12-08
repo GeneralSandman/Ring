@@ -9,12 +9,12 @@
       "args": [
         "-O0",
         "run",
-        "${workspaceFolder}/test/040-aonymous-function/test-001.ring"
+        "${workspaceFolder}/test/040-closure/test-006-02.ring"
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
       "environment": [],
-      "externalConsole": false,
+      "externalConsole": true,
       "MIMode": "lldb"
     },
     {

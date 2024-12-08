@@ -725,13 +725,15 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
-        case RVM_CODE_PUSH_STACK_STRING:
-            caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            STACK_SET_STRING_OFFSET(0,
-                                    STACK_GET_STRING_INDEX(VM_CUR_CO_CSB + caller_stack_offset));
+        case RVM_CODE_PUSH_STACK_STRING: {
+            caller_stack_offset    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            RVM_String* rvm_string = STACK_GET_STRING_INDEX(VM_CUR_CO_CSB + caller_stack_offset);
+            STACK_SET_STRING_OFFSET(0, rvm_string);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
-            break;
+        }
+
+        break;
         case RVM_CODE_PUSH_STACK_CLASS_OB:
             caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_CLASS_OB_OFFSET(0,
@@ -1598,16 +1600,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_INVOKE_FUNC_NATIVE:
             argument_list_size = STACK_GET_INT_OFFSET(-2);
-
             oper_num           = STACK_GET_INT_OFFSET(-1);
             package_index      = oper_num >> 8;
             func_index         = oper_num & 0XFF;
-
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
 
             callee_function = &(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index]);
-
             assert(callee_function->type == RVM_FUNCTION_TYPE_NATIVE);
+
             invoke_native_function(rvm,
                                    callee_function,
                                    argument_list_size);
@@ -2638,7 +2638,8 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
 
 
     // Step-3: init local variables which defined in callee_function.
-    for (unsigned int i = 0; i < function->local_variable_size;
+    for (unsigned int i = 0;
+         i < function->local_variable_size;
          i++, local_vari_stack_offset++) {
 
         type_specifier = function->local_variable_list[i].type_specifier;

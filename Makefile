@@ -12,7 +12,7 @@ CMD_INSTALL_DATA= $(CMD_INSTALL) -m 0644
 CMD_MKDIR= mkdir -p
 CMD_RM= rm -rf
 
-T_STD_PACKS= buildin debug fmt io math os reflect time vm
+T_STD_PACKS= buildin debug fmt io math os reflect strings time vm
 
 
 PLATS= linux macosx windows Darwim

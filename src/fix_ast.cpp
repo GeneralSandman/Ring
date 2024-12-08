@@ -2609,6 +2609,14 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
  */
 Variable* resolve_variable(char* package_posit, char* identifier, Block* block) {
 
+    // Package* package = nullptr;
+    // if (package_posit == nullptr || strlen(package_posit) == 0) {
+    //     // FIXME: 应该是在当前 package中查找, 而不是 main package
+    //     package = block->package_unit->parent_package;
+    // } else {
+    //     search_package(get_compiler_entry(), package_posit);
+    // }
+
     if (package_posit == nullptr || strlen(package_posit) == 0) {
         // FIXME: 应该是在当前 package中查找, 而不是 main package
         package_posit = (char*)"main";

@@ -70,13 +70,13 @@ TOOL_GEN_VMCODE_DOC_OBJS  = vm.o tool_gen_vmcode_doc.o
 #  DDEBUG_RVM_MEM_POOL_DETAIL 	     展示 Memory Pool 内存分配的详情
 #  DEBUG_RVM_GC_DETAIL 			     展示 Garbage Collect 的详情
 #  DEBUG_RDB_TRACE_DISPATH_DETAIL    调试开发Ring-Debugger: 展示 rdb trace_dispath 的详情, 可以展示每一次回掉到debugger的详情
-CFLAGS = -c -static -O2 -std=c++17 \
+CFLAGS = -c -static  -std=c++17 \
 				-Wall \
 				-Wextra \
 				-Wno-sign-compare \
 				-Wno-unused-parameter \
 				-Wno-unused-function \
-				 # -g \
+				  -g \
 				 -DDEBUG \
 				 -DDEBUG_FLEX1 \
 				 -DDEBUG_BISON1 \

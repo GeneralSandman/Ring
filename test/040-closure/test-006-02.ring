@@ -10,59 +10,47 @@ import {
 	os;
 	debug;
 	fmt;
-}
-
-
-typedef function(double) -> (string) functype_0;
-typedef function(int64) -> (functype_0) functype_1;
-typedef function(int) -> (functype_1) functype_2;
-
-
-function return_closure() -> (functype_2) {
-	fmt::println("return_closure:: invoke level3");
-	var functype_2 func_var;
-	func_var = function(var int  a) -> (functype_1) {
-		fmt::printf("return_closure:: invoke level2 int={}\n", a);
-		var functype_1 func_var;
-		func_var = function(var int64 a) -> (functype_0) {
-			fmt::printf("return_closure:: invoke level1 int64={}\n", a);
-			var functype_0 func_var;
-			func_var = function(var double a) -> (string) {
-				fmt::printf("return_closure:: invoke level0 double={}\n", a);
-				return "hello ring compiler";
-			};
-			return func_var;
-		};
-		return func_var;
-	};
-	return func_var;
+	strings;
 }
 
 
 @main
 function main() {
-	var functype_2 tmp_2;
-	fmt::println("\nmain::1");
-	tmp_2 = return_closure();
-	fmt::printf("tmp_2 type:{}\n", reflect::typeof(tmp_2));
+	var string[] string_array = string[]{"c", "b"};
 
+	// res = strings::join(string_array, "-");
+	// fmt::println(res);
 
-	var functype_1 tmp_1;
-	fmt::println("\nmain::2");
-	tmp_1 = tmp_2(123);
-	fmt::printf("tmp_1 type:{}\n", reflect::typeof(tmp_1));
+	
+	test(string_array);
 
-	var functype_0 tmp_0;
-	fmt::println("\nmain::3");
-	tmp_0 = tmp_1(456L);
-	fmt::printf("tmp_0 type:{}\n", reflect::typeof(tmp_0));
-
-	var string tmp;
-	fmt::println("\nmain::4");
-	tmp = tmp_0(3.1415);
-	fmt::printf("tmp type:{}, value:{}\n", reflect::typeof(tmp), tmp);
+	fmt::println("==============");
+	strings_join(string_array, "-");
 }
 
+function test(var string[] aaa) {
+	var string res;
+	res = res .. "xx";
+	// fmt::println(res);
+}
 
+function strings_join(var string[] a, var string sep) -> (string) {
+	var string res;
 
+	// res = "a";
+	fmt::println(res);
 
+	var int i = 0;
+	for(i = 0; i < len(a); i++) {
+		fmt::println(a[i]);
+	
+		res = res .. a[i];
+		if (i != len(a)-1) {
+			res = res .. sep;
+		}
+
+		fmt::println(res);
+	}
+
+	return res;
+}

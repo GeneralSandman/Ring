@@ -1083,6 +1083,7 @@ Block* start_new_block() {
     block->parent_block                = get_package_unit()->current_block;
     block->block_labels.break_label    = 0;
     block->block_labels.continue_label = 0;
+    block->package_unit                = get_package_unit();
 
     get_package_unit()->current_block  = block;
 
