@@ -1837,6 +1837,8 @@ struct Block {
     Block*         parent_block;
 
     BlockLabels    block_labels;
+
+    PackageUnit*   package_unit; // 所属的package_unit
 };
 
 
@@ -3110,7 +3112,7 @@ RVM_CallInfo*        store_callinfo(RVM_CallInfo* head, RVM_CallInfo* call_info)
 RVM_CallInfo*        restore_callinfo(RVM_CallInfo** head_);
 void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                                          RVM_ClassObject*     callee_object,
-                                                         RVM_Function*        function,
+                                                         RVM_Function*        callee_function,
                                                          unsigned int         argument_list_size);
 
 RVM_String*          string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal);

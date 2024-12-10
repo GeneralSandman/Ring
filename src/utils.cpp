@@ -1029,7 +1029,9 @@ std::string format_function_arguments(ArgumentList* argument) {
 
 
     for (; argument != nullptr; argument = argument->next) {
-        strings.push_back(format_type_specifier(argument->expression->convert_type[0]));
+        if (argument->expression->convert_type_size) {
+            strings.push_back(format_type_specifier(argument->expression->convert_type[0]));
+        }
     }
 
     str = strings_join(strings, ",");

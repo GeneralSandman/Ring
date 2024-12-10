@@ -1598,16 +1598,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_INVOKE_FUNC_NATIVE:
             argument_list_size = STACK_GET_INT_OFFSET(-2);
-
             oper_num           = STACK_GET_INT_OFFSET(-1);
             package_index      = oper_num >> 8;
             func_index         = oper_num & 0XFF;
-
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
 
             callee_function = &(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index]);
-
             assert(callee_function->type == RVM_FUNCTION_TYPE_NATIVE);
+
             invoke_native_function(rvm,
                                    callee_function,
                                    argument_list_size);
@@ -2521,7 +2519,7 @@ RVM_CallInfo* restore_callinfo(RVM_CallInfo** head_) {
  */
 void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                          RVM_ClassObject*     callee_object,
-                                         RVM_Function*        function,
+                                         RVM_Function*        callee_function,
                                          unsigned int         argument_list_size) {
 
     RVM_TypeSpecifier*   type_specifier          = nullptr;
@@ -2549,10 +2547,10 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
     // access arguments by array.
     unsigned int argument_stack_offset = 0;
     for (unsigned int i = 0;
-         i < function->parameter_size && argument_stack_offset < argument_list_size;
-         i++, local_vari_stack_offset++, argument_stack_offset++) {
+         i < callee_function->parameter_size && argument_stack_offset < argument_list_size;
+         i++, argument_stack_offset++) {
 
-        RVM_Parameter* parameter = &function->parameter_list[i];
+        RVM_Parameter* parameter = &callee_function->parameter_list[i];
 
         if (parameter->is_variadic) {
             // 可变参数只能是函数的最后一个参数,
@@ -2626,6 +2624,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             }
 
             STACK_SET_ARRAY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, array);
+            local_vari_stack_offset++;
 
             // 可变参数只能是函数的最后一个参数
             break;
@@ -2633,15 +2632,17 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             STACK_COPY_INDEX(
                 VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset,
                 argument_stack_index + argument_stack_offset);
+            local_vari_stack_offset++;
         }
     }
 
 
     // Step-3: init local variables which defined in callee_function.
-    for (unsigned int i = 0; i < function->local_variable_size;
-         i++, local_vari_stack_offset++) {
+    for (unsigned int i = 0;
+         i < callee_function->local_variable_size;
+         i++) {
 
-        type_specifier = function->local_variable_list[i].type_specifier;
+        type_specifier = callee_function->local_variable_list[i].type_specifier;
 
         // 初始化 self 变量
         if (callee_object != nullptr && i == 0) {
@@ -2656,9 +2657,9 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
         // 看看 是否已经在 Step-2初始化了
         // TODO: 后续优化一下, 这个试下方式不太好
         bool already_init = false;
-        for (unsigned int p = 0; p < function->parameter_size; p++) {
-            RVM_Parameter* parameter = &function->parameter_list[p];
-            if (str_eq(function->local_variable_list[i].identifier, parameter->identifier)) {
+        for (unsigned int p = 0; p < callee_function->parameter_size; p++) {
+            RVM_Parameter* parameter = &callee_function->parameter_list[p];
+            if (str_eq(callee_function->local_variable_list[i].identifier, parameter->identifier)) {
                 already_init = true;
                 break;
             }
@@ -2695,14 +2696,21 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
         case RING_BASIC_TYPE_FUNC:
             STACK_SET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, nullptr);
             break;
+        case RING_BASIC_TYPE_ARRAY:
+            // TODO: 这里没有分配空间
+            break;
 
         default:
             break;
         }
+
+        local_vari_stack_offset++;
     }
 
+    assert(callee_function->local_variable_size == local_vari_stack_offset);
+
     // Step-End: increase top index of runtime_stack.
-    VM_CUR_CO_STACK_TOP_INDEX += function->local_variable_size;
+    VM_CUR_CO_STACK_TOP_INDEX += callee_function->local_variable_size;
 }
 
 

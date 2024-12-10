@@ -167,7 +167,7 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
     unsigned int argument_stack_offset = 0;
     for (unsigned int i = 0;
          i < callee_function->parameter_size && argument_stack_offset < argument_list_size;
-         i++, local_vari_stack_offset++, argument_stack_offset++) {
+         i++, argument_stack_offset++) {
 
         RVM_Parameter* parameter = &callee_function->parameter_list[i];
 
@@ -244,19 +244,21 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
 
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type          = RVM_VALUE_TYPE_ARRAY;
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.array_value = array;
-
+            local_vari_stack_offset++;
             // 可变参数只能是函数的最后一个参数
             break;
         } else {
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset] =
                 VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset];
+            local_vari_stack_offset++;
         }
     }
 
 
     // Step-3: init local variables which defined in callee_function.
-    for (unsigned int i = 0; i < callee_function->local_variable_size;
-         i++, local_vari_stack_offset++) {
+    for (unsigned int i = 0;
+         i < callee_function->local_variable_size;
+         i++) {
 
         type_specifier = callee_function->local_variable_list[i].type_specifier;
 
@@ -321,10 +323,21 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type             = RVM_VALUE_TYPE_CLASS_OB;
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.class_ob_value = class_ob;
             break;
+        case RING_BASIC_TYPE_FUNC:
+            // TODO: 这里没有分配空间
+            break;
+        case RING_BASIC_TYPE_ARRAY:
+            // TODO: 这里没有分配空间
+            break;
 
-        default: break;
+        default:
+            break;
         }
+
+        local_vari_stack_offset++;
     }
+
+    assert(callee_function->local_variable_size == local_vari_stack_offset);
 
 
     // Step-End: increase top index of runtime_stack.
