@@ -1450,6 +1450,7 @@ struct FieldMember {
 struct Statement {
     unsigned int  line_number;
 
+    Block*        block; // 所属的 block
     StatementType type;
     union {
         Expression*             expression;
@@ -2654,7 +2655,7 @@ void           yyin_move_to_next_line();
  * function definition
  *
  */
-void                          finish_global_block(Statement* global_statement_list);
+void                          finish_global_block(Block* block, Statement* global_statement_list);
 
 Statement*                    statement_list_add_item(Statement* statement_list, Statement* statement);
 Statement*                    create_statemen_from_expression(Expression* expression);

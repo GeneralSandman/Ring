@@ -6,11 +6,12 @@
 
 
 // finish a block compile
-void finish_global_block(Statement* global_statement_list) {
+void finish_global_block(Block* block, Statement* global_statement_list) {
     debug_ast_info_with_yellow("");
 
     get_package_unit()->global_block_statement_list = global_statement_list;
     for (; global_statement_list != nullptr; global_statement_list = global_statement_list->next) {
+        global_statement_list->block = block;
         get_package_unit()->global_block_statement_list_size++;
     }
 }
@@ -1098,6 +1099,7 @@ Block* finish_block(Block* block, Statement* statement_list) {
 
     block->statement_list  = statement_list;
     for (Statement* pos = statement_list; pos; pos = pos->next) {
+        pos->block = block;
         block->statement_list_size++;
     }
 

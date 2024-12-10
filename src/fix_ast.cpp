@@ -107,7 +107,7 @@ void ring_compiler_fix_ast(Package* package) {
                 if (expression->type != EXPRESSION_TYPE_ASSIGN) {
                     ring_error_report("only support variable definition&init statement in global block. expression->type:%d\n", expression->type);
                 }
-                fix_assign_expression(expression->u.assign_expression, nullptr, nullptr);
+                fix_assign_expression(expression->u.assign_expression, statement->block, nullptr);
             } break;
             default:
                 ring_error_report("only support variable definition&init statement in global block. statement->type:%d\n", statement->type);
@@ -147,7 +147,7 @@ void ring_compiler_fix_ast(Package* package) {
             if (expression->type != EXPRESSION_TYPE_ASSIGN) {
                 ring_error_report("only support variable definition&init statement in global block. expression->type:%d\n", expression->type);
             }
-            fix_assign_expression(expression->u.assign_expression, nullptr, nullptr);
+            fix_assign_expression(expression->u.assign_expression, global_statement->block, nullptr);
         } break;
         default:
             ring_error_report("only support variable definition&init statement in global block. statement->type:%d\n", global_statement->type);

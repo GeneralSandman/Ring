@@ -331,10 +331,10 @@ import_package_info
     ;
 
 global_variable_definition_block
-    : TOKEN_GLOBAL TOKEN_LC global_variable_definition_list TOKEN_RC
+    : TOKEN_GLOBAL TOKEN_LC { $<m_block>$ = start_new_block(); } global_variable_definition_list TOKEN_RC
     {
         debug_bison_info_with_green("[RULE::global_variable_definition_block:2]\t ");
-        finish_global_block($3);
+        finish_global_block($<m_block>3, $4);
     }
     | TOKEN_GLOBAL TOKEN_LC TOKEN_RC
     {
