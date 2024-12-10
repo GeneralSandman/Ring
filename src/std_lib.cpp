@@ -22,6 +22,7 @@ char RING_PACKAGE_STD_PATH_IO[]      = "/Users/bytedance/Desktop/Ring/std/io/";
 char RING_PACKAGE_STD_PATH_MATH[]    = "/Users/bytedance/Desktop/Ring/std/math/";
 char RING_PACKAGE_STD_PATH_OS[]      = "/Users/bytedance/Desktop/Ring/std/os/";
 char RING_PACKAGE_STD_PATH_REFLECT[] = "/Users/bytedance/Desktop/Ring/std/reflect/";
+char RING_PACKAGE_STD_PATH_STRINGS[] = "/Users/bytedance/Desktop/Ring/std/strings";
 char RING_PACKAGE_STD_PATH_TIME[]    = "/Users/bytedance/Desktop/Ring/std/time/";
 char RING_PACKAGE_STD_PATH_VM[]      = "/Users/bytedance/Desktop/Ring/std/vm/";
 #else
@@ -31,6 +32,7 @@ char RING_PACKAGE_STD_PATH_IO[]      = "/usr/local/lib/ring/std/io/";
 char RING_PACKAGE_STD_PATH_MATH[]    = "/usr/local/lib/ring/std/math/";
 char RING_PACKAGE_STD_PATH_OS[]      = "/usr/local/lib/ring/std/os/";
 char RING_PACKAGE_STD_PATH_REFLECT[] = "/usr/local/lib/ring/std/reflect/";
+char RING_PACKAGE_STD_PATH_STRINGS[] = "/usr/local/lib/ring/std/strings/";
 char RING_PACKAGE_STD_PATH_TIME[]    = "/usr/local/lib/ring/std/time/";
 char RING_PACKAGE_STD_PATH_VM[]      = "/usr/local/lib/ring/std/vm/";
 #endif
@@ -119,6 +121,12 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         std::vector<StdPackageNativeFunction>{
             {(char*)"typeof", std_lib_reflect_typeof, 0, 1},
         },
+    },
+
+    {
+        (char*)"strings",
+        RING_PACKAGE_STD_PATH_STRINGS,
+        std::vector<StdPackageNativeFunction>{},
     },
 
     {

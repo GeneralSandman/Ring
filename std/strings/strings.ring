@@ -10,4 +10,17 @@ import {
 
 }
 
-function concat(var string a, var string b);
+function join(var string[] a, var string sep) -> (string) {
+	var string result;
+
+	var int i = 0;
+
+	for(i = 0; i < len(a); i++) {
+		result = result .. a[i];
+		if (i != len(a) - 1) {
+			result = result .. sep;
+		}
+	}
+	
+	return result;
+}
