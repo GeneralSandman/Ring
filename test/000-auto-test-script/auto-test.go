@@ -88,6 +88,7 @@ var (
 		"065-std-package-io",
 		"066-std-package-time",
 		"067-std-package-math",
+		"068-std-package-strings",
 	}
 
 	NOT_TEST_FILES = []string{
