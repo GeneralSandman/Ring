@@ -328,6 +328,45 @@ function main() {
 |RingDebug: fix_ast.cpp:1013
 ```
 
+
+
+### H. Proposal: 提供 strings::join 标准库
+
+
+### I. Fix: 局部变量不进行初始化会 panic
+
+
+```
+function join(var string[] a, var string sep) -> (string) {
+	var string result;
+
+	var int i = 0;
+
+	for(i = 0; i < len(a); i++) {
+		result = result .. a[i];
+		if (i != len(a) - 1) {
+			result = result .. sep;
+		}
+	}
+	
+	return result;
+}
+```
+
+
+### J. Proposal: 关于整个工程的链接问题
+
+1. 在多个package链接在一起的时候，bug：访问常量会直接访问到main-package的常量区，这里需要进行优化
+
+
+
+### M. Fix: 编译报错，变量定义重复
+
+```
+function (var int a) {
+    var int a;
+}
+```
 -----------------------------
 
 
