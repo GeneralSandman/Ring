@@ -194,7 +194,7 @@ int yylex();
 %type <m_statement_list> statement statement_list
 %type <m_statement_list> multi_variable_definition_statement
 %type <m_statement_list> global_variable_definition global_variable_definition_list
-%type <m_expression> expression expression_list
+%type <m_expression> expression expression_list expression_list_maybe_empty
 %type <m_expression> postfix_expression
 %type <m_expression> unitary_expression
 %type <m_expression> ternary_expression
@@ -941,6 +941,16 @@ class_field_init_element
     }
     ;
 
+expression_list_maybe_empty
+    : 
+    {
+        $$ = nullptr;
+    }
+    | expression_list
+    {
+    }
+    ;
+
 expression_list
     : expression
     | expression_list TOKEN_COMMA expression
@@ -1373,24 +1383,30 @@ iife_expression
     ;
 
 
+/*
+ * 数组常量规则
+ *
+ * 1. {} 内 可以为空
+ * 2. {} 内 可以有 一个或多个元素，最后一个元素后边，逗号为可选
+ */ 
 array_literal_expression
-    : basic_type_specifier dimension_expression TOKEN_LC expression_list             TOKEN_RC
+    : basic_type_specifier dimension_expression TOKEN_LC    expression_list_maybe_empty    TOKEN_RC
     {
         debug_bison_info_with_green("[RULE::array_literal_expression:basic]\t ");
         $$ = create_array_literal_expression(create_type_specifier($1), $2, $4);
     }
-    | basic_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_COMMA TOKEN_RC
+    | basic_type_specifier dimension_expression TOKEN_LC    expression_list TOKEN_COMMA    TOKEN_RC
     {
         debug_bison_info_with_green("[RULE::array_literal_expression:basic]\t ");
         $$ = create_array_literal_expression(create_type_specifier($1), $2, $4);
     }
-    | class_type_specifier dimension_expression TOKEN_LC expression_list             TOKEN_RC
+    | class_type_specifier dimension_expression TOKEN_LC    expression_list_maybe_empty    TOKEN_RC
     {
         // FIXME: 这里会产生一个 reduce/reduce conflict
         debug_bison_info_with_green("[RULE::array_literal_expression:class]\t ");
         $$ = create_array_literal_expression($1, $2, $4);
     }
-    | class_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_COMMA TOKEN_RC
+    | class_type_specifier dimension_expression TOKEN_LC    expression_list TOKEN_COMMA    TOKEN_RC
     {
         // FIXME: 这里会产生一个 reduce/reduce conflict
         debug_bison_info_with_green("[RULE::array_literal_expression:class]\t ");

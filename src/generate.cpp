@@ -2496,7 +2496,6 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
 
     debug_generate_info_with_darkgreen("\t");
     assert(array_literal_expression != nullptr);
-    assert(array_literal_expression->expression_list != nullptr);
     assert(array_literal_expression->dimension_expression != nullptr);
     assert(array_literal_expression->type_specifier != nullptr);
     assert(array_literal_expression->type_specifier->kind == RING_BASIC_TYPE_ARRAY);
