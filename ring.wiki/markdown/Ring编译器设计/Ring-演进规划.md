@@ -35,7 +35,7 @@
 ### 测试集  ring run
 
 ```
-2024-07-12
+2024-12-27
 
 
 [TestInfo]:
@@ -48,7 +48,7 @@ TEST_PATH         = ./test
 
 
 [Result]:
-Pass/All = 401/401
+Pass/All = 487/487
 NotTest  = 5
 Fail     = 0
 Usetime  = 23S     
@@ -84,7 +84,7 @@ Usetime  = 1S
    2. 返回值的类型是类      class
    3. 返回值的类型是数组    bool[]/int[]/int64[]/double[]/string[]
    4. 返回值的类型是数组    class[]
-   5. TODO:  多维数组（基础类型+类）
+   5. 多维数组（基础类型+类）
 3. 全局变量
    1. 变量的定义+初始化 (Path: ./test/011-global-variable/def-and-init-*)
    2. 全局变量的类型是基础类型 bool/int/int64/double/string
@@ -273,9 +273,11 @@ curl -H "Authorization: token xx" https://api.github.com/rate_limit
 上传到一个 cos 的 bucket桶中，桶中的数据
 
 
-### E. Fix: 这个会语法错误
+### E. Fix: 这个会语法错误 ✅
 
+```
 return bool[]{};
+```
 
 ### F. Optimize: debug::debug_assert() 改成 debug::assert()  ✅
 
@@ -367,6 +369,36 @@ function (var int a) {
     var int a;
 }
 ```
+
+
+### N. Fix: 
+
+```
+
+function test(var int[] array) {
+
+}
+
+
+test();
+
+```
+
+编译器报错：
+
+```
+./test/004-derive-function/return-value/int-multi-array-000.ring:14:0: 
+|       fmt::println(return_1_int_array_1());
+| ^......
+|
+|Err: function return_1_int_array_1() requires (array) arguments, but () was provided; E:300002
+```
+
+
+ 
+应该 `array` 的报错更加详细
+
+
 -----------------------------
 
 
