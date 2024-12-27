@@ -1,6 +1,6 @@
 module ring-auto-test
 
-go 1.22.5
+go 1.16
 
 require (
 	github.com/gosuri/uiprogress v0.0.1

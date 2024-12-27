@@ -20,7 +20,8 @@ apt-get -y install flex && \
 apt-get -y install bison && \
 apt-get -y install g++ && \
 apt-get -y install gdb && \
-apt-get -y install valgrind
+apt-get -y install valgrind && \
+apt-get -y install golang
 
 # build
 cd /home/Ring && \
@@ -42,7 +43,8 @@ yum update -y && \
     yum install -y flex && \
     yum install -y clang && \
     yum install -y gdb && \
-    yum install -y wget
+    yum install -y wget && \
+    yum install -y golang
 
 # install bision 3.8.2
 cd /home && \

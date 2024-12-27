@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstring>
 #include <fcntl.h>
+#include <cassert>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>

@@ -1,4 +1,5 @@
 #include "ring.hpp"
+#include <cassert>
 
 
 extern int RING_DEBUG_TRACE_COROUTINE_SCHED;
