@@ -116,7 +116,6 @@ function main() {
 
 
     fmt::println_string("\ntest case 2-------");
-    var Job local_job_value;
     for(local_job_value in range global_job_array_0) {
         local_job_value.printInfo();
     }

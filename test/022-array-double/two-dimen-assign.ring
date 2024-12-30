@@ -83,8 +83,8 @@ function main() {
 
     fmt::println_string("\ntest cast 5 ------------------------");
 
-    var int i = 0;
-    var int j = 0;
+    i = 0;
+    j = 0;
 
     for(i = 0; i < 2; i = i+1) {
         for(j = 0; j < 4; j = j+1) {
