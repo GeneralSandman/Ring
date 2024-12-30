@@ -2816,7 +2816,9 @@ void ring_compiler_analysis_global_variable(Package* package);
 void ring_compiler_analysis_function(Package* package);
 void ring_compiler_analysis_function_block(Package* package, Block* block);
 void ring_compiler_analysis_class(Package* package);
-void check_function_call(FunctionCallExpression* function_call_expression, Function* function);
+void check_function_call(FunctionCallExpression* function_call_expression,
+                         Function*               function,
+                         VarDecl*                anony_func_decl);
 
 void ring_compiler_analysis_class_block(Package* package, ClassDefinition* class_def);
 
@@ -3330,6 +3332,9 @@ std::string              formate_array_item_type(RVM_Array* array_value);
 
 std::string              formate_closure_type(Package_Executer* package_executer,
                                               RVM_Closure*      closure_value);
+
+bool                     comp_type_specifier(TypeSpecifier* a, TypeSpecifier* b);
+bool                     comp_type_specifier_func(Ring_DeriveType_Func* a, Ring_DeriveType_Func* b);
 
 std::string              sprintf_string(const char* format, ...);
 

@@ -141,17 +141,32 @@ void ring_compiler_analysis_function_block(Package* package, Block* block) {
  * 1. 参数数量不正确
  * 2. 参数类型不正确
  * 3. 返回值和函数的声明不一致
+ *
+ * - function anony_func_decl 二者选其一
+ * function 为 函数调用
+ * anony_func_decl 为匿名函数变量定义
+ *
  */
-void check_function_call(FunctionCallExpression* function_call_expression, Function* function) {
+void check_function_call(FunctionCallExpression* function_call_expression,
+                         Function*               function,
+                         VarDecl*                anony_func_decl) {
     assert(function_call_expression != nullptr);
-    assert(function != nullptr);
+    assert(function != nullptr || anony_func_decl != nullptr);
 
 
     ArgumentList* argument_pos  = function_call_expression->argument_list;
-    Parameter*    parameter_pos = function->parameter_list;
+    Parameter*    parameter_pos = nullptr;
 
-    std::string   parameter_str = format_function_parameters(parameter_pos);
-    std::string   argument_str  = format_function_arguments(argument_pos);
+    if (function != nullptr) {
+        parameter_pos = function->parameter_list;
+    } else {
+        assert(anony_func_decl->type_specifier->kind == RING_BASIC_TYPE_FUNC);
+        parameter_pos = anony_func_decl->type_specifier->u.func_t->parameter_list;
+    }
+
+
+    std::string parameter_str = format_function_parameters(parameter_pos);
+    std::string argument_str  = format_function_arguments(argument_pos);
 
 
     // TODO:
@@ -164,8 +179,9 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
     for (; argument_pos != nullptr && parameter_pos != nullptr;) {
 
         // Ring-Compiler-Error-Report ERROR_ARGUMENT_MISMATCH_TYPE
-        if (parameter_pos->type_specifier->kind != RING_BASIC_TYPE_ANY
-            && parameter_pos->type_specifier->kind != argument_pos->expression->convert_type[0]->kind) {
+        if (!comp_type_specifier(parameter_pos->type_specifier,
+                                 argument_pos->expression->convert_type[0])) {
+            // FIXME：这里只比对了 convert_type[0]
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf            = sprintf_string("function %s() requires (%s) arguments, but (%s) was provided; E:%d",
@@ -201,7 +217,8 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
         parameter_pos = parameter_pos->next;
     }
 
-    // 没有消费完
+    // argument, parameter 没有消费完
+    // 函数调用不匹配
     if (argument_pos != nullptr || parameter_pos != nullptr) {
         DEFINE_ERROR_REPORT_STR;
 

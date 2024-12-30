@@ -1794,7 +1794,10 @@ void fix_function_call_expression(Expression*             expression,
             function_call_expression->type              = FUNCTION_CALL_TYPE_CLOSURE;
             function_call_expression->u.cc.closure_decl = variable->decl;
 
-            FunctionReturnList* return_pos              = nullptr;
+            check_function_call(function_call_expression, nullptr, variable->decl);
+
+
+            FunctionReturnList* return_pos = nullptr;
             EXPRESSION_CLEAR_CONVERT_TYPE(expression);
             for (return_pos = variable->decl->type_specifier->u.func_t->return_list;
                  return_pos != nullptr;
@@ -1851,7 +1854,7 @@ void fix_function_call_expression(Expression*             expression,
         ring_compile_error_report(&context);
     }
 
-    check_function_call(function_call_expression, function);
+    check_function_call(function_call_expression, function, nullptr);
 
     function_call_expression->type          = FUNCTION_CALL_TYPE_FUNC;
     function_call_expression->u.fc.function = function;

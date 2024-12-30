@@ -1424,11 +1424,81 @@ std::string formate_closure_type(Package_Executer* package_executer,
  *
  * 深度比较两个 TypeSpecifier
  * 后续需要添加一个参数：用来判断是否 any 类型
+ * TODO: 如何比较类
  */
-// bool comp_type_specifier(TypeSpecifier* a, TypeSpecifier* b) {
-//     assert(a != nullptr);
-//     assert(b != nullptr);
-// }
+bool comp_type_specifier(TypeSpecifier* a, TypeSpecifier* b) {
+    if (a == nullptr && b == nullptr) {
+        return true;
+    } else if (a == nullptr || b == nullptr) {
+        return false;
+    }
+
+    if (a->kind == RING_BASIC_TYPE_ANY
+        || b->kind == RING_BASIC_TYPE_ANY) {
+        return true;
+    }
+
+    if (a->kind != b->kind) {
+        return false;
+    }
+
+    if (a->kind == RING_BASIC_TYPE_CLASS) {
+        // TODO: class 如何比较
+        return true;
+    } else if (a->kind == RING_BASIC_TYPE_ARRAY) {
+        Ring_DeriveType_Array* a_array_t = a->u.array_t;
+        Ring_DeriveType_Array* b_array_t = b->u.array_t;
+
+        return a_array_t->dimension == b_array_t->dimension
+            && comp_type_specifier(a_array_t->sub, b_array_t->sub);
+
+    } else if (a->kind == RING_BASIC_TYPE_FUNC) {
+        return comp_type_specifier_func(a->u.func_t, b->u.func_t);
+    }
+
+    return true;
+}
+
+bool comp_type_specifier_func(Ring_DeriveType_Func* a, Ring_DeriveType_Func* b) {
+
+    if (a->parameter_list_size != b->parameter_list_size
+        || a->return_list_size != b->return_list_size) {
+        return false;
+    }
+
+
+    // compare parameter
+    Parameter* a_param = a->parameter_list;
+    Parameter* b_param = b->parameter_list;
+    for (; a_param != nullptr && b_param != nullptr;
+         a_param = a_param->next, b_param = b_param->next) {
+
+        bool tmp = a_param->is_variadic == b_param->is_variadic
+            && comp_type_specifier(a_param->type_specifier,
+                                   b_param->type_specifier);
+
+        if (!tmp) {
+            return false;
+        }
+    }
+
+    // compare return lists
+    FunctionReturnList* a_return = a->return_list;
+    FunctionReturnList* b_return = b->return_list;
+    for (; a_return != nullptr && b_return != nullptr;
+         a_return = a_return->next, b_return = b_return->next) {
+
+        bool tmp = comp_type_specifier(a_return->type_specifier,
+                                       b_return->type_specifier);
+
+        if (!tmp) {
+            return false;
+        }
+    }
+
+
+    return true;
+}
 
 std::string sprintf_string(const char* format, ...) {
     // 首先计算所需的缓冲区大小
