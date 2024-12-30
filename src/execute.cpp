@@ -378,7 +378,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
     RVM_ClassDefinition* rvm_class_definition   = nullptr;
     RingCoroutine*       new_coroutine          = nullptr;
-    CO_ID                co_id                  = 0; // FIXME: 类型不一致
+    CO_ID                co_id                  = 0;
 
     ErrorCode            error_code             = ERROR_CODE_SUCCESS;
     int                  exit_code              = 0;
@@ -767,15 +767,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             int_value        = STACK_GET_INT_OFFSET(-1);
             FREE_SET_INT_INDEX(free_value_index, int_value);
-            // {
-            //     RVM_Value* p = nullptr;
-            //     if (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].is_recur) {
-            //         p = (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.recur->u.p);
-            //     } else {
-            //         p = VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.p;
-            //     }
-            //     p->u.int_value = int_value;
-            // }
 
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             VM_CUR_CO_PC += 3;
@@ -816,15 +807,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_FREE_INT:
             free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             int_value        = FREE_GET_INT_INDEX(free_value_index);
-            // {
-            //     RVM_Value* p = nullptr;
-            //     if (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].is_recur) {
-            //         p = (VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.recur->u.p);
-            //     } else {
-            //         p = VM_CUR_CO_CALLINFO->curr_closure->free_value_list[free_value_index].u.p;
-            //     }
-            //     int_value = p->u.int_value;
-            // }
             STACK_SET_INT_OFFSET(0, int_value);
 
             VM_CUR_CO_STACK_TOP_INDEX += 1;

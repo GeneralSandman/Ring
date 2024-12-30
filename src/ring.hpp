@@ -2322,6 +2322,11 @@ typedef enum {
     ERROR_ASSIGNMENT_MISMATCH_TYPE            = 200018, // 赋值时, 左值和右值的类型不匹配
     ERROR_CONCAT_OPERATOR_MISMATCH_TYPE       = 200019, // string .. 操作数类型不不匹配
     ERROR_MATH_OPERATOR_MISMATCH_TYPE         = 200020, // 数学运算操作数不是 int/int64/double 类型
+    ERROR_REDEFINITE_LOCAL_VARIABLE           = 200021, // 重复定义的局部变量
+
+    ERROR_REDEFINITE_CLASS                    = 200022, // 重复定义 class
+    ERROR_REDEFINITE_MEMBER_IN_CLASS          = 200023, // 重复定义 class field/method
+
 
     ERROR_OVERFLOWS                           = 200051, // 溢出
 
@@ -2806,8 +2811,11 @@ void ring_compiler_semantic_analysis(Package* package);
 void ring_compiler_analysis_import_package(Package* package);
 void ring_compiler_analysis_global_variable(Package* package);
 void ring_compiler_analysis_function(Package* package);
+void ring_compiler_analysis_function_block(Package* package, Block* block);
 void ring_compiler_analysis_class(Package* package);
 void check_function_call(FunctionCallExpression* function_call_expression, Function* function);
+
+void ring_compiler_analysis_class_block(Package* package, ClassDefinition* class_def);
 
 void ring_compiler_check_exit(Package* package);
 // --------------------

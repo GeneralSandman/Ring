@@ -241,6 +241,10 @@ void package_compile(Package* package) {
     ring_compiler_check_exit(package);
     ring_compiler_fix_ast(package);
 
+    ring_compiler_analysis_global_variable(package);
+    ring_compiler_analysis_function(package);
+    ring_compiler_analysis_class(package);
+
 
 #ifdef DEBUG_COMPILER_SUMMARY
     if (str_eq(package->package_name, "main")) {

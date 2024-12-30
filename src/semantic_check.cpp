@@ -9,9 +9,6 @@
 
 void ring_compiler_semantic_analysis(Package* package) {
     ring_compiler_analysis_import_package(package);
-    ring_compiler_analysis_global_variable(package);
-    ring_compiler_analysis_function(package);
-    ring_compiler_analysis_class(package);
 }
 
 void ring_compiler_analysis_import_package(Package* package) {
@@ -55,6 +52,8 @@ void ring_compiler_analysis_global_variable(Package* package) {
 }
 
 void ring_compiler_analysis_function(Package* package) {
+
+    // 一个package中的函数是否重复
     for (Function* function : package->function_list) {
         std::string identifier = std::string(function->identifier);
         auto        iter       = package->function_map.find(identifier);
@@ -65,13 +64,8 @@ void ring_compiler_analysis_function(Package* package) {
 
             compile_err_buf = sprintf_string(
                 "redefinition of function `%s`; E:%d.",
-
                 function->identifier,
                 ERROR_REDEFINITE_FUNCTION);
-            compile_adv_buf = sprintf_string(
-                "the first definition of function `%s` is here.",
-
-                function->identifier);
 
             ErrorReportContext context = {
                 .package                 = package,
@@ -89,7 +83,55 @@ void ring_compiler_analysis_function(Package* package) {
             ring_compile_error_report(&context);
             continue;
         }
+
         package->function_map[identifier] = function;
+    }
+
+    for (Function* function : package->function_list) {
+        if (function->type != FUNCTION_TYPE_DERIVE) {
+            continue;
+        }
+        ring_compiler_analysis_function_block(package, function->block);
+    }
+}
+
+void ring_compiler_analysis_function_block(Package* package, Block* block) {
+
+    //
+    std::unordered_map<std::string, VarDecl*> local_var_map;
+
+    VarDecl*                                  decl_pos = block->var_decl_list;
+    for (; decl_pos != nullptr; decl_pos = decl_pos->next) {
+        std::string identifier = std::string(decl_pos->identifier);
+        auto        iter       = local_var_map.find(identifier);
+
+        // Ring-Compiler-Error-Report ERROR_REDEFINITE_LOCAL_VARIABLE
+        if (iter != local_var_map.end()) {
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "redefinition of variable `%s`; E:%d.",
+                decl_pos->identifier,
+                ERROR_REDEFINITE_LOCAL_VARIABLE);
+
+            ErrorReportContext context = {
+                .package                 = package,
+                .package_unit            = nullptr,
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(decl_pos->line_number),
+                .line_number             = decl_pos->line_number,
+                .column_number           = 0,
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+            continue;
+        }
+
+        local_var_map[identifier] = decl_pos;
     }
 }
 /*
@@ -187,6 +229,136 @@ void check_function_call(FunctionCallExpression* function_call_expression, Funct
 }
 
 void ring_compiler_analysis_class(Package* package) {
+    std::unordered_map<std::string, ClassDefinition*> class_map;
+
+    for (ClassDefinition* class_def : package->class_definition_list) {
+
+        std::string identifier = std::string(class_def->identifier);
+        auto        iter       = class_map.find(identifier);
+
+        // Ring-Compiler-Error-Report ERROR_REDEFINITE_CLASS
+        if (iter != class_map.end()) {
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "redefinition of class`%s`; E:%d.",
+                class_def->identifier,
+                ERROR_REDEFINITE_CLASS);
+
+            ErrorReportContext context = {
+                .package                 = package,
+                .package_unit            = nullptr,
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(class_def->start_line_number),
+                .line_number             = class_def->start_line_number,
+                .column_number           = 0,
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+            continue;
+        }
+
+        class_map[identifier] = class_def;
+    }
+
+    for (ClassDefinition* class_def : package->class_definition_list) {
+        ring_compiler_analysis_class_block(package, class_def);
+    }
+}
+
+
+/*
+ * ring_compiler_analysis_class_block
+ * 1. field method 名字不能重复
+ * 2. 对 method 进行 function 式检查
+ */
+void ring_compiler_analysis_class_block(Package* package, ClassDefinition* class_def) {
+    std::unordered_set<std::string> member_map;
+
+
+    for (FieldMember* field_member = class_def->field_list;
+         field_member != nullptr;
+         field_member = field_member->next) {
+
+        std::string identifier = std::string(field_member->identifier);
+        auto        iter       = member_map.find(identifier);
+
+        // Ring-Compiler-Error-Report ERROR_REDEFINITE_MEMBER_IN_CLASS
+        if (iter != member_map.end()) {
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "redefinition of field `%s`; E:%d.",
+                field_member->identifier,
+                ERROR_REDEFINITE_MEMBER_IN_CLASS);
+
+            ErrorReportContext context = {
+                .package                 = package,
+                .package_unit            = nullptr,
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(field_member->line_number),
+                .line_number             = field_member->line_number,
+                .column_number           = 0,
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+            continue;
+        }
+
+        member_map.insert(identifier);
+    }
+
+    for (MethodMember* method_member = class_def->method_list;
+         method_member != nullptr;
+         method_member = (MethodMember*)method_member->next) {
+
+        std::string identifier = std::string(method_member->identifier);
+        auto        iter       = member_map.find(identifier);
+
+        // Ring-Compiler-Error-Report ERROR_REDEFINITE_MEMBER_IN_CLASS
+        if (iter != member_map.end()) {
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "redefinition of method `%s`; E:%d.",
+                method_member->identifier,
+                ERROR_REDEFINITE_MEMBER_IN_CLASS);
+
+            ErrorReportContext context = {
+                .package                 = package,
+                .package_unit            = nullptr,
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(method_member->start_line_number),
+                .line_number             = method_member->start_line_number,
+                .column_number           = 0,
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+            continue;
+        }
+
+        member_map.insert(identifier);
+    }
+
+
+    for (MethodMember* method_member = class_def->method_list;
+         method_member != nullptr;
+         method_member = (MethodMember*)method_member->next) {
+
+        ring_compiler_analysis_function_block(package, method_member->block);
+    }
 }
 
 void ring_compiler_check_exit(Package* package) {

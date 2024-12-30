@@ -765,7 +765,7 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf = sprintf_string(
-                "return mismatch: expect %s but return %s; E:%d.",
+                "return mismatch: function expect %s but return %s; E:%d.",
                 expect_type_str.c_str(),
                 actual_type_str.c_str(),
                 ERROR_ASSIGNMENT_MISMATCH_TYPE);
