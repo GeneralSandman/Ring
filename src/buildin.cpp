@@ -276,7 +276,7 @@ void fix_buildin_func_pop(Expression*             expression,
         ring_compile_error_report(&context);
     }
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-    EXPRESSION_ADD_CONVERT_TYPE(expression, (array_type_specifier->sub));
+    EXPRESSION_ADD_CONVERT_TYPE(expression, (array_type_specifier->u.array_t->sub));
 }
 
 void fix_buildin_func_to_string(Expression*             expression,

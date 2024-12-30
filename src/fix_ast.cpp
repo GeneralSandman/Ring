@@ -28,44 +28,32 @@
 TypeSpecifier bool_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_BOOL,
-    .u           = {.array_type = nullptr},
-    .dimension   = 0,
-    .sub         = 0,
+    .u           = {.array_t = nullptr},
 };
 TypeSpecifier int_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_INT,
-    .u           = {.array_type = nullptr},
-    .dimension   = 0,
-    .sub         = 0,
+    .u           = {.array_t = nullptr},
 };
 TypeSpecifier int64_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_INT64,
-    .u           = {.array_type = nullptr},
-    .dimension   = 0,
-    .sub         = 0,
+    .u           = {.array_t = nullptr},
 };
 TypeSpecifier double_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_DOUBLE,
-    .u           = {.array_type = nullptr},
-    .dimension   = 0,
-    .sub         = 0,
+    .u           = {.array_t = nullptr},
 };
 TypeSpecifier string_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_STRING,
-    .u           = {.array_type = nullptr},
-    .dimension   = 0,
-    .sub         = 0,
+    .u           = {.array_t = nullptr},
 };
 TypeSpecifier func_type_specifier = TypeSpecifier{
     .line_number = 0,
     .kind        = RING_BASIC_TYPE_FUNC,
-    .u           = {.array_type = nullptr},
-    .dimension   = 0,
-    .sub         = 0,
+    .u           = {.array_t = nullptr},
 };
 
 extern Ring_Command_Arg ring_command_arg;
@@ -514,7 +502,7 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
             class_type->class_definition      = class_definition;
 
             type_specifier->kind              = RING_BASIC_TYPE_CLASS;
-            type_specifier->u.class_type      = class_type;
+            type_specifier->u.class_t         = class_type;
             goto END;
         }
 
@@ -522,10 +510,8 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
         type_alias = search_type_alias(type_specifier->identifier);
         if (type_alias != nullptr) {
             // TODO: 这个写法需要再优化一下
-            type_specifier->kind      = type_alias->type_specifier->kind;
-            type_specifier->u         = type_alias->type_specifier->u;
-            type_specifier->dimension = type_alias->type_specifier->dimension;
-            type_specifier->sub       = type_alias->type_specifier->sub;
+            type_specifier->kind = type_alias->type_specifier->kind;
+            type_specifier->u    = type_alias->type_specifier->u;
             goto END;
         }
 
@@ -565,11 +551,11 @@ END:
     // 递归修正数组
     // 其实修正递归数组，只会对 class-object的数组生效
     if (type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
-        fix_type_specfier(type_specifier->sub);
+        fix_type_specfier(type_specifier->u.array_t->sub);
     }
 
     if (type_specifier->kind == RING_BASIC_TYPE_FUNC) {
-        Ring_DeriveType_Func* func_type = type_specifier->u.func_type;
+        Ring_DeriveType_Func* func_type = type_specifier->u.func_t;
         for (unsigned int i = 0; i < func_type->parameter_list_size; i++) {
             // TODO: 修正 parameter
         }
@@ -1804,20 +1790,20 @@ void fix_function_call_expression(Expression*             expression,
 
         if (variable->decl->type_specifier->kind == RING_BASIC_TYPE_FUNC) {
             // 是一个变量，并且是一个函数变量，需要继续匹配
-            // 匹配函数调用的语义
+            // TODO: 匹配函数调用的语义
             function_call_expression->type              = FUNCTION_CALL_TYPE_CLOSURE;
             function_call_expression->u.cc.closure_decl = variable->decl;
 
             FunctionReturnList* return_pos              = nullptr;
             EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-            for (return_pos = variable->decl->type_specifier->u.func_type->return_list;
+            for (return_pos = variable->decl->type_specifier->u.func_t->return_list;
                  return_pos != nullptr;
                  return_pos = return_pos->next) {
                 EXPRESSION_ADD_CONVERT_TYPE(expression, return_pos->type_specifier);
             }
             return;
         } else {
-            // 只是一个普通变量
+            // 只是一个普通变量，普通的变量 可以不覆盖 函数的可见性
             // continue search
         }
     }
@@ -1834,6 +1820,8 @@ void fix_function_call_expression(Expression*             expression,
     }
 
 
+    // 3. 搜素剩下的函数
+    // 如果还不能搜索到，就需要报错了
     function = search_function(function_call_expression->package_posit,
                                function_call_expression->func_identifier);
     // Ring-Compiler-Error-Report ERROR_UNDEFINITE_FUNCTION
@@ -1897,7 +1885,7 @@ void fix_method_call_expression(Expression*           expression,
     fix_expression(object_expression, block, func);
 
     // 1. find class definition by object.
-    class_definition = object_expression->convert_type[0]->u.class_type->class_definition;
+    class_definition = object_expression->convert_type[0]->u.class_t->class_definition;
     if (class_definition == nullptr) {
         ring_error_report("fix_method_call_expression error\n");
     }
@@ -1910,8 +1898,9 @@ void fix_method_call_expression(Expression*           expression,
         DEFINE_ERROR_REPORT_STR;
 
         compile_err_buf = sprintf_string(
-            "not found method `%s`; E:%d.",
+            "not found method `%s` in class `%s`; E:%d.",
             member_identifier,
+            class_definition->identifier,
             ERROR_INVALID_NOT_FOUND_CLASS_METHOD);
 
         ErrorReportContext context = {
@@ -1937,6 +1926,8 @@ void fix_method_call_expression(Expression*           expression,
     for (; pos != nullptr; pos = pos->next) {
         fix_expression(pos->expression, block, func);
     }
+
+    // method 定义 与 method 调用表达式一致性检查
 
     // method_call_expression 的类型取决于 method返回值的类型
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
@@ -2039,17 +2030,20 @@ void fix_array_index_expression(Expression*           expression,
      * students[0] is a three-dimension array.
      * students[0,0,0] is a int value.
      */
-    if (index_expression->dimension < variable->decl->type_specifier->dimension) {
-        type->kind = variable->decl->type_specifier->kind;
-    } else if (index_expression->dimension == variable->decl->type_specifier->dimension) {
-        type->kind = variable->decl->type_specifier->sub->kind;
+    if (index_expression->dimension < variable->decl->type_specifier->u.array_t->dimension) {
+        type->kind                 = variable->decl->type_specifier->kind;
+        type->u.array_t            = (Ring_DeriveType_Array*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Array));
+        type->u.array_t->dimension = variable->decl->type_specifier->u.array_t->dimension - index_expression->dimension;
+        type->u.array_t->sub       = variable->decl->type_specifier->u.array_t->sub;
+    } else if (index_expression->dimension == variable->decl->type_specifier->u.array_t->dimension) {
+        type->kind = variable->decl->type_specifier->u.array_t->sub->kind;
     } else {
         ring_error_report("array index access error; E:%d.\n", ERROR_ARRAY_DIMENSION_INVALID);
     }
 
 
     if (type->kind == RING_BASIC_TYPE_CLASS) {
-        type->u.class_type = variable->decl->type_specifier->sub->u.class_type;
+        type->u.class_t = variable->decl->type_specifier->u.array_t->sub->u.class_t;
     }
     fix_type_specfier(type);
 
@@ -2106,7 +2100,7 @@ void fix_class_object_literal_expression(Expression*                   expressio
 
     fix_type_specfier(literal_expression->type_specifier);
 
-    ClassDefinition*     class_definition = literal_expression->type_specifier->u.class_type->class_definition;
+    ClassDefinition*     class_definition = literal_expression->type_specifier->u.class_t->class_definition;
 
 
     FieldInitExpression* pos              = literal_expression->field_init_expression_list;
@@ -2182,7 +2176,7 @@ void fix_field_member_expression(Expression*       expression,
     fix_expression(object_expression, block, func);
 
     // 1. find class definition by object.
-    class_definition = object_expression->convert_type[0]->u.class_type->class_definition;
+    class_definition = object_expression->convert_type[0]->u.class_t->class_definition;
     if (class_definition == nullptr) {
         ring_error_report("fix_field_member_expression error, class_definition is null\n");
     }
@@ -2500,9 +2494,7 @@ void fix_anonymous_func_expression(Expression*              expression,
     type_specifier->line_number          = closure_expression->line_number;
     type_specifier->identifier           = nullptr;
     type_specifier->kind                 = RING_BASIC_TYPE_FUNC;
-    type_specifier->u.func_type          = func_type;
-    type_specifier->dimension            = 0;
-    type_specifier->sub                  = nullptr;
+    type_specifier->u.func_t             = func_type;
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     EXPRESSION_ADD_CONVERT_TYPE(expression, type_specifier);
 }
@@ -2570,13 +2562,15 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
 
             if (src_type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
                 // 直接增加一个维度即可
-                type_specifier->dimension = src_type_specifier->dimension + 1;
-                type_specifier->sub       = src_type_specifier->sub;
+                type_specifier->u.array_t            = (Ring_DeriveType_Array*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Array));
+                type_specifier->u.array_t->dimension = src_type_specifier->u.array_t->dimension + 1;
+                type_specifier->u.array_t->sub       = src_type_specifier->u.array_t->sub;
 
             } else {
                 // 元素升级为数组
-                type_specifier->dimension = 1;
-                type_specifier->sub       = src_type_specifier;
+                type_specifier->u.array_t            = (Ring_DeriveType_Array*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Array));
+                type_specifier->u.array_t->dimension = 1;
+                type_specifier->u.array_t->sub       = src_type_specifier;
             }
         } else {
             type_specifier = src_type_specifier;
@@ -2890,7 +2884,7 @@ bool compare_type_specifier(TypeSpecifier* a, TypeSpecifier* b) {
 
     // 深度比较 func_type
     if (a->kind == RING_BASIC_TYPE_FUNC) {
-        return compare_type_specifier_func(a->u.func_type, b->u.func_type);
+        return compare_type_specifier_func(a->u.func_t, b->u.func_t);
     } else if (a->kind == RING_BASIC_TYPE_ARRAY) {
         // TODO:
     } else if (a->kind == RING_BASIC_TYPE_CLASS) {

@@ -1156,8 +1156,6 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
     TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
     type_specifier->line_number   = package_unit_get_line_number();
     type_specifier->kind          = basic_type;
-    type_specifier->dimension     = 0;
-    type_specifier->sub           = nullptr;
 
     return type_specifier;
 }
@@ -1174,20 +1172,20 @@ TypeSpecifier* create_type_specifier(Ring_BasicType basic_type) {
 TypeSpecifier* create_type_specifier_array(TypeSpecifier*       sub_type,
                                            DimensionExpression* dimension_expression) {
 
-    TypeSpecifier* type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
-    type_specifier->line_number   = package_unit_get_line_number();
-    type_specifier->kind          = RING_BASIC_TYPE_ARRAY;
-    type_specifier->u.array_type  = nullptr;
-    type_specifier->dimension     = dimension_expression->dimension;
-    type_specifier->sub           = sub_type;
+    TypeSpecifier* type_specifier        = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type_specifier->line_number          = package_unit_get_line_number();
+    type_specifier->kind                 = RING_BASIC_TYPE_ARRAY;
+    type_specifier->u.array_t            = (Ring_DeriveType_Array*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Array));
+    type_specifier->u.array_t->dimension = dimension_expression->dimension;
+    type_specifier->u.array_t->sub       = sub_type;
 
     // Ring-Compiler-Error-Report ERROR_ARRAY_DIMENSION_INVALID
-    if (type_specifier->dimension > MAX_DIMENSION_NUM) {
+    if (type_specifier->u.array_t->dimension > MAX_DIMENSION_NUM) {
         DEFINE_ERROR_REPORT_STR;
 
         compile_err_buf = sprintf_string(
             "dimension of array is %d, greater then 8; E:%d.",
-            type_specifier->dimension,
+            type_specifier->u.array_t->dimension,
             ERROR_ARRAY_DIMENSION_INVALID);
 
 
@@ -1224,8 +1222,6 @@ TypeSpecifier* create_type_specifier_alias(char* identifier) {
     type_specifier->line_number   = package_unit_get_line_number();
     type_specifier->identifier    = identifier;
     type_specifier->kind          = RING_BASIC_TYPE_UNKNOW;
-    type_specifier->dimension     = 0;
-    type_specifier->sub           = nullptr;
 
     return type_specifier;
 }
@@ -1277,9 +1273,7 @@ TypeAlias* add_type_alias_func(Parameter*          parameter_list,
     TypeSpecifier*        type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
     type_specifier->line_number          = package_unit_get_line_number();
     type_specifier->kind                 = RING_BASIC_TYPE_FUNC;
-    type_specifier->u.func_type          = func_type;
-    type_specifier->dimension            = 0;
-    type_specifier->sub                  = nullptr;
+    type_specifier->u.func_t             = func_type;
 
 
     TypeAlias* type_alias                = (TypeAlias*)mem_alloc(get_front_mem_pool(), sizeof(TypeAlias));

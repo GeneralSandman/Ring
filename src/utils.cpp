@@ -963,7 +963,7 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
         str = "array"; // TODO: 格式化数组类型
         break;
     case RING_BASIC_TYPE_FUNC:
-        str = format_type_specifier_func(type_specifier->u.func_type);
+        str = format_type_specifier_func(type_specifier->u.func_t);
         break;
 
     case RING_BASIC_TYPE_ANY:
@@ -1102,7 +1102,7 @@ std::string format_rvm_type_specifier(Package_Executer*  package_executer,
         str = "string";
         break;
     case RING_BASIC_TYPE_ARRAY:
-        switch (type_specifier->sub->kind) {
+        switch (type_specifier->u.array_t->sub->kind) {
         case RING_BASIC_TYPE_BOOL: str = "bool"; break;
         case RING_BASIC_TYPE_INT: str = "int"; break;
         case RING_BASIC_TYPE_INT64: str = "int64"; break;
@@ -1114,14 +1114,14 @@ std::string format_rvm_type_specifier(Package_Executer*  package_executer,
             break;
         default: str = ".unknow"; break;
         }
-        str += "[!" + std::to_string(type_specifier->dimension) + "]";
+        str += "[!" + std::to_string(type_specifier->u.array_t->dimension) + "]";
         break;
     case RING_BASIC_TYPE_CLASS:
         rvm_class_definition = &(package_executer->class_list[type_specifier->u.class_def_index]);
         str                  = std::string(rvm_class_definition->identifier);
         break;
     case RING_BASIC_TYPE_FUNC: {
-        RVM_TypeSpecifier_Func* func_type = type_specifier->u.func_type;
+        RVM_TypeSpecifier_Func* func_type = type_specifier->u.func_t;
 
         // 与 formate_closure_type 重复了
         std::vector<std::string> parameter_list_s;
@@ -1418,6 +1418,17 @@ std::string formate_closure_type(Package_Executer* package_executer,
 
     return result;
 }
+
+/*
+ * comp_type_specifier
+ *
+ * 深度比较两个 TypeSpecifier
+ * 后续需要添加一个参数：用来判断是否 any 类型
+ */
+// bool comp_type_specifier(TypeSpecifier* a, TypeSpecifier* b) {
+//     assert(a != nullptr);
+//     assert(b != nullptr);
+// }
 
 std::string sprintf_string(const char* format, ...) {
     // 首先计算所需的缓冲区大小

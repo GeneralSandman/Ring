@@ -316,12 +316,12 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
         case RING_BASIC_TYPE_ARRAY:
             runtime_static->data[i].type                     = RVM_VALUE_TYPE_ARRAY;
             runtime_static->data[i].u.array_value            = new_array(rvm);
-            runtime_static->data[i].u.array_value->type      = RVM_Array_Type(type_specifier->sub->kind); // 这里强制转化一下
-            runtime_static->data[i].u.array_value->dimension = type_specifier->dimension;
+            runtime_static->data[i].u.array_value->type      = RVM_Array_Type(type_specifier->u.array_t->sub->kind); // 这里强制转化一下
+            runtime_static->data[i].u.array_value->dimension = type_specifier->u.array_t->dimension;
             runtime_static->data[i].u.array_value->length    = 0;
             runtime_static->data[i].u.array_value->capacity  = 0;
 
-            sub_type_specifier                               = type_specifier->sub;
+            sub_type_specifier                               = type_specifier->u.array_t->sub;
             if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
                 RVM_ClassDefinition* class_definition            = &(rvm->class_list[sub_type_specifier->u.class_def_index]);
                 runtime_static->data[i].u.array_value->class_ref = class_definition;

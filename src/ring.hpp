@@ -119,6 +119,7 @@ typedef struct RVM_FreeValueDesc            RVM_FreeValueDesc;
 typedef struct RVM_FreeValue                RVM_FreeValue;
 typedef struct RVM_ClassObject              RVM_ClassObject;
 typedef struct RVM_GC_Object                RVM_GC_Object;
+typedef struct RVM_TypeSpecifier_Array      RVM_TypeSpecifier_Array;
 typedef struct RVM_TypeSpecifier_Func       RVM_TypeSpecifier_Func;
 typedef struct RVM_TypeSpecifier            RVM_TypeSpecifier;
 
@@ -494,6 +495,8 @@ typedef enum {
 
 
 struct Ring_DeriveType_Array {
+    unsigned int   dimension;
+    TypeSpecifier* sub;
 };
 
 struct Ring_DeriveType_Class {
@@ -527,22 +530,17 @@ struct TypeSpecifier {
 
     Ring_BasicType kind;
     union {
-        Ring_DeriveType_Array* array_type;
-        Ring_DeriveType_Class* class_type;
-        Ring_DeriveType_Func*  func_type;
+        Ring_DeriveType_Array* array_t;
+        Ring_DeriveType_Class* class_t;
+        Ring_DeriveType_Func*  func_t;
     } u;
-    unsigned int   dimension;
-    TypeSpecifier* sub;
-    // 当 kind == array:
-    //     sub才用了指明数组中元素的类型
-    //     dimension 指明数组的维度
 };
 
 #define TYPE_IS_STRING_ARRAY_1(type_specifier)         \
     (((type_specifier)->kind == RING_BASIC_TYPE_ARRAY) \
-     && ((type_specifier)->dimension == 1)             \
-     && ((type_specifier)->sub != nullptr)             \
-     && ((type_specifier)->sub->kind == RING_BASIC_TYPE_STRING))
+     && ((type_specifier)->u.array_t->dimension == 1)  \
+     && ((type_specifier)->u.array_t->sub != nullptr)  \
+     && ((type_specifier)->u.array_t->sub->kind == RING_BASIC_TYPE_STRING))
 
 #define TYPE_IS_NUM(type)                       \
     (((type)->kind == RING_BASIC_TYPE_INT)      \
@@ -795,6 +793,11 @@ struct RVM_ClassObject {
     RVM_Value*           field;
 };
 
+struct RVM_TypeSpecifier_Array {
+    unsigned int       dimension; // 维度，用来指明sub
+    RVM_TypeSpecifier* sub;
+};
+
 struct RVM_TypeSpecifier_Func {
     unsigned int       parameter_list_size;
     RVM_Parameter*     parameter_list;
@@ -809,12 +812,10 @@ struct RVM_TypeSpecifier {
     Ring_BasicType kind;
 
     union {
-        unsigned int            class_def_index;
-        RVM_TypeSpecifier_Func* func_type;
+        RVM_TypeSpecifier_Array* array_t;
+        unsigned int             class_def_index;
+        RVM_TypeSpecifier_Func*  func_t;
     } u;
-
-    unsigned int       dimension; // 维度，用来指明sub
-    RVM_TypeSpecifier* sub;
 };
 
 // 支持线性寻址
@@ -1680,6 +1681,8 @@ struct MethodCallExpression {
     Expression*   object_expression;
     char*         member_identifier;
     MethodMember* method_member;
+
+    unsigned int  argument_list_size;
     ArgumentList* argument_list;
 };
 
