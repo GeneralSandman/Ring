@@ -100,8 +100,9 @@ void ring_compiler_analysis_function_block(Package* package, Block* block) {
     //
     std::unordered_map<std::string, VarDecl*> local_var_map;
 
-    VarDecl*                                  decl_pos = block->var_decl_list;
-    for (; decl_pos != nullptr; decl_pos = decl_pos->next) {
+    for (VarDecl* decl_pos = block->var_decl_list;
+         decl_pos != nullptr;
+         decl_pos = decl_pos->next) {
         std::string identifier = std::string(decl_pos->identifier);
         auto        iter       = local_var_map.find(identifier);
 
@@ -134,34 +135,95 @@ void ring_compiler_analysis_function_block(Package* package, Block* block) {
         local_var_map[identifier] = decl_pos;
     }
 }
+
+void check_function_call(FunctionCallExpression* function_call_expression,
+                         Function*               function) {
+
+    check_call(function_call_expression->func_identifier,
+               function_call_expression->line_number,
+               function_call_expression->argument_list,
+               function,
+               nullptr,
+               nullptr,
+               nullptr);
+}
+
+void check_func_var_call(FunctionCallExpression* function_call_expression,
+                         VarDecl*                anony_func_decl) {
+
+    check_call(function_call_expression->func_identifier,
+               function_call_expression->line_number,
+               function_call_expression->argument_list,
+               nullptr,
+               anony_func_decl,
+               nullptr,
+               nullptr);
+}
+
+void check_iife_call(ImmediateInvokFuncExpression* iife) {
+    check_call((char*)"<closure>",
+               iife->line_number,
+               iife->argument_list,
+               nullptr,
+               nullptr,
+               iife->anonymous_func,
+               nullptr);
+}
+
+void check_method_call(MethodCallExpression* method_call_expression,
+                       MethodMember*         method) {
+    check_call(method_call_expression->member_identifier,
+               method_call_expression->line_number,
+               method_call_expression->argument_list,
+               nullptr,
+               nullptr,
+               nullptr,
+               method);
+}
+
+
 /*
- *check_function_call
+ * check_function_call
  *
  * 对函数调用进行详细的语义分析
  * 1. 参数数量不正确
  * 2. 参数类型不正确
  * 3. 返回值和函数的声明不一致
  *
+ * - function_call_expression method_call_expression iife_expression 三者选其一
  * - function anony_func_decl 二者选其一
  * function 为 函数调用
  * anony_func_decl 为匿名函数变量定义
  *
  */
-void check_function_call(FunctionCallExpression* function_call_expression,
-                         Function*               function,
-                         VarDecl*                anony_func_decl) {
-    assert(function_call_expression != nullptr);
-    assert(function != nullptr || anony_func_decl != nullptr);
+void check_call(char*          func_identifier,
+                unsigned int   line_number,
+                ArgumentList*  argument_list,
+                Function*      function,
+                VarDecl*       func_var_decl,
+                AnonymousFunc* anony_func,
+                MethodMember*  method_member) {
+
+    assert(function != nullptr
+           || func_var_decl != nullptr
+           || anony_func != nullptr
+           || method_member != nullptr);
 
 
-    ArgumentList* argument_pos  = function_call_expression->argument_list;
+    ArgumentList* argument_pos  = argument_list;
     Parameter*    parameter_pos = nullptr;
 
     if (function != nullptr) {
         parameter_pos = function->parameter_list;
-    } else {
-        assert(anony_func_decl->type_specifier->kind == RING_BASIC_TYPE_FUNC);
-        parameter_pos = anony_func_decl->type_specifier->u.func_t->parameter_list;
+    } else if (func_var_decl != nullptr) {
+        assert(func_var_decl->type_specifier->kind == RING_BASIC_TYPE_FUNC);
+        parameter_pos = func_var_decl->type_specifier->u.func_t->parameter_list;
+    } else if (anony_func != nullptr) {
+        // TODO:
+        parameter_pos = anony_func->parameter_list;
+    } else if (method_member != nullptr) {
+        // TODO:
+        parameter_pos = method_member->parameter_list;
     }
 
 
@@ -182,30 +244,8 @@ void check_function_call(FunctionCallExpression* function_call_expression,
         if (!comp_type_specifier(parameter_pos->type_specifier,
                                  argument_pos->expression->convert_type[0])) {
             // FIXME：这里只比对了 convert_type[0]
-            DEFINE_ERROR_REPORT_STR;
-
-            compile_err_buf            = sprintf_string("function %s() requires (%s) arguments, but (%s) was provided; E:%d",
-                                                        function_call_expression->func_identifier,
-                                                        parameter_str.c_str(),
-                                                        argument_str.c_str(),
-                                                        ERROR_ARGUMENT_MISMATCH_TYPE);
-
-            ErrorReportContext context = {
-                .package                 = nullptr,
-                .package_unit            = nullptr,
-                .source_file_name        = get_package_unit()->current_file_name,
-                .line_content            = package_unit_get_line_content(function_call_expression->line_number),
-                .line_number             = function_call_expression->line_number,
-                .column_number           = 0,
-                .error_message           = std::string(compile_err_buf),
-                .advice                  = std::string(compile_adv_buf),
-                .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
-                .ring_compiler_file      = (char*)__FILE__,
-                .ring_compiler_file_line = __LINE__,
-            };
-            ring_compile_error_report(&context);
+            goto ERROR_REPORT;
         }
-
 
         argument_pos = argument_pos->next;
         if (!parameter_pos->is_variadic) {
@@ -217,13 +257,19 @@ void check_function_call(FunctionCallExpression* function_call_expression,
         parameter_pos = parameter_pos->next;
     }
 
-    // argument, parameter 没有消费完
-    // 函数调用不匹配
-    if (argument_pos != nullptr || parameter_pos != nullptr) {
+    // argument, parameter 都消费完
+    // success
+    if (argument_pos == nullptr && parameter_pos == nullptr) {
+        return;
+    }
+
+ERROR_REPORT:
+    // Ring-Compiler-Error-Report ERROR_ARGUMENT_MISMATCH_TYPE
+    {
         DEFINE_ERROR_REPORT_STR;
 
         compile_err_buf            = sprintf_string("function %s() requires (%s) arguments, but (%s) was provided; E:%d",
-                                                    function_call_expression->func_identifier,
+                                                    func_identifier,
                                                     parameter_str.c_str(),
                                                     argument_str.c_str(),
                                                     ERROR_ARGUMENT_MISMATCH_TYPE);
@@ -232,8 +278,8 @@ void check_function_call(FunctionCallExpression* function_call_expression,
             .package                 = nullptr,
             .package_unit            = nullptr,
             .source_file_name        = get_package_unit()->current_file_name,
-            .line_content            = package_unit_get_line_content(function_call_expression->line_number),
-            .line_number             = function_call_expression->line_number,
+            .line_content            = package_unit_get_line_content(line_number),
+            .line_number             = line_number,
             .column_number           = 0,
             .error_message           = std::string(compile_err_buf),
             .advice                  = std::string(compile_adv_buf),

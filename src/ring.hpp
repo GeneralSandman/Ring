@@ -1866,21 +1866,6 @@ struct FunctionTuple {
 
 struct AnonymousFunc {
     FUNCTION_TUPLE_HEADER;
-
-    // unsigned int   free_value_size;
-    // FreeValueDesc* free_value_list;
-};
-
-struct FreeValueDesc {
-    char* identifier;
-    bool  is_curr_local; // 是本层函数定义的局部变量
-    union {
-        unsigned int curr_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
-        unsigned int out_free_value_index;
-    } u;
-
-    unsigned       free_value_index; // UPDATED_BY_FIX_AST
-    FreeValueDesc* next;
 };
 
 struct Function {
@@ -1898,6 +1883,18 @@ struct MethodMember {
     Package*     package;
     char*        identifier;
     unsigned int index_of_class; // 所在类的index UPDATED_BY_FIX_AST
+};
+
+struct FreeValueDesc {
+    char* identifier;
+    bool  is_curr_local; // 是本层函数定义的局部变量
+    union {
+        unsigned int curr_local_index; // 如果是直接外层函数的局部变量，外层函数的局部变量索引
+        unsigned int out_free_value_index;
+    } u;
+
+    unsigned       free_value_index; // UPDATED_BY_FIX_AST
+    FreeValueDesc* next;
 };
 
 struct FunctionReturnList {
@@ -2816,9 +2813,21 @@ void ring_compiler_analysis_global_variable(Package* package);
 void ring_compiler_analysis_function(Package* package);
 void ring_compiler_analysis_function_block(Package* package, Block* block);
 void ring_compiler_analysis_class(Package* package);
+
 void check_function_call(FunctionCallExpression* function_call_expression,
-                         Function*               function,
+                         Function*               function);
+void check_func_var_call(FunctionCallExpression* function_call_expression,
                          VarDecl*                anony_func_decl);
+void check_iife_call(ImmediateInvokFuncExpression* iife);
+void check_method_call(MethodCallExpression* method_call_expression,
+                       MethodMember*         method);
+void check_call(char*          func_identifier,
+                unsigned int   line_number,
+                ArgumentList*  argument_list,
+                Function*      function,
+                VarDecl*       anony_func_decl,
+                AnonymousFunc* anony_func,
+                MethodMember*  method_member);
 
 void ring_compiler_analysis_class_block(Package* package, ClassDefinition* class_def);
 

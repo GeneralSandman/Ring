@@ -1794,7 +1794,7 @@ void fix_function_call_expression(Expression*             expression,
             function_call_expression->type              = FUNCTION_CALL_TYPE_CLOSURE;
             function_call_expression->u.cc.closure_decl = variable->decl;
 
-            check_function_call(function_call_expression, nullptr, variable->decl);
+            check_func_var_call(function_call_expression, variable->decl);
 
 
             FunctionReturnList* return_pos = nullptr;
@@ -1812,7 +1812,7 @@ void fix_function_call_expression(Expression*             expression,
     }
 
 
-    // 2. 判断是 ring build function
+    // 2. 判断是 ring buildin function
     if (is_buildin_function_identifier(function_call_expression->package_posit,
                                        function_call_expression->func_identifier)) {
 
@@ -1854,7 +1854,7 @@ void fix_function_call_expression(Expression*             expression,
         ring_compile_error_report(&context);
     }
 
-    check_function_call(function_call_expression, function, nullptr);
+    check_function_call(function_call_expression, function);
 
     function_call_expression->type          = FUNCTION_CALL_TYPE_FUNC;
     function_call_expression->u.fc.function = function;
@@ -1879,15 +1879,22 @@ void fix_method_call_expression(Expression*           expression,
         return;
     }
 
+    // fix argument list
+    for (ArgumentList* pos = method_call_expression->argument_list;
+         pos != nullptr;
+         pos = pos->next) {
+        fix_expression(pos->expression, block, func);
+    }
+
     char*            member_identifier = method_call_expression->member_identifier;
     ClassDefinition* class_definition  = nullptr;
     MethodMember*    method            = nullptr;
     Expression*      object_expression = method_call_expression->object_expression;
 
-    // 0. fix object expression
+    // fix object expression
     fix_expression(object_expression, block, func);
 
-    // 1. find class definition by object.
+    // find class definition by object.
     class_definition = object_expression->convert_type[0]->u.class_t->class_definition;
     if (class_definition == nullptr) {
         ring_error_report("fix_method_call_expression error\n");
@@ -1922,21 +1929,18 @@ void fix_method_call_expression(Expression*           expression,
         ring_compile_error_report(&context);
     }
 
+    // method 定义 与 method 调用表达式一致性检查
+    check_method_call(method_call_expression, method);
+
     method_call_expression->method_member = method;
 
-    // 4. fix argument list
-    ArgumentList* pos = method_call_expression->argument_list;
-    for (; pos != nullptr; pos = pos->next) {
-        fix_expression(pos->expression, block, func);
-    }
-
-    // method 定义 与 method 调用表达式一致性检查
 
     // method_call_expression 的类型取决于 method返回值的类型
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-    FunctionReturnList* return_pos = method->return_list;
-    for (; return_pos != nullptr; return_pos = return_pos->next) {
-        EXPRESSION_ADD_CONVERT_TYPE(expression, return_pos->type_specifier);
+    for (FunctionReturnList* pos = method->return_list;
+         pos != nullptr;
+         pos = pos->next) {
+        EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
     }
 }
 
@@ -2511,6 +2515,13 @@ void fix_iife_expression(Expression*                   expression,
         return;
     }
 
+    // fix argument list
+    for (ArgumentList* pos = iife->argument_list;
+         pos != nullptr;
+         pos = pos->next) {
+        fix_expression(pos->expression, block, func);
+    }
+
     AnonymousFunc* anonymous_func = iife->anonymous_func;
 
     Parameter*     parameter_list = anonymous_func->parameter_list;
@@ -2529,11 +2540,7 @@ void fix_iife_expression(Expression*                   expression,
         fix_statement_list(anonymous_func->block->statement_list, anonymous_func->block, (FunctionTuple*)anonymous_func);
     }
 
-    for (ArgumentList* pos = iife->argument_list;
-         pos != nullptr;
-         pos = pos->next) {
-        fix_expression(pos->expression, block, func);
-    }
+    check_iife_call(iife);
 
 
     // FIXME: 应该是函数的返回值类型
