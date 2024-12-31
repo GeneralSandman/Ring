@@ -123,29 +123,42 @@ Usetime  = 1S
 第四轮主要进行 ast的剪枝优化
 第五轮主要进行代码的生成
 
-1. 变量名称重复
-   1. block中定义的 局部变量重复(函数没有参数)
-   2. block中定义的 局部变量和 函数参数中的变量 名称重复
-   3. 函数参数中的变量 他们之间重复
+1. 局部变量名称重复 ✅
+   1. block中定义的 局部变量重复(函数没有参数)  ✅
+   2. block中定义的 局部变量和 函数参数中的变量 名称重复  ✅
+   3. 函数参数中的变量 他们之间重复  ✅
 
-2. 函数名重复
-   1. 一个package中函数名称重复
+2. 函数名重复 ✅
+   1. 一个package中函数名称重复  ✅
+   
+3. 全局变量重复 ✅
+   1. 全局变量 在 一个package中重复  ✅
 
-3. function/method 返回值
-   1. 返回值数量不对
-   2. 返回值类型不对
-   3. 调用函数 接受返回值的数量不对
-   4. 调用函数 接受返回值的类型不对
+4. function/method 返回值  ✅
+   1. 返回值数量不对  ✅
+   2. 返回值类型不对   ✅
+   3. 调用函数 接受返回值的数量不对  ✅
+   4. 调用函数 接受返回值的类型不对  ✅
 
-4. function/method 参数
-   1. 参数数量不对
-   2. 参数类型不对 
+5. 函数调用 进行参数校验
+   1. build func
+   2. std lib func
+   3. derive func ✅
+   4. method  ✅
+   5. 匿名函数  ✅
+   6. 函数变量  ✅
+6. launch 调用 进行参数校验
+   1. build func
+   2. std lib func
+   3. derive func ✅
+   4. method  ✅
+   5. 匿名函数  ✅
+   6. 函数变量  ✅
 
-
-5. class field/method
-   1. field 重复
-   2. method 重复
-   3. field method 不能重复, 得是唯一id
+7. class field/method
+   1. field 重复  ✅
+   2. method 重复  ✅
+   3. field method 不能重复, 得是唯一id  ✅
    4. field 只能是 bool int double string 
 
 
@@ -160,6 +173,19 @@ Usetime  = 1S
    1. 返回值的数量不能超过 255
 9. package
    1.  一个package中的数量不能超过 255
+
+
+
+10. 函数定义有返回值，但是没有返回的话，会直接core dump
+
+```
+function test() -> (bool, int) {
+}
+
+a, b = test();
+```
+
+
 
 
 
@@ -398,6 +424,34 @@ test();
  
 应该 `array` 的报错更加详细
 
+
+### Q. Optimize: 如何统一的进行 function-call method-call 的函数参数检查 ✅
+
+将 函数/method/匿名函数变量，构建出一个TypeSpecifier, 通过比较 Func_TypeSpecifier 和 argument_list 是否可以统一判断
+
+1. TypeSpecifier 中 ，能方式 variadic 么
+2. 要深度比对，比如说某个函数的参数是个函数变量，需要继续深度比对
+
+
+
+### H. Proposal:
+
+对于 
+
+a.func()
+
+func 不一定是method，还又可能是 匿名函数field。
+
+这里看看后续如何兼容
+
+
+### I. Proposal: launch 入口函数为函数变量 ✅
+
+需要支持 launch 函数变量
+
+var FuncType func_var;
+
+launch func_var();
 
 -----------------------------
 
