@@ -12,7 +12,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	var string string_value_1;
 	var string string_value_2, string_value_3;

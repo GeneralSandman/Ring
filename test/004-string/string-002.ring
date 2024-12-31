@@ -12,7 +12,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
   fmt::println_string("1"  .. "1"  .. "1");
   fmt::println_string("2"  .. "2"  .. "2");
   fmt::println_string("3"  .. "3"  .. "3");

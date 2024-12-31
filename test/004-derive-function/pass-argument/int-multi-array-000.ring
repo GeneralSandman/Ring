@@ -9,7 +9,7 @@ import {
 // TestDetail: derive函数传递int数组类型参数
 // TestDetail: 分别传递1-8个int数组类型参数
 @main
-function main() {
+fn main() {
 
 	pass_1_int_array_1(int[]{1});
 
@@ -68,18 +68,18 @@ function main() {
 
 
 
-function pass_1_int_array_1(var int[] a) {
+fn pass_1_int_array_1(var int[] a) {
 	fmt::println(a);
 }
 
-function pass_1_int_array_2(var int[,] a) {
+fn pass_1_int_array_2(var int[,] a) {
 	fmt::println(a);
 }
 
-function pass_1_int_array_3(var int[,,] a) {
+fn pass_1_int_array_3(var int[,,] a) {
 	fmt::println(a);
 }
 
-function pass_1_int_array_4(var int[,,,] a) {
+fn pass_1_int_array_4(var int[,,,] a) {
 	fmt::println(a);
 }

@@ -16,7 +16,7 @@ global {
 }
 
 
-function producer(var int64 next_job_co_id, var int produce_count) {
+fn producer(var int64 next_job_co_id, var int produce_count) {
 	var int i = 0;
 
 	fmt::printf("producer start work\n");
@@ -28,7 +28,7 @@ function producer(var int64 next_job_co_id, var int produce_count) {
 }
 
 
-function consumer_1(var int64 next_job_co_id) {
+fn consumer_1(var int64 next_job_co_id) {
 	var int   consumer_1_count;
 	fmt::printf("consumer_1 start work\n");
 
@@ -40,7 +40,7 @@ function consumer_1(var int64 next_job_co_id) {
 	}
 }
 
-function consumer_2() {
+fn consumer_2() {
 	var int   consumer_2_count;
 	fmt::printf("consumer_2 start work\n");
 
@@ -52,7 +52,7 @@ function consumer_2() {
 }
 
 @main
-function main() {
+fn main() {
 	var int64 consumer_1_id;
 	var int64 consumer_2_id;
 

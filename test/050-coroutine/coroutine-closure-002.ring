@@ -12,17 +12,17 @@ import {
 }
 
 
-typedef function() FuncType;
+typedef fn() FuncType;
 
 @main
-function main() {
+fn main() {
 	var int64 co_id;
 
 
 	fmt::println("main::0");
 	
 
-	co_id = launch function() {
+	co_id = launch fn() {
 		fmt::println("    coroutine action::1");
 		yield();
 		fmt::println("    coroutine action::2");

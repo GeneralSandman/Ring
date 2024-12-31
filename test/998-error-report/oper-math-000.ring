@@ -12,14 +12,14 @@ import {
 }
 
 typedef class Job {
-      field bool    Running;
-      field int     JobID;
-      field double  Score;
+      var bool    Running;
+      var int     JobID;
+      var double  Score;
   }
 
 //TestDetail: 编译错误
 @main
-function main() {
+fn main() {
       // func_0() + func_1(); // 编译报错
       // func_1() + func_1(); // 正常
       // func_5() + func_5(); // 编译报错
@@ -34,14 +34,14 @@ function main() {
 }
 
 
-function func_0() {
+fn func_0() {
 
 }
 
-function func_1() -> (int) {
+fn func_1() -> (int) {
       
 }
 
-function func_5() -> (Job) {
+fn func_5() -> (Job) {
       
 }

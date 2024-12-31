@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_int64_array_0 = func_return_int64_array();
 	
 	fmt::println_string("\n=================func main\n");
@@ -47,7 +47,7 @@ function main() {
 	debug::assert(global_int64_array_0[14] == 14L);
 }
 
-function func_return_int64_array() -> (int64[]) {
+fn func_return_int64_array() -> (int64[]) {
 	var int64[] int64_array = int64[]{0L, 1L, 2L, 
 		3L, 4L, 5L, 
 		6L, 7L, 8L, 

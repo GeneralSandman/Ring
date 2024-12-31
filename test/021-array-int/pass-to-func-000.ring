@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_int_array_0 = int[]{0, 1, 2, 
 		3, 4, 5, 
 		6, 7, 8, 
@@ -22,7 +22,7 @@ function main() {
 	
 }
 
-function func_accept_int_array(var int[] int_array) {
+fn func_accept_int_array(var int[] int_array) {
 	fmt::println_int(int_array[0]);
 	fmt::println_int(int_array[1]);
 	fmt::println_int(int_array[2]);

@@ -6,10 +6,10 @@ import {
 }
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 }
 
 global {
@@ -17,7 +17,7 @@ global {
 }
 
 
-function test_func(var Job1[,] local_job1_array_0) {
+fn test_func(var Job1[,] local_job1_array_0) {
 
 	debug::assert(len(local_job1_array_0) == 2);
 	debug::assert(len(local_job1_array_0[0]) == 10);
@@ -49,7 +49,7 @@ function test_func(var Job1[,] local_job1_array_0) {
 
 // TestDetail: 测试通过函数参数传递多维数组
 @main
-function main() {
+fn main() {
 	global_job1_array_0 = Job1[,]{
 		Job1[]{
 			Job1{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},

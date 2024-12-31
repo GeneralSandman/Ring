@@ -16,10 +16,10 @@ import {
 // TestDetail: 测试string的GC算法
 
 @main
-function main() {
+fn main() {
     /*
      * 该段代码的含义：
-     * 1. main() 函数的完整签名为 `function main(var string[] args){}`
+     * 1. main() 函数的完整签名为 `fn main(var string[] args){}`
      * 2. args 也是一个动态内存分配的数组
      * 3. 在执行 main() 函数之前，args 已经被分配了内存
      * 4. 我们测试 gc，主要关注在main()函数内分片的内存

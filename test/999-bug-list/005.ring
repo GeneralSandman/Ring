@@ -1,6 +1,6 @@
 var int int_value = 0;
 
-function add_one(var int a) -> (int) {
+fn add_one(var int a) -> (int) {
 	a++;
 	return a++;
 }

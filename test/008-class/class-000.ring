@@ -9,9 +9,9 @@ import {
 
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
 }
 
 global {
@@ -20,7 +20,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
 
     fmt::println_string("\ntest case 1");

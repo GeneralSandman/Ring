@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_double_array_0 = double[]{0.0, 1.0, 2.0, 
 		3.0, 4.0, 5.0, 
 		6.0, 7.0, 8.0, 
@@ -22,7 +22,7 @@ function main() {
 	
 }
 
-function func_accept_double_array(var double[] double_array) {
+fn func_accept_double_array(var double[] double_array) {
 	fmt::println_double(double_array[0]);
 	fmt::println_double(double_array[1]);
 	fmt::println_double(double_array[2]);

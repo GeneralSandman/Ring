@@ -11,7 +11,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
   global_int_array_0 = return_int_array();
 
@@ -35,7 +35,7 @@ function main() {
   pass_int_array_to_fun(global_int_array_0);
 }
 
-function use_glocal_variable() {
+fn use_glocal_variable() {
   fmt::println_string("[function use_glocal_variable]");
   debug::assert(global_int_array_0[0]  == 0);
   debug::assert(global_int_array_0[1]  == 1);
@@ -50,7 +50,7 @@ function use_glocal_variable() {
   fmt::println_string("[function use_glocal_variable]\n");
 }
 
-function return_int_array() -> (int[]) {
+fn return_int_array() -> (int[]) {
     var int[] local_int_array_0 = int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
     fmt::println_string("[function return_int_array]");
@@ -69,7 +69,7 @@ function return_int_array() -> (int[]) {
     return local_int_array_0;
 }
 
-function pass_int_array_to_fun(var int[] array) {
+fn pass_int_array_to_fun(var int[] array) {
   fmt::println_string("[function pass_int_array_to_fun]");
   debug::assert(array[0]  == 0);
   debug::assert(array[1]  == 1);

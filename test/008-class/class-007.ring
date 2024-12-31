@@ -12,19 +12,19 @@ import {
 
 
 typedef class Runner {
-    field bool    Valid;
-    field int     RunnerID;
-    field double  UseTime;
-    field string  RName;
+    var bool    Valid;
+    var int     RunnerID;
+    var double  UseTime;
+    var string  RName;
 }
 
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
-    field string  Name;
-    field Runner  Runner;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
+    var string  Name;
+    var Runner  Runner;
 }
 
 global {
@@ -35,7 +35,7 @@ global {
 
 
 @main
-function main() {
+fn main() {
 
 
     global_runner_value_0 = Runner{

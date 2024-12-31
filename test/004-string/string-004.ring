@@ -16,7 +16,7 @@ import {
 // TestDetail: 测试转义字符
 
 @main
-function main() {
+fn main() {
     var string string_value;
 
     fmt::println_string("1234567890");

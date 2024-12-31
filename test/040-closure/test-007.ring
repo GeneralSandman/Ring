@@ -12,11 +12,11 @@ import {
 	fmt;
 }
 
-typedef function()-> (int) FuncType;
+typedef fn()-> (int) FuncType;
 
 
 @main
-function main() {
+fn main() {
 	var FuncType tmp0;
 
 	tmp0 = return_closure();
@@ -27,9 +27,9 @@ function main() {
 	fmt::println(int_value);
 }
 
-function return_closure() -> (FuncType) {
+fn return_closure() -> (FuncType) {
 	var FuncType tmp;
-	tmp = function() -> (int){
+	tmp = fn() -> (int){
 		return 6456;
 	};
 	return tmp;

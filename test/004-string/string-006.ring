@@ -16,7 +16,7 @@ import {
 // TestDetail: 测试多行字符串
 
 @main
-function main() {
+fn main() {
     var string string_value;
 
     // 100 行, 每行有101个字符(包含换行符), 100 * 101 = 10100

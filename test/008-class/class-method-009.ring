@@ -8,11 +8,11 @@ import {
 
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
 
-    method PrintInfo(var bool Running, var int JobID, var double Score) {
+    fn PrintInfo(var bool Running, var int JobID, var double Score) {
         var bool   local_bool_value_0;
         var int    local_int_value_0;
         var double local_double_value_0;
@@ -49,7 +49,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
     fmt::println_string("\ntest case 1");
     job_0.PrintInfo(true, 1, 1.1);

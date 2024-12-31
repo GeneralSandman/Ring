@@ -14,7 +14,7 @@ global {
 // TestDetail: 二维数组的初始化
 
 @main
-function main() {
+fn main() {
     global_int64_array_0 =  int64[,]{
         int64[]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
         int64[]{10,11,12,13,14,15,16,17,18,19},

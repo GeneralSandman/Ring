@@ -9,11 +9,11 @@ import {
 
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
 
-    method PrintInfo() {
+    fn PrintInfo() {
         
     }
 }
@@ -31,7 +31,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
     test();
     fmt::println_string("------\n");
 
@@ -91,7 +91,7 @@ function main() {
 
 
 // test pass
-function test() {
+fn test() {
     fmt::println_string("function[test] begin");
 
 	var int int_value_1;

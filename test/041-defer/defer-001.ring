@@ -14,20 +14,20 @@ import {
 
 
 @main
-function main() {
+fn main() {
 
 	test();
 	
 	fmt::printf("main end\n");
 }
 
-function test() {
-	defer function() {
+fn test() {
+	defer fn() {
 		fmt::printf("defer 1\n");
 		destory_func();
 	}();
 
-	defer function() {
+	defer fn() {
 		fmt::printf("defer 2\n");
 		destory_func();
 	}();
@@ -37,6 +37,6 @@ function test() {
 	fmt::printf("test end\n");
 }
 
-function destory_func() {
+fn destory_func() {
 	fmt::printf("destory_func\n");
 }

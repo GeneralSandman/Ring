@@ -24,7 +24,7 @@ global {
 }
 
 @main
-function main(var string[] args) {
+fn main(var string[] args) {
 	
 	fmt::println(global_bool_value_0);
 	fmt::println(global_bool_value_1);

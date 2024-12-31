@@ -12,7 +12,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
   double_array = new double[10];
 

@@ -11,19 +11,19 @@ import {
 
 
 
-function add_one(var int parameter_1) -> (int) {
+fn add_one(var int parameter_1) -> (int) {
 	return parameter_1 + 1;
 }
 
 
-function add(var int parameter_1, var int parameter_2) -> (int) {
+fn add(var int parameter_1, var int parameter_2) -> (int) {
 	return parameter_1 + parameter_2;
 }
 
 
 
 @main
-function main() {
+fn main() {
 
 
 	var int int_value = 0;

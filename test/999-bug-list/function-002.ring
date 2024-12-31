@@ -7,7 +7,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 
 // 先简单写，后改成 rust的方式

@@ -13,7 +13,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	fmt::println_int(0);
 	fmt::println_int(-0);

@@ -11,7 +11,7 @@ import {
     debug;
 }
 
-function test(var int int_value_1, var int int_value_2) -> (int,int,int,int) {
+fn test(var int int_value_1, var int int_value_2) -> (int,int,int,int) {
 	var int int_value_3;
 	var int int_value_4;
 
@@ -22,7 +22,7 @@ function test(var int int_value_1, var int int_value_2) -> (int,int,int,int) {
 }
 
 @main
-function main() {
+fn main() {
     fmt::println_string("entry main");
     
     var int local_int_value_1;

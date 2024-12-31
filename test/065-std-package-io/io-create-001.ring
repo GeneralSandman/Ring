@@ -11,12 +11,12 @@ import {
 
 
 typedef class File {
-    field int fd;
+    var int fd;
 }
 
 // 测试 exist/create/seek/read_all/write/close/remove 函数
 @main
-function main() {
+fn main() {
 
     var string file_name = "./io-create-001.ring.result.tmp";
     var bool   exist;

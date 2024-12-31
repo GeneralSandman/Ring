@@ -14,19 +14,19 @@ import {
 
 
 @main
-function main() {
+fn main() {
 
 	test();
 	
 	fmt::printf("main end\n");
 }
 
-function test() {
-	defer function() {
+fn test() {
+	defer fn() {
 		fmt::printf("defer 1\n");
 	}();
 
-	defer function() {
+	defer fn() {
 		fmt::printf("defer 2\n");
 	}();
 	

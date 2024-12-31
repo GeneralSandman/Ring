@@ -11,7 +11,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	debug::assert(true == true);
 	debug::assert(true == false);

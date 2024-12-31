@@ -13,7 +13,7 @@ global {
 // TestDetail: e.g. global_int64_array_0[i+1] = i;
 
 @main
-function main() {
+fn main() {
     var int i = 0;
     global_int64_array_0 = int64[]{9L,8L,7L,6L,5L,4L,3L,2L,1L,0L};
 

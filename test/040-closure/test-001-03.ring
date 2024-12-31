@@ -13,22 +13,22 @@ import {
 }
 
 
-typedef function() FuncType0;
-typedef function(int) FuncType1;
-typedef function(int, int) FuncType2;
-typedef function(int, int, int) FuncType3;
+typedef fn() FuncType0;
+typedef fn(int) FuncType1;
+typedef fn(int, int) FuncType2;
+typedef fn(int, int, int) FuncType3;
 
-typedef function() -> (int) FuncType4;
-typedef function(int) -> (int) FuncType5;
-typedef function(int, int) -> (int) FuncType6;
-typedef function(int, int, int) -> (int) FuncType7;
+typedef fn() -> (int) FuncType4;
+typedef fn(int) -> (int) FuncType5;
+typedef fn(int, int) -> (int) FuncType6;
+typedef fn(int, int, int) -> (int) FuncType7;
 
 
-typedef function(bool, int, int64, double, string) -> (bool, int, int64, double, string) FuncType8;
+typedef fn(bool, int, int64, double, string) -> (bool, int, int64, double, string) FuncType8;
 
 
 @main
-function main() {
+fn main() {
 	var FuncType0  local_func_var0;
 	var FuncType1  local_func_var1;
 	var FuncType2  local_func_var2;
@@ -53,15 +53,15 @@ function main() {
 
 	fmt::println("\nafter init closure===========\n");
 
-	local_func_var0 = function() {};
-	local_func_var1 = function(var int a) {};
-	local_func_var2 = function(var int a, var int b) {};
-	local_func_var3 = function(var int a, var int b, var int c) {};
-	local_func_var4 = function() -> (int) {};
-	local_func_var5 = function(var int a) -> (int) {};
-	local_func_var6 = function(var int a, var int b) -> (int) {};
-	local_func_var7 = function(var int a, var int b, var int c) -> (int) {};
-	local_func_var8 = function(var bool a, var int b, var int64 c, var double d, var string e) -> (bool, int, int64, double, string) {};
+	local_func_var0 = fn() {};
+	local_func_var2 = fn(var int a, var int b) {};
+	local_func_var1 = fn(var int a) {};
+	local_func_var3 = fn(var int a, var int b, var int c) {};
+	local_func_var4 = fn() -> (int) {};
+	local_func_var5 = fn(var int a) -> (int) {};
+	local_func_var6 = fn(var int a, var int b) -> (int) {};
+	local_func_var7 = fn(var int a, var int b, var int c) -> (int) {};
+	local_func_var8 = fn(var bool a, var int b, var int64 c, var double d, var string e) -> (bool, int, int64, double, string) {};
 
 	fmt::println(reflect::typeof(local_func_var0));
 	fmt::println(reflect::typeof(local_func_var1));

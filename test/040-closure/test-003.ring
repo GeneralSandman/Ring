@@ -13,18 +13,18 @@ import {
 }
 
 
-typedef function() FuncType;
+typedef fn() FuncType;
 
 
 @main
-function main() {
+fn main() {
 	var FuncType tmp;
 	tmp = return_closure();
 	tmp();
 }
 
-function return_closure() -> (FuncType) {
-	return function() {
+fn return_closure() -> (FuncType) {
+	return fn() {
 		fmt::println("return_closure:: closure block");
 	};
 }

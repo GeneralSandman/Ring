@@ -13,7 +13,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	fmt::println_string("1");
 	fmt::println_string("2");

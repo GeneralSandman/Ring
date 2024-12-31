@@ -14,13 +14,13 @@ import {
 
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+	var int64   Int64;
+    var double  Double;
+    var string  String;
 
-	method job_action1(var bool bool_value_0, var bool bool_value_1) {
+	fn job_action1(var bool bool_value_0, var bool bool_value_1) {
 		fmt::printf("            self:{}\n", self);
 
 		fmt::printf("            Job1::job_action1 bool_value_0:  {}\n", bool_value_0);
@@ -53,7 +53,7 @@ typedef class Job1 {
 
 
 @main
-function main() {
+fn main() {
 
 	var int64 co_id;
 

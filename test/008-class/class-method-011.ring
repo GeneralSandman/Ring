@@ -8,11 +8,11 @@ import {
 
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
 
-    method Action() {
+    fn Action() {
         var int  local_int_value_0    = 0;
 	var int  local_int_value_1    = 1;
 	var int  local_int_value_2    = 2;
@@ -534,6 +534,6 @@ global {
 // TestDetail: 测试method中的局部变量为255
 
 @main
-function main() {
+fn main() {
     job_0.Action();
 }

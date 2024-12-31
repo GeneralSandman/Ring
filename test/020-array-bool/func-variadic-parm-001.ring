@@ -12,7 +12,7 @@ global {
 // TestDetail:可变参数为 bool... 类型
 // TestDetail: 同时参数中还有非可变参数
 @main
-function main() {
+fn main() {
     fmt::println_string("test case 1--------");
     func_variadic_parameter(false,   false);
 
@@ -27,7 +27,7 @@ function main() {
 }
 
 
-function func_variadic_parameter(var bool para_bool_value, var bool... array_value) {
+fn func_variadic_parameter(var bool para_bool_value, var bool... array_value) {
     fmt::printf("len(array_value)      = {}\n", len(array_value));
     fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
 

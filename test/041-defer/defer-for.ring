@@ -14,18 +14,18 @@ import {
 
 
 @main
-function main() {
+fn main() {
 
 	test();
 	
 	fmt::printf("main end\n");
 }
 
-function test() {
+fn test() {
 	var int int_value = 0;
 
 	for(int_value = 0; int_value < 10; int_value++) {
-		defer function() {
+		defer fn() {
 			fmt::printf("defer closure\n");
 		}();
 	}

@@ -19,7 +19,7 @@ global {
 }
 
 
-function producer() {
+fn producer() {
 	var int i = 0;
 
 	fmt::printf("producer start work\n");
@@ -31,7 +31,7 @@ function producer() {
 }
 
 
-function consumer() {
+fn consumer() {
 	fmt::printf("consumer start work\n");
     for(;;) {
 		yield();
@@ -41,7 +41,7 @@ function consumer() {
 }
 
 @main
-function main() {
+fn main() {
 
 	consumerid = launch consumer();
 	resume(consumerid);

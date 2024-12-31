@@ -14,7 +14,7 @@ global {
 // TestDetail: 三维数组的初始化
 
 @main
-function main() {
+fn main() {
     global_bool_array_0 =  bool[,,]{
         bool[,]{
             bool[]{true, false, true, false},

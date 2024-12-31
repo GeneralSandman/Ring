@@ -8,34 +8,34 @@ import {
 
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
-    field Job2    Job2;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
+    var Job2    Job2;
 }
 
 typedef class Job2 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
-    field Job3    Job3;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
+    var Job3    Job3;
 }
 
 typedef class Job3 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
-    field Job4    Job4;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
+    var Job4    Job4;
 }
 
 typedef class Job4 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 }
 
 
@@ -50,7 +50,7 @@ global {
 // TestDetail: 测试对象嵌套的初始化
 
 @main
-function main() {
+fn main() {
 
     // 测试 class field的默认值
     fmt::println_string("test case 1-------");

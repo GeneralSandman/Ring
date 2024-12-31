@@ -4,16 +4,16 @@
 // Date:    2023-04-11
 //
 
-function println_bool(var bool bool_value);
-function println_int(var int int_value);
-function println_double(var double double_value);
-function println_string(var string string_value);
-function debug_assert(var bool bool_value);
-function exit(var int int_value);
-function print(var any value) -> (int);
-function println(var any value) -> (int);
-function printf(var string format, var any value)   -> (int);
-function printfln(var string format, var any value) -> (int);
+fn println_bool(var bool bool_value);
+fn println_int(var int int_value);
+fn println_double(var double double_value);
+fn println_string(var string string_value);
+fn debug_assert(var bool bool_value);
+fn exit(var int int_value);
+fn print(var any value) -> (int);
+fn println(var any value) -> (int);
+fn printf(var string format, var any value)   -> (int);
+fn printfln(var string format, var any value) -> (int);
 
 // -----------------------------
 
@@ -28,7 +28,7 @@ debug_assert(double_value_1 + double_value_2 == 2.2);
 
 
 typedef class Job {
-    field double  Score;
+    var double  Score;
 };
 
 var Job job_0;

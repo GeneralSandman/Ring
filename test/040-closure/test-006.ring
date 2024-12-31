@@ -13,11 +13,11 @@ import {
 }
 
 
-typedef function() FuncType1;
-typedef function() -> (FuncType1) FuncType2;
+typedef fn() FuncType1;
+typedef fn() -> (FuncType1) FuncType2;
 
 @main
-function main() {
+fn main() {
 	var FuncType1 tmp1;
 	var FuncType2 tmp2;
 
@@ -33,13 +33,13 @@ function main() {
 	fmt::println("\nmain::4");
 }
 
-function return_closure() -> (FuncType2) {
+fn return_closure() -> (FuncType2) {
 	fmt::println("return_closure begin");
 
 	var FuncType2 tmp2;
-	tmp2 = function() -> (FuncType1){
+	tmp2 = fn() -> (FuncType1){
 		fmt::println("return_closure::level1 begin");
-		return function() {
+		return fn() {
 			fmt::println("return_closure::level2 begin");
 		};
 	};

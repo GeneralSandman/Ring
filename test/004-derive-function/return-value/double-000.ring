@@ -8,7 +8,7 @@ import {
 
 // TestDetail: 测试函数返回 bool 类型
 @main
-function main() {
+fn main() {
 	fmt::println(return_1_double_0());
 	fmt::println(return_1_double_1());
 
@@ -39,72 +39,72 @@ function main() {
 
 
 
-function return_1_double_0() -> (double) {
+fn return_1_double_0() -> (double) {
 	return 0.0;
 }
-function return_1_double_1() -> (double) {
+fn return_1_double_1() -> (double) {
 	return 1.0;
 }
 
 
 
-function return_2_double_0() -> (double,double) {
+fn return_2_double_0() -> (double,double) {
 	return 0.0, 1.0;
 }
-function return_2_double_1() -> (double,double) {
+fn return_2_double_1() -> (double,double) {
 	return 1.0, 0.0;
 }
 
 
 
-function return_3_double_0() -> (double,double,double) {
+fn return_3_double_0() -> (double,double,double) {
 	return 0.0, 1.0, 0.0;
 }
-function return_3_double_1() -> (double,double,double) {
+fn return_3_double_1() -> (double,double,double) {
 	return 1.0, 0.0, 1.0;
 }
 
 
 
-function return_4_double_0() -> (double,double,double,double) {
+fn return_4_double_0() -> (double,double,double,double) {
 	return 0.0, 1.0, 0.0, 1.0;
 }
-function return_4_double_1() -> (double,double,double,double) {
+fn return_4_double_1() -> (double,double,double,double) {
 	return 1.0, 0.0, 1.0, 0.0;
 }
 
 
 
-function return_5_double_0() -> (double,double,double,double,double) {
+fn return_5_double_0() -> (double,double,double,double,double) {
 	return 0.0, 1.0, 0.0, 1.0, 0.0;
 }
-function return_5_double_1() -> (double,double,double,double,double) {
+fn return_5_double_1() -> (double,double,double,double,double) {
 	return 1.0, 0.0, 1.0, 0.0, 1.0;
 }
 
 
 
-function return_6_double_0() -> (double,double,double,double,double,double) {
+fn return_6_double_0() -> (double,double,double,double,double,double) {
 	return 0.0, 1.0, 0.0, 1.0, 0.0, 1.0;
 }
-function return_6_double_1() -> (double,double,double,double,double,double) {
+fn return_6_double_1() -> (double,double,double,double,double,double) {
 	return 1.0, 0.0, 1.0, 0.0, 1.0, 0.0;
 }
 
 
 
-function return_7_double_0() -> (double,double,double,double,double,double,double) {
+fn return_7_double_0() -> (double,double,double,double,double,double,double) {
 	return 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0;
 }
-function return_7_double_1() -> (double,double,double,double,double,double,double) {
+fn return_7_double_1() -> (double,double,double,double,double,double,double) {
 	return 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0;
 }
 
 
 
-function return_8_double_0() -> (double,double,double,double,double,double,double,double) {
+fn return_8_double_0() -> (double,double,double,double,double,double,double,double) {
 	return 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0;
 }
-function return_8_double_1() -> (double,double,double,double,double,double,double,double) {
+fn return_8_double_1() -> (double,double,double,double,double,double,double,double) {
 	return 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0;
 }

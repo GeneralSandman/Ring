@@ -13,11 +13,11 @@ import {
 }
 
 
-typedef function(string) FuncType;
+typedef fn(string) FuncType;
 
 
 @main
-function main() {
+fn main() {
 	var FuncType func_var;
 
 	func_var = return_a_closure();
@@ -26,12 +26,12 @@ function main() {
 }
 
 
-function return_a_closure() -> (FuncType) {
+fn return_a_closure() -> (FuncType) {
 	var FuncType local_func_var;
 
 	var int local_int_value_0;
 
-	local_func_var = function(var string string_var) {
+	local_func_var = fn(var string string_var) {
 		fmt::printf("invoke a closure local_int_value_0={}\n", local_int_value_0);
 		fmt::printf("invoke a closure string_var={}\n", string_var);
 	};

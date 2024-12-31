@@ -12,7 +12,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	var int int_value_1 = 1;
 	var int int_value_2, int_value_3 = 2, 3;

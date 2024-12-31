@@ -8,14 +8,14 @@ import {
 
 
 
-function max(var int parameter_1, var int parameter_2) -> (int) {
+fn max(var int parameter_1, var int parameter_2) -> (int) {
 	if(parameter_1>=parameter_2) {
 		return parameter_1;
 	}
 	return parameter_2;
 }
 
-function min(var int parameter_1, var int parameter_2) -> (int) {
+fn min(var int parameter_1, var int parameter_2) -> (int) {
 	if(parameter_1<=parameter_2) {
 		return parameter_1;
 	}
@@ -23,13 +23,13 @@ function min(var int parameter_1, var int parameter_2) -> (int) {
 }
 
 
-function add(var int parameter_1, var int parameter_2) -> (int) {
+fn add(var int parameter_1, var int parameter_2) -> (int) {
 	return parameter_1 + parameter_2;
 }
 
 
 @main
-function main() {
+fn main() {
 
 	var int result;
 

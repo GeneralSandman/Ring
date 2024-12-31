@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	var bool local_bool_value_1 = true;
 	var int  local_int_value_1 = 2;
 	var double local_double_value_1 = 3.0;

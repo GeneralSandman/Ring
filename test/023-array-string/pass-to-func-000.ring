@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_string_array_0 = string[]{"0.0", "1.0", "2.0", 
 		"3.0", "4.0", "5.0", 
 		"6.0", "7.0", "8.0", 
@@ -22,7 +22,7 @@ function main() {
 	
 }
 
-function func_accept_string_array(var string[] string_array) {
+fn func_accept_string_array(var string[] string_array) {
 	fmt::println_string(string_array[0]);
 	fmt::println_string(string_array[1]);
 	fmt::println_string(string_array[2]);

@@ -6,7 +6,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	
 	fmt::println(strings::join(string[]{}, ","));
 

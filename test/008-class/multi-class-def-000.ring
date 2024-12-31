@@ -9,18 +9,18 @@ import {
 
 
 typedef class Job1 {
-    field bool    Running1;
+    var bool    Running1;
 }
 
 typedef class Job2 {
-    field bool    Running2;
-    field int     JobID2;
+    var bool    Running2;
+    var int     JobID2;
 }
 
 typedef class Job3 {
-    field bool    Running3;
-    field int     JobID3;
-    field double  Score3;
+    var bool    Running3;
+    var int     JobID3;
+    var double  Score3;
 }
 
 
@@ -33,7 +33,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
 
     fmt::println_string("\ntest case 1");

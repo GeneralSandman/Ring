@@ -13,24 +13,24 @@ import {
 }
 
 
-typedef function() functype_0;
-typedef function() -> (string) functype_1;
+typedef fn() functype_0;
+typedef fn() -> (string) functype_1;
 
 // TestDetail: 匿名函数
 // TestDetail: 不需要定义匿名函数变量, 可以直接通过函数参数传递
 @main
-function main() {
+fn main() {
 
-	pass_closure(function() {
+	pass_closure(fn() {
 		fmt::println("main:: closure block 1");
-	}, function() -> (string) {
+	}, fn() -> (string) {
 		fmt::println("main:: closure block 2");
 		return "main:: closure return value";
 	});
 	
 }
 
-function pass_closure(var functype_0 func_0, var functype_1 func_1) {
+fn pass_closure(var functype_0 func_0, var functype_1 func_1) {
 	fmt::println("pass_closure::begin");
 	func_0();
 

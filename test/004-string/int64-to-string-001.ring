@@ -14,7 +14,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	var int64    int64_value;
     var string   string_value;
 

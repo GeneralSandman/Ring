@@ -12,11 +12,11 @@ import {
 	fmt;
 }
 
-typedef function() -> (int64) FuncType1;
+typedef fn() -> (int64) FuncType1;
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸
 @main
-function main() {
+fn main() {
 
 	var FuncType1 counter0;
 	var FuncType1 counter1;
@@ -69,11 +69,11 @@ function main() {
 
 }
 
-function get_counter(var int64 begin, var int64 step) -> (FuncType1) {
+fn get_counter(var int64 begin, var int64 step) -> (FuncType1) {
 
 	var int64 level0_local_int_value_0 = begin;
 
-	return function() -> (int64) {
+	return fn() -> (int64) {
 		level0_local_int_value_0 += step;
 		return level0_local_int_value_0;
 	};

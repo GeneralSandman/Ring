@@ -10,25 +10,25 @@ import {
 
 
 typedef class Job {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
-    field Runner  Runner;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
+    var Runner  Runner;
 
 
-    field bool[]    BoolArray;
-    field int[]     IntArray;
-    field double[]  DoubleArray;
-    field string[]  StringArray;
-    field Runner[]  RunnerArray;
+    var bool[]    BoolArray;
+    var int[]     IntArray;
+    var double[]  DoubleArray;
+    var string[]  StringArray;
+    var Runner[]  RunnerArray;
 }
 
 typedef class Runner {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 }
 
 global {
@@ -39,7 +39,7 @@ global {
 // TestDetail: class中field支持数组
 
 @main
-function main() {
+fn main() {
 
     // 测试 class field的默认值
     fmt::println_string("test case 1-------");

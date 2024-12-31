@@ -13,7 +13,7 @@ import {
 }
 
 
-typedef function() FuncType;
+typedef fn() FuncType;
 
 global {
 	var bool   global_bool_value_1;
@@ -25,10 +25,10 @@ global {
 
 
 @main
-function main() {
+fn main() {
 	var FuncType local_func_var;
 
-	local_func_var = function() {
+	local_func_var = fn() {
 		fmt::println("invoke a closure 1:begin");
 		global_bool_value_1   = true;
 		global_int_value_1    = 1;

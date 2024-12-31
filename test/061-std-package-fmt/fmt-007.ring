@@ -11,22 +11,22 @@ import {
 }
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+	var int64   Int64;
+    var double  Double;
+    var string  String;
 
-	field string[] StringArray;
-	field Job2    Job2;
+	var string[] StringArray;
+	var Job2    Job2;
 }
 
 typedef class Job2 {
-	field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
+	var bool    Bool;
+    var int     Int;
+	var int64   Int64;
+    var double  Double;
+    var string  String;
 }
 
 global {
@@ -42,7 +42,7 @@ global {
 // TestDetail: 测试 fmt::println fmt::printf 函数
 // TestDetail:  测试 打印数组 打印ClassObject
 @main
-function main() {
+fn main() {
 
 
 

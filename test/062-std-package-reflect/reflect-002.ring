@@ -13,17 +13,17 @@ import {
 }
 
 typedef class Job {
-    field bool    Bool;
-    field int     Int;
-    field int64   Int64;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var int64   Int64;
+    var double  Double;
+    var string  String;
 }
 
 // TestDetail: 通过 字符串比较的方式来比较获取 typeof
 // TestDetail: reflect::typeof(bool_value) == "bool"
 @main
-function main() {
+fn main() {
 	var bool   bool_value;
 	var int    int_value;
 	var int64  int64_value;

@@ -9,7 +9,7 @@ import {
 
 
 
-function test(var int parameter_1, var int parameter_2, var int parameter_3, var int parameter_4, var int parameter_5, var int parameter_6, var int parameter_7, var int parameter_8, var int parameter_9, var int parameter_10) -> (int) {
+fn test(var int parameter_1, var int parameter_2, var int parameter_3, var int parameter_4, var int parameter_5, var int parameter_6, var int parameter_7, var int parameter_8, var int parameter_9, var int parameter_10) -> (int) {
 	var int int_value_local_1;
 	var int int_value_local_2;
 	var int int_value_local_3;
@@ -79,7 +79,7 @@ function test(var int parameter_1, var int parameter_2, var int parameter_3, var
 
 
 @main
-function main() {
+fn main() {
 
 	var int result;
 	result = test(11,12,13,14,15,16,17,18,19,20);

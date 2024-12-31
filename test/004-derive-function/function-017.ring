@@ -8,7 +8,7 @@ import {
 
 
 
-function test(var int int_value_1, var int int_value_2, var int int_value_3) -> (int) {
+fn test(var int int_value_1, var int int_value_2, var int int_value_3) -> (int) {
     var int result = 0;
 
     result = result + int_value_1;
@@ -19,7 +19,7 @@ function test(var int int_value_1, var int int_value_2, var int int_value_3) -> 
 }
 
 @main
-function main() {
+fn main() {
 
     var int int_value;
     

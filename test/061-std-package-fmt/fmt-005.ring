@@ -11,12 +11,12 @@ import {
 }
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 
-	method printInfo() {
+	fn printInfo() {
 		fmt::printf("Bool:{} Int:{} Double:{} String:{}\n", self.Bool, self.Int, self.Double, self.String);
 	}
 }
@@ -28,7 +28,7 @@ global {
 // TestDetail: 测试 fmt::printf 函数
 
 @main
-function main() {
+fn main() {
 	fmt::printf("{} {} {} {}\n", true, 1, 1.1, "hello");
 	fmt::printf("\{} {} {} {}\n", true, 1, 1.1, "hello");
 	fmt::printf("\{\} {} {} {}\n", true, 1, 1.1, "hello");

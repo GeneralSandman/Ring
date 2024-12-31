@@ -11,11 +11,11 @@ import {
 
 
 typedef class File {
-    field int fd;
+    var int fd;
 }
 
 @main
-function main() {
+fn main() {
     var int fileid = io::open("/Users/zhenhuli/Desktop/Ring/test/065-std-package-io/000.ring");
 
     // var string content = io::read_all(fileid);  // FIXME: 这样写存在bug, 会调用两次

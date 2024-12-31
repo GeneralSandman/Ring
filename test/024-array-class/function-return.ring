@@ -6,10 +6,10 @@ import {
 }
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 }
 
 global {
@@ -17,7 +17,7 @@ global {
 }
 
 
-function test_func() -> (Job1[,]) {
+fn test_func() -> (Job1[,]) {
 	var Job1[,] local_job1_array_0;
 
 	local_job1_array_0 = Job1[,]{
@@ -54,7 +54,7 @@ function test_func() -> (Job1[,]) {
 
 // TestDetail: 测试通过函数返回多维数组
 @main
-function main() {
+fn main() {
 	
 
 	global_job1_array_0 = test_func();

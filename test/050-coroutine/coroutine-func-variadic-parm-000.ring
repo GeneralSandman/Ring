@@ -11,7 +11,7 @@ global {
 // TestDetail:测试可变参数
 // TestDetail:可变参数为 int... 类型
 @main
-function main() {
+fn main() {
     var int64 co_id;
 
 
@@ -44,7 +44,7 @@ function main() {
 }
 
 
-function func_variadic_parameter(var int... array_value) {
+fn func_variadic_parameter(var int... array_value) {
     fmt::printf("len(array_value)      = {}\n", len(array_value));
     fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
 

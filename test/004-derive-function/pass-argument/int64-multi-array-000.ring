@@ -9,7 +9,7 @@ import {
 // TestDetail: derive函数传递int64数组类型参数
 // TestDetail: 分别传递1-8个int64数组类型参数
 @main
-function main() {
+fn main() {
 
 	pass_1_int64_array_1(int64[]{1L});
 
@@ -68,18 +68,18 @@ function main() {
 
 
 
-function pass_1_int64_array_1(var int64[] a) {
+fn pass_1_int64_array_1(var int64[] a) {
 	fmt::println(a);
 }
 
-function pass_1_int64_array_2(var int64[,] a) {
+fn pass_1_int64_array_2(var int64[,] a) {
 	fmt::println(a);
 }
 
-function pass_1_int64_array_3(var int64[,,] a) {
+fn pass_1_int64_array_3(var int64[,,] a) {
 	fmt::println(a);
 }
 
-function pass_1_int64_array_4(var int64[,,,] a) {
+fn pass_1_int64_array_4(var int64[,,,] a) {
 	fmt::println(a);
 }

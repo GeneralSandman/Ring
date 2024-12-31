@@ -12,13 +12,13 @@ import {
 	fmt;
 }
 
-typedef function() FuncType;
+typedef fn() FuncType;
 
-function test1() -> (FuncType, FuncType) {
+fn test1() -> (FuncType, FuncType) {
 
 	var FuncType local_func_var_0, local_func_var_1;
 
-	local_func_var_0 = function() {
+	local_func_var_0 = fn() {
 		var bool   local_bool_value_0 = false;
 		var int    local_int_value_0 = 0;
 		var int64  local_int64_value_0 = 0L;
@@ -32,7 +32,7 @@ function test1() -> (FuncType, FuncType) {
 		fmt::println("-local_double_value_0:", local_double_value_0);
         fmt::println("-local_string_value_0:", local_string_value_0);
 	};
-	local_func_var_1 = function() {
+	local_func_var_1 = fn() {
 		var bool   local_bool_value_0 = true;
 		var int    local_int_value_0 = 1;
 		var int64  local_int64_value_0 = 2L;
@@ -53,7 +53,7 @@ function test1() -> (FuncType, FuncType) {
 
 
 @main
-function main() {
+fn main() {
 	var FuncType local_func_var_0, local_func_var_1;
 	
 	

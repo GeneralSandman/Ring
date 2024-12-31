@@ -9,10 +9,10 @@ import {
 
 
 typedef class Job {
-    field bool    Bool;
-    field int     Int;
-    field int64   Int64;
-    field double  Double;
+    var bool    Bool;
+    var int     Int;
+    var int64   Int64;
+    var double  Double;
 }
 
 global {
@@ -24,7 +24,7 @@ global {
 // TestDetail: e.g. 
 
 @main
-function main() {
+fn main() {
 
 
     fmt::println_string("\ntest case 0");

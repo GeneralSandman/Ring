@@ -6,9 +6,9 @@ import {
 }
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
 }
 
 global {
@@ -18,7 +18,7 @@ global {
 // TestDetail: 数组中的元素为类
 // TestDetail: 通过数组索引对数组元素的成员变量进行赋值
 @main
-function main() {
+fn main() {
     global_job_array_0 = new Job[200];
 
     var int index = 0;

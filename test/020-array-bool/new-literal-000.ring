@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_bool_array_0 = bool[]{true, false, false, 
 		true, false, false, 
 		true, false, false, 

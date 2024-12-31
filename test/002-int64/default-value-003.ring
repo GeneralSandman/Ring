@@ -12,7 +12,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	var int64 int64_value_1 = 1L;
 	var int64 int64_value_2 = 0;

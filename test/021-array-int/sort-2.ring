@@ -13,7 +13,7 @@ global {
 // TestDetail: e.g. global_int_array_0[i+1] = i;
 
 @main
-function main() {
+fn main() {
     var int i = 0;
     global_int_array_0 = int[]{9,8,7,6,5,4,3,2,1,0};
 

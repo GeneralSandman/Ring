@@ -12,14 +12,14 @@ import {
 }
 
 typedef class Job {
-      field bool    Running;
-      field int     JobID;
-      field double  Score;
+      var bool    Running;
+      var int     JobID;
+      var double  Score;
   }
 
 //TestDetail: 编译错误
 @main
-function main() {
+fn main() {
       true == true; // success
       // true == 1; // failed
 
@@ -31,14 +31,14 @@ function main() {
 }
 
 
-function func_0() {
+fn func_0() {
 
 }
 
-function func_1() -> (int) {
+fn func_1() -> (int) {
       
 }
 
-function func_5() -> (Job) {
+fn func_5() -> (Job) {
       
 }

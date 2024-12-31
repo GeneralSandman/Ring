@@ -7,11 +7,11 @@ import {
 }
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
 
-    method PrintInfo() {
+    fn PrintInfo() {
         
     }
 }
@@ -20,7 +20,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
     var Job local_value_job_0;
     local_value_job_0.Running = true;
     local_value_job_0.JobID = 1;
@@ -49,7 +49,7 @@ function main() {
 
 }
 
-function test(var Job job) {
+fn test(var Job job) {
     // fmt::println_pointer(job);
 
     fmt::println_bool(job.Running);

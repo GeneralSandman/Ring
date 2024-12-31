@@ -11,7 +11,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	
 	fmt::println_string("test case 1");
 	fmt::println_int64(global_int64_value_1);

@@ -11,7 +11,7 @@ global {
 // TestDetail:测试可变参数, 实现一个 sum函数
 // TestDetail:可变参数为 int... 类型
 @main
-function main() {
+fn main() {
     var int64 sum;
 
 
@@ -73,7 +73,7 @@ function main() {
 }
 
 
-function sum(var int64... array_value) -> (int64) {
+fn sum(var int64... array_value) -> (int64) {
     var int64 sum;
     var int64 int64_value;
 

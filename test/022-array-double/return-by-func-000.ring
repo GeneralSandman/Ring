@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_double_array_0 = func_return_double_array();
 	
 	fmt::println_string("\n=================func main\n");
@@ -47,7 +47,7 @@ function main() {
 	debug::assert(global_double_array_0[14] == 14.0);
 }
 
-function func_return_double_array() -> (double[]) {
+fn func_return_double_array() -> (double[]) {
 	var double[] double_array = double[]{0.0, 1.0, 2.0, 
 		3.0, 4.0, 5.0, 
 		6.0, 7.0, 8.0, 

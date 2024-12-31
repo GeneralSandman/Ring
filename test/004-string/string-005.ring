@@ -16,7 +16,7 @@ import {
 // TestDetail: 测试多行字符串
 
 @main
-function main() {
+fn main() {
     var string string_value;
 
     string_value = `block begin

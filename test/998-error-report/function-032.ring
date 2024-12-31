@@ -9,17 +9,17 @@ import {
 
 
 typedef class Job {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 }
 
 
-function func_return_0(var bool bool_value, var int int_value, var double double_value, var string string_value) {
+fn func_return_0(var bool bool_value, var int int_value, var double double_value, var string string_value) {
 }
 
-function test1(var string format, var any... any_value) {
+fn test1(var string format, var any... any_value) {
 
 }
 
@@ -29,7 +29,7 @@ function test1(var string format, var any... any_value) {
 // TestDetail: 
 
 @main
-function main() {
+fn main() {
     var Job   local_job_value_0;
 
     func_return_01(true, 1, 1.1, "1.1");

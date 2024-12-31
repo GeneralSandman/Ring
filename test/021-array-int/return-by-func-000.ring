@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_int_array_0 = func_return_int_array();
 	
 	fmt::println_string("\n=================func main\n");
@@ -47,7 +47,7 @@ function main() {
 	debug::assert(global_int_array_0[14] == 14);
 }
 
-function func_return_int_array() -> (int[]) {
+fn func_return_int_array() -> (int[]) {
 	var int[] int_array = int[]{0, 1, 2, 
 		3, 4, 5, 
 		6, 7, 8, 

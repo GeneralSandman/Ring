@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	
 	fmt::println_string("test case 1");
 	fmt::println_bool(global_bool_value_1);

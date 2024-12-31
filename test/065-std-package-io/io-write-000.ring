@@ -10,7 +10,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	io::write(1, "Hello\n");
 	// io::write(2, "Hello\n");
 }

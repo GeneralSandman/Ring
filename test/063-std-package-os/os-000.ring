@@ -16,7 +16,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
     fmt::println_string("before invoke os::exit");
     os::exit(0);
     fmt::println_string("after invoke os::exit");

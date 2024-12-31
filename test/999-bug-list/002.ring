@@ -3,7 +3,7 @@ var int int_value;
 
 int_value = 1;
 
-function testRecursion() {
+fn testRecursion() {
     print("testRecursion ", int_value, "\n");
     int_value = int_value + 1;
     testRecursion();

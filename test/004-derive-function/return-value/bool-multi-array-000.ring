@@ -9,7 +9,7 @@ import {
 // TestDetail: derive函数传递bool数组类型参数
 // TestDetail: 分别传递1-8个bool数组类型参数
 @main
-function main() {
+fn main() {
 
 	fmt::println(return_1_bool_array_1());
 
@@ -25,18 +25,18 @@ function main() {
 
 
 
-function return_1_bool_array_1() -> (bool[]) {
+fn return_1_bool_array_1() -> (bool[]) {
 	return bool[]{true};
 }
 
-function return_1_bool_array_2() -> (bool[,]) {
+fn return_1_bool_array_2() -> (bool[,]) {
 	return bool[,]{
 		bool[]{true, false},
 		bool[]{false, true},
 	};
 }
 
-function return_1_bool_array_3() -> (bool[,,]) {
+fn return_1_bool_array_3() -> (bool[,,]) {
 	return bool[,,]{
 		bool[,]{
 			bool[]{true, false, true},
@@ -51,7 +51,7 @@ function return_1_bool_array_3() -> (bool[,,]) {
 	};
 }
 
-function return_1_bool_array_4() -> (bool[,,,]) {
+fn return_1_bool_array_4() -> (bool[,,,]) {
 	return bool[,,,]{
 		bool[,,]{
 			bool[,]{

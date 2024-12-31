@@ -13,7 +13,7 @@ import {
 
 //TestDetail: 编译错误
 @main
-function main() {
+fn main() {
       var string string_value;
 
       string_value = string_value .. "a";

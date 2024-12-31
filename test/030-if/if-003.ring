@@ -7,7 +7,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 
 	debug::assert(true and true);

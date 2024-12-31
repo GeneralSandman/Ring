@@ -9,17 +9,17 @@ import {
 
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
 
-    method PrintInfo() {
+    fn PrintInfo() {
         
     }
 }
 
 /*
-method Job::Init(var bool _Running, var int _JobID, var double _Score) {
+fn Job::Init(var bool _Running, var int _JobID, var double _Score) {
     self.Running = _Running;
     self.JobID   = _JobID;
     self.Score   = _Score;
@@ -27,7 +27,7 @@ method Job::Init(var bool _Running, var int _JobID, var double _Score) {
 */
 
 /*
-method Job::PrintInfo() {
+fn Job::PrintInfo() {
     fmt::println_bool(self.Running);
     fmt::println_int(self.JobID);
     fmt::println_double(self.Score);
@@ -52,7 +52,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
     // fmt::println_bool(job_0.Running);
     // fmt::println_int(job_0.JobID);

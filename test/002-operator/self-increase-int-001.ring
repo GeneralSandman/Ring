@@ -11,7 +11,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
 
 

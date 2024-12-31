@@ -14,7 +14,7 @@ import {
 
 // 测试 2147483649L 这种形式的 int64常量
 @main
-function main() {
+fn main() {
 	var int64 local_int64_value_0;
 
 	local_int64_value_0 = -2147483649L + -10L;

@@ -15,7 +15,7 @@ import {
 
 // TestDetail: 测试通过函数参数传递 string类型的参数
 @main
-function main() {
+fn main() {
     var string string_value;
     string_value = "1234567890";
 
@@ -23,6 +23,6 @@ function main() {
     pass_to_string("1234567890");
 }
 
-function pass_to_string(var string string_value) {
+fn pass_to_string(var string string_value) {
     fmt::printf("string_value={}\n", string_value);
 }

@@ -12,12 +12,12 @@ import {
 	fmt;
 }
 
-typedef function() FuncType;
+typedef fn() FuncType;
 
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸
 @main
-function main() {
+fn main() {
 
 	var FuncType func_var;
 
@@ -35,14 +35,14 @@ function main() {
 	func_var();
 }
 
-function use_closure() -> (FuncType) {
+fn use_closure() -> (FuncType) {
 
 	var int level0_local_int_value_0;
 
 	level0_local_int_value_0 = 1;
 	fmt::printf("[new closure] level0_local_int_value_0={}\n", level0_local_int_value_0);
 
-	return function() {
+	return fn() {
 		level0_local_int_value_0++;
 		fmt::printf("[+closure] level0_local_int_value_0={}\n", level0_local_int_value_0);
 	};

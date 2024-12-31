@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	var bool   local_bool_value_1;
 	var int    local_int_value_1;
 	var int64  local_int64_value_1;

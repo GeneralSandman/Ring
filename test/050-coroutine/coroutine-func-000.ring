@@ -13,7 +13,7 @@ import {
 }
 
 
-function job_action_0() {
+fn job_action_0() {
 	fmt::printf("            job_action_0::begin\n");
 	yield();
 	fmt::printf("            job_action_0::end\n");
@@ -22,7 +22,7 @@ function job_action_0() {
 
 // TestDetail: 测试 launch 一个函数，函数没有参数，没有返回值
 @main
-function main() {
+fn main() {
 	var int64 co_id;
 
 	fmt::println("main::1");

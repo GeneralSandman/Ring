@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	var double local_double_value_1;
 	
 	fmt::println_string("test case 1");

@@ -11,7 +11,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	
 	fmt::println_string("test case 1");
 	fmt::println_int(global_int_value_1);

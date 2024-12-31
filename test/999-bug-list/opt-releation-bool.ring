@@ -14,7 +14,7 @@ import {
 
 // minus 符号
 @main
-function main() {
+fn main() {
 	var bool local_bool_value_0;
 
 	local_bool_value_0 = false == false;

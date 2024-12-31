@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
     var int a = 8;
     var int b = 7;
     var int c = 6;

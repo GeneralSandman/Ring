@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_bool_array_0 = new bool[50];
 	
 	fmt::println_bool(global_bool_array_0[0]);

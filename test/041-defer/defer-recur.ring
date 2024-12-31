@@ -14,7 +14,7 @@ import {
 
 
 @main
-function main() {
+fn main() {
 
 	fmt::printf("main begin\n");
 
@@ -23,16 +23,16 @@ function main() {
 	fmt::printf("main end\n");
 }
 
-function test() {
+fn test() {
 
 	fmt::printf("test begin\n");
 
 
-	defer function() {
+	defer fn() {
 		
 		fmt::printf("defer 1 begin\n");
 		
-		defer function() {
+		defer fn() {
 			fmt::printf("    defer 1 --- defer\n");
 		}();
 
@@ -40,11 +40,11 @@ function test() {
 	}();
 
 
-	defer function() {
+	defer fn() {
 		
 		fmt::printf("defer 2 begin\n");
 		
-		defer function() {
+		defer fn() {
 			fmt::printf("    defer 2 --- defer\n");
 		}();
 

@@ -9,7 +9,7 @@ import {
 
 
 
-function test() {
+fn test() {
 	var int int_value_local_1;
 	var int int_value_local_2;
 	var int int_value_local_3;
@@ -58,7 +58,7 @@ function test() {
 }
 
 @main
-function main() {
+fn main() {
 
 	test();
 }

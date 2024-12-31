@@ -14,7 +14,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
     var string string_value;
 
     fmt::println_string("test cast 1 ------------------------");

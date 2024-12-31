@@ -10,7 +10,7 @@ global {
     var int int_value_global;
 }
 
-function func_use_local_variable() {
+fn func_use_local_variable() {
     var int int_value_local;
     int_value_local = 123;
     fmt::println_int(int_value_local);
@@ -26,7 +26,7 @@ function func_use_local_variable() {
 // --------------
 
 @main
-function main() {
+fn main() {
 
     int_value_global = 2;
     fmt::println_int(int_value_global);

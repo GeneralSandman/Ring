@@ -12,11 +12,11 @@ import {
 	fmt;
 }
 
-typedef function(string) FuncType1;
+typedef fn(string) FuncType1;
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸
 @main
-function main() {
+fn main() {
 
 	// test_log();
 	// return;
@@ -39,16 +39,16 @@ function main() {
 
 }
 
-function get_logger(var string level, var string prefix) -> (FuncType1) {
+fn get_logger(var string level, var string prefix) -> (FuncType1) {
 
-	return function(var string message) {
+	return fn(var string message) {
 		fmt::printf("[{}]{} {}\n", level, prefix, message);
 	};
 }
 
 
 
-function test_log() {
+fn test_log() {
 	fmt::println("------------");
 	log("INFO", "Job", "start");
 	log("INFO", "Job", "running");
@@ -60,7 +60,7 @@ function test_log() {
 	
 }
 
-function log(var string level, var string prefix, var string message) {
+fn log(var string level, var string prefix, var string message) {
 	fmt::printf("[{}]{} {}\n", level, prefix, message);
 }
 

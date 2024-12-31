@@ -6,9 +6,9 @@ import {
 }
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
 }
 
 global {
@@ -16,7 +16,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
     global_job_array_0 = new Job[5];
 
 

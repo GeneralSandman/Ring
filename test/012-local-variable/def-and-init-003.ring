@@ -10,39 +10,39 @@ global {
 }
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+	var int64   Int64;
+    var double  Double;
+    var string  String;
 }
 
-function func_return_3_bool() -> (bool, bool, bool) {
+fn func_return_3_bool() -> (bool, bool, bool) {
 	fmt::println("func_return_3_bool::start");
 	return true, false, true;
 }
 
-function func_return_3_int() -> (int, int, int) {
+fn func_return_3_int() -> (int, int, int) {
 	fmt::println("func_return_3_int::start");
 	return 1, 2, 3;
 }
 
-function func_return_3_int64() -> (int64, int64, int64) {
+fn func_return_3_int64() -> (int64, int64, int64) {
 	fmt::println("func_return_3_int64::start");
 	return 655367L, 655368L, 655369L;
 }
 
-function func_return_3_double() -> (double, double, double) {
+fn func_return_3_double() -> (double, double, double) {
 	fmt::println("func_return_3_double::start");
 	return 655367655367.0, 655367655367.123, 655367655367.456;
 }
 
-function func_return_3_string() -> (string, string, string) {
+fn func_return_3_string() -> (string, string, string) {
 	fmt::println("func_return_3_string::start");
 	return "ring-v0.2.14-release", "ring-v0.2.14-beta", "ring-v0.2.14-alpha";
 }
 
-function func_return_3_job1() -> (Job1, Job1, Job1) {
+fn func_return_3_job1() -> (Job1, Job1, Job1) {
 	fmt::println("func_return_3_job1::start");
 	return Job1{
 		Bool:   true,
@@ -72,7 +72,7 @@ function func_return_3_job1() -> (Job1, Job1, Job1) {
 // TestDetail: 均为局部变量
 // TestDetail: 初始化表达式为函数调用
 @main
-function main() {
+fn main() {
 	fmt::println("main::start");
 
 	var bool   local_bool_value_0,   local_bool_value_1,   local_bool_value_2   = func_return_3_bool();

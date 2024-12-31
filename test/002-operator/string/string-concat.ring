@@ -7,7 +7,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	fmt::printf("--------\n");
 	var string local_string_value_0;

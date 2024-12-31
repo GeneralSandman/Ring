@@ -15,7 +15,7 @@ global {
 
 
 
-function func_use_global_variable() {
+fn func_use_global_variable() {
     int_value_global = 222;
     fmt::println_int(int_value_global);
     fmt::println_int(int_value_global);
@@ -31,7 +31,7 @@ function func_use_global_variable() {
 // --------------
 
 @main
-function main() {
+fn main() {
 
     int_value_global = 1;
     fmt::println_int(int_value_global);

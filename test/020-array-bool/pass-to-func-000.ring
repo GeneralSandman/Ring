@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_bool_array_0 = bool[]{true, false, false, 
 		true, false, false, 
 		true, false, false, 
@@ -21,7 +21,7 @@ function main() {
 	
 }
 
-function func_accept_bool_array(var bool[] bool_array) {
+fn func_accept_bool_array(var bool[] bool_array) {
 	fmt::println_bool(bool_array[0]);
 	fmt::println_bool(bool_array[1]);
 	fmt::println_bool(bool_array[2]);

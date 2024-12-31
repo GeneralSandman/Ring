@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	var bool[] bool_array;
 	var int[]  int_array;
 	var int64[] int64_array;

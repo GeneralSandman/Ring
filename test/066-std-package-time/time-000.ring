@@ -12,7 +12,7 @@ import {
 
 // 测试 time package time() / sleep() 函数
 @main
-function main() {
+fn main() {
 	var int64 timestamp_0;
 	var int64 timestamp_1;
 	var int64 interval;

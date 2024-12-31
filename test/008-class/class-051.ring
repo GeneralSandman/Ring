@@ -8,60 +8,60 @@ import {
 
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
-    field Job2    Job2;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
+    var Job2    Job2;
 
-    method printInfo() {
+    fn printInfo() {
         fmt::printf("Job1({}, {}, {}, {})\n", self.Bool, self.Int, self.Double, self.String);
     }
-    method returnSelf() -> (Job1) {
+    fn returnSelf() -> (Job1) {
         return self;
     }
 }
 
 typedef class Job2 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
-    field Job3    Job3;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
+    var Job3    Job3;
 
-    method printInfo() {
+    fn printInfo() {
         fmt::printf("Job2({}, {}, {}, {})\n", self.Bool, self.Int, self.Double, self.String);
     }
-    method returnSelf() -> (Job2) {
+    fn returnSelf() -> (Job2) {
         return self;
     }
 }
 
 typedef class Job3 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
-    field Job4    Job4;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
+    var Job4    Job4;
 
-    method printInfo() {
+    fn printInfo() {
         fmt::printf("Job3({}, {}, {}, {})\n", self.Bool, self.Int, self.Double, self.String);
     }
-    method returnSelf() -> (Job3) {
+    fn returnSelf() -> (Job3) {
         return self;
     }
 }
 
 typedef class Job4 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 
-    method printInfo() {
+    fn printInfo() {
         fmt::printf("Job4({}, {}, {}, {})\n", self.Bool, self.Int, self.Double, self.String);
     }
-    method returnSelf() -> (Job4) {
+    fn returnSelf() -> (Job4) {
         return self;
     }
 }
@@ -78,7 +78,7 @@ global {
 // TestDetail: 测试方法链式调用
 
 @main
-function main() {
+fn main() {
 
     // 测试 class field的默认值
     fmt::println_string("test case 1-------");

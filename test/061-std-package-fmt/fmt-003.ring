@@ -11,6 +11,6 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	fmt::println_string("hello world");
 }

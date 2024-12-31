@@ -7,7 +7,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	debug::assert(2 > 1);
 	if(2>1) {

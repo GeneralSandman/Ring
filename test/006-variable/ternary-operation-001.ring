@@ -6,16 +6,16 @@ import {
 }
 
 
-function a() {
+fn a() {
 	fmt::println_string("function a");
 }
 
-function b() {
+fn b() {
 	fmt::println_string("function b");
 }
 
 @main
-function main() {
+fn main() {
 
 	true ? a() : b();
 	

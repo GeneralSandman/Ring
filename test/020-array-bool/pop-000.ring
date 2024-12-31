@@ -12,7 +12,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
     fmt::println_string("test cast 1 ------------------------");
     global_bool_array_0 = new bool[200];

@@ -9,21 +9,21 @@ import {
 
 
 
-function test_return_1() -> (int) {
+fn test_return_1() -> (int) {
     return 1;
 }
 
 
-function test_return_2() -> (int,int) {
+fn test_return_2() -> (int,int) {
     return 2, 3;
 }
 
-function test_return_3() -> (int,int,int) {
+fn test_return_3() -> (int,int,int) {
     return 4, 5, 6;
 }
 
 @main
-function main() {
+fn main() {
     var int int_value_1;
     var int int_value_2;
     var int int_value_3;

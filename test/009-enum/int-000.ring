@@ -14,7 +14,7 @@ enum int AccessMode {
 }
 
 @main
-function main() {
+fn main() {
 	fmt::println(AccessMode::O_RDONLY);
 }
 

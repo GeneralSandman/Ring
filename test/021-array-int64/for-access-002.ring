@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	var int64 value;
 
   global_int64_array_0 = new int64[200];

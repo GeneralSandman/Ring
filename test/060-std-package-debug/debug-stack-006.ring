@@ -23,7 +23,7 @@ global {
 // TestDetail: 测试 debug::print_call_stack()
 // TestDetail: 函数多次调用
 @main
-function main() {
+fn main() {
 
 	
 	fmt::println("\ntest 1-------------");
@@ -40,7 +40,7 @@ function main() {
 
 }
 
-function test1() {
+fn test1() {
 	fmt::println("test1()::0");
 	fmt::println("test1()::1");
 	fmt::printf(""); // 空指令，无意义，用于占行
@@ -53,7 +53,7 @@ function test1() {
 	fmt::println("test1()::3");
 }
 
-function test2() {
+fn test2() {
 
 
 
@@ -67,7 +67,7 @@ function test2() {
 	fmt::println("test2()::3");
 }
 
-function test3() {
+fn test3() {
 	fmt::println("test3()::0");
 	fmt::println("test3()::1");
 	fmt::println("test3()::2");

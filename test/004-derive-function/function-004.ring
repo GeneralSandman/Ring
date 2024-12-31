@@ -12,7 +12,7 @@ global {
 
 
 
-function func_use_local_variable_hidden_global() {
+fn func_use_local_variable_hidden_global() {
     var int int_value_global;
     int_value_global = 234;
     fmt::println_int(int_value_global);
@@ -29,7 +29,7 @@ function func_use_local_variable_hidden_global() {
 // --------------
 
 @main
-function main() {
+fn main() {
 
     int_value_global = 1;
     fmt::println_int(int_value_global);

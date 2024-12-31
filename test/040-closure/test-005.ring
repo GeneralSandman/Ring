@@ -13,14 +13,14 @@ import {
 }
 
 
-typedef function() FuncType;
+typedef fn() FuncType;
 
 
 @main
-function main() {
+fn main() {
 	var FuncType tmp0, tmp1;
 
-	tmp0 = function() {
+	tmp0 = fn() {
 		fmt::println("main:: closure block");
 	};
 	tmp1 = pass_closure(tmp0);
@@ -33,12 +33,12 @@ function main() {
 	
 }
 
-function pass_closure(var FuncType func_var) -> (FuncType) {
+fn pass_closure(var FuncType func_var) -> (FuncType) {
 	fmt::println("pass_closure::begin");
 	func_var();
 	fmt::println("pass_closure::end");
 
-	return function() {
+	return fn() {
 		fmt::println("pass_closure:: closure block");
 	};
 }

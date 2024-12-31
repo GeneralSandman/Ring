@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_int64_array_0 = int64[]{0L, 1L, 2L, 
 		3L, 4L, 5L, 
 		6L, 7L, 8L, 
@@ -22,7 +22,7 @@ function main() {
 	
 }
 
-function func_accept_int64_array(var int64[] int64_array) {
+fn func_accept_int64_array(var int64[] int64_array) {
 	fmt::println_int64(int64_array[0]);
 	fmt::println_int64(int64_array[1]);
 	fmt::println_int64(int64_array[2]);

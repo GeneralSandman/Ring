@@ -13,21 +13,21 @@ import {
 }
 
 
-typedef function(string) FuncType;
+typedef fn(string) FuncType;
 
 
 @main
-function main() {
+fn main() {
 	test();
 }
 
 
-function test() {
+fn test() {
 	var FuncType local_func_var;
 
 	var int local_int_value_0;
 
-	function(var string string_var) {
+	fn(var string string_var) {
 		fmt::printf("invoke a closure local_int_value_0={}\n", local_int_value_0);
 		fmt::printf("invoke a closure string_var={}\n", string_var);
 	}("hello world");
@@ -35,7 +35,7 @@ function test() {
 
 	local_int_value_0 = 100;
 
-	function(var string string_var) {
+	fn(var string string_var) {
 		fmt::printf("invoke a closure local_int_value_0={}\n", local_int_value_0);
 		fmt::printf("invoke a closure string_var={}\n", string_var);
 	}("hello world");

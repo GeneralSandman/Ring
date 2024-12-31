@@ -13,19 +13,19 @@ import {
 }
 
 
-typedef function() FuncType;
+typedef fn() FuncType;
 
 
 @main
-function main() {
+fn main() {
 	var FuncType local_func_var;
 
-	local_func_var = function() {
+	local_func_var = fn() {
 		fmt::println("invoke a closure 1");
 	};
 	local_func_var();
 
-	local_func_var = function() {
+	local_func_var = fn() {
 		fmt::println("invoke a closure 2");
 	};
 	local_func_var();

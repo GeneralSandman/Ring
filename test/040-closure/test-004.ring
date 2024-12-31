@@ -12,21 +12,21 @@ import {
 	fmt;
 }
 
-typedef function() FuncType;
+typedef fn() FuncType;
 
 
 @main
-function main() {
+fn main() {
 	var FuncType tmp;
 
-	tmp = function() {
+	tmp = fn() {
 		fmt::println("main:: closure block");
 	};
 
 	pass_closure(tmp);
 }
 
-function pass_closure(var FuncType func_var) {
+fn pass_closure(var FuncType func_var) {
 	fmt::println("pass_closure::begin");
 	func_var();
 	fmt::println("pass_closure::end");

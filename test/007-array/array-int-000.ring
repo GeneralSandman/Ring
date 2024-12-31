@@ -12,7 +12,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
   int_array = new int[10];
 

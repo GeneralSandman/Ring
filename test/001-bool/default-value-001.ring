@@ -12,7 +12,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	var bool bool_value_1;
 	var bool bool_value_2, bool_value_3;

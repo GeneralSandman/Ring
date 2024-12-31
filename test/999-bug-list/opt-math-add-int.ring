@@ -14,7 +14,7 @@ import {
 
 // minus 符号
 @main
-function main() {
+fn main() {
 	var int local_int_value_0;
 
 	local_int_value_0 = -1 + -1;

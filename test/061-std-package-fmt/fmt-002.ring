@@ -11,6 +11,6 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	fmt::println_double(123.456);
 }

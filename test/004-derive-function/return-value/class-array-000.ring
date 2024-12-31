@@ -7,11 +7,11 @@ import {
 
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+	var int64   Int64;
+    var double  Double;
+    var string  String;
 }
 
 global {
@@ -35,7 +35,7 @@ global {
 
 // TestDetail: 测试函数返回 job1 数组类型
 @main
-function main() {
+fn main() {
 	fmt::println(return_job1_array_1_0());
 	fmt::println(return_job1_array_1_1());
 	fmt::println(return_job1_array_1_2());
@@ -56,35 +56,35 @@ function main() {
 
 
 
-function return_job1_array_1_0() -> (Job1[]) {
+fn return_job1_array_1_0() -> (Job1[]) {
 	return Job1[]{global_job1_value_1};
 }
-function return_job1_array_1_1() -> (Job1[]) {
+fn return_job1_array_1_1() -> (Job1[]) {
 	return Job1[]{global_job1_value_2};
 }
-function return_job1_array_1_2() -> (Job1[]) {
+fn return_job1_array_1_2() -> (Job1[]) {
 	return Job1[]{global_job1_value_2, global_job1_value_1, global_job1_value_2, global_job1_value_1};
 }
-function return_job1_array_1_3() -> (Job1[]) {
+fn return_job1_array_1_3() -> (Job1[]) {
 	return Job1[]{global_job1_value_2, global_job1_value_1, global_job1_value_2, global_job1_value_1, global_job1_value_2};
 }
 
 
-function return_job1_array_2_0() -> (Job1[], Job1[]) {
+fn return_job1_array_2_0() -> (Job1[], Job1[]) {
 	return Job1[]{global_job1_value_1}, Job1[]{global_job1_value_2};
 }
-function return_job1_array_2_1() -> (Job1[], Job1[]) {
+fn return_job1_array_2_1() -> (Job1[], Job1[]) {
 	return Job1[]{global_job1_value_2}, Job1[]{global_job1_value_1};
 }
-function return_job1_array_2_2() -> (Job1[], Job1[]) {
+fn return_job1_array_2_2() -> (Job1[], Job1[]) {
 	return Job1[]{global_job1_value_2, global_job1_value_1, global_job1_value_2, global_job1_value_1}, Job1[]{global_job1_value_2, global_job1_value_1, global_job1_value_2, global_job1_value_1};
 }
-function return_job1_array_2_3() -> (Job1[], Job1[]) {
+fn return_job1_array_2_3() -> (Job1[], Job1[]) {
 	return Job1[]{global_job1_value_2, global_job1_value_1, global_job1_value_2, global_job1_value_1, global_job1_value_2}, Job1[]{global_job1_value_2, global_job1_value_1, global_job1_value_2, global_job1_value_1, global_job1_value_2};
 }
 
 
 
-function return_job1_array_8_0() -> (Job1[], Job1[], Job1[], Job1[], Job1[], Job1[], Job1[], Job1[]) {
+fn return_job1_array_8_0() -> (Job1[], Job1[], Job1[], Job1[], Job1[], Job1[], Job1[], Job1[]) {
 	return Job1[]{global_job1_value_1}, Job1[]{global_job1_value_2}, Job1[]{global_job1_value_1}, Job1[]{global_job1_value_2}, Job1[]{global_job1_value_1}, Job1[]{global_job1_value_2}, Job1[]{global_job1_value_1}, Job1[]{global_job1_value_2};
 }

@@ -13,7 +13,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	var int int_value;
 	fmt::println_int(int_value);
 	debug::assert(int_value == 0);

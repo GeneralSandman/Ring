@@ -9,12 +9,12 @@ import {
 
 
 typedef class Job {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 
-    method printInfo() {
+    fn printInfo() {
         fmt::printf("Job({}, {}, {}, {})\n", self.Bool, self.Int, self.Double, self.String);
     }
 }
@@ -26,7 +26,7 @@ global {
 // TestDetail: 数组的元素为 class-obect, 数组为二维数组
 // TestDetail: 直接通过索引对数组元素中的成员就行修改
 @main
-function main() {
+fn main() {
 
     global_job_array_0 = new Job[2,2];
     global_job_array_0[0,0] = Job{

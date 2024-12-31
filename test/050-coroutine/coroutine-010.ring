@@ -13,15 +13,15 @@ import {
 
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+	var int64   Int64;
+    var double  Double;
+    var string  String;
 }
 
 
-function job_action1() {
+fn job_action1() {
 	var bool   local_bool_value_0   ;
 	var int    local_int_value_0    ;
 	var int64  local_int64_value_0  ;
@@ -40,7 +40,7 @@ function job_action1() {
 	fmt::printf("            job_action1::2\n");
 }
 
-function job_action2() {
+fn job_action2() {
 	var bool   local_bool_value_0   = true;
 	var int    local_int_value_0    = 1;
 	var int64  local_int64_value_0  = 2L;
@@ -65,7 +65,7 @@ function job_action2() {
 	fmt::printf("            job_action2::2\n");
 }
 @main
-function main() {
+fn main() {
 
 	var int64 co_id;
 

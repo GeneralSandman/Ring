@@ -6,10 +6,10 @@ import {
 }
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 }
 
 global {
@@ -19,7 +19,7 @@ global {
 
 // TestDetail: 测试对二维数组进行 for-range 遍历
 @main
-function main() {
+fn main() {
 	global_job1_array_0 = Job1[,]{
 		Job1[]{
 			Job1{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},

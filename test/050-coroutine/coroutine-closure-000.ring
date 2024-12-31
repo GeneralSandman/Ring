@@ -12,13 +12,13 @@ import {
 }
 
 
-typedef function() FuncType;
+typedef fn() FuncType;
 
 @main
-function main() {
+fn main() {
 
 	var FuncType job_action1;
-	job_action1 = function() {
+	job_action1 = fn() {
 		fmt::println("            job_action1::1");
 		yield();
 		fmt::println("            job_action1::2");

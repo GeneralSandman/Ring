@@ -14,7 +14,7 @@ import {
 
 // minus 符号
 @main
-function main() {
+fn main() {
 	
 	var int i;
 	for(i=0; false; i++) {

@@ -8,7 +8,7 @@ import {
 
 
 
-function fibonacci_1(var int num) -> (int) {
+fn fibonacci_1(var int num) -> (int) {
     if(num == 1 or num == 2) {
         return 1;
     } else {
@@ -16,7 +16,7 @@ function fibonacci_1(var int num) -> (int) {
     }
 }
 
-function fibonacci_2(var int num) -> (int) {
+fn fibonacci_2(var int num) -> (int) {
     if(num < 3) {
         return 1;
     }
@@ -36,7 +36,7 @@ function fibonacci_2(var int num) -> (int) {
 
 
 @main
-function main() {
+fn main() {
 
     fmt::println_string("\ntest case 1");
     fmt::println_int(fibonacci_1(1));

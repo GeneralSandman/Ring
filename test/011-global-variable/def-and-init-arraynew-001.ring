@@ -15,11 +15,11 @@ global {
 }
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+	var int64   Int64;
+    var double  Double;
+    var string  String;
 }
 
 
@@ -27,7 +27,7 @@ typedef class Job1 {
 // TestDetail: 均为全局变量
 // TestDetail: 数组变量 使用 new 关键字初始化
 @main
-function main() {
+fn main() {
 
 	fmt::println(local_bool_array_0);
 	fmt::println(local_int_array_0);

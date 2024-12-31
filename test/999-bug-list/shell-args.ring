@@ -13,7 +13,7 @@ import {
 }
 
 @main
-function main(var string[] args) {
+fn main(var string[] args) {
 
     fmt::println(len(args));
 	fmt::println(args);

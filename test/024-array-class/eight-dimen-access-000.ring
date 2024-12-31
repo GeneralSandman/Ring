@@ -6,10 +6,10 @@ import {
 }
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
-    field string  Name;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
+    var string  Name;
 }
 
 global {
@@ -19,7 +19,7 @@ global {
 // TestDetail: 测试八维数组，数组元素为class
 
 @main
-function main() {
+fn main() {
     global_job_array_0 = new Job[1,2,3,4,5,6,7,8];
 
     fmt::println_string("test cast 1 ------------------------");

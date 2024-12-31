@@ -16,13 +16,13 @@ global {
 }
 
 
-function job_action1() {
+fn job_action1() {
 	fmt::println("            job_action1::1");
 	job_action2();
 	fmt::println("            job_action1::2");
 }
 
-function job_action2() {
+fn job_action2() {
 	fmt::println("            job_action2::1");
 	yield();
 	job_action3_co_id = launch job_action3();
@@ -32,21 +32,21 @@ function job_action2() {
 
 }
 
-function job_action3() {
+fn job_action3() {
 	fmt::println("                job_action3::1");
 	job_action4();
 	fmt::println("                job_action3::2");
 
 }
 
-function job_action4() {
+fn job_action4() {
 	fmt::println("                job_action4::1");
 	yield();
 	fmt::println("                job_action4::2");
 }
 
 @main
-function main() {
+fn main() {
 
 	var int64 co_id;
 

@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
     var int64 int64_value;
 
     fmt::println_string("test cast 0 length&capacity------------------------");

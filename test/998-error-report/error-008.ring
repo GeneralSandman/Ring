@@ -13,20 +13,20 @@ import {
 	debug;
 }
 
-function return_true() -> (bool) {
+fn return_true() -> (bool) {
 	return true;
 }
 
-function return_false() -> (bool) {
+fn return_false() -> (bool) {
 	return false;
 }
 
-function return_int() -> (int) {
+fn return_int() -> (int) {
 
 }
 
 @main
-function main() {
+fn main() {
 	var bool bool_value;
 	var int a;
 	var string s;

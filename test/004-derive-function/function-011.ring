@@ -16,7 +16,7 @@ global {
 
 
 
-function test_1(var int int_value_1, var int int_value_2) -> (int, int) {
+fn test_1(var int int_value_1, var int int_value_2) -> (int, int) {
     fmt::println_string("function test_1");
 
     fmt::println_int(int_value_1);
@@ -30,7 +30,7 @@ function test_1(var int int_value_1, var int int_value_2) -> (int, int) {
 }
 
 @main
-function main() {
+fn main() {
     debug::assert(int_value_global_1 == 0);
     debug::assert(int_value_global_2 == 0);
 

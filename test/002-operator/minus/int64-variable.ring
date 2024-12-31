@@ -6,7 +6,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	var int64 local_int64_value_0;
 
 	fmt::println("test 1 ----------");

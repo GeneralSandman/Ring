@@ -12,6 +12,6 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	var bool self;
 }

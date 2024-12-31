@@ -16,7 +16,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
     var string env_name  = "RING_TEST_ENV";
 	var string env_value = "";
 	var string tmp       = "";

@@ -12,7 +12,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_string_array_0 = new string[10];
 
 

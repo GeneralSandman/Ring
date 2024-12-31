@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
   global_double_array_0 = new double[200];
 
   var int index = 0;

@@ -7,18 +7,18 @@ import {
 
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+	var int64   Int64;
+    var double  Double;
+    var string  String;
 }
 
 
 // TestDetail: derive函数传递class类型参数
 // TestDetail: 分别传递1-8个class类型参数
 @main
-function main() {
+fn main() {
 
 	var Job1 local_job1_value_0;
 	var Job1 local_job1_value_1;
@@ -67,35 +67,35 @@ function main() {
 
 
 
-function pass_1_job1(var Job1 a) {
+fn pass_1_job1(var Job1 a) {
 	fmt::println(a);
 }
 
-function pass_2_job1(var Job1 a, var Job1 b) {
+fn pass_2_job1(var Job1 a, var Job1 b) {
 	fmt::println(a, b);
 }
 
-function pass_3_job1(var Job1 a, var Job1 b, var Job1 c) {
+fn pass_3_job1(var Job1 a, var Job1 b, var Job1 c) {
     fmt::println(a, b, c);
 }
 
-function pass_4_job1(var Job1 a, var Job1 b, var Job1 c, var Job1 d) {
+fn pass_4_job1(var Job1 a, var Job1 b, var Job1 c, var Job1 d) {
     fmt::println(a, b, c, d);
 }
 
-function pass_5_job1(var Job1 a, var Job1 b, var Job1 c, var Job1 d, var Job1 e) {
+fn pass_5_job1(var Job1 a, var Job1 b, var Job1 c, var Job1 d, var Job1 e) {
     fmt::println(a, b, c, d, e);
 }
 
-function pass_6_job1(var Job1 a, var Job1 b, var Job1 c, var Job1 d, var Job1 e, var Job1 f) {
+fn pass_6_job1(var Job1 a, var Job1 b, var Job1 c, var Job1 d, var Job1 e, var Job1 f) {
     fmt::println(a, b, c, d, e, f);
 }
 
-function pass_7_job1(var Job1 a, var Job1 b, var Job1 c, var Job1 d, var Job1 e, var Job1 f, var Job1 g) {
+fn pass_7_job1(var Job1 a, var Job1 b, var Job1 c, var Job1 d, var Job1 e, var Job1 f, var Job1 g) {
     fmt::println(a, b, c, d, e, f, g);
 }
 
-function pass_8_job1(var Job1 a, var Job1 b, var Job1 c, var Job1 d, var Job1 e, var Job1 f, var Job1 g, var Job1 h) {
+fn pass_8_job1(var Job1 a, var Job1 b, var Job1 c, var Job1 d, var Job1 e, var Job1 f, var Job1 g, var Job1 h) {
     fmt::println(a, b, c, d, e, f, g, h);
 }
 

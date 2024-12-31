@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_int_array_0 = int[]{0, 1, 2, 
 		3, 4, 5, 
 		6, 7, 8, 

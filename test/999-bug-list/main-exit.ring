@@ -17,11 +17,11 @@ global {
 }
 
 @main
-function main(var string[] args) {
+fn main(var string[] args) {
 	os::exit(-1);
 }
 
-function return_bool() -> (bool) {
+fn return_bool() -> (bool) {
 	fmt::println("return_bool");
 	return true;
 }

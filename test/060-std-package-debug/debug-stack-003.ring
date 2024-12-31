@@ -12,32 +12,32 @@ import {
 }
 
 @main
-function main() {
-	fmt::println("function main()");
+fn main() {
+	fmt::println("fn main()");
 	test0();
 }
 
-function test0() {
-	fmt::println("function test0()");
+fn test0() {
+	fmt::println("fn test0()");
 	test1(false);
 }
 
-function test1(var bool bool_value) {
-	fmt::println("function test1()");
+fn test1(var bool bool_value) {
+	fmt::println("fn test1()");
 	test2(1);
 }
 
-function test2(var int int_value) {
-	fmt::println("function test2()");
+fn test2(var int int_value) {
+	fmt::println("fn test2()");
 	test3(1.2);
 }
 
-function test3(var double double_value) {
-	fmt::println("function test3()");
+fn test3(var double double_value) {
+	fmt::println("fn test3()");
 	test4("a");
 }
 
-function test4(var string string_value) {
-	fmt::println("function test4()");
+fn test4(var string string_value) {
+	fmt::println("fn test4()");
 	debug::print_call_stack();
 }

@@ -17,21 +17,21 @@ global {
 	
 }
 
-function get_next_global_count_1() -> (int) {
+fn get_next_global_count_1() -> (int) {
 	var int tmp0 = global_count;
 	fmt::printf("invoke get_next_global_count_1\n");
 	global_count = global_count + 1;
     return tmp0;
 }
 
-function get_next_global_count_2() -> (int, int) {
+fn get_next_global_count_2() -> (int, int) {
 	var int tmp0, tmp1 = global_count, global_count+1;
 	fmt::printf("invoke get_next_global_count_2\n");
 	global_count = global_count + 2;
     return tmp0, tmp1;
 }
 
-function get_next_global_count_3() -> (int, int, int) {
+fn get_next_global_count_3() -> (int, int, int) {
 	var int tmp0, tmp1, tmp2 = global_count, global_count+1, global_count+2;
 	fmt::printf("invoke get_next_global_count_3\n");
 	global_count = global_count + 3;
@@ -42,7 +42,7 @@ function get_next_global_count_3() -> (int, int, int) {
 // TestDetail: 初始化表达式为函数调用
 // TestDetail: 初始 初始化的顺序是否正确
 @main
-function main() {
+fn main() {
 	fmt::println("main::start");
 	
 	var int local_int_value_0                                       = get_next_global_count_1();

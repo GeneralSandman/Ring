@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
   var string string_value;
 
   global_string_array_0 = new string[200];

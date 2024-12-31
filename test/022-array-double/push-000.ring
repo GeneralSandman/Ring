@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
     fmt::println_string("test cast 1 ------------------------");
     global_double_array_0 = new double[200];

@@ -13,7 +13,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 
     if("a" == "a") {

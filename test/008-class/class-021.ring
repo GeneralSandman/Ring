@@ -9,12 +9,12 @@ import {
 
 
 typedef class Job {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 
-    method printInfo() {
+    fn printInfo() {
         fmt::printf("Job({}, {}, {}, {})\n", self.Bool, self.Int, self.Double, self.String);
     }
 }
@@ -41,7 +41,7 @@ global {
 // TestDetail: `global_job_0.String, global_job_1.String = global_job_1.String, global_job_0.String;`
 
 @main
-function main() {
+fn main() {
 
     global_job_0 = Job{
         Bool:   true,

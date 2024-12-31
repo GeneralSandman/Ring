@@ -8,20 +8,20 @@ import {
 
 
 
-function doit1() {
+fn doit1() {
     fmt::println_string("I'm function doit1, go go go!");
 }
 
-function doit2() {
+fn doit2() {
     fmt::println_string("I'm function doit2, go go go!");
 }
 
-function doit3() {
+fn doit3() {
     fmt::println_string("I'm function doit3, go go go!");
 }
 
 
-function doit4() {
+fn doit4() {
     fmt::println_string("doit4 begin");
 
     doit1();
@@ -32,7 +32,7 @@ function doit4() {
 }
 
 @main
-function main() {
+fn main() {
 
     fmt::println_string("invoke doit1");
     doit1();

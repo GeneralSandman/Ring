@@ -6,7 +6,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	var int int_value = 1;
 

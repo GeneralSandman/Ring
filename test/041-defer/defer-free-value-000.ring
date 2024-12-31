@@ -14,14 +14,14 @@ import {
 
 
 @main
-function main() {
+fn main() {
 
 	test();
 	
 	fmt::printf("main end\n");
 }
 
-function test() {
+fn test() {
 
 	var bool local_bool_value;
 	var int local_int_value;
@@ -29,7 +29,7 @@ function test() {
 	var string local_string_value;
 
 
-	defer function() {
+	defer fn() {
 		fmt::printf("---------- defer 1 ----------\n");
 		fmt::printf("defer bool_value={}\n", local_bool_value);
 		fmt::printf("defer int_value={}\n", local_int_value);
@@ -45,7 +45,7 @@ function test() {
 	local_int64_value = 456L;
 	local_string_value = "hello world";
 
-	defer function() {
+	defer fn() {
 		fmt::printf("---------- defer 2 ----------\n");
 		fmt::printf("defer bool_value={}\n", local_bool_value);
 		fmt::printf("defer int_value={}\n", local_int_value);

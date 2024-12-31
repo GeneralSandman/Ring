@@ -6,11 +6,11 @@ import {
 }
 
 typedef class Job {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
 
-    method PrintInfo() {
+    fn PrintInfo() {
         
     }
 }
@@ -20,7 +20,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
     fmt::println_string("test case 1");
     fmt::println_bool(global_value_job_0.Bool);

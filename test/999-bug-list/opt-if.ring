@@ -14,7 +14,7 @@ import {
 
 // minus 符号
 @main
-function main() {
+fn main() {
 	if(false) {
 		fmt::println("1");
 	} else {

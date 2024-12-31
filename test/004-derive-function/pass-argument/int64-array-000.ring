@@ -9,7 +9,7 @@ import {
 // TestDetail: derive函数传递int64数组类型参数
 // TestDetail: 分别传递1-8个int64数组类型参数
 @main
-function main() {
+fn main() {
 
 	pass_1_int64_array(int64[]{0L});
 	pass_1_int64_array(int64[]{1L});
@@ -40,35 +40,35 @@ function main() {
 
 
 
-function pass_1_int64_array(var int64[] a) {
+fn pass_1_int64_array(var int64[] a) {
 	fmt::println(a);
 }
 
-function pass_2_int64_array(var int64[] a, var int64[] b) {
+fn pass_2_int64_array(var int64[] a, var int64[] b) {
 	fmt::println(a, b);
 }
 
-function pass_3_int64_array(var int64[] a, var int64[] b, var int64[] c) {
+fn pass_3_int64_array(var int64[] a, var int64[] b, var int64[] c) {
     fmt::println(a, b, c);
 }
 
-function pass_4_int64_array(var int64[] a, var int64[] b, var int64[] c, var int64[] d) {
+fn pass_4_int64_array(var int64[] a, var int64[] b, var int64[] c, var int64[] d) {
     fmt::println(a, b, c, d);
 }
 
-function pass_5_int64_array(var int64[] a, var int64[] b, var int64[] c, var int64[] d, var int64[] e) {
+fn pass_5_int64_array(var int64[] a, var int64[] b, var int64[] c, var int64[] d, var int64[] e) {
     fmt::println(a, b, c, d, e);
 }
 
-function pass_6_int64_array(var int64[] a, var int64[] b, var int64[] c, var int64[] d, var int64[] e, var int64[] f) {
+fn pass_6_int64_array(var int64[] a, var int64[] b, var int64[] c, var int64[] d, var int64[] e, var int64[] f) {
     fmt::println(a, b, c, d, e, f);
 }
 
-function pass_7_int64_array(var int64[] a, var int64[] b, var int64[] c, var int64[] d, var int64[] e, var int64[] f, var int64[] g) {
+fn pass_7_int64_array(var int64[] a, var int64[] b, var int64[] c, var int64[] d, var int64[] e, var int64[] f, var int64[] g) {
     fmt::println(a, b, c, d, e, f, g);
 }
 
-function pass_8_int64_array(var int64[] a, var int64[] b, var int64[] c, var int64[] d, var int64[] e, var int64[] f, var int64[] g, var int64[] h) {
+fn pass_8_int64_array(var int64[] a, var int64[] b, var int64[] c, var int64[] d, var int64[] e, var int64[] f, var int64[] g, var int64[] h) {
     fmt::println(a, b, c, d, e, f, g, h);
 }
 

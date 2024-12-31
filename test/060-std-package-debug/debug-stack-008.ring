@@ -12,12 +12,12 @@ import {
 }
 
 typedef class Job {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 
-    method test1() {
+    fn test1() {
 		fmt::println("Job::test1()::0");
 		fmt::println("Job::test1()::1");
 		self.test2();
@@ -25,7 +25,7 @@ typedef class Job {
 		fmt::println("Job::test1()::3");
     }
 
-	method test2() {
+	fn test2() {
 		fmt::println("Job::test2()::0");
 		fmt::println("Job::test2()::1");
 		self.test3();
@@ -33,7 +33,7 @@ typedef class Job {
 		fmt::println("Job::test2()::3");
     }
 
-	method test3() {
+	fn test3() {
 		fmt::println("Job::test3()::0");
 		fmt::println("Job::test3()::1");
 		fmt::println("Job::test3()::2");
@@ -54,7 +54,7 @@ global {
 // TestDetail: 测试 debug::print_call_stack()
 // TestDetail: 函数/method 多次调用
 @main
-function main() {
+fn main() {
 
 	
 	fmt::println("\ntest 1-------------");
@@ -66,7 +66,7 @@ function main() {
 
 }
 
-function test1() {
+fn test1() {
 	fmt::println("test1()::0");
 	fmt::println("test1()::1");
 	test2();
@@ -74,7 +74,7 @@ function test1() {
 	fmt::println("test1()::3");
 }
 
-function test2() {
+fn test2() {
 	fmt::println("test2()::0");
 	fmt::println("test2()::1");
 	test3();
@@ -82,7 +82,7 @@ function test2() {
 	fmt::println("test2()::3");
 }
 
-function test3() {
+fn test3() {
 	fmt::println("test3()::0");
 	fmt::println("test3()::1");
 	fmt::println("test3()::2");

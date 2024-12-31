@@ -7,7 +7,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	var int int_value_1, int_value_2;
 	var double double_value_1, double_value_2;

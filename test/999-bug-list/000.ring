@@ -1,5 +1,5 @@
 
-function doit5() (int) {
+fn doit5() (int) {
 	return 5;
 }
 

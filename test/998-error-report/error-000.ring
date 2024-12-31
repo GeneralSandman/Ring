@@ -4,9 +4,9 @@
 // Date:    2023-04-11
 //
 
-function main() {
+fn main() {
 }
-function test() {
+fn test() {
 	a;
 }
 

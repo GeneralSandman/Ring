@@ -8,7 +8,7 @@ import {
 
 
 
-function get_level_by_score(var int score) -> (int) {
+fn get_level_by_score(var int score) -> (int) {
 	if(0<=score and score<=100) {
 		return score/10;
 	} else {
@@ -17,7 +17,7 @@ function get_level_by_score(var int score) -> (int) {
 }
 
 @main
-function main() {
+fn main() {
 
 	var int sum;
 	var int score;

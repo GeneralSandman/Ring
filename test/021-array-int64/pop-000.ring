@@ -12,7 +12,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
     fmt::println_string("test cast 1 ------------------------");
     global_int64_array_0 = new int64[200];

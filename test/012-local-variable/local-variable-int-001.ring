@@ -12,7 +12,7 @@ global {
 // TestDetail: 测试局部变量有255个
 
 @main
-function main() {
+fn main() {
 	var int  local_int_value_0    = 0;
 	var int  local_int_value_1    = 1;
 	var int  local_int_value_2    = 2;

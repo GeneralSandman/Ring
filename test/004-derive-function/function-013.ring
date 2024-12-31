@@ -9,7 +9,7 @@ import {
 
 
 
-function get_level_by_score(var int score) -> (int) {
+fn get_level_by_score(var int score) -> (int) {
 	if(0<=score and score<10) {
 		fmt::println_string("level 0");
 	} elseif(10<=score and score<20) {
@@ -42,7 +42,7 @@ function get_level_by_score(var int score) -> (int) {
 
 
 @main
-function main() {
+fn main() {
 
 	var int score;
 	var int level;

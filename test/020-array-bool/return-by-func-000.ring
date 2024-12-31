@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_bool_array_0 = func_return_bool_array();
 	
 	fmt::println_string("\n=================func main\n");
@@ -47,7 +47,7 @@ function main() {
 	debug::assert(global_bool_array_0[14] == false);
 }
 
-function func_return_bool_array() -> (bool[]) {
+fn func_return_bool_array() -> (bool[]) {
 	var bool[] bool_array = bool[]{true, false, false, 
 		true, false, false, 
 		true, false, false, 

@@ -12,7 +12,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	var double double_value_1;
 	var double double_value_2, double_value_3;

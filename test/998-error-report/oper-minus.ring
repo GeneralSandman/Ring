@@ -12,20 +12,20 @@ import {
 }
 
 typedef class Job {
-      field bool    Running;
-      field int     JobID;
-      field double  Score;
+      var bool    Running;
+      var int     JobID;
+      var double  Score;
   }
 
 @main
-function main() {
+fn main() {
       var bool bool_value;
 
       // bool_value = -1;
 
 }
 
-function test() -> (bool) {
+fn test() -> (bool) {
       return 1;
 }
 

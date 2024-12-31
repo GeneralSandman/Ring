@@ -14,7 +14,7 @@ import {
 
 
 @main
-function main() {
+fn main() {
 
 	test1();
 
@@ -23,11 +23,11 @@ function main() {
 	fmt::printf("main end\n");
 }
 
-function test1() {
+fn test1() {
 	var int int_value = 0;
 
 	for(int_value = 0; int_value < 10; int_value++) {
-		defer function() {
+		defer fn() {
 			fmt::printf("test1 defer int_value={}\n", int_value);
 		}();
 	}
@@ -37,11 +37,11 @@ function test1() {
 	fmt::printf("test1 end\n");
 }
 
-function test2() {
+fn test2() {
 	var int int_value = 0;
 
 	for(int_value = 0; int_value < 10; int_value++) {
-		defer function(var int int_value) {
+		defer fn(var int int_value) {
 			fmt::printf("test1 defer int_value={}\n", int_value);
 		}(int_value);
 	}

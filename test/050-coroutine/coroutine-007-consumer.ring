@@ -16,7 +16,7 @@ global {
 }
 
 
-function producer(var int64 consumer_co_id, var int produce_count) {
+fn producer(var int64 consumer_co_id, var int produce_count) {
 	var int i = 0;
 
 	fmt::printf("producer start work\n");
@@ -27,7 +27,7 @@ function producer(var int64 consumer_co_id, var int produce_count) {
 	}
 }
 
-function consumer_1() {
+fn consumer_1() {
 	var int   consumer_1_count;
 	fmt::printf("consumer_1 start work\n");
 
@@ -51,7 +51,7 @@ function consumer_1() {
 	}
 }
 
-function consumer_2(var string arg) {
+fn consumer_2(var string arg) {
 
 	yield();
 
@@ -59,7 +59,7 @@ function consumer_2(var string arg) {
 }
 
 @main
-function main() {
+fn main() {
 	var int64 consumer_1_id;
 
 	consumer_1_id = launch consumer_1();

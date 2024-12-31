@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_int_array_0 = new int[50];
 	
 	fmt::println_int(global_int_array_0[0]);

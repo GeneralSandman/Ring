@@ -9,7 +9,7 @@ import {
 // TestDetail: derive函数传递string数组类型参数
 // TestDetail: 分别传递1-8个string数组类型参数
 @main
-function main() {
+fn main() {
 
 	pass_1_string_array_1(string[]{"true"});
 
@@ -56,18 +56,18 @@ function main() {
 
 
 
-function pass_1_string_array_1(var string[] a) {
+fn pass_1_string_array_1(var string[] a) {
 	fmt::println(a);
 }
 
-function pass_1_string_array_2(var string[,] a) {
+fn pass_1_string_array_2(var string[,] a) {
 	fmt::println(a);
 }
 
-function pass_1_string_array_3(var string[,,] a) {
+fn pass_1_string_array_3(var string[,,] a) {
 	fmt::println(a);
 }
 
-function pass_1_string_array_4(var string[,,,] a) {
+fn pass_1_string_array_4(var string[,,,] a) {
 	fmt::println(a);
 }

@@ -13,7 +13,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	var bool bool_value;
 	fmt::println_bool(bool_value);
 	debug::assert(bool_value == false);

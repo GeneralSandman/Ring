@@ -13,18 +13,18 @@ import {
 }
 
 
-typedef function(double) -> (string) functype_0;
-typedef function(int64) -> (functype_0) functype_1;
-typedef function(int) -> (functype_1) functype_2;
+typedef fn(double) -> (string) functype_0;
+typedef fn(int64) -> (functype_0) functype_1;
+typedef fn(int) -> (functype_1) functype_2;
 
 
-function return_closure() -> (functype_2) {
+fn return_closure() -> (functype_2) {
 	fmt::println("return_closure:: invoke level3");
-	return function(var int  a) -> (functype_1) {
+	return fn(var int  a) -> (functype_1) {
 		fmt::printf("return_closure:: invoke level2 int={}\n", a);
-		return function(var int64 a) -> (functype_0) {
+		return fn(var int64 a) -> (functype_0) {
 			fmt::printf("return_closure:: invoke level1 int64={}\n", a);
-			return function(var double a) -> (string) {
+			return fn(var double a) -> (string) {
 				fmt::printf("return_closure:: invoke level0 double={}\n", a);
 				return "hello ring compiler";
 			};
@@ -36,7 +36,7 @@ function return_closure() -> (functype_2) {
 // TestDetail: 不需要定义匿名函数变量, 可以直接返回
 
 @main
-function main() {
+fn main() {
 	var functype_2 tmp_2;
 	fmt::println("\nmain::1");
 	tmp_2 = return_closure();

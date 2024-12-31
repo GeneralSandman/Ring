@@ -7,7 +7,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	
 
 

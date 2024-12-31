@@ -6,7 +6,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	fmt::println("test 1 ----------");
 	fmt::println_double(0.0);

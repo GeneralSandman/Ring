@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
   fmt::println_string("test cast 1 ------------------------");
   fmt::println_int(len(global_bool_array_0));

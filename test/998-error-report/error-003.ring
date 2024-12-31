@@ -8,11 +8,11 @@ global {
     var int int_value_0;
 }
 
-function main() {
+fn main() {
 
 }
 
-function main() {
+fn main() {
 
 
 }

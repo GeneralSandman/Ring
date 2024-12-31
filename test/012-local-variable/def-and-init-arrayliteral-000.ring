@@ -10,11 +10,11 @@ global {
 }
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+	var int64   Int64;
+    var double  Double;
+    var string  String;
 }
 
 
@@ -22,7 +22,7 @@ typedef class Job1 {
 // TestDetail: 均为局部变量
 // TestDetail: 数组变量 通过数组常量初始化
 @main
-function main() {
+fn main() {
 	var bool[]   local_bool_array_0   = bool[]{true, false, true, false};
 	var int[]    local_int_array_0    = int[]{1, 2, 3, 4};
 	var int64[]  local_int64_array_0  = int64[]{1L, 2L, 3L, 4L};

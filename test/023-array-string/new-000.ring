@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	global_string_array_0 = new string[50];
 	
 	fmt::println_string(global_string_array_0[0]);

@@ -8,22 +8,22 @@ import {
 }
 
 typedef class Job1 {
-  field bool    Bool;
-  field int     Int;
-  field double  Double;
-  field string  String;
+  var bool    Bool;
+  var int     Int;
+  var double  Double;
+  var string  String;
 
-  method printInfo() {
+  fn printInfo() {
       fmt::printf("Job1({}, {}, {}, {})\n", self.Bool, self.Int, self.Double, self.String);
   }
-  method returnSelf() -> (Job1) {
+  fn returnSelf() -> (Job1) {
       return self;
   }
-  method method_return_0() -> (string, int) {
+  fn method_return_0() -> (string, int) {
   }
 }
 
-function func_return_0() -> (bool, int) {
+fn func_return_0() -> (bool, int) {
     return true, 1;
 }
 
@@ -33,7 +33,7 @@ function func_return_0() -> (bool, int) {
 // TestDetail: 
 
 @main
-function main() {
+fn main() {
     var bool   local_bool_value_0;
     var int    local_int_value_0;
     var double local_double_value_0;

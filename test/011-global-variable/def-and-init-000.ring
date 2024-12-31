@@ -21,18 +21,18 @@ global {
 }
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+	var int64   Int64;
+    var double  Double;
+    var string  String;
 }
 
 
 // TestDetail: 测试 bool/int/int64/double/string/class 类型变量的定义和初始化
 // TestDetail: 均为全局变量
 @main
-function main() {
+fn main() {
 
 	fmt::println(local_bool_value_0);
 	fmt::println(local_int_value_0);

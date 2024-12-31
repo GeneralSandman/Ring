@@ -10,11 +10,11 @@ import {
 
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
 
-    method Echo() -> (bool, int, double) {
+    fn Echo() -> (bool, int, double) {
         return self.Running, self.JobID, self.Score;
     }
 }
@@ -24,7 +24,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
     var bool   local_bool_value_0;
     var int    local_int_value_0;
     var double local_double_value_0;

@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
   var double double_value;
 
   global_double_array_0 = new double[200];

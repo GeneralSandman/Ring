@@ -9,12 +9,12 @@ import {
 
 
 typedef class Job {
-    field bool    Bool;
-    field int     Int;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+    var double  Double;
+    var string  String;
 
-    method printInfo() {
+    fn printInfo() {
         fmt::printf("Job({}, {}, {}, {})\n", self.Bool, self.Int, self.Double, self.String);
     }
 }
@@ -27,7 +27,7 @@ global {
 // TestDetail: 通过一行多项赋值一个个初始化
 // TestDetail: 多项赋值的右边全部为 class-object literal
 @main
-function main() {
+fn main() {
     global_job_array_0 = new Job[10];
 
     global_job_array_0[0], global_job_array_0[1], global_job_array_0[2], global_job_array_0[3], 

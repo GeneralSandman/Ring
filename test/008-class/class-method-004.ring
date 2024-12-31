@@ -8,12 +8,12 @@ import {
 
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
-    field string  Name;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
+    var string  Name;
 
-    method PrintInfo() {
+    fn PrintInfo() {
         fmt::println_string("invoke Job::PrintInfo");
         fmt::println_bool(self.Running);
         fmt::println_int(self.JobID);
@@ -27,7 +27,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
     fmt::println_string("\ntest case 1");
     job_0.PrintInfo();

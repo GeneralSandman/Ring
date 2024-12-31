@@ -7,7 +7,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
 	fmt::println_string("\ntest case 1");
 	var bool bool_value_0;

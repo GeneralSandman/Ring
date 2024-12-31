@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
   var bool bool_value;
 
   global_bool_array_0 = new bool[200];

@@ -6,11 +6,11 @@ import {
 }
 
 typedef class Job {
-    field bool    Running;
-    field int     JobID;
-    field double  Score;
+    var bool    Running;
+    var int     JobID;
+    var double  Score;
 
-    method PrintInfo() {
+    fn PrintInfo() {
         
     }
 }
@@ -19,7 +19,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
     var Job local_value_job_0;
     var Job local_value_job_1;
 

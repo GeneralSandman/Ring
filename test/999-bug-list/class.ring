@@ -7,17 +7,17 @@ import {
 
 
 typedef class Job1 {
-    field bool    Bool;
-    field int     Int;
-	field int64   Int64;
-    field double  Double;
-    field string  String;
+    var bool    Bool;
+    var int     Int;
+	var int64   Int64;
+    var double  Double;
+    var string  String;
 }
 
 
 // TestDetail: 测试函数返回 bool 类型
 @main
-function main() {
+fn main() {
 
 	var Job1 local_job1_value_0 = Job1{
 		Bool:   false,

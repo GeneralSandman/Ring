@@ -6,7 +6,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	var double local_double_value_0;
 
 	fmt::println("test 1 ----------");

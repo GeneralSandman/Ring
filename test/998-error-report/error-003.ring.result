@@ -1,5 +1,5 @@
 ./test/998-error-report/error-003.ring:15:0
-|function main() {
+|fn main() {
 | ^......
 |
 |Error: redefinition of function `main`; E:200002.

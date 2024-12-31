@@ -12,12 +12,12 @@ import {
 	fmt;
 }
 
-typedef function() FuncType;
+typedef fn() FuncType;
 
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸
 @main
-function main() {
+fn main() {
 	var FuncType func_var;
 
 	func_var = return_closure();
@@ -29,7 +29,7 @@ function main() {
 	func_var();
 }
 
-function return_closure() -> (FuncType) {
+fn return_closure() -> (FuncType) {
 	fmt::printf("------------------ [return_closure] ------------------\n");
 
 	var FuncType tmp;
@@ -37,7 +37,7 @@ function return_closure() -> (FuncType) {
 	var int local_int_value_1 = 200;
 
 
-	tmp = function() {
+	tmp = fn() {
 		local_int_value_0 ++;
 		local_int_value_1 += 2;
 

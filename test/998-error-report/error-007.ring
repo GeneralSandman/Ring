@@ -12,12 +12,12 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	fmt::println("main start");
 	var int a = return_int();
 }
 
-function return_int() -> (int) {
+fn return_int() -> (int) {
 	fmt::println("return_int");
 	return 1;
 }

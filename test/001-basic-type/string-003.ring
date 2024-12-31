@@ -13,7 +13,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 
     var bool bool_value;
     var int int_value;

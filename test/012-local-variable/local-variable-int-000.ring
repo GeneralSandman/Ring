@@ -10,7 +10,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 	var int  local_int_value_1;
 	
 	fmt::println_string("test case 1");

@@ -11,7 +11,7 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	fmt::println_bool(true);
 	fmt::println_int(123);
 	fmt::println_double(123.456);

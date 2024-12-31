@@ -8,29 +8,29 @@ import {
 
 
 
-function test_a(){
+fn test_a(){
     fmt::println_string("invoke function test_a");
 }
 
-function test_b(){
+fn test_b(){
     fmt::println_string("invoke function test_b");
 }
 
 
 
-function return_false() -> (bool) {
+fn return_false() -> (bool) {
     fmt::println_string("invoke function return_false");
     return false;
 }
 
-function return_true() -> (bool) {
+fn return_true() -> (bool) {
     fmt::println_string("invoke function return_true");
     return true;
 }
 
 
 @main
-function main() {
+fn main() {
     var bool result;
 
     fmt::println_string("\ntest case 1-----------");

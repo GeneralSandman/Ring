@@ -11,10 +11,10 @@ import {
 }
 
 @main
-function main() {
+fn main() {
 	test1(false);
 }
 
-function test1(var bool bool_value) {
+fn test1(var bool bool_value) {
   debug::print_call_stack();
 }

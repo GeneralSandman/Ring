@@ -11,7 +11,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 
   bool_array = bool[]{true, false, true, false, true, false, true, false, true, false};
 
