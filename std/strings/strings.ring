@@ -10,7 +10,7 @@ import {
 
 }
 
-function join(var string[] a, var string sep) -> (string) {
+fn join(var string[] a, var string sep) -> (string) {
 	var string result;
 
 	var int i = 0;

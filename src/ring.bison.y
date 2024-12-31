@@ -108,8 +108,6 @@ int yylex();
 %token TOKEN_PRIVATE
 %token TOKEN_PUBLIC
 %token TOKEN_ATTRIBUTE
-%token TOKEN_FIELD
-%token TOKEN_METHOD
 %token TOKEN_CONSTRUCTOR
 
 %token TOKEN_GLOBAL
@@ -130,7 +128,7 @@ int yylex();
 %token TOKEN_AUTO
 %token TOKEN_ANY
 %token TOKEN_CONST
-%token TOKEN_FUNCTION
+%token TOKEN_FN
 %token TOKEN_NEW
 %token TOKEN_DELETE
 %token TOKEN_DOT
@@ -402,12 +400,12 @@ class_definition
 *         typedef function(int) Func1;
 */
 type_alias_def
-    : TOKEN_TYPEDEF  TOKEN_FUNCTION TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP  identifier_v2
+    : TOKEN_TYPEDEF  TOKEN_FN TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP  identifier_v2
     {
         debug_bison_info_with_green("[RULE::type_definition]\t ");
          $<m_type_alias_def>$ = add_type_alias_func($4, nullptr, $6);
     }
-    | TOKEN_TYPEDEF  TOKEN_FUNCTION TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP  identifier_v2
+    | TOKEN_TYPEDEF  TOKEN_FN TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP  identifier_v2
     {
         debug_bison_info_with_green("[RULE::type_definition]\t ");
          $<m_type_alias_def>$ = add_type_alias_func($4, $8, $10);
@@ -439,7 +437,7 @@ class_member_declaration
     ;
 
 field_member
-    : TOKEN_FIELD type_specifier identifier_list TOKEN_SEMICOLON
+    : TOKEN_VAR type_specifier identifier_list TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::filed_member]\t ");
         $$ = create_class_member_field($2, $3);
@@ -447,22 +445,22 @@ field_member
     ;
 
 method_member
-    : TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP block
+    : TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, nullptr, $6);
     }
-    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, nullptr, nullptr);
     }
-    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, $10);
     }
-    | TOKEN_METHOD identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, nullptr);
@@ -714,22 +712,22 @@ defer_statement
     }
 
 function_definition
-    : TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP block
+    : TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, $6);
     }
-    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, nullptr);
     }
-    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, $10);
     }
-    | TOKEN_FUNCTION identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, nullptr);
@@ -738,7 +736,7 @@ function_definition
 
 
 closure_definition
-    : TOKEN_FUNCTION function_tuple
+    : TOKEN_FN function_tuple
     {
         debug_bison_info_with_green("[RULE::anonymous_function]\t ");
         $$ = create_expression_anonymous_func((AnonymousFunc*)($2));
@@ -1372,11 +1370,11 @@ function_call_expression
     ;
 
 iife_expression
-    : TOKEN_FUNCTION function_tuple TOKEN_LP argument_list TOKEN_RP
+    : TOKEN_FN function_tuple TOKEN_LP argument_list TOKEN_RP
     {
         $$ = create_expression_iife((AnonymousFunc*)($2), $4);
     }
-    | TOKEN_FUNCTION function_tuple TOKEN_LP               TOKEN_RP
+    | TOKEN_FN function_tuple TOKEN_LP               TOKEN_RP
     {
         $$ = create_expression_iife((AnonymousFunc*)($2), nullptr);
     }

@@ -16,43 +16,27 @@ global {
 }
 
 
-// typedef class File {
-//     field int fd;
-
-// 	method read_all() -> (string) {
-// 	    return read_all(self.fd);
-// 	}
-
-// 	method write(var string buffer) {
-// 	    write(self.fd, buffer);
-// 	}
-
-// 	method close() {
-// 	    close(self.fd);
-// 	}
-// }
+@native
+fn exist(var string path) -> (bool);
 
 @native
-function exist(var string path) -> (bool);
+fn open(var string path) -> (int);
 
 @native
-function open(var string path) -> (int);
+fn create(var string path) -> (int);
 
 @native
-function create(var string path) -> (int);
+fn seek(var int fd, var int64 offset, var int whence);
 
 @native
-function seek(var int fd, var int64 offset, var int whence);
+fn read_all(var int fd) -> (string);
 
 @native
-function read_all(var int fd) -> (string);
+fn write(var int fd, var string buffer);
 
 @native
-function write(var int fd, var string buffer);
+fn close(var int fd);
 
 @native
-function close(var int fd);
-
-@native
-function remove(var string path);
+fn remove(var string path);
 

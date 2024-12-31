@@ -12,12 +12,12 @@ import {
 
 
 @native
-function abs(var double x) -> (double);
+fn abs(var double x) -> (double);
 
 
 @native
-function sqrt(var double x) -> (double);
+fn sqrt(var double x) -> (double);
 
 
 @native
-function pow(var double x, var double y) -> (double);
+fn pow(var double x, var double y) -> (double);

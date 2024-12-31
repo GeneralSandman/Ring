@@ -12,5 +12,5 @@ import {
 }
 
 @native
-function typeof(var any any_value) -> (string);
+fn typeof(var any any_value) -> (string);
 

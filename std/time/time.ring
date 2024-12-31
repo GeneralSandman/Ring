@@ -13,9 +13,9 @@ import {
 
 // 返回 纳秒时间戳
 @native
-function time() -> (int64);
+fn time() -> (int64);
 
 
 // 参数为 ns
 @native
-function sleep(var int64 ns);
+fn sleep(var int64 ns);

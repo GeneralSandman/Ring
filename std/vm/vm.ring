@@ -11,7 +11,7 @@ import {
 }
 
 @native
-function heap_size() -> (int64);
+fn heap_size() -> (int64);
 
 @native
-function garbage_collect();
+fn garbage_collect();

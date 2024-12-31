@@ -11,8 +11,8 @@ import {
 }
 
 @native
-function assert(var bool bool_value);
+fn assert(var bool bool_value);
 
 
 @native
-function print_call_stack();
+fn print_call_stack();

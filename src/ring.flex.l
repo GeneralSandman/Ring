@@ -44,8 +44,6 @@ extern "C" int yywrap(){
 <INITIAL>"private"      { package_unit_update_line_content(yytext); return TOKEN_PRIVATE;        }
 <INITIAL>"public"       { package_unit_update_line_content(yytext); return TOKEN_PUBLIC;         }
 <INITIAL>"@"            { package_unit_update_line_content(yytext); return TOKEN_ATTRIBUTE;      }
-<INITIAL>"field"        { package_unit_update_line_content(yytext); return TOKEN_FIELD;          }
-<INITIAL>"method"       { package_unit_update_line_content(yytext); return TOKEN_METHOD;         }
 <INITIAL>"constructor"  { package_unit_update_line_content(yytext); return TOKEN_CONSTRUCTOR;    }
 
 <INITIAL>"global"       { package_unit_update_line_content(yytext); return TOKEN_GLOBAL;         }
@@ -66,7 +64,7 @@ extern "C" int yywrap(){
 <INITIAL>"auto"         { package_unit_update_line_content(yytext); return TOKEN_AUTO;           }
 <INITIAL>"any"          { package_unit_update_line_content(yytext); return TOKEN_ANY;            }
 <INITIAL>"const"        { package_unit_update_line_content(yytext); return TOKEN_CONST;          }
-<INITIAL>"function"     { package_unit_update_line_content(yytext); return TOKEN_FUNCTION;       }
+<INITIAL>"fn"           { package_unit_update_line_content(yytext); return TOKEN_FN;             }
 <INITIAL>"new"          { package_unit_update_line_content(yytext); return TOKEN_NEW;            }
 <INITIAL>"delete"       { package_unit_update_line_content(yytext); return TOKEN_DELETE;         }
 <INITIAL>"."            { package_unit_update_line_content(yytext); return TOKEN_DOT;            }
