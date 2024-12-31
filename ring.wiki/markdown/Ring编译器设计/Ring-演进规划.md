@@ -179,7 +179,7 @@ Usetime  = 1S
 10. 函数定义有返回值，但是没有返回的话，会直接core dump
 
 ```
-function test() -> (bool, int) {
+fn test() -> (bool, int) {
 }
 
 a, b = test();
@@ -316,13 +316,13 @@ return bool[]{};
 目前
 
 ```
-typedef function(var int a, var int b) -> (int) FuncType;
+typedef fn(var int a, var int b) -> (int) FuncType;
 ```
 
 应该简化成更舒服的写法：
 
 ```
-typedef function(int, int) -> (int) FuncType;
+typedef fn(int, int) -> (int) FuncType;
 ```
 
 
@@ -332,13 +332,13 @@ typedef function(int, int) -> (int) FuncType;
 e.g. 该测试用例不应该通过
 
 ```
-typedef function(bool, bool) -> (string) FuncType;
+typedef fn(bool, bool) -> (string) FuncType;
 
 @main
-function main() {
+fn main() {
 	var FuncType local_func_var;
 
-	local_func_var = function(var bool a, var int b) -> (string) {
+	local_func_var = fn(var bool a, var int b) -> (string) {
 		fmt::println("invoke a closure 1");
 		return fmt::sprintf("ring {} {}", a, b);
 	};
@@ -365,7 +365,7 @@ function main() {
 
 
 ```
-function join(var string[] a, var string sep) -> (string) {
+fn join(var string[] a, var string sep) -> (string) {
 	var string result;
 
 	var int i = 0;
@@ -391,7 +391,7 @@ function join(var string[] a, var string sep) -> (string) {
 ### M. Fix: 编译报错，变量定义重复
 
 ```
-function (var int a) {
+fn (var int a) {
     var int a;
 }
 ```
@@ -401,7 +401,7 @@ function (var int a) {
 
 ```
 
-function test(var int[] array) {
+fn test(var int[] array) {
 
 }
 
@@ -480,8 +480,8 @@ launch func_var();
 目前 Ring稍微有点成熟了，支持了匿名函数，支持了协程，有必要可以开始考虑defer机制了
 
 ```
-function main() {
-    defer function() {
+fn main() {
+    defer fn() {
     }()
 }
 ```
@@ -495,7 +495,7 @@ function main() {
 ### D. 闭包在循环中定义会怎么办 ✅
 
 for(i=0; i<10; i++) {
-    function() {
+    fn() {
     }();
 }
 
@@ -528,7 +528,7 @@ for(i=0; i<10; i++) {
 
 ```
 var functype funcvar;
-funcvar = function() {
+funcvar = fn() {
 
 };
 co_id = launch funcvar();
@@ -603,7 +603,7 @@ Ring已经支持了匿名函数，如果在匿名函数中支持闭包，
 1. 可以直接返回  ✅
 
 ```
-return function() {
+return fn() {
 
 };
 ```
@@ -611,9 +611,9 @@ return function() {
 2. 不用命名变量, 直接通过函数传递参数  ✅
 
 ```
-pass_closure(function() {
+pass_closure(fn() {
 		fmt::println("main:: closure block 1");
-	}, function() -> (string) {
+	}, fn() -> (string) {
 		fmt::println("main:: closure block 2");
 		return "main:: closure return value";
 	});
@@ -622,7 +622,7 @@ pass_closure(function() {
 3. 支持 Immediately invoked function expression ✅
 
 ```
-function() {
+fn() {
 
 }();
 ```
@@ -643,7 +643,7 @@ invoke_closures
 TODO: 如果一个匿名函数变量没有被初始化，会得到 `nil-closure`
 
 ```
-typedef function() FuncType0;
+typedef fn() FuncType0;
 
 
 var FuncType0  local_func_var0;
@@ -696,7 +696,7 @@ closure function build-function 他们名字相同时，允许覆盖么，
 
 ### D. Proposal: 支持typedef 定义类型别名 TODO:
 
-当前只支持 typedef function() FuncType;
+当前只支持 typedef fn() FuncType;
 
 后续还要支持，基础类型和嵌套类型别名
 ```
@@ -777,13 +777,13 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 如果入口函数支持可变参数，也能很好的支持：
 
 ```
-function func_(var int... array_value) {
+fn func_(var int... array_value) {
     fmt::printf("len(array_value)      = {}\n", len(array_value));
     fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
 }
 
 @main
-function main() {
+fn main() {
     launch func_(1, 2, 3);
 }
 ```
@@ -793,7 +793,7 @@ function main() {
 当然，launch后续也可以扩展成一个代码块/匿名函数，这里需要后边统一设置匿名函数/闭包
 
 ```
-    launch function() {
+    launch fn() {
         // action
         
         func_(arg1, arg2);
@@ -836,7 +836,7 @@ e.g.
 
 ### E. Proposal: 关于ring的保留字 TODO:
 
-#### 1. class 中的 field/method 是否应该改为 var/function
+#### 1. class 中的 field/method 是否应该改为 var/fn
 
 直观的优点是：这样可以少两个关键字
 
@@ -861,7 +861,7 @@ typedef class Job {
     field int Name;
 
 
-    function init() -> (Job) {
+    fn init() -> (Job) {
 
     }
 
@@ -874,7 +874,7 @@ global {
     var int global_int;
 }
 
-function main() {
+fn main() {
     var int a;
 }
 ```
@@ -1062,7 +1062,7 @@ import {
     fmt;
 }
 
-function main() {
+fn main() {
     fmt::println("hello world");
 }
 ```
@@ -1075,7 +1075,7 @@ import {
     job;
 }
 
-function main() {
+fn main() {
     var job::Job tmp;
 }
 ```
@@ -1089,7 +1089,7 @@ enum string Region {
 }
 
 
-function main() {
+fn main() {
     var string tmp = Region::Test;
 }
 ```
@@ -1101,7 +1101,7 @@ import {
     job;
 }
 
-function main() {
+fn main() {
     var string tmp = job::Region::Test;
 }
 ```
@@ -1116,7 +1116,7 @@ typedef class Job {
 
     }
 }
-function main() {
+fn main() {
     var Job tmp;
 
     tmp.Name;
@@ -1128,7 +1128,7 @@ function main() {
 3. `->` 用于函数返回值
 
 ```ring
-function test() -> (int) {
+fn test() -> (int) {
     return 0;
 }
 ```
@@ -1310,7 +1310,7 @@ typedef class File {
 }
 
 @main
-function main() {
+fn main() {
     var int fileid = io::open("/Users/zhenhuli/Desktop/Ring/test/065-std-package-io/000.ring", "");
 
     // var string content = io::read_all(fileid);  // FIXME: 这样写存在bug, 会调用两次
@@ -1642,14 +1642,14 @@ int main(int argc, char** argv) {
 ring main 的函数原型
 
 ```ring
-function main(var string[] args) -> (int) {
+fn main(var string[] args) -> (int) {
     return 0;
 }
 ```
 
 如果不打算收集 args，这样的main函数也是可以的
 ```ring
-function main() -> (int) {
+fn main() -> (int) {
     return 0;
 }
 ```
@@ -1674,12 +1674,12 @@ function main() -> (int) {
 4. 合法的main函数定义
 
 ```
-function main(var string[] args) {
+fn main(var string[] args) {
 }
 ```
 
 ```
-function main() {
+fn main() {
     // main 函数 无需关注 命令行参数
 }
 ```
@@ -1687,7 +1687,7 @@ function main() {
 5. 如果main函数需要自定义返回值的话，请使用 `os::exit()` 函数
    
 ```
-function main() {
+fn main() {
     os::exit(-1);
 }
 ```
@@ -1794,7 +1794,7 @@ var int a,b = 1;
 1. 首先考虑局部变量的初始化流程：
 
 ```
-function test() {
+fn test() {
     var int local_int = 1;
 }
 ```
@@ -1824,7 +1824,7 @@ global {
 }
 
 @main
-function main() {
+fn main() {
 }
 
 ```
@@ -2018,11 +2018,11 @@ b.2; // 访问 tuple中的元素
 typedef tuple Student = (bool,int,int64,double,string);
 
 
-function test0(var (bool,int,int64,double,string) a) -> ((bool,int,int64,double,string)) {
+fn test0(var (bool,int,int64,double,string) a) -> ((bool,int,int64,double,string)) {
 
 }
 
-function test1(var Student a) -> (Student) {
+fn test1(var Student a) -> (Student) {
 
 }
 
@@ -2771,10 +2771,10 @@ fmt::println() 参数为string的时候,行为不太正确, 需要通过 length�
 
 ```
 @native
-function println(var any... any_value);
+fn println(var any... any_value);
 
 @native
-function printf(var string format, var any... any_value);
+fn printf(var string format, var any... any_value);
 ```
 
 
@@ -2784,7 +2784,7 @@ function printf(var string format, var any... any_value);
 函数定义:
 
 ```
-function func_return_2_value() (bool, int) {
+fn func_return_2_value() (bool, int) {
 
 }
 ```
@@ -2819,7 +2819,7 @@ a, b, c = true, 1, "aa";
 
 这样是可允许的, 也是因为 func_return_2_value() 返回值作为一个整体, 可以继续展开:
 ```
-    function func_pass_2_value(var bool bool_value, var int int_value) {
+    fn func_pass_2_value(var bool bool_value, var int int_value) {
     
     }
 
@@ -2829,7 +2829,7 @@ a, b, c = true, 1, "aa";
 
 这样是不可允许的, 因为 func_return_2_value() 后边还有别的表达式, 不能继续展开:
 ```
-    function func_pass_3_value(var bool bool_value, var int int_value, var string string_value) {
+    fn func_pass_3_value(var bool bool_value, var int int_value, var string string_value) {
     
     }
 
@@ -4835,7 +4835,7 @@ var Job job_0(); // 这里就是去调用 constructor函数
 ### bug 1
 
 ```
-    function test(var any any_value) {
+    fn test(var any any_value) {
         fmt::println_string(reflect::typeof(any_value));
     }
 
@@ -4845,12 +4845,12 @@ var Job job_0(); // 这里就是去调用 constructor函数
 ### bug 2
     
 ```
-function test(var int... int_value) {
+fn test(var int... int_value) {
 }
 
 
 @main
-function main() {
+fn main() {
     var int int_value_0;
     var int int_value_1;
 
@@ -4862,7 +4862,7 @@ function main() {
 ### reflect 构想 通过函数名字获取函数类型 
 
 ```
-function test(var bool bool_value, var int int_value)->(string) {
+fn test(var bool bool_value, var int int_value)->(string) {
 
 }
 

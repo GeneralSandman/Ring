@@ -72,7 +72,7 @@ import {
     job;
 }
 
-function main() {
+fn main() {
     fmt::println(job::Color::Red);
 }
 ```

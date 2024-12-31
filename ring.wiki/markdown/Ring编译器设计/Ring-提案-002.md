@@ -67,13 +67,13 @@ fn main() {
 
 ```ring
 
-function main() {
+fn main() {
 
     // 定义函数变量 
     var FuncType local_func_var;
 
     // 将一个匿名函数赋值给一个函数变量
-    local_func_var = function() {
+    local_func_var = fn() {
 
     };
 

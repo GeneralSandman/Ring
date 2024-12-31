@@ -17,7 +17,7 @@ for(int_value=1; int_value<5; int_value=int_value+1) {
 
 ```ring
 
-defer function() {
+defer fn() {
     print("---\n");
 }();
 

@@ -66,17 +66,17 @@ https://www.runoob.com/lua/lua-coroutine.html
 
 ```ring
 
-function test1() {
+fn test1() {
     fmt::printf("test 1");
 
     test2();
 }
 
-function test2() {
+fn test2() {
     fmt::printf("test 2");
 }
 
-function main() {
+fn main() {
 
     var int64 co_id;
 
@@ -174,7 +174,7 @@ c. 当前协程 resume 别的协程之后，当前协程会被挂起，目标协
 
 ```ring
 
-function func_main() -> (string) {
+fn func_main() -> (string) {
 
     // do some work
 
@@ -192,7 +192,7 @@ yield any; // 这里还没设计好，因为Ring是一个静态类型系统，�
 
 ```ring
 @main
-function main() {
+fn main() {
     
     // create
     co_id = launch func_main();
@@ -231,7 +231,7 @@ import {
     fmt;
 }
 
-function job() {
+fn job() {
 
     fmt::println("job::doit1");
 
@@ -244,7 +244,7 @@ function job() {
 
 
 @main
-function main() {
+fn main() {
     var int64 co_id;
 
     // 创建协程但不运行
@@ -289,7 +289,7 @@ main::end
 //--boot
 launch(main, string[]{"1", "2"});
 
-function main() {
+fn main() {
     co_id = launch(job_action);
 }
 
