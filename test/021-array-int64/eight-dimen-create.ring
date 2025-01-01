@@ -20,7 +20,7 @@ fn main() {
     var int g = 2;
     var int h = 1;
 
-    global_int64_array_0 = new int[a,b,c,d,e,f,g,h];
+    global_int64_array_0 = new int64[a,b,c,d,e,f,g,h];
 
     fmt::println_int(len(global_int64_array_0));
     fmt::println_int(len(global_int64_array_0[0]));
