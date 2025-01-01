@@ -957,10 +957,10 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
         break;
 
     case RING_BASIC_TYPE_CLASS:
-        str = "class"; // TODO: 格式化类
+        str = format_type_specifier_class(type_specifier->u.class_t);
         break;
     case RING_BASIC_TYPE_ARRAY:
-        str = "array"; // TODO: 格式化数组类型
+        str = format_type_specifier_array(type_specifier->u.array_t);
         break;
     case RING_BASIC_TYPE_FUNC:
         str = format_type_specifier_func(type_specifier->u.func_t);
@@ -978,6 +978,35 @@ std::string format_type_specifier(TypeSpecifier* type_specifier) {
     return str;
 }
 
+std::string format_type_specifier_array(Ring_DeriveType_Array* array_type) {
+    std::string res = "";
+    std::string sub = "";
+
+    switch (array_type->sub->kind) {
+    case RING_BASIC_TYPE_BOOL: sub = "bool"; break;
+    case RING_BASIC_TYPE_INT: sub = "int"; break;
+    case RING_BASIC_TYPE_INT64: sub = "int64"; break;
+    case RING_BASIC_TYPE_DOUBLE: sub = "double"; break;
+    case RING_BASIC_TYPE_STRING: sub = "string"; break;
+    case RING_BASIC_TYPE_CLASS: sub = format_type_specifier_class(array_type->sub->u.class_t); break;
+    case RING_BASIC_TYPE_FUNC: sub = format_type_specifier_func(array_type->sub->u.func_t); break;
+
+    // RING_BASIC_TYPE_ARRAY 是不合法的
+    default: sub = ".unknow"; break;
+    }
+
+    res = sprintf_string("%s[!%d]", sub.c_str(), array_type->dimension);
+
+    return res;
+}
+
+std::string format_type_specifier_class(Ring_DeriveType_Class* class_type) {
+    std::string res;
+    //
+    res = sprintf_string("%s", class_type->class_identifier);
+    return res;
+}
+
 std::string format_type_specifier_func(Ring_DeriveType_Func* func_type) {
     assert(func_type != nullptr);
 
@@ -986,7 +1015,7 @@ std::string format_type_specifier_func(Ring_DeriveType_Func* func_type) {
     std::string str_return;
 
     str_par = format_function_parameters(func_type->parameter_list);
-    res     = sprintf_string("function(%s)", str_par.c_str());
+    res     = sprintf_string("fn(%s)", str_par.c_str());
 
     if (func_type->return_list_size) {
         str_return = format_function_return_list(func_type->return_list);

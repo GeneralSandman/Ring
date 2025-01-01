@@ -488,7 +488,7 @@ std::string package_unit_get_line_content(unsigned int line_number) {
     // 这里得使用一个新的随机读取指针, 不能和bison使用的fp共用
     // 不然会影响 bision继续 向下分析
     fseek(g_package_unit->file_fp_random, line_offset, SEEK_SET);
-    char buffer[1024]; // TODO: 这里后续要按需分配
+    char buffer[2048];
     if (size == 0) {
         return "";
     }

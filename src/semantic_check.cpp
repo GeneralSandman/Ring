@@ -219,10 +219,8 @@ void check_call(char*          func_identifier,
         assert(func_var_decl->type_specifier->kind == RING_BASIC_TYPE_FUNC);
         parameter_pos = func_var_decl->type_specifier->u.func_t->parameter_list;
     } else if (anony_func != nullptr) {
-        // TODO:
         parameter_pos = anony_func->parameter_list;
     } else if (method_member != nullptr) {
-        // TODO:
         parameter_pos = method_member->parameter_list;
     }
 

@@ -509,7 +509,7 @@ void fix_type_specfier(TypeSpecifier* type_specifier) {
         // step-2. 是个函数别名
         type_alias = search_type_alias(type_specifier->identifier);
         if (type_alias != nullptr) {
-            // TODO: 这个写法需要再优化一下
+            // shallow copy
             type_specifier->kind = type_alias->type_specifier->kind;
             type_specifier->u    = type_alias->type_specifier->u;
             goto END;
@@ -556,13 +556,17 @@ END:
 
     if (type_specifier->kind == RING_BASIC_TYPE_FUNC) {
         Ring_DeriveType_Func* func_type = type_specifier->u.func_t;
-        for (unsigned int i = 0; i < func_type->parameter_list_size; i++) {
-            // TODO: 修正 parameter
+
+        for (Parameter* param_pos = func_type->parameter_list;
+             param_pos != nullptr;
+             param_pos = param_pos->next) {
+            fix_type_specfier(param_pos->type_specifier);
         }
 
 
-        FunctionReturnList* return_pos = nullptr;
-        for (return_pos = func_type->return_list; return_pos != nullptr; return_pos = return_pos->next) {
+        for (FunctionReturnList* return_pos = func_type->return_list;
+             return_pos != nullptr;
+             return_pos = return_pos->next) {
             fix_type_specfier(return_pos->type_specifier);
         }
     }
@@ -746,8 +750,8 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
         TypeSpecifier* expect = return_value->type_specifier;
         TypeSpecifier* actual = return_convert_type[i];
 
-        // TODO: 深度比较, 比对 类
-        if (expect->kind != actual->kind) {
+        // return 语句是否和 函数定义中的返回值是否一致
+        if (!comp_type_specifier(expect, actual)) {
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf = sprintf_string(
@@ -974,9 +978,8 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     // Ring-Compiler-Error-Report ERROR_ASSIGNMENT_MISMATCH_TYPE
     for (unsigned int i = 0; i < left_convert_type.size(); i++) {
 
-        // TODO: 深度比较
-        // 比对 类, 比较typedef的类型
-        if (!compare_type_specifier(left_convert_type[i], right_convert_type[i])) {
+        // 深度比较两个类型是否匹配
+        if (!comp_type_specifier(left_convert_type[i], right_convert_type[i])) {
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf = sprintf_string(
@@ -1790,10 +1793,10 @@ void fix_function_call_expression(Expression*             expression,
 
         if (variable->decl->type_specifier->kind == RING_BASIC_TYPE_FUNC) {
             // 是一个变量，并且是一个函数变量，需要继续匹配
-            // TODO: 匹配函数调用的语义
             function_call_expression->type              = FUNCTION_CALL_TYPE_CLOSURE;
             function_call_expression->u.cc.closure_decl = variable->decl;
 
+            // check 函数调用是否符合语义
             check_func_var_call(function_call_expression, variable->decl);
 
 
@@ -1854,6 +1857,7 @@ void fix_function_call_expression(Expression*             expression,
         ring_compile_error_report(&context);
     }
 
+    // check 函数调用是否符合语义
     check_function_call(function_call_expression, function);
 
     function_call_expression->type          = FUNCTION_CALL_TYPE_FUNC;
@@ -1869,7 +1873,6 @@ void fix_function_call_expression(Expression*             expression,
     }
 }
 
-// TODO: 需要调用 check_function_call
 void fix_method_call_expression(Expression*           expression,
                                 MethodCallExpression* method_call_expression,
                                 Block*                block,
@@ -1929,7 +1932,7 @@ void fix_method_call_expression(Expression*           expression,
         ring_compile_error_report(&context);
     }
 
-    // method 定义 与 method 调用表达式一致性检查
+    // check method 调用是否和method定义是否一致
     check_method_call(method_call_expression, method);
 
     method_call_expression->method_member = method;
@@ -2393,9 +2396,8 @@ void fix_ternary_condition_expression(Expression*        expression,
 
         for (unsigned int i = 0; i < true_convert_type.size(); i++) {
 
-            // TODO: 深度比较
-            // 比对 类, 比较typedef的类型
-            if (true_convert_type[i]->kind != false_convert_type[i]->kind) {
+            // 比较 true 和 false 表达式是否一致
+            if (!comp_type_specifier(true_convert_type[i], false_convert_type[i])) {
                 DEFINE_ERROR_REPORT_STR;
 
                 compile_err_buf = sprintf_string(
@@ -2882,42 +2884,4 @@ Variable* variable_list_add_item(Variable* head, Variable* variable) {
     }
     pos->next = variable;
     return head;
-}
-
-bool compare_type_specifier(TypeSpecifier* a, TypeSpecifier* b) {
-    assert(a != nullptr);
-    assert(b != nullptr);
-
-    if (a->kind != b->kind) {
-        return false;
-    }
-
-    // 深度比较 func_type
-    if (a->kind == RING_BASIC_TYPE_FUNC) {
-        return compare_type_specifier_func(a->u.func_t, b->u.func_t);
-    } else if (a->kind == RING_BASIC_TYPE_ARRAY) {
-        // TODO:
-    } else if (a->kind == RING_BASIC_TYPE_CLASS) {
-        // TODO:
-    }
-
-    return true;
-}
-
-bool compare_type_specifier_func(Ring_DeriveType_Func* a, Ring_DeriveType_Func* b) {
-    assert(a != nullptr);
-    assert(b != nullptr);
-
-
-    std::string a_str, b_str;
-
-    a_str = format_type_specifier_func(a);
-    b_str = format_type_specifier_func(b);
-
-    // TODO: 这里当前使用string去比较，后续应该使用 结构体直接比较
-    if (a_str != b_str) {
-        return false;
-    }
-
-    return true;
 }

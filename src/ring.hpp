@@ -1332,19 +1332,6 @@ typedef void (*BuildinFuncFix)(Expression*             expression,
                                Ring_Buildin_Func*      build_func);
 
 
-typedef enum {
-    RING_BUILD_IN_FNC_UNKNOW = 0,
-    RING_BUILD_IN_FNC_LEN,
-    RING_BUILD_IN_FNC_CAPACITY,
-    RING_BUILD_IN_FNC_PUSH,
-    RING_BUILD_IN_FNC_POP,
-    RING_BUILD_IN_FNC_TO_STRING,
-    RING_BUILD_IN_FNC_TO_INT64,
-
-    RING_BUILD_IN_FNC_RESUME,
-    RING_BUILD_IN_FNC_YIELD,
-} RING_BUILD_IN_FUNC_ID;
-
 struct Ring_Buildin_Func {
     const char*                 identifier;
 
@@ -2946,8 +2933,6 @@ Function*        search_function(char* package_posit, char* identifier);
 FreeValueDesc*   free_value_list_add_item(FreeValueDesc* head, FreeValueDesc* free_value);
 Variable*        variable_list_add_item(Variable* head, Variable* variable);
 
-bool             compare_type_specifier(TypeSpecifier* a, TypeSpecifier* b);
-bool             compare_type_specifier_func(Ring_DeriveType_Func* a, Ring_DeriveType_Func* b);
 // --------------------
 
 /* --------------------
@@ -3316,6 +3301,8 @@ std::string              format_rvm_call_stack(Ring_VirtualMachine* rvm);
 std::string              format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int source_line_number);
 
 std::string              format_type_specifier(TypeSpecifier* type_specifier);
+std::string              format_type_specifier_array(Ring_DeriveType_Array* array_type);
+std::string              format_type_specifier_class(Ring_DeriveType_Class* class_type);
 std::string              format_type_specifier_func(Ring_DeriveType_Func* func_type);
 std::string              format_function_parameters(Parameter* parameter);
 
@@ -3463,59 +3450,59 @@ void debug_generate_closure_dot_file(RVM_Closure* closure);
  */
 
 
-void                  check_build_func_param_num(Expression*             expression,
-                                                 FunctionCallExpression* function_call_expression,
-                                                 Block*                  block,
-                                                 Function*               func,
-                                                 Ring_Buildin_Func*      build_func);
+void         check_build_func_param_num(Expression*             expression,
+                                        FunctionCallExpression* function_call_expression,
+                                        Block*                  block,
+                                        Function*               func,
+                                        Ring_Buildin_Func*      build_func);
 
-void                  fix_buildin_func_len(Expression*             expression,
-                                           FunctionCallExpression* function_call_expression,
-                                           Block*                  block,
-                                           Function*               func,
-                                           Ring_Buildin_Func*      build_func);
-void                  fix_buildin_func_capacity(Expression*             expression,
-                                                FunctionCallExpression* function_call_expression,
-                                                Block*                  block,
-                                                Function*               func,
-                                                Ring_Buildin_Func*      build_func);
-void                  fix_buildin_func_push(Expression*             expression,
-                                            FunctionCallExpression* function_call_expression,
-                                            Block*                  block,
-                                            Function*               func,
-                                            Ring_Buildin_Func*      build_func);
-void                  fix_buildin_func_pop(Expression*             expression,
-                                           FunctionCallExpression* function_call_expression,
-                                           Block*                  block,
-                                           Function*               func,
-                                           Ring_Buildin_Func*      build_func);
-void                  fix_buildin_func_to_string(Expression*             expression,
-                                                 FunctionCallExpression* function_call_expression,
-                                                 Block*                  block,
-                                                 Function*               func,
-                                                 Ring_Buildin_Func*      build_func);
-void                  fix_buildin_func_to_int64(Expression*             expression,
-                                                FunctionCallExpression* function_call_expression,
-                                                Block*                  block,
-                                                Function*               func,
-                                                Ring_Buildin_Func*      build_func);
-
-void                  fix_buildin_func_to_resume(Expression*             expression,
-                                                 FunctionCallExpression* function_call_expression,
-                                                 Block*                  block,
-                                                 Function*               func,
-                                                 Ring_Buildin_Func*      build_func);
-void                  fix_buildin_func_to_yield(Expression*             expression,
-                                                FunctionCallExpression* function_call_expression,
-                                                Block*                  block,
-                                                Function*               func,
-                                                Ring_Buildin_Func*      build_func);
-
-RING_BUILD_IN_FUNC_ID is_buildin_function_identifier(char* package_posit, char* identifier);
-void                  fix_buildin_func(Expression*             expression,
+void         fix_buildin_func_len(Expression*             expression,
+                                  FunctionCallExpression* function_call_expression,
+                                  Block*                  block,
+                                  Function*               func,
+                                  Ring_Buildin_Func*      build_func);
+void         fix_buildin_func_capacity(Expression*             expression,
                                        FunctionCallExpression* function_call_expression,
                                        Block*                  block,
-                                       FunctionTuple*          func);
+                                       Function*               func,
+                                       Ring_Buildin_Func*      build_func);
+void         fix_buildin_func_push(Expression*             expression,
+                                   FunctionCallExpression* function_call_expression,
+                                   Block*                  block,
+                                   Function*               func,
+                                   Ring_Buildin_Func*      build_func);
+void         fix_buildin_func_pop(Expression*             expression,
+                                  FunctionCallExpression* function_call_expression,
+                                  Block*                  block,
+                                  Function*               func,
+                                  Ring_Buildin_Func*      build_func);
+void         fix_buildin_func_to_string(Expression*             expression,
+                                        FunctionCallExpression* function_call_expression,
+                                        Block*                  block,
+                                        Function*               func,
+                                        Ring_Buildin_Func*      build_func);
+void         fix_buildin_func_to_int64(Expression*             expression,
+                                       FunctionCallExpression* function_call_expression,
+                                       Block*                  block,
+                                       Function*               func,
+                                       Ring_Buildin_Func*      build_func);
+
+void         fix_buildin_func_to_resume(Expression*             expression,
+                                        FunctionCallExpression* function_call_expression,
+                                        Block*                  block,
+                                        Function*               func,
+                                        Ring_Buildin_Func*      build_func);
+void         fix_buildin_func_to_yield(Expression*             expression,
+                                       FunctionCallExpression* function_call_expression,
+                                       Block*                  block,
+                                       Function*               func,
+                                       Ring_Buildin_Func*      build_func);
+
+unsigned int is_buildin_function_identifier(char* package_posit, char* identifier);
+void         fix_buildin_func(Expression*             expression,
+                              FunctionCallExpression* function_call_expression,
+                              Block*                  block,
+                              FunctionTuple*          func);
 
 // --------------------
 
