@@ -151,8 +151,7 @@ void ring_generate_vm_code(CompilerEntry* compiler_entry,
  */
 void add_global_variable(Package* package, Package_Executer* executer) {
     debug_generate_info_with_darkgreen("\t");
-    // FIXME: 在 Compiler 中大部分是链表：因为在编译的时候不确定存储空间
-    // 在 Executer 中 大部分是数组，因为编译完成，存储空间的数量都已经确认了。
+
     if (package->global_var_decl_list.empty()) {
         return;
     }
@@ -324,7 +323,7 @@ void copy_function(Package_Executer* executer, RVM_Function* dst, Function* src)
         dst->parameter_list      = (RVM_Parameter*)mem_alloc(NULL_MEM_POOL,
                                                              sizeof(RVM_Parameter) * dst->parameter_size);
         dst->local_variable_size = 0;
-        dst->local_variable_list = nullptr; // TODO:
+        dst->local_variable_list = nullptr;
 
         // deep copy function parameters
         Parameter* param = src->parameter_list;
@@ -2888,10 +2887,11 @@ unsigned int calc_runtime_stack_capacity(RVM_Byte* code_list, unsigned int code_
 }
 
 
-// TODO:
-// 这里实现完成了, 但是有点bug, 还未测试
-// 因为 executer 和 rvm 有点耦合, 所以这里设计的有点问题, 需要重新设计
-void add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number, unsigned int start_pc, unsigned int opcode_size) {
+void add_code_line_map(RVM_OpcodeBuffer* opcode_buffer,
+                       unsigned int      line_number,
+                       unsigned int      start_pc,
+                       unsigned int      opcode_size) {
+
     if (opcode_buffer->code_line_map.empty()
         || opcode_buffer->code_line_map.rbegin()->line_number != line_number) {
         RVM_SourceCodeLineMap tmp = {
@@ -2907,9 +2907,6 @@ void add_code_line_map(RVM_OpcodeBuffer* opcode_buffer, unsigned int line_number
     }
 }
 
-// TODO:
-// 这里实现完成了, 但是有点bug, 还未测试
-// 因为 executer 和 rvm 有点耦合, 所以这里设计的有点问题, 需要重新设计
 void dump_code_line_map(std::vector<RVM_SourceCodeLineMap>& code_line_map) {
     printf("------------------ CodeLineMap-Dump-begin ------------------\n");
     printf("    line_number       start_pc           size\n");

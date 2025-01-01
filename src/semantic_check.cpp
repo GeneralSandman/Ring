@@ -229,7 +229,6 @@ void check_call(char*          func_identifier,
     std::string argument_str  = format_function_arguments(argument_pos);
 
 
-    // TODO:
     // 这里比对 arguments 和 parameters, 有几个细节需要注意
     // 1. 深度比对派生类型 数组(多维数组)、类
     // 2. 比对 parameter 为     any类型

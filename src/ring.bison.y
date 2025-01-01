@@ -13,8 +13,8 @@ int yylex();
 
 %locations                       // 开启locations
 %glr-parser                      // 使用 GLR 解析
-%expect    0                     // legitimate 0 shift/reduce conflicts
-%expect-rr 1                     // legitimate 0 reduce/reduce conflicts
+%expect    3                     // legitimate 0 shift/reduce conflicts
+%expect-rr 0                     // legitimate 0 reduce/reduce conflicts
 
 // 在 array_literal_expression 的 class_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_RC
 // 存在 reduce/reduce conflicts, 需要使用 %code_completion 进行处理
@@ -33,9 +33,8 @@ int yylex();
 %union {
     char*                               m_comment_value;
     char*                               m_literal_interface;
-    char*                               m_identifier; // TODO: 废弃, 使用 identifier_v2
-    Identifier*                         m_identifier_v2;
-    Identifier*                         m_identifier_list;
+    char*                               m_identifier_str;
+    Identifier*                         m_identifier;
     Statement*                          m_statement_list;
     Expression*                         m_expression;
     AssignExpression*                   m_assign_expression;
@@ -186,9 +185,9 @@ int yylex();
 %token IDENTIFIER
 
 %type <m_literal_interface> INT_LITERAL INT64_LITERAL DOUBLE_LITERAL STRING_LITERAL TOKEN_TRUE TOKEN_FALSE
-%type <m_identifier> identifier IDENTIFIER // TODO: 废弃, 使用 identifier_v2
-%type <m_identifier_v2>   identifier_v2
-%type <m_identifier_list> identifier_list
+%type <m_identifier_str>  IDENTIFIER
+%type <m_identifier>      identifier
+%type <m_identifier>      identifier_list
 %type <m_statement_list> statement statement_list
 %type <m_statement_list> multi_variable_definition_statement
 %type <m_statement_list> global_variable_definition global_variable_definition_list
@@ -400,12 +399,12 @@ class_definition
 *         typedef function(int) Func1;
 */
 type_alias_def
-    : TOKEN_TYPEDEF  TOKEN_FN TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP  identifier_v2
+    : TOKEN_TYPEDEF  TOKEN_FN TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP  identifier
     {
         debug_bison_info_with_green("[RULE::type_definition]\t ");
          $<m_type_alias_def>$ = add_type_alias_func($4, nullptr, $6);
     }
-    | TOKEN_TYPEDEF  TOKEN_FN TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP  identifier_v2
+    | TOKEN_TYPEDEF  TOKEN_FN TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP  identifier
     {
         debug_bison_info_with_green("[RULE::type_definition]\t ");
          $<m_type_alias_def>$ = add_type_alias_func($4, $8, $10);
@@ -445,22 +444,22 @@ field_member
     ;
 
 method_member
-    : TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP block
+    : TOKEN_FN identifier TOKEN_LP parameter_list_maybe_empty TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, nullptr, $6);
     }
-    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FN identifier TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, nullptr, nullptr);
     }
-    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_FN identifier TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, $10);
     }
-    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FN identifier TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::method_member]\t ");
         $$ = create_class_member_method(FUNCTION_TYPE_UNKNOW, $2, $4, $8, nullptr);
@@ -639,7 +638,7 @@ for_statement
         debug_bison_info_with_green("[RULE::for_statement]\t ");
         $$ = create_for_ternary_statement($3, $5, $7, $9);
     }
-    | TOKEN_FOR TOKEN_LP      identifier TOKEN_IN TOKEN_RANGE primary_not_new_array      TOKEN_RP block 
+    | TOKEN_FOR TOKEN_LP      IDENTIFIER TOKEN_IN TOKEN_RANGE primary_not_new_array      TOKEN_RP block 
     {
         debug_bison_info_with_green("[RULE::for_statement:range]\t ");
         
@@ -712,22 +711,22 @@ defer_statement
     }
 
 function_definition
-    : TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP block
+    : TOKEN_FN identifier TOKEN_LP parameter_list_maybe_empty TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, $6);
     }
-    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FN identifier TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, nullptr, nullptr);
     }
-    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
+    | TOKEN_FN identifier TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP block
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, $10);
     }
-    | TOKEN_FN identifier_v2 TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
+    | TOKEN_FN identifier TOKEN_LP parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP TOKEN_SEMICOLON
     {
         debug_bison_info_with_green("[RULE::function_definition]\t ");
         $$ = create_function_definition(FUNCTION_TYPE_DERIVE, $2, $4, $8, nullptr);
@@ -1170,11 +1169,11 @@ unitary_expression
     ;
 
 postfix_expression
-    : identifier self_incr_decr_token
+    : IDENTIFIER self_incr_decr_token
     {
         $$ = create_expression_unitary($2, create_expression_identifier($1));
     }
-    | identifier dimension_expression self_incr_decr_token
+    | IDENTIFIER dimension_expression self_incr_decr_token
     {
         $$ = create_expression_unitary($3, 
                                         create_expression_identifier_with_index(create_expression_identifier($1), $2));
@@ -1251,12 +1250,12 @@ sub_dimension_expression
     ;
 
 primary_not_new_array
-    : identifier
+    : IDENTIFIER
     {
         debug_bison_info_with_green("[RULE::literal_term:identifier]\t ");
         $$ = create_expression_identifier($1);
     }
-    | identifier dimension_expression
+    | IDENTIFIER dimension_expression
     {
         $$ = create_expression_identifier_with_index(create_expression_identifier($1), $2);
     }
@@ -1265,7 +1264,7 @@ primary_not_new_array
         debug_bison_info_with_green("[RULE::literal_term:function_call_expression]\t ");
         $$ = create_expression_from_function_call($1);
     }
-    | identifier TOKEN_2COLON primary_not_new_array
+    | IDENTIFIER TOKEN_2COLON primary_not_new_array
     {
         $$ = expression_add_package_posit($3, $1);
     }
@@ -1277,11 +1276,11 @@ primary_not_new_array
 
 
 member_expression
-    : primary_not_new_array TOKEN_DOT identifier
+    : primary_not_new_array TOKEN_DOT IDENTIFIER
     {
         $$ = create_member_expression($1, $3);
     }
-    | member_expression TOKEN_DOT identifier
+    | member_expression TOKEN_DOT IDENTIFIER
     {
         $$ = create_member_expression($1, $3);
     }
@@ -1292,19 +1291,19 @@ member_expression
     ;
 
 method_call_expression
-    : primary_not_new_array TOKEN_DOT identifier TOKEN_LP               TOKEN_RP
+    : primary_not_new_array TOKEN_DOT IDENTIFIER TOKEN_LP               TOKEN_RP
     {
         $$ = create_method_call_expression($1, $3, nullptr);
     }
-    | member_expression     TOKEN_DOT identifier TOKEN_LP               TOKEN_RP
+    | member_expression     TOKEN_DOT IDENTIFIER TOKEN_LP               TOKEN_RP
     {
         $$ = create_method_call_expression($1, $3, nullptr);
     }
-    | primary_not_new_array TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
+    | primary_not_new_array TOKEN_DOT IDENTIFIER TOKEN_LP argument_list TOKEN_RP
     {
         $$ = create_method_call_expression($1, $3, $5);
     }
-    | member_expression     TOKEN_DOT identifier TOKEN_LP argument_list TOKEN_RP
+    | member_expression     TOKEN_DOT IDENTIFIER TOKEN_LP argument_list TOKEN_RP
     {
         $$ = create_method_call_expression($1, $3, $5);
     }
@@ -1357,12 +1356,12 @@ derive_value_literal_expression
     ;
 
 function_call_expression
-    : identifier TOKEN_LP argument_list TOKEN_RP
+    : IDENTIFIER TOKEN_LP argument_list TOKEN_RP
     {
         debug_bison_info_with_green("[RULE::function_call_expression]\t ");
         $$ = create_function_call_expression($1, $3);
     }
-    | identifier TOKEN_LP               TOKEN_RP
+    | IDENTIFIER TOKEN_LP               TOKEN_RP
     {
         debug_bison_info_with_green("[RULE::function_call_expression]\t ");
         $$ = create_function_call_expression($1, nullptr);
@@ -1400,13 +1399,11 @@ array_literal_expression
     }
     | class_type_specifier dimension_expression TOKEN_LC    expression_list_maybe_empty    TOKEN_RC
     {
-        // FIXME: 这里会产生一个 reduce/reduce conflict
         debug_bison_info_with_green("[RULE::array_literal_expression:class]\t ");
         $$ = create_array_literal_expression($1, $2, $4);
     }
     | class_type_specifier dimension_expression TOKEN_LC    expression_list TOKEN_COMMA    TOKEN_RC
     {
-        // FIXME: 这里会产生一个 reduce/reduce conflict
         debug_bison_info_with_green("[RULE::array_literal_expression:class]\t ");
         $$ = create_array_literal_expression($1, $2, $4);
     }
@@ -1431,27 +1428,27 @@ assign_expression
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ASSIGN, $1, $3);
     }
-    | identifier TOKEN_ADD_ASSIGN right_value_expression
+    | IDENTIFIER TOKEN_ADD_ASSIGN right_value_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_ADD_ASSIGN, create_expression_identifier($1), $3);
     }
-    | identifier TOKEN_SUB_ASSIGN right_value_expression
+    | IDENTIFIER TOKEN_SUB_ASSIGN right_value_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_SUB_ASSIGN, create_expression_identifier($1), $3);
     }
-    | identifier TOKEN_MUL_ASSIGN right_value_expression
+    | IDENTIFIER TOKEN_MUL_ASSIGN right_value_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MUL_ASSIGN, create_expression_identifier($1), $3);
     }
-    | identifier TOKEN_DIV_ASSIGN right_value_expression
+    | IDENTIFIER TOKEN_DIV_ASSIGN right_value_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_DIV_ASSIGN, create_expression_identifier($1), $3);
     }
-    | identifier TOKEN_MOD_ASSIGN right_value_expression
+    | IDENTIFIER TOKEN_MOD_ASSIGN right_value_expression
     {
         debug_bison_info_with_green("[RULE::assign_expression]\t ");
         $$ = create_assign_expression(ASSIGN_EXPRESSION_TYPE_MOD_ASSIGN, create_expression_identifier($1), $3);
@@ -1459,33 +1456,26 @@ assign_expression
     ;
 
 identifier_list
-    : identifier
+    : IDENTIFIER
     {
         debug_bison_info_with_green("[RULE::identifier_list]\t ");
         $$ = create_identifier(IDENTIFIER_TYPE_VARIABLE, $1);
     }
-    | identifier_list TOKEN_COMMA identifier
+    | identifier_list TOKEN_COMMA IDENTIFIER
     {
         debug_bison_info_with_green("[RULE::identifier_list]\t ");
         $$ = identifier_list_add_item($1, create_identifier(IDENTIFIER_TYPE_VARIABLE, $3));
     }
     ;
 
-identifier_v2
-    : IDENTIFIER
-    {
-        debug_bison_info_with_green("[RULE::identifier_v2]\t identifier_v2(%s)", $1);
-        $$ = create_identifier(IDENTIFIER_TYPE_UNKNOW, $1);
-    }
-    ;
-
-// TODO: 废弃, 使用 identifier_v2
 identifier
     : IDENTIFIER
     {
         debug_bison_info_with_green("[RULE::identifier]\t identifier(%s)", $1);
+        $$ = create_identifier(IDENTIFIER_TYPE_UNKNOW, $1);
     }
     ;
+
 
 argument_list
     : argument 
@@ -1505,7 +1495,7 @@ argument
     ;
 
 tag_definition_statement
-    : TOKEN_NUM_SIGN identifier
+    : TOKEN_NUM_SIGN IDENTIFIER
     {
         debug_bison_info_with_green("[RULE::tag_definition_statement]\t ");
         $$ = create_tag_definition_statement($2);
@@ -1513,7 +1503,7 @@ tag_definition_statement
     ;
 
 jump_tag_statement
-    : TOKEN_JUMP TOKEN_NUM_SIGN identifier
+    : TOKEN_JUMP TOKEN_NUM_SIGN IDENTIFIER
     {
         debug_bison_info_with_green("[RULE::jump_tag_statement]\t ");
         $$ = create_jump_tag_statement($3);

@@ -127,7 +127,7 @@ extern "C" int yywrap(){
     for (i=0;i<strlen(yytext);i++) {
         string_literal_add_char(yytext[i]);
     }
-    yylval.m_identifier = get_string_literal();
+    yylval.m_identifier_str = get_string_literal();
     reset_string_literal_buffer();
     
     return IDENTIFIER;

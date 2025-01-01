@@ -142,7 +142,6 @@ void gc_mark(Ring_VirtualMachine* rvm) {
     //  2. runtime stack 变量 指向的位置 需要标记
     for (unsigned int stack_index = 0; stack_index < VM_CUR_CO_STACK_TOP_INDEX; stack_index++) {
         RVM_Value* value = &(VM_CUR_CO_STACK_DATA[stack_index]);
-        // TODO:
         switch (value->type) {
         case RVM_VALUE_TYPE_STRING:
             value->u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
