@@ -445,13 +445,55 @@ func 不一定是method，还又可能是 匿名函数field。
 这里看看后续如何兼容
 
 
-### I. Proposal: launch 入口函数为函数变量 ✅
+### U. Proposal: launch 入口函数为函数变量 ✅
 
 需要支持 launch 函数变量
 
 var FuncType func_var;
 
 launch func_var();
+
+### P. Proposal: ring 语法重构
+
+1. 关键字 function -> fn  ✅
+2. 关键字 method -> fn     ✅
+3. 关键字 field -> var   ✅
+4. 关键字 typedef -> type TODO:
+
+
+### Y. Proposal: push pop 支持更多的类型
+
+1. 支持多维数组
+2. 支持多维类
+3. 支持 匿名函数数组
+
+
+### T. BUG: coredump
+
+```
+typedef class Job {
+	var int a;
+	var int b;
+}
+
+fn test3(var Job[] a) {
+
+}
+```
+
+
+ring dump 会 coredump 
+
+
+
+### K. Proposal: array_pop_bool pop_array_bool 字节码 两个字节码应该区分一下
+
+
+
+### Q. Proposal: 字节码的顺序重新排列一下
+
+
+### S. Proposal: @main 是否有点多次一举
 
 -----------------------------
 
