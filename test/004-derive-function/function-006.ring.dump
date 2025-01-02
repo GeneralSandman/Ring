@@ -137,7 +137,7 @@ $main()    <./test/004-derive-function/function-006.ring:32,109>
  ├──62      push_func                     1, 4                                  
  ├──63      invoke_func_native                                                  
  ├──64      argument_num                  0                   58                
- ├──65      push_func                     8, 0                                  
+ ├──65      push_func                     9, 0                                  
  ├──66      invoke_func                                                         
  ├──67      pop_stack_int                 0                                     
  ├──68      push_stack_int                0                   59                
@@ -205,7 +205,7 @@ $main()    <./test/004-derive-function/function-006.ring:32,109>
  ├──130     push_func                     1, 4                                  
  ├──131     invoke_func_native                                                  
  ├──132     argument_num                  0                   75                
- ├──133     push_func                     8, 1                                  
+ ├──133     push_func                     9, 1                                  
  ├──134     invoke_func                                                         
  ├──135     deep_copy                     1, 1                                  
  ├──136     pop_stack_int                 1                                     
@@ -275,7 +275,7 @@ $main()    <./test/004-derive-function/function-006.ring:32,109>
  ├──200     push_func                     1, 4                                  
  ├──201     invoke_func_native                                                  
  ├──202     argument_num                  0                   92                
- ├──203     push_func                     8, 2                                  
+ ├──203     push_func                     9, 2                                  
  ├──204     invoke_func                                                         
  ├──205     deep_copy                     1, 1                                  
  ├──206     pop_stack_int                 2                                     

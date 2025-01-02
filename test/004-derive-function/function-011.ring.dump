@@ -76,7 +76,7 @@ $main()    <./test/004-derive-function/function-011.ring:33,42>
  ├──12      push_int_1byte                123                 37                
  ├──13      push_int_1byte                234                                   
  ├──14      argument_num                  2                                     
- ├──15      push_func                     8, 1                                  
+ ├──15      push_func                     9, 1                                  
  ├──16      invoke_func                                                         
  ├──17      deep_copy                     1, 1                                  
  ├──18      pop_static_int                1                                     

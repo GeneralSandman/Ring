@@ -34,13 +34,13 @@ $fibonacci_1(var int)    <./test/004-derive-function/function-020.ring:11,17>
  ├──14      push_int_1byte                1                                     
  ├──15      sub_int                                                             
  ├──16      argument_num                  1                                     
- ├──17      push_func                     8, 0                                  
+ ├──17      push_func                     9, 0                                  
  ├──18      invoke_func                                                         
  ├──19      push_stack_int                0                                     
  ├──20      push_int_1byte                2                                     
  ├──21      sub_int                                                             
  ├──22      argument_num                  1                                     
- ├──23      push_func                     8, 0                                  
+ ├──23      push_func                     9, 0                                  
  ├──24      invoke_func                                                         
  ├──25      add_int                                                             
  ├──26      return                        1                                     
@@ -108,70 +108,70 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──3       invoke_func_native                                                  
  ├──4       push_int_1byte                1                   42                
  ├──5       argument_num                  1                                     
- ├──6       push_func                     8, 0                                  
+ ├──6       push_func                     9, 0                                  
  ├──7       invoke_func                                                         
  ├──8       argument_num                  1                                     
  ├──9       push_func                     1, 1                                  
  ├──10      invoke_func_native                                                  
  ├──11      push_int_1byte                2                   43                
  ├──12      argument_num                  1                                     
- ├──13      push_func                     8, 0                                  
+ ├──13      push_func                     9, 0                                  
  ├──14      invoke_func                                                         
  ├──15      argument_num                  1                                     
  ├──16      push_func                     1, 1                                  
  ├──17      invoke_func_native                                                  
  ├──18      push_int_1byte                3                   44                
  ├──19      argument_num                  1                                     
- ├──20      push_func                     8, 0                                  
+ ├──20      push_func                     9, 0                                  
  ├──21      invoke_func                                                         
  ├──22      argument_num                  1                                     
  ├──23      push_func                     1, 1                                  
  ├──24      invoke_func_native                                                  
  ├──25      push_int_1byte                4                   45                
  ├──26      argument_num                  1                                     
- ├──27      push_func                     8, 0                                  
+ ├──27      push_func                     9, 0                                  
  ├──28      invoke_func                                                         
  ├──29      argument_num                  1                                     
  ├──30      push_func                     1, 1                                  
  ├──31      invoke_func_native                                                  
  ├──32      push_int_1byte                5                   46                
  ├──33      argument_num                  1                                     
- ├──34      push_func                     8, 0                                  
+ ├──34      push_func                     9, 0                                  
  ├──35      invoke_func                                                         
  ├──36      argument_num                  1                                     
  ├──37      push_func                     1, 1                                  
  ├──38      invoke_func_native                                                  
  ├──39      push_int_1byte                6                   47                
  ├──40      argument_num                  1                                     
- ├──41      push_func                     8, 0                                  
+ ├──41      push_func                     9, 0                                  
  ├──42      invoke_func                                                         
  ├──43      argument_num                  1                                     
  ├──44      push_func                     1, 1                                  
  ├──45      invoke_func_native                                                  
  ├──46      push_int_1byte                7                   48                
  ├──47      argument_num                  1                                     
- ├──48      push_func                     8, 0                                  
+ ├──48      push_func                     9, 0                                  
  ├──49      invoke_func                                                         
  ├──50      argument_num                  1                                     
  ├──51      push_func                     1, 1                                  
  ├──52      invoke_func_native                                                  
  ├──53      push_int_1byte                8                   49                
  ├──54      argument_num                  1                                     
- ├──55      push_func                     8, 0                                  
+ ├──55      push_func                     9, 0                                  
  ├──56      invoke_func                                                         
  ├──57      argument_num                  1                                     
  ├──58      push_func                     1, 1                                  
  ├──59      invoke_func_native                                                  
  ├──60      push_int_1byte                9                   50                
  ├──61      argument_num                  1                                     
- ├──62      push_func                     8, 0                                  
+ ├──62      push_func                     9, 0                                  
  ├──63      invoke_func                                                         
  ├──64      argument_num                  1                                     
  ├──65      push_func                     1, 1                                  
  ├──66      invoke_func_native                                                  
  ├──67      push_int_1byte                10                  51                
  ├──68      argument_num                  1                                     
- ├──69      push_func                     8, 0                                  
+ ├──69      push_func                     9, 0                                  
  ├──70      invoke_func                                                         
  ├──71      argument_num                  1                                     
  ├──72      push_func                     1, 1                                  
@@ -182,70 +182,70 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──77      invoke_func_native                                                  
  ├──78      push_int_1byte                1                   56                
  ├──79      argument_num                  1                                     
- ├──80      push_func                     8, 1                                  
+ ├──80      push_func                     9, 1                                  
  ├──81      invoke_func                                                         
  ├──82      argument_num                  1                                     
  ├──83      push_func                     1, 1                                  
  ├──84      invoke_func_native                                                  
  ├──85      push_int_1byte                2                   57                
  ├──86      argument_num                  1                                     
- ├──87      push_func                     8, 1                                  
+ ├──87      push_func                     9, 1                                  
  ├──88      invoke_func                                                         
  ├──89      argument_num                  1                                     
  ├──90      push_func                     1, 1                                  
  ├──91      invoke_func_native                                                  
  ├──92      push_int_1byte                3                   58                
  ├──93      argument_num                  1                                     
- ├──94      push_func                     8, 1                                  
+ ├──94      push_func                     9, 1                                  
  ├──95      invoke_func                                                         
  ├──96      argument_num                  1                                     
  ├──97      push_func                     1, 1                                  
  ├──98      invoke_func_native                                                  
  ├──99      push_int_1byte                4                   59                
  ├──100     argument_num                  1                                     
- ├──101     push_func                     8, 1                                  
+ ├──101     push_func                     9, 1                                  
  ├──102     invoke_func                                                         
  ├──103     argument_num                  1                                     
  ├──104     push_func                     1, 1                                  
  ├──105     invoke_func_native                                                  
  ├──106     push_int_1byte                5                   60                
  ├──107     argument_num                  1                                     
- ├──108     push_func                     8, 1                                  
+ ├──108     push_func                     9, 1                                  
  ├──109     invoke_func                                                         
  ├──110     argument_num                  1                                     
  ├──111     push_func                     1, 1                                  
  ├──112     invoke_func_native                                                  
  ├──113     push_int_1byte                6                   61                
  ├──114     argument_num                  1                                     
- ├──115     push_func                     8, 1                                  
+ ├──115     push_func                     9, 1                                  
  ├──116     invoke_func                                                         
  ├──117     argument_num                  1                                     
  ├──118     push_func                     1, 1                                  
  ├──119     invoke_func_native                                                  
  ├──120     push_int_1byte                7                   62                
  ├──121     argument_num                  1                                     
- ├──122     push_func                     8, 1                                  
+ ├──122     push_func                     9, 1                                  
  ├──123     invoke_func                                                         
  ├──124     argument_num                  1                                     
  ├──125     push_func                     1, 1                                  
  ├──126     invoke_func_native                                                  
  ├──127     push_int_1byte                8                   63                
  ├──128     argument_num                  1                                     
- ├──129     push_func                     8, 1                                  
+ ├──129     push_func                     9, 1                                  
  ├──130     invoke_func                                                         
  ├──131     argument_num                  1                                     
  ├──132     push_func                     1, 1                                  
  ├──133     invoke_func_native                                                  
  ├──134     push_int_1byte                9                   64                
  ├──135     argument_num                  1                                     
- ├──136     push_func                     8, 1                                  
+ ├──136     push_func                     9, 1                                  
  ├──137     invoke_func                                                         
  ├──138     argument_num                  1                                     
  ├──139     push_func                     1, 1                                  
  ├──140     invoke_func_native                                                  
  ├──141     push_int_1byte                10                  65                
  ├──142     argument_num                  1                                     
- ├──143     push_func                     8, 1                                  
+ ├──143     push_func                     9, 1                                  
  ├──144     invoke_func                                                         
  ├──145     argument_num                  1                                     
  ├──146     push_func                     1, 1                                  
@@ -256,11 +256,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──151     invoke_func_native                                                  
  ├──152     push_int_1byte                1                   69                
  ├──153     argument_num                  1                                     
- ├──154     push_func                     8, 0                                  
+ ├──154     push_func                     9, 0                                  
  ├──155     invoke_func                                                         
  ├──156     push_int_1byte                1                                     
  ├──157     argument_num                  1                                     
- ├──158     push_func                     8, 1                                  
+ ├──158     push_func                     9, 1                                  
  ├──159     invoke_func                                                         
  ├──160     eq_int                                                              
  ├──161     argument_num                  1                                     
@@ -268,11 +268,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──163     invoke_func_native                                                  
  ├──164     push_int_1byte                2                   70                
  ├──165     argument_num                  1                                     
- ├──166     push_func                     8, 0                                  
+ ├──166     push_func                     9, 0                                  
  ├──167     invoke_func                                                         
  ├──168     push_int_1byte                2                                     
  ├──169     argument_num                  1                                     
- ├──170     push_func                     8, 1                                  
+ ├──170     push_func                     9, 1                                  
  ├──171     invoke_func                                                         
  ├──172     eq_int                                                              
  ├──173     argument_num                  1                                     
@@ -280,11 +280,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──175     invoke_func_native                                                  
  ├──176     push_int_1byte                3                   71                
  ├──177     argument_num                  1                                     
- ├──178     push_func                     8, 0                                  
+ ├──178     push_func                     9, 0                                  
  ├──179     invoke_func                                                         
  ├──180     push_int_1byte                3                                     
  ├──181     argument_num                  1                                     
- ├──182     push_func                     8, 1                                  
+ ├──182     push_func                     9, 1                                  
  ├──183     invoke_func                                                         
  ├──184     eq_int                                                              
  ├──185     argument_num                  1                                     
@@ -292,11 +292,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──187     invoke_func_native                                                  
  ├──188     push_int_1byte                4                   72                
  ├──189     argument_num                  1                                     
- ├──190     push_func                     8, 0                                  
+ ├──190     push_func                     9, 0                                  
  ├──191     invoke_func                                                         
  ├──192     push_int_1byte                4                                     
  ├──193     argument_num                  1                                     
- ├──194     push_func                     8, 1                                  
+ ├──194     push_func                     9, 1                                  
  ├──195     invoke_func                                                         
  ├──196     eq_int                                                              
  ├──197     argument_num                  1                                     
@@ -304,11 +304,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──199     invoke_func_native                                                  
  ├──200     push_int_1byte                5                   73                
  ├──201     argument_num                  1                                     
- ├──202     push_func                     8, 0                                  
+ ├──202     push_func                     9, 0                                  
  ├──203     invoke_func                                                         
  ├──204     push_int_1byte                5                                     
  ├──205     argument_num                  1                                     
- ├──206     push_func                     8, 1                                  
+ ├──206     push_func                     9, 1                                  
  ├──207     invoke_func                                                         
  ├──208     eq_int                                                              
  ├──209     argument_num                  1                                     
@@ -316,11 +316,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──211     invoke_func_native                                                  
  ├──212     push_int_1byte                6                   74                
  ├──213     argument_num                  1                                     
- ├──214     push_func                     8, 0                                  
+ ├──214     push_func                     9, 0                                  
  ├──215     invoke_func                                                         
  ├──216     push_int_1byte                6                                     
  ├──217     argument_num                  1                                     
- ├──218     push_func                     8, 1                                  
+ ├──218     push_func                     9, 1                                  
  ├──219     invoke_func                                                         
  ├──220     eq_int                                                              
  ├──221     argument_num                  1                                     
@@ -328,11 +328,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──223     invoke_func_native                                                  
  ├──224     push_int_1byte                7                   75                
  ├──225     argument_num                  1                                     
- ├──226     push_func                     8, 0                                  
+ ├──226     push_func                     9, 0                                  
  ├──227     invoke_func                                                         
  ├──228     push_int_1byte                7                                     
  ├──229     argument_num                  1                                     
- ├──230     push_func                     8, 1                                  
+ ├──230     push_func                     9, 1                                  
  ├──231     invoke_func                                                         
  ├──232     eq_int                                                              
  ├──233     argument_num                  1                                     
@@ -340,11 +340,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──235     invoke_func_native                                                  
  ├──236     push_int_1byte                8                   76                
  ├──237     argument_num                  1                                     
- ├──238     push_func                     8, 0                                  
+ ├──238     push_func                     9, 0                                  
  ├──239     invoke_func                                                         
  ├──240     push_int_1byte                8                                     
  ├──241     argument_num                  1                                     
- ├──242     push_func                     8, 1                                  
+ ├──242     push_func                     9, 1                                  
  ├──243     invoke_func                                                         
  ├──244     eq_int                                                              
  ├──245     argument_num                  1                                     
@@ -352,11 +352,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──247     invoke_func_native                                                  
  ├──248     push_int_1byte                9                   77                
  ├──249     argument_num                  1                                     
- ├──250     push_func                     8, 0                                  
+ ├──250     push_func                     9, 0                                  
  ├──251     invoke_func                                                         
  ├──252     push_int_1byte                9                                     
  ├──253     argument_num                  1                                     
- ├──254     push_func                     8, 1                                  
+ ├──254     push_func                     9, 1                                  
  ├──255     invoke_func                                                         
  ├──256     eq_int                                                              
  ├──257     argument_num                  1                                     
@@ -364,11 +364,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──259     invoke_func_native                                                  
  ├──260     push_int_1byte                10                  78                
  ├──261     argument_num                  1                                     
- ├──262     push_func                     8, 0                                  
+ ├──262     push_func                     9, 0                                  
  ├──263     invoke_func                                                         
  ├──264     push_int_1byte                10                                    
  ├──265     argument_num                  1                                     
- ├──266     push_func                     8, 1                                  
+ ├──266     push_func                     9, 1                                  
  ├──267     invoke_func                                                         
  ├──268     eq_int                                                              
  ├──269     argument_num                  1                                     
@@ -376,11 +376,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──271     invoke_func_native                                                  
  ├──272     push_int_1byte                11                  79                
  ├──273     argument_num                  1                                     
- ├──274     push_func                     8, 0                                  
+ ├──274     push_func                     9, 0                                  
  ├──275     invoke_func                                                         
  ├──276     push_int_1byte                11                                    
  ├──277     argument_num                  1                                     
- ├──278     push_func                     8, 1                                  
+ ├──278     push_func                     9, 1                                  
  ├──279     invoke_func                                                         
  ├──280     eq_int                                                              
  ├──281     argument_num                  1                                     
@@ -388,11 +388,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──283     invoke_func_native                                                  
  ├──284     push_int_1byte                12                  80                
  ├──285     argument_num                  1                                     
- ├──286     push_func                     8, 0                                  
+ ├──286     push_func                     9, 0                                  
  ├──287     invoke_func                                                         
  ├──288     push_int_1byte                12                                    
  ├──289     argument_num                  1                                     
- ├──290     push_func                     8, 1                                  
+ ├──290     push_func                     9, 1                                  
  ├──291     invoke_func                                                         
  ├──292     eq_int                                                              
  ├──293     argument_num                  1                                     
@@ -400,11 +400,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──295     invoke_func_native                                                  
  ├──296     push_int_1byte                13                  81                
  ├──297     argument_num                  1                                     
- ├──298     push_func                     8, 0                                  
+ ├──298     push_func                     9, 0                                  
  ├──299     invoke_func                                                         
  ├──300     push_int_1byte                13                                    
  ├──301     argument_num                  1                                     
- ├──302     push_func                     8, 1                                  
+ ├──302     push_func                     9, 1                                  
  ├──303     invoke_func                                                         
  ├──304     eq_int                                                              
  ├──305     argument_num                  1                                     
@@ -412,11 +412,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──307     invoke_func_native                                                  
  ├──308     push_int_1byte                14                  82                
  ├──309     argument_num                  1                                     
- ├──310     push_func                     8, 0                                  
+ ├──310     push_func                     9, 0                                  
  ├──311     invoke_func                                                         
  ├──312     push_int_1byte                14                                    
  ├──313     argument_num                  1                                     
- ├──314     push_func                     8, 1                                  
+ ├──314     push_func                     9, 1                                  
  ├──315     invoke_func                                                         
  ├──316     eq_int                                                              
  ├──317     argument_num                  1                                     
@@ -424,11 +424,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──319     invoke_func_native                                                  
  ├──320     push_int_1byte                15                  83                
  ├──321     argument_num                  1                                     
- ├──322     push_func                     8, 0                                  
+ ├──322     push_func                     9, 0                                  
  ├──323     invoke_func                                                         
  ├──324     push_int_1byte                15                                    
  ├──325     argument_num                  1                                     
- ├──326     push_func                     8, 1                                  
+ ├──326     push_func                     9, 1                                  
  ├──327     invoke_func                                                         
  ├──328     eq_int                                                              
  ├──329     argument_num                  1                                     
@@ -436,11 +436,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──331     invoke_func_native                                                  
  ├──332     push_int_1byte                16                  84                
  ├──333     argument_num                  1                                     
- ├──334     push_func                     8, 0                                  
+ ├──334     push_func                     9, 0                                  
  ├──335     invoke_func                                                         
  ├──336     push_int_1byte                16                                    
  ├──337     argument_num                  1                                     
- ├──338     push_func                     8, 1                                  
+ ├──338     push_func                     9, 1                                  
  ├──339     invoke_func                                                         
  ├──340     eq_int                                                              
  ├──341     argument_num                  1                                     
@@ -448,11 +448,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──343     invoke_func_native                                                  
  ├──344     push_int_1byte                17                  85                
  ├──345     argument_num                  1                                     
- ├──346     push_func                     8, 0                                  
+ ├──346     push_func                     9, 0                                  
  ├──347     invoke_func                                                         
  ├──348     push_int_1byte                17                                    
  ├──349     argument_num                  1                                     
- ├──350     push_func                     8, 1                                  
+ ├──350     push_func                     9, 1                                  
  ├──351     invoke_func                                                         
  ├──352     eq_int                                                              
  ├──353     argument_num                  1                                     
@@ -460,11 +460,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──355     invoke_func_native                                                  
  ├──356     push_int_1byte                18                  86                
  ├──357     argument_num                  1                                     
- ├──358     push_func                     8, 0                                  
+ ├──358     push_func                     9, 0                                  
  ├──359     invoke_func                                                         
  ├──360     push_int_1byte                18                                    
  ├──361     argument_num                  1                                     
- ├──362     push_func                     8, 1                                  
+ ├──362     push_func                     9, 1                                  
  ├──363     invoke_func                                                         
  ├──364     eq_int                                                              
  ├──365     argument_num                  1                                     
@@ -472,11 +472,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──367     invoke_func_native                                                  
  ├──368     push_int_1byte                19                  87                
  ├──369     argument_num                  1                                     
- ├──370     push_func                     8, 0                                  
+ ├──370     push_func                     9, 0                                  
  ├──371     invoke_func                                                         
  ├──372     push_int_1byte                19                                    
  ├──373     argument_num                  1                                     
- ├──374     push_func                     8, 1                                  
+ ├──374     push_func                     9, 1                                  
  ├──375     invoke_func                                                         
  ├──376     eq_int                                                              
  ├──377     argument_num                  1                                     
@@ -484,11 +484,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──379     invoke_func_native                                                  
  ├──380     push_int_1byte                20                  88                
  ├──381     argument_num                  1                                     
- ├──382     push_func                     8, 0                                  
+ ├──382     push_func                     9, 0                                  
  ├──383     invoke_func                                                         
  ├──384     push_int_1byte                20                                    
  ├──385     argument_num                  1                                     
- ├──386     push_func                     8, 1                                  
+ ├──386     push_func                     9, 1                                  
  ├──387     invoke_func                                                         
  ├──388     eq_int                                                              
  ├──389     argument_num                  1                                     
@@ -496,11 +496,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──391     invoke_func_native                                                  
  ├──392     push_int_1byte                21                  89                
  ├──393     argument_num                  1                                     
- ├──394     push_func                     8, 0                                  
+ ├──394     push_func                     9, 0                                  
  ├──395     invoke_func                                                         
  ├──396     push_int_1byte                21                                    
  ├──397     argument_num                  1                                     
- ├──398     push_func                     8, 1                                  
+ ├──398     push_func                     9, 1                                  
  ├──399     invoke_func                                                         
  ├──400     eq_int                                                              
  ├──401     argument_num                  1                                     
@@ -508,11 +508,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──403     invoke_func_native                                                  
  ├──404     push_int_1byte                22                  90                
  ├──405     argument_num                  1                                     
- ├──406     push_func                     8, 0                                  
+ ├──406     push_func                     9, 0                                  
  ├──407     invoke_func                                                         
  ├──408     push_int_1byte                22                                    
  ├──409     argument_num                  1                                     
- ├──410     push_func                     8, 1                                  
+ ├──410     push_func                     9, 1                                  
  ├──411     invoke_func                                                         
  ├──412     eq_int                                                              
  ├──413     argument_num                  1                                     
@@ -520,11 +520,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──415     invoke_func_native                                                  
  ├──416     push_int_1byte                23                  91                
  ├──417     argument_num                  1                                     
- ├──418     push_func                     8, 0                                  
+ ├──418     push_func                     9, 0                                  
  ├──419     invoke_func                                                         
  ├──420     push_int_1byte                23                                    
  ├──421     argument_num                  1                                     
- ├──422     push_func                     8, 1                                  
+ ├──422     push_func                     9, 1                                  
  ├──423     invoke_func                                                         
  ├──424     eq_int                                                              
  ├──425     argument_num                  1                                     
@@ -532,11 +532,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──427     invoke_func_native                                                  
  ├──428     push_int_1byte                24                  92                
  ├──429     argument_num                  1                                     
- ├──430     push_func                     8, 0                                  
+ ├──430     push_func                     9, 0                                  
  ├──431     invoke_func                                                         
  ├──432     push_int_1byte                24                                    
  ├──433     argument_num                  1                                     
- ├──434     push_func                     8, 1                                  
+ ├──434     push_func                     9, 1                                  
  ├──435     invoke_func                                                         
  ├──436     eq_int                                                              
  ├──437     argument_num                  1                                     
@@ -544,11 +544,11 @@ $main()    <./test/004-derive-function/function-020.ring:39,96>
  ├──439     invoke_func_native                                                  
  ├──440     push_int_1byte                25                  93                
  ├──441     argument_num                  1                                     
- ├──442     push_func                     8, 0                                  
+ ├──442     push_func                     9, 0                                  
  ├──443     invoke_func                                                         
  ├──444     push_int_1byte                25                                    
  ├──445     argument_num                  1                                     
- ├──446     push_func                     8, 1                                  
+ ├──446     push_func                     9, 1                                  
  ├──447     invoke_func                                                         
  ├──448     eq_int                                                              
  ├──449     argument_num                  1                                     

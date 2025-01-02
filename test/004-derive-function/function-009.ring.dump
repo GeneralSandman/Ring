@@ -149,7 +149,7 @@ $main()    <./test/004-derive-function/function-009.ring:61,64>
 +Instructions: 8
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       argument_num                  0                   63                
- ├──1       push_func                     8, 0                                  
+ ├──1       push_func                     9, 0                                  
  ├──2       invoke_func                                                         
  ├──3       pop_defer                                         64                
  ├──4       function_finish                                                     

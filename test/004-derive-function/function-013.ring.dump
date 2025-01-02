@@ -216,7 +216,7 @@ $main()    <./test/004-derive-function/function-013.ring:45,61>
  ├──6       jump_if_false                 84                                    
  ├──7       push_stack_int                0                   51                
  ├──8       argument_num                  1                                     
- ├──9       push_func                     8, 0                                  
+ ├──9       push_func                     9, 0                                  
  ├──10      invoke_func                                                         
  ├──11      pop_stack_int                 1                                     
  ├──12      push_string                   12                  53                

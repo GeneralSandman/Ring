@@ -43,7 +43,7 @@ $doit2()    <./test/004-derive-function/function-001.ring:16,22>
  ├──2       push_func                     1, 4                                  
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   19                
- ├──5       push_func                     8, 0                                  
+ ├──5       push_func                     9, 0                                  
  ├──6       invoke_func                                                         
  ├──7       push_string                   3                   21                
  ├──8       argument_num                  1                                     
@@ -63,7 +63,7 @@ $doit3()    <./test/004-derive-function/function-001.ring:24,30>
  ├──2       push_func                     1, 4                                  
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   27                
- ├──5       push_func                     8, 1                                  
+ ├──5       push_func                     9, 1                                  
  ├──6       invoke_func                                                         
  ├──7       push_string                   5                   29                
  ├──8       argument_num                  1                                     
@@ -83,7 +83,7 @@ $doit4()    <./test/004-derive-function/function-001.ring:32,38>
  ├──2       push_func                     1, 4                                  
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   35                
- ├──5       push_func                     8, 2                                  
+ ├──5       push_func                     9, 2                                  
  ├──6       invoke_func                                                         
  ├──7       push_string                   7                   37                
  ├──8       argument_num                  1                                     
@@ -103,7 +103,7 @@ $doit5()    <./test/004-derive-function/function-001.ring:40,46>
  ├──2       push_func                     1, 4                                  
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   43                
- ├──5       push_func                     8, 3                                  
+ ├──5       push_func                     9, 3                                  
  ├──6       invoke_func                                                         
  ├──7       push_string                   9                   45                
  ├──8       argument_num                  1                                     
@@ -123,7 +123,7 @@ $doit6()    <./test/004-derive-function/function-001.ring:48,54>
  ├──2       push_func                     1, 4                                  
  ├──3       invoke_func_native                                                  
  ├──4       argument_num                  0                   51                
- ├──5       push_func                     8, 4                                  
+ ├──5       push_func                     9, 4                                  
  ├──6       invoke_func                                                         
  ├──7       push_string                   11                  53                
  ├──8       argument_num                  1                                     
@@ -139,7 +139,7 @@ $main()    <./test/004-derive-function/function-001.ring:57,61>
 +Instructions: 8
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       argument_num                  0                   59                
- ├──1       push_func                     8, 5                                  
+ ├──1       push_func                     9, 5                                  
  ├──2       invoke_func                                                         
  ├──3       pop_defer                                         61                
  ├──4       function_finish                                                     

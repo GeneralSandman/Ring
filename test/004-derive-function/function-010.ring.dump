@@ -106,7 +106,7 @@ $main()    <./test/004-derive-function/function-010.ring:30,56>
  ├──44      push_int_1byte                0                   49                
  ├──45      push_int_1byte                0                                     
  ├──46      argument_num                  2                                     
- ├──47      push_func                     8, 0                                  
+ ├──47      push_func                     9, 0                                  
  ├──48      invoke_func                                                         
  ├──49      deep_copy                     1, 1                                  
  ├──50      pop_stack_int                 3                                     

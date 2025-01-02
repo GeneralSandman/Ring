@@ -109,7 +109,7 @@ $main()    <./test/004-derive-function/function-004.ring:32,52>
  ├──32      push_func                     1, 4                                  
  ├──33      invoke_func_native                                                  
  ├──34      argument_num                  0                   42                
- ├──35      push_func                     8, 1                                  
+ ├──35      push_func                     9, 1                                  
  ├──36      invoke_func                                                         
  ├──37      push_string                   1                   43                
  ├──38      argument_num                  1                                     
