@@ -893,7 +893,7 @@ struct RVM_Opcode_Info {
 typedef enum {
     RVM_CODE_UNKNOW = 0,
 
-    // int double string const
+    // push int/int64/double/string const to stack
     RVM_CODE_PUSH_BOOL,
     RVM_CODE_PUSH_INT_1BYTE, // operand 0-255
     RVM_CODE_PUSH_INT_2BYTE, // operand 256-65535
@@ -937,7 +937,7 @@ typedef enum {
     RVM_CODE_PUSH_STACK_ARRAY,
     RVM_CODE_PUSH_STACK_CLOSURE,
 
-    // free value
+    // free-value
     RVM_CODE_POP_FREE_BOOL,
     RVM_CODE_POP_FREE_INT,
     RVM_CODE_POP_FREE_INT64,
@@ -981,7 +981,37 @@ typedef enum {
     RVM_CODE_ARRAY_POP_STRING,
     RVM_CODE_ARRAY_POP_CLASS_OB,
 
+    // array
+    RVM_CODE_NEW_ARRAY_BOOL,
+    RVM_CODE_NEW_ARRAY_INT,
+    RVM_CODE_NEW_ARRAY_INT64,
+    RVM_CODE_NEW_ARRAY_DOUBLE,
+    RVM_CODE_NEW_ARRAY_STRING,
+    RVM_CODE_NEW_ARRAY_CLASS_OB,
+
+    RVM_CODE_NEW_ARRAY_LITERAL_BOOL,
+    RVM_CODE_NEW_ARRAY_LITERAL_INT,
+    RVM_CODE_NEW_ARRAY_LITERAL_INT64,
+    RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE,
+    RVM_CODE_NEW_ARRAY_LITERAL_STRING,
+    RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB,
+    RVM_CODE_NEW_ARRAY_LITERAL_A,
+
+
+    // range array/string
+    RVM_CODE_FOR_RANGE_ARRAY_A,
+    RVM_CODE_FOR_RANGE_ARRAY_BOOL,
+    RVM_CODE_FOR_RANGE_ARRAY_INT,
+    RVM_CODE_FOR_RANGE_ARRAY_INT64,
+    RVM_CODE_FOR_RANGE_ARRAY_DOUBLE,
+    RVM_CODE_FOR_RANGE_ARRAY_STRING,
+    RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB,
+    RVM_CODE_FOR_RANGE_STRING,
+    RVM_CODE_FOR_RANGE_FINISH,
+
     // class
+    RVM_CODE_NEW_CLASS_OB_LITERAL,
+
     RVM_CODE_POP_FIELD_BOOL,
     RVM_CODE_POP_FIELD_INT,
     RVM_CODE_POP_FIELD_INT64,
@@ -989,6 +1019,7 @@ typedef enum {
     RVM_CODE_POP_FIELD_STRING,
     RVM_CODE_POP_FIELD_CLASS_OB,
     RVM_CODE_POP_FIELD_ARRAY,
+
     RVM_CODE_PUSH_FIELD_BOOL,
     RVM_CODE_PUSH_FIELD_INT,
     RVM_CODE_PUSH_FIELD_INT64,
@@ -1030,6 +1061,10 @@ typedef enum {
     RVM_CODE_SELF_DECREASE_DOUBLE,
 
     RVM_CODE_CONCAT,
+    RVM_CODE_PUSH_ARRAY_LEN,
+    RVM_CODE_PUSH_ARRAY_CAPACITY,
+    RVM_CODE_PUSH_STRING_LEN,
+    RVM_CODE_PUSH_STRING_CAPACITY,
 
     // type cast
     RVM_CODE_CAST_BOOL_TO_INT,
@@ -1037,6 +1072,12 @@ typedef enum {
 
     RVM_CODE_CAST_INT_TO_BOOL,
     RVM_CODE_CAST_DOUBLE_TO_INT,
+
+    RVM_CODE_BOOL_2_STRING,
+    RVM_CODE_INT_2_STRING,
+    RVM_CODE_INT64_2_STRING,
+    RVM_CODE_DOUBLE_2_STRING,
+    RVM_CODE_INT_2_INT64,
 
     // logical
     RVM_CODE_LOGICAL_AND,
@@ -1093,56 +1134,15 @@ typedef enum {
     RVM_CODE_INVOKE_METHOD,
     RVM_CODE_RETURN,
     RVM_CODE_FUNCTION_FINISH,
+    RVM_CODE_EXIT,
+
+    // closure
+    RVM_CODE_NEW_CLOSURE,
 
     // defer
     RVM_CODE_PUSH_DEFER,
     RVM_CODE_POP_DEFER,
 
-    RVM_CODE_EXIT,
-
-    // array
-    RVM_CODE_NEW_ARRAY_BOOL,
-    RVM_CODE_NEW_ARRAY_INT,
-    RVM_CODE_NEW_ARRAY_INT64,
-    RVM_CODE_NEW_ARRAY_DOUBLE,
-    RVM_CODE_NEW_ARRAY_STRING,
-    RVM_CODE_NEW_ARRAY_CLASS_OB,
-
-    RVM_CODE_NEW_ARRAY_LITERAL_BOOL,
-    RVM_CODE_NEW_ARRAY_LITERAL_INT,
-    RVM_CODE_NEW_ARRAY_LITERAL_INT64,
-    RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE,
-    RVM_CODE_NEW_ARRAY_LITERAL_STRING,
-    RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB,
-
-    RVM_CODE_NEW_ARRAY_LITERAL_A,
-
-
-    RVM_CODE_PUSH_ARRAY_LEN,
-    RVM_CODE_PUSH_ARRAY_CAPACITY,
-    RVM_CODE_PUSH_STRING_LEN,
-    RVM_CODE_PUSH_STRING_CAPACITY,
-
-    // class
-    RVM_CODE_NEW_CLASS_OB_LITERAL,
-
-    // range
-    RVM_CODE_FOR_RANGE_ARRAY_A,
-    RVM_CODE_FOR_RANGE_ARRAY_BOOL,
-    RVM_CODE_FOR_RANGE_ARRAY_INT,
-    RVM_CODE_FOR_RANGE_ARRAY_INT64,
-    RVM_CODE_FOR_RANGE_ARRAY_DOUBLE,
-    RVM_CODE_FOR_RANGE_ARRAY_STRING,
-    RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB,
-    RVM_CODE_FOR_RANGE_STRING,
-    RVM_CODE_FOR_RANGE_FINISH,
-
-    // convert
-    RVM_CODE_BOOL_2_STRING,
-    RVM_CODE_INT_2_STRING,
-    RVM_CODE_INT64_2_STRING,
-    RVM_CODE_DOUBLE_2_STRING,
-    RVM_CODE_INT_2_INT64,
 
     // coroutine
     RVM_CODE_LAUNCH,
@@ -1151,8 +1151,6 @@ typedef enum {
     RVM_CODE_RESUME,
     RVM_CODE_YIELD,
 
-    // closure
-    RVM_CODE_NEW_CLOSURE,
 
     // 不对应实际的字节码, 不能在生成代码的时候使用
     RVM_CODES_NUM, // 用来标记RVM CODE 的数量
@@ -3017,7 +3015,13 @@ void              generate_pop_to_leftvalue_identifier(Package_Executer* execute
 void              generate_pop_to_leftvalue_member(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_pop_to_leftvalue_array_index(Package_Executer* executer, ArrayIndexExpression* array_index_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_logical_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
-void              generate_vmcode_from_binary_expression(Package_Executer* executer, BinaryExpression* expression, RVM_OpcodeBuffer* opcode_buffer, RVM_Opcode opcode);
+void              generate_vmcode_from_concat_expression(Package_Executer* executer,
+                                                         BinaryExpression* expression,
+                                                         RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_binary_expression(Package_Executer* executer,
+                                                         BinaryExpression* expression,
+                                                         RVM_OpcodeBuffer* opcode_buffer,
+                                                         RVM_Opcode        opcode);
 void              generate_vmcode_from_relational_expression(Package_Executer* executer,
                                                              ExpressionType    expression_type,
                                                              BinaryExpression* expression,

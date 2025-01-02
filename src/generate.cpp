@@ -51,10 +51,6 @@ void print_package_executer(Package_Executer* package_executer) {
 
 // ring 使用者
 void package_executer_dump(Package_Executer* package_executer) {
-    // printf("%sPackage:    %s%s\n",
-    //        LOG_COLOR_GREEN,
-    //        package_executer->package_name,
-    //        LOG_COLOR_CLEAR);
 
     // 1. dump constant
     printf("#Constants:       %d\n", package_executer->constant_pool_size);
@@ -124,20 +120,6 @@ void ring_generate_vm_code(CompilerEntry* compiler_entry,
     ring_generate_vm_code(main_package, package_executer);
     executer_entry->package_executer_list.push_back(package_executer);
 
-    // for (Package* package : compiler_entry->package_list) {
-    //     // FIXME: find duplicate
-    //     for (Package_Executer* package_executer : executer_entry->package_executer_list) {
-    //         if (str_eq(package_executer->package_name, package->package_name)) {
-    //             debug_generate_info_with_darkgreen("\tpackage executer[%s] already register", package->package_name);
-
-    //             continue;
-    //         }
-    //     }
-    //     Package_Executer* package_executer = package_executer_create(executer_entry, package->package_name);
-    //     ring_generate_vm_code(package, package_executer);
-    //     executer_entry->package_executer_list.push_back(package_executer);
-    // }
-
 #ifdef DEBUG_GENERATE_SUMMARY
     executer_entry_dump(executer_entry);
 #endif
@@ -188,7 +170,6 @@ void add_functions(Package* package, Package_Executer* executer) {
             executer->exist_main_func = true;
             executer->main_func_index = i;
         } else if (str_eq(package->function_list[i]->identifier, "__global_init")) {
-            // printf("find __global_init:%d\n", i);
             executer->exist_global_init_func = true;
             executer->global_init_func_index = i;
         }
@@ -202,10 +183,10 @@ void add_classes(Package* package, Package_Executer* executer) {
     executer->class_list = (RVM_ClassDefinition*)mem_alloc(NULL_MEM_POOL,
                                                            sizeof(RVM_ClassDefinition) * executer->class_size);
 
-    unsigned int i       = 0;
-    for (ClassDefinition* pos : package->class_definition_list) {
-        class_def_deep_copy(executer, &executer->class_list[i], pos);
-        i++;
+    for (unsigned int i = 0;
+         i < package->class_definition_list.size();
+         i++) {
+        class_def_deep_copy(executer, &executer->class_list[i], package->class_definition_list[i]);
     }
 }
 
@@ -478,7 +459,6 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
     }
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
-    // FIXME: (package->compiler_entry->package_list.size() - 1) << 8) 需要统一修正一下
 
 
     // step-1. 生成调用 __global_init() 函数相关的字节码
@@ -557,8 +537,6 @@ void generate_code_from_function_definition(Package_Executer* executer,
     dst->u.derive_func->code_list     = opcode_buffer->code_list;
     dst->u.derive_func->code_size     = opcode_buffer->code_size;
     dst->u.derive_func->code_line_map = opcode_buffer->code_line_map;
-    // dst->local_variable_size          = 0;
-    // dst->local_variable_list          = nullptr;
 
 
 #ifdef DEBUG_GENERATE_OUTPUT_VMCODE
@@ -585,12 +563,12 @@ void generate_code_from_method_definition(Package_Executer* executer,
     dst->rvm_function->u.derive_func->code_list     = opcode_buffer->code_list;
     dst->rvm_function->u.derive_func->code_size     = opcode_buffer->code_size;
     dst->rvm_function->u.derive_func->code_line_map = opcode_buffer->code_line_map;
-    // TODO: dump method detail
 }
 
 
 RVM_OpcodeBuffer* new_opcode_buffer() {
     debug_generate_info_with_darkgreen("\t");
+
     RVM_OpcodeBuffer* buffer = (RVM_OpcodeBuffer*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_OpcodeBuffer));
 
     buffer->code_list        = nullptr;
@@ -607,10 +585,11 @@ void generate_vmcode_from_block(Package_Executer* executer,
                                 Block*            block,
                                 RVM_OpcodeBuffer* opcode_buffer) {
 
+    debug_generate_info_with_darkgreen("\t");
+
     if (block == nullptr) {
         return;
     }
-    debug_generate_info_with_darkgreen("\t");
     generate_vmcode_from_statement_list(executer, block, block->statement_list, opcode_buffer);
 }
 
@@ -620,6 +599,7 @@ void generate_vmcode_from_statement_list(Package_Executer* executer,
                                          RVM_OpcodeBuffer* opcode_buffer) {
 
     debug_generate_info_with_darkgreen("\t");
+
     for (Statement* statement = statement_list; statement != nullptr; statement = statement->next) {
         switch (statement->type) {
         case STATEMENT_TYPE_EXPRESSION:
@@ -677,6 +657,7 @@ void generate_vmcode_from_if_statement(Package_Executer* executer,
                                        RVM_OpcodeBuffer* opcode_buffer) {
 
     debug_generate_info_with_darkgreen("\t");
+
     if (if_statement == nullptr) {
         return;
     }
@@ -713,7 +694,7 @@ void generate_vmcode_from_if_statement(Package_Executer* executer,
         opcode_buffer_set_label(opcode_buffer, elseif_false_jump_label, opcode_buffer->code_size);
     }
 
-    // handle else
+    // handle else block
     if (if_statement->else_block != nullptr) {
         generate_vmcode_from_block(executer, if_statement->else_block, opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, if_end_label, if_statement->else_block->start_line_number);
@@ -736,8 +717,6 @@ void generate_vmcode_from_for_statement(Package_Executer* executer,
         generate_vmcode_from_for_ternary_statement(executer, for_statement, opcode_buffer);
     } else if (for_statement->type == FOR_STATEMENT_TYPE_RANGE) {
         generate_vmcode_from_for_range_statement(executer, for_statement, opcode_buffer);
-    } else {
-        // TODO: error report
     }
 }
 
@@ -793,7 +772,6 @@ void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
 
 
     // Step-End:
-
     opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
 }
 
@@ -967,9 +945,8 @@ void generate_vmcode_from_break_statement(Package_Executer* executer,
     Block*       pos            = block;
     unsigned int loop_num       = 1;
     for (; pos; pos = pos->parent_block) {
-        if (pos->type == BLOCK_TYPE_FOR) {
-        } else if (pos->type == BLOCK_TYPE_DOFOR) {
-        } else {
+
+        if (pos->type != BLOCK_TYPE_FOR && pos->type != BLOCK_TYPE_DOFOR) {
             continue;
         }
 
@@ -981,6 +958,7 @@ void generate_vmcode_from_break_statement(Package_Executer* executer,
 
 
     if (pos == nullptr) {
+        // TODO: 这里应该 在 fix_ast 中编译报错
         ring_error_report("generate vm code of `break`\n");
     }
 
@@ -999,17 +977,14 @@ void generate_vmcode_from_continue_statement(Package_Executer*  executer,
 
     Block* pos = block;
     for (; pos; pos = pos->parent_block) {
-        if (pos->type == BLOCK_TYPE_FOR) {
+        if (pos->type == BLOCK_TYPE_FOR || pos->type == BLOCK_TYPE_DOFOR) {
             break;
-        } else if (pos->type == BLOCK_TYPE_DOFOR) {
-            break;
-        } else {
-            continue;
         }
     }
 
 
     if (pos == nullptr) {
+        // TODO: 这里应该 在 fix_ast 中编译报错
         ring_error_report("generate vm code of `continue`\n");
     }
 
@@ -1114,8 +1089,7 @@ void generate_vmcode_from_expression(Package_Executer* executer,
         generate_vmcode_from_identifier_expression(executer, expression->u.identifier_expression, opcode_buffer);
         break;
     case EXPRESSION_TYPE_CONCAT:
-        // TODO: 这里需要单独拆分开
-        generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_CONCAT);
+        generate_vmcode_from_concat_expression(executer, expression->u.binary_expression, opcode_buffer);
         break;
     case EXPRESSION_TYPE_ARITHMETIC_ADD:
         generate_vmcode_from_binary_expression(executer, expression->u.binary_expression, opcode_buffer, RVM_CODE_ADD_INT);
@@ -1280,7 +1254,6 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer,
         for (unsigned int i = 0; i < operand_num; i++) {
             unsigned int offset  = i + 1;
             unsigned int operand = (offset << 8) | offset;
-            // printf("-RVM_CODE_DEEP_COPY: i:%d offset: %d, dst_offset: %d, src_offset: %d, operand: %d, operand: %X\n", i, offset, offset, offset, operand, operand);
             generate_vmcode(executer, opcode_buffer, RVM_CODE_DEEP_COPY, operand, expression->line_number);
         }
     }
@@ -1384,10 +1357,12 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
 
     VarDecl* declaration = array_index_expression->array_expression->u.identifier_expression->u.variable->decl;
     if (declaration == nullptr) {
+        // TODO: 编译报错
         ring_error_report("invalid operator[] in identifier:%s\n",
                           array_index_expression->array_expression->u.identifier_expression->identifier);
     }
     if (declaration->type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
+        // TODO: 编译报错
         ring_error_report("invalid declaration in operation[] identifier:%s\n",
                           array_index_expression->array_expression->u.identifier_expression->identifier);
     }
@@ -1427,7 +1402,10 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
                 case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_POP_ARRAY_DOUBLE; break;
                 case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_POP_ARRAY_STRING; break;
                 case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_POP_ARRAY_CLASS_OB; break;
-                default: ring_error_report("error: assign to item of array only support bool[] int[] double[] string[] class[]\n");
+                default:
+                    // TODO: 编译报错
+                    ring_error_report("error: assign to item of array only support bool[] int[] double[] string[] class[]\n");
+                    break;
                 }
                 generate_vmcode(executer, opcode_buffer, opcode, 0, array_index_expression->line_number);
             }
@@ -1477,10 +1455,9 @@ void generate_vmcode_from_logical_expression(Package_Executer* executer,
     opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
 }
 
-void generate_vmcode_from_binary_expression(Package_Executer* executer,
+void generate_vmcode_from_concat_expression(Package_Executer* executer,
                                             BinaryExpression* expression,
-                                            RVM_OpcodeBuffer* opcode_buffer,
-                                            RVM_Opcode        opcode) {
+                                            RVM_OpcodeBuffer* opcode_buffer) {
 
     debug_generate_info_with_darkgreen("\t");
     if (expression == nullptr) {
@@ -1489,10 +1466,33 @@ void generate_vmcode_from_binary_expression(Package_Executer* executer,
     Expression* left  = expression->left_expression;
     Expression* right = expression->right_expression;
 
+    generate_vmcode_from_expression(executer, left, opcode_buffer);
+    generate_vmcode_from_expression(executer, right, opcode_buffer);
 
-    if (opcode == RVM_CODE_CONCAT) {
-        goto END;
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_CONCAT, 0, expression->line_number);
+}
+
+
+void generate_vmcode_from_binary_expression(Package_Executer* executer,
+                                            BinaryExpression* expression,
+                                            RVM_OpcodeBuffer* opcode_buffer,
+                                            RVM_Opcode        opcode) {
+
+    debug_generate_info_with_darkgreen("\t");
+
+    assert(opcode == RVM_CODE_ADD_INT
+           || opcode == RVM_CODE_SUB_INT
+           || opcode == RVM_CODE_MUL_INT
+           || opcode == RVM_CODE_DIV_INT
+           || opcode == RVM_CODE_MOD_INT);
+
+    if (expression == nullptr) {
+        return;
     }
+
+    Expression* left  = expression->left_expression;
+    Expression* right = expression->right_expression;
+
 
     if (left->convert_type != nullptr
         && left->convert_type[0]->kind == RING_BASIC_TYPE_STRING
@@ -1556,24 +1556,12 @@ void generate_vmcode_from_relational_expression(Package_Executer* executer,
     RVM_Opcode     opcode     = RVM_CODE_UNKNOW;
 
     switch (expression_type) {
-    case EXPRESSION_TYPE_RELATIONAL_EQ:
-        opcode = RVM_CODE_RELATIONAL_EQ_INT;
-        break;
-    case EXPRESSION_TYPE_RELATIONAL_NE:
-        opcode = RVM_CODE_RELATIONAL_NE_INT;
-        break;
-    case EXPRESSION_TYPE_RELATIONAL_GT:
-        opcode = RVM_CODE_RELATIONAL_GT_INT;
-        break;
-    case EXPRESSION_TYPE_RELATIONAL_GE:
-        opcode = RVM_CODE_RELATIONAL_GE_INT;
-        break;
-    case EXPRESSION_TYPE_RELATIONAL_LT:
-        opcode = RVM_CODE_RELATIONAL_LT_INT;
-        break;
-    case EXPRESSION_TYPE_RELATIONAL_LE:
-        opcode = RVM_CODE_RELATIONAL_LE_INT;
-        break;
+    case EXPRESSION_TYPE_RELATIONAL_EQ: opcode = RVM_CODE_RELATIONAL_EQ_INT; break;
+    case EXPRESSION_TYPE_RELATIONAL_NE: opcode = RVM_CODE_RELATIONAL_NE_INT; break;
+    case EXPRESSION_TYPE_RELATIONAL_GT: opcode = RVM_CODE_RELATIONAL_GT_INT; break;
+    case EXPRESSION_TYPE_RELATIONAL_GE: opcode = RVM_CODE_RELATIONAL_GE_INT; break;
+    case EXPRESSION_TYPE_RELATIONAL_LT: opcode = RVM_CODE_RELATIONAL_LT_INT; break;
+    case EXPRESSION_TYPE_RELATIONAL_LE: opcode = RVM_CODE_RELATIONAL_LE_INT; break;
     default: break;
     }
 
@@ -1581,17 +1569,10 @@ void generate_vmcode_from_relational_expression(Package_Executer* executer,
 
 
     switch (left_type->kind) {
-    case RING_BASIC_TYPE_INT:
-        break;
-    case RING_BASIC_TYPE_INT64:
-        opcode = RVM_Opcode(opcode + 1);
-        break;
-    case RING_BASIC_TYPE_DOUBLE:
-        opcode = RVM_Opcode(opcode + 2);
-        break;
-    case RING_BASIC_TYPE_STRING:
-        opcode = RVM_Opcode(opcode + 3);
-        break;
+    case RING_BASIC_TYPE_INT: break;
+    case RING_BASIC_TYPE_INT64: opcode = RVM_Opcode(opcode + 1); break;
+    case RING_BASIC_TYPE_DOUBLE: opcode = RVM_Opcode(opcode + 2); break;
+    case RING_BASIC_TYPE_STRING: opcode = RVM_Opcode(opcode + 3); break;
     default: break;
     }
 
@@ -1668,17 +1649,10 @@ void generate_vmcode_from_unitary_minus_expression(Package_Executer* executer,
     TypeSpecifier* type_specifier = expression->convert_type[0];
 
     switch (type_specifier->kind) {
-    case RING_BASIC_TYPE_INT:
-        opcode = RVM_CODE_MINUS_INT;
-        break;
-    case RING_BASIC_TYPE_INT64:
-        opcode = RVM_CODE_MINUS_INT64;
-        break;
-    case RING_BASIC_TYPE_DOUBLE:
-        opcode = RVM_CODE_MINUS_DOUBLE;
-        break;
-    default:
-        break;
+    case RING_BASIC_TYPE_INT: opcode = RVM_CODE_MINUS_INT; break;
+    case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_MINUS_INT64; break;
+    case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_MINUS_DOUBLE; break;
+    default: break;
     }
 
 
@@ -2037,7 +2011,6 @@ void generate_vmcode_from_cast_expression(Package_Executer* executer,
     }
 
     generate_vmcode_from_expression(executer, cast_expression->operand, opcode_buffer);
-    // RVM_Opcode opcode = RVM_CODE_UNKNOW;
 
     // FIXME: derive type
     switch (cast_expression->type_specifier->kind) {
@@ -2078,7 +2051,6 @@ void generate_vmcode_from_cast_expression(Package_Executer* executer,
     default:
         break;
     }
-    // generate_vmcode(executer, opcode_buffer, opcode, 0);
 }
 
 /*
@@ -2394,22 +2366,18 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
     assert(new_array_expression->type_specifier->kind == RING_BASIC_TYPE_ARRAY);
     assert(new_array_expression->type_specifier->u.array_t->sub != nullptr);
 
+    // 当前 new的时候，dimension 当前只能是1
     // TODO: 继续支持多维数组
-    // dimension 当前只能是1
     unsigned int dimension = new_array_expression->dimension_expression->dimension;
 
     // 将每个维度的size push stack
     SubDimensionExpression* pos = new_array_expression->dimension_expression->dimension_list;
     for (unsigned int i = 0; i < dimension; i++, pos = pos->next) {
-        // generate_vmcode(executer, opcode_buffer,
-        //                 RVM_CODE_PUSH_INT_2BYTE, pos->num,
-        //                 new_array_expression->line_number);
         generate_vmcode_from_expression(executer, pos->num_expression, opcode_buffer);
     }
 
     // 将维度 push stack 中
 
-    // unsigned int size = new_array_expression->dimension_expression->dimension_list->num;
     TypeSpecifier*   sub_type_specifier = new_array_expression->type_specifier->u.array_t->sub;
 
     ClassDefinition* class_definition   = nullptr;
@@ -2428,7 +2396,10 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
         class_definition = sub_type_specifier->u.class_t->class_definition;
         operand          = (dimension << 8) | (class_definition->class_index);
         break;
-    default: ring_error_report("error: new array only support bool[] int[] int64[] double[] string[] class[]\n");
+    default:
+        // TODO: 编译报错
+        ring_error_report("error: new array only support bool[] int[] int64[] double[] string[] class[]\n");
+        break;
     }
 
     generate_vmcode(executer, opcode_buffer, opcode, operand, new_array_expression->line_number);
@@ -2516,7 +2487,10 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
             class_definition = sub_type_specifier->u.class_t->class_definition;
             operand          = (class_definition->class_index << 16) | size;
             break;
-        default: ring_error_report("error: array literal expression not support bool[] int[] double[] string[] <class>[]\n"); break;
+        default:
+            // TODO: 编译报错
+            ring_error_report("error: array literal expression not support bool[] int[] double[] string[] <class>[]\n");
+            break;
         }
         generate_vmcode(executer, opcode_buffer, opcode, operand, array_literal_expression->line_number);
 
@@ -2559,7 +2533,6 @@ void generate_vmcode_from_array_index_expression(Package_Executer*     executer,
     generate_vmcode(executer, opcode_buffer, opcode, declaration->variable_index, array_index_expression->line_number);
 
     // push index-expression to runtime_stack
-    // generate_vmcode_from_expression(executer, index, opcode_buffer, 0);
 
     SubDimensionExpression* pos_index = array_index_expression->index_expression->dimension_list;
     for (unsigned int i = 0; i < declaration->type_specifier->u.array_t->dimension - 1 && pos_index != nullptr; i++, pos_index = pos_index->next) {
@@ -2593,7 +2566,7 @@ void generate_vmcode(Package_Executer* executer,
                      unsigned int      line_number) {
 
     debug_generate_info_with_darkgreen("\t");
-    // TODO: 这里可能会有少量的空间浪费，当前阶段暂不考虑
+    // 这里可能会有少量的空间浪费，当前阶段暂不考虑
     if (opcode_buffer->code_capacity <= opcode_buffer->code_size + 3) {
         size_t old_alloc_size = opcode_buffer->code_capacity * sizeof(RVM_Byte);
         opcode_buffer->code_capacity += 4096;
@@ -2605,11 +2578,13 @@ void generate_vmcode(Package_Executer* executer,
         ring_error_report("error: invalid opcode %d in generate\n", opcode);
     }
 
-    RVM_Opcode_Info opcode_info                          = RVM_Opcode_Infos[opcode];
-    unsigned int    start_pc                             = opcode_buffer->code_size;
+    RVM_Opcode_Info opcode_info = RVM_Opcode_Infos[opcode];
+    unsigned int    start_pc    = opcode_buffer->code_size;
 
-    opcode_buffer->code_list[opcode_buffer->code_size++] = opcode; // 操作码
+    // set opcode
+    opcode_buffer->code_list[opcode_buffer->code_size++] = opcode;
 
+    // set operand
     switch (opcode_info.operand_type) {
     case OPCODE_OPERAND_TYPE_0BYTE:
         break;
@@ -2633,8 +2608,9 @@ void generate_vmcode(Package_Executer* executer,
     default: break;
     }
 
-    if (line_number)
+    if (line_number) {
         add_code_line_map(opcode_buffer, line_number, start_pc, opcode_buffer->code_size - start_pc);
+    }
 }
 
 int constant_pool_grow(Package_Executer* executer, unsigned int growth_size) {
@@ -2656,8 +2632,8 @@ int constant_pool_grow(Package_Executer* executer, unsigned int growth_size) {
 
 int constant_pool_add_int(Package_Executer* executer, int int_literal) {
     debug_generate_info_with_darkgreen("\t");
-    int index                                       = constant_pool_grow(executer, 1);
 
+    int index                                       = constant_pool_grow(executer, 1);
     executer->constant_pool_list[index].type        = CONSTANTPOOL_TYPE_INT;
     executer->constant_pool_list[index].u.int_value = int_literal;
     return index;
@@ -2665,8 +2641,8 @@ int constant_pool_add_int(Package_Executer* executer, int int_literal) {
 
 int constant_pool_add_int64(Package_Executer* executer, long long int64_literal) {
     debug_generate_info_with_darkgreen("\t");
-    int index                                         = constant_pool_grow(executer, 1);
 
+    int index                                         = constant_pool_grow(executer, 1);
     executer->constant_pool_list[index].type          = CONSTANTPOOL_TYPE_INT64;
     executer->constant_pool_list[index].u.int64_value = int64_literal;
     return index;
@@ -2674,8 +2650,8 @@ int constant_pool_add_int64(Package_Executer* executer, long long int64_literal)
 
 int constant_pool_add_double(Package_Executer* executer, double double_literal) {
     debug_generate_info_with_darkgreen("\t");
-    int index                                          = constant_pool_grow(executer, 1);
 
+    int index                                          = constant_pool_grow(executer, 1);
     executer->constant_pool_list[index].type           = CONSTANTPOOL_TYPE_DOUBLE;
     executer->constant_pool_list[index].u.double_value = double_literal;
     return index;
@@ -2683,8 +2659,8 @@ int constant_pool_add_double(Package_Executer* executer, double double_literal) 
 
 int constant_pool_add_string(Package_Executer* executer, const char* string_literal) {
     debug_generate_info_with_darkgreen("\t");
-    int index                                          = constant_pool_grow(executer, 1);
 
+    int index                                          = constant_pool_grow(executer, 1);
     executer->constant_pool_list[index].type           = CONSTANTPOOL_TYPE_STRING;
     executer->constant_pool_list[index].u.string_value = string_literal;
     return index;
@@ -2692,8 +2668,8 @@ int constant_pool_add_string(Package_Executer* executer, const char* string_lite
 
 int constant_pool_add_closure(Package_Executer* executer, RVM_Function* func) {
     debug_generate_info_with_darkgreen("\t");
-    int index                                                  = constant_pool_grow(executer, 1);
 
+    int index                                                  = constant_pool_grow(executer, 1);
     executer->constant_pool_list[index].type                   = CONSTANTPOOL_TYPE_CLOSURE;
     executer->constant_pool_list[index].u.anonymous_func_value = func;
     return index;
@@ -2702,8 +2678,8 @@ int constant_pool_add_closure(Package_Executer* executer, RVM_Function* func) {
 
 unsigned int opcode_buffer_get_label(RVM_OpcodeBuffer* opcode_buffer) {
     debug_generate_info_with_darkgreen("\t");
-    unsigned int old_index = opcode_buffer->lable_list.size();
 
+    unsigned int old_index = opcode_buffer->lable_list.size();
     opcode_buffer->lable_list.push_back(RVM_LabelTable());
 
     return old_index;
@@ -2755,23 +2731,11 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
 
 
         switch (opcode_info.operand_type) {
-        case OPCODE_OPERAND_TYPE_0BYTE:
-            i++;
-            break;
-
-        case OPCODE_OPERAND_TYPE_1BYTE_A:
-            i += 2;
-            break;
-
+        case OPCODE_OPERAND_TYPE_0BYTE: i++; break;
+        case OPCODE_OPERAND_TYPE_1BYTE_A: i += 2; break;
         case OPCODE_OPERAND_TYPE_2BYTE_As:
-        case OPCODE_OPERAND_TYPE_2BYTE_AB:
-            i += 3;
-            break;
-
-        case OPCODE_OPERAND_TYPE_3BYTE_ABs:
-            i += 4;
-            break;
-
+        case OPCODE_OPERAND_TYPE_2BYTE_AB: i += 3; break;
+        case OPCODE_OPERAND_TYPE_3BYTE_ABs: i += 4; break;
         default:
             ring_error_report("opcode_buffer_fix_label(opcode is valid:%d)\n", opcode);
             break;
