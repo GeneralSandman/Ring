@@ -1171,7 +1171,7 @@ std::string format_rvm_type_specifier(Package_Executer*  package_executer,
         return_s = strings_join(return_list_s, ", ");
 
         //
-        str = sprintf_string("function(%s) -> (%s)", parameter_s.c_str(), return_s.c_str());
+        str = sprintf_string("fn(%s) -> (%s)", parameter_s.c_str(), return_s.c_str());
     } break;
     default:
         str = ".unknow";
@@ -1443,7 +1443,7 @@ std::string formate_closure_type(Package_Executer* package_executer,
 
 
     //
-    result = sprintf_string("function(%s) -> (%s)", parameter_s.c_str(), return_s.c_str());
+    result = sprintf_string("fn(%s) -> (%s)", parameter_s.c_str(), return_s.c_str());
 
     return result;
 }
