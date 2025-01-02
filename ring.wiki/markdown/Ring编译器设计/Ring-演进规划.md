@@ -237,6 +237,15 @@ class-object  ✅
 -----------------------------
 
 
+## 2025-01-06周
+
+
+### A. Proposal: 设计并实现增量式垃圾回收机制
+
+
+-----------------------------
+
+
 ## 2024下半年发展大规划
 
 完善Ring的基本功能, 争取在2024-12-31之前发布第一个release版本.
@@ -334,7 +343,6 @@ e.g. 该测试用例不应该通过
 ```
 typedef fn(bool, bool) -> (string) FuncType;
 
-@main
 fn main() {
 	var FuncType local_func_var;
 
@@ -352,7 +360,7 @@ fn main() {
 |       };
 |  ^......
 |
-|Err: assignment mismatch: expect (function(bool,bool)->(string)) but provided (function(bool,int)->(string)); E:200018.
+|Err: assignment mismatch: expect (fn(bool,bool)->(string)) but provided (fn(bool,int)->(string)); E:200018.
 |RingDebug: fix_ast.cpp:1013
 ```
 
@@ -388,7 +396,7 @@ fn join(var string[] a, var string sep) -> (string) {
 
 
 
-### M. Fix: 编译报错，变量定义重复
+### M. Fix: 编译报错，变量定义重复 ✅
 
 ```
 fn (var int a) {
@@ -397,7 +405,7 @@ fn (var int a) {
 ```
 
 
-### N. Fix: 
+### N. Fix: 报错提示时，能够更精确的提示出 array的维度和元素的类型 ✅
 
 ```
 
@@ -423,6 +431,16 @@ test();
 
  
 应该 `array` 的报错更加详细
+
+改进之后：
+
+```
+./test/998-error-report/function-call-check-02.ring:28:0: 
+|       test();
+| ^......
+|
+|Err: function test() requires (int[!1]) arguments, but () was provided; E:300002
+```
 
 
 ### Q. Optimize: 如何统一的进行 function-call method-call 的函数参数检查 ✅
@@ -824,7 +842,6 @@ fn func_(var int... array_value) {
     fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
 }
 
-@main
 fn main() {
     launch func_(1, 2, 3);
 }
@@ -847,7 +864,7 @@ fn main() {
 
 
 
-### C. Feature: 完善函数调用/方法调用 的语义检查 TODO:
+### C. Feature: 完善函数调用/方法调用 的语义检查  ✅ 
 
 
 1. `func_();` 函数调用/方法调用：需要强制检查func_函数的参数类型是否一致
@@ -856,7 +873,7 @@ fn main() {
 
 
 
-### C. Test: 系统化测试 Coroutine相关 TODO:
+### C. Test: 系统化测试 Coroutine相关  ✅ 
 
 
 
@@ -940,7 +957,7 @@ Job::printInfo() 为非静态方法
 当起Ring还不是 类中的静态field/method，可以后续扩展
 
 
-#### 2. 定义函数 function 关键字精简 为fn TODO:
+#### 2. 定义函数 function 关键字精简 为fn  ✅ 
 
 这样的优点是，在定义匿名函数的时候比较迅速：
 
@@ -1351,7 +1368,6 @@ typedef class File {
     field int fd;
 }
 
-@main
 fn main() {
     var int fileid = io::open("/Users/zhenhuli/Desktop/Ring/test/065-std-package-io/000.ring", "");
 
@@ -1865,7 +1881,6 @@ global {
 	var int global_int = 1;
 }
 
-@main
 fn main() {
 }
 
@@ -4891,7 +4906,6 @@ fn test(var int... int_value) {
 }
 
 
-@main
 fn main() {
     var int int_value_0;
     var int int_value_1;
@@ -5243,8 +5257,7 @@ global {
 - 理解：Diksam 在生成字节码的时候 同时记录与源代码之间的关系 LineNumber✅
 - 实现：Ring实现记录字节码与源代码的映射关系✅
 - 重构：简单重构一下代码✅
-- 实现：main函数 @main
-- 理解：Diksam 是如何实现源代码切分的，也就是require ✅
+- 实现：main函数 - 理解：Diksam 是如何实现源代码切分的，也就是require ✅
 - 设计：Ring 多源代码输入的编译逻辑 ✅
 - 实现：Ring 的package定义 和 import 导包 ✅
 - 设计：Ring 多源代码输入的编译逻辑

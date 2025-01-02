@@ -191,7 +191,6 @@ yield any; // 这里还没设计好，因为Ring是一个静态类型系统，�
 
 
 ```ring
-@main
 fn main() {
     
     // create
@@ -243,7 +242,6 @@ fn job() {
 }
 
 
-@main
 fn main() {
     var int64 co_id;
 
