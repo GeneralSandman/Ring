@@ -24,7 +24,6 @@ global {
 }
 
 
-@main
 fn main() {
 	var FuncType local_func_var;
 

@@ -7,7 +7,6 @@ import {
 
 
 // TestDetail: 测试函数返回 double 数组类型
-@main
 fn main() {
 	fmt::println(return_double_array_1_0());
 	fmt::println(return_double_array_1_1());

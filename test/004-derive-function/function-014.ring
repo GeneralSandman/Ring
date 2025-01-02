@@ -19,7 +19,7 @@ fn add_two(var int int_1, var int int_2) -> (int) {
 
 
 
-@main
+
 fn main() {
 
 	var int int_value_1;

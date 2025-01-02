@@ -17,7 +17,6 @@ typedef class Job1 {
 
 // TestDetail: derive函数传递class数组类型参数
 // TestDetail: 分别传递1-8个class数组类型参数
-@main
 fn main() {
 
 	var Job1[] local_job1_value_0;

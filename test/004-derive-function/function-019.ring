@@ -16,7 +16,7 @@ fn get_level_by_score(var int score) -> (int) {
 	}
 }
 
-@main
+
 fn main() {
 
 	var int sum;

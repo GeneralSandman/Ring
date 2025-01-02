@@ -9,7 +9,6 @@ import {
 global {
 }
 
-@main
 fn main() {
 	var bool[] bool_array;
 	var int[]  int_array;

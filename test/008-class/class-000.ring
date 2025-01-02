@@ -19,7 +19,6 @@ global {
     var Job job_1;
 }
 
-@main
 fn main() {
 
 

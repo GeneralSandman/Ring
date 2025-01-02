@@ -26,7 +26,7 @@ fn test(var int int_value_1, var int int_value_2) -> (int,int,int,int) {
     return int_value_1, int_value_2, int_value_3, int_value_4;
 }
 
-@main
+
 fn main() {
     var int int_value_1;
     var int int_value_2;

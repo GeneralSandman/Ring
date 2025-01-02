@@ -28,7 +28,7 @@ fn add(var int parameter_1, var int parameter_2) -> (int) {
 }
 
 
-@main
+
 fn main() {
 
 	var int result;

@@ -9,7 +9,6 @@ global {
 	
 }
 
-@main
 fn main() {
 	var int  local_int_value_1;
 	

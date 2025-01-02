@@ -78,7 +78,7 @@ fn test(var int parameter_1, var int parameter_2, var int parameter_3, var int p
 }
 
 
-@main
+
 fn main() {
 
 	var int result;

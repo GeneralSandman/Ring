@@ -11,7 +11,6 @@ global {
   var int[] int_array;
 }
 
-@main
 fn main() {
 
   int_array = new int[10];

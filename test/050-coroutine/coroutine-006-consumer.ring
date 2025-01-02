@@ -51,7 +51,6 @@ fn consumer_2() {
 	}
 }
 
-@main
 fn main() {
 	var int64 consumer_1_id;
 	var int64 consumer_2_id;

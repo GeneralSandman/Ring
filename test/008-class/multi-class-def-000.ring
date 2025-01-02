@@ -32,7 +32,6 @@ global {
     var Job3 global_job3_value_0;
 }
 
-@main
 fn main() {
 
 

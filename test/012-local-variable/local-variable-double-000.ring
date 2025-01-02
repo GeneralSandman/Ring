@@ -9,7 +9,6 @@ global {
 	
 }
 
-@main
 fn main() {
 	var double local_double_value_1;
 	

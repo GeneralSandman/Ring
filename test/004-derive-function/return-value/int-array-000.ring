@@ -7,7 +7,6 @@ import {
 
 
 // TestDetail: 测试函数返回 int 数组类型
-@main
 fn main() {
 	fmt::println(return_int_array_1_0());
 	fmt::println(return_int_array_1_1());

@@ -11,7 +11,6 @@ global {
   var int global_int_value_0;
 }
 
-@main
 fn main() {
 
     fmt::println_string("test cast 1 ------------------------");

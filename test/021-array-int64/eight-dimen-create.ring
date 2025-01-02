@@ -9,7 +9,6 @@ global {
     var int64[!8] global_int64_array_0;
 }
 
-@main
 fn main() {
     var int a = 8;
     var int b = 7;

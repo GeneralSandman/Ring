@@ -52,7 +52,6 @@ fn consumer_2() {
 	}
 }
 
-@main
 fn main() {
 
 	consumer_1_id = launch consumer_1();

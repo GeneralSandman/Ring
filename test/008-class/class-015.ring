@@ -30,7 +30,6 @@ global {
 // TestDetail:     local_job_value.printInfo();
 // TestDetail: }
 // TestDetail: ```
-@main
 fn main() {
     global_job_array_0 = Job[]{
         Job{

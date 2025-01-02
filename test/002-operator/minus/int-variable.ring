@@ -5,7 +5,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 	var int local_int_value_0;
 

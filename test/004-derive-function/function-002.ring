@@ -25,7 +25,7 @@ fn func_use_local_variable() {
 
 // --------------
 
-@main
+
 fn main() {
 
     int_value_global = 2;

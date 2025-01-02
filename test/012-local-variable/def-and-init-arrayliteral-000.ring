@@ -21,7 +21,6 @@ typedef class Job1 {
 // TestDetail: 测试 bool[]/int[]/int64[]/double[]/string[]/class[] 类型变量的定义和初始化
 // TestDetail: 均为局部变量
 // TestDetail: 数组变量 通过数组常量初始化
-@main
 fn main() {
 	var bool[]   local_bool_array_0   = bool[]{true, false, true, false};
 	var int[]    local_int_array_0    = int[]{1, 2, 3, 4};

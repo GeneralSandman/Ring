@@ -17,7 +17,6 @@ import {
 // TestDetail: 匿名函数
 // TestDetail: 生命匿名函数直接调用
 // TestDetail: Immediately invoked function expression
-@main
 fn main() {
 
 	fn() {

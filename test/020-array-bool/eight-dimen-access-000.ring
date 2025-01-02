@@ -9,7 +9,6 @@ global {
     var bool[,,,,,,,] global_bool_array_0;
 }
 
-@main
 fn main() {
     global_bool_array_0 = new bool[1,2,3,4,5,6,7,8];
 

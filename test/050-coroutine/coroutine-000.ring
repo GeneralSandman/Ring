@@ -24,7 +24,6 @@ fn job_action2() {
 	fmt::println("job_action2::2");
 }
 
-@main
 fn main() {
 
 

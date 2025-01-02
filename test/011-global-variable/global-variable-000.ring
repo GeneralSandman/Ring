@@ -13,7 +13,6 @@ global {
 	var string global_string_value_1;
 }
 
-@main
 fn main() {
 
 	fmt::println_string("test case 1");

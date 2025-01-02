@@ -9,7 +9,6 @@ global {
   var double[] global_double_array_0;
 }
 
-@main
 fn main() {
   var double double_value;
 

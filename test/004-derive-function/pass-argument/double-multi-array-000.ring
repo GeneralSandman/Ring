@@ -8,7 +8,6 @@ import {
 
 // TestDetail: derive函数传递double数组类型参数
 // TestDetail: 分别传递1-8个double数组类型参数
-@main
 fn main() {
 
 	pass_1_double_array_1(double[]{1.0});

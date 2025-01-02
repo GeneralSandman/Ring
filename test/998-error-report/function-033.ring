@@ -55,7 +55,6 @@ fn func_return_4() -> (bool, int, string) {
 
 
 // TestDetail: 语义检查 return语句 与 function定义的返回值 不匹配
-@main
 fn main() {
     var bool   local_bool_value_0;
     var int    local_int_value_0;

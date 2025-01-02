@@ -5,7 +5,6 @@ import {
 	strings;
 }
 
-@main
 fn main() {
 	
 	fmt::println(strings::join(string[]{}, ","));

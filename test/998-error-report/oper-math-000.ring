@@ -18,7 +18,6 @@ typedef class Job {
   }
 
 //TestDetail: 编译错误
-@main
 fn main() {
       // func_0() + func_1(); // 编译报错
       // func_1() + func_1(); // 正常

@@ -27,7 +27,6 @@ global {
 
 // TestDetail: 测试 fmt::printf 函数
 
-@main
 fn main() {
 	fmt::printf("{} {} {} {}\n", true, 1, 1.1, "hello");
 	fmt::printf("\{} {} {} {}\n", true, 1, 1.1, "hello");

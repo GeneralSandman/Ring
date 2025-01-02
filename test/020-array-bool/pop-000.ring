@@ -11,7 +11,6 @@ global {
   var bool global_bool_value_0;
 }
 
-@main
 fn main() {
 
     fmt::println_string("test cast 1 ------------------------");

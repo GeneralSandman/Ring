@@ -15,7 +15,6 @@ import {
 
 // TestDetail: 测试多行字符串
 
-@main
 fn main() {
     var string string_value;
 

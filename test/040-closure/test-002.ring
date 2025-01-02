@@ -52,7 +52,6 @@ fn test1() -> (FuncType, FuncType) {
 }
 
 
-@main
 fn main() {
 	var FuncType local_func_var_0, local_func_var_1;
 	

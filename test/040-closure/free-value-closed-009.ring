@@ -16,7 +16,6 @@ typedef fn() FuncType;
 
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸
-@main
 fn main() {
 	var FuncType func_var;
 

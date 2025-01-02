@@ -11,7 +11,6 @@ import {
 
 
 // 测试 time package time() / sleep() 函数
-@main
 fn main() {
 	var int64 timestamp_0;
 	var int64 timestamp_1;

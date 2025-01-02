@@ -13,7 +13,6 @@ global {
 // TestDetail: 测试多维数组的初始化
 // TestDetail: 二维数组的初始化
 
-@main
 fn main() {
     global_bool_array_0 =  bool[,]{
         bool[]{true, false, true, false, true, false, true, false, true, false},

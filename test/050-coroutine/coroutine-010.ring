@@ -64,7 +64,6 @@ fn job_action2() {
 	fmt::printf("            local_job1_value_0:   {}\n", local_job1_value_0);
 	fmt::printf("            job_action2::2\n");
 }
-@main
 fn main() {
 
 	var int64 co_id;

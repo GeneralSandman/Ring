@@ -13,7 +13,6 @@ import {
     vm;
 }
 
-@main
 fn main() {
 	var bool   bool_value;
     var string string_value;

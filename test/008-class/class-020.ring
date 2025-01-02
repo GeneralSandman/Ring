@@ -34,7 +34,6 @@ global {
 
 // TestDetail: 交换两个class-object的变量数值, 通过多项赋值直接操作, 不需要中间变量
 // TestDetail: job_0, job_1 = job_1, job_0;
-@main
 fn main() {
 
     global_job_0 = Job{

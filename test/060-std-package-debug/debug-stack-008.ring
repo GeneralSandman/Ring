@@ -53,7 +53,7 @@ global {
 
 // TestDetail: 测试 debug::print_call_stack()
 // TestDetail: 函数/method 多次调用
-@main
+
 fn main() {
 
 	

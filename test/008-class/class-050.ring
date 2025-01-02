@@ -71,7 +71,6 @@ global {
 // TestDetail:     job_1.Job2.Job3.printInfo();
 // TestDetail:     job_1.Job2.Job3.Job4.printInfo();
 // TestDetail: ```
-@main
 fn main() {
 
     // 测试 class field的默认值

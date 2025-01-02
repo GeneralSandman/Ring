@@ -27,7 +27,6 @@ typedef fn(int, int, int) -> (int) FuncType7;
 typedef fn(bool, int, int64, double, string) -> (bool, int, int64, double, string) FuncType8;
 
 
-@main
 fn main() {
 	var FuncType0  local_func_var0;
 	var FuncType1  local_func_var1;

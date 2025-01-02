@@ -7,7 +7,6 @@ import {
 
 
 // TestDetail: 测试函数返回 string 数组类型
-@main
 fn main() {
 	fmt::println(return_string_array_1_0());
 	fmt::println(return_string_array_1_1());

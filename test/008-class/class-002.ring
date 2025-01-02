@@ -51,7 +51,6 @@ global {
     var Job job_0;
 }
 
-@main
 fn main() {
 
     // fmt::println_bool(job_0.Running);

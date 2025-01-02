@@ -20,7 +20,6 @@ typedef class Job1 {
 
 // TestDetail: 测试 bool/int/int64/double/string/class 类型变量的定义和初始化
 // TestDetail: 均为局部变量
-@main
 fn main() {
 	var bool   local_bool_value_0   = true;
 	var int    local_int_value_0    = 123;

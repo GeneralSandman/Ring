@@ -16,7 +16,6 @@ import {
 
 typedef fn(bool, bool) -> (string) FuncType;
 
-@main
 fn main() {
 	var FuncType local_func_var;
 

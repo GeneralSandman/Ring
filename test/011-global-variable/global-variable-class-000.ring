@@ -19,7 +19,6 @@ global {
     var Job global_value_job_0;
 }
 
-@main
 fn main() {
 
     fmt::println_string("test case 1");

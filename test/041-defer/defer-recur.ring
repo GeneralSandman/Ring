@@ -13,7 +13,6 @@ import {
 }
 
 
-@main
 fn main() {
 
 	fmt::printf("main begin\n");

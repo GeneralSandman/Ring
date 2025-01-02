@@ -10,7 +10,6 @@ global {
 
 // TestDetail:测试可变参数, 实现一个 sum函数
 // TestDetail:可变参数为 int... 类型
-@main
 fn main() {
     var int64 sum;
 

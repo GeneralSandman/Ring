@@ -17,7 +17,6 @@ global {
 // TestDetail: 自增运算符应用到 class中的field
 // TestDetail: e.g. 
 
-@main
 fn main() {
 
     global_int_array_0 = new int[10];

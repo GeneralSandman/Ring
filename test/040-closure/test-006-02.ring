@@ -39,7 +39,6 @@ fn return_closure() -> (functype_2) {
 }
 
 
-@main
 fn main() {
 	var functype_2 tmp_2;
 	fmt::println("\nmain::1");

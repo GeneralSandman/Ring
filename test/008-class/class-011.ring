@@ -49,7 +49,6 @@ global {
 // TestDetail: class有4级嵌套
 // TestDetail: 测试对象嵌套的初始化
 
-@main
 fn main() {
 
     // 测试 class field的默认值

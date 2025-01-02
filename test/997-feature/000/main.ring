@@ -10,7 +10,6 @@ import {
 	fmt;
 }
 
-@main
 fn main() {
 	var Job1 local_job1_value_0;
 	local_job1_value_0.printInfo();

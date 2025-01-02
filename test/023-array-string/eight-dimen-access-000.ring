@@ -9,7 +9,6 @@ global {
     var string[,,,,,,,] global_string_array_0;
 }
 
-@main
 fn main() {
     global_string_array_0 = new string[1,2,3,4,5,6,7,8];
 

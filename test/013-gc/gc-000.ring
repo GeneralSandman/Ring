@@ -11,7 +11,6 @@ global {
   var int[] global_int_array_0;
 }
 
-@main
 fn main() {
   global_int_array_0 = return_int_array();
 

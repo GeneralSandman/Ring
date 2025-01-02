@@ -6,7 +6,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 
 	fmt::printf("--------\n");

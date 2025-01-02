@@ -11,7 +11,6 @@ global {
   var double[] double_array;
 }
 
-@main
 fn main() {
 
   double_array = new double[10];

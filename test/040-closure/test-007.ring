@@ -15,7 +15,6 @@ import {
 typedef fn()-> (int) FuncType;
 
 
-@main
 fn main() {
 	var FuncType tmp0;
 

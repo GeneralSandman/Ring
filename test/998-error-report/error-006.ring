@@ -11,7 +11,6 @@ import {
 	fmt;
 }
 
-@main
 fn main() {
 	var bool self;
 }

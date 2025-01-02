@@ -5,7 +5,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 
 	fmt::println("test 1 ----------");

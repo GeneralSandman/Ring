@@ -22,7 +22,6 @@ typedef class Job {
 
 // TestDetail: 通过 字符串比较的方式来比较获取 typeof
 // TestDetail: reflect::typeof(bool_value) == "bool"
-@main
 fn main() {
 	var bool   bool_value;
 	var int    int_value;

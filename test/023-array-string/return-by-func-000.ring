@@ -9,7 +9,6 @@ global {
   var string[] global_string_array_0;
 }
 
-@main
 fn main() {
 	global_string_array_0 = func_return_string_array();
 	

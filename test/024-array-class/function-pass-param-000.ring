@@ -48,7 +48,6 @@ fn test_func(var Job1[,] local_job1_array_0) {
 
 
 // TestDetail: 测试通过函数参数传递多维数组
-@main
 fn main() {
 	global_job1_array_0 = Job1[,]{
 		Job1[]{

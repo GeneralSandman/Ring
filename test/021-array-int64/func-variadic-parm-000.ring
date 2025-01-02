@@ -10,7 +10,6 @@ global {
 
 // TestDetail:测试可变参数
 // TestDetail:可变参数为 int... 类型
-@main
 fn main() {
     fmt::println_string("test case 1--------");
     func_variadic_parameter(0L);

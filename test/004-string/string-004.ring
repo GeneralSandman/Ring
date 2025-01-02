@@ -15,7 +15,6 @@ import {
 
 // TestDetail: 测试转义字符
 
-@main
 fn main() {
     var string string_value;
 

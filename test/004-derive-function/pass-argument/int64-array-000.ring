@@ -8,7 +8,6 @@ import {
 
 // TestDetail: derive函数传递int64数组类型参数
 // TestDetail: 分别传递1-8个int64数组类型参数
-@main
 fn main() {
 
 	pass_1_int64_array(int64[]{0L});

@@ -18,7 +18,7 @@ fn test(var int int_value_1, var int int_value_2, var int int_value_3) -> (int) 
     return result;
 }
 
-@main
+
 fn main() {
 
     var int int_value;

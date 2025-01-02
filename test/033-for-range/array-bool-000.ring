@@ -9,7 +9,6 @@ global {
 
 }
 
-@main
 fn main() {
 	var bool[] local_bool_array_0 = bool[]{true, false, false, 
 		true, false, false, 

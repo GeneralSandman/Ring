@@ -18,7 +18,7 @@ fn test(var int... int_value_list) {
 
 
 // TestDetail: 测试一下函数的可变参数
-@main
+
 fn main() {
     var int int_value_0;
     var int int_value_1;

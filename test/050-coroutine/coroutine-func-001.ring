@@ -22,7 +22,6 @@ fn job_action_0(var bool bool_arg) {
 
 
 // TestDetail: 测试 launch 一个函数，函数有参数，没有返回值
-@main
 fn main() {
 	var int64 co_id;
 

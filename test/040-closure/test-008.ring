@@ -18,7 +18,6 @@ typedef fn() -> (string) functype_1;
 
 // TestDetail: 匿名函数
 // TestDetail: 不需要定义匿名函数变量, 可以直接通过函数参数传递
-@main
 fn main() {
 
 	pass_closure(fn() {

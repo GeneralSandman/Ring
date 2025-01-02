@@ -34,7 +34,6 @@ global {
 
 // TestDetail: derive函数传递class数组类型参数
 // TestDetail: 分别传递1-8个class数组类型参数
-@main
 fn main() {
 
 	fmt::println(pass_1_job1_array_1());

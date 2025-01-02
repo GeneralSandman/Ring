@@ -15,7 +15,6 @@ global {
   var int heap_size;
 }
 
-@main
 fn main() {
     fmt::println_string("before invoke os::exit");
     os::exit(0);

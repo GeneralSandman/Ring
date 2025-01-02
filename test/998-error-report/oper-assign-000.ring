@@ -38,7 +38,6 @@ fn test4() -> (Job[]) {
 }
 
 
-@main
 fn main() {
 	var int[] int_array = new int[0];
 

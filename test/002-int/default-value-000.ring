@@ -12,7 +12,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 	var int int_value;
 	fmt::println_int(int_value);

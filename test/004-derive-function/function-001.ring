@@ -53,7 +53,7 @@ fn doit6() {
     fmt::println_string("function doit6 END");
 }
 
-@main
+
 fn main() {
 
     doit6();

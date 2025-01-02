@@ -16,7 +16,6 @@ import {
 typedef fn(string) FuncType;
 
 
-@main
 fn main() {
 	test();
 }

@@ -34,7 +34,6 @@ global {
 
 
 // TestDetail: 测试函数返回 job1 数组类型
-@main
 fn main() {
 	fmt::println(return_job1_array_1_0());
 	fmt::println(return_job1_array_1_1());

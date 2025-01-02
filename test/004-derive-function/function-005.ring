@@ -22,7 +22,7 @@ fn test_return_3() -> (int,int,int) {
     return 4, 5, 6;
 }
 
-@main
+
 fn main() {
     var int int_value_1;
     var int int_value_2;

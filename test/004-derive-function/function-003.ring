@@ -30,7 +30,7 @@ fn func_use_global_variable() {
 
 // --------------
 
-@main
+
 fn main() {
 
     int_value_global = 1;

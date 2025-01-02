@@ -22,7 +22,6 @@ typedef class Job {
 
 // TestDetail: 测试 class-object 的GC算法
 
-@main
 fn main() {
     /*
      * 该段代码的含义：

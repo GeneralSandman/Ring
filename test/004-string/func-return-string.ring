@@ -15,7 +15,6 @@ import {
 
 // TestDetail: 测试通过函数参数传递 string类型的参数
 // TestDetail: 通过函数返回 string类型
-@main
 fn main() {
     var string string_value;
 

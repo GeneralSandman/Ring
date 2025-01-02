@@ -52,7 +52,7 @@ global {
 
 // TestDetail: 测试 debug::print_call_stack()
 // TestDetail: method多次调用
-@main
+
 fn main() {
 	var Job    local_job_value;
 

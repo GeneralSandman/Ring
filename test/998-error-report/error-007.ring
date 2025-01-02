@@ -11,7 +11,6 @@ import {
 	fmt;
 }
 
-@main
 fn main() {
 	fmt::println("main start");
 	var int a = return_int();

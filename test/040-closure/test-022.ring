@@ -18,7 +18,6 @@ typedef fn(string...) -> (string) FuncType1;
 typedef fn(FuncType1) FuncType2;
 
 
-@main
 fn main() {
 
 	var FuncType1 func_value;

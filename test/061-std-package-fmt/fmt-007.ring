@@ -41,7 +41,6 @@ global {
 
 // TestDetail: 测试 fmt::println fmt::printf 函数
 // TestDetail:  测试 打印数组 打印ClassObject
-@main
 fn main() {
 
 

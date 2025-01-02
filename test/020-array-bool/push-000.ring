@@ -10,7 +10,6 @@ global {
   var bool[] global_bool_array_0;
 }
 
-@main
 fn main() {
 
     fmt::println_string("test cast 1 ------------------------");

@@ -25,7 +25,6 @@ fn return_int() -> (int) {
 
 }
 
-@main
 fn main() {
 	var bool bool_value;
 	var int a;

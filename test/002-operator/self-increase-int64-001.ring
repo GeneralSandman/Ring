@@ -10,7 +10,6 @@ global {
 
 }
 
-@main
 fn main() {
 
 

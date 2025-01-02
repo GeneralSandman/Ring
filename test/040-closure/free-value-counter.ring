@@ -15,7 +15,6 @@ import {
 typedef fn() -> (int64) FuncType1;
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸
-@main
 fn main() {
 
 	var FuncType1 counter0;

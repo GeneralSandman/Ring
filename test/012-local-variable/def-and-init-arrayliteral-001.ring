@@ -21,7 +21,6 @@ typedef class Job1 {
 // TestDetail: 测试 bool[!2]/int[!2]/int64[!2]/double[!2]/string[!2]/class[!2] 类型变量的定义和初始化
 // TestDetail: 均为全局变量
 // TestDetail: 数组变量 通过数组常量初始化
-@main
 fn main() {
 	var bool[!2]   local_bool_array_0   = bool[!2]{
 		bool[]{true, false, true, false},

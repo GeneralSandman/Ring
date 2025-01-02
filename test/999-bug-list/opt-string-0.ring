@@ -12,7 +12,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 	var string local_string_value_0;
 	local_string_value_0 = "123" .. "456";

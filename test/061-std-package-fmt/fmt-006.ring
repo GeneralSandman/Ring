@@ -26,7 +26,6 @@ global {
 }
 
 // TestDetail: 测试 fmt::println 函数
-@main
 fn main() {
 
 

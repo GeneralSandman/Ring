@@ -77,7 +77,6 @@ global {
 // TestDetail: class有4级嵌套
 // TestDetail: 测试方法链式调用
 
-@main
 fn main() {
 
     // 测试 class field的默认值

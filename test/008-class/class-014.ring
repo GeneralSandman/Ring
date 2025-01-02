@@ -26,7 +26,6 @@ global {
 // TestDetail: 数组元素为 class-obect
 // TestDetail: 通过索引访问数组元素并直接调用method
 // TestDetail: `global_job_array_0[i].printInfo();`
-@main
 fn main() {
     global_job_array_0 = Job[]{
         Job{

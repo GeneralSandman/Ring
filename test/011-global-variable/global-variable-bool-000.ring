@@ -9,7 +9,6 @@ global {
 	var bool global_bool_value_1;
 }
 
-@main
 fn main() {
 	
 	fmt::println_string("test case 1");

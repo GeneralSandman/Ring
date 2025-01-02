@@ -29,7 +29,6 @@ global {
 // TestDetail: global_job_array_0 = new Job[2,2];
 // TestDetail: global_job_array_0[0], global_job_array_0[1] = global_job_array_0[1], global_job_array_0[0];
 // TestDetail: ```
-@main
 fn main() {
 
     global_job_array_0 = new Job[2,2];

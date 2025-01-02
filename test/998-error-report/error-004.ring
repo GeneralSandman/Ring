@@ -13,7 +13,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 
 }

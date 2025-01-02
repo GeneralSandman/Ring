@@ -6,7 +6,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 
 	var int int_value;

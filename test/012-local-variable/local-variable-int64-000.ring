@@ -9,7 +9,6 @@ global {
 	
 }
 
-@main
 fn main() {
 	var int64  local_int64_value_1;
 	

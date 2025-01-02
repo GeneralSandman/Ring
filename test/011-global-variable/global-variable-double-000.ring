@@ -9,7 +9,6 @@ global {
 	var double global_double_value_1;
 }
 
-@main
 fn main() {
 	
 	fmt::println_string("test case 1");

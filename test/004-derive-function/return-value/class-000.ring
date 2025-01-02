@@ -15,7 +15,6 @@ typedef class Job1 {
 
 
 // TestDetail: 测试函数返回 Job1 类型
-@main
 fn main() {
 	fmt::println(return_1_job1_0());
 	fmt::println(return_1_job1_1());

@@ -35,7 +35,6 @@ fn return_closure() -> (functype_2) {
 // TestDetail: 匿名函数
 // TestDetail: 不需要定义匿名函数变量, 可以直接返回
 
-@main
 fn main() {
 	var functype_2 tmp_2;
 	fmt::println("\nmain::1");

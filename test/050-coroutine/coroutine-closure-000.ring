@@ -14,7 +14,6 @@ import {
 
 typedef fn() FuncType;
 
-@main
 fn main() {
 
 	var FuncType job_action1;

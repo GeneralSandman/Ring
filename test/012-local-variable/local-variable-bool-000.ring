@@ -9,7 +9,6 @@ global {
 	
 }
 
-@main
 fn main() {
 	var bool local_bool_value_1;
 	

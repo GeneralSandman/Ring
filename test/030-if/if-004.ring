@@ -6,7 +6,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 
 	debug::assert(2 > 1);

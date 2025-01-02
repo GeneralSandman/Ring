@@ -21,7 +21,6 @@ global {
 
 }
 
-@main
 fn main() {
     global_value_job_0.Running = true;
     global_value_job_0.JobID = 1;

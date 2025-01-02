@@ -23,7 +23,6 @@ global {
     var Job job_0;
 }
 
-@main
 fn main() {
     var bool   local_bool_value_0;
     var int    local_int_value_0;

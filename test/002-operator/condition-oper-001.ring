@@ -29,7 +29,6 @@ fn return_true() -> (bool) {
 }
 
 
-@main
 fn main() {
     var bool result;
 

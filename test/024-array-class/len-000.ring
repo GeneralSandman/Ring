@@ -15,7 +15,6 @@ global {
     var Job[] global_job_array_0;
 }
 
-@main
 fn main() {
     
 

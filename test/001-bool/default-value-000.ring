@@ -12,7 +12,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 	var bool bool_value;
 	fmt::println_bool(bool_value);

@@ -58,7 +58,6 @@ fn consumer_2(var string arg) {
 	fmt::printf("consumer_2 recv:{}\n", arg);
 }
 
-@main
 fn main() {
 	var int64 consumer_1_id;
 

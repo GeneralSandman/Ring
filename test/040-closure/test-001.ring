@@ -16,7 +16,6 @@ import {
 typedef fn() FuncType;
 
 
-@main
 fn main() {
 	var FuncType local_func_var;
 

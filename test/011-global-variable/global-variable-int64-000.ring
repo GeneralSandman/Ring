@@ -10,7 +10,6 @@ global {
 	
 }
 
-@main
 fn main() {
 	
 	fmt::println_string("test case 1");

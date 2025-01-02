@@ -28,7 +28,6 @@ fn test1(var string format, var any... any_value) {
 // TestDetail: 不能编译通过, 函数数量和类型不匹配
 // TestDetail: 
 
-@main
 fn main() {
     var Job   local_job_value_0;
 

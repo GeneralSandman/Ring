@@ -7,7 +7,6 @@ import {
 
 
 // TestDetail: 测试函数返回 bool 类型
-@main
 fn main() {
 	fmt::println(return_1_string_0());
 	fmt::println(return_1_string_1());

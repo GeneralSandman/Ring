@@ -13,7 +13,6 @@ import {
 }
 
 // minus 符号
-@main
 fn main() {
 	var bool local_bool_value_0;
 

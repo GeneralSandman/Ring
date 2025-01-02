@@ -40,7 +40,6 @@ fn consumer() {
 	}
 }
 
-@main
 fn main() {
 
 	consumerid = launch consumer();

@@ -26,7 +26,6 @@ global {
 // TestDetail: 数组的元素为 class-obect
 // TestDetail: 通过一行多项赋值一个个初始化
 // TestDetail: 多项赋值的右边全部为 class-object literal
-@main
 fn main() {
     global_job_array_0 = new Job[10];
 

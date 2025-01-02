@@ -28,7 +28,7 @@ fn func_use_local_variable_hidden_global() {
 
 // --------------
 
-@main
+
 fn main() {
 
     int_value_global = 1;

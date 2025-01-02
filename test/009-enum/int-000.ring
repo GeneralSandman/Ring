@@ -13,7 +13,6 @@ enum int AccessMode {
     // O_ACCMODE = 3;
 }
 
-@main
 fn main() {
 	fmt::println(AccessMode::O_RDONLY);
 }

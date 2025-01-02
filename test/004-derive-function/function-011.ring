@@ -29,7 +29,7 @@ fn test_1(var int int_value_1, var int int_value_2) -> (int, int) {
 
 }
 
-@main
+
 fn main() {
     debug::assert(int_value_global_1 == 0);
     debug::assert(int_value_global_2 == 0);

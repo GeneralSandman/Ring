@@ -34,7 +34,6 @@ global {
 }
 
 
-@main
 fn main() {
 
 

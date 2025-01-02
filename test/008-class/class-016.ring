@@ -26,7 +26,6 @@ global {
 // TestDetail: 数组的元素为 class-obect
 // TestDetail: 一个个初始化
 // TestDetail: 并通过一行多项赋值 翻转
-@main
 fn main() {
     global_job_array_0 = new Job[10];
 

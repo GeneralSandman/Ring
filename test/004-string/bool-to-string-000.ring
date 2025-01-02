@@ -13,7 +13,6 @@ import {
     vm;
 }
 
-@main
 fn main() {
     var string string_value;
 

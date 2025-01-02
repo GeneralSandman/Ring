@@ -34,7 +34,6 @@ global {
     
 }
 
-@main
 fn main() {
     var Job job_0;
     var Job job_1;

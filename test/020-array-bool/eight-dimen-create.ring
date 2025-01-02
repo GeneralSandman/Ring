@@ -9,7 +9,6 @@ global {
     var bool[,,,,,,,] global_bool_array_0;
 }
 
-@main
 fn main() {
     var int a = 8;
     var int b = 7;

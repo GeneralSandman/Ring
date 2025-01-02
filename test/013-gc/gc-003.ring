@@ -11,7 +11,6 @@ global {
   var string global_string_value_0;
 }
 
-@main
 fn main(var string[] args) {
     /*
      * 该段代码的含义：

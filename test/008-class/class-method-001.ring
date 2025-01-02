@@ -36,7 +36,6 @@ global {
     
 }
 
-@main
 fn main() {
 
     fmt::println_string("\ntest case 1");

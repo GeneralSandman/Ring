@@ -45,7 +45,6 @@ fn job_action4() {
 	fmt::println("                job_action4::2");
 }
 
-@main
 fn main() {
 
 	var int64 co_id;

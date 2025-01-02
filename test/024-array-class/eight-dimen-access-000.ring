@@ -18,7 +18,6 @@ global {
 
 // TestDetail: 测试八维数组，数组元素为class
 
-@main
 fn main() {
     global_job_array_0 = new Job[1,2,3,4,5,6,7,8];
 

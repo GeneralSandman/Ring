@@ -14,7 +14,6 @@ typedef class File {
     var int fd;
 }
 
-@main
 fn main() {
     var string file_name = "./test/065-std-package-io/io-open-000.ring";
     var bool   exist;

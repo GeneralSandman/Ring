@@ -25,7 +25,6 @@ global {
 
 // TestDetail: 数组的元素为 class-obect, 数组为二维数组
 // TestDetail: 一行一行的单独初始化
-@main
 fn main() {
 
     global_job_array_0 = new Job[2,2];

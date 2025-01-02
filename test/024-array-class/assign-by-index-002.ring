@@ -18,7 +18,6 @@ global {
     var Job global_job_value_0;
 }
 
-@main
 fn main() {
     global_job_array_0 = new Job[5];
 

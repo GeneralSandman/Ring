@@ -8,7 +8,6 @@ import {
 
 
 // 测试 math abs() 函数
-@main
 fn main() {
 	
 

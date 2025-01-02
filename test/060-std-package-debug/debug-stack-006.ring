@@ -22,7 +22,7 @@ global {
 
 // TestDetail: 测试 debug::print_call_stack()
 // TestDetail: 函数多次调用
-@main
+
 fn main() {
 
 	

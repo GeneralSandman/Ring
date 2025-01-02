@@ -18,7 +18,6 @@ typedef class Job {
   }
 
 //TestDetail: 编译错误
-@main
 fn main() {
       // true and true; // 编译成功
 

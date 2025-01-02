@@ -57,7 +57,6 @@ global {
   var Job[,,,]    global_job_array_4;
 }
 
-@main
 fn main() {
   var bool   bool_value;
 	var int    int_value;

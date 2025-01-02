@@ -14,7 +14,6 @@ fn b() {
 	fmt::println_string("function b");
 }
 
-@main
 fn main() {
 
 	true ? a() : b();

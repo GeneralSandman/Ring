@@ -31,7 +31,7 @@ fn doit4() {
     fmt::println_string("doit4 end");
 }
 
-@main
+
 fn main() {
 
     fmt::println_string("invoke doit1");

@@ -23,7 +23,6 @@ global {
 
 }
 
-@main
 fn main(var string[] args) {
 	
 	fmt::println(global_bool_value_0);

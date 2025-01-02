@@ -38,7 +38,6 @@ global {
 
 // TestDetail: class中field支持数组
 
-@main
 fn main() {
 
     // 测试 class field的默认值

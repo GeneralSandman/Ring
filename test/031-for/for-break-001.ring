@@ -4,7 +4,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
     var int int_value_1;
     var int int_value_2;

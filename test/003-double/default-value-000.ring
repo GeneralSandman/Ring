@@ -12,7 +12,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 	var double double_value;
 	fmt::println_double(double_value);

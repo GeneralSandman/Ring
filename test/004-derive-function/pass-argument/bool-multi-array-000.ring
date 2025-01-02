@@ -8,7 +8,6 @@ import {
 
 // TestDetail: derive函数传递bool数组类型参数
 // TestDetail: 分别传递1-8个bool数组类型参数
-@main
 fn main() {
 
 	pass_1_bool_array_1(bool[]{true});

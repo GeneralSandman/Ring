@@ -71,7 +71,6 @@ fn func_return_3_job1() -> (Job1, Job1, Job1) {
 // TestDetail: 测试 bool/int/int64/double/string/class 类型变量的定义和初始化
 // TestDetail: 均为局部变量
 // TestDetail: 初始化表达式为函数调用
-@main
 fn main() {
 	fmt::println("main::start");
 

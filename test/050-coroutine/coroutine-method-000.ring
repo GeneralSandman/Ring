@@ -52,7 +52,6 @@ typedef class Job1 {
 
 
 
-@main
 fn main() {
 
 	var int64 co_id;

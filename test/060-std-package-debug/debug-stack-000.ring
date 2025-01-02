@@ -10,7 +10,7 @@ import {
 	debug;
 }
 
-@main
+
 fn main() {
 	test1(false);
 }

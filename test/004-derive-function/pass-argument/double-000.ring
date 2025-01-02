@@ -8,7 +8,6 @@ import {
 
 // TestDetail: derive函数传递double类型参数
 // TestDetail: 分别传递1-8个double类型参数
-@main
 fn main() {
 
 	pass_1_double(0.0);

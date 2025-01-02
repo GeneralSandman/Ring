@@ -9,7 +9,6 @@ global {
 
 }
 
-@main
 fn main() {
 	var int64[] local_int_array_0 = int64[]{0L, 1L, 2L, 
 		3L,  4L,  5L, 

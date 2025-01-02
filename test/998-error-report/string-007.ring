@@ -12,7 +12,6 @@ import {
 }
 
 //TestDetail: 编译错误
-@main
 fn main() {
       var string string_value;
 

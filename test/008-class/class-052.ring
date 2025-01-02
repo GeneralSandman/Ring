@@ -95,7 +95,6 @@ global {
 // TestDetail: 测试对象嵌套的初始化
 // TestDetail: 测试嵌套访问method
 
-@main
 fn main() {
 
     // 测试 class field的默认值

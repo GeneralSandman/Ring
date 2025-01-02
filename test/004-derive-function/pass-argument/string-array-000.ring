@@ -8,7 +8,6 @@ import {
 
 // TestDetail: derive函数传递string数组类型参数
 // TestDetail: 分别传递1-8个string数组类型参数
-@main
 fn main() {
 
 	pass_1_string_array(string[]{"0"});

@@ -9,7 +9,6 @@ global {
   var int64[] global_int64_array_0;
 }
 
-@main
 fn main() {
 	global_int64_array_0 = func_return_int64_array();
 	

@@ -10,7 +10,6 @@ import {
 	fmt;
 }
 
-@main
 fn main() {
 	fmt::println_int(123);
 }

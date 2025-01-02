@@ -18,7 +18,6 @@ typedef fn() -> (FuncType1) FuncType2;
 
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸
-@main
 fn main() {
 
 	var FuncType2 func_type2_var;

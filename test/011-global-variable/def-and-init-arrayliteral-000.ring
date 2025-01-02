@@ -41,7 +41,6 @@ typedef class Job1 {
 // TestDetail: 测试 bool[]/int[]/int64[]/double[]/string[]/class[] 类型变量的定义和初始化
 // TestDetail: 均为全局变量
 // TestDetail: 数组变量 通过数组常量初始化
-@main
 fn main() {
 
 	fmt::println(local_bool_array_0);

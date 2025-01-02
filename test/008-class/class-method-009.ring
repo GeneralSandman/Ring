@@ -48,7 +48,6 @@ global {
     var Job job_0;
 }
 
-@main
 fn main() {
 
     fmt::println_string("\ntest case 1");

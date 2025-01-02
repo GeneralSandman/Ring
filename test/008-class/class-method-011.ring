@@ -533,7 +533,6 @@ global {
 
 // TestDetail: 测试method中的局部变量为255
 
-@main
 fn main() {
     job_0.Action();
 }

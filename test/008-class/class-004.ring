@@ -30,7 +30,6 @@ global {
     var int global_int_value_9;
 }
 
-@main
 fn main() {
     test();
     fmt::println_string("------\n");

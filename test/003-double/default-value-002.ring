@@ -11,7 +11,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 
 	var double double_value_1 = 1.1;

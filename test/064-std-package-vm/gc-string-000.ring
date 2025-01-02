@@ -15,7 +15,6 @@ import {
 
 // TestDetail: 测试string的GC算法
 
-@main
 fn main() {
     /*
      * 该段代码的含义：

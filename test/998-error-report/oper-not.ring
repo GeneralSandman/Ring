@@ -17,7 +17,6 @@ typedef class Job {
       var double  Score;
   }
 
-@main
 fn main() {
       var bool bool_value;
 

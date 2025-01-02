@@ -11,7 +11,7 @@ import {
 	debug;
 }
 
-@main
+
 fn main() {
 	fmt::println("fn main()");
 	test0();

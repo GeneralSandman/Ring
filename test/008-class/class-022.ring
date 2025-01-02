@@ -25,7 +25,6 @@ global {
 
 // TestDetail: 数组的元素为 class-obect
 // TestDetail: 直接通过索引对数组元素中的成员赋值
-@main
 fn main() {
 
     global_job_array_0 = new Job[4];

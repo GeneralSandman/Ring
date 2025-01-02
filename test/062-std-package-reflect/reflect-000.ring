@@ -29,7 +29,6 @@ global {
 	var Job    global_job_class_value_1;
 }
 
-@main
 fn main() {
 	var bool   bool_value;
 	var int    int_value;

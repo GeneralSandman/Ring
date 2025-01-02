@@ -9,7 +9,6 @@ global {
 }
 
 // TestDetail: 测试 数组动态分配所占用的内存大小是否正确
-@main
 fn main() {
     /*
      * 该段代码的含义：

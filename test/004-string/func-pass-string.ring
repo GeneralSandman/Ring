@@ -14,7 +14,6 @@ import {
 }
 
 // TestDetail: 测试通过函数参数传递 string类型的参数
-@main
 fn main() {
     var string string_value;
     string_value = "1234567890";

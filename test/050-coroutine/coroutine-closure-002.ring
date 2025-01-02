@@ -14,7 +14,6 @@ import {
 
 typedef fn() FuncType;
 
-@main
 fn main() {
 	var int64 co_id;
 

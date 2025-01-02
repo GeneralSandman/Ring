@@ -9,7 +9,6 @@ global {
 	
 }
 
-@main
 fn main() {
 	var string local_string_value_1;
 	

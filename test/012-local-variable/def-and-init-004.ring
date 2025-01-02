@@ -41,7 +41,6 @@ fn get_next_global_count_3() -> (int, int, int) {
 // TestDetail: 测试 int 类型变量的定义和初始化
 // TestDetail: 初始化表达式为函数调用
 // TestDetail: 初始 初始化的顺序是否正确
-@main
 fn main() {
 	fmt::println("main::start");
 	

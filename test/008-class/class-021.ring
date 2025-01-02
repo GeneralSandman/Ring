@@ -40,7 +40,6 @@ global {
 // TestDetail: `global_job_0.Double, global_job_1.Double = global_job_1.Double, global_job_0.Double;`
 // TestDetail: `global_job_0.String, global_job_1.String = global_job_1.String, global_job_0.String;`
 
-@main
 fn main() {
 
     global_job_0 = Job{

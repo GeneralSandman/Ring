@@ -12,7 +12,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 	var string string_value;
 	fmt::println_string(string_value);

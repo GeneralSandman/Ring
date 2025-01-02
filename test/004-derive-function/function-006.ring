@@ -28,7 +28,7 @@ fn test_return_3() -> (int,int,int) {
     return int_value_local_1, int_value_local_1 + 1, int_value_local_1 + 2;
 }
 
-@main
+
 fn main() {
 	var int int_value_1;
 	var int int_value_2;

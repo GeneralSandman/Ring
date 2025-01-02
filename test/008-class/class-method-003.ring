@@ -24,7 +24,6 @@ global {
     var Job job_0;
 }
 
-@main
 fn main() {
     job_0.PrintInfo();
 }

@@ -9,7 +9,6 @@ global {
     var double[,,,,,,,] global_double_array_0;
 }
 
-@main
 fn main() {
     global_double_array_0 = new double[1,2,3,4,5,6,7,8];
 

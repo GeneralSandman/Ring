@@ -8,7 +8,6 @@ import {
 
 // TestDetail: 测试 括号运算符
 // TestDetail: 括号运算符可以改变运算优先级
-@main
 fn main() {
 
 	var int int_value;

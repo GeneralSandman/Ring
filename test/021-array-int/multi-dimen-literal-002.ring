@@ -13,7 +13,6 @@ global {
 // TestDetail: 测试多维数组的初始化
 // TestDetail: 二维数组的初始化
 
-@main
 fn main() {
     global_int_array_0 =  int[,]{
         int[]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9},

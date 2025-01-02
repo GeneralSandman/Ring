@@ -18,7 +18,6 @@ global {
 
 
 // TestDetail: 测试对二维数组进行 for-range 遍历
-@main
 fn main() {
 	global_job1_array_0 = Job1[,]{
 		Job1[]{

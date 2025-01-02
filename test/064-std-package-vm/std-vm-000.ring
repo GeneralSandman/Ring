@@ -14,7 +14,6 @@ global {
   var int64 heap_size;
 }
 
-@main
 fn main() {
     /*
      * 该段代码的含义：

@@ -12,7 +12,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 
 	fmt::println_double(1.234567);

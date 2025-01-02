@@ -33,7 +33,6 @@ global {
 }
 
 
-@main
 fn main() {
 
 

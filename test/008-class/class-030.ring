@@ -32,7 +32,6 @@ global {
 // TestDetail:     global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];
 // TestDetail: }
 // TestDetail: ```
-@main
 fn main() {
     global_job_array_0 = Job[]{
         Job{

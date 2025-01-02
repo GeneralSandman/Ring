@@ -15,7 +15,6 @@ import {
 typedef fn(string) FuncType1;
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸
-@main
 fn main() {
 
 	// test_log();

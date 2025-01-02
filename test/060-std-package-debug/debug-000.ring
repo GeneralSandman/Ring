@@ -50,7 +50,6 @@ global {
 	var string global_string_value;
 }
 
-@main
 fn main() {
 	var bool   local_bool_value;
 	var int    local_int_value;

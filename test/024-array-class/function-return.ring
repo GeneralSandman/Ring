@@ -53,7 +53,6 @@ fn test_func() -> (Job1[,]) {
 
 
 // TestDetail: 测试通过函数返回多维数组
-@main
 fn main() {
 	
 

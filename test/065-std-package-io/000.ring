@@ -14,7 +14,6 @@ typedef class File {
     var int fd;
 }
 
-@main
 fn main() {
     var int fileid = io::open("/Users/zhenhuli/Desktop/Ring/test/065-std-package-io/000.ring");
 

@@ -25,7 +25,7 @@ fn PrintInfo(var bool Running, var int JobID, var double Score) {
     debug::print_call_stack();
 }
 
-@main
+
 fn main() {
 
     fmt::println_string("\ntest case 1");

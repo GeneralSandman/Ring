@@ -11,7 +11,6 @@ global {
 // TestDetail:测试可变参数
 // TestDetail:可变参数为 bool... 类型
 // TestDetail: 同时参数中还有非可变参数
-@main
 fn main() {
     fmt::println_string("test case 1--------");
     func_variadic_parameter(false, 0, 0.0, "#0.0",    "1");

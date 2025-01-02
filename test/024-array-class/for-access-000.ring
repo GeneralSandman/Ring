@@ -17,7 +17,6 @@ global {
 
 // TestDetail: 数组中的元素为类
 // TestDetail: 通过数组索引对数组元素的成员变量进行赋值
-@main
 fn main() {
     global_job_array_0 = new Job[200];
 

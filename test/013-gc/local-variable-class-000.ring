@@ -19,7 +19,6 @@ typedef class Job {
 global {
 }
 
-@main
 fn main() {
     var Job local_value_job_0;
     local_value_job_0.Running = true;

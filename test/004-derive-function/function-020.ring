@@ -35,7 +35,7 @@ fn fibonacci_2(var int num) -> (int) {
 }
 
 
-@main
+
 fn main() {
 
     fmt::println_string("\ntest case 1");

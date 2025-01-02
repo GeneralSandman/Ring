@@ -11,7 +11,6 @@ global {
   var string global_string_value_0;
 }
 
-@main
 fn main() {
 
     fmt::println_string("test cast 1 ------------------------");

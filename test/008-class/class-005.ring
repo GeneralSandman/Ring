@@ -16,7 +16,6 @@ global {
     var Job job_0;
 }
 
-@main
 fn main() {
 
 

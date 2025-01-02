@@ -32,7 +32,6 @@ fn func_return_0() -> (bool, int) {
 // TestDetail: 不能贬义通过, function_call 不能应用到多项赋值中
 // TestDetail: 
 
-@main
 fn main() {
     var bool   local_bool_value_0;
     var int    local_int_value_0;

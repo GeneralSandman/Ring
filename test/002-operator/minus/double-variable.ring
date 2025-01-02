@@ -5,7 +5,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 	var double local_double_value_0;
 

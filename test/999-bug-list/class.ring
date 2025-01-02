@@ -16,7 +16,6 @@ typedef class Job1 {
 
 
 // TestDetail: 测试函数返回 bool 类型
-@main
 fn main() {
 
 	var Job1 local_job1_value_0 = Job1{

@@ -19,7 +19,6 @@ global {
 // TestDetail: 测试一维数组的初始化
 // TestDetail: 一维数组的初始化
 // TestDetail: 数组中的元素为 ClassObject
-@main
 fn main() {
 	global_job1_array_0 = Job1[]{
 		Job1{Bool: true,  Int: 0, Double: 0.0, String: "0.0"},

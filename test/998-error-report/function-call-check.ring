@@ -29,7 +29,6 @@ typedef fn(int, bool) FuncType;
 
 
 // 主要看函数调用，参数是不是匹配
-@main
 fn main() {
 
 	test_call();

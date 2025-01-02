@@ -13,7 +13,6 @@ import {
 }
 
 // minus 符号
-@main
 fn main() {
 	var int local_int_value_0;
 

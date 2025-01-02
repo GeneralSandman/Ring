@@ -10,7 +10,6 @@ import {
 	debug;
 }
 
-@main
 fn main() {
 	debug::assert(false);
 }

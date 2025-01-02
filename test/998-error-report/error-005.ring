@@ -11,6 +11,5 @@ import {
 	fmt,
 }
 
-@main
 fn main() {
 }

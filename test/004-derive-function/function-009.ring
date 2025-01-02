@@ -57,7 +57,7 @@ fn test() {
     debug::assert(int_value_local_10 == 10);
 }
 
-@main
+
 fn main() {
 
 	test();
