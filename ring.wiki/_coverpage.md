@@ -22,5 +22,5 @@
 
 [Wiki](./markdown/index-v2/001-Ring简介.md)
 [Example](https://example.ring.wiki/)
-[Source Code](https://github.com/GeneralSandman/Ring)
+[Github](https://github.com/GeneralSandman/Ring)
 
