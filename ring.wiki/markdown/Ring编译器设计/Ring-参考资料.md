@@ -183,3 +183,19 @@ https://www.cnblogs.com/lsgxeva/p/17226032.html
 
 
 quickjs 协程和golang协程 https://poe.com/s/tgHGQK5BaQYvVlmW67X9
+
+
+## 如何编写一个vscode插件
+
+
+从零开始为你的自制编程语言写一个专属VSCode插件
+https://zhuanlan.zhihu.com/p/164736736
+
+
+golang tmLanguage json
+https://github.com/microsoft/vscode/blob/main/extensions/go/syntaxes/go.tmLanguage.json
+https://github.com/worlpaker/go-syntax/blob/master/syntaxes/go.tmLanguage.json
+
+
+关于vscode 的 debugger插件
+https://code.visualstudio.com/api/extension-guides/debugger-extension
