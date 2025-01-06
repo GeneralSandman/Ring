@@ -32,29 +32,7 @@ void gc_summary(Ring_VirtualMachine* rvm) {
         RVM_Value*  value = &(VM_STATIC_DATA[i]);
 
         std::string type;
-        switch (value->type) {
-        case RVM_VALUE_TYPE_BOOL:
-            type = "bool";
-            break;
-        case RVM_VALUE_TYPE_INT:
-            type = "int";
-            break;
-        case RVM_VALUE_TYPE_INT64:
-            type = "int64";
-            break;
-        case RVM_VALUE_TYPE_DOUBLE:
-            type = "double";
-            break;
-        case RVM_VALUE_TYPE_STRING:
-            type = "string";
-            break;
-        case RVM_VALUE_TYPE_CLASS_OB:
-            type = "class";
-            break;
-        default:
-            type = "unknow";
-            break;
-        }
+        type = format_rvm_type(rvm, value);
         printf("\tRVM_Value: %s\n", type.c_str());
     }
 
@@ -78,27 +56,9 @@ void gc_summary(Ring_VirtualMachine* rvm) {
     printf("%sStack:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
     for (unsigned int stack_index = 0; stack_index < VM_CUR_CO_STACK_TOP_INDEX; stack_index++) {
         RVM_Value*  value = &(VM_CUR_CO_STACK_DATA[stack_index]);
+
         std::string type;
-        switch (value->type) {
-        case RVM_VALUE_TYPE_BOOL:
-            type = "bool";
-            break;
-        case RVM_VALUE_TYPE_INT:
-            type = "int";
-            break;
-        case RVM_VALUE_TYPE_INT64:
-            type = "int64";
-            break;
-        case RVM_VALUE_TYPE_DOUBLE:
-            type = "double";
-            break;
-        case RVM_VALUE_TYPE_STRING:
-            type = "string";
-            break;
-        default:
-            type = "unknow";
-            break;
-        }
+        type = format_rvm_type(rvm, value);
 
         // 不展示目前 函数调用写死 的 20 local_variable_size
         if (!str_eq(type.c_str(), "callinfo")
@@ -326,7 +286,6 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
                 alloc_size               = init_string(rvm, array->u.string_array[i], ROUND_UP8(1));
                 rvm_heap_list_add_object(rvm, (RVM_GC_Object*)(array->u.string_array[i]));
                 rvm_heap_alloc_size_incr(rvm, alloc_size);
-                // printf("alloc_size: %d\n", alloc_size);
             }
             alloc_size = 0;
             break;
@@ -367,39 +326,40 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
 
 
 RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
-    RVM_Array* array = nullptr;
+    RVM_Array* array  = nullptr;
 
-    array            = new_array(rvm);
-    array->type      = src->type;
-    array->dimension = src->dimension;
-    array->length    = src->length;
-    array->capacity  = src->capacity;
-    // array->class_ref  = src->class_ref;
+    array             = new_array(rvm);
+    array->type       = src->type;
+    array->dimension  = src->dimension;
+    array->length     = src->length;
+    array->capacity   = src->capacity;
+    array->class_ref  = src->class_ref;
+
 
     size_t alloc_size = 0;
 
     switch (src->type) {
     case RVM_ARRAY_BOOL:
         alloc_size          = sizeof(bool) * array->capacity;
-        array->u.bool_array = (bool*)calloc(1, alloc_size);
+        array->u.bool_array = (bool*)calloc(1, alloc_size); // TODO: 分配在内存池上
         memcpy(array->u.bool_array, src->u.bool_array, alloc_size);
         break;
 
     case RVM_ARRAY_INT:
         alloc_size         = sizeof(int) * array->capacity;
-        array->u.int_array = (int*)calloc(1, alloc_size);
+        array->u.int_array = (int*)calloc(1, alloc_size); // TODO: 分配在内存池上
         memcpy(array->u.int_array, src->u.int_array, alloc_size);
         break;
 
     case RVM_ARRAY_INT64:
         alloc_size           = sizeof(long long) * array->capacity;
-        array->u.int64_array = (long long*)calloc(1, alloc_size);
+        array->u.int64_array = (long long*)calloc(1, alloc_size); // TODO: 分配在内存池上
         memcpy(array->u.int64_array, src->u.int64_array, alloc_size);
         break;
 
     case RVM_ARRAY_DOUBLE:
         alloc_size            = sizeof(double) * array->capacity;
-        array->u.double_array = (double*)calloc(1, alloc_size);
+        array->u.double_array = (double*)calloc(1, alloc_size); // TODO: 分配在内存池上
         memcpy(array->u.double_array, src->u.double_array, alloc_size);
         break;
 
@@ -658,10 +618,12 @@ RVM_ClassObject* rvm_deep_copy_class_object(Ring_VirtualMachine* rvm, RVM_ClassO
     RVM_ClassObject* class_object = rvm_heap_new_class_object(rvm);
     class_object->class_ref       = src->class_ref;
     class_object->field_count     = src->field_count;
+    class_object->field           = nullptr;
 
     // FIXME: 这里还要继续完善深度copy
     RVM_Value* field = nullptr;
-    field            = (RVM_Value*)mem_alloc(rvm->meta_pool, src->field_count * sizeof(RVM_Value));
+    field            = (RVM_Value*)mem_alloc(rvm->meta_pool,
+                                             src->field_count * sizeof(RVM_Value));
     memcpy(field, src->field, src->field_count * sizeof(RVM_Value));
     class_object->field = field;
     return class_object;

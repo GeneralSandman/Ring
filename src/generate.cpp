@@ -1809,7 +1809,7 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
 
 
     if (is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
-        generate_vmcode_from_native_function_call_expression(executer, function_call_expression, opcode_buffer);
+        generate_vmcode_buildin_func(executer, function_call_expression, opcode_buffer);
         return;
     }
 
@@ -1860,117 +1860,6 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
         generate_vmcode(executer, opcode_buffer, opcode, offset, function_call_expression->line_number);
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, 0, function_call_expression->line_number);
-    }
-}
-
-// native function 这个函数名起的 不太好
-// 容易跟 std-package 混淆
-// TODO: 这里需要重新设计一下 跟 is_native_function_identifier
-void generate_vmcode_from_native_function_call_expression(Package_Executer*       executer,
-                                                          FunctionCallExpression* function_call_expression,
-                                                          RVM_OpcodeBuffer*       opcode_buffer) {
-
-    ArgumentList* pos                 = nullptr;
-    char*         function_identifier = function_call_expression->func_identifier;
-
-    if (str_eq(function_identifier, "len")) {
-        if (function_call_expression->argument_list->expression->convert_type[0]->kind == RING_BASIC_TYPE_STRING) {
-            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_LEN, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type[0]->kind == RING_BASIC_TYPE_ARRAY) {
-            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_LEN, 0, function_call_expression->line_number);
-        } else {
-            // TODO: 应该在语义检查的过程中报错
-            ring_error_report("function `len()` argument is not string or array\n");
-        }
-    } else if (str_eq(function_identifier, "capacity")) {
-        if (function_call_expression->argument_list->expression->convert_type[0]->kind == RING_BASIC_TYPE_STRING) {
-            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_STRING_CAPACITY, 0, function_call_expression->line_number);
-        } else if (function_call_expression->argument_list->expression->convert_type[0]->kind == RING_BASIC_TYPE_ARRAY) {
-            generate_vmcode_from_expression(executer, function_call_expression->argument_list->expression, opcode_buffer);
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_ARRAY_CAPACITY, 0, function_call_expression->line_number);
-        } else {
-            // TODO: 应该在语义检查的过程中报错
-            ring_error_report("function `capacity()` argument is not string or array\n");
-        }
-    } else if (str_eq(function_identifier, "push")) {
-        pos = function_call_expression->argument_list;
-        for (; pos != nullptr; pos = pos->next) {
-            generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-        }
-
-        if (function_call_expression->argument_list->expression->convert_type[0]->kind != RING_BASIC_TYPE_ARRAY) {
-            ring_error_report("error: push() only used to append value to array\n");
-        }
-
-        RVM_Opcode opcode = RVM_CODE_UNKNOW;
-        switch (function_call_expression->argument_list->expression->convert_type[0]->u.array_t->sub->kind) {
-        case RING_BASIC_TYPE_BOOL: opcode = RVM_CODE_ARRAY_APPEND_BOOL; break;
-        case RING_BASIC_TYPE_INT: opcode = RVM_CODE_ARRAY_APPEND_INT; break;
-        case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_ARRAY_APPEND_INT64; break;
-        case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_ARRAY_APPEND_DOUBLE; break;
-        case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_ARRAY_APPEND_STRING; break;
-        case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_ARRAY_APPEND_CLASS_OB; break;
-        default: ring_error_report("error: push() is only be used by bool[] int[] double[] string[] class[]\n");
-        }
-        generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
-
-    } else if (str_eq(function_identifier, "pop")) {
-        pos = function_call_expression->argument_list;
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-
-        if (pos->expression->convert_type[0]->kind != RING_BASIC_TYPE_ARRAY) {
-            ring_error_report("error: pop() only used to append value to array\n");
-        }
-
-        RVM_Opcode opcode = RVM_CODE_UNKNOW;
-        switch (pos->expression->convert_type[0]->u.array_t->sub->kind) {
-        case RING_BASIC_TYPE_BOOL: opcode = RVM_CODE_ARRAY_POP_BOOL; break;
-        case RING_BASIC_TYPE_INT: opcode = RVM_CODE_ARRAY_POP_INT; break;
-        case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_ARRAY_POP_INT64; break;
-        case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_ARRAY_POP_DOUBLE; break;
-        case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_ARRAY_POP_STRING; break;
-        case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_ARRAY_POP_CLASS_OB; break;
-        default: ring_error_report("error: pop() is only be used by bool[] int[] double[] string[] class[]\n");
-        }
-        generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
-
-    } else if (str_eq(function_identifier, "to_string")) {
-        pos = function_call_expression->argument_list;
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-
-        RVM_Opcode opcode = RVM_CODE_UNKNOW;
-        switch (pos->expression->convert_type[0]->kind) {
-        case RING_BASIC_TYPE_BOOL: opcode = RVM_CODE_BOOL_2_STRING; break;
-        case RING_BASIC_TYPE_INT: opcode = RVM_CODE_INT_2_STRING; break;
-        case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_INT64_2_STRING; break;
-        case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_DOUBLE_2_STRING; break;
-        default: ring_error_report("error: to_string() only be used by bool/int/double\n");
-        }
-        generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
-
-    } else if (str_eq(function_identifier, "to_int64")) {
-        pos = function_call_expression->argument_list;
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-
-        if (pos->expression->convert_type[0]->kind == RING_BASIC_TYPE_INT) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_INT_2_INT64, 0, function_call_expression->line_number);
-        } else {
-            ring_error_report("error: to_int64() only be used by int\n");
-        }
-    } else if (str_eq(function_identifier, "resume")) {
-        pos = function_call_expression->argument_list;
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-
-        if (pos->expression->convert_type[0]->kind == RING_BASIC_TYPE_INT64) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_RESUME, 0, function_call_expression->line_number);
-        } else {
-            ring_error_report("error: resume() 's argument is int64\n");
-        }
-    } else if (str_eq(function_identifier, "yield")) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_YIELD, 0, function_call_expression->line_number);
     }
 }
 
@@ -2133,11 +2022,11 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
         if (function_call_expression->type == FUNCTION_CALL_TYPE_FUNC) {
 
             if (is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
-                ring_error_report("not support build func(%s) in launch expression now", function_call_expression->func_identifier);
+                ring_error_report("not support buildin func(%s) in launch expression", function_call_expression->func_identifier);
                 return;
             }
             if (function_call_expression->u.fc.function->type != FUNCTION_TYPE_DERIVE) {
-                ring_error_report("not support build func(%s) in launch expression now", function_call_expression->func_identifier);
+                ring_error_report("not support native func(%s) in launch expression", function_call_expression->func_identifier);
                 return;
             }
 

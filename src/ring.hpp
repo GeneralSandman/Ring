@@ -679,7 +679,7 @@ struct RVM_ClassDefinition {
 
     char*        identifier;
 
-    unsigned int class_index;
+    unsigned int class_index; // TODO: 这里是相对于哪里的偏移量，是整个字节码么，还是一个package 内的
 
     unsigned int field_size;
     RVM_Field*   field_list;
@@ -757,6 +757,7 @@ typedef enum {
     RVM_ARRAY_STRING,       // string 数组
     RVM_ARRAY_CLASS_OBJECT, // 类 数组
     RVM_ARRAY_A,            // 多维数组的中间态， 感觉有必要删除
+    // TODO: closure 数组
 } RVM_Array_Type;
 
 
@@ -778,7 +779,7 @@ struct RVM_Array {
         int*             int_array;
         long long*       int64_array;
         double*          double_array;
-        RVM_String**     string_array;
+        RVM_String**     string_array; // FIXME: 这里为什么不是 RVM_String*, 需要统一一下
         RVM_ClassObject* class_ob_array;
         RVM_Array*       a_array; // 多维数组
     } u;
@@ -1205,12 +1206,12 @@ struct RVM_DeferItem {
     RVM_DeferItem* next;
 };
 
-#define CALL_INFO_MAGIC_NUMBER (0x8421) // 33852
 
 /*
  * Ring_String 是专门给源信息使用的
  * 不是 虚拟机使用的
  * 虚拟机使用 RVM_String
+ * TODO: 后续下线
  */
 struct Ring_String {
     char*        data;
@@ -1329,6 +1330,10 @@ typedef void (*BuildinFuncFix)(Expression*             expression,
                                Function*               func,
                                Ring_Buildin_Func*      build_func);
 
+typedef void (*BuildinFuncGenerate)(Package_Executer*       executer,
+                                    FunctionCallExpression* function_call_expression,
+                                    RVM_OpcodeBuffer*       opcode_buffer);
+
 
 struct Ring_Buildin_Func {
     const char*                 identifier;
@@ -1340,6 +1345,7 @@ struct Ring_Buildin_Func {
     std::vector<TypeSpecifier*> return_types;
 
     BuildinFuncFix              buildin_func_fix;
+    BuildinFuncGenerate         buildin_func_generate;
 };
 
 struct EnumDeclaration {
@@ -3044,7 +3050,6 @@ void              generate_vmcode_from_string_expression(Package_Executer* execu
                                                          Expression*       expression,
                                                          RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_native_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_method_call_expression(Package_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_member_expression(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
@@ -3460,6 +3465,15 @@ void         check_build_func_param_num(Expression*             expression,
                                         Function*               func,
                                         Ring_Buildin_Func*      build_func);
 
+unsigned int is_buildin_function_identifier(char* package_posit, char* identifier);
+void         fix_buildin_func(Expression*             expression,
+                              FunctionCallExpression* function_call_expression,
+                              Block*                  block,
+                              FunctionTuple*          func);
+void         generate_vmcode_buildin_func(Package_Executer*       executer,
+                                          FunctionCallExpression* function_call_expression,
+                                          RVM_OpcodeBuffer*       opcode_buffer);
+
 void         fix_buildin_func_len(Expression*             expression,
                                   FunctionCallExpression* function_call_expression,
                                   Block*                  block,
@@ -3502,11 +3516,37 @@ void         fix_buildin_func_to_yield(Expression*             expression,
                                        Function*               func,
                                        Ring_Buildin_Func*      build_func);
 
-unsigned int is_buildin_function_identifier(char* package_posit, char* identifier);
-void         fix_buildin_func(Expression*             expression,
-                              FunctionCallExpression* function_call_expression,
-                              Block*                  block,
-                              FunctionTuple*          func);
+
+void         generate_buildin_func_len(Package_Executer*       executer,
+                                       FunctionCallExpression* function_call_expression,
+                                       RVM_OpcodeBuffer*       opcode_buffer);
+
+void         generate_buildin_func_capacity(Package_Executer*       executer,
+                                            FunctionCallExpression* function_call_expression,
+                                            RVM_OpcodeBuffer*       opcode_buffer);
+
+void         generate_buildin_func_push(Package_Executer*       executer,
+                                        FunctionCallExpression* function_call_expression,
+                                        RVM_OpcodeBuffer*       opcode_buffer);
+
+void         generate_buildin_func_pop(Package_Executer*       executer,
+                                       FunctionCallExpression* function_call_expression,
+                                       RVM_OpcodeBuffer*       opcode_buffer);
+
+void         generate_buildin_func_to_string(Package_Executer*       executer,
+                                             FunctionCallExpression* function_call_expression,
+                                             RVM_OpcodeBuffer*       opcode_buffer);
+
+void         generate_buildin_func_to_int64(Package_Executer*       executer,
+                                            FunctionCallExpression* function_call_expression,
+                                            RVM_OpcodeBuffer*       opcode_buffer);
+void         generate_buildin_func_resume(Package_Executer*       executer,
+                                          FunctionCallExpression* function_call_expression,
+                                          RVM_OpcodeBuffer*       opcode_buffer);
+
+void         generate_buildin_func_yield(Package_Executer*       executer,
+                                         FunctionCallExpression* function_call_expression,
+                                         RVM_OpcodeBuffer*       opcode_buffer);
 
 // --------------------
 

@@ -2714,7 +2714,7 @@ RVM_String* string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* s
 
     string->length          = length;
     string->capacity        = capacity;
-    string->data            = (char*)calloc(1, alloc_size);
+    string->data            = (char*)calloc(1, alloc_size); // FIXME:
 
     rvm_heap_list_add_object(rvm, (RVM_GC_Object*)string);
     rvm_heap_alloc_size_incr(rvm, alloc_size);
@@ -2770,8 +2770,8 @@ RVM_Array* rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsigned int siz
     unsigned int dimension_list[] = {size};
 
     RVM_Array*   array            = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL, nullptr);
-    for (int i = 0; i < size; i++) {
-        array->u.bool_array[i] = STACK_GET_INT_OFFSET(-size + i);
+    for (unsigned int i = 0; i < size; i++) {
+        array->u.bool_array[i] = STACK_GET_BOOL_OFFSET(-size + i);
     }
 
     return array;
@@ -2787,7 +2787,7 @@ RVM_Array* rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size
     unsigned int dimension_list[] = {size};
 
     RVM_Array*   array            = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT, nullptr);
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         array->u.int_array[i] = STACK_GET_INT_OFFSET(-size + i);
     }
 
@@ -2804,7 +2804,7 @@ RVM_Array* rvm_new_array_literal_int64(Ring_VirtualMachine* rvm, unsigned int si
     unsigned int dimension_list[] = {size};
 
     RVM_Array*   array            = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT64, nullptr);
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         array->u.int64_array[i] = STACK_GET_INT64_OFFSET(-size + i);
     }
 
@@ -2821,7 +2821,7 @@ RVM_Array* rvm_new_array_literal_double(Ring_VirtualMachine* rvm, unsigned int s
     unsigned int dimension_list[] = {size};
 
     RVM_Array*   array            = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE, nullptr);
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         array->u.double_array[i] = STACK_GET_DOUBLE_OFFSET(-size + i);
     }
 
@@ -2838,7 +2838,7 @@ RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int s
     unsigned int dimension_list[] = {size};
 
     RVM_Array*   array            = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING, nullptr);
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         // TODO: shallow copy
         array->u.string_array[i] = STACK_GET_STRING_OFFSET(-size + i);
     }
@@ -2859,7 +2859,8 @@ RVM_Array* rvm_new_array_literal_class_object(Ring_VirtualMachine* rvm,
     unsigned int dimension_list[] = {size};
 
     RVM_Array*   array            = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLASS_OBJECT, class_definition);
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
+        // TODO: shallow copy
         array->u.class_ob_array[i] = *(STACK_GET_CLASS_OB_OFFSET(-size + i));
     }
 
@@ -2928,9 +2929,7 @@ ErrorCode rvm_array_get_array(Ring_VirtualMachine* rvm, RVM_Array* array, int in
     if (index >= array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
-
     *value = &(array->u.a_array[index]);
-
     return ERROR_CODE_SUCCESS;
 }
 
@@ -2938,10 +2937,7 @@ ErrorCode rvm_array_set_array(Ring_VirtualMachine* rvm, RVM_Array* array, int in
     if (index >= array->length) {
         return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
     }
-
-    // *value = &(array->u.a_array[index]);
     array->u.a_array[index] = *value;
-
     return ERROR_CODE_SUCCESS;
 }
 

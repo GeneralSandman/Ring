@@ -3,76 +3,85 @@
 
 Ring_Buildin_Func Ring_Buildin_Funcs[] = {
     {
-        .identifier       = "-",
-        .param_size       = 0,
-        .param_types      = std::vector<TypeSpecifier*>{},
-        .return_size      = 0,
-        .return_types     = std::vector<TypeSpecifier*>{},
-        .buildin_func_fix = nullptr,
+        .identifier            = "-",
+        .param_size            = 0,
+        .param_types           = std::vector<TypeSpecifier*>{},
+        .return_size           = 0,
+        .return_types          = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix      = nullptr,
+        .buildin_func_generate = nullptr,
     },
     {
-        .identifier       = "len",
-        .param_size       = 1,
-        .param_types      = std::vector<TypeSpecifier*>{},
-        .return_size      = 1,
-        .return_types     = std::vector<TypeSpecifier*>{},
-        .buildin_func_fix = fix_buildin_func_len,
+        .identifier            = "len",
+        .param_size            = 1,
+        .param_types           = std::vector<TypeSpecifier*>{},
+        .return_size           = 1,
+        .return_types          = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix      = fix_buildin_func_len,
+        .buildin_func_generate = generate_buildin_func_len,
     },
     {
-        .identifier       = "capacity",
-        .param_size       = 1,
-        .param_types      = std::vector<TypeSpecifier*>{},
-        .return_size      = 1,
-        .return_types     = std::vector<TypeSpecifier*>{},
-        .buildin_func_fix = fix_buildin_func_capacity,
+        .identifier            = "capacity",
+        .param_size            = 1,
+        .param_types           = std::vector<TypeSpecifier*>{},
+        .return_size           = 1,
+        .return_types          = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix      = fix_buildin_func_capacity,
+        .buildin_func_generate = generate_buildin_func_capacity,
     },
     {
-        .identifier       = "push",
-        .param_size       = 2,
-        .param_types      = std::vector<TypeSpecifier*>{},
-        .return_size      = 0,
-        .return_types     = std::vector<TypeSpecifier*>{},
-        .buildin_func_fix = fix_buildin_func_push,
+        .identifier            = "push",
+        .param_size            = 2,
+        .param_types           = std::vector<TypeSpecifier*>{},
+        .return_size           = 0,
+        .return_types          = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix      = fix_buildin_func_push,
+        .buildin_func_generate = generate_buildin_func_push,
     },
     {
-        .identifier       = "pop",
-        .param_size       = 1,
-        .param_types      = std::vector<TypeSpecifier*>{},
-        .return_size      = 0,
-        .return_types     = std::vector<TypeSpecifier*>{},
-        .buildin_func_fix = fix_buildin_func_pop,
+        .identifier            = "pop",
+        .param_size            = 1,
+        .param_types           = std::vector<TypeSpecifier*>{},
+        .return_size           = 0,
+        .return_types          = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix      = fix_buildin_func_pop,
+        .buildin_func_generate = generate_buildin_func_pop,
     },
     {
-        .identifier       = "to_string",
-        .param_size       = 1,
-        .param_types      = std::vector<TypeSpecifier*>{},
-        .return_size      = 1,
-        .return_types     = std::vector<TypeSpecifier*>{},
-        .buildin_func_fix = fix_buildin_func_to_string,
+        .identifier            = "to_string",
+        .param_size            = 1,
+        .param_types           = std::vector<TypeSpecifier*>{},
+        .return_size           = 1,
+        .return_types          = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix      = fix_buildin_func_to_string,
+        .buildin_func_generate = generate_buildin_func_to_string,
     },
     {
-        .identifier       = "to_int64",
-        .param_size       = 1,
-        .param_types      = std::vector<TypeSpecifier*>{},
-        .return_size      = 1,
-        .return_types     = std::vector<TypeSpecifier*>{},
-        .buildin_func_fix = fix_buildin_func_to_int64,
+        .identifier            = "to_int64",
+        .param_size            = 1,
+        .param_types           = std::vector<TypeSpecifier*>{},
+        .return_size           = 1,
+        .return_types          = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix      = fix_buildin_func_to_int64,
+        .buildin_func_generate = generate_buildin_func_to_int64,
     },
     {
-        .identifier       = "resume",
-        .param_size       = 1,
-        .param_types      = std::vector<TypeSpecifier*>{},
-        .return_size      = 1,
-        .return_types     = std::vector<TypeSpecifier*>{},
-        .buildin_func_fix = fix_buildin_func_to_resume,
+        .identifier            = "resume",
+        .param_size            = 1,
+        .param_types           = std::vector<TypeSpecifier*>{},
+        .return_size           = 1,
+        .return_types          = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix      = fix_buildin_func_to_resume,
+        .buildin_func_generate = generate_buildin_func_resume,
     },
     {
-        .identifier       = "yield",
-        .param_size       = 0,
-        .param_types      = std::vector<TypeSpecifier*>{},
-        .return_size      = 1,
-        .return_types     = std::vector<TypeSpecifier*>{},
-        .buildin_func_fix = fix_buildin_func_to_yield,
+        .identifier            = "yield",
+        .param_size            = 0,
+        .param_types           = std::vector<TypeSpecifier*>{},
+        .return_size           = 1,
+        .return_types          = std::vector<TypeSpecifier*>{},
+        .buildin_func_fix      = fix_buildin_func_to_yield,
+        .buildin_func_generate = generate_buildin_func_yield,
     },
 };
 
@@ -112,6 +121,53 @@ void check_build_func_param_num(Expression*             expression,
         ring_compile_error_report(&context);
     }
 }
+
+unsigned int is_buildin_function_identifier(char* package_posit, char* identifier) {
+    if (package_posit != nullptr) {
+        return 0;
+    }
+
+    unsigned int size = sizeof(Ring_Buildin_Funcs) / sizeof(Ring_Buildin_Func);
+    for (unsigned int i = 1; i < size; i++) {
+        if (str_eq(Ring_Buildin_Funcs[i].identifier, identifier)) {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+void fix_buildin_func(Expression*             expression,
+                      FunctionCallExpression* function_call_expression,
+                      Block*                  block,
+                      FunctionTuple*          func) {
+
+    unsigned int      func_id    = is_buildin_function_identifier(function_call_expression->package_posit,
+                                                                  function_call_expression->func_identifier);
+
+    Ring_Buildin_Func build_func = Ring_Buildin_Funcs[func_id];
+
+    build_func.buildin_func_fix(expression,
+                                function_call_expression,
+                                block,
+                                (Function*)func,
+                                &build_func);
+}
+
+void generate_vmcode_buildin_func(Package_Executer*       executer,
+                                  FunctionCallExpression* function_call_expression,
+                                  RVM_OpcodeBuffer*       opcode_buffer) {
+
+    unsigned int      func_id    = is_buildin_function_identifier(function_call_expression->package_posit,
+                                                                  function_call_expression->func_identifier);
+
+    Ring_Buildin_Func build_func = Ring_Buildin_Funcs[func_id];
+
+    build_func.buildin_func_generate(executer,
+                                     function_call_expression,
+                                     opcode_buffer);
+}
+
 
 void fix_buildin_func_len(Expression*             expression,
                           FunctionCallExpression* function_call_expression,
@@ -468,34 +524,177 @@ void fix_buildin_func_to_yield(Expression*             expression,
     check_build_func_param_num(expression, function_call_expression, block, (Function*)func, build_func);
 }
 
-unsigned int is_buildin_function_identifier(char* package_posit, char* identifier) {
-    if (package_posit != nullptr) {
-        return 0;
+
+void generate_buildin_func_len(Package_Executer*       executer,
+                               FunctionCallExpression* function_call_expression,
+                               RVM_OpcodeBuffer*       opcode_buffer) {
+
+    TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
+    assert(type_specifier->kind == RING_BASIC_TYPE_STRING
+           || type_specifier->kind == RING_BASIC_TYPE_ARRAY);
+
+    // push arguments
+    for (ArgumentList* pos = function_call_expression->argument_list;
+         pos != nullptr;
+         pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
     }
 
-    unsigned int size = sizeof(Ring_Buildin_Funcs) / sizeof(Ring_Buildin_Func);
-    for (unsigned int i = 1; i < size; i++) {
-        if (str_eq(Ring_Buildin_Funcs[i].identifier, identifier)) {
-            return i;
-        }
+    RVM_Opcode opcode = RVM_CODE_UNKNOW;
+    if (type_specifier->kind == RING_BASIC_TYPE_STRING) {
+        opcode = RVM_CODE_PUSH_STRING_LEN;
+    } else if (type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
+        opcode = RVM_CODE_PUSH_ARRAY_LEN;
     }
-
-    return 0;
+    generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
 }
 
-void fix_buildin_func(Expression*             expression,
-                      FunctionCallExpression* function_call_expression,
-                      Block*                  block,
-                      FunctionTuple*          func) {
+void generate_buildin_func_capacity(Package_Executer*       executer,
+                                    FunctionCallExpression* function_call_expression,
+                                    RVM_OpcodeBuffer*       opcode_buffer) {
 
-    unsigned int             func_id = is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier);
+    TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
+    assert(type_specifier->kind == RING_BASIC_TYPE_STRING
+           || type_specifier->kind == RING_BASIC_TYPE_ARRAY);
 
-    extern Ring_Buildin_Func Ring_Buildin_Funcs[];
-    Ring_Buildin_Func        build_func = Ring_Buildin_Funcs[func_id];
+    // push arguments
+    for (ArgumentList* pos = function_call_expression->argument_list;
+         pos != nullptr;
+         pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+    }
 
-    build_func.buildin_func_fix(expression,
-                                function_call_expression,
-                                block,
-                                (Function*)func,
-                                &build_func);
+    RVM_Opcode opcode = RVM_CODE_UNKNOW;
+    if (type_specifier->kind == RING_BASIC_TYPE_STRING) {
+        opcode = RVM_CODE_PUSH_STRING_CAPACITY;
+    } else if (type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
+        opcode = RVM_CODE_PUSH_ARRAY_CAPACITY;
+    }
+    generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
+}
+
+void generate_buildin_func_push(Package_Executer*       executer,
+                                FunctionCallExpression* function_call_expression,
+                                RVM_OpcodeBuffer*       opcode_buffer) {
+
+
+    TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
+    assert(type_specifier->kind == RING_BASIC_TYPE_ARRAY);
+
+    // push arguments
+    for (ArgumentList* pos = function_call_expression->argument_list;
+         pos != nullptr;
+         pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+    }
+
+
+    RVM_Opcode opcode = RVM_CODE_UNKNOW;
+    switch (type_specifier->u.array_t->sub->kind) {
+    case RING_BASIC_TYPE_BOOL: opcode = RVM_CODE_ARRAY_APPEND_BOOL; break;
+    case RING_BASIC_TYPE_INT: opcode = RVM_CODE_ARRAY_APPEND_INT; break;
+    case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_ARRAY_APPEND_INT64; break;
+    case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_ARRAY_APPEND_DOUBLE; break;
+    case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_ARRAY_APPEND_STRING; break;
+    case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_ARRAY_APPEND_CLASS_OB; break;
+    default: ring_error_report("error: push() is only be used by bool[] int[] double[] string[] class[]\n");
+    }
+    generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
+}
+
+void generate_buildin_func_pop(Package_Executer*       executer,
+                               FunctionCallExpression* function_call_expression,
+                               RVM_OpcodeBuffer*       opcode_buffer) {
+
+    TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
+    assert(type_specifier->kind == RING_BASIC_TYPE_ARRAY);
+
+    // push arguments
+    for (ArgumentList* pos = function_call_expression->argument_list;
+         pos != nullptr;
+         pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+    }
+
+    RVM_Opcode opcode = RVM_CODE_UNKNOW;
+    switch (type_specifier->u.array_t->sub->kind) {
+    case RING_BASIC_TYPE_BOOL: opcode = RVM_CODE_ARRAY_POP_BOOL; break;
+    case RING_BASIC_TYPE_INT: opcode = RVM_CODE_ARRAY_POP_INT; break;
+    case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_ARRAY_POP_INT64; break;
+    case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_ARRAY_POP_DOUBLE; break;
+    case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_ARRAY_POP_STRING; break;
+    case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_ARRAY_POP_CLASS_OB; break;
+    default: ring_error_report("error: pop() is only be used by bool[] int[] double[] string[] class[]\n");
+    }
+    generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
+}
+
+void generate_buildin_func_to_string(Package_Executer*       executer,
+                                     FunctionCallExpression* function_call_expression,
+                                     RVM_OpcodeBuffer*       opcode_buffer) {
+
+    TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
+    assert(type_specifier->kind == RING_BASIC_TYPE_BOOL
+           || type_specifier->kind == RING_BASIC_TYPE_INT
+           || type_specifier->kind == RING_BASIC_TYPE_INT64
+           || type_specifier->kind == RING_BASIC_TYPE_DOUBLE);
+
+    // push arguments
+    for (ArgumentList* pos = function_call_expression->argument_list;
+         pos != nullptr;
+         pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+    }
+
+    RVM_Opcode opcode = RVM_CODE_UNKNOW;
+    switch (type_specifier->kind) {
+    case RING_BASIC_TYPE_BOOL: opcode = RVM_CODE_BOOL_2_STRING; break;
+    case RING_BASIC_TYPE_INT: opcode = RVM_CODE_INT_2_STRING; break;
+    case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_INT64_2_STRING; break;
+    case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_DOUBLE_2_STRING; break;
+    default: ring_error_report("error: to_string() only be used by bool/int/double\n");
+    }
+    generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
+}
+
+void generate_buildin_func_to_int64(Package_Executer*       executer,
+                                    FunctionCallExpression* function_call_expression,
+                                    RVM_OpcodeBuffer*       opcode_buffer) {
+
+    TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
+    assert(type_specifier->kind == RING_BASIC_TYPE_INT);
+
+    // push arguments
+    for (ArgumentList* pos = function_call_expression->argument_list;
+         pos != nullptr;
+         pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+    }
+
+
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_INT_2_INT64, 0, function_call_expression->line_number);
+}
+
+void generate_buildin_func_resume(Package_Executer*       executer,
+                                  FunctionCallExpression* function_call_expression,
+                                  RVM_OpcodeBuffer*       opcode_buffer) {
+
+    TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
+    assert(type_specifier->kind == RING_BASIC_TYPE_INT64);
+
+    // push arguments
+    for (ArgumentList* pos = function_call_expression->argument_list;
+         pos != nullptr;
+         pos = pos->next) {
+        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+    }
+
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_RESUME, 0, function_call_expression->line_number);
+}
+
+void generate_buildin_func_yield(Package_Executer*       executer,
+                                 FunctionCallExpression* function_call_expression,
+                                 RVM_OpcodeBuffer*       opcode_buffer) {
+
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_YIELD, 0, function_call_expression->line_number);
 }
