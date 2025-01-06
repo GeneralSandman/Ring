@@ -511,7 +511,13 @@ ring dump 会 coredump
 ### Q. Proposal: 字节码的顺序重新排列一下
 
 
-### S. Proposal: @main 是否有点多次一举
+### S. Proposal: @main 是否有点多次一举 ✅
+
+fn main() {
+
+}
+
+main 函数就是函数的唯一入口
 
 -----------------------------
 
