@@ -291,7 +291,15 @@ int main(int argc, char** argv) {
     ring_virtualmachine_init(ring_vm);
 
     // Step-8: 运行虚拟机
-    exit_code = ring_execute_vm_code(ring_vm);
+    try {
+        exit_code = ring_execute_vm_code(ring_vm);
+    } catch (const RuntimeException& e) {
+        printf("%s\n", e.what());
+        printf("exit status 2\n");
+        exit(2);
+    } catch (...) {
+        printf("Caught an unknown exception.\n");
+    }
 
 
 #ifdef DEBUG_RVM_INTERACTIVE

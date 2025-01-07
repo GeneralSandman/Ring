@@ -111,8 +111,10 @@ void gc_mark(Ring_VirtualMachine* rvm) {
             gc_mark_class_ob(rvm, value->u.class_ob_value);
             break;
         case RVM_VALUE_TYPE_ARRAY:
-            value->u.array_value->gc_mark = GC_MARK_COLOR_BLACK;
-            gc_mark_array(rvm, value->u.array_value);
+            if (value->u.array_value != nullptr) {
+                value->u.array_value->gc_mark = GC_MARK_COLOR_BLACK;
+                gc_mark_array(rvm, value->u.array_value);
+            }
             break;
         default:
             // ring_error_report("mark stack error, type:%d", value->type);

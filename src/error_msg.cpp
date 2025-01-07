@@ -33,3 +33,42 @@ struct SyntaxInfo SyntaxInfos[] = {
         (char*)"[Variable Definition]: var type identifier [ = value];",
     },
 };
+
+
+// TODO: 这里是个静态变量，后续优化掉
+static std::string runtime_exception_str;
+//
+RuntimeException::RuntimeException(ErrorEnum            error_num,
+                                   std::string          message,
+                                   Ring_VirtualMachine* rvm) {
+    this->error_num = error_num;
+    this->message   = message;
+    this->rvm       = rvm;
+}
+const char* RuntimeException::what() const noexcept {
+
+    std::string error_num_str;
+    switch (this->error_num) {
+    case RING_INTERNAL_ERROR: error_num_str = "InternalError"; break;
+    case RING_NIL_ERROR: error_num_str = "NilError"; break;
+    case RING_RANGE_ERROR: error_num_str = "RangeError"; break;
+    }
+
+    std::string call_stack = format_rvm_call_stack(this->rvm);
+
+    runtime_exception_str  = sprintf_string("runtime error: %s: %s\n"
+                                             "call stack:\n%s",
+                                            error_num_str.c_str(),
+                                            message.c_str(),
+                                            call_stack.c_str());
+    return runtime_exception_str.c_str();
+}
+
+void throw_nil_error(Ring_VirtualMachine* rvm, const char* fmt, ...) {
+    std::string message = sprintf_string(fmt);
+    throw RuntimeException(RING_NIL_ERROR, message, rvm);
+}
+void throw_range_error(Ring_VirtualMachine* rvm, const char* fmt, ...) {
+    std::string message = sprintf_string(fmt);
+    throw RuntimeException(RING_RANGE_ERROR, message, rvm);
+}
