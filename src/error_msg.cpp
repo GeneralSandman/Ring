@@ -52,6 +52,7 @@ const char* RuntimeException::what() const noexcept {
     case RING_INTERNAL_ERROR: error_num_str = "InternalError"; break;
     case RING_NIL_ERROR: error_num_str = "NilError"; break;
     case RING_RANGE_ERROR: error_num_str = "RangeError"; break;
+    case RING_INVALID_OPCODE_ERROR: error_num_str = "InvalidOpcodeError"; break;
     }
 
     std::string call_stack = format_rvm_call_stack(this->rvm);
@@ -71,4 +72,9 @@ void throw_nil_error(Ring_VirtualMachine* rvm, const char* fmt, ...) {
 void throw_range_error(Ring_VirtualMachine* rvm, const char* fmt, ...) {
     std::string message = sprintf_string(fmt);
     throw RuntimeException(RING_RANGE_ERROR, message, rvm);
+}
+
+void throw_invalid_opcode_error(Ring_VirtualMachine* rvm, const char* fmt, ...) {
+    std::string message = sprintf_string(fmt);
+    throw RuntimeException(RING_INVALID_OPCODE_ERROR, message, rvm);
 }

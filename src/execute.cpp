@@ -842,7 +842,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_ARRAY_A:
             array_c_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index   = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_get_array(rvm, array_c_value, array_index, &array_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
@@ -853,7 +853,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_ARRAY_BOOL:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_get_bool(rvm, array_value, array_index, &bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
@@ -864,7 +864,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_ARRAY_INT:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_get_int(rvm, array_value, array_index, &int_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
@@ -875,7 +875,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_ARRAY_INT64:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_get_int64(rvm, array_value, array_index, &int64_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
@@ -886,7 +886,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_ARRAY_DOUBLE:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_get_double(rvm, array_value, array_index, &double_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
@@ -897,7 +897,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_ARRAY_STRING:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_get_string(rvm, array_value, array_index, &string_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
@@ -908,7 +908,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_ARRAY_CLASS_OB:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_get_class_object(rvm, array_value, array_index, &class_ob_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
@@ -921,7 +921,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_c_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index   = STACK_GET_INT_OFFSET(-1);
             array_value   = STACK_GET_ARRAY_OFFSET(-3);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_set_array(rvm, array_c_value, array_index, array_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
@@ -931,7 +931,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
             bool_value  = (bool)STACK_GET_BOOL_OFFSET(-3);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_set_bool(rvm, array_value, array_index, &bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
@@ -940,7 +940,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_ARRAY_INT:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_set_int(rvm, array_value, array_index, &STACK_GET_INT_OFFSET(-3));
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
@@ -949,7 +949,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_ARRAY_INT64:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_set_int64(rvm, array_value, array_index, &STACK_GET_INT64_OFFSET(-3));
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
@@ -958,7 +958,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_ARRAY_DOUBLE:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_set_double(rvm, array_value, array_index, &STACK_GET_DOUBLE_OFFSET(-3));
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
@@ -967,7 +967,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_ARRAY_STRING:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_set_string(rvm, array_value, array_index, &STACK_GET_STRING_OFFSET(-3));
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
@@ -976,7 +976,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_ARRAY_CLASS_OB:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            assert_throw_nil(array_value == nullptr);
+            assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
             rvm_array_set_class_object(rvm, array_value, array_index, &STACK_GET_CLASS_OB_OFFSET(-3));
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
@@ -1928,10 +1928,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
 
-            if (closure_value == nullptr) {
-                VM_CUR_CO_PC += 1;
-                break;
-            }
+            assert_throw_nil_closure(closure_value == nullptr);
 
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
@@ -2151,8 +2148,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
 
         default:
-            ring_error_report("Vitual machine execute vmcode error: invalid opcode(%d), pc(%d)\n",
-                              opcode, VM_CUR_CO_PC);
+            throw_invalid_opcode(opcode, VM_CUR_CO_PC);
             break;
         }
     }

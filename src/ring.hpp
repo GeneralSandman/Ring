@@ -1205,6 +1205,8 @@ typedef enum ErrorEnum {
     RING_NIL_ERROR,
     RING_RANGE_ERROR,
 
+    RING_INVALID_OPCODE_ERROR,
+
     // out of memory
     // stack over flow
 
@@ -1227,10 +1229,14 @@ void throw_nil_error(Ring_VirtualMachine* rvm, const char* fmt, ...)
     __attribute__((format(printf, 2, 3)));
 void throw_range_error(Ring_VirtualMachine* rvm, const char* fmt, ...)
     __attribute__((format(printf, 2, 3)));
+void throw_invalid_opcode_error(Ring_VirtualMachine* rvm, const char* fmt, ...)
+    __attribute__((format(printf, 2, 3)));
 
 
 #define THROW_NIL_FMT "invalid memory address or nil pointer dereference"
+#define THROW_NIL_FMT_DETAIL "invalid memory address or nil pointer dereference: %s"
 #define THROW_RANGE_FMT "index out of range [%d] with length %d"
+#define THROW_INVAID_OPCODE "invalid vm opcode: %d, pc: %d"
 
 /*
  * 报错模板：
@@ -1240,8 +1246,18 @@ void throw_range_error(Ring_VirtualMachine* rvm, const char* fmt, ...)
 #define assert_throw_nil(check) \
     ((check) ? throw_nil_error((rvm), THROW_NIL_FMT) : (void)0)
 
+#define assert_throw_nil_array(check) \
+    ((check) ? throw_nil_error((rvm), THROW_NIL_FMT_DETAIL, "nil array") : (void)0)
+
+#define assert_throw_nil_closure(check) \
+    ((check) ? throw_nil_error((rvm), THROW_NIL_FMT_DETAIL, "nil closure") : (void)0)
+
 #define assert_throw_range(index, length) \
     (((index) >= (length)) ? throw_range_error((rvm), THROW_RANGE_FMT, (index), (length)) : (void)0)
+
+#define throw_invalid_opcode(opcode, pc) \
+    throw_invalid_opcode_error((rvm), THROW_INVAID_OPCODE, (opcode), (pc))
+
 
 struct RVM_DeferItem {
 
