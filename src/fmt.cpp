@@ -119,7 +119,7 @@ std::string fmt_array(RVM_Array* array_value) {
             break;
         case RVM_ARRAY_STRING: {
             std::string tmp;
-            tmp.assign(array_value->u.string_array[i]->data, array_value->u.string_array[i]->length);
+            tmp.assign(array_value->u.string_array[i].data, array_value->u.string_array[i].length);
             result += tmp;
         } break;
         case RVM_ARRAY_CLASS_OBJECT:

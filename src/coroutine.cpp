@@ -144,7 +144,6 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
     RVM_ClassDefinition* rvm_class_definition    = nullptr;
     RVM_ClassObject*     class_ob                = nullptr;
     RVM_String*          string                  = nullptr;
-    unsigned int         alloc_size              = 0;
 
     unsigned int         argument_stack_index    = 0; // argument's abs-index in runtime_stack.
     unsigned int         local_vari_stack_offset = 0; // callee_function's local variable offset in runtime_stack.
@@ -315,17 +314,16 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
             break;
 
         case RING_BASIC_TYPE_STRING:
-            string     = new_string(rvm);
-            alloc_size = init_string(rvm, string, ROUND_UP8(1));
-            rvm_heap_list_add_object(rvm, (RVM_GC_Object*)string);
-            rvm_heap_alloc_size_incr(rvm, alloc_size);
+            string = rvm_gc_new_string_meta(rvm);
+            rvm_fill_string(rvm, string, ROUND_UP8(1));
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type           = RVM_VALUE_TYPE_STRING;
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.string_value = string;
             break;
 
         case RING_BASIC_TYPE_CLASS:
-            rvm_class_definition                                                                             = &(rvm->class_list[type_specifier->u.class_def_index]);
-            class_ob                                                                                         = rvm_new_class_object(rvm, rvm_class_definition);
+            rvm_class_definition = &(rvm->class_list[type_specifier->u.class_def_index]);
+            class_ob             = rvm_gc_new_class_ob_meta(rvm);
+            rvm_fill_class_ob(rvm, class_ob, rvm_class_definition);
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type             = RVM_VALUE_TYPE_CLASS_OB;
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.class_ob_value = class_ob;
             break;

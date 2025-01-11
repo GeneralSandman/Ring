@@ -1,8 +1,8 @@
 #include "ring.hpp"
+#include <cassert>
 #include <cmath>
 #include <cstring>
 #include <fcntl.h>
-#include <cassert>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -265,8 +265,8 @@ RVM_Value std_lib_os_getenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
         res = (char*)"";
     }
 
-    RVM_String* str_val = new_string(rvm);
-    init_string(rvm, str_val, ROUND_UP8(strlen(res)));
+    RVM_String* str_val = rvm_gc_new_string_meta(rvm);
+    rvm_fill_string(rvm, str_val, ROUND_UP8(strlen(res)));
     memcpy(str_val->data, res, strlen(res));
     str_val->length            = strlen(res);
     str_val->data[strlen(res)] = '\0';
@@ -401,8 +401,8 @@ RVM_Value std_lib_io_read_all(Ring_VirtualMachine* rvm, unsigned int arg_count, 
     }
 
     // FIXME:  这里写的实在是太丑了
-    RVM_String* str_val = new_string(rvm);
-    init_string(rvm, str_val, ROUND_UP8(result.size()));
+    RVM_String* str_val = rvm_gc_new_string_meta(rvm);
+    rvm_fill_string(rvm, str_val, ROUND_UP8(result.size()));
 
     memcpy(str_val->data, result.c_str(), result.size());
 
