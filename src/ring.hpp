@@ -3406,8 +3406,9 @@ bool                     comp_type_specifier(TypeSpecifier* a, TypeSpecifier* b)
 bool                     comp_type_specifier_func(Ring_DeriveType_Func* a, Ring_DeriveType_Func* b);
 
 std::string              sprintf_string(const char* format, ...);
+// std::string              sprintf_string(const char* format, va_list args);
 
-std::string              convert_troff_string_2_c_control(const std::string& input);
+std::string convert_troff_string_2_c_control(const std::string& input);
 // --------------------
 
 

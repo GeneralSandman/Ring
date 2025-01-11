@@ -30,7 +30,8 @@ OBJS   = \
 
 # bison 可执行文件路径
 # bison >= 3.8.2
-BisonBin     =  /usr/local/Cellar/bison/3.8.2/bin/bison
+# BisonBin     = /opt/homebrew/Cellar/bison/3.8.2/bin/bison
+BisonBin     = /usr/local/Cellar/bison/3.8.2/bin/bison
 BisonRequire = 3.8.2
 BisonVersion =  $(shell $(BisonBin) --version | grep 'bison' | awk '{print $$4}')
 

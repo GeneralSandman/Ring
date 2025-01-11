@@ -380,7 +380,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RingCoroutine*       new_coroutine          = nullptr;
     CO_ID                co_id                  = 0;
 
-    ErrorCode            error_code             = ERROR_CODE_SUCCESS;
     int                  exit_code              = 0;
     RVM_Frame            frame                  = RVM_Frame{};
     RVM_Byte             prev_opcde             = 0;
@@ -1032,6 +1031,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_ARRAY_POP_BOOL:
             array_value = STACK_GET_ARRAY_OFFSET(-1);
             bool_value  = false;
+            assert_throw_nil_array(array_value->length == 0);
             rvm_array_pop_bool(rvm, array_value, &bool_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_BOOL_OFFSET(0, (RVM_Bool)bool_value);
@@ -1041,6 +1041,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_ARRAY_POP_INT:
             array_value = STACK_GET_ARRAY_OFFSET(-1);
             int_value   = 0;
+            assert_throw_nil_array(array_value->length == 0);
             rvm_array_pop_int(rvm, array_value, &int_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_INT_OFFSET(0, int_value);
@@ -1050,6 +1051,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_ARRAY_POP_INT64:
             array_value = STACK_GET_ARRAY_OFFSET(-1);
             int64_value = 0;
+            assert_throw_nil_array(array_value->length == 0);
             rvm_array_pop_int64(rvm, array_value, &int64_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_INT64_OFFSET(0, int64_value);
@@ -1059,6 +1061,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_ARRAY_POP_DOUBLE:
             array_value  = STACK_GET_ARRAY_OFFSET(-1);
             double_value = false;
+            assert_throw_nil_array(array_value->length == 0);
             rvm_array_pop_double(rvm, array_value, &double_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_DOUBLE_OFFSET(0, double_value);
@@ -1068,6 +1071,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_ARRAY_POP_STRING:
             array_value  = STACK_GET_ARRAY_OFFSET(-1);
             string_value = nullptr;
+            assert_throw_nil_array(array_value->length == 0);
             rvm_array_pop_string(rvm, array_value, &string_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_STRING_OFFSET(0, string_value);
@@ -1076,6 +1080,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_ARRAY_POP_CLASS_OB:
             array_value = STACK_GET_ARRAY_OFFSET(-1);
+            assert_throw_nil_array(array_value->length == 0);
             rvm_array_pop_class_object(rvm, array_value, &class_ob_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_CLASS_OB_OFFSET(0, class_ob_value);
@@ -1228,11 +1233,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_FOR_RANGE_ARRAY_A:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            error_code  = rvm_array_get_array(rvm, array_value, array_index, &array_value);
-            if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
+            if (array_index >= array_value->length) {
                 VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
+            rvm_array_get_array(rvm, array_value, array_index, &array_value);
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_A 的不同点 区别
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
@@ -1244,11 +1249,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_FOR_RANGE_ARRAY_BOOL:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            error_code  = rvm_array_get_bool(rvm, array_value, array_index, &bool_value);
-            if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
+            if (array_index >= array_value->length) {
                 VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
+            rvm_array_get_bool(rvm, array_value, array_index, &bool_value);
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_BOOL 的不同点 区别
             STACK_SET_BOOL_OFFSET(0, (RVM_Bool)((int)bool_value));
             VM_CUR_CO_STACK_TOP_INDEX += 1;
@@ -1260,11 +1265,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_FOR_RANGE_ARRAY_INT:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            error_code  = rvm_array_get_int(rvm, array_value, array_index, &int_value);
-            if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
+            if (array_index >= array_value->length) {
                 VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
+            rvm_array_get_int(rvm, array_value, array_index, &int_value);
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_INT 的不同点 区别
             STACK_SET_INT_OFFSET(0, int_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
@@ -1276,11 +1281,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_FOR_RANGE_ARRAY_INT64:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            error_code  = rvm_array_get_int64(rvm, array_value, array_index, &int64_value);
-            if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
+            if (array_index >= array_value->length) {
                 VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
+            rvm_array_get_int64(rvm, array_value, array_index, &int64_value);
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_INT 的不同点 区别
             STACK_SET_INT64_OFFSET(0, int64_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
@@ -1292,11 +1297,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_FOR_RANGE_ARRAY_DOUBLE:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            error_code  = rvm_array_get_double(rvm, array_value, array_index, &double_value);
-            if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
+            if (array_index >= array_value->length) {
                 VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
+            rvm_array_get_double(rvm, array_value, array_index, &double_value);
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_DOUBLE 的不同点 区别
             STACK_SET_DOUBLE_OFFSET(0, double_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
@@ -1308,11 +1313,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_FOR_RANGE_ARRAY_STRING:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            error_code  = rvm_array_get_string(rvm, array_value, array_index, &string_value);
-            if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
+            if (array_index >= array_value->length) {
                 VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
+            rvm_array_get_string(rvm, array_value, array_index, &string_value);
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_STRING 的不同点 区别
             STACK_SET_STRING_OFFSET(0, string_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
@@ -1324,11 +1329,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB:
             array_value = STACK_GET_ARRAY_OFFSET(-2);
             array_index = STACK_GET_INT_OFFSET(-1);
-            error_code  = rvm_array_get_class_object(rvm, array_value, array_index, &class_ob_value);
-            if (error_code == RUNTIME_ERR_OUT_OF_ARRAY_RANGE) {
+            if (array_index >= array_value->length) {
                 VM_CUR_CO_PC = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
                 break;
             }
+            rvm_array_get_class_object(rvm, array_value, array_index, &class_ob_value);
             // VM_CUR_CO_STACK_TOP_INDEX -= 2; // 与 RVM_CODE_PUSH_ARRAY_OBJECT 的不同点 区别
             STACK_SET_CLASS_OB_OFFSET(0, class_ob_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
@@ -2563,27 +2568,27 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             unsigned int dimension        = 1;
             unsigned int dimension_list[] = {size};
 
-            RVM_Array*   array            = nullptr;
+            RVM_Array*   array_value      = nullptr;
 
             switch (parameter->type_specifier->kind) {
             case RING_BASIC_TYPE_BOOL:
-                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL, nullptr);
+                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL, nullptr);
                 break;
             case RING_BASIC_TYPE_INT:
-                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT, nullptr);
+                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT, nullptr);
                 break;
             case RING_BASIC_TYPE_INT64:
-                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT64, nullptr);
+                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT64, nullptr);
                 break;
             case RING_BASIC_TYPE_DOUBLE:
-                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE, nullptr);
+                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE, nullptr);
                 break;
             case RING_BASIC_TYPE_STRING:
-                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING, nullptr);
+                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING, nullptr);
                 break;
             case RING_BASIC_TYPE_CLASS:
                 rvm_class_definition = &(rvm->class_list[parameter->type_specifier->u.class_def_index]);
-                array                = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLASS_OBJECT, rvm_class_definition);
+                array_value          = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLASS_OBJECT, rvm_class_definition);
                 break;
 
             default:
@@ -2592,32 +2597,37 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             }
 
             // 将stack中的参数放入array中
-            for (unsigned array_i = 0; argument_stack_offset < argument_list_size; array_i++, argument_stack_offset++) {
+            for (unsigned array_index = 0;
+                 argument_stack_offset < argument_list_size;
+                 array_index++, argument_stack_offset++) {
+
+                assert_throw_range(array_index, array_value->length);
+
                 switch (parameter->type_specifier->kind) {
                 case RING_BASIC_TYPE_BOOL: {
                     RVM_Bool tmp        = STACK_GET_BOOL_INDEX(argument_stack_index + argument_stack_offset);
                     bool     bool_value = tmp;
-                    rvm_array_set_bool(rvm, array, array_i, &bool_value);
+                    rvm_array_set_bool(rvm, array_value, array_index, &bool_value);
                 } break;
                 case RING_BASIC_TYPE_INT: {
                     int int_value = STACK_GET_INT_INDEX(argument_stack_index + argument_stack_offset);
-                    rvm_array_set_int(rvm, array, array_i, &int_value);
+                    rvm_array_set_int(rvm, array_value, array_index, &int_value);
                 } break;
                 case RING_BASIC_TYPE_INT64: {
                     long long int64_value = STACK_GET_INT64_INDEX(argument_stack_index + argument_stack_offset);
-                    rvm_array_set_int64(rvm, array, array_i, &int64_value);
+                    rvm_array_set_int64(rvm, array_value, array_index, &int64_value);
                 } break;
                 case RING_BASIC_TYPE_DOUBLE: {
                     double double_value = STACK_GET_DOUBLE_INDEX(argument_stack_index + argument_stack_offset);
-                    rvm_array_set_double(rvm, array, array_i, &double_value);
+                    rvm_array_set_double(rvm, array_value, array_index, &double_value);
                 } break;
                 case RING_BASIC_TYPE_STRING: {
                     RVM_String* string_value = STACK_GET_STRING_INDEX(argument_stack_index + argument_stack_offset);
-                    rvm_array_set_string(rvm, array, array_i, &string_value);
+                    rvm_array_set_string(rvm, array_value, array_index, &string_value);
                 } break;
                 case RING_BASIC_TYPE_CLASS: {
                     RVM_ClassObject* class_ob = STACK_GET_CLASS_OB_INDEX(argument_stack_index + argument_stack_offset);
-                    rvm_array_set_class_object(rvm, array, array_i, &class_ob);
+                    rvm_array_set_class_object(rvm, array_value, array_index, &class_ob);
                 } break;
 
                 default:
@@ -2626,7 +2636,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                 }
             }
 
-            STACK_SET_ARRAY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, array);
+            STACK_SET_ARRAY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, array_value);
             local_vari_stack_offset++;
 
             // 可变参数只能是函数的最后一个参数
@@ -2952,33 +2962,21 @@ void rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_String* string, int* 
  * shallow copy
  */
 ErrorCode rvm_array_get_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array** value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     *value = &(array->u.a_array[index]);
     return ERROR_CODE_SUCCESS;
 }
 
 ErrorCode rvm_array_set_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array* value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     array->u.a_array[index] = *value;
     return ERROR_CODE_SUCCESS;
 }
 
 ErrorCode rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Array* array, int index, bool* value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     *value = array->u.bool_array[index];
     return ERROR_CODE_SUCCESS;
 }
 
 ErrorCode rvm_array_set_bool(Ring_VirtualMachine* rvm, RVM_Array* array, int index, bool* value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     array->u.bool_array[index] = *value;
     return ERROR_CODE_SUCCESS;
 }
@@ -3009,25 +3007,16 @@ ErrorCode rvm_array_append_bool(Ring_VirtualMachine* rvm, RVM_Array* array, bool
 }
 
 ErrorCode rvm_array_pop_bool(Ring_VirtualMachine* rvm, RVM_Array* array, bool* value) {
-    if (array->length == 0) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     *value = array->u.bool_array[--array->length];
     return ERROR_CODE_SUCCESS;
 }
 
 ErrorCode rvm_array_get_int(Ring_VirtualMachine* rvm, RVM_Array* array, int index, int* value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     *value = array->u.int_array[index];
     return ERROR_CODE_SUCCESS;
 }
 
 ErrorCode rvm_array_set_int(Ring_VirtualMachine* rvm, RVM_Array* array, int index, int* value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     array->u.int_array[index] = *value;
     return ERROR_CODE_SUCCESS;
 }
@@ -3058,26 +3047,17 @@ ErrorCode rvm_array_append_int(Ring_VirtualMachine* rvm, RVM_Array* array, int* 
 }
 
 ErrorCode rvm_array_pop_int(Ring_VirtualMachine* rvm, RVM_Array* array, int* value) {
-    if (array->length == 0) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     *value = array->u.int_array[--array->length];
     return ERROR_CODE_SUCCESS;
 }
 
 
 ErrorCode rvm_array_get_int64(Ring_VirtualMachine* rvm, RVM_Array* array, int index, long long* value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     *value = array->u.int64_array[index];
     return ERROR_CODE_SUCCESS;
 }
 
 ErrorCode rvm_array_set_int64(Ring_VirtualMachine* rvm, RVM_Array* array, int index, long long* value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     array->u.int64_array[index] = *value;
     return ERROR_CODE_SUCCESS;
 }
@@ -3108,25 +3088,16 @@ ErrorCode rvm_array_append_int64(Ring_VirtualMachine* rvm, RVM_Array* array, lon
 }
 
 ErrorCode rvm_array_pop_int64(Ring_VirtualMachine* rvm, RVM_Array* array, long long* value) {
-    if (array->length == 0) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     *value = array->u.int64_array[--array->length];
     return ERROR_CODE_SUCCESS;
 }
 
 ErrorCode rvm_array_get_double(Ring_VirtualMachine* rvm, RVM_Array* array, int index, double* value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     *value = array->u.double_array[index];
     return ERROR_CODE_SUCCESS;
 }
 
 ErrorCode rvm_array_set_double(Ring_VirtualMachine* rvm, RVM_Array* array, int index, double* value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     array->u.double_array[index] = *value;
     return ERROR_CODE_SUCCESS;
 }
@@ -3157,17 +3128,11 @@ ErrorCode rvm_array_append_double(Ring_VirtualMachine* rvm, RVM_Array* array, do
 }
 
 ErrorCode rvm_array_pop_double(Ring_VirtualMachine* rvm, RVM_Array* array, double* value) {
-    if (array->length == 0) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     *value = array->u.double_array[--array->length];
     return ERROR_CODE_SUCCESS;
 }
 
 ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_String** value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     RVM_String* src_string = array->u.string_array[index];
 
     RVM_String* dst_string = rvm_deep_copy_string(rvm, src_string);
@@ -3182,9 +3147,6 @@ ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Array* array, int i
  * FIXME: 重新考虑一下, 可能存在内存泄漏
  */
 ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_String** value) {
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     RVM_String* dst_string       = rvm_deep_copy_string(rvm, *value);
 
     array->u.string_array[index] = dst_string;
@@ -3218,9 +3180,6 @@ ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Array* array, RV
 }
 
 ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_String** value) {
-    if (array->length == 0) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     RVM_String* dst_string = rvm_deep_copy_string(rvm, (array->u.string_array[--array->length]));
     *value                 = dst_string; // FIXME: 这里内存泄漏了
     return ERROR_CODE_SUCCESS;
@@ -3234,9 +3193,6 @@ ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm,
                                      int                  index,
                                      RVM_ClassObject**    value) {
 
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
     RVM_ClassObject* src_class_object = &(array->u.class_ob_array[index]);
     RVM_ClassObject* dst_class_object = nullptr;
 
@@ -3254,10 +3210,6 @@ ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm,
                                      RVM_Array*           array,
                                      int                  index,
                                      RVM_ClassObject**    value) {
-
-    if (index >= array->length) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
 
     RVM_ClassObject* dst_class_object = nullptr;
     dst_class_object                  = rvm_deep_copy_class_object(rvm, *value);
@@ -3299,10 +3251,6 @@ ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm,
 ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm,
                                      RVM_Array*           array,
                                      RVM_ClassObject**    value) {
-
-    if (array->length == 0) {
-        return RUNTIME_ERR_OUT_OF_ARRAY_RANGE;
-    }
 
     RVM_ClassObject* src_class_object = &(array->u.class_ob_array[--array->length]);
     RVM_ClassObject* dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);

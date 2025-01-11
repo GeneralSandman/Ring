@@ -1,4 +1,5 @@
 #include "ring.hpp"
+#include <cassert>
 
 
 Ring_Buildin_Func Ring_Buildin_Funcs[] = {

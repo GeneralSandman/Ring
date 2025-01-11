@@ -180,27 +180,27 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
             unsigned int dimension        = 1;
             unsigned int dimension_list[] = {size};
 
-            RVM_Array*   array            = nullptr;
+            RVM_Array*   array_value      = nullptr;
 
             switch (parameter->type_specifier->kind) {
             case RING_BASIC_TYPE_BOOL:
-                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL, nullptr);
+                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL, nullptr);
                 break;
             case RING_BASIC_TYPE_INT:
-                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT, nullptr);
+                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT, nullptr);
                 break;
             case RING_BASIC_TYPE_INT64:
-                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT64, nullptr);
+                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT64, nullptr);
                 break;
             case RING_BASIC_TYPE_DOUBLE:
-                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE, nullptr);
+                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE, nullptr);
                 break;
             case RING_BASIC_TYPE_STRING:
-                array = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING, nullptr);
+                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING, nullptr);
                 break;
             case RING_BASIC_TYPE_CLASS:
                 rvm_class_definition = &(rvm->class_list[parameter->type_specifier->u.class_def_index]);
-                array                = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLASS_OBJECT, rvm_class_definition);
+                array_value          = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLASS_OBJECT, rvm_class_definition);
                 break;
 
             default:
@@ -209,32 +209,37 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
             }
 
             // 将stack中的参数放入array中
-            for (unsigned array_i = 0; argument_stack_offset < argument_list_size; array_i++, argument_stack_offset++) {
+            for (unsigned array_index = 0;
+                 argument_stack_offset < argument_list_size;
+                 array_index++, argument_stack_offset++) {
+
+                assert_throw_range(array_index, array_value->length);
+
                 switch (parameter->type_specifier->kind) {
                 case RING_BASIC_TYPE_BOOL: {
                     RVM_Bool tmp        = VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset].u.bool_value;
                     bool     bool_value = tmp;
-                    rvm_array_set_bool(rvm, array, array_i, &bool_value);
+                    rvm_array_set_bool(rvm, array_value, array_index, &bool_value);
                 } break;
                 case RING_BASIC_TYPE_INT: {
                     int int_value = VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset].u.int_value;
-                    rvm_array_set_int(rvm, array, array_i, &int_value);
+                    rvm_array_set_int(rvm, array_value, array_index, &int_value);
                 } break;
                 case RING_BASIC_TYPE_INT64: {
                     long long int64_value = VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset].u.int64_value;
-                    rvm_array_set_int64(rvm, array, array_i, &int64_value);
+                    rvm_array_set_int64(rvm, array_value, array_index, &int64_value);
                 } break;
                 case RING_BASIC_TYPE_DOUBLE: {
                     double double_value = VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset].u.double_value;
-                    rvm_array_set_double(rvm, array, array_i, &double_value);
+                    rvm_array_set_double(rvm, array_value, array_index, &double_value);
                 } break;
                 case RING_BASIC_TYPE_STRING: {
                     RVM_String* string_value = VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset].u.string_value;
-                    rvm_array_set_string(rvm, array, array_i, &string_value);
+                    rvm_array_set_string(rvm, array_value, array_index, &string_value);
                 } break;
                 case RING_BASIC_TYPE_CLASS: {
                     RVM_ClassObject* class_ob = VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset].u.class_ob_value;
-                    rvm_array_set_class_object(rvm, array, array_i, &class_ob);
+                    rvm_array_set_class_object(rvm, array_value, array_index, &class_ob);
                 } break;
 
                 default:
@@ -244,7 +249,7 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
             }
 
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type          = RVM_VALUE_TYPE_ARRAY;
-            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.array_value = array;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.array_value = array_value;
             local_vari_stack_offset++;
             // 可变参数只能是函数的最后一个参数
             break;

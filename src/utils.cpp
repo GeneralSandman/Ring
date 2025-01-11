@@ -1549,6 +1549,21 @@ std::string sprintf_string(const char* format, ...) {
     return result;
 }
 
+// std::string sprintf_string(const char* format, va_list args) {
+//     // 首先计算所需的缓冲区大小
+//     int len = std::vsnprintf(nullptr, 0, format, args);
+
+//     // 分配足够大的缓冲区
+//     std::string result(len, '\0');
+
+//     // 使用 std::vsnprintf() 填充缓冲区
+//     std::vsnprintf(&result[0], len + 1, format, args);
+
+//     // 移除多余的空字符
+//     result.resize(len);
+//     return result;
+// }
+
 /*
  * 在 Linux 的 man 手册中，加粗文本通常是通过使用宏和格式控制字符实现的。
  * 这些宏和字符会在手册页被格式化时转换为适当的输出格式，例如加粗或斜体。
