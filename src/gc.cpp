@@ -192,64 +192,17 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
     switch (object->gc_type) {
     case RVM_GC_OBJECT_TYPE_STRING:
         string_value = (RVM_String*)object;
-        free_size    = string_value->capacity * sizeof(char);
-        debug_exec_info_with_white("\t string::free_size:%ld", free_size);
+        free_size    = rvm_free_string(rvm, string_value);
         break;
 
     case RVM_GC_OBJECT_TYPE_CLASS_OB:
-        class_ob = (RVM_ClassObject*)object;
-        for (unsigned int field_index = 0; field_index < class_ob->field_count; field_index++) {
-            switch (class_ob->field_list[field_index].type) {
-            case RVM_VALUE_TYPE_BOOL:
-                free_size += 1;
-                break;
-            case RVM_VALUE_TYPE_INT:
-                free_size += 4;
-                break;
-            case RVM_VALUE_TYPE_INT64:
-                free_size += 8;
-                break;
-            case RVM_VALUE_TYPE_DOUBLE:
-                free_size += 8;
-                break;
-            case RVM_VALUE_TYPE_STRING:
-                break;
-            default: break;
-            }
-        }
-        debug_exec_info_with_white("\t class-object::free_size:%ld", free_size);
+        class_ob  = (RVM_ClassObject*)object;
+        free_size = rvm_free_class_ob(rvm, class_ob);
         break;
 
     case RVM_GC_OBJECT_TYPE_ARRAY:
-        array = (RVM_Array*)object;
-        switch (array->type) {
-        case RVM_ARRAY_BOOL:
-            free_size = sizeof(bool) * array->capacity;
-            mem_free(rvm->data_pool, array->u.bool_array, free_size);
-            break;
-        case RVM_ARRAY_INT:
-            free_size = sizeof(int) * array->capacity;
-            mem_free(rvm->data_pool, array->u.int_array, free_size);
-            break;
-        case RVM_ARRAY_INT64:
-            free_size = sizeof(long long) * array->capacity;
-            mem_free(rvm->data_pool, array->u.int64_array, free_size);
-            break;
-        case RVM_ARRAY_DOUBLE:
-            free_size = sizeof(double) * array->capacity;
-            mem_free(rvm->data_pool, array->u.double_array, free_size);
-            break;
-        case RVM_ARRAY_STRING:
-            // TODO:
-            break;
-        case RVM_ARRAY_CLASS_OBJECT:
-            // TODO:
-            break;
-        case RVM_ARRAY_A:
-            // TODO:
-            break;
-        default: break;
-        }
+        array     = (RVM_Array*)object;
+        free_size = rvm_free_array(rvm, array);
         break;
 
     default:
@@ -276,12 +229,16 @@ RVM_String* rvm_gc_new_string_meta(Ring_VirtualMachine* rvm) {
 }
 
 void rvm_fill_string(Ring_VirtualMachine* rvm, RVM_String* string, unsigned int capacity) {
+    if (capacity == 0)
+        capacity = 8;
     assert(capacity == ROUND_UP8(capacity));
 
     unsigned int alloc_size = capacity * sizeof(char);
     string->length          = 0;
     string->capacity        = capacity;
-    string->data            = (char*)calloc(1, alloc_size);
+    string->data            = (char*)mem_alloc(rvm->data_pool, alloc_size);
+
+    memset(string->data, 0, alloc_size);
 
     rvm_heap_alloc_size_incr(rvm, alloc_size);
 }
@@ -294,7 +251,7 @@ RVM_String* rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src) {
     alloc_size              = sizeof(char) * src->capacity;
     string->length          = src->length;
     string->capacity        = src->capacity;
-    string->data            = (char*)calloc(1, alloc_size);
+    string->data            = (char*)mem_alloc(rvm->data_pool, alloc_size);
 
     memcpy(string->data, src->data, alloc_size);
 
@@ -499,6 +456,44 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
     return array;
 }
 
+unsigned int rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
+    unsigned int free_size = 0;
+
+    switch (array->type) {
+    case RVM_ARRAY_BOOL:
+        free_size = sizeof(bool) * array->capacity;
+        mem_free(rvm->data_pool, array->u.bool_array, free_size);
+        break;
+    case RVM_ARRAY_INT:
+        free_size = sizeof(int) * array->capacity;
+        mem_free(rvm->data_pool, array->u.int_array, free_size);
+        break;
+    case RVM_ARRAY_INT64:
+        free_size = sizeof(long long) * array->capacity;
+        mem_free(rvm->data_pool, array->u.int64_array, free_size);
+        break;
+    case RVM_ARRAY_DOUBLE:
+        free_size = sizeof(double) * array->capacity;
+        mem_free(rvm->data_pool, array->u.double_array, free_size);
+        break;
+    case RVM_ARRAY_STRING:
+        // TODO:
+        break;
+    case RVM_ARRAY_CLASS_OBJECT:
+        // TODO:
+        break;
+    case RVM_ARRAY_CLOSURE:
+        // TODO:
+        break;
+    case RVM_ARRAY_A:
+        // TODO:
+        break;
+    default: break;
+    }
+
+    return free_size;
+}
+
 
 RVM_ClassObject* rvm_gc_new_class_ob_meta(Ring_VirtualMachine* rvm) {
     RVM_ClassObject* class_object = (RVM_ClassObject*)mem_alloc(rvm->meta_pool, sizeof(RVM_ClassObject));
@@ -528,16 +523,17 @@ void rvm_fill_class_ob(Ring_VirtualMachine* rvm,
 
     assert(class_definition != nullptr);
 
-    RVM_Value*       field_list      = nullptr;
-    RVM_String*      field_string    = nullptr;
-    RVM_ClassObject* field_class_ob  = nullptr;
-    RVM_Array*       field_array     = nullptr;
-    size_t           alloc_meta_size = 0;
-    size_t           alloc_data_size = 0;
+    RVM_Value*           field_list             = nullptr;
+    RVM_String*          field_string           = nullptr;
+    RVM_ClassObject*     field_class_ob         = nullptr;
+    RVM_ClassDefinition* field_class_definition = nullptr;
+    RVM_Array*           field_array            = nullptr;
+    size_t               alloc_meta_size        = 0;
+    size_t               alloc_data_size        = 0;
 
-    alloc_meta_size                  = class_definition->field_size * sizeof(RVM_Value);
-    field_list                       = (RVM_Value*)mem_alloc(rvm->meta_pool,
-                                                             alloc_meta_size);
+    alloc_meta_size                             = class_definition->field_size * sizeof(RVM_Value);
+    field_list                                  = (RVM_Value*)mem_alloc(rvm->meta_pool,
+                                                                        alloc_meta_size);
     memset(field_list, 0, alloc_meta_size);
 
     for (unsigned int field_index = 0;
@@ -573,15 +569,15 @@ void rvm_fill_class_ob(Ring_VirtualMachine* rvm,
             field_list[field_index].type           = RVM_VALUE_TYPE_STRING;
             field_list[field_index].u.string_value = field_string;
             break;
-        case RING_BASIC_TYPE_CLASS: {
-            RVM_ClassDefinition* field_class_definition = &(rvm->class_list[type_specifier->u.class_def_index]);
-            field_class_ob                              = rvm_gc_new_class_ob_meta(rvm);
+        case RING_BASIC_TYPE_CLASS:
+            field_class_definition = &(rvm->class_list[type_specifier->u.class_def_index]);
+            field_class_ob         = rvm_gc_new_class_ob_meta(rvm);
             rvm_fill_class_ob(rvm, field_class_ob, field_class_definition);
             field_list[field_index].type             = RVM_VALUE_TYPE_CLASS_OB;
             field_list[field_index].u.class_ob_value = field_class_ob;
-        } break;
+            break;
         case RING_BASIC_TYPE_ARRAY:
-            field_array                           = nullptr; // FIXME:
+            field_array                           = nullptr;
             field_list[field_index].type          = RVM_VALUE_TYPE_ARRAY;
             field_list[field_index].u.array_value = field_array;
             alloc_data_size += 8;
@@ -601,9 +597,8 @@ void rvm_fill_class_ob(Ring_VirtualMachine* rvm,
 
 
 RVM_ClassObject* rvm_deep_copy_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* src) {
-    RVM_ClassObject* class_object = rvm_gc_new_class_ob_meta(rvm);
+    RVM_ClassObject*     class_object     = rvm_gc_new_class_ob_meta(rvm);
 
-    // FIXME: 这里还要继续完善深度copy
     RVM_ClassDefinition* class_definition = src->class_ref;
 
     RVM_Value*           field_list       = nullptr;
@@ -627,15 +622,19 @@ RVM_ClassObject* rvm_deep_copy_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObjec
 
         switch (type_specifier->kind) {
         case RING_BASIC_TYPE_BOOL:
+            // bool 无需重新copy，直接计算空间即可
             alloc_data_size += 1;
             break;
         case RING_BASIC_TYPE_INT:
+            // int 无需重新copy，直接计算空间即可
             alloc_data_size += 4;
             break;
         case RING_BASIC_TYPE_INT64:
+            // int64 无需重新copy，直接计算空间即可
             alloc_data_size += 8;
             break;
         case RING_BASIC_TYPE_DOUBLE:
+            // double 无需重新copy，直接计算空间即可
             alloc_data_size += 8;
             break;
         case RING_BASIC_TYPE_STRING:
@@ -643,11 +642,11 @@ RVM_ClassObject* rvm_deep_copy_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObjec
             field_list[field_index].type           = RVM_VALUE_TYPE_STRING;
             field_list[field_index].u.string_value = field_string;
             break;
-        case RING_BASIC_TYPE_CLASS: {
+        case RING_BASIC_TYPE_CLASS:
             field_class_ob                           = rvm_deep_copy_class_ob(rvm, src->field_list[field_index].u.class_ob_value);
             field_list[field_index].type             = RVM_VALUE_TYPE_CLASS_OB;
             field_list[field_index].u.class_ob_value = field_class_ob;
-        } break;
+            break;
         case RING_BASIC_TYPE_ARRAY:
             field_array                           = rvm_deep_copy_array(rvm, src->field_list[field_index].u.array_value);
             field_list[field_index].type          = RVM_VALUE_TYPE_ARRAY;
@@ -672,9 +671,41 @@ unsigned int rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_
     unsigned int free_size = 0;
 
     // FIXME: 释放 string class array
+    for (unsigned int field_index = 0; field_index < class_ob->field_count; field_index++) {
+        switch (class_ob->field_list[field_index].type) {
+        case RVM_VALUE_TYPE_BOOL:
+            free_size += 1;
+            break;
+        case RVM_VALUE_TYPE_INT:
+            free_size += 4;
+            break;
+        case RVM_VALUE_TYPE_INT64:
+            free_size += 8;
+            break;
+        case RVM_VALUE_TYPE_DOUBLE:
+            free_size += 8;
+            break;
+        case RVM_VALUE_TYPE_STRING:
+            // TODO:
+            break;
+        case RVM_VALUE_TYPE_CLASS_OB:
+            // TODO:
+            break;
+        case RVM_VALUE_TYPE_ARRAY:
+            // TODO:
+            break;
+        case RVM_VALUE_TYPE_CLOSURE:
+            // TODO:
+            break;
+        default:
+            break;
+        }
+    }
 
     if (class_ob->field_list != nullptr) {
-        mem_free(rvm->meta_pool, class_ob->field_list, class_ob->field_count * sizeof(RVM_Value));
+        mem_free(rvm->meta_pool,
+                 class_ob->field_list,
+                 class_ob->field_count * sizeof(RVM_Value));
     }
     free_size = class_ob->field_count * sizeof(RVM_Value);
     mem_free(rvm->meta_pool, class_ob, sizeof(RVM_ClassObject));

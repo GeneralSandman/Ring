@@ -757,8 +757,8 @@ typedef enum {
     RVM_ARRAY_DOUBLE,       // double 数组
     RVM_ARRAY_STRING,       // string 数组
     RVM_ARRAY_CLASS_OBJECT, // 类 数组
+    RVM_ARRAY_CLOSURE,      // 匿名函数 数组
     RVM_ARRAY_A,            // 多维数组的中间态， 感觉有必要删除
-    // TODO: closure 数组
 } RVM_Array_Type;
 
 
@@ -3463,6 +3463,7 @@ RVM_Array*       rvm_new_array(Ring_VirtualMachine* rvm,
                                RVM_Array_Type       array_type,
                                RVM_ClassDefinition* class_definition);
 RVM_Array*       rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src);
+unsigned int     rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array);
 
 
 RVM_ClassObject* rvm_gc_new_class_ob_meta(Ring_VirtualMachine* rvm);
@@ -3627,11 +3628,10 @@ std::string fmt_bool(RVM_Value* value);
 std::string fmt_int(RVM_Value* value);
 std::string fmt_int64(RVM_Value* value);
 std::string fmt_double(RVM_Value* value);
-std::string fmt_string(RVM_Value* value);
-std::string fmt_class(RVM_Value* value);
+std::string fmt_string(RVM_String* string_value);
 std::string fmt_class(RVM_ClassObject* class_object);
-std::string fmt_array(RVM_Value* value);
 std::string fmt_array(RVM_Array* array_value);
+std::string fmt_closure(RVM_Closure* closure);
 
 // --------------------
 

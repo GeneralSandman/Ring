@@ -17,16 +17,16 @@ std::string fmt_any(RVM_Value* value) {
         return fmt_double(value);
         break;
     case RVM_VALUE_TYPE_STRING:
-        return fmt_string(value);
+        return fmt_string(value->u.string_value);
         break;
     case RVM_VALUE_TYPE_CLASS_OB:
-        return fmt_class(value);
+        return fmt_class(value->u.class_ob_value);
         break;
     case RVM_VALUE_TYPE_ARRAY:
-        return fmt_array(value);
+        return fmt_array(value->u.array_value);
         break;
     case RVM_VALUE_TYPE_CLOSURE:
-        return "CLOSURE";
+        return fmt_closure(value->u.closure_value);
         break;
     default:
         break;
@@ -56,14 +56,10 @@ std::string fmt_double(RVM_Value* value) {
     return std::to_string(value->u.double_value);
 }
 
-std::string fmt_string(RVM_Value* value) {
+std::string fmt_string(RVM_String* string_value) {
     std::string res;
-    res.assign(value->u.string_value->data, value->u.string_value->length);
+    res.assign(string_value->data, string_value->length);
     return res;
-}
-
-std::string fmt_class(RVM_Value* value) {
-    return fmt_class(value->u.class_ob_value);
 }
 
 std::string fmt_class(RVM_ClassObject* class_object) {
@@ -85,10 +81,6 @@ std::string fmt_class(RVM_ClassObject* class_object) {
     result += "}";
 
     return result;
-}
-
-std::string fmt_array(RVM_Value* value) {
-    return fmt_array(value->u.array_value);
 }
 
 std::string fmt_array(RVM_Array* array_value) {
@@ -137,4 +129,12 @@ std::string fmt_array(RVM_Array* array_value) {
     result += "]";
 
     return result;
+}
+
+
+std::string fmt_closure(RVM_Closure* closure) {
+    if (closure == nullptr) {
+        return "nil";
+    }
+    return sprintf_string("CLOSURE(%p)", closure);
 }

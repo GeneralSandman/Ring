@@ -2734,25 +2734,14 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
  *
  */
 RVM_String* string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal) {
-    size_t       length     = 0;
-    unsigned int capacity   = 0;
-    size_t       alloc_size = 0;
-    RVM_String*  string     = rvm_gc_new_string_meta(rvm);
+    size_t length      = 0;
+    length             = (string_literal != nullptr) ? strlen(string_literal) : 0;
 
-    length                  = (string_literal != nullptr) ? strlen(string_literal) : 0;
-    capacity                = ROUND_UP8(length);
-    alloc_size              = capacity * sizeof(char);
+    RVM_String* string = rvm_gc_new_string_meta(rvm);
+    rvm_fill_string(rvm, string, ROUND_UP8(length));
 
-    string->length          = length;
-    string->capacity        = capacity;
-    string->data            = (char*)calloc(1, alloc_size); // FIXME:
-
-    rvm_heap_alloc_size_incr(rvm, alloc_size);
-    debug_exec_info_with_white("\t string::alloc_size:%ld", alloc_size);
-
-
-    memset(string->data, 0, alloc_size);
     strncpy(string->data, string_literal, length);
+    string->length = length;
 
     return string;
 }
