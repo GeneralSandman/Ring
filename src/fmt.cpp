@@ -79,7 +79,7 @@ std::string fmt_class(RVM_ClassObject* class_object) {
 
         result += class_def->field_list[i].identifier;
         result += ":";
-        result += fmt_any(&class_object->field[i]);
+        result += fmt_any(&class_object->field_list[i]);
     }
 
     result += "}";

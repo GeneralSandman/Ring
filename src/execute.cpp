@@ -1359,58 +1359,58 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_POP_FIELD_BOOL:
-            class_ob_value                                  = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                     = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            class_ob_value->field[field_index].type         = RVM_VALUE_TYPE_BOOL;
-            class_ob_value->field[field_index].u.bool_value = STACK_GET_BOOL_OFFSET(-2);
+            class_ob_value                                       = STACK_GET_CLASS_OB_OFFSET(-1);
+            field_index                                          = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            class_ob_value->field_list[field_index].type         = RVM_VALUE_TYPE_BOOL;
+            class_ob_value->field_list[field_index].u.bool_value = STACK_GET_BOOL_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_INT:
-            class_ob_value                                 = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            class_ob_value->field[field_index].type        = RVM_VALUE_TYPE_INT;
-            class_ob_value->field[field_index].u.int_value = STACK_GET_INT_OFFSET(-2);
+            class_ob_value                                      = STACK_GET_CLASS_OB_OFFSET(-1);
+            field_index                                         = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            class_ob_value->field_list[field_index].type        = RVM_VALUE_TYPE_INT;
+            class_ob_value->field_list[field_index].u.int_value = STACK_GET_INT_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_INT64:
-            class_ob_value                                   = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                      = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            class_ob_value->field[field_index].type          = RVM_VALUE_TYPE_INT64;
-            class_ob_value->field[field_index].u.int64_value = STACK_GET_INT64_OFFSET(-2);
+            class_ob_value                                        = STACK_GET_CLASS_OB_OFFSET(-1);
+            field_index                                           = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            class_ob_value->field_list[field_index].type          = RVM_VALUE_TYPE_INT64;
+            class_ob_value->field_list[field_index].u.int64_value = STACK_GET_INT64_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_DOUBLE:
-            class_ob_value                                    = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                       = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            class_ob_value->field[field_index].type           = RVM_VALUE_TYPE_DOUBLE;
-            class_ob_value->field[field_index].u.double_value = STACK_GET_DOUBLE_OFFSET(-2);
+            class_ob_value                                         = STACK_GET_CLASS_OB_OFFSET(-1);
+            field_index                                            = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            class_ob_value->field_list[field_index].type           = RVM_VALUE_TYPE_DOUBLE;
+            class_ob_value->field_list[field_index].u.double_value = STACK_GET_DOUBLE_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_STRING:
-            class_ob_value                                    = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                       = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            class_ob_value->field[field_index].type           = RVM_VALUE_TYPE_STRING;
-            class_ob_value->field[field_index].u.string_value = STACK_GET_STRING_OFFSET(-2);
+            class_ob_value                                         = STACK_GET_CLASS_OB_OFFSET(-1);
+            field_index                                            = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            class_ob_value->field_list[field_index].type           = RVM_VALUE_TYPE_STRING;
+            class_ob_value->field_list[field_index].u.string_value = STACK_GET_STRING_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_CLASS_OB:
-            class_ob_value                                      = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                         = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            class_ob_value->field[field_index].type             = RVM_VALUE_TYPE_CLASS_OB;
-            class_ob_value->field[field_index].u.class_ob_value = STACK_GET_CLASS_OB_OFFSET(-2);
+            class_ob_value                                           = STACK_GET_CLASS_OB_OFFSET(-1);
+            field_index                                              = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            class_ob_value->field_list[field_index].type             = RVM_VALUE_TYPE_CLASS_OB;
+            class_ob_value->field_list[field_index].u.class_ob_value = STACK_GET_CLASS_OB_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_POP_FIELD_ARRAY:
-            class_ob_value                                   = STACK_GET_CLASS_OB_OFFSET(-1);
-            field_index                                      = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            class_ob_value->field[field_index].type          = RVM_VALUE_TYPE_ARRAY;
-            class_ob_value->field[field_index].u.array_value = STACK_GET_ARRAY_OFFSET(-2);
+            class_ob_value                                        = STACK_GET_CLASS_OB_OFFSET(-1);
+            field_index                                           = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            class_ob_value->field_list[field_index].type          = RVM_VALUE_TYPE_ARRAY;
+            class_ob_value->field_list[field_index].u.array_value = STACK_GET_ARRAY_OFFSET(-2);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             VM_CUR_CO_PC += 3;
             break;
@@ -1428,43 +1428,43 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             //     printf("tmp:%s\n", tmp.c_str());
             //     ring_exec_err_report("Runtime Stack:\n%s\n", tmp.c_str());
             // }
-            STACK_SET_BOOL_OFFSET(-1, class_ob_value->field[field_index].u.bool_value);
+            STACK_SET_BOOL_OFFSET(-1, class_ob_value->field_list[field_index].u.bool_value);
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_INT:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
             field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            STACK_SET_INT_OFFSET(-1, class_ob_value->field[field_index].u.int_value);
+            STACK_SET_INT_OFFSET(-1, class_ob_value->field_list[field_index].u.int_value);
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_INT64:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
             field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            STACK_SET_INT64_OFFSET(-1, class_ob_value->field[field_index].u.int64_value);
+            STACK_SET_INT64_OFFSET(-1, class_ob_value->field_list[field_index].u.int64_value);
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_DOUBLE:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
             field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            STACK_SET_DOUBLE_OFFSET(-1, class_ob_value->field[field_index].u.double_value);
+            STACK_SET_DOUBLE_OFFSET(-1, class_ob_value->field_list[field_index].u.double_value);
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_STRING:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
             field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            STACK_SET_STRING_OFFSET(-1, class_ob_value->field[field_index].u.string_value);
+            STACK_SET_STRING_OFFSET(-1, class_ob_value->field_list[field_index].u.string_value);
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_CLASS_OB:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
             field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            STACK_SET_CLASS_OB_OFFSET(-1, class_ob_value->field[field_index].u.class_ob_value);
+            STACK_SET_CLASS_OB_OFFSET(-1, class_ob_value->field_list[field_index].u.class_ob_value);
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_FIELD_ARRAY:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
             field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            STACK_SET_ARRAY_OFFSET(-1, class_ob_value->field[field_index].u.array_value);
+            STACK_SET_ARRAY_OFFSET(-1, class_ob_value->field_list[field_index].u.array_value);
             VM_CUR_CO_PC += 3;
             break;
 

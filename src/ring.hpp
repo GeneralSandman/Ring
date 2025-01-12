@@ -792,7 +792,7 @@ struct RVM_ClassObject {
 
     RVM_ClassDefinition* class_ref;
     unsigned int         field_count;
-    RVM_Value*           field;
+    RVM_Value*           field_list;
 };
 
 struct RVM_TypeSpecifier_Array {
