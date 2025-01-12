@@ -13,6 +13,8 @@ fn test1() {
 fn test2() {
 	var int[] array;
 
+	fmt::println(capacity(array));
+
 	// 空数组报错
 	// array[10] = 1;
 
@@ -22,12 +24,8 @@ fn test2() {
 
 
 	// 空 匿名函数变量 报错
-	var FuncType func_var;
-
-	func_var = fn() {
-		fmt::println("hello world");
-	};
-	func_var();
+	// var FuncType func_var;
+	// func_var();
 }
 
 

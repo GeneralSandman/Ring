@@ -36,6 +36,7 @@ fn main() {
     debug::assert(vm::heap_size() - init_heap_size == 320L);
 
 
+    fmt::printf("\ngarbage_collect-------\n");
     vm::garbage_collect();
 
 

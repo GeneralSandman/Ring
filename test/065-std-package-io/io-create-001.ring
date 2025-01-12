@@ -17,7 +17,7 @@ typedef class File {
 // 测试 exist/create/seek/read_all/write/close/remove 函数
 fn main() {
 
-    var string file_name = "./io-create-001.ring.result.tmp";
+    var string file_name = "./io-create-001.ring.result.tmp.1";
     var bool   exist;
     var int    fileid;
     var string content;

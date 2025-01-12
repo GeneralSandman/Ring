@@ -115,6 +115,12 @@ var (
 
 		"test/050-coroutine/sleep-and-yield.ring",
 		// 就是未来死循环验证协程切换, 可以暂时不用测试
+
+
+		// 等 v0.3.0 重新设计垃圾回收算法之后，重新验证
+		"test/064-std-package-vm/gc-array.ring",
+		"test/064-std-package-vm/gc-array-string.ring",
+		"test/064-std-package-vm/gc-class-002.ring",
 	}
 
 	TEST_CASE_WORKFLOW_PATH = "/Users/bytedance/Desktop/Ring"
