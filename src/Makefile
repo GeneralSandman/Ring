@@ -32,6 +32,7 @@ OBJS   = \
 # bison >= 3.8.2
 # BisonBin     = /opt/homebrew/Cellar/bison/3.8.2/bin/bison
 BisonBin     = /usr/local/Cellar/bison/3.8.2/bin/bison
+# BisonBin     = bison
 BisonRequire = 3.8.2
 BisonVersion =  $(shell $(BisonBin) --version | grep 'bison' | awk '{print $$4}')
 
