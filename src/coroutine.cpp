@@ -1,5 +1,6 @@
 #include "ring.hpp"
 #include <cassert>
+#include <ctime>
 
 
 extern int RING_DEBUG_TRACE_COROUTINE_SCHED;
@@ -144,6 +145,7 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
     RVM_ClassDefinition* rvm_class_definition    = nullptr;
     RVM_ClassObject*     class_ob                = nullptr;
     RVM_String*          string                  = nullptr;
+    RVM_Array*           array                   = nullptr;
 
     unsigned int         argument_stack_index    = 0; // argument's abs-index in runtime_stack.
     unsigned int         local_vari_stack_offset = 0; // callee_function's local variable offset in runtime_stack.
@@ -327,13 +329,25 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type             = RVM_VALUE_TYPE_CLASS_OB;
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.class_ob_value = class_ob;
             break;
+        case RING_BASIC_TYPE_ARRAY: {
+            // 这里没有分配空间, 只分配了一下meta
+            RVM_ClassDefinition* sub_class_definition = nullptr;
+            RVM_TypeSpecifier*   sub_type_specifier   = type_specifier->u.array_t->sub;
+            if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
+                sub_class_definition = &(rvm->class_list[sub_type_specifier->u.class_def_index]);
+            }
+
+            array = rvm_gc_new_array_meta(rvm,
+                                          RVM_Array_Type(type_specifier->u.array_t->sub->kind), // 这里强制转化一下
+                                          sub_class_definition,
+                                          type_specifier->u.array_t->dimension);
+            //
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type          = RVM_VALUE_TYPE_ARRAY;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.array_value = array;
+        } break;
         case RING_BASIC_TYPE_FUNC:
             // TODO: 这里没有分配空间
             break;
-        case RING_BASIC_TYPE_ARRAY:
-            // TODO: 这里没有分配空间
-            break;
-
         default:
             break;
         }

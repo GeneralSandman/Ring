@@ -27,31 +27,37 @@
  */
 TypeSpecifier bool_type_specifier = TypeSpecifier{
     .line_number = 0,
+    .identifier  = nullptr,
     .kind        = RING_BASIC_TYPE_BOOL,
     .u           = {.array_t = nullptr},
 };
 TypeSpecifier int_type_specifier = TypeSpecifier{
     .line_number = 0,
+    .identifier  = nullptr,
     .kind        = RING_BASIC_TYPE_INT,
     .u           = {.array_t = nullptr},
 };
 TypeSpecifier int64_type_specifier = TypeSpecifier{
     .line_number = 0,
+    .identifier  = nullptr,
     .kind        = RING_BASIC_TYPE_INT64,
     .u           = {.array_t = nullptr},
 };
 TypeSpecifier double_type_specifier = TypeSpecifier{
     .line_number = 0,
+    .identifier  = nullptr,
     .kind        = RING_BASIC_TYPE_DOUBLE,
     .u           = {.array_t = nullptr},
 };
 TypeSpecifier string_type_specifier = TypeSpecifier{
     .line_number = 0,
+    .identifier  = nullptr,
     .kind        = RING_BASIC_TYPE_STRING,
     .u           = {.array_t = nullptr},
 };
 TypeSpecifier func_type_specifier = TypeSpecifier{
     .line_number = 0,
+    .identifier  = nullptr,
     .kind        = RING_BASIC_TYPE_FUNC,
     .u           = {.array_t = nullptr},
 };

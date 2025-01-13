@@ -1,5 +1,6 @@
 #include "ring.hpp"
 #include <cassert>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -20,8 +21,7 @@ Statement* statement_list_add_item(Statement* statement_list, Statement* stateme
     debug_ast_info_with_yellow("statement->type:%d", statement->type);
 
     Statement* pos = statement_list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = statement;
     return statement_list;
 }
@@ -445,8 +445,7 @@ FieldInitExpression* field_init_list_add_item(FieldInitExpression* list,
                                               FieldInitExpression* item) {
 
     FieldInitExpression* pos = list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = item;
     return list;
 }
@@ -535,16 +534,14 @@ Expression* expression_list_add_item(Expression* expression_list, Expression* ex
     }
 
     Expression* pos = expression_list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = expression;
     return expression_list;
 }
 
 ArgumentList* argument_list_add_item(ArgumentList* argument_list, ArgumentList* argument) {
     ArgumentList* pos = argument_list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = argument;
     return argument_list;
 }
@@ -575,8 +572,7 @@ Identifier* create_identifier(IdentifierType type, char* name) {
 
 Identifier* identifier_list_add_item(Identifier* identifier_list, Identifier* identifier) {
     Identifier* pos = identifier_list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = identifier;
     return identifier_list;
 }
@@ -594,8 +590,7 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
                                                   TypeSpecifier*      type_specifier) {
 
     FunctionReturnList* pos = return_list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = create_function_return_list(type_specifier);
     return return_list;
 }
@@ -623,12 +618,11 @@ FunctionTuple* create_function_tuple(Location*           location,
                 ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER);
 
             ErrorReportContext context = {
-                .package          = nullptr,
-                .package_unit     = get_package_unit(),
-                .source_file_name = get_package_unit()->current_file_name,
-                // FIXME:
-                // .line_content            = package_unit_get_line_content(identifier->line_number),
-                // .line_number             = identifier->line_number,
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(location->line_number),
+                .line_number             = location->line_number,
                 .column_number           = package_unit_get_column_number(),
                 .error_message           = std::string(compile_err_buf),
                 .advice                  = std::string(compile_adv_buf),

@@ -598,7 +598,8 @@ void generate_buildin_func_push(Package_Executer*       executer,
     case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_ARRAY_APPEND_DOUBLE; break;
     case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_ARRAY_APPEND_STRING; break;
     case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_ARRAY_APPEND_CLASS_OB; break;
-    default: ring_error_report("error: push() is only be used by bool[] int[] double[] string[] class[]\n");
+    case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_ARRAY_APPEND_CLOSURE; break;
+    default: ring_error_report("error: push() is only be used by bool[] int[] int64[] double[] string[] class[] fn[]\n");
     }
     generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
 }
@@ -625,7 +626,8 @@ void generate_buildin_func_pop(Package_Executer*       executer,
     case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_ARRAY_POP_DOUBLE; break;
     case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_ARRAY_POP_STRING; break;
     case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_ARRAY_POP_CLASS_OB; break;
-    default: ring_error_report("error: pop() is only be used by bool[] int[] double[] string[] class[]\n");
+    case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_ARRAY_POP_CLOSURE; break;
+    default: ring_error_report("error: pop() is only be used by bool[] int[] int64[] double[] string[] class[] fn[]\n");
     }
     generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
 }

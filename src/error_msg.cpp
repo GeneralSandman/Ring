@@ -1,5 +1,5 @@
 #include "ring.hpp"
-
+#include <cstdarg>
 
 struct ErrorMessageInfo ErrorMessageInfos[] = {
     {ERROR_CODE_SUCCESS, "SUCCESS"},
@@ -66,15 +66,24 @@ const char* RuntimeException::what() const noexcept {
 }
 
 void throw_nil_error(Ring_VirtualMachine* rvm, const char* fmt, ...) {
-    std::string message = sprintf_string(fmt);
+    va_list args;
+    va_start(args, fmt);
+    std::string message = sprintf_string_va(fmt, args);
+    va_end(args);
     throw RuntimeException(RING_NIL_ERROR, message, rvm);
 }
 void throw_range_error(Ring_VirtualMachine* rvm, const char* fmt, ...) {
-    std::string message = sprintf_string(fmt);
+    va_list args;
+    va_start(args, fmt);
+    std::string message = sprintf_string_va(fmt, args);
+    va_end(args);
     throw RuntimeException(RING_RANGE_ERROR, message, rvm);
 }
 
 void throw_invalid_opcode_error(Ring_VirtualMachine* rvm, const char* fmt, ...) {
-    std::string message = sprintf_string(fmt);
+    va_list args;
+    va_start(args, fmt);
+    std::string message = sprintf_string_va(fmt, args);
+    va_end(args);
     throw RuntimeException(RING_INVALID_OPCODE_ERROR, message, rvm);
 }

@@ -1406,6 +1406,9 @@ std::string formate_array_item_type(RVM_Array* array_value) {
         // 递归向下找，找到元素的类型，最后加上 数组维度
         str = formate_array_item_type(array_value->u.a_array);
         break;
+    case RVM_ARRAY_CLOSURE:
+        str = "closure";
+        break;
 
     default:
         str = "unknow";
@@ -1549,20 +1552,21 @@ std::string sprintf_string(const char* format, ...) {
     return result;
 }
 
-// std::string sprintf_string(const char* format, va_list args) {
-//     // 首先计算所需的缓冲区大小
-//     int len = std::vsnprintf(nullptr, 0, format, args);
+std::string sprintf_string_va(const char* format, va_list args) {
+    // 首先计算所需的缓冲区大小
+    int len = std::vsnprintf(nullptr, 0, format, args);
 
-//     // 分配足够大的缓冲区
-//     std::string result(len, '\0');
+    // 分配足够大的缓冲区
+    std::string result(len, '\0');
 
-//     // 使用 std::vsnprintf() 填充缓冲区
-//     std::vsnprintf(&result[0], len + 1, format, args);
+    // 使用 std::vsnprintf() 填充缓冲区
+    std::vsnprintf(&result[0], len + 1, format, args);
+    // FIXME: Apple clang version 14.0.3 (clang-1403.0.22.14.1) 运行会报错
 
-//     // 移除多余的空字符
-//     result.resize(len);
-//     return result;
-// }
+    // 移除多余的空字符
+    result.resize(len);
+    return result;
+}
 
 /*
  * 在 Linux 的 man 手册中，加粗文本通常是通过使用宏和格式控制字符实现的。

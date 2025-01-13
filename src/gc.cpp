@@ -146,7 +146,14 @@ void gc_mark_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob) {
         case RVM_VALUE_TYPE_STRING:
             class_ob->field_list[field_index].u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
             break;
+        case RVM_VALUE_TYPE_CLASS_OB:
+            class_ob->field_list[field_index].u.class_ob_value->gc_mark = GC_MARK_COLOR_BLACK;
+            break;
         case RVM_VALUE_TYPE_ARRAY:
+            class_ob->field_list[field_index].u.array_value->gc_mark = GC_MARK_COLOR_BLACK;
+            break;
+        case RVM_VALUE_TYPE_CLOSURE:
+            // TODO:
             break;
         default:
             break;
@@ -171,6 +178,9 @@ void gc_mark_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
             break;
         case RVM_ARRAY_CLASS_OBJECT:
             array->u.class_ob_array[i].gc_mark = GC_MARK_COLOR_BLACK;
+            break;
+        case RVM_ARRAY_CLOSURE:
+            // TODO:
             break;
         case RVM_ARRAY_A:
             break;
@@ -274,17 +284,21 @@ unsigned int rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string) {
 }
 
 
-RVM_Array* rvm_gc_new_array_meta(Ring_VirtualMachine* rvm) {
+RVM_Array* rvm_gc_new_array_meta(Ring_VirtualMachine* rvm,
+                                 RVM_Array_Type       array_type,
+                                 RVM_ClassDefinition* class_definition,
+                                 unsigned int         dimension) {
+
     RVM_Array* array    = (RVM_Array*)mem_alloc(rvm->meta_pool, sizeof(RVM_Array));
     array->gc_type      = RVM_GC_OBJECT_TYPE_ARRAY;
     array->gc_mark      = GC_MARK_COLOR_WHITE;
     array->gc_prev      = nullptr;
     array->gc_next      = nullptr;
-    array->type         = RVM_ARRAY_UNKNOW;
-    array->dimension    = 0;
+    array->type         = array_type;
+    array->dimension    = dimension;
     array->length       = 0;
     array->capacity     = 0;
-    array->class_ref    = nullptr;
+    array->class_ref    = class_definition;
     array->u.bool_array = nullptr;
 
     rvm_heap_list_add_object(rvm, (RVM_GC_Object*)array);
@@ -306,9 +320,8 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
     RVM_Array*   array      = nullptr;
     unsigned int alloc_size = 0;
 
-    array                   = rvm_gc_new_array_meta(rvm);
-    array->type             = array_type;
-    array->dimension        = dimension_index;
+    array                   = rvm_gc_new_array_meta(rvm,
+                                                    array_type, class_definition, dimension_index);
     array->length           = dimension_list[dimension - dimension_index];
     array->capacity         = dimension_list[dimension - dimension_index];
 
@@ -344,7 +357,6 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
             break;
         case RVM_ARRAY_CLASS_OBJECT:
             assert(class_definition != nullptr);
-            array->class_ref        = class_definition;
             array->u.class_ob_array = (RVM_ClassObject*)mem_alloc(rvm->data_pool,
                                                                   sizeof(RVM_ClassObject) * array->capacity);
             for (unsigned int i = 0; i < array->length; i++) {
@@ -381,12 +393,10 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
 RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
     RVM_Array* array  = nullptr;
 
-    array             = rvm_gc_new_array_meta(rvm);
-    array->type       = src->type;
-    array->dimension  = src->dimension;
+    array             = rvm_gc_new_array_meta(rvm,
+                                              src->type, src->class_ref, src->dimension);
     array->length     = src->length;
     array->capacity   = src->capacity;
-    array->class_ref  = src->class_ref;
 
 
     size_t alloc_size = 0;

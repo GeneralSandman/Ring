@@ -757,9 +757,10 @@ typedef enum {
     RVM_ARRAY_DOUBLE,       // double 数组
     RVM_ARRAY_STRING,       // string 数组
     RVM_ARRAY_CLASS_OBJECT, // 类 数组
-    RVM_ARRAY_CLOSURE,      // 匿名函数 数组
     RVM_ARRAY_A,            // 多维数组的中间态， 感觉有必要删除
+    RVM_ARRAY_CLOSURE,      // 匿名函数 数组
 } RVM_Array_Type;
+// 这里的顺序要和 Ring_BasicType 保持一致
 
 
 struct RVM_Array {
@@ -782,6 +783,7 @@ struct RVM_Array {
         double*          double_array;
         RVM_String*      string_array;
         RVM_ClassObject* class_ob_array;
+        RVM_Closure*     closure_array;
         RVM_Array*       a_array; // 多维数组
     } u;
 };
@@ -959,6 +961,7 @@ typedef enum {
     RVM_CODE_PUSH_ARRAY_DOUBLE,
     RVM_CODE_PUSH_ARRAY_STRING,
     RVM_CODE_PUSH_ARRAY_CLASS_OB,
+    RVM_CODE_PUSH_ARRAY_CLOSURE,
 
     RVM_CODE_POP_ARRAY_A,
     RVM_CODE_POP_ARRAY_BOOL,
@@ -967,6 +970,7 @@ typedef enum {
     RVM_CODE_POP_ARRAY_DOUBLE,
     RVM_CODE_POP_ARRAY_STRING,
     RVM_CODE_POP_ARRAY_CLASS_OB,
+    RVM_CODE_POP_ARRAY_CLOSURE,
 
     // array append
     RVM_CODE_ARRAY_APPEND_BOOL,
@@ -975,6 +979,7 @@ typedef enum {
     RVM_CODE_ARRAY_APPEND_DOUBLE,
     RVM_CODE_ARRAY_APPEND_STRING,
     RVM_CODE_ARRAY_APPEND_CLASS_OB,
+    RVM_CODE_ARRAY_APPEND_CLOSURE,
     // array pop
     RVM_CODE_ARRAY_POP_BOOL,
     RVM_CODE_ARRAY_POP_INT,
@@ -982,6 +987,7 @@ typedef enum {
     RVM_CODE_ARRAY_POP_DOUBLE,
     RVM_CODE_ARRAY_POP_STRING,
     RVM_CODE_ARRAY_POP_CLASS_OB,
+    RVM_CODE_ARRAY_POP_CLOSURE,
 
     // array
     RVM_CODE_NEW_ARRAY_BOOL,
@@ -3252,6 +3258,20 @@ ErrorCode            rvm_array_set_class_object(Ring_VirtualMachine* rvm, RVM_Ar
 ErrorCode            rvm_array_append_class_object(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_ClassObject** value);
 ErrorCode            rvm_array_pop_class_object(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_ClassObject** value);
 
+ErrorCode            rvm_array_get_closure(Ring_VirtualMachine* rvm,
+                                           RVM_Array*           array,
+                                           int                  index,
+                                           RVM_Closure**        value);
+ErrorCode            rvm_array_set_closure(Ring_VirtualMachine* rvm,
+                                           RVM_Array*           array,
+                                           int                  index,
+                                           RVM_Closure**        value);
+ErrorCode            rvm_array_append_closure(Ring_VirtualMachine* rvm,
+                                              RVM_Array*           array,
+                                              RVM_Closure**        value);
+ErrorCode            rvm_array_pop_closure(Ring_VirtualMachine* rvm,
+                                           RVM_Array*           array,
+                                           RVM_Closure**        value);
 
 RVM_String*          rvm_bool_2_string(Ring_VirtualMachine* rvm, bool value);
 RVM_String*          rvm_int_2_string(Ring_VirtualMachine* rvm, int value);
@@ -3406,9 +3426,9 @@ bool                     comp_type_specifier(TypeSpecifier* a, TypeSpecifier* b)
 bool                     comp_type_specifier_func(Ring_DeriveType_Func* a, Ring_DeriveType_Func* b);
 
 std::string              sprintf_string(const char* format, ...);
-// std::string              sprintf_string(const char* format, va_list args);
+std::string              sprintf_string_va(const char* format, va_list args);
 
-std::string convert_troff_string_2_c_control(const std::string& input);
+std::string              convert_troff_string_2_c_control(const std::string& input);
 // --------------------
 
 
@@ -3455,7 +3475,10 @@ RVM_String*      rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src)
 unsigned int     rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
 
 
-RVM_Array*       rvm_gc_new_array_meta(Ring_VirtualMachine* rvm);
+RVM_Array*       rvm_gc_new_array_meta(Ring_VirtualMachine* rvm,
+                                       RVM_Array_Type       array_type,
+                                       RVM_ClassDefinition* class_definition,
+                                       unsigned int         dimension);
 RVM_Array*       rvm_new_array(Ring_VirtualMachine* rvm,
                                unsigned int         dimension,
                                unsigned int*        dimension_list,

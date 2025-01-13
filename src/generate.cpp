@@ -841,7 +841,7 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
         case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_FOR_RANGE_ARRAY_DOUBLE; break;
         case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_FOR_RANGE_ARRAY_STRING; break;
         case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB; break;
-        default: ring_error_report("error: range expression only support bool[] int[] double[] string[]\n");
+        default: ring_error_report("error: range expression only support bool[] int[] int64[] double[] string[] class[]\n");
         }
         generate_vmcode(executer, opcode_buffer, opcode, end_label, range_statement->operand->u.identifier_expression->line_number);
     }
@@ -1402,9 +1402,10 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
                 case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_POP_ARRAY_DOUBLE; break;
                 case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_POP_ARRAY_STRING; break;
                 case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_POP_ARRAY_CLASS_OB; break;
+                case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_POP_ARRAY_CLOSURE; break;
                 default:
                     // TODO: 编译报错
-                    ring_error_report("error: assign to item of array only support bool[] int[] double[] string[] class[]\n");
+                    ring_error_report("error: assign to item of array only support bool[] int[] int64[] double[] string[] class[] fn[]\n");
                     break;
                 }
                 generate_vmcode(executer, opcode_buffer, opcode, 0, array_index_expression->line_number);
@@ -2285,6 +2286,9 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
         class_definition = sub_type_specifier->u.class_t->class_definition;
         operand          = (dimension << 8) | (class_definition->class_index);
         break;
+    // case RING_BASIC_TYPE_FUNC:
+    //     // opcode = RVM_CODE_NEW_ARRAY_CLOSURE; // FIXME:
+    //     break;
     default:
         // TODO: 编译报错
         ring_error_report("error: new array only support bool[] int[] int64[] double[] string[] class[]\n");
@@ -2441,7 +2445,8 @@ void generate_vmcode_from_array_index_expression(Package_Executer*     executer,
         case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_PUSH_ARRAY_DOUBLE; break;
         case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_PUSH_ARRAY_STRING; break;
         case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_PUSH_ARRAY_CLASS_OB; break;
-        default: ring_error_report("error: array index expression only support bool[] int[] double[] string[] class[]\n");
+        case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_PUSH_ARRAY_CLOSURE; break;
+        default: ring_error_report("error: array index expression only support bool[] int[] int64[] double[] string[] class[] fn[]\n");
         }
         // access value by array-object and index-expression
         generate_vmcode(executer, opcode_buffer, opcode, 0, array_index_expression->line_number);

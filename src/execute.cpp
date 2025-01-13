@@ -278,9 +278,9 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
     RVM_Variable*        global_variable_list = executer->global_variable_list;
     RVM_TypeSpecifier*   type_specifier       = nullptr;
     RVM_ClassDefinition* rvm_class_definition = nullptr;
-    RVM_ClassObject*     class_ob             = nullptr;
     RVM_String*          string               = nullptr;
-    RVM_TypeSpecifier*   sub_type_specifier   = nullptr;
+    RVM_ClassObject*     class_ob             = nullptr;
+    RVM_Array*           array                = nullptr;
 
     for (unsigned int i = 0; i < size; i++) {
         type_specifier = global_variable_list[i].type_specifier;
@@ -310,20 +310,21 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
             STATIC_SET_CLASS_OB_INDEX(i, class_ob);
             break;
 
-        case RING_BASIC_TYPE_ARRAY:
-            runtime_static->data[i].type                     = RVM_VALUE_TYPE_ARRAY;
-            runtime_static->data[i].u.array_value            = rvm_gc_new_array_meta(rvm);
-            runtime_static->data[i].u.array_value->type      = RVM_Array_Type(type_specifier->u.array_t->sub->kind); // 这里强制转化一下
-            runtime_static->data[i].u.array_value->dimension = type_specifier->u.array_t->dimension;
-            runtime_static->data[i].u.array_value->length    = 0;
-            runtime_static->data[i].u.array_value->capacity  = 0;
-
-            sub_type_specifier                               = type_specifier->u.array_t->sub;
+        case RING_BASIC_TYPE_ARRAY: {
+            // 这里没有分配空间, 只分配了一下meta
+            RVM_ClassDefinition* sub_class_definition = nullptr;
+            RVM_TypeSpecifier*   sub_type_specifier   = type_specifier->u.array_t->sub;
             if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
-                RVM_ClassDefinition* class_definition            = &(rvm->class_list[sub_type_specifier->u.class_def_index]);
-                runtime_static->data[i].u.array_value->class_ref = class_definition;
+                sub_class_definition = &(rvm->class_list[sub_type_specifier->u.class_def_index]);
             }
-            break;
+
+            array = rvm_gc_new_array_meta(rvm,
+                                          RVM_Array_Type(type_specifier->u.array_t->sub->kind), // 这里强制转化一下
+                                          sub_class_definition,
+                                          type_specifier->u.array_t->dimension);
+
+            STATIC_SET_ARRAY_INDEX(i, array);
+        } break;
 
         default:
             break;
@@ -385,7 +386,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     int                  res                    = 0;
 
     unsigned int         dimension              = 0;
-    unsigned int*        dimension_list         = (unsigned int*)calloc(1, sizeof(unsigned int) * MAX_DIMENSION_NUM);
+    unsigned int*        dimension_list         = (unsigned int*)mem_alloc(rvm->meta_pool, sizeof(unsigned int) * MAX_DIMENSION_NUM);
 
 
     RVM_ClassObject*     caller_class_ob        = nullptr;
@@ -912,6 +913,17 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 1;
             break;
+        case RVM_CODE_PUSH_ARRAY_CLOSURE:
+            array_value = STACK_GET_ARRAY_OFFSET(-2);
+            array_index = STACK_GET_INT_OFFSET(-1);
+            assert_throw_nil_array(array_value == nullptr);
+            assert_throw_range(array_index, array_value->length);
+            rvm_array_get_closure(rvm, array_value, array_index, &closure_value);
+            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+            STACK_SET_CLOSURE_OFFSET(0, closure_value);
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 1;
+            break;
 
         case RVM_CODE_POP_ARRAY_A:
             array_c_value = STACK_GET_ARRAY_OFFSET(-2);
@@ -978,6 +990,15 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
             VM_CUR_CO_PC += 1;
             break;
+        case RVM_CODE_POP_ARRAY_CLOSURE:
+            array_value = STACK_GET_ARRAY_OFFSET(-2);
+            array_index = STACK_GET_INT_OFFSET(-1);
+            assert_throw_nil_array(array_value == nullptr);
+            assert_throw_range(array_index, array_value->length);
+            rvm_array_set_closure(rvm, array_value, array_index, &STACK_GET_CLOSURE_OFFSET(-3));
+            VM_CUR_CO_STACK_TOP_INDEX -= 3;
+            VM_CUR_CO_PC += 1;
+            break;
 
 
         // array append
@@ -1020,6 +1041,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             array_value    = STACK_GET_ARRAY_OFFSET(-2);
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
             rvm_array_append_class_object(rvm, array_value, &class_ob_value);
+            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+            VM_CUR_CO_PC += 1;
+            break;
+        case RVM_CODE_ARRAY_APPEND_CLOSURE:
+            array_value   = STACK_GET_ARRAY_OFFSET(-2);
+            closure_value = STACK_GET_CLOSURE_OFFSET(-1);
+            rvm_array_append_closure(rvm, array_value, &closure_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
             VM_CUR_CO_PC += 1;
             break;
@@ -1081,6 +1109,15 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             rvm_array_pop_class_object(rvm, array_value, &class_ob_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             STACK_SET_CLASS_OB_OFFSET(0, class_ob_value);
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 1;
+            break;
+        case RVM_CODE_ARRAY_POP_CLOSURE:
+            array_value = STACK_GET_ARRAY_OFFSET(-1);
+            assert_throw_nil_array(array_value->length == 0);
+            rvm_array_pop_closure(rvm, array_value, &closure_value);
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
+            STACK_SET_CLOSURE_OFFSET(0, closure_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 1;
             break;
@@ -2160,7 +2197,6 @@ EXIT:
 
     destory_mem_pool(rvm->meta_pool);
     // destory_mem_pool(rvm->data_pool);
-    free(dimension_list);
 
     return exit_code;
 }
@@ -2531,6 +2567,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
     RVM_ClassDefinition* rvm_class_definition    = nullptr;
     RVM_ClassObject*     class_ob                = nullptr;
     RVM_String*          string                  = nullptr;
+    RVM_Array*           array                   = nullptr;
 
     unsigned int         argument_stack_index    = 0; // argument's abs-index in runtime_stack.
     unsigned int         local_vari_stack_offset = 0; // callee_function's local variable offset in runtime_stack.
@@ -2701,12 +2738,24 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             rvm_fill_class_ob(rvm, class_ob, rvm_class_definition);
             STACK_SET_CLASS_OB_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, class_ob);
             break;
+        case RING_BASIC_TYPE_ARRAY: {
+            // 这里没有分配空间, 只分配了一下meta
+            RVM_ClassDefinition* sub_class_definition = nullptr;
+            RVM_TypeSpecifier*   sub_type_specifier   = type_specifier->u.array_t->sub;
+            if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
+                sub_class_definition = &(rvm->class_list[sub_type_specifier->u.class_def_index]);
+            }
+
+            array = rvm_gc_new_array_meta(rvm,
+                                          RVM_Array_Type(type_specifier->u.array_t->sub->kind), // 这里强制转化一下
+                                          sub_class_definition,
+                                          type_specifier->u.array_t->dimension);
+
+            STACK_SET_ARRAY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, array);
+        } break;
         case RING_BASIC_TYPE_FUNC:
-            STACK_SET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, nullptr);
-            break;
-        case RING_BASIC_TYPE_ARRAY:
             // TODO: 这里没有分配空间
-            STACK_SET_ARRAY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, nullptr);
+            STACK_SET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, nullptr);
             break;
 
         default:
@@ -2888,15 +2937,14 @@ RVM_Array* rvm_new_array_literal_a(Ring_VirtualMachine* rvm,
                                    unsigned int         dimension,
                                    unsigned int         size) {
 
-    RVM_Array* array = rvm_gc_new_array_meta(rvm);
-    array->type      = RVM_ARRAY_A;
-    array->dimension = dimension;
+    RVM_Array* array = rvm_gc_new_array_meta(rvm, RVM_ARRAY_A, nullptr, dimension);
     array->length    = size;
     array->capacity  = size;
 
     array->u.a_array = (RVM_Array*)mem_alloc(rvm->meta_pool,
                                              sizeof(RVM_Array) * array->capacity);
 
+    // FIXME:
     for (unsigned int i = 0; i < size; i++) {
         // this is shallow copy
         array->u.a_array[i] = *(STACK_GET_ARRAY_OFFSET(-size + i));
@@ -3234,6 +3282,83 @@ ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm,
     RVM_ClassObject* dst_class_object = rvm_deep_copy_class_ob(rvm, src_class_object);
 
     *value                            = dst_class_object;
+    return ERROR_CODE_SUCCESS;
+}
+
+/*
+ * shallow copy
+ */
+ErrorCode rvm_array_get_closure(Ring_VirtualMachine* rvm,
+                                RVM_Array*           array,
+                                int                  index,
+                                RVM_Closure**        value) {
+
+    RVM_Closure* src_closure = &(array->u.closure_array[index]);
+    RVM_Closure* dst_closure = nullptr;
+
+    // dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
+    // FIXME: deep 还是 shallow
+    dst_closure = src_closure;
+
+    *value      = dst_closure;
+    return ERROR_CODE_SUCCESS;
+}
+
+/*
+ * shallow copy
+ */
+ErrorCode rvm_array_set_closure(Ring_VirtualMachine* rvm,
+                                RVM_Array*           array,
+                                int                  index,
+                                RVM_Closure**        value) {
+
+    RVM_Closure* dst_closure = nullptr;
+    // FIXME: deep 还是 shallow
+    dst_closure                   = *value;
+
+    array->u.closure_array[index] = *dst_closure;
+
+    return ERROR_CODE_SUCCESS;
+}
+
+ErrorCode rvm_array_append_closure(Ring_VirtualMachine* rvm,
+                                   RVM_Array*           array,
+                                   RVM_Closure**        value) {
+
+    size_t old_alloc_size = 0;
+    size_t new_alloc_size = 0;
+
+    if (array->length >= array->capacity) {
+        old_alloc_size = array->capacity * sizeof(RVM_Closure);
+
+        if (array->capacity == 0) {
+            array->capacity = 4;
+        } else {
+            array->capacity *= 2;
+        }
+
+        new_alloc_size         = array->capacity * sizeof(RVM_Closure);
+
+
+        array->u.closure_array = (RVM_Closure*)mem_realloc(rvm->meta_pool,
+                                                           array->u.class_ob_array,
+                                                           old_alloc_size,
+                                                           new_alloc_size);
+    }
+    // FIXME: deep 还是 shallow
+    array->u.closure_array[array->length++] = **value;
+    return ERROR_CODE_SUCCESS;
+}
+
+ErrorCode rvm_array_pop_closure(Ring_VirtualMachine* rvm,
+                                RVM_Array*           array,
+                                RVM_Closure**        value) {
+
+    RVM_Closure* src_closure = &(array->u.closure_array[--array->length]);
+    // FIXME: deep 还是 shallow
+    RVM_Closure* dst_closure = src_closure;
+
+    *value                   = dst_closure;
     return ERROR_CODE_SUCCESS;
 }
 

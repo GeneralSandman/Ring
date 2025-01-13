@@ -1,4 +1,5 @@
 #include "ring.hpp"
+#include <ctime>
 #include <set>
 #include <string>
 #include <tuple>

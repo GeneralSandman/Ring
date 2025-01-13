@@ -117,6 +117,9 @@ std::string fmt_array(RVM_Array* array_value) {
         case RVM_ARRAY_CLASS_OBJECT:
             result += fmt_class(&array_value->u.class_ob_array[i]);
             break;
+        case RVM_ARRAY_CLOSURE:
+            result += fmt_closure(&array_value->u.closure_array[i]);
+            break;
         case RVM_ARRAY_A:
             result += fmt_array(&array_value->u.a_array[i]);
             break;
