@@ -1,0 +1,30 @@
+test init closure array-------
+[]
+closure[!1]
+0
+0
+
+test push closure array-------
+closure[!1]
+fn() -> ()
+5
+8
+
+test range closure array-------
+local_array_func item 0
+local_array_func item 1
+local_array_func item 2
+local_array_func item 3
+local_array_func item 4
+
+test pop closure array-------
+local_array_func item 4
+local_array_func item 3
+local_array_func item 2
+local_array_func item 1
+local_array_func item 0
+
+test empty closure array-------
+[]
+0
+8
