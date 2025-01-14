@@ -841,7 +841,8 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
         case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_FOR_RANGE_ARRAY_DOUBLE; break;
         case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_FOR_RANGE_ARRAY_STRING; break;
         case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB; break;
-        default: ring_error_report("error: range expression only support bool[] int[] int64[] double[] string[] class[]\n");
+        case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_FOR_RANGE_ARRAY_CLOSURE; break;
+        default: ring_error_report("error: range expression only support bool[] int[] int64[] double[] string[] class[] fn[]\n");
         }
         generate_vmcode(executer, opcode_buffer, opcode, end_label, range_statement->operand->u.identifier_expression->line_number);
     }
@@ -2610,6 +2611,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         case RVM_CODE_FOR_RANGE_ARRAY_DOUBLE:
         case RVM_CODE_FOR_RANGE_ARRAY_STRING:
         case RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB:
+        case RVM_CODE_FOR_RANGE_ARRAY_CLOSURE:
         case RVM_CODE_FOR_RANGE_ARRAY_A:
         case RVM_CODE_FOR_RANGE_STRING:
             label                           = (opcode_buffer->code_list[i + 1] << 8) + (opcode_buffer->code_list[i + 2]);
@@ -2727,8 +2729,10 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         return RVM_Opcode(opcode + 6);
         break;
     case RING_BASIC_TYPE_FUNC:
-        // RVM_CODE_POP_STACK_AONY_FUNC
-        // RVM_CODE_PUSH_STACK_AONY_FUNC
+        // RVM_CODE_POP_STACK_CLOSURE
+        // RVM_CODE_PUSH_STACK_CLOSURE
+        // RVM_CODE_POP_FIELD_CLOSURE
+        // RVM_CODE_PUSH_FIELD_CLOSURE
         return RVM_Opcode(opcode + 7);
         break;
 

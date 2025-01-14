@@ -154,6 +154,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_FOR_RANGE_ARRAY_DOUBLE, "range_array_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "range double value for array", "", ""},
     {RVM_CODE_FOR_RANGE_ARRAY_STRING, "range_array_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "range string value for array", "", ""},
     {RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB, "range_array_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "range object value for array", "", ""},
+    {RVM_CODE_FOR_RANGE_ARRAY_CLOSURE, "range_array_closure", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "range closure value for array", "", ""},
     {RVM_CODE_FOR_RANGE_STRING, "range_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "range char value for string", "", ""},
     {RVM_CODE_FOR_RANGE_FINISH, "for_range_finish", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "", "", ""},
 
@@ -168,6 +169,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_POP_FIELD_STRING, "pop_field_string", OPCODE_OPERAND_TYPE_2BYTE_As, -2, "", "[string,object]->[]", "Field(So(-1).object, As).string = So(-2).string"},
     {RVM_CODE_POP_FIELD_CLASS_OB, "pop_field_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, -2, "", "[object,object]->[]", "Field(So(-1).object, As).object = So(-2).object"},
     {RVM_CODE_POP_FIELD_ARRAY, "pop_field_array", OPCODE_OPERAND_TYPE_2BYTE_As, -2, "", "[array,object]->[]", "Field(So(-1).object, As).array = So(-2).array"},
+    {RVM_CODE_POP_FIELD_CLOSURE, "pop_field_closure", OPCODE_OPERAND_TYPE_2BYTE_As, -2, "", "[closure,object]->[]", "Field(So(-1).object, As).closure = So(-2).closure"},
 
     {RVM_CODE_PUSH_FIELD_BOOL, "push_field_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[bool]", "S(-1).bool = Field(So(-1).object, As).bool"},
     {RVM_CODE_PUSH_FIELD_INT, "push_field_int", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[int]", "S(-1).int = Field(So(-1).object, As).int"},
@@ -176,6 +178,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_PUSH_FIELD_STRING, "push_field_string", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[string]", "S(-1).string = Field(So(-1).object, As).string"},
     {RVM_CODE_PUSH_FIELD_CLASS_OB, "push_field_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[object]", "S(-1).object = Field(So(-1).object, As).object"},
     {RVM_CODE_PUSH_FIELD_ARRAY, "push_field_array", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[array]", "S(-1).array = Field(So(-1).object, As).array"},
+    {RVM_CODE_PUSH_FIELD_CLOSURE, "push_field_closure", OPCODE_OPERAND_TYPE_2BYTE_As, 0, "", "[object]->[array]", "S(-1).closure = Field(So(-1).object, As).closure"},
 
 
     // arithmetic

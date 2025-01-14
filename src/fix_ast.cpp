@@ -2060,6 +2060,10 @@ void fix_array_index_expression(Expression*           expression,
 
     if (type->kind == RING_BASIC_TYPE_CLASS) {
         type->u.class_t = variable->decl->type_specifier->u.array_t->sub->u.class_t;
+    } else if (type->kind == RING_BASIC_TYPE_FUNC) {
+        type->u.func_t = variable->decl->type_specifier->u.array_t->sub->u.func_t;
+    } else {
+        // TODO:
     }
     fix_type_specfier(type);
 
