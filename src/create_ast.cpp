@@ -136,14 +136,14 @@ Expression* create_expression_from_function_call(FunctionCallExpression* functio
     return expression;
 }
 
-Expression* create_expression_from_method_call(MethodCallExpression* method_call_expression) {
-    debug_ast_info_with_yellow("method_call_expression->name:");
+Expression* create_expression_from_member_call(MemberCallExpression* member_call_expression) {
+    debug_ast_info_with_yellow("member_call_expression->name:");
 
     Expression* expression               = (Expression*)mem_alloc(get_front_mem_pool(), sizeof(Expression));
     expression->line_number              = package_unit_get_line_number();
     expression->convert_type             = nullptr; // UPDATED_BY_FIX_AST
-    expression->type                     = EXPRESSION_TYPE_METHOD_CALL;
-    expression->u.method_call_expression = method_call_expression;
+    expression->type                     = EXPRESSION_TYPE_MEMBER_CALL;
+    expression->u.member_call_expression = member_call_expression;
     return expression;
 }
 
@@ -198,7 +198,7 @@ Expression* create_expression_ternary(Expression* condition,
 
 Expression* create_expression_launch(LaunchExpressionType          type,
                                      FunctionCallExpression*       function_call_expression,
-                                     MethodCallExpression*         method_call_expression,
+                                     MemberCallExpression*         member_call_expression,
                                      ImmediateInvokFuncExpression* iife) {
 
     LaunchExpression* launch_expression = (LaunchExpression*)mem_alloc(get_front_mem_pool(), sizeof(LaunchExpression));
@@ -206,8 +206,8 @@ Expression* create_expression_launch(LaunchExpressionType          type,
     launch_expression->type             = type;
     if (type == LAUNCH_EXPRESSION_TYPE_FUNCTION_CALL) {
         launch_expression->u.function_call_expression = function_call_expression;
-    } else if (type == LAUNCH_EXPRESSION_TYPE_METHOD_CALL) {
-        launch_expression->u.method_call_expression = method_call_expression;
+    } else if (type == LAUNCH_EXPRESSION_TYPE_MEMBER_CALL) {
+        launch_expression->u.member_call_expression = member_call_expression;
     } else if (type == LAUNCH_EXPRESSION_TYPE_IIFE) {
         launch_expression->u.iife = iife;
     }
@@ -491,16 +491,16 @@ FunctionCallExpression* create_function_call_expression(char*         func_ident
     return function_call_expression;
 }
 
-MethodCallExpression* create_method_call_expression(Expression*   object_expression,
+MemberCallExpression* create_member_call_expression(Expression*   object_expression,
                                                     char*         member_identifier,
                                                     ArgumentList* argument_list) {
 
-    MethodCallExpression* method_call_expression = (MethodCallExpression*)mem_alloc(get_front_mem_pool(), sizeof(MethodCallExpression));
-    method_call_expression->line_number          = package_unit_get_line_number();
-    method_call_expression->object_expression    = object_expression;
-    method_call_expression->member_identifier    = member_identifier;
-    method_call_expression->argument_list        = argument_list;
-    return method_call_expression;
+    MemberCallExpression* member_call_expression = (MemberCallExpression*)mem_alloc(get_front_mem_pool(), sizeof(MemberCallExpression));
+    member_call_expression->line_number          = package_unit_get_line_number();
+    member_call_expression->object_expression    = object_expression;
+    member_call_expression->member_identifier    = member_identifier;
+    member_call_expression->argument_list        = argument_list;
+    return member_call_expression;
 }
 
 ArrayLiteralExpression* create_array_literal_expression(TypeSpecifier*       sub_type,

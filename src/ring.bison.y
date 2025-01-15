@@ -39,7 +39,7 @@ int yylex();
     Expression*                         m_expression;
     AssignExpression*                   m_assign_expression;
     FunctionCallExpression*             m_function_call_expression;
-    MethodCallExpression*               m_method_call_expression;
+    MemberCallExpression*               m_member_call_expression;
     ArrayLiteralExpression*             m_array_literal_expression;
     ClassObjectLiteralExpression*       m_class_object_literal_expression;
     FieldInitExpression*                m_field_init_expression;
@@ -216,7 +216,7 @@ int yylex();
 %type <m_assign_expression> assign_expression
 
 %type <m_function_call_expression> function_call_expression
-%type <m_method_call_expression>   method_call_expression
+%type <m_member_call_expression>   member_call_expression
 
 %type <m_array_literal_expression> array_literal_expression
 %type <m_class_object_literal_expression> class_object_literal_expression
@@ -974,10 +974,10 @@ launch_expression
         debug_bison_info_with_green("[RULE::launch_expression:function_call_expression]\t ");
         $$ = create_expression_launch(LAUNCH_EXPRESSION_TYPE_FUNCTION_CALL, $2, nullptr, nullptr);
     }
-    | TOKEN_LAUNCH method_call_expression
+    | TOKEN_LAUNCH member_call_expression
     {
-        debug_bison_info_with_green("[RULE::launch_expression:method_call_expression]\t ");
-        $$ = create_expression_launch(LAUNCH_EXPRESSION_TYPE_METHOD_CALL, nullptr, $2, nullptr);
+        debug_bison_info_with_green("[RULE::launch_expression:member_call_expression]\t ");
+        $$ = create_expression_launch(LAUNCH_EXPRESSION_TYPE_MEMBER_CALL, nullptr, $2, nullptr);
     }
     | TOKEN_LAUNCH iife_expression
     {
@@ -1284,28 +1284,28 @@ member_expression
     {
         $$ = create_member_expression($1, $3);
     }
-    | method_call_expression
+    | member_call_expression
     {
-        $$ = create_expression_from_method_call($1);
+        $$ = create_expression_from_member_call($1);
     }
     ;
 
-method_call_expression
+member_call_expression
     : primary_not_new_array TOKEN_DOT IDENTIFIER TOKEN_LP               TOKEN_RP
     {
-        $$ = create_method_call_expression($1, $3, nullptr);
+        $$ = create_member_call_expression($1, $3, nullptr);
     }
     | member_expression     TOKEN_DOT IDENTIFIER TOKEN_LP               TOKEN_RP
     {
-        $$ = create_method_call_expression($1, $3, nullptr);
+        $$ = create_member_call_expression($1, $3, nullptr);
     }
     | primary_not_new_array TOKEN_DOT IDENTIFIER TOKEN_LP argument_list TOKEN_RP
     {
-        $$ = create_method_call_expression($1, $3, $5);
+        $$ = create_member_call_expression($1, $3, $5);
     }
     | member_expression     TOKEN_DOT IDENTIFIER TOKEN_LP argument_list TOKEN_RP
     {
-        $$ = create_method_call_expression($1, $3, $5);
+        $$ = create_member_call_expression($1, $3, $5);
     }
     ; 
 

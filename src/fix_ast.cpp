@@ -338,8 +338,8 @@ BEGIN:
         fix_function_call_expression(expression, expression->u.function_call_expression, block, func);
         break;
 
-    case EXPRESSION_TYPE_METHOD_CALL:
-        fix_method_call_expression(expression, expression->u.method_call_expression, block, func);
+    case EXPRESSION_TYPE_MEMBER_CALL:
+        fix_member_call_expression(expression, expression->u.member_call_expression, block, func);
         break;
 
     case EXPRESSION_TYPE_ASSIGN:
@@ -654,7 +654,7 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
          pos = pos->next, return_exp_num++) {
 
         if (pos->type == EXPRESSION_TYPE_FUNCTION_CALL
-            || pos->type == EXPRESSION_TYPE_METHOD_CALL) {
+            || pos->type == EXPRESSION_TYPE_MEMBER_CALL) {
             has_call = true;
         }
 
@@ -887,7 +887,7 @@ void fix_assign_expression(AssignExpression* expression, Block* block, FunctionT
     for (Expression* pos = expression->operand; pos; pos = pos->next, right_expr_num++) {
 
         if (pos->type == EXPRESSION_TYPE_FUNCTION_CALL
-            || pos->type == EXPRESSION_TYPE_METHOD_CALL) {
+            || pos->type == EXPRESSION_TYPE_MEMBER_CALL) {
             call_expression = pos;
             has_call        = true;
         }
@@ -1798,20 +1798,20 @@ void fix_function_call_expression(Expression*             expression,
     if (variable != nullptr) {
 
         if (variable->decl->type_specifier->kind == RING_BASIC_TYPE_FUNC) {
+
+            // check 函数调用是否符合语义
+            check_func_var_call(function_call_expression, variable->decl->type_specifier);
+
             // 是一个变量，并且是一个函数变量，需要继续匹配
             function_call_expression->type              = FUNCTION_CALL_TYPE_CLOSURE;
             function_call_expression->u.cc.closure_decl = variable->decl;
 
-            // check 函数调用是否符合语义
-            check_func_var_call(function_call_expression, variable->decl);
-
-
-            FunctionReturnList* return_pos = nullptr;
+            // function_call_expression 的类型取决于 function 返回值的类型
             EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-            for (return_pos = variable->decl->type_specifier->u.func_t->return_list;
-                 return_pos != nullptr;
-                 return_pos = return_pos->next) {
-                EXPRESSION_ADD_CONVERT_TYPE(expression, return_pos->type_specifier);
+            for (FunctionReturnList* pos = variable->decl->type_specifier->u.func_t->return_list;
+                 pos != nullptr;
+                 pos = pos->next) {
+                EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
             }
             return;
         } else {
@@ -1879,26 +1879,27 @@ void fix_function_call_expression(Expression*             expression,
     }
 }
 
-void fix_method_call_expression(Expression*           expression,
-                                MethodCallExpression* method_call_expression,
+void fix_member_call_expression(Expression*           expression,
+                                MemberCallExpression* member_call_expression,
                                 Block*                block,
                                 FunctionTuple*        func) {
 
-    if (method_call_expression == nullptr) {
+    if (member_call_expression == nullptr) {
         return;
     }
 
     // fix argument list
-    for (ArgumentList* pos = method_call_expression->argument_list;
+    for (ArgumentList* pos = member_call_expression->argument_list;
          pos != nullptr;
          pos = pos->next) {
         fix_expression(pos->expression, block, func);
     }
 
-    char*            member_identifier = method_call_expression->member_identifier;
+    char*            member_identifier = member_call_expression->member_identifier;
     ClassDefinition* class_definition  = nullptr;
     MethodMember*    method            = nullptr;
-    Expression*      object_expression = method_call_expression->object_expression;
+    FieldMember*     field             = nullptr;
+    Expression*      object_expression = member_call_expression->object_expression;
 
     // fix object expression
     fix_expression(object_expression, block, func);
@@ -1906,28 +1907,88 @@ void fix_method_call_expression(Expression*           expression,
     // find class definition by object.
     class_definition = object_expression->convert_type[0]->u.class_t->class_definition;
     if (class_definition == nullptr) {
-        ring_error_report("fix_method_call_expression error\n");
+        ring_error_report("fix_member_call_expression error\n");
     }
 
-    // 2. find member declaration by member identifier.
+    // 2. is method or not ?
     method = search_class_method(class_definition, member_identifier);
+    if (method != nullptr) {
+        // check method 调用是否和method定义是否一致
+        check_method_call(member_call_expression, method);
+        member_call_expression->type               = MEMBER_CALL_TYPE_METHOD;
+        member_call_expression->u.mc.method_member = method;
 
-    // Ring-Compiler-Error-Report ERROR_INVALID_NOT_FOUND_CLASS_METHOD
-    if (method == nullptr) {
+        // member_call_expression 的类型取决于 method返回值的类型
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        for (FunctionReturnList* pos = method->return_list;
+             pos != nullptr;
+             pos = pos->next) {
+            EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
+        }
+        return;
+    }
+
+    // 3. 看看是不是一个 field，这个field的类型是匿名函数变量
+    field = search_class_field(class_definition, member_identifier);
+    if (field != nullptr) {
+        // Ring-Compiler-Error-Report ERROR_INVOKE_FIELD_OF_CLASS_AS_METHOD
+        if (field->type_specifier->kind != RING_BASIC_TYPE_FUNC) {
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "field `%s` not a anonymous-function in class `%s`; E:%d.",
+                member_identifier,
+                class_definition->identifier,
+                ERROR_NOT_FOUND_CLASS_MEMBER);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(member_call_expression->line_number),
+                .line_number             = member_call_expression->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+
+        // check field 调用是否和field 匿名函数的类型定义是否一致
+        check_field_call(member_call_expression, field);
+        member_call_expression->type              = MEMBER_CALL_TYPE_FIELD;
+        member_call_expression->u.fc.field_member = field;
+
+        // member_call_expression 的类型取决于 method返回值的类型
+        EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+        for (FunctionReturnList* pos = field->type_specifier->u.func_t->return_list;
+             pos != nullptr;
+             pos = pos->next) {
+            EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
+        }
+        return;
+    }
+
+
+    // Ring-Compiler-Error-Report ERROR_NOT_FOUND_CLASS_MEMBER
+    if (true) {
         DEFINE_ERROR_REPORT_STR;
 
         compile_err_buf = sprintf_string(
-            "not found method `%s` in class `%s`; E:%d.",
+            "not found method/field `%s` in class `%s`; E:%d.",
             member_identifier,
             class_definition->identifier,
-            ERROR_INVALID_NOT_FOUND_CLASS_METHOD);
+            ERROR_NOT_FOUND_CLASS_MEMBER);
 
         ErrorReportContext context = {
             .package                 = nullptr,
             .package_unit            = get_package_unit(),
             .source_file_name        = get_package_unit()->current_file_name,
-            .line_content            = package_unit_get_line_content(method_call_expression->line_number),
-            .line_number             = method_call_expression->line_number,
+            .line_content            = package_unit_get_line_content(member_call_expression->line_number),
+            .line_number             = member_call_expression->line_number,
             .column_number           = package_unit_get_column_number(),
             .error_message           = std::string(compile_err_buf),
             .advice                  = std::string(compile_adv_buf),
@@ -1936,20 +1997,6 @@ void fix_method_call_expression(Expression*           expression,
             .ring_compiler_file_line = __LINE__,
         };
         ring_compile_error_report(&context);
-    }
-
-    // check method 调用是否和method定义是否一致
-    check_method_call(method_call_expression, method);
-
-    method_call_expression->method_member = method;
-
-
-    // method_call_expression 的类型取决于 method返回值的类型
-    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-    for (FunctionReturnList* pos = method->return_list;
-         pos != nullptr;
-         pos = pos->next) {
-        EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
     }
 }
 
@@ -2212,7 +2259,7 @@ void fix_field_member_expression(Expression*       expression,
         compile_err_buf = sprintf_string(
             "not found field `%s`; E:%d.",
             member_identifier,
-            ERROR_INVALID_NOT_FOUND_CLASS_FIELD);
+            ERROR_NOT_FOUND_CLASS_FIELD);
 
         ErrorReportContext context = {
             .package                 = nullptr,
@@ -2466,8 +2513,8 @@ void fix_launch_expression(Expression*       expression,
         fix_function_call_expression(expression, launch_expression->u.function_call_expression, block, func);
         break;
 
-    case LAUNCH_EXPRESSION_TYPE_METHOD_CALL:
-        fix_method_call_expression(expression, launch_expression->u.method_call_expression, block, func);
+    case LAUNCH_EXPRESSION_TYPE_MEMBER_CALL:
+        fix_member_call_expression(expression, launch_expression->u.member_call_expression, block, func);
         break;
 
     case LAUNCH_EXPRESSION_TYPE_IIFE:

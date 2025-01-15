@@ -2000,20 +2000,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
-        case RVM_CODE_INVOKE_CLOSURE:
-            argument_list_size = STACK_GET_INT_OFFSET(-2);
-            closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
-            VM_CUR_CO_STACK_TOP_INDEX -= 2;
-
-            assert_throw_nil_closure(closure_value == nullptr);
-
-            invoke_derive_function(rvm,
-                                   &caller_class_ob, &caller_function, &caller_closure,
-                                   nullptr, closure_value->anonymous_func, closure_value,
-                                   argument_list_size,
-                                   false);
-
-            break;
         case RVM_CODE_INVOKE_FUNC_NATIVE:
             argument_list_size = STACK_GET_INT_OFFSET(-2);
             oper_num           = STACK_GET_INT_OFFSET(-1);
@@ -2042,6 +2028,20 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
                                    nullptr, callee_function, nullptr,
+                                   argument_list_size,
+                                   false);
+
+            break;
+        case RVM_CODE_INVOKE_CLOSURE:
+            argument_list_size = STACK_GET_INT_OFFSET(-2);
+            closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
+            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+
+            assert_throw_nil_closure(closure_value == nullptr);
+
+            invoke_derive_function(rvm,
+                                   &caller_class_ob, &caller_function, &caller_closure,
+                                   nullptr, closure_value->anonymous_func, closure_value,
                                    argument_list_size,
                                    false);
 

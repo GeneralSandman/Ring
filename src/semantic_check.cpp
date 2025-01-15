@@ -149,13 +149,13 @@ void check_function_call(FunctionCallExpression* function_call_expression,
 }
 
 void check_func_var_call(FunctionCallExpression* function_call_expression,
-                         VarDecl*                anony_func_decl) {
+                         TypeSpecifier*          func_type_specifier) {
 
     check_call(function_call_expression->func_identifier,
                function_call_expression->line_number,
                function_call_expression->argument_list,
                nullptr,
-               anony_func_decl,
+               func_type_specifier,
                nullptr,
                nullptr);
 }
@@ -170,15 +170,26 @@ void check_iife_call(ImmediateInvokFuncExpression* iife) {
                nullptr);
 }
 
-void check_method_call(MethodCallExpression* method_call_expression,
+void check_method_call(MemberCallExpression* member_call_expression,
                        MethodMember*         method) {
-    check_call(method_call_expression->member_identifier,
-               method_call_expression->line_number,
-               method_call_expression->argument_list,
+    check_call(member_call_expression->member_identifier,
+               member_call_expression->line_number,
+               member_call_expression->argument_list,
                nullptr,
                nullptr,
                nullptr,
                method);
+}
+
+void check_field_call(MemberCallExpression* member_call_expression,
+                      FieldMember*          field) {
+    check_call(member_call_expression->member_identifier,
+               member_call_expression->line_number,
+               member_call_expression->argument_list,
+               nullptr,
+               field->type_specifier,
+               nullptr,
+               nullptr);
 }
 
 
@@ -190,22 +201,23 @@ void check_method_call(MethodCallExpression* method_call_expression,
  * 2. 参数类型不正确
  * 3. 返回值和函数的声明不一致
  *
- * - function_call_expression method_call_expression iife_expression 三者选其一
- * - function anony_func_decl 二者选其一
- * function 为 函数调用
- * anony_func_decl 为匿名函数变量定义
+ * - function
+ * - func_type_specifier  匿名函数变量的类型
+ * - anony_func
+ * - method_member
+ * 四者选一
  *
  */
 void check_call(char*          func_identifier,
                 unsigned int   line_number,
                 ArgumentList*  argument_list,
                 Function*      function,
-                VarDecl*       func_var_decl,
+                TypeSpecifier* func_type_specifier,
                 AnonymousFunc* anony_func,
                 MethodMember*  method_member) {
 
     assert(function != nullptr
-           || func_var_decl != nullptr
+           || func_type_specifier != nullptr
            || anony_func != nullptr
            || method_member != nullptr);
 
@@ -215,9 +227,9 @@ void check_call(char*          func_identifier,
 
     if (function != nullptr) {
         parameter_pos = function->parameter_list;
-    } else if (func_var_decl != nullptr) {
-        assert(func_var_decl->type_specifier->kind == RING_BASIC_TYPE_FUNC);
-        parameter_pos = func_var_decl->type_specifier->u.func_t->parameter_list;
+    } else if (func_type_specifier != nullptr) {
+        assert(func_type_specifier->kind == RING_BASIC_TYPE_FUNC);
+        parameter_pos = func_type_specifier->u.func_t->parameter_list;
     } else if (anony_func != nullptr) {
         parameter_pos = anony_func->parameter_list;
     } else if (method_member != nullptr) {

@@ -62,7 +62,7 @@ typedef struct SubDimensionExpression       SubDimensionExpression;
 typedef struct BinaryExpression             BinaryExpression;
 typedef struct TernaryExpression            TernaryExpression;
 typedef struct FunctionCallExpression       FunctionCallExpression;
-typedef struct MethodCallExpression         MethodCallExpression;
+typedef struct MemberCallExpression         MemberCallExpression;
 typedef struct AssignExpression             AssignExpression;
 typedef struct FieldInitExpression          FieldInitExpression;
 typedef struct LaunchExpression             LaunchExpression;
@@ -1139,9 +1139,9 @@ typedef enum {
     RVM_CODE_ARGUMENT_NUM,
     RVM_CODE_PUSH_FUNC,
     RVM_CODE_PUSH_METHOD,
-    RVM_CODE_INVOKE_CLOSURE,
     RVM_CODE_INVOKE_FUNC_NATIVE,
     RVM_CODE_INVOKE_FUNC,
+    RVM_CODE_INVOKE_CLOSURE,
     RVM_CODE_INVOKE_METHOD,
     RVM_CODE_RETURN,
     RVM_CODE_FUNCTION_FINISH,
@@ -1324,7 +1324,7 @@ typedef enum {
     EXPRESSION_TYPE_VARIABLE,
     EXPRESSION_TYPE_IDENTIFIER,
     EXPRESSION_TYPE_FUNCTION_CALL,
-    EXPRESSION_TYPE_METHOD_CALL,
+    EXPRESSION_TYPE_MEMBER_CALL,
     EXPRESSION_TYPE_ASSIGN,
 
     EXPRESSION_TYPE_TERNARY, // 三目运算
@@ -1563,7 +1563,7 @@ struct Expression {
         const char*                   string_literal;
         IdentifierExpression*         identifier_expression;
         FunctionCallExpression*       function_call_expression;
-        MethodCallExpression*         method_call_expression;
+        MemberCallExpression*         member_call_expression;
         AssignExpression*             assign_expression;
         TernaryExpression*            ternary_expression;
         BinaryExpression*             binary_expression;
@@ -1737,12 +1737,27 @@ struct FunctionCallExpression {
     ArgumentList* argument_list;
 };
 
-struct MethodCallExpression {
-    unsigned int  line_number;
+typedef enum {
+    MEMBER_CALL_TYPE_UNKNOW,
+    MEMBER_CALL_TYPE_METHOD,
+    MEMBER_CALL_TYPE_FIELD,
+} MemberCallType;
 
-    Expression*   object_expression;
-    char*         member_identifier;
-    MethodMember* method_member;
+struct MemberCallExpression {
+    unsigned int   line_number;
+
+    Expression*    object_expression;
+    char*          member_identifier;
+
+    MemberCallType type;
+    union {
+        struct {
+            MethodMember* method_member; // UPDATED_BY_FIX_AST
+        } mc;                            // method-call, a.method()
+        struct {
+            FieldMember* field_member; // UPDATED_BY_FIX_AST
+        } fc;                          // field 的类型为匿名函数数组, a.field()
+    } u;
 
     unsigned int  argument_list_size;
     ArgumentList* argument_list;
@@ -1779,7 +1794,7 @@ struct FieldInitExpression {
 typedef enum {
     LAUNCH_EXPRESSION_TYPE_UNKNOW = 0,
     LAUNCH_EXPRESSION_TYPE_FUNCTION_CALL,
-    LAUNCH_EXPRESSION_TYPE_METHOD_CALL,
+    LAUNCH_EXPRESSION_TYPE_MEMBER_CALL,
     LAUNCH_EXPRESSION_TYPE_IIFE,
     // LAUNCH_EXPRESSION_TYPE_BLOCK,
 } LaunchExpressionType;
@@ -1791,7 +1806,7 @@ struct LaunchExpression {
 
     union {
         FunctionCallExpression*       function_call_expression;
-        MethodCallExpression*         method_call_expression;
+        MemberCallExpression*         member_call_expression;
         ImmediateInvokFuncExpression* iife;
     } u;
 };
@@ -2370,27 +2385,28 @@ typedef enum {
     ERROR_DUPLICATE_IMPORT_PACKAGE            = 200004, // 重复 import package
     ERROR_INVALID_VARIABLE_IDENTIFIER         = 200005, // 不合法的变量标识符
     ERROR_TOO_MANY_LOCAL_VARIABLES            = 200006, // 局部变量数量超过限制
-    ERROR_TOO_MANY_FIELDS_IN_CLASS            = 200007, // class 中 field 的数量超过限制
-    ERROR_TOO_MANY_METHODS_IN_CLASS           = 200008, // class 中 method 的数量超过限制
-    ERROR_MISS_CLASS_DEFINITION               = 200009, // 缺少 class 定义
-    ERROR_INVALID_FIELD_IN_CLASS              = 200010, // field 不合法
-    ERROR_ARRAY_DIMENSION_INVALID             = 200011, // 数组维度不合法
-    ERROR_ASSIGN_TO_METHOD_OF_CLASS           = 200012, // 不能给 class中 method赋值
-    ERROR_INVALID_NOT_FOUND_CLASS_FIELD       = 200013, // 找不到 class field
-    ERROR_INVALID_NOT_FOUND_CLASS_METHOD      = 200014, // 找不到 class field
-    ERROR_UNCLOSED_STRING_LITERAL             = 200015, // 未关闭的字符串常量
 
-    ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS  = 200016, // 函数调用用到 多项赋值中
+    ERROR_ARRAY_DIMENSION_INVALID             = 200010, // 数组维度不合法
+    ERROR_UNCLOSED_STRING_LITERAL             = 200011, // 未关闭的字符串常量
+    ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS  = 200012, // 函数调用用到 多项赋值中
 
-    ERROR_ASSIGNMENT_MISMATCH_NUM             = 200017, // 赋值时, 左值和右值的数量不匹配
-    ERROR_ASSIGNMENT_MISMATCH_TYPE            = 200018, // 赋值时, 左值和右值的类型不匹配
-    ERROR_CONCAT_OPERATOR_MISMATCH_TYPE       = 200019, // string .. 操作数类型不不匹配
-    ERROR_MATH_OPERATOR_MISMATCH_TYPE         = 200020, // 数学运算操作数不是 int/int64/double 类型
-    ERROR_REDEFINITE_LOCAL_VARIABLE           = 200021, // 重复定义的局部变量
+    ERROR_ASSIGNMENT_MISMATCH_NUM             = 200020, // 赋值时, 左值和右值的数量不匹配
+    ERROR_ASSIGNMENT_MISMATCH_TYPE            = 200021, // 赋值时, 左值和右值的类型不匹配
+    ERROR_CONCAT_OPERATOR_MISMATCH_TYPE       = 200022, // string .. 操作数类型不不匹配
+    ERROR_MATH_OPERATOR_MISMATCH_TYPE         = 200023, // 数学运算操作数不是 int/int64/double 类型
+    ERROR_REDEFINITE_LOCAL_VARIABLE           = 200024, // 重复定义的局部变量
 
-    ERROR_REDEFINITE_CLASS                    = 200022, // 重复定义 class
-    ERROR_REDEFINITE_MEMBER_IN_CLASS          = 200023, // 重复定义 class field/method
-
+    ERROR_REDEFINITE_CLASS                    = 200030, // 重复定义 class
+    ERROR_REDEFINITE_MEMBER_IN_CLASS          = 200031, // 重复定义 class field/method
+    ERROR_TOO_MANY_FIELDS_IN_CLASS            = 200032, // class 中 field 的数量超过限制
+    ERROR_TOO_MANY_METHODS_IN_CLASS           = 200033, // class 中 method 的数量超过限制
+    ERROR_MISS_CLASS_DEFINITION               = 200034, // 缺少 class 定义
+    ERROR_INVALID_FIELD_IN_CLASS              = 200035, // field 不合法
+    ERROR_ASSIGN_TO_METHOD_OF_CLASS           = 200036, // 不能给 class中 method赋值
+    ERROR_INVOKE_FIELD_OF_CLASS_AS_METHOD     = 200037, // 不能将 class field作为匿名函数去 调用
+    ERROR_NOT_FOUND_CLASS_MEMBER              = 200038, // 找不到 class field或者method
+    ERROR_NOT_FOUND_CLASS_FIELD               = 200039, // 找不到 class field
+    ERROR_NOT_FOUND_CLASS_METHOD              = 200040, // 找不到 class method
 
     ERROR_OVERFLOWS                           = 200051, // 溢出
 
@@ -2735,14 +2751,14 @@ Expression*                   create_expression_identifier(char* identifier);
 Expression*                   create_expression_identifier_with_index(Expression* array_expression, DimensionExpression* index);
 Expression*                   create_member_expression(Expression* object_expression, char* member_identifier);
 Expression*                   create_expression_from_function_call(FunctionCallExpression* function_call_expression);
-Expression*                   create_expression_from_method_call(MethodCallExpression* method_call_expression);
+Expression*                   create_expression_from_member_call(MemberCallExpression* member_call_expression);
 Expression*                   create_expression_from_array_literal(ArrayLiteralExpression* array_literal);
 Expression*                   create_expression_from_class_object_literal(ClassObjectLiteralExpression* object_literal);
 Expression*                   create_expression_assign(AssignExpression* assign_expression);
 Expression*                   create_expression_ternary(Expression* condition, Expression* true_expression, Expression* false_expression);
 Expression*                   create_expression_launch(LaunchExpressionType          type,
                                                        FunctionCallExpression*       function_call_expression,
-                                                       MethodCallExpression*         method_call_expression,
+                                                       MemberCallExpression*         member_call_expression,
                                                        ImmediateInvokFuncExpression* iife);
 
 Expression*                   create_expression_anonymous_func(AnonymousFunc* func);
@@ -2764,7 +2780,7 @@ FieldInitExpression*          field_init_list_add_item(FieldInitExpression* list
 AssignExpression*             create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
 
 FunctionCallExpression*       create_function_call_expression(char* identifier, ArgumentList* argument_list);
-MethodCallExpression*         create_method_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list);
+MemberCallExpression*         create_member_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list);
 ArrayLiteralExpression*       create_array_literal_expression(TypeSpecifier* sub_type, DimensionExpression* dimension_expression, Expression* expression_list);
 ClassObjectLiteralExpression* create_class_object_literal_expression(TypeSpecifier* type_specifier, FieldInitExpression* field_init_expression_list);
 Expression*                   expression_list_add_item(Expression* expression_list, Expression* expression);
@@ -2881,15 +2897,17 @@ void ring_compiler_analysis_class(Package* package);
 void check_function_call(FunctionCallExpression* function_call_expression,
                          Function*               function);
 void check_func_var_call(FunctionCallExpression* function_call_expression,
-                         VarDecl*                anony_func_decl);
+                         TypeSpecifier*          func_type_specifier);
 void check_iife_call(ImmediateInvokFuncExpression* iife);
-void check_method_call(MethodCallExpression* method_call_expression,
+void check_method_call(MemberCallExpression* member_call_expression,
                        MethodMember*         method);
+void check_field_call(MemberCallExpression* member_call_expression,
+                      FieldMember*          field);
 void check_call(char*          func_identifier,
                 unsigned int   line_number,
                 ArgumentList*  argument_list,
                 Function*      function,
-                VarDecl*       anony_func_decl,
+                TypeSpecifier* func_type_specifier,
                 AnonymousFunc* anony_func,
                 MethodMember*  method_member);
 
@@ -2956,8 +2974,8 @@ void             fix_function_call_expression(Expression*             expression
                                               FunctionCallExpression* function_call_expression,
                                               Block*                  block,
                                               FunctionTuple*          func);
-void             fix_method_call_expression(Expression*           expression,
-                                            MethodCallExpression* method_call_expression,
+void             fix_member_call_expression(Expression*           expression,
+                                            MemberCallExpression* member_call_expression,
                                             Block*                block,
                                             FunctionTuple*        func);
 void             fix_class_definition(ClassDefinition* class_definition);
@@ -3123,7 +3141,7 @@ void              generate_vmcode_from_string_expression(Package_Executer* execu
                                                          Expression*       expression,
                                                          RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_function_call_expression(Package_Executer* executer, FunctionCallExpression* function_call_expression, RVM_OpcodeBuffer* opcode_buffer);
-void              generate_vmcode_from_method_call_expression(Package_Executer* executer, MethodCallExpression* method_call_expression, RVM_OpcodeBuffer* opcode_buffer);
+void              generate_vmcode_from_member_call_expression(Package_Executer* executer, MemberCallExpression* member_call_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_cast_expression(Package_Executer* executer, CastExpression* cast_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_member_expression(Package_Executer* executer, MemberExpression* member_expression, RVM_OpcodeBuffer* opcode_buffer);
 void              generate_vmcode_from_ternary_condition_expression(Package_Executer* executer, TernaryExpression* ternary_expression, RVM_OpcodeBuffer* opcode_buffer);
