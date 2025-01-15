@@ -1856,9 +1856,11 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
         RVM_Opcode   opcode  = RVM_CODE_UNKNOW;
         unsigned int offset  = 0;
 
+        // push_stack_closure or push_static_closure
         if (closure->is_local) {
             opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_BOOL, closure->type_specifier);
         } else {
+            // TODO: 不支持全局变量为匿名函数，理论上不会走的这里，需要在 语义检查的时候报错
             opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_BOOL, closure->type_specifier);
         }
         offset = closure->variable_index;
