@@ -1,0 +1,11 @@
+--- test invoke method&field ----
+Hello1 from Job::MethodField, self.StringField=Hello2, bool_value=true
+Hello2 from FuncField, string_value=RING
+
+--- test return value of invoke method&field ----
+local_bool_value_0  =true
+local_string_value_0=RING
+
+--- test launch method&field ----
+Hello1 from Job::MethodField, self.StringField=Hello2, bool_value=false
+Hello2 from FuncField, string_value=RING-beta
