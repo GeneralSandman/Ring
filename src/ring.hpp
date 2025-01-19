@@ -3364,6 +3364,7 @@ RVM_Value std_lib_fmt_sprintf(Ring_VirtualMachine* rvm, unsigned int arg_count, 
 
 RVM_Value std_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_debug_var_dump(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_vm_garbage_collect(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
@@ -3436,6 +3437,8 @@ static int               hex_digit_to_int(char c);
 
 std::string              strings_join(const std::vector<std::string>& lst, const std::string& delim);
 int                      string_compare(const char* str1, unsigned int str1_len, const char* str2, unsigned int str2_len);
+
+std::string              formate_class_type(RVM_ClassObject* class_object);
 
 std::string              formate_array_type(RVM_Array* array_value);
 std::string              formate_array_item_type(RVM_Array* array_value);
@@ -3676,6 +3679,25 @@ std::string fmt_string(RVM_String* string_value);
 std::string fmt_class(RVM_ClassObject* class_object);
 std::string fmt_array(RVM_Array* array_value);
 std::string fmt_closure(RVM_Closure* closure);
+
+std::string var_dump_any(Package_Executer* package_executer,
+                         RVM_Value*        value,
+                         unsigned int      indent);
+std::string var_dump_bool(RVM_Value* value);
+std::string var_dump_int(RVM_Value* value);
+std::string var_dump_int64(RVM_Value* value);
+std::string var_dump_double(RVM_Value* value);
+std::string var_dump_string(RVM_String* string_value);
+std::string var_dump_class(Package_Executer* package_executer,
+                           RVM_ClassObject*  class_object,
+                           unsigned int      indent);
+std::string var_dump_array(Package_Executer* package_executer,
+                           RVM_Array*        array_value,
+                           unsigned int      indent);
+std::string var_dump_closure(Package_Executer* package_executer, RVM_Closure* closure);
+
+std::string build_indent(unsigned int indent, std::string indent_str);
+
 
 // --------------------
 

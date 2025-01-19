@@ -1376,6 +1376,16 @@ int string_compare(const char* str1, unsigned int str1_len, const char* str2, un
     }
 }
 
+std::string formate_class_type(RVM_ClassObject* class_object) {
+    std::string str;
+    if (class_object->class_ref) {
+        str = sprintf_string("%s", class_object->class_ref->identifier);
+    } else {
+        str = "unknow";
+    }
+    return str;
+}
+
 std::string formate_array_type(RVM_Array* array_value) {
     std::string str = "";
 

@@ -61,6 +61,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         std::vector<StdPackageNativeFunction>{
             {(char*)"assert", std_lib_debug_assert, 1, 0},
             {(char*)"print_call_stack", std_lib_debug_print_call_stack, 0, 0},
+            {(char*)"var_dump", std_lib_debug_var_dump, 1, 0},
         },
     },
 
@@ -884,6 +885,27 @@ RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int 
     std::string call_stack = format_rvm_call_stack(rvm);
     printf("%s", call_stack.c_str());
 
+    fflush(stdout);
+
+    RVM_Value ret;
+    ret.u.int_value = 0;
+    return ret;
+}
+
+/*
+ * Package: debug
+ * Function: std_lib_debug_var_dump
+ * Type: @native
+ */
+RVM_Value std_lib_debug_var_dump(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+
+    std::string res;
+    for (unsigned int i = 0; i < arg_count; i++) {
+        res += var_dump_any(rvm->executer, &args[i], 0);
+        res += "\n";
+    }
+
+    printf("%s", res.c_str());
     fflush(stdout);
 
     RVM_Value ret;
