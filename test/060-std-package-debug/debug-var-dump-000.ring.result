@@ -25,34 +25,34 @@ Task(fields:6, methods:0) => {
     }
 }
 bool[!1](len:2 cap:8) => [
-    false
-    true
+    [0] -> false
+    [1] -> true
 ]
 int[!1](len:2 cap:8) => [
-    1
-    2
+    [0] -> 1
+    [1] -> 2
 ]
 int64[!1](len:2 cap:8) => [
-    2
-    3
+    [0] -> 2
+    [1] -> 3
 ]
 double[!1](len:2 cap:8) => [
-    1.100000
-    2.200000
+    [0] -> 1.100000
+    [1] -> 2.200000
 ]
 string[!1](len:2 cap:8) => [
-    string(len:5, cap:8) => "hello"
-    string(len:5, cap:8) => "world"
+    [0] -> string(len:5, cap:8) => "hello"
+    [1] -> string(len:5, cap:8) => "world"
 ]
 Job[!1](len:2 cap:8) => [
-    Job(fields:5, methods:0) => {
+    [0] -> Job(fields:5, methods:0) => {
         Bool: bool(false)
         Int: int(1)
         Int64: int64(1)
         Double: double(1.100000)
         String: string(len:5, cap:8) => "hello"
     }
-    Job(fields:5, methods:0) => {
+    [1] -> Job(fields:5, methods:0) => {
         Bool: bool(true)
         Int: int(2)
         Int64: int64(2)
@@ -60,66 +60,96 @@ Job[!1](len:2 cap:8) => [
         String: string(len:5, cap:8) => "world"
     }
 ]
+Task[!1](len:2 cap:8) => [
+    [0] -> Task(fields:6, methods:0) => {
+        Bool: bool(false)
+        Int: int(1)
+        Int64: int64(1)
+        Double: double(1.100000)
+        String: string(len:5, cap:8) => "hello"
+        JobValue: Job(fields:5, methods:0) => {
+            Bool: bool(false)
+            Int: int(0)
+            Int64: int64(0)
+            Double: double(0.000000)
+            String: string(len:0, cap:8) => ""
+        }
+    }
+    [1] -> Task(fields:6, methods:0) => {
+        Bool: bool(true)
+        Int: int(2)
+        Int64: int64(2)
+        Double: double(2.200000)
+        String: string(len:5, cap:8) => "world"
+        JobValue: Job(fields:5, methods:0) => {
+            Bool: bool(false)
+            Int: int(0)
+            Int64: int64(0)
+            Double: double(0.000000)
+            String: string(len:0, cap:8) => ""
+        }
+    }
+]
 bool[!2](len:2 cap:2) => [
-    bool[!1](len:2 cap:8) => [
-        false
-        true
+    [0] -> bool[!1](len:2 cap:8) => [
+        [0] -> false
+        [1] -> true
     ]
-    bool[!1](len:2 cap:8) => [
-        true
-        false
+    [1] -> bool[!1](len:2 cap:8) => [
+        [0] -> true
+        [1] -> false
     ]
 ]
 int[!2](len:2 cap:2) => [
-    int[!1](len:2 cap:8) => [
-        1
-        2
+    [0] -> int[!1](len:2 cap:8) => [
+        [0] -> 1
+        [1] -> 2
     ]
-    int[!1](len:2 cap:8) => [
-        2
-        1
+    [1] -> int[!1](len:2 cap:8) => [
+        [0] -> 2
+        [1] -> 1
     ]
 ]
 int64[!2](len:2 cap:2) => [
-    int64[!1](len:2 cap:8) => [
-        2
-        3
+    [0] -> int64[!1](len:2 cap:8) => [
+        [0] -> 2
+        [1] -> 3
     ]
-    int64[!1](len:2 cap:8) => [
-        3
-        2
+    [1] -> int64[!1](len:2 cap:8) => [
+        [0] -> 3
+        [1] -> 2
     ]
 ]
 double[!2](len:2 cap:2) => [
-    double[!1](len:2 cap:8) => [
-        1.100000
-        2.200000
+    [0] -> double[!1](len:2 cap:8) => [
+        [0] -> 1.100000
+        [1] -> 2.200000
     ]
-    double[!1](len:2 cap:8) => [
-        2.200000
-        1.100000
+    [1] -> double[!1](len:2 cap:8) => [
+        [0] -> 2.200000
+        [1] -> 1.100000
     ]
 ]
 string[!2](len:2 cap:2) => [
-    string[!1](len:2 cap:8) => [
-        string(len:5, cap:8) => "hello"
-        string(len:5, cap:8) => "world"
+    [0] -> string[!1](len:2 cap:8) => [
+        [0] -> string(len:5, cap:8) => "hello"
+        [1] -> string(len:5, cap:8) => "world"
     ]
-    string[!1](len:2 cap:8) => [
-        string(len:5, cap:8) => "world"
-        string(len:5, cap:8) => "hello"
+    [1] -> string[!1](len:2 cap:8) => [
+        [0] -> string(len:5, cap:8) => "world"
+        [1] -> string(len:5, cap:8) => "hello"
     ]
 ]
 Job[!2](len:2 cap:2) => [
-    Job[!1](len:2 cap:8) => [
-        Job(fields:5, methods:0) => {
+    [0] -> Job[!1](len:2 cap:8) => [
+        [0] -> Job(fields:5, methods:0) => {
             Bool: bool(false)
             Int: int(1)
             Int64: int64(1)
             Double: double(1.100000)
             String: string(len:5, cap:8) => "hello"
         }
-        Job(fields:5, methods:0) => {
+        [1] -> Job(fields:5, methods:0) => {
             Bool: bool(true)
             Int: int(2)
             Int64: int64(2)
@@ -127,20 +157,82 @@ Job[!2](len:2 cap:2) => [
             String: string(len:5, cap:8) => "world"
         }
     ]
-    Job[!1](len:2 cap:8) => [
-        Job(fields:5, methods:0) => {
+    [1] -> Job[!1](len:2 cap:8) => [
+        [0] -> Job(fields:5, methods:0) => {
             Bool: bool(false)
             Int: int(1)
             Int64: int64(1)
             Double: double(1.100000)
             String: string(len:5, cap:8) => "hello"
         }
-        Job(fields:5, methods:0) => {
+        [1] -> Job(fields:5, methods:0) => {
             Bool: bool(true)
             Int: int(2)
             Int64: int64(2)
             Double: double(2.200000)
             String: string(len:5, cap:8) => "world"
+        }
+    ]
+]
+Task[!2](len:2 cap:2) => [
+    [0] -> Task[!1](len:2 cap:8) => [
+        [0] -> Task(fields:6, methods:0) => {
+            Bool: bool(false)
+            Int: int(0)
+            Int64: int64(0)
+            Double: double(0.000000)
+            String: string(len:0, cap:8) => ""
+            JobValue: Job(fields:5, methods:0) => {
+                Bool: bool(false)
+                Int: int(0)
+                Int64: int64(0)
+                Double: double(0.000000)
+                String: string(len:0, cap:8) => ""
+            }
+        }
+        [1] -> Task(fields:6, methods:0) => {
+            Bool: bool(false)
+            Int: int(0)
+            Int64: int64(0)
+            Double: double(0.000000)
+            String: string(len:0, cap:8) => ""
+            JobValue: Job(fields:5, methods:0) => {
+                Bool: bool(false)
+                Int: int(0)
+                Int64: int64(0)
+                Double: double(0.000000)
+                String: string(len:0, cap:8) => ""
+            }
+        }
+    ]
+    [1] -> Task[!1](len:2 cap:8) => [
+        [0] -> Task(fields:6, methods:0) => {
+            Bool: bool(false)
+            Int: int(0)
+            Int64: int64(0)
+            Double: double(0.000000)
+            String: string(len:0, cap:8) => ""
+            JobValue: Job(fields:5, methods:0) => {
+                Bool: bool(false)
+                Int: int(0)
+                Int64: int64(0)
+                Double: double(0.000000)
+                String: string(len:0, cap:8) => ""
+            }
+        }
+        [1] -> Task(fields:6, methods:0) => {
+            Bool: bool(false)
+            Int: int(0)
+            Int64: int64(0)
+            Double: double(0.000000)
+            String: string(len:0, cap:8) => ""
+            JobValue: Job(fields:5, methods:0) => {
+                Bool: bool(false)
+                Int: int(0)
+                Int64: int64(0)
+                Double: double(0.000000)
+                String: string(len:0, cap:8) => ""
+            }
         }
     ]
 ]

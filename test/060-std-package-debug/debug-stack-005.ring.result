@@ -1,13 +1,13 @@
 
 test case 1
-#0 $ring!Job.PrintInfo(var bool, var int, var double)
+#0 $ring!Job.PrintInfo(bool, int, double)
     ./test/060-std-package-debug/debug-stack-005.ring:16
 #1 $ring!main()
     ./test/060-std-package-debug/debug-stack-005.ring:32
 #2 $ring!start()
 
 test case 2
-#0 $ring!PrintInfo(var bool, var int, var double)
+#0 $ring!PrintInfo(bool, int, double)
     ./test/060-std-package-debug/debug-stack-005.ring:25
 #1 $ring!main()
     ./test/060-std-package-debug/debug-stack-005.ring:36

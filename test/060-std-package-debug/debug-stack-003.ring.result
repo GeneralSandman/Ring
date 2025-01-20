@@ -4,13 +4,13 @@ fn test1()
 fn test2()
 fn test3()
 fn test4()
-#0 $ring!test4(var string)
+#0 $ring!test4(string)
     ./test/060-std-package-debug/debug-stack-003.ring:42
-#1 $ring!test3(var double)
+#1 $ring!test3(double)
     ./test/060-std-package-debug/debug-stack-003.ring:37
-#2 $ring!test2(var int)
+#2 $ring!test2(int)
     ./test/060-std-package-debug/debug-stack-003.ring:32
-#3 $ring!test1(var bool)
+#3 $ring!test1(bool)
     ./test/060-std-package-debug/debug-stack-003.ring:27
 #4 $ring!test0()
     ./test/060-std-package-debug/debug-stack-003.ring:22

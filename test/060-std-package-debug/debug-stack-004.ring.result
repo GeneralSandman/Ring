@@ -1,12 +1,12 @@
-#0 $ring!test_any(var bool, var int, var double, var string)
+#0 $ring!test_any(bool, int, double, string)
     ./test/060-std-package-debug/debug-stack-004.ring:42
-#1 $ring!test_two_string(var string, var string)
+#1 $ring!test_two_string(string, string)
     ./test/060-std-package-debug/debug-stack-004.ring:38
-#2 $ring!test_two_double(var double, var double)
+#2 $ring!test_two_double(double, double)
     ./test/060-std-package-debug/debug-stack-004.ring:34
-#3 $ring!test_two_int(var int, var int)
+#3 $ring!test_two_int(int, int)
     ./test/060-std-package-debug/debug-stack-004.ring:30
-#4 $ring!test_two_bool(var bool, var bool)
+#4 $ring!test_two_bool(bool, bool)
     ./test/060-std-package-debug/debug-stack-004.ring:26
 #5 $ring!test0()
     ./test/060-std-package-debug/debug-stack-004.ring:22
