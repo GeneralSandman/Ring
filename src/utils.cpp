@@ -1011,15 +1011,15 @@ std::string format_type_specifier_func(Ring_DeriveType_Func* func_type) {
     assert(func_type != nullptr);
 
     std::string res = "";
-    std::string str_par;
-    std::string str_return;
+    std::string par_str;
+    std::string return_str;
 
-    str_par = format_function_parameters(func_type->parameter_list);
-    res     = sprintf_string("fn(%s)", str_par.c_str());
+    par_str = format_function_parameters(func_type->parameter_list);
+    res     = sprintf_string("fn(%s)", par_str.c_str());
 
     if (func_type->return_list_size) {
-        str_return = format_function_return_list(func_type->return_list);
-        res += sprintf_string("->(%s)", str_return.c_str());
+        return_str = format_function_return_list(func_type->return_list);
+        res += sprintf_string("->(%s)", return_str.c_str());
     }
 
     return res;
@@ -1068,6 +1068,42 @@ std::string format_function_arguments(ArgumentList* argument) {
     return str;
 }
 
+// TODO: 考虑和 format_type_specifier_func 融合在一起
+std::string format_rvm_function_type(Package_Executer* package_executer,
+                                     RVM_Function*     function) {
+
+    std::string result = "";
+
+    // 1. function parameters
+    std::string par_str;
+    for (unsigned int i = 0; i < function->parameter_size; i++) {
+        if (i != 0) {
+            par_str += ", ";
+        }
+
+        std::string tmp = format_rvm_type_specifier(package_executer, function->parameter_list[i].type_specifier, "")
+            + (function->parameter_list[i].is_variadic ? "..." : "");
+
+        par_str += tmp;
+    }
+    result += sprintf_string("(%s)", par_str.c_str());
+
+    // 2. function return values
+    std::string return_res;
+    for (unsigned int i = 0; i < function->return_value_size; i++) {
+        if (i != 0) {
+            return_res += ", ";
+        }
+
+        std::string tmp = format_rvm_type_specifier(package_executer, function->return_value_list[i].type_specifier, "");
+        return_res += tmp;
+    }
+    if (return_res.size()) {
+        result += sprintf_string("->(%s)", return_res.c_str());
+    }
+
+    return result;
+}
 
 std::string format_rvm_function(Package_Executer* package_executer,
                                 RVM_Function*     function) {
@@ -1083,23 +1119,8 @@ std::string format_rvm_function(Package_Executer* package_executer,
         std::string tmp = sprintf_string("%p", (void*)function);
         result += "<closure " + tmp + ">";
     }
-    result += "(";
 
-    // 2. function parameters
-    for (unsigned int i = 0; i < function->parameter_size; i++) {
-        if (i != 0) {
-            result += ", ";
-        }
-
-        std::string tmp = format_rvm_type_specifier(package_executer, function->parameter_list[i].type_specifier, "var ")
-            + (function->parameter_list[i].is_variadic ? "..." : "");
-
-        result += tmp;
-    }
-    result += ")";
-
-    // TODO:
-    // 3. function return values
+    result += format_rvm_function_type(package_executer, function);
 
     return result;
 }

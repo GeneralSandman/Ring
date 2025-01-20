@@ -996,6 +996,7 @@ typedef enum {
     RVM_CODE_NEW_ARRAY_DOUBLE,
     RVM_CODE_NEW_ARRAY_STRING,
     RVM_CODE_NEW_ARRAY_CLASS_OB,
+    RVM_CODE_NEW_ARRAY_CLOSURE,
 
     RVM_CODE_NEW_ARRAY_LITERAL_BOOL,
     RVM_CODE_NEW_ARRAY_LITERAL_INT,
@@ -1003,6 +1004,7 @@ typedef enum {
     RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE,
     RVM_CODE_NEW_ARRAY_LITERAL_STRING,
     RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB,
+    RVM_CODE_NEW_ARRAY_LITERAL_CLOSURE,
     RVM_CODE_NEW_ARRAY_LITERAL_A,
 
 
@@ -3235,6 +3237,8 @@ RVM_Array*           rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsi
 RVM_Array*           rvm_new_array_literal_class_object(Ring_VirtualMachine* rvm,
                                                         unsigned int         size,
                                                         RVM_ClassDefinition* class_definition);
+RVM_Array*           rvm_new_array_literal_closure(Ring_VirtualMachine* rvm,
+                                                   unsigned int         size);
 RVM_Array*           rvm_new_array_literal_a(Ring_VirtualMachine* rvm,
                                              unsigned int         dimension,
                                              unsigned int         size);
@@ -3424,6 +3428,8 @@ std::string              format_function_parameters(Parameter* parameter);
 std::string              format_function_return_list(FunctionReturnList* return_list);
 std::string              format_function_arguments(ArgumentList* argument);
 
+std::string              format_rvm_function_type(Package_Executer* package_executer,
+                                                  RVM_Function*     function);
 std::string              format_rvm_function(Package_Executer* package_executer,
                                              RVM_Function*     function);
 std::string              format_rvm_type_specifier(Package_Executer*  package_executer,
@@ -3520,6 +3526,10 @@ void             rvm_fill_class_ob(Ring_VirtualMachine* rvm,
 RVM_ClassObject* rvm_deep_copy_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
 unsigned int     rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob);
 
+
+RVM_Closure*     rvm_gc_new_closure_meta(Ring_VirtualMachine* rvm);
+RVM_Closure*     rvm_deep_copy_closure(Ring_VirtualMachine* rvm, RVM_Closure* src);
+unsigned int     rvm_free_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure);
 // --------------------
 
 

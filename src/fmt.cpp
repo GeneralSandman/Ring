@@ -136,7 +136,7 @@ std::string fmt_array(RVM_Array* array_value) {
 
 
 std::string fmt_closure(RVM_Closure* closure) {
-    if (closure == nullptr) {
+    if (closure == nullptr || closure->anonymous_func == nullptr) {
         return "nil";
     }
     return sprintf_string("closure(%p)", closure);
@@ -254,6 +254,7 @@ std::string var_dump_array(Package_Executer* package_executer,
     result += "[";
     for (unsigned int i = 0; array_value != nullptr && i < array_value->length; i++) {
         result += "\n" + line_prefix;
+        result += sprintf_string("[%u] -> ", i);
 
         switch (array_value->type) {
         case RVM_ARRAY_BOOL:
@@ -308,12 +309,12 @@ std::string var_dump_array(Package_Executer* package_executer,
 std::string var_dump_closure(Package_Executer* package_executer, RVM_Closure* closure) {
     std::string res;
 
-    if (closure == nullptr) {
+    if (closure == nullptr || closure->anonymous_func == nullptr) {
         return "closure(nil)";
     }
 
-    res = sprintf_string("closure(%s %p)",
-                         format_rvm_function(package_executer, closure->anonymous_func).c_str(),
+    res = sprintf_string("closure(fn%s) => %p",
+                         format_rvm_function_type(package_executer, closure->anonymous_func).c_str(),
                          closure);
 
     return res;

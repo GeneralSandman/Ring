@@ -365,6 +365,14 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
                 array->u.class_ob_array[i] = *class_ob;
             }
             break;
+        case RVM_ARRAY_CLOSURE:
+            array->u.closure_array = (RVM_Closure*)mem_alloc(rvm->data_pool,
+                                                             sizeof(RVM_Closure) * array->capacity);
+            for (unsigned int i = 0; i < array->length; i++) {
+                RVM_Closure* closure      = rvm_gc_new_closure_meta(rvm);
+                array->u.closure_array[i] = *closure;
+            }
+            break;
         default:
             break;
         }
@@ -452,6 +460,15 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         for (unsigned int i = 0; i < array->length; i++) {
             RVM_Array* tmp      = rvm_deep_copy_array(rvm, &(src->u.a_array[i]));
             array->u.a_array[i] = *tmp;
+        }
+        break;
+
+    case RVM_ARRAY_CLOSURE:
+        array->u.closure_array = (RVM_Closure*)mem_alloc(rvm->data_pool,
+                                                         sizeof(RVM_Closure) * array->capacity);
+        for (unsigned int i = 0; i < src->length; i++) {
+            RVM_Closure* closure      = rvm_deep_copy_closure(rvm, &(src->u.closure_array[i]));
+            array->u.closure_array[i] = *closure;
         }
         break;
 
@@ -720,4 +737,22 @@ unsigned int rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_
     free_size = class_ob->field_count * sizeof(RVM_Value);
     mem_free(rvm->meta_pool, class_ob, sizeof(RVM_ClassObject));
     return free_size;
+}
+
+RVM_Closure* rvm_gc_new_closure_meta(Ring_VirtualMachine* rvm) {
+    RVM_Closure* closure     = (RVM_Closure*)mem_alloc(rvm->meta_pool, sizeof(RVM_Closure));
+    closure->anonymous_func  = nullptr;
+    closure->free_value_size = 0;
+    closure->free_value_list = nullptr;
+    return closure;
+}
+
+RVM_Closure* rvm_deep_copy_closure(Ring_VirtualMachine* rvm, RVM_Closure* src) {
+    // TODO:
+    return src;
+}
+
+unsigned int rvm_free_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure) {
+    // TODO:
+    return 0;
 }

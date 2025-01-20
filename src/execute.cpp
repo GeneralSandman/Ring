@@ -1200,6 +1200,18 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
+        case RVM_CODE_NEW_ARRAY_CLOSURE:
+            dimension = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            memset(dimension_list, 0, sizeof(unsigned int) * MAX_DIMENSION_NUM);
+            for (unsigned int i = 0; i < dimension; i++) {
+                dimension_list[dimension - 1 - i] = STACK_GET_INT_OFFSET(-(i + 1));
+            }
+            VM_CUR_CO_STACK_TOP_INDEX -= dimension;
+            array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLOSURE, nullptr);
+            STACK_SET_ARRAY_OFFSET(0, array_value);
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 2;
+            break;
 
         case RVM_CODE_NEW_ARRAY_LITERAL_BOOL:
             array_size  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
@@ -1250,6 +1262,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 4;
+            break;
+        case RVM_CODE_NEW_ARRAY_LITERAL_CLOSURE:
+            array_size  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            array_value = rvm_new_array_literal_closure(rvm, array_size);
+            VM_CUR_CO_STACK_TOP_INDEX -= array_size;
+            STACK_SET_ARRAY_OFFSET(0, array_value);
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_A:
             dimension   = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
@@ -2963,6 +2983,20 @@ RVM_Array* rvm_new_array_literal_class_object(Ring_VirtualMachine* rvm,
     for (unsigned int i = 0; i < size; i++) {
         // TODO: shallow copy
         array->u.class_ob_array[i] = *(STACK_GET_CLASS_OB_OFFSET(-size + i));
+    }
+
+    return array;
+}
+
+RVM_Array* rvm_new_array_literal_closure(Ring_VirtualMachine* rvm,
+                                         unsigned int         size) {
+
+    unsigned int dimension        = 1;
+    unsigned int dimension_list[] = {size};
+
+    RVM_Array*   array            = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLOSURE, nullptr);
+    for (unsigned int i = 0; i < size; i++) {
+        array->u.closure_array[i] = *STACK_GET_CLOSURE_OFFSET(-size + i);
     }
 
     return array;

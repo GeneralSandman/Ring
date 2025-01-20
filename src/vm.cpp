@@ -136,6 +136,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_NEW_ARRAY_DOUBLE, "new_array_double", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "create an array of double with dimension", "", ""},
     {RVM_CODE_NEW_ARRAY_STRING, "new_array_string", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "create an array of string with dimension", "", ""},
     {RVM_CODE_NEW_ARRAY_CLASS_OB, "new_array_class_ob", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, "create an array of object with dimension", "", ""},
+    {RVM_CODE_NEW_ARRAY_CLOSURE, "new_array_closure", OPCODE_OPERAND_TYPE_1BYTE_A, 1, "create an array of closure with dimension", "", ""},
 
     {RVM_CODE_NEW_ARRAY_LITERAL_BOOL, "new_array_literal_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "create an array of bool with literal", "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_INT, "new_array_literal_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "create an array of int with literal", "", ""},
@@ -143,6 +144,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE, "new_array_literal_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "create an array of double with literal", "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_STRING, "new_array_literal_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "create an array of string with literal", "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB, "new_array_literal_class_ob", OPCODE_OPERAND_TYPE_3BYTE_ABs, 1, "create an array of object with literal", "", ""},
+    {RVM_CODE_NEW_ARRAY_LITERAL_CLOSURE, "new_array_literal_closure", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "create an array of closure with literal", "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_A, "new_array_literal_a", OPCODE_OPERAND_TYPE_3BYTE_ABs, 1, "", "", ""},
 
 

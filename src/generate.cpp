@@ -2327,12 +2327,10 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
         class_definition = sub_type_specifier->u.class_t->class_definition;
         operand          = (dimension << 8) | (class_definition->class_index);
         break;
-    // case RING_BASIC_TYPE_FUNC:
-    //     // opcode = RVM_CODE_NEW_ARRAY_CLOSURE; // FIXME:
-    //     break;
+    case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_NEW_ARRAY_CLOSURE; break;
     default:
         // TODO: 编译报错
-        ring_error_report("error: new array only support bool[] int[] int64[] double[] string[] class[]\n");
+        ring_error_report("error: new array only support bool[] int[] int64[] double[] string[] class[] fn[]\n");
         break;
     }
 
@@ -2421,9 +2419,10 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
             class_definition = sub_type_specifier->u.class_t->class_definition;
             operand          = (class_definition->class_index << 16) | size;
             break;
+        case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_NEW_ARRAY_LITERAL_CLOSURE; break;
         default:
             // TODO: 编译报错
-            ring_error_report("error: array literal expression not support bool[] int[] double[] string[] <class>[]\n");
+            ring_error_report("error: array literal expression not support bool[] int[] double[] string[] <class>[] fn[]\n");
             break;
         }
         generate_vmcode(executer, opcode_buffer, opcode, operand, array_literal_expression->line_number);
