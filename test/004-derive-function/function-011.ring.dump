@@ -15,7 +15,7 @@ $__global_init()    <./test/004-derive-function/function-011.ring:0,0>
  ├──0       pop_defer                                                           
  ├──1       function_finish                                                     
 
-$test_1(var int, var int)    <./test/004-derive-function/function-011.ring:19,30>
+$test_1(int, int)->(int, int)    <./test/004-derive-function/function-011.ring:19,30>
 +Parameter:   2
  ├──var int              int_value_1         
  ├──var int              int_value_2         

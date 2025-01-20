@@ -5,7 +5,7 @@ test case 1 ======)
 
 #Globals:       0
 
-$test(var int, var int, var int, var int, var int, var int, var int, var int, var int, var int)    <./test/004-derive-function/function-012.ring:12,78>
+$test(int, int, int, int, int, int, int, int, int, int)->(int)    <./test/004-derive-function/function-012.ring:12,78>
 +Parameter:   10
  ├──var int              parameter_1         
  ├──var int              parameter_2         

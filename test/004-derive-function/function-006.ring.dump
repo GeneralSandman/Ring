@@ -9,7 +9,7 @@ test case 3)
 
 #Globals:       0
 
-$test_return_1()    <./test/004-derive-function/function-006.ring:12,16>
+$test_return_1()->(int)    <./test/004-derive-function/function-006.ring:12,16>
 +Parameter:   0
 +Local:       1
  ├──var int              int_value_local_1   
@@ -23,7 +23,7 @@ $test_return_1()    <./test/004-derive-function/function-006.ring:12,16>
  ├──4       pop_defer                                         16                
  ├──5       function_finish                                                     
 
-$test_return_2()    <./test/004-derive-function/function-006.ring:19,23>
+$test_return_2()->(int, int)    <./test/004-derive-function/function-006.ring:19,23>
 +Parameter:   0
 +Local:       1
  ├──var int              int_value_local_1   
@@ -40,7 +40,7 @@ $test_return_2()    <./test/004-derive-function/function-006.ring:19,23>
  ├──7       pop_defer                                         23                
  ├──8       function_finish                                                     
 
-$test_return_3()    <./test/004-derive-function/function-006.ring:25,29>
+$test_return_3()->(int, int, int)    <./test/004-derive-function/function-006.ring:25,29>
 +Parameter:   0
 +Local:       1
  ├──var int              int_value_local_1   

@@ -3,7 +3,7 @@
 
 #Globals:       0
 
-$test(var int, var int, var int)    <./test/004-derive-function/function-017.ring:11,19>
+$test(int, int, int)->(int)    <./test/004-derive-function/function-017.ring:11,19>
 +Parameter:   3
  ├──var int              int_value_1         
  ├──var int              int_value_2         

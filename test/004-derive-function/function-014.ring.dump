@@ -9,7 +9,7 @@ test case 3)
 
 #Globals:       0
 
-$increase_one(var int)    <./test/004-derive-function/function-014.ring:11,13>
+$increase_one(int)->(int)    <./test/004-derive-function/function-014.ring:11,13>
 +Parameter:   1
  ├──var int              int_1               
 +Local:       1
@@ -24,7 +24,7 @@ $increase_one(var int)    <./test/004-derive-function/function-014.ring:11,13>
  ├──4       pop_defer                                         13                
  ├──5       function_finish                                                     
 
-$add_two(var int, var int)    <./test/004-derive-function/function-014.ring:15,17>
+$add_two(int, int)->(int)    <./test/004-derive-function/function-014.ring:15,17>
 +Parameter:   2
  ├──var int              int_1               
  ├──var int              int_2               

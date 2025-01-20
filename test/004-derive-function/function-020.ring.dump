@@ -9,7 +9,7 @@ test case 3)
 
 #Globals:       0
 
-$fibonacci_1(var int)    <./test/004-derive-function/function-020.ring:11,17>
+$fibonacci_1(int)->(int)    <./test/004-derive-function/function-020.ring:11,17>
 +Parameter:   1
  ├──var int              num                 
 +Local:       1
@@ -48,7 +48,7 @@ $fibonacci_1(var int)    <./test/004-derive-function/function-020.ring:11,17>
  ├──28      pop_defer                                         17                
  ├──29      function_finish                                                     
 
-$fibonacci_2(var int)    <./test/004-derive-function/function-020.ring:19,35>
+$fibonacci_2(int)->(int)    <./test/004-derive-function/function-020.ring:19,35>
 +Parameter:   1
  ├──var int              num                 
 +Local:       5

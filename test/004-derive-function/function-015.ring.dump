@@ -13,7 +13,7 @@ test case 5)
 
 #Globals:       0
 
-$max(var int, var int)    <./test/004-derive-function/function-015.ring:11,16>
+$max(int, int)->(int)    <./test/004-derive-function/function-015.ring:11,16>
 +Parameter:   2
  ├──var int              parameter_1         
  ├──var int              parameter_2         
@@ -35,7 +35,7 @@ $max(var int, var int)    <./test/004-derive-function/function-015.ring:11,16>
  ├──9       pop_defer                                         16                
  ├──10      function_finish                                                     
 
-$min(var int, var int)    <./test/004-derive-function/function-015.ring:18,23>
+$min(int, int)->(int)    <./test/004-derive-function/function-015.ring:18,23>
 +Parameter:   2
  ├──var int              parameter_1         
  ├──var int              parameter_2         
@@ -57,7 +57,7 @@ $min(var int, var int)    <./test/004-derive-function/function-015.ring:18,23>
  ├──9       pop_defer                                         23                
  ├──10      function_finish                                                     
 
-$add(var int, var int)    <./test/004-derive-function/function-015.ring:26,28>
+$add(int, int)->(int)    <./test/004-derive-function/function-015.ring:26,28>
 +Parameter:   2
  ├──var int              parameter_1         
  ├──var int              parameter_2         

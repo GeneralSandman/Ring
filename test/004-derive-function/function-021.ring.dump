@@ -3,7 +3,7 @@
 
 #Globals:       0
 
-$test(var int...)    <./test/004-derive-function/function-021.ring:12,17>
+$test(int...)    <./test/004-derive-function/function-021.ring:12,17>
 +Parameter:   1
  ├──var int...           int_value_list      
 +Local:       2
