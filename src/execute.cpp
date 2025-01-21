@@ -113,6 +113,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     (GET_FREE_VALUE(index))->u.double_value = (value);
 #define FREE_SET_STRING_INDEX(index, value) \
     (GET_FREE_VALUE(index))->u.string_value = (value);
+#define FREE_SET_CLASS_OB_INDEX(index, value) \
+    (GET_FREE_VALUE(index))->u.class_ob_value = (value);
 
 #define FREE_GET_BOOL_INDEX(index) \
     (GET_FREE_VALUE(index))->u.bool_value;
@@ -124,7 +126,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     (GET_FREE_VALUE(index))->u.double_value;
 #define FREE_GET_STRING_INDEX(index) \
     (GET_FREE_VALUE(index))->u.string_value;
-
+#define FREE_GET_CLASS_OB_INDEX(index) \
+    (GET_FREE_VALUE(index))->u.class_ob_value;
 
 #define STACK_COPY_INDEX(dst_index, src_index) \
     (VM_CUR_CO_STACK_DATA[(dst_index)] = VM_CUR_CO_STACK_DATA[(src_index)])
@@ -792,6 +795,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             VM_CUR_CO_PC += 3;
             break;
+        case RVM_CODE_POP_FREE_CLASS_OB:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            class_ob_value   = STACK_GET_CLASS_OB_OFFSET(-1);
+            FREE_SET_CLASS_OB_INDEX(free_value_index, class_ob_value);
+
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
+            VM_CUR_CO_PC += 3;
+            break;
 
         case RVM_CODE_PUSH_FREE_BOOL:
             free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
@@ -829,6 +840,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             string_value     = FREE_GET_STRING_INDEX(free_value_index);
             STACK_SET_STRING_OFFSET(0, string_value);
+
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 3;
+            break;
+        case RVM_CODE_PUSH_FREE_CLASS_OB:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            class_ob_value   = FREE_GET_CLASS_OB_INDEX(free_value_index);
+            STACK_SET_CLASS_OB_OFFSET(0, class_ob_value);
 
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
@@ -2509,7 +2528,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
         for (unsigned int i = 0; i < closure->free_value_size; i++) {
             if (!closure->free_value_list[i].is_recur
                 && closure->free_value_list[i].is_open) {
-                // TODO: deep_copy string array
+                // TODO: deep_copy string/array/class-object
                 closure->free_value_list[i].c_value = *(closure->free_value_list[i].u.p);
                 closure->free_value_list[i].u.p     = &(closure->free_value_list[i].c_value);
                 closure->free_value_list[i].is_open = false;

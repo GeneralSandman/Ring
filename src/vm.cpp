@@ -83,12 +83,14 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_POP_FREE_INT64, "pop_free_int64", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "int64 assign to local-variable", "", "Fi(FSB+As).int64 = S(-1).int64"},
     {RVM_CODE_POP_FREE_DOUBLE, "pop_free_double", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "double assign to local-variable", "", "Fi(FSB+As).double = S(-1).double"},
     {RVM_CODE_POP_FREE_STRING, "pop_free_string", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "string assign to local-variable", "", "Fi(FSB+As).string = S(-1).string"},
+    {RVM_CODE_POP_FREE_CLASS_OB, "pop_free_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, -1, "class-object assign to local-variable", "", "Fi(FSB+As).object = S(-1).object"},
 
     {RVM_CODE_PUSH_FREE_BOOL, "push_free_bool", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's bool to stack", "", "So(0).bool = Fi(FSB+As).bool"},
     {RVM_CODE_PUSH_FREE_INT, "push_free_int", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's int to stack", "", "So(0).int = Fi(FSB+As).int"},
     {RVM_CODE_PUSH_FREE_INT64, "push_free_int64", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's int64 to stack", "", "So(0).int64 = Fi(FSB+As).int64"},
     {RVM_CODE_PUSH_FREE_DOUBLE, "push_free_double", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's double to stack", "", "So(0).double = Fi(FSB+As).double"},
     {RVM_CODE_PUSH_FREE_STRING, "push_free_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's string to stack", "", "So(0).string = Fi(FSB+As).string"},
+    {RVM_CODE_PUSH_FREE_CLASS_OB, "push_free_class_ob", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "push local-variable's class-object to stack", "", "So(0).object = Fi(FSB+As).object"},
 
 
     // array

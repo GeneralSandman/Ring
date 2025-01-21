@@ -2754,6 +2754,8 @@ RVM_Opcode convert_opcode_by_rvm_type(RVM_Opcode opcode, TypeSpecifier* type) {
         // RVM_CODE_PUSH_STATIC_CLASS_OB
         // RVM_CODE_POP_STACK_CLASS_OB
         // RVM_CODE_PUSH_STACK_CLASS_OB
+        // RVM_CODE_POP_FREE_CLASS_OB
+        // RVM_CODE_PUSH_FREE_CLASS_OB
         // RVM_CODE_POP_FIELD_CLASS_OB
         // RVM_CODE_PUSH_FIELD_CLASS_OB
         return RVM_Opcode(opcode + 5);
