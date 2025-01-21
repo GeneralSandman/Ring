@@ -1,0 +1,92 @@
+========== return new closure
+----------- in return_closure block
+[return_closure] level0_local_bool_value_0=true
+[return_closure] level0_local_int_value_0=1
+[return_closure] level0_local_int64_value_0=1
+[return_closure] level0_local_double_value_0=1.000000
+[return_closure] level0_local_string_value_0=s
+[return_closure] level0_local_job_value_0={Bool:true Int:1 Int64:1 Double:1.000000 String:s}
+----------- out return_closure block
+
+----------- in closure block
+[closure block] level0_local_bool_value_0=false
+[closure block] level0_local_int_value_0=2
+[closure block] level0_local_int64_value_0=2
+[closure block] level0_local_double_value_0=2.000000
+[closure block] level0_local_string_value_0=s1
+[closure block] level0_local_job_value_0={Bool:false Int:2 Int64:2 Double:2.000000 String:s1}
+----------- out closure block
+
+----------- in closure block
+[closure block] level0_local_bool_value_0=true
+[closure block] level0_local_int_value_0=3
+[closure block] level0_local_int64_value_0=3
+[closure block] level0_local_double_value_0=3.000000
+[closure block] level0_local_string_value_0=s12
+[closure block] level0_local_job_value_0={Bool:true Int:3 Int64:3 Double:3.000000 String:s12}
+----------- out closure block
+
+----------- in closure block
+[closure block] level0_local_bool_value_0=false
+[closure block] level0_local_int_value_0=4
+[closure block] level0_local_int64_value_0=4
+[closure block] level0_local_double_value_0=4.000000
+[closure block] level0_local_string_value_0=s123
+[closure block] level0_local_job_value_0={Bool:false Int:4 Int64:4 Double:4.000000 String:s123}
+----------- out closure block
+
+----------- in closure block
+[closure block] level0_local_bool_value_0=true
+[closure block] level0_local_int_value_0=5
+[closure block] level0_local_int64_value_0=5
+[closure block] level0_local_double_value_0=5.000000
+[closure block] level0_local_string_value_0=s1234
+[closure block] level0_local_job_value_0={Bool:true Int:5 Int64:5 Double:5.000000 String:s1234}
+----------- out closure block
+
+========== return new closure
+----------- in return_closure block
+[return_closure] level0_local_bool_value_0=true
+[return_closure] level0_local_int_value_0=1
+[return_closure] level0_local_int64_value_0=1
+[return_closure] level0_local_double_value_0=1.000000
+[return_closure] level0_local_string_value_0=s
+[return_closure] level0_local_job_value_0={Bool:true Int:1 Int64:1 Double:1.000000 String:s}
+----------- out return_closure block
+
+----------- in closure block
+[closure block] level0_local_bool_value_0=false
+[closure block] level0_local_int_value_0=2
+[closure block] level0_local_int64_value_0=2
+[closure block] level0_local_double_value_0=2.000000
+[closure block] level0_local_string_value_0=s1
+[closure block] level0_local_job_value_0={Bool:false Int:2 Int64:2 Double:2.000000 String:s1}
+----------- out closure block
+
+----------- in closure block
+[closure block] level0_local_bool_value_0=true
+[closure block] level0_local_int_value_0=3
+[closure block] level0_local_int64_value_0=3
+[closure block] level0_local_double_value_0=3.000000
+[closure block] level0_local_string_value_0=s12
+[closure block] level0_local_job_value_0={Bool:true Int:3 Int64:3 Double:3.000000 String:s12}
+----------- out closure block
+
+----------- in closure block
+[closure block] level0_local_bool_value_0=false
+[closure block] level0_local_int_value_0=4
+[closure block] level0_local_int64_value_0=4
+[closure block] level0_local_double_value_0=4.000000
+[closure block] level0_local_string_value_0=s123
+[closure block] level0_local_job_value_0={Bool:false Int:4 Int64:4 Double:4.000000 String:s123}
+----------- out closure block
+
+----------- in closure block
+[closure block] level0_local_bool_value_0=true
+[closure block] level0_local_int_value_0=5
+[closure block] level0_local_int64_value_0=5
+[closure block] level0_local_double_value_0=5.000000
+[closure block] level0_local_string_value_0=s1234
+[closure block] level0_local_job_value_0={Bool:true Int:5 Int64:5 Double:5.000000 String:s1234}
+----------- out closure block
+
