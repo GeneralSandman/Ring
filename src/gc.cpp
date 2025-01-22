@@ -48,6 +48,9 @@ void gc_summary(Ring_VirtualMachine* rvm) {
         case RVM_GC_OBJECT_TYPE_ARRAY:
             printf("\tRVM_GC_Object: array\n");
             break;
+        case RVM_GC_OBJECT_TYPE_CLOSURE:
+            printf("\tRVM_GC_Object: closure\n");
+            break;
         default:
             break;
         }
@@ -198,6 +201,7 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
     RVM_String*      string_value = nullptr;
     RVM_Array*       array        = nullptr;
     RVM_ClassObject* class_ob     = nullptr;
+    RVM_Closure*     closure      = nullptr;
 
     switch (object->gc_type) {
     case RVM_GC_OBJECT_TYPE_STRING:
@@ -213,6 +217,11 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
     case RVM_GC_OBJECT_TYPE_ARRAY:
         array     = (RVM_Array*)object;
         free_size = rvm_free_array(rvm, array);
+        break;
+
+    case RVM_GC_OBJECT_TYPE_CLOSURE:
+        closure   = (RVM_Closure*)object;
+        free_size = rvm_free_closure(rvm, closure);
         break;
 
     default:
@@ -741,9 +750,16 @@ unsigned int rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_
 
 RVM_Closure* rvm_gc_new_closure_meta(Ring_VirtualMachine* rvm) {
     RVM_Closure* closure     = (RVM_Closure*)mem_alloc(rvm->meta_pool, sizeof(RVM_Closure));
+    closure->gc_type         = RVM_GC_OBJECT_TYPE_CLOSURE;
+    closure->gc_mark         = GC_MARK_COLOR_WHITE;
+    closure->gc_prev         = nullptr;
+    closure->gc_next         = nullptr;
     closure->anonymous_func  = nullptr;
     closure->free_value_size = 0;
     closure->free_value_list = nullptr;
+
+    rvm_heap_list_add_object(rvm, (RVM_GC_Object*)closure);
+
     return closure;
 }
 
@@ -753,6 +769,6 @@ RVM_Closure* rvm_deep_copy_closure(Ring_VirtualMachine* rvm, RVM_Closure* src) {
 }
 
 unsigned int rvm_free_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure) {
-    // TODO:
+    // TODO: 释放 free_value
     return 0;
 }

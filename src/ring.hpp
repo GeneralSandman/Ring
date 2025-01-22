@@ -628,12 +628,6 @@ struct RVM_Function {
 };
 
 
-struct RVM_Closure {
-    RVM_Function*  anonymous_func;
-    unsigned int   free_value_size;
-    RVM_FreeValue* free_value_list;
-};
-
 struct RVM_FreeValueDesc {
     const char* identifier;
     bool        is_curr_local;
@@ -721,6 +715,7 @@ typedef enum {
     RVM_GC_OBJECT_TYPE_STRING,
     RVM_GC_OBJECT_TYPE_CLASS_OB,
     RVM_GC_OBJECT_TYPE_ARRAY,
+    RVM_GC_OBJECT_TYPE_CLOSURE,
 } RVM_GC_Object_Type;
 
 typedef enum {
@@ -795,6 +790,14 @@ struct RVM_ClassObject {
     RVM_ClassDefinition* class_ref;
     unsigned int         field_count;
     RVM_Value*           field_list;
+};
+
+struct RVM_Closure {
+    RVM_GC_Object_Header;
+
+    RVM_Function*  anonymous_func;
+    unsigned int   free_value_size;
+    RVM_FreeValue* free_value_list;
 };
 
 struct RVM_TypeSpecifier_Array {

@@ -2386,7 +2386,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
     if (callee_closure == nullptr && callee_function->free_value_size) {
         // 初始化一个闭包
 
-        RVM_Closure* closure     = (RVM_Closure*)mem_alloc(rvm->meta_pool, sizeof(RVM_Closure));
+        RVM_Closure* closure     = rvm_gc_new_closure_meta(rvm);
         closure->anonymous_func  = callee_function;
         closure->free_value_size = callee_function->free_value_size;
         closure->free_value_list = (RVM_FreeValue*)mem_alloc(rvm->data_pool,
@@ -3428,9 +3428,10 @@ ErrorCode rvm_array_append_closure(Ring_VirtualMachine* rvm,
             array->capacity *= 2;
         }
 
-        new_alloc_size         = array->capacity * sizeof(RVM_Closure);
+        new_alloc_size = array->capacity * sizeof(RVM_Closure);
 
 
+        // FIXME: 这里内存分配的位置不对
         array->u.closure_array = (RVM_Closure*)mem_realloc(rvm->meta_pool,
                                                            array->u.class_ob_array,
                                                            old_alloc_size,
@@ -3602,7 +3603,8 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
                          RVM_Function* callee_function) {
 
     // FIXME: 需要分配在堆上
-    RVM_Closure* closure     = (RVM_Closure*)mem_alloc(rvm->meta_pool, sizeof(RVM_Closure));
+    // free value 需要分配在堆上
+    RVM_Closure* closure     = rvm_gc_new_closure_meta(rvm);
     closure->anonymous_func  = callee_function;
     closure->free_value_size = callee_function->free_value_size;
     closure->free_value_list = (RVM_FreeValue*)mem_alloc(rvm->data_pool,
