@@ -23,7 +23,10 @@ fn main() {
 	local_job_value_0.FuncField = fn() {
 		fmt::println("Hello1 from FuncField");
 	};
-	fmt::printf("local_job_value_0={}\n", local_job_value_0);
+
+	// 输出是指针，不太好测试
+	// fmt::printf("local_job_value_0={}\n", local_job_value_0);
+	// 输出：local_job_value_0={StringField:Hello1 FuncField:closure(0x131e96520)}
 
 
 	// 通过常量去初始化
@@ -33,16 +36,18 @@ fn main() {
 			fmt::println("Hello2 from FuncField");
 		}
 	};
-	fmt::printf("local_job_value_0={}\n", local_job_value_0);
+	// 输出是指针，不太好测试
+	// fmt::printf("local_job_value_0={}\n", local_job_value_0);
+	// 输出：local_job_value_0={StringField:Hello2 FuncField:closure(0x131e964a0)}
 
 
-	// local_job_value_0.FuncField();
-	// FIXME:
-	// 这里会编译报错，因为在语法层面，认为 FuncField是个method，而不是个 field
-	// 需要通过语义分析优化
+	// 像调用 method 一样调用 field
+	local_job_value_0.FuncField();
+
 
 
 	// 测试 push_field_closure
+	// 将 field 赋值给一个临时变量，然后当成函数一样调用
 	var FuncType local_func_value_0;
 	local_func_value_0 = local_job_value_0.FuncField;
 	local_func_value_0();

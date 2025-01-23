@@ -1,0 +1,10 @@
+
+test new closure literal array-------
+4
+8
+
+test range closure array-------
+local_array_func item 0, array-clsoure-literal
+local_array_func item 1, array-clsoure-literal
+local_array_func item 2, array-clsoure-literal
+local_array_func item 3, array-clsoure-literal

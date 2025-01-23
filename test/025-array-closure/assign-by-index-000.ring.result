@@ -1,0 +1,17 @@
+test cast 1 ------------------------
+nil
+nil
+nil
+nil
+nil
+
+test cast 2 ------------------------
+
+test cast 3 ------------------------
+
+test cast 4 ------------------------
+global_func_array_0 func item 0
+global_func_array_0 func item 1
+global_func_array_0 func item 2
+global_func_array_0 func item 3
+global_func_array_0 func item 4

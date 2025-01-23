@@ -69,6 +69,7 @@ var (
 		"022-array-double",
 		"023-array-string",
 		"024-array-class",
+		"025-array-closure",
 
 		"030-if",
 		"031-for",
@@ -116,7 +117,6 @@ var (
 		"test/050-coroutine/sleep-and-yield.ring",
 		// 就是未来死循环验证协程切换, 可以暂时不用测试
 
-
 		// 等 v0.3.0 重新设计垃圾回收算法之后，重新验证
 		"test/064-std-package-vm/gc-array.ring",
 		"test/064-std-package-vm/gc-array-string.ring",
@@ -137,7 +137,6 @@ var (
 	IS_EXPORT_TEST_DETAIL_SUMMARY = 0
 	TEST_DETAIL_SUMMARY           = "./test/ring-测试用例表.md.raw"
 	TEST_PATH                     = "./test"
-
 )
 
 func main() {
@@ -181,7 +180,7 @@ func main() {
 
 				wg.Add(1)
 				maxConcurrentChannel <- struct{}{}
-				
+
 				testResult := autoTestAction(testCase, displayMode)
 				testCaseResultMap.Store(testCase.FileName, testResult)
 			}(testCase)
@@ -296,7 +295,7 @@ func getAllTestCases() []RingTestCase {
 		files, _ := os.ReadDir(sourceFilePath)
 
 		for _, file := range files {
-			
+
 			if filepath.Ext(file.Name()) == ".ring" {
 
 				filePath := filepath.Join(TEST_PATH, model, file.Name())
