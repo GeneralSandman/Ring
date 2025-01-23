@@ -35,14 +35,14 @@ https://wubingzheng.github.io/build-lua-in-rust/zh/ch09-02.escape_and_closure.ht
 #### 书籍
 1. 《Lua设计与实现》https://github.com/lichuang/Lua-Source-Internal
 2. 《自己动手实现Lua：虚拟机、编译器和标准库》
+3. lua 中 lua_State 和 global_State 含义 
+
+https://chenanbao.github.io/2018/07/27/Lua%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%88%9B%E5%BB%BA%E5%88%86%E6%9E%90/
 
 
-
-1. 实现自己的编程语言 
+4. 实现自己的编程语言 
    https://github.com/codecrafters-io/build-your-own-x#build-your-own-programming-language
 
-2. Mark-Sweep垃圾回收机制 
-   https://journal.stuffwithstuff.com/2013/12/08/babys-first-garbage-collector/
 
 3. Lua GC 算法介绍
    https://manistein.github.io/blog/post/program/let-us-build-a-lua-interpreter/%E6%9E%84%E5%BB%BAlua%E8%A7%A3%E9%87%8A%E5%99%A8part2/
@@ -199,3 +199,21 @@ https://github.com/worlpaker/go-syntax/blob/master/syntaxes/go.tmLanguage.json
 
 关于vscode 的 debugger插件
 https://code.visualstudio.com/api/extension-guides/debugger-extension
+
+
+
+## 垃圾回收专题
+
+《Go 语言设计与实现 —— 7.2 垃圾收集器》
+https://draveness.me/golang/docs/part3-runtime/ch07-memory/golang-garbage-collector/
+
+《图示Golang垃圾回收机制》
+https://zhuanlan.zhihu.com/p/297177002
+
+简单实现  Mark-Sweep垃圾回收机制 
+https://journal.stuffwithstuff.com/2013/12/08/babys-first-garbage-collector/
+
+
+
+《构建Lua解释器Part2：Garbage Collection基础架构》 Incremental Mark and Sweep算法
+https://manistein.github.io/blog/post/program/let-us-build-a-lua-interpreter/%E6%9E%84%E5%BB%BAlua%E8%A7%A3%E9%87%8A%E5%99%A8part2/
