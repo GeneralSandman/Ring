@@ -290,7 +290,7 @@ struct RingCoroutine {
     CO_ID             co_id;
     CO_ID             p_co_id;
 
-    long              last_run_time;
+    long long         last_run_time;
     CO_STAT           status;
 
     RVM_RuntimeStack* runtime_stack; // 运行堆栈
@@ -1223,6 +1223,9 @@ typedef enum ErrorEnum {
 
     RING_INVALID_OPCODE_ERROR,
 
+    RING_COROUTINE_SCHED_ERROR, // 协程调度错误
+
+
     // out of memory
     // stack over flow
 
@@ -1230,29 +1233,30 @@ typedef enum ErrorEnum {
 
 class RuntimeException : public std::exception {
 
+    Ring_VirtualMachine* rvm;
     ErrorEnum            error_num;
     std::string          message;
-    Ring_VirtualMachine* rvm;
 
 public:
-    RuntimeException(ErrorEnum            error_num,
-                     std::string          message,
-                     Ring_VirtualMachine* rvm);
+    RuntimeException(Ring_VirtualMachine* rvm,
+                     ErrorEnum            error_num,
+                     std::string          message);
     const char* what() const noexcept override;
 };
 
-void throw_nil_error(Ring_VirtualMachine* rvm, const char* fmt, ...)
-    __attribute__((format(printf, 2, 3)));
-void throw_range_error(Ring_VirtualMachine* rvm, const char* fmt, ...)
-    __attribute__((format(printf, 2, 3)));
-void throw_invalid_opcode_error(Ring_VirtualMachine* rvm, const char* fmt, ...)
-    __attribute__((format(printf, 2, 3)));
+void throw_runtime_err(Ring_VirtualMachine* rvm,
+                       ErrorEnum            error_num,
+                       const char*          fmt, ...)
+    __attribute__((format(printf, 3, 4)));
 
 
 #define THROW_NIL_FMT "invalid memory address or nil pointer dereference"
 #define THROW_NIL_FMT_DETAIL "invalid memory address or nil pointer dereference: %s"
 #define THROW_RANGE_FMT "index out of range [%d] with length %d"
 #define THROW_INVAID_OPCODE "invalid vm opcode: %d, pc: %d"
+#define THROW_COROUTINE_NIL "coroutine is nil, coroutinue id: %llu"
+#define THROW_COROUTINE_DEAD "coroutine is dead, coroutinue id: %llu"
+#define THROW_COROUTINE_RESUME_SELF "coroutine resume self, coroutinue id: %llu"
 
 /*
  * 报错模板：
@@ -1260,20 +1264,24 @@ void throw_invalid_opcode_error(Ring_VirtualMachine* rvm, const char* fmt, ...)
  * runtime error: RangeError: index out of range [3] with length 2
  */
 #define assert_throw_nil(check) \
-    ((check) ? throw_nil_error((rvm), THROW_NIL_FMT) : (void)0)
-
+    ((check) ? throw_runtime_err((rvm), RING_NIL_ERROR, THROW_NIL_FMT) : (void)0)
 #define assert_throw_nil_array(check) \
-    ((check) ? throw_nil_error((rvm), THROW_NIL_FMT_DETAIL, "nil array") : (void)0)
-
+    ((check) ? throw_runtime_err((rvm), RING_NIL_ERROR, THROW_NIL_FMT_DETAIL, "nil array") : (void)0)
 #define assert_throw_nil_closure(check) \
-    ((check) ? throw_nil_error((rvm), THROW_NIL_FMT_DETAIL, "nil closure") : (void)0)
+    ((check) ? throw_runtime_err((rvm), RING_NIL_ERROR, THROW_NIL_FMT_DETAIL, "nil closure") : (void)0)
 
 #define assert_throw_range(index, length) \
-    (((index) >= (length)) ? throw_range_error((rvm), THROW_RANGE_FMT, (index), (length)) : (void)0)
+    (((index) >= (length)) ? throw_runtime_err((rvm), RING_RANGE_ERROR, THROW_RANGE_FMT, (index), (length)) : (void)0)
 
 #define throw_invalid_opcode(opcode, pc) \
-    throw_invalid_opcode_error((rvm), THROW_INVAID_OPCODE, (opcode), (pc))
+    throw_runtime_err((rvm), RING_INVALID_OPCODE_ERROR, THROW_INVAID_OPCODE, (opcode), (pc))
 
+#define assert_throw_nil_coroutine(co_id, coroutine) \
+    (((coroutine) == nullptr) ? throw_runtime_err((rvm), RING_COROUTINE_SCHED_ERROR, THROW_COROUTINE_NIL, (co_id)) : (void)0)
+#define assert_throw_dead_coroutine(co_id, coroutine) \
+    ((((coroutine)->status) == CO_STAT_DEAD) ? throw_runtime_err((rvm), RING_COROUTINE_SCHED_ERROR, THROW_COROUTINE_DEAD, (co_id)) : (void)0)
+#define assert_throw_coroutine_resume_self(check, co_id) \
+    ((check) ? throw_runtime_err((rvm), RING_COROUTINE_SCHED_ERROR, THROW_COROUTINE_RESUME_SELF, (co_id)) : (void)0)
 
 struct RVM_DeferItem {
 

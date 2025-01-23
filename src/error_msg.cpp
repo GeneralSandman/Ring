@@ -38,9 +38,9 @@ struct SyntaxInfo SyntaxInfos[] = {
 // TODO: 这里是个静态变量，后续优化掉
 static std::string runtime_exception_str;
 //
-RuntimeException::RuntimeException(ErrorEnum            error_num,
-                                   std::string          message,
-                                   Ring_VirtualMachine* rvm) {
+RuntimeException::RuntimeException(Ring_VirtualMachine* rvm,
+                                   ErrorEnum            error_num,
+                                   std::string          message) {
     this->error_num = error_num;
     this->message   = message;
     this->rvm       = rvm;
@@ -49,10 +49,14 @@ const char* RuntimeException::what() const noexcept {
 
     std::string error_num_str;
     switch (this->error_num) {
-    case RING_INTERNAL_ERROR: error_num_str = "InternalError"; break;
     case RING_NIL_ERROR: error_num_str = "NilError"; break;
     case RING_RANGE_ERROR: error_num_str = "RangeError"; break;
     case RING_INVALID_OPCODE_ERROR: error_num_str = "InvalidOpcodeError"; break;
+    case RING_COROUTINE_SCHED_ERROR: error_num_str = "CoroutineSchedError"; break;
+    case RING_INTERNAL_ERROR:
+    default:
+        error_num_str = "InternalError";
+        break;
     }
 
     std::string call_stack = format_rvm_call_stack(this->rvm);
@@ -65,25 +69,12 @@ const char* RuntimeException::what() const noexcept {
     return runtime_exception_str.c_str();
 }
 
-void throw_nil_error(Ring_VirtualMachine* rvm, const char* fmt, ...) {
+void throw_runtime_err(Ring_VirtualMachine* rvm,
+                       ErrorEnum            error_num,
+                       const char*          fmt, ...) {
     va_list args;
     va_start(args, fmt);
     std::string message = sprintf_string_va(fmt, args);
     va_end(args);
-    throw RuntimeException(RING_NIL_ERROR, message, rvm);
-}
-void throw_range_error(Ring_VirtualMachine* rvm, const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    std::string message = sprintf_string_va(fmt, args);
-    va_end(args);
-    throw RuntimeException(RING_RANGE_ERROR, message, rvm);
-}
-
-void throw_invalid_opcode_error(Ring_VirtualMachine* rvm, const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    std::string message = sprintf_string_va(fmt, args);
-    va_end(args);
-    throw RuntimeException(RING_INVALID_OPCODE_ERROR, message, rvm);
+    throw RuntimeException(rvm, error_num, message);
 }

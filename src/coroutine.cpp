@@ -375,17 +375,16 @@ int resume_coroutine(Ring_VirtualMachine* rvm,
 
     RingCoroutine* target_co = coroutine_map[target_co_id];
     if (target_co == nullptr) {
-        // TODO: error-report
+        // 为什么这里没有抛出异常
+        // 这里的设计是，resume 一个不存在的/已经dead 协程不会报错
         return -1;
     }
+    // status 为 CO_STAT_DEAD 不能 resume
     if (target_co->status == CO_STAT_DEAD) {
         return -1;
     }
-    if (target_co->co_id == curr_co->co_id) {
-        // TODO: error-report
-        // 不能自己唤醒自己
-        return -1;
-    }
+    // 不能自己唤醒自己
+    assert_throw_coroutine_resume_self(target_co->co_id == curr_co->co_id, curr_co->co_id);
 
     // 第一次被调度
     if (target_co->status == CO_STAT_INIT) {
@@ -440,16 +439,22 @@ int yield_coroutine(Ring_VirtualMachine* rvm) {
     CO_ID          target_co_id = curr_co->p_co_id;
     RingCoroutine* target_co    = coroutine_map[target_co_id];
     if (target_co == nullptr) {
-        // TODO: error-report
-        // printf("yield_coroutine error\n");
+        // 为什么这里没有抛出异常
+        // 如果一个 root coroutine yield, 应该是没有效果的
+        // 不应该退出
         return -1;
     }
 
 
+    // get ns timestamp
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    long long timestamp = (long long)(ts.tv_sec) * 1000000000 + ts.tv_nsec;
+
     // 协程上下文切换
     curr_co->status          = CO_STAT_SUSPENDED;
 
-    target_co->last_run_time = time(nullptr); // TODO: ns
+    target_co->last_run_time = timestamp;
     target_co->status        = CO_STAT_RUNNING;
     target_co->call_info->pc += 1;
 
@@ -497,17 +502,17 @@ int finish_coroutine(Ring_VirtualMachine* rvm,
 
     CO_ID          target_co_id = curr_co->p_co_id;
     RingCoroutine* target_co    = coroutine_map[target_co_id];
-    if (target_co == nullptr) {
-        // TODO: error-report
-        printf("parent coroutine not found p_co_id:%llu\n", target_co_id);
-        return -1;
-    }
+    assert_throw_nil_coroutine(target_co_id, target_co);
 
+    // get ns timestamp
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    long long timestamp = (long long)(ts.tv_sec) * 1000000000 + ts.tv_nsec;
 
     // 上下文切换
     curr_co->status          = CO_STAT_DEAD;
 
-    target_co->last_run_time = time(nullptr); // TODO: ns
+    target_co->last_run_time = timestamp;
     target_co->status        = CO_STAT_RUNNING;
     target_co->call_info->pc += 1;
 

@@ -2,12 +2,12 @@
 #include <cassert>
 #include <cmath>
 #include <cstring>
+#include <ctime>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/uio.h>
-#include <time.h>
 #include <unistd.h>
 #include <vector>
 
