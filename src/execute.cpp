@@ -2702,7 +2702,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                 break;
 
             default:
-                ring_error_report("only support bool/int/double/string/class as variadic parameter");
+                ring_error_report("only support bool/int/int64/double/string/class as variadic parameter");
                 break;
             }
 
@@ -2741,7 +2741,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                 } break;
 
                 default:
-                    ring_error_report("only support bool/int/double/string/class as variadic parameter");
+                    ring_error_report("only support bool/int/int64/double/string/class as variadic parameter");
                     break;
                 }
             }
@@ -2750,6 +2750,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             local_vari_stack_offset++;
 
             // 可变参数只能是函数的最后一个参数
+            // 直接break没有问题
             break;
         } else {
             STACK_COPY_INDEX(
@@ -3719,4 +3720,8 @@ void fill_defer_item_argument_stack(Ring_VirtualMachine* rvm, RVM_DeferItem* def
     }
 
     VM_CUR_CO_STACK_TOP_INDEX += defer_item->argument_size;
+}
+
+// 在函数调用的过程中，处理函数的 可变参数，将它变为数组
+RVM_Array* init_derive_function_variadic_argument() {
 }

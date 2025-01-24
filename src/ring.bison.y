@@ -13,7 +13,7 @@ int yylex();
 
 %locations                       // 开启locations
 %glr-parser                      // 使用 GLR 解析
-%expect    3                     // legitimate 0 shift/reduce conflicts
+%expect    4                     // legitimate 0 shift/reduce conflicts
 %expect-rr 0                     // legitimate 0 reduce/reduce conflicts
 
 // 在 array_literal_expression 的 class_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_RC
@@ -385,10 +385,10 @@ definition_or_statement
     ;
 
 class_definition
-    : TOKEN_TYPEDEF TOKEN_CLASS IDENTIFIER TOKEN_LC { $<m_class_definition>$ = start_class_definition($3); } class_member_declaration_list TOKEN_RC
+    : TOKEN_TYPEDEF IDENTIFIER TOKEN_ASSIGN TOKEN_CLASS {$<m_class_definition>$ = start_class_definition(nullptr);} TOKEN_LC class_member_declaration_list TOKEN_RC
     {
         debug_bison_info_with_green("[RULE::class_definition]\t ");
-        $<m_class_definition>$ = finish_class_definition($<m_class_definition>5, $6);
+        $<m_class_definition>$ = finish_class_definition($<m_class_definition>5, $7, $2);
     }
     ;
 
@@ -399,15 +399,15 @@ class_definition
 *         typedef function(int) Func1;
 */
 type_alias_def
-    : TOKEN_TYPEDEF  TOKEN_FN TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP  identifier
+    : TOKEN_TYPEDEF identifier TOKEN_ASSIGN TOKEN_FN TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP
     {
         debug_bison_info_with_green("[RULE::type_definition]\t ");
-         $<m_type_alias_def>$ = add_type_alias_func($4, nullptr, $6);
+         $<m_type_alias_def>$ = add_type_alias_func($6, nullptr, $2);
     }
-    | TOKEN_TYPEDEF  TOKEN_FN TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP  identifier
+    | TOKEN_TYPEDEF identifier TOKEN_ASSIGN TOKEN_FN TOKEN_LP simple_parameter_list_maybe_empty TOKEN_RP TOKEN_ARROW TOKEN_LP return_list TOKEN_RP
     {
         debug_bison_info_with_green("[RULE::type_definition]\t ");
-         $<m_type_alias_def>$ = add_type_alias_func($4, $8, $10);
+         $<m_type_alias_def>$ = add_type_alias_func($6, $10, $2);
     }
     ;
 

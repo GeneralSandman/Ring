@@ -1573,7 +1573,8 @@ ClassDefinition* start_class_definition(char* class_identifier) {
 }
 
 ClassDefinition* finish_class_definition(ClassDefinition*        class_def,
-                                         ClassMemberDeclaration* class_member_declar) {
+                                         ClassMemberDeclaration* class_member_declar,
+                                         char*                   class_identifier) {
     debug_ast_info_with_yellow("\t");
 
     assert(class_def != nullptr);
@@ -1613,6 +1614,7 @@ ClassDefinition* finish_class_definition(ClassDefinition*        class_def,
     }
 
     class_def->end_line_number = package_unit_get_line_number();
+    class_def->identifier      = class_identifier;
     class_def->field_size      = field_size;
     class_def->field_list      = field_list;
     class_def->method_size     = method_size;

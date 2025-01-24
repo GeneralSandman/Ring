@@ -2874,7 +2874,9 @@ EnumItemDeclaration*          enum_item_declaration_list_add_item(EnumItemDeclar
 EnumItemDeclaration*          create_enum_item_declaration(char* identifier);
 
 ClassDefinition*              start_class_definition(char* class_identifier);
-ClassDefinition*              finish_class_definition(ClassDefinition* class_def, ClassMemberDeclaration* class_member_declar);
+ClassDefinition*              finish_class_definition(ClassDefinition*        class_def,
+                                                      ClassMemberDeclaration* class_member_declar,
+                                                      char*                   class_identifier);
 
 ClassMemberDeclaration*       class_member_declaration_list_add_item(ClassMemberDeclaration* list, ClassMemberDeclaration* decl);
 ClassMemberDeclaration*       create_class_member_field_declaration(Attribute attribute, FieldMember* field_member);
