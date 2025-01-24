@@ -13,18 +13,18 @@ import {
 }
 
 
-typedef fn() FuncType0;
-typedef fn(int) FuncType1;
-typedef fn(int, int) FuncType2;
-typedef fn(int, int, int) FuncType3;
+typedef FuncType0 = fn();
+typedef FuncType1 = fn(int);
+typedef FuncType2 = fn(int, int);
+typedef FuncType3 = fn(int, int, int);
 
-typedef fn() -> (int) FuncType4;
-typedef fn(int) -> (int) FuncType5;
-typedef fn(int, int) -> (int) FuncType6;
-typedef fn(int, int, int) -> (int) FuncType7;
+typedef FuncType4 = fn() -> (int);
+typedef FuncType5 = fn(int) -> (int);
+typedef FuncType6 = fn(int, int) -> (int);
+typedef FuncType7 = fn(int, int, int) -> (int);
 
 
-typedef fn(bool, int, int64, double, string) -> (bool, int, int64, double, string) FuncType8;
+typedef FuncType8 = fn(bool, int, int64, double, string) -> (bool, int, int64, double, string);
 
 
 fn main() {

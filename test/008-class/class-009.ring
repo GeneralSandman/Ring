@@ -9,7 +9,7 @@ import {
 
 
 
-typedef class Job {
+typedef Job = class {
     var bool    Bool;
     var int     Int;
     var double  Double;
@@ -24,7 +24,7 @@ typedef class Job {
     var Runner[]  RunnerArray;
 }
 
-typedef class Runner {
+typedef Runner = class {
     var bool    Bool;
     var int     Int;
     var double  Double;

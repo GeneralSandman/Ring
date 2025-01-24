@@ -12,7 +12,7 @@ import {
 	fmt;
 }
 
-typedef fn() -> (int64) FuncType1;
+typedef FuncType1 = fn() -> (int64);
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸
 fn main() {

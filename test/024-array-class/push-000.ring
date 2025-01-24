@@ -5,7 +5,7 @@ import {
     debug;
 }
 
-typedef class Job {
+typedef Job = class {
   var bool    Running;
   var int     JobID;
   var double  Score;

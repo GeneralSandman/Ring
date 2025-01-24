@@ -13,7 +13,7 @@ import {
 }
 
 
-typedef fn() FuncType;
+typedef FuncType = fn();
 
 global {
 	var bool   global_bool_value_1;

@@ -12,7 +12,7 @@ import {
 	fmt;
 }
 
-typedef fn(string) FuncType1;
+typedef FuncType1 = fn(string);
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸
 fn main() {

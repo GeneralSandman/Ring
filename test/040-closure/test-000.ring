@@ -14,7 +14,7 @@ import {
 }
 
 
-typedef fn() FuncType;
+typedef FuncType = fn();
 
 
 fn main() {

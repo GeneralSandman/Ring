@@ -12,9 +12,9 @@ import {
 	fmt;
 }
 
-typedef fn() FuncType1;
+typedef FuncType1 = fn();
 
-typedef fn() -> (FuncType1) FuncType2;
+typedef FuncType2 = fn() -> (FuncType1);
 
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸

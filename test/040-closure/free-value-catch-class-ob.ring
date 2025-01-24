@@ -12,7 +12,7 @@ import {
 	fmt;
 }
 
-typedef class Job {
+typedef Job = class {
     var bool    Bool;
     var int     Int;
 	var int64   Int64;
@@ -20,7 +20,7 @@ typedef class Job {
     var string  String;
 }
 
-typedef class Task {
+typedef Task = class {
 	var bool    Bool;
 	var int     Int;
     var int64   Int64;
@@ -30,9 +30,9 @@ typedef class Task {
 	var Job     JobValue;
 }
 
-typedef fn() FuncType1;
+typedef FuncType1 = fn();
 
-typedef fn() -> (FuncType1) FuncType2;
+typedef FuncType2 = fn() -> (FuncType1);
 
 
 // TestDetail: 测试见的FreeValue , 不支持逃逸

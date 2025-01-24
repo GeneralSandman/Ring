@@ -5,7 +5,7 @@ import {
     debug;
 }
 
-typedef fn() FuncType;
+typedef FuncType = fn();
 
 global {
     var FuncType[] global_func_array_0;

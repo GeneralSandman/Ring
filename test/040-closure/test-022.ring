@@ -13,9 +13,9 @@ import {
 }
 
 
-typedef fn(string...) -> (string) FuncType1;
+typedef FuncType1 = fn(string...) -> (string);
 
-typedef fn(FuncType1) FuncType2;
+typedef FuncType2 = fn(FuncType1);
 
 
 fn main() {

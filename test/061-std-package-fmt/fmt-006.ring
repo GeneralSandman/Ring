@@ -10,7 +10,7 @@ import {
 	fmt;
 }
 
-typedef class Job1 {
+typedef Job1 = class {
     var bool    Bool;
     var int     Int;
     var double  Double;

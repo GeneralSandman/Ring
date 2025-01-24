@@ -12,7 +12,7 @@ import {
 	fmt;
 }
 
-typedef fn()-> (int) FuncType;
+typedef FuncType = fn()-> (int);
 
 
 fn main() {

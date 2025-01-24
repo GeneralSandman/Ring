@@ -10,7 +10,7 @@ import {
 }
 
 
-typedef class File {
+typedef File = class {
     var int fd;
 }
 

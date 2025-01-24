@@ -13,9 +13,9 @@ import {
 }
 
 
-typedef fn(double) -> (string) functype_0;
-typedef fn(int64) -> (functype_0) functype_1;
-typedef fn(int) -> (functype_1) functype_2;
+typedef functype_0 = fn(double) -> (string);
+typedef functype_1 = fn(int64) -> (functype_0);
+typedef functype_2 = fn(int) -> (functype_1);
 
 
 fn return_closure() -> (functype_2) {

@@ -13,7 +13,7 @@ import {
 }
 
 
-typedef fn(string) FuncType;
+typedef FuncType = fn(string);
 
 
 fn main() {

@@ -10,7 +10,7 @@ import {
 // TestDetail: 测试 new ClassObject常量时，Field初始化的顺序可以任意顺序
 
 
-typedef class Runner {
+typedef Runner = class {
     var bool    Valid;
     var int     RunnerID;
     var double  UseTime;
@@ -18,7 +18,7 @@ typedef class Runner {
 }
 
 
-typedef class Job {
+typedef Job = class {
     var bool    Running;
     var int     JobID;
     var double  Score;

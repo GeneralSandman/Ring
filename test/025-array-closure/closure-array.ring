@@ -5,7 +5,7 @@ import {
 	reflect;
 }
 
-typedef fn() FuncType;
+typedef FuncType = fn();
 
 // TestDetail: array中的元素为匿名函数变量
 fn main() {

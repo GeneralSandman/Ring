@@ -14,7 +14,7 @@ global {
 	var Job1[]   global_job1_array_0   = new Job1[4];
 }
 
-typedef class Job1 {
+typedef Job1 = class {
     var bool    Bool;
     var int     Int;
 	var int64   Int64;

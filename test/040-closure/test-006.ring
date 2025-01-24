@@ -13,8 +13,8 @@ import {
 }
 
 
-typedef fn() FuncType1;
-typedef fn() -> (FuncType1) FuncType2;
+typedef FuncType1 = fn();
+typedef FuncType2 = fn() -> (FuncType1);
 
 fn main() {
 	var FuncType1 tmp1;

@@ -13,8 +13,8 @@ import {
 }
 
 
-typedef fn() functype_0;
-typedef fn() -> (string) functype_1;
+typedef functype_0 = fn();
+typedef functype_1 = fn() -> (string);
 
 // TestDetail: 匿名函数
 // TestDetail: 不需要定义匿名函数变量, 可以直接通过函数参数传递

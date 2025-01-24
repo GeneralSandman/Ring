@@ -8,16 +8,16 @@ import {
 
 
 
-typedef class Job1 {
+typedef Job1 = class {
     var bool    Running1;
 }
 
-typedef class Job2 {
+typedef Job2 = class {
     var bool    Running2;
     var int     JobID2;
 }
 
-typedef class Job3 {
+typedef Job3 = class {
     var bool    Running3;
     var int     JobID3;
     var double  Score3;

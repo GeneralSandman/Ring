@@ -18,14 +18,14 @@ fn test(var bool a) {
 
 }
 
-typedef class Job {
+typedef Job = class {
 	var int a;
 	fn PrintInfo(var int a, var bool b) {
 	}
 }
 
 
-typedef fn(int, bool) FuncType;
+typedef FuncType = fn(int, bool);
 
 
 // 主要看函数调用，参数是不是匹配

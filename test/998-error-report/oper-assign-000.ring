@@ -13,12 +13,12 @@ import {
 	debug;
 }
 
-typedef class Job {
+typedef Job = class {
 	var int a;
 	var int b;
 }
 
-typedef fn()->(string) FuncType;
+typedef FuncType = fn()->(string);
 
 fn test1(var Job a) {
 

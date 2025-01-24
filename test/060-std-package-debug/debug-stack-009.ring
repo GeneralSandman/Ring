@@ -11,7 +11,7 @@ import {
 	debug;
 }
 
-typedef class Job {
+typedef Job = class {
     var bool    Bool;
     var int     Int;
     var double  Double;
@@ -43,7 +43,7 @@ typedef class Job {
 }
 
 
-typedef class Tool {
+typedef Tool = class {
     var bool    Bool;
     var int     Int;
     var double  Double;

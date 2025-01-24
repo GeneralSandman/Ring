@@ -27,7 +27,7 @@ debug_assert(double_value_1 + double_value_2 == 2.2);
 
 
 
-typedef class Job {
+typedef Job = class {
     var double  Score;
 };
 

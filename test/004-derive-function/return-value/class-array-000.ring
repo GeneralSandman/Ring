@@ -6,7 +6,7 @@ import {
 }
 
 
-typedef class Job1 {
+typedef Job1 = class {
     var bool    Bool;
     var int     Int;
 	var int64   Int64;

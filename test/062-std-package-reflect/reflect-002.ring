@@ -12,7 +12,7 @@ import {
 	reflect;
 }
 
-typedef class Job {
+typedef Job = class {
     var bool    Bool;
     var int     Int;
     var int64   Int64;

@@ -5,10 +5,10 @@ import {
 	reflect;
 }
 
-typedef fn(string) -> (string) FuncType;
+typedef FuncType = fn(string) -> (string);
 
 
-typedef class Job {
+typedef Job = class {
 	var string StringField;
 	var FuncType FuncField;
 

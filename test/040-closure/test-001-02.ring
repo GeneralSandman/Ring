@@ -12,7 +12,7 @@ import {
 	fmt;
 }
 
-typedef fn(bool, int) -> (string) FuncType;
+typedef FuncType = fn(bool, int) -> (string);
 
 
 

@@ -8,7 +8,7 @@ import {
 
 
 
-typedef class Job {
+typedef Job = class {
     var bool    Bool;
     var int     Int;
     var double  Double;

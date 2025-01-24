@@ -7,7 +7,7 @@ import {
 }
 
 
-typedef class Job1 {
+typedef Job1 = class {
     var bool    Bool;
     var int     Int;
     var double  Double;
@@ -15,7 +15,7 @@ typedef class Job1 {
     var Job2    Job2;
 }
 
-typedef class Job2 {
+typedef Job2 = class {
     var bool    Bool;
     var int     Int;
     var double  Double;
@@ -23,7 +23,7 @@ typedef class Job2 {
     var Job3    Job3;
 }
 
-typedef class Job3 {
+typedef Job3 = class {
     var bool    Bool;
     var int     Int;
     var double  Double;
@@ -31,7 +31,7 @@ typedef class Job3 {
     var Job4    Job4;
 }
 
-typedef class Job4 {
+typedef Job4 = class {
     var bool    Bool;
     var int     Int;
     var double  Double;

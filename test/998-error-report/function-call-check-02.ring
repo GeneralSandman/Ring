@@ -14,7 +14,7 @@ import {
 }
 
 
-typedef fn(bool, bool) -> (string) FuncType;
+typedef FuncType = fn(bool, bool) -> (string);
 
 fn main() {
 	var FuncType local_func_var;
