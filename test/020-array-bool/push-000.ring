@@ -3,7 +3,7 @@ package main
 import {
     fmt;
     debug;
-    vm;
+    runtime;
 }
 
 global {
@@ -33,5 +33,5 @@ fn main() {
     debug::assert(global_bool_array_0[199] == false);
     debug::assert(global_bool_array_0[200] == true);
 
-    vm::garbage_collect();
+    runtime::gc();
 }

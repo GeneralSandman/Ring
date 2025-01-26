@@ -3,7 +3,7 @@ package main
 
 import {
 	fmt;
-	debug;
+	runtime;
 }
 
 
@@ -13,7 +13,7 @@ typedef Job = class {
     var double  Score;
 
     fn PrintInfo(var bool Running, var int JobID, var double Score) {
-        debug::print_call_stack();
+        runtime::print_call_stack();
     }
 }
 
@@ -22,7 +22,7 @@ global {
 }
 
 fn PrintInfo(var bool Running, var int JobID, var double Score) {
-    debug::print_call_stack();
+    runtime::print_call_stack();
 }
 
 

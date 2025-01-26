@@ -10,7 +10,7 @@ package main
 import {
 	fmt;
 	debug;
-    vm;
+    runtime;
 }
 
 typedef Job = class {
@@ -32,10 +32,10 @@ fn main() {
      * 5. 所以这里需要先进行一次 gc，将 args 分配的内存删除掉，方便在 main函数中测试显示分配的动态内存
      * 
      * init_heap_size 其实就是main()函数执行之前所有非垃圾内存
-     * 之后测试的时候，`vm::heap_size() - init_heap_size` 即为刚刚分配的内存
+     * 之后测试的时候，`runtime::heap_size() - init_heap_size` 即为刚刚分配的内存
     */
-    vm::garbage_collect();
-    var int64 init_heap_size = vm::heap_size() - 21L;
+    runtime::gc();
+    var int64 init_heap_size = runtime::heap_size() - 21L;
     // - 21 是因为 job_value_0 局部变量占用内存 21Byte, 需要算到本次的测试用例中
 
 
@@ -46,11 +46,11 @@ fn main() {
 
 
 
-    // fmt::println_int(vm::heap_size());
-    // debug::assert(vm::heap_size() == 21); // 1+4+8+8
-    // vm::garbage_collect();
-    // fmt::println_int(vm::heap_size());
-    // debug::assert(vm::heap_size() == 21); // 1+4+8+8
+    // fmt::println_int(runtime::heap_size());
+    // debug::assert(runtime::heap_size() == 21); // 1+4+8+8
+    // runtime::gc();
+    // fmt::println_int(runtime::heap_size());
+    // debug::assert(runtime::heap_size() == 21); // 1+4+8+8
 
 
 
@@ -63,11 +63,11 @@ fn main() {
 
 
 
-    fmt::println_int64(vm::heap_size() - init_heap_size);
-    debug::assert(vm::heap_size() - init_heap_size == 58L); // (1+4+8+8)*2 + 16
-    vm::garbage_collect();
-    fmt::println_int64(vm::heap_size() - init_heap_size);
-    debug::assert(vm::heap_size() - init_heap_size == 29L); //  1+4+8+16
+    fmt::println_int64(runtime::heap_size() - init_heap_size);
+    debug::assert(runtime::heap_size() - init_heap_size == 58L); // (1+4+8+8)*2 + 16
+    runtime::gc();
+    fmt::println_int64(runtime::heap_size() - init_heap_size);
+    debug::assert(runtime::heap_size() - init_heap_size == 29L); //  1+4+8+16
 
 
     debug::assert(job_value_0.Running == true);

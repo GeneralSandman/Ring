@@ -4,7 +4,7 @@ package main
 import {
     fmt;
     debug;
-    vm;
+    runtime;
 }
 
 global {
@@ -24,37 +24,37 @@ fn main() {
      * 5. 所以这里需要先进行一次 gc，将 args 分配的内存删除掉，方便在 main函数中测试显示分配的动态内存
      * 
      * init_heap_size 其实就是main()函数执行之前所有非垃圾内存
-     * 之后测试的时候，`vm::heap_size() - init_heap_size` 即为刚刚分配的内存
+     * 之后测试的时候，`runtime::heap_size() - init_heap_size` 即为刚刚分配的内存
     */
-    vm::garbage_collect();
-    var int64 init_heap_size = vm::heap_size();
+    runtime::gc();
+    var int64 init_heap_size = runtime::heap_size();
     //
 
 
   
     // before new
-    heap_size = vm::heap_size();
+    heap_size = runtime::heap_size();
     fmt::println(heap_size - init_heap_size);
     debug::assert(heap_size - init_heap_size == 0L);
 
     int_array = new int[10];
 
     // after new
-    heap_size = vm::heap_size();
+    heap_size = runtime::heap_size();
     fmt::println(heap_size - init_heap_size);
     debug::assert(heap_size - init_heap_size == 128L);
 
     int_array = new int[10];
 
     // after new
-    heap_size = vm::heap_size();
+    heap_size = runtime::heap_size();
     fmt::println(heap_size - init_heap_size);
     debug::assert(heap_size - init_heap_size == 256L);
 
 
     // after gc
-    vm::garbage_collect();
-    heap_size = vm::heap_size();
+    runtime::gc();
+    heap_size = runtime::heap_size();
     fmt::println(heap_size - init_heap_size);
     debug::assert(heap_size - init_heap_size == 64L);
 }

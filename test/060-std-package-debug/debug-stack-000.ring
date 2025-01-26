@@ -7,7 +7,7 @@
 package main
 
 import {
-	debug;
+	runtime;
 }
 
 
@@ -16,5 +16,5 @@ fn main() {
 }
 
 fn test1(var bool bool_value) {
-  debug::print_call_stack();
+  runtime::print_call_stack();
 }

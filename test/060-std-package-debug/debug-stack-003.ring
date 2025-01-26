@@ -8,7 +8,7 @@ package main
 
 import {
 	fmt;
-	debug;
+	runtime;
 }
 
 
@@ -39,5 +39,5 @@ fn test3(var double double_value) {
 
 fn test4(var string string_value) {
 	fmt::println("fn test4()");
-	debug::print_call_stack();
+	runtime::print_call_stack();
 }

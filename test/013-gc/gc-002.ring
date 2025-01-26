@@ -4,7 +4,7 @@ package main
 import {
   fmt;
   debug;
-  vm;
+  runtime;
 }
 
 global {
@@ -17,7 +17,7 @@ fn main() {
     
     debug::assert(global_int_array_0[9]  == 9);
 
-    vm::garbage_collect();
+    runtime::gc();
 
     debug::assert(global_int_array_0[9]  == 9);
 

@@ -8,7 +8,7 @@ package main
 
 import {
 	fmt;
-	debug;
+	runtime;
 }
 
 
@@ -72,7 +72,7 @@ fn test3() {
 	fmt::println("test3()::1");
 	fmt::println("test3()::2");
 	fmt::println("test3()::3");
-	debug::print_call_stack();
+	runtime::print_call_stack();
 
 
 

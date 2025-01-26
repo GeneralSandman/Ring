@@ -7,7 +7,7 @@
 package main
 
 import {
-	debug;
+	runtime;
 }
 
 
@@ -38,7 +38,7 @@ typedef Job = class {
 		fmt::println("Job::test3()::1");
 		fmt::println("Job::test3()::2");
 		fmt::println("Job::test3()::3");
-		debug::print_call_stack();
+		runtime::print_call_stack();
     }
 }
 
@@ -104,7 +104,7 @@ fn test2() {
 }
 
 fn test3() {
-	debug::print_call_stack();
+	runtime::print_call_stack();
 	fmt::println("test3()::0");
 	fmt::println("test3()::1");
 	fmt::println("test3()::2");

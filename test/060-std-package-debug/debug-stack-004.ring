@@ -7,7 +7,7 @@
 package main
 
 import {
-	debug;
+	runtime;
 }
 
 
@@ -39,5 +39,5 @@ fn test_two_string(var string string_value_0, var string string_value_1) {
 }
 
 fn test_any(var bool bool_value_0, var int int_value_0, var double double_value_0, var string string_value_0) {
-	debug::print_call_stack();
+	runtime::print_call_stack();
 }

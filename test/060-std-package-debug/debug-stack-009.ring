@@ -8,7 +8,7 @@ package main
 
 import {
 	fmt;
-	debug;
+	runtime;
 }
 
 typedef Job = class {
@@ -121,5 +121,5 @@ fn test3() {
 }
 
 fn test4() {
-	debug::print_call_stack();
+	runtime::print_call_stack();
 }

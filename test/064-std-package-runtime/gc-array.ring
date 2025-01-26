@@ -3,6 +3,7 @@ package main
 import {
     fmt;
     debug;
+    runtime;
 }
 
 global {
@@ -19,10 +20,10 @@ fn main() {
      * 5. 所以这里需要先进行一次 gc，将 args 分配的内存删除掉，方便在 main函数中测试显示分配的动态内存
      * 
      * init_heap_size 其实就是main()函数执行之前所有非垃圾内存
-     * 之后测试的时候，`vm::heap_size() - init_heap_size` 即为刚刚分配的内存
+     * 之后测试的时候，`runtime::heap_size() - init_heap_size` 即为刚刚分配的内存
     */
-    vm::garbage_collect();
-    var int64 init_heap_size = vm::heap_size();
+    runtime::gc();
+    var int64 init_heap_size = runtime::heap_size();
     //
 
 
@@ -34,30 +35,30 @@ fn main() {
     var string[] local_string_array_0;
 
     local_bool_array_0 = new bool[128]; // 128*1 *2 = 256
-    fmt::println(vm::heap_size() - init_heap_size);
-    debug::assert(vm::heap_size() - init_heap_size == 256L);
+    fmt::println(runtime::heap_size() - init_heap_size);
+    debug::assert(runtime::heap_size() - init_heap_size == 256L);
 
     local_int_array_0 = new int[128]; // 128*4 *2 = 1024
-    fmt::println(vm::heap_size() - init_heap_size);
-    debug::assert(vm::heap_size() - init_heap_size == to_int64(256+1024));
+    fmt::println(runtime::heap_size() - init_heap_size);
+    debug::assert(runtime::heap_size() - init_heap_size == to_int64(256+1024));
 
     local_int64_array_0 = new int64[128]; // 128*8 *2 = 2048
-    fmt::println(vm::heap_size() - init_heap_size);
-    debug::assert(vm::heap_size() - init_heap_size == to_int64(256+1024+2048));
+    fmt::println(runtime::heap_size() - init_heap_size);
+    debug::assert(runtime::heap_size() - init_heap_size == to_int64(256+1024+2048));
 
     local_double_array_0 = new double[128];// 128*8 *2 = 2048
-    fmt::println(vm::heap_size() - init_heap_size);
-    debug::assert(vm::heap_size() - init_heap_size == to_int64(256+1024+2048+2048));
+    fmt::println(runtime::heap_size() - init_heap_size);
+    debug::assert(runtime::heap_size() - init_heap_size == to_int64(256+1024+2048+2048));
 
     local_string_array_0 = new string[128];// 128*8 *2 = 2048
-    fmt::println(vm::heap_size() - init_heap_size);
-    debug::assert(vm::heap_size() - init_heap_size == to_int64(256+1024+2048+2048+2048));
+    fmt::println(runtime::heap_size() - init_heap_size);
+    debug::assert(runtime::heap_size() - init_heap_size == to_int64(256+1024+2048+2048+2048));
 
 
 
-    vm::garbage_collect();
+    runtime::gc();
 
 
-    fmt::println(vm::heap_size() - init_heap_size);
-    debug::assert(vm::heap_size() - init_heap_size == to_int64(256/2+1024/2+2048/2+2048/2+2048/2));
+    fmt::println(runtime::heap_size() - init_heap_size);
+    debug::assert(runtime::heap_size() - init_heap_size == to_int64(256/2+1024/2+2048/2+2048/2+2048/2));
 }

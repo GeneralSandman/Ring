@@ -3,7 +3,7 @@ package main
 import {
 	fmt;
 	debug;
-    vm;
+    runtime;
 }
 
 typedef Job = class {
@@ -39,7 +39,7 @@ fn main() {
 
 
     fmt::println_string("\n------test case 4\n");
-    vm::garbage_collect();
+    runtime::gc();
 
     fmt::println_bool(local_value_job_0.Running);
     fmt::println_int(local_value_job_0.JobID);
