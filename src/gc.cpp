@@ -1,6 +1,7 @@
 #include "ring.hpp"
 #include <assert.h>
 #include <cstring>
+#include <ctime>
 
 
 /*
@@ -12,16 +13,22 @@
 
 void gc(Ring_VirtualMachine* rvm) {
 #ifdef DEBUG_RVM_GC_DETAIL
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    long long start_timestamp = (long long)(ts.tv_sec) * 1000000000 + ts.tv_nsec;
     printf("============Debug RVM GC Detail(Begin)============\n");
-    gc_summary(rvm);
+    // gc_summary(rvm);
 #endif
 
     gc_mark(rvm);
     gc_sweep(rvm);
 
 #ifdef DEBUG_RVM_GC_DETAIL
+    clock_gettime(CLOCK_REALTIME, &ts);
+    long long end_timestamp = (long long)(ts.tv_sec) * 1000000000 + ts.tv_nsec;
+    printf("gc use time:%f ms\n", double(end_timestamp - start_timestamp) / 1000000.0);
     printf("%s-----------------GC Action-----------------%s\n", LOG_COLOR_YELLOW, LOG_COLOR_CLEAR);
-    gc_summary(rvm);
+    // gc_summary(rvm);
     printf("============Debug RVM GC Detail(End)============\n\n");
 #endif
 }
@@ -84,45 +91,13 @@ void gc_mark(Ring_VirtualMachine* rvm) {
     // 1. static 变量指向的位置 需要标记
     for (unsigned int i = 0; i < rvm->runtime_static->size; i++) {
         RVM_Value* value = &(VM_STATIC_DATA[i]);
-        switch (value->type) {
-        case RVM_VALUE_TYPE_STRING:
-            value->u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
-            break;
-        case RVM_VALUE_TYPE_CLASS_OB:
-            value->u.class_ob_value->gc_mark = GC_MARK_COLOR_BLACK;
-            gc_mark_class_ob(rvm, value->u.class_ob_value);
-            break;
-        case RVM_VALUE_TYPE_ARRAY:
-            value->u.array_value->gc_mark = GC_MARK_COLOR_BLACK;
-            gc_mark_array(rvm, value->u.array_value);
-            break;
-        default:
-            // ring_error_report("mark static error, type:%d", value->type);
-            break;
-        }
+        gc_mark_rvm_value(value);
     }
 
     //  2. runtime stack 变量 指向的位置 需要标记
     for (unsigned int stack_index = 0; stack_index < VM_CUR_CO_STACK_TOP_INDEX; stack_index++) {
         RVM_Value* value = &(VM_CUR_CO_STACK_DATA[stack_index]);
-        switch (value->type) {
-        case RVM_VALUE_TYPE_STRING:
-            value->u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
-            break;
-        case RVM_VALUE_TYPE_CLASS_OB:
-            value->u.class_ob_value->gc_mark = GC_MARK_COLOR_BLACK;
-            gc_mark_class_ob(rvm, value->u.class_ob_value);
-            break;
-        case RVM_VALUE_TYPE_ARRAY:
-            if (value->u.array_value != nullptr) {
-                value->u.array_value->gc_mark = GC_MARK_COLOR_BLACK;
-                gc_mark_array(rvm, value->u.array_value);
-            }
-            break;
-        default:
-            // ring_error_report("mark stack error, type:%d", value->type);
-            break;
-        }
+        gc_mark_rvm_value(value);
     }
 }
 
@@ -141,41 +116,42 @@ void gc_sweep(Ring_VirtualMachine* rvm) {
     }
 }
 
-void gc_mark_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob) {
-    debug_exec_info_with_white("\t mark:class-object %p", class_ob);
-
-    for (unsigned int field_index = 0; field_index < class_ob->field_count; field_index++) {
-        switch (class_ob->field_list[field_index].type) {
-        case RVM_VALUE_TYPE_STRING:
-            class_ob->field_list[field_index].u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
-            break;
-        case RVM_VALUE_TYPE_CLASS_OB:
-            class_ob->field_list[field_index].u.class_ob_value->gc_mark = GC_MARK_COLOR_BLACK;
-            break;
-        case RVM_VALUE_TYPE_ARRAY:
-            class_ob->field_list[field_index].u.array_value->gc_mark = GC_MARK_COLOR_BLACK;
-            break;
-        case RVM_VALUE_TYPE_CLOSURE:
-            // TODO:
-            break;
-        default:
-            break;
-        }
+void gc_mark_rvm_value(RVM_Value* value) {
+    switch (value->type) {
+    case RVM_VALUE_TYPE_STRING:
+        value->u.string_value->gc_mark = GC_MARK_COLOR_BLACK;
+        break;
+    case RVM_VALUE_TYPE_CLASS_OB:
+        gc_mark_class_ob(value->u.class_ob_value);
+        break;
+    case RVM_VALUE_TYPE_ARRAY:
+        gc_mark_array(value->u.array_value);
+        break;
+    case RVM_VALUE_TYPE_CLOSURE:
+        gc_mark_closure(value->u.closure_value);
+        break;
+    default:
+        break;
     }
 }
 
-void gc_mark_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
+void gc_mark_class_ob(RVM_ClassObject* class_ob) {
+    class_ob->gc_mark = GC_MARK_COLOR_BLACK;
+
+    for (unsigned int field_index = 0;
+         field_index < class_ob->field_count;
+         field_index++) {
+        RVM_Value* value = &class_ob->field_list[field_index];
+        gc_mark_rvm_value(value);
+    }
+}
+
+// FIXME: 这里需要重新审视
+void gc_mark_array(RVM_Array* array) {
+    array->gc_mark = GC_MARK_COLOR_BLACK;
 
     for (unsigned int i = 0; i < array->length; i++) {
         switch (array->type) {
-        case RVM_ARRAY_BOOL:
-            break;
-        case RVM_ARRAY_INT:
-            break;
-        case RVM_ARRAY_INT64:
-            break;
-        case RVM_ARRAY_DOUBLE:
-            break;
         case RVM_ARRAY_STRING:
             array->u.string_array[i].gc_mark = GC_MARK_COLOR_BLACK;
             break;
@@ -183,13 +159,32 @@ void gc_mark_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
             array->u.class_ob_array[i].gc_mark = GC_MARK_COLOR_BLACK;
             break;
         case RVM_ARRAY_CLOSURE:
-            // TODO:
+            array->u.closure_array[i].gc_mark = GC_MARK_COLOR_BLACK;
             break;
         case RVM_ARRAY_A:
+            array->u.a_array[i].gc_mark = GC_MARK_COLOR_BLACK;
             break;
         default:
             break;
         }
+    }
+}
+
+void gc_mark_closure(RVM_Closure* closure) {
+    closure->gc_mark = GC_MARK_COLOR_BLACK;
+
+    for (unsigned int i = 0;
+         i < closure->free_value_size;
+         i++) {
+        gc_mark_free_value(&closure->free_value_list[i]);
+    }
+}
+
+void gc_mark_free_value(RVM_FreeValue* free_value) {
+    if (free_value->is_recur) {
+        gc_mark_free_value(free_value->u.recur);
+    } else {
+        gc_mark_rvm_value(free_value->u.p);
     }
 }
 
@@ -205,21 +200,25 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
 
     switch (object->gc_type) {
     case RVM_GC_OBJECT_TYPE_STRING:
+        // printf("free string\n");
         string_value = (RVM_String*)object;
         free_size    = rvm_free_string(rvm, string_value);
         break;
 
     case RVM_GC_OBJECT_TYPE_CLASS_OB:
+        // printf("free class-object\n");
         class_ob  = (RVM_ClassObject*)object;
         free_size = rvm_free_class_ob(rvm, class_ob);
         break;
 
     case RVM_GC_OBJECT_TYPE_ARRAY:
+        // printf("free array\n");
         array     = (RVM_Array*)object;
         free_size = rvm_free_array(rvm, array);
         break;
 
     case RVM_GC_OBJECT_TYPE_CLOSURE:
+        // printf("free closure\n");
         closure   = (RVM_Closure*)object;
         free_size = rvm_free_closure(rvm, closure);
         break;

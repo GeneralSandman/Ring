@@ -2680,31 +2680,10 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
 
             RVM_Array*   array_value      = nullptr;
 
-            switch (parameter->type_specifier->kind) {
-            case RING_BASIC_TYPE_BOOL:
-                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL, nullptr);
-                break;
-            case RING_BASIC_TYPE_INT:
-                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT, nullptr);
-                break;
-            case RING_BASIC_TYPE_INT64:
-                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT64, nullptr);
-                break;
-            case RING_BASIC_TYPE_DOUBLE:
-                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE, nullptr);
-                break;
-            case RING_BASIC_TYPE_STRING:
-                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING, nullptr);
-                break;
-            case RING_BASIC_TYPE_CLASS:
-                rvm_class_definition = &(rvm->class_list[parameter->type_specifier->u.class_def_index]);
-                array_value          = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLASS_OBJECT, rvm_class_definition);
-                break;
-
-            default:
-                ring_error_report("only support bool/int/int64/double/string/class as variadic parameter");
-                break;
-            }
+            //
+            array_value = init_derive_function_variadic_argument(rvm,
+                                                                 parameter,
+                                                                 dimension, dimension_list);
 
             // 将stack中的参数放入array中
             for (unsigned array_index = 0;
@@ -2739,14 +2718,20 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                     RVM_ClassObject* class_ob = STACK_GET_CLASS_OB_INDEX(argument_stack_index + argument_stack_offset);
                     rvm_array_set_class_object(rvm, array_value, array_index, &class_ob);
                 } break;
+                case RING_BASIC_TYPE_FUNC: {
+                    RVM_Closure* closure = STACK_GET_CLOSURE_INDEX(argument_stack_index + argument_stack_offset);
+                    rvm_array_set_closure(rvm, array_value, array_index, &closure);
+                } break;
 
                 default:
-                    ring_error_report("only support bool/int/int64/double/string/class as variadic parameter");
+                    ring_error_report("only support bool/int/int64/double/string/class/fn as variadic parameter");
                     break;
                 }
             }
 
-            STACK_SET_ARRAY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, array_value);
+            STACK_SET_ARRAY_INDEX(
+                VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset,
+                array_value);
             local_vari_stack_offset++;
 
             // 可变参数只能是函数的最后一个参数
@@ -3723,7 +3708,25 @@ void fill_defer_item_argument_stack(Ring_VirtualMachine* rvm, RVM_DeferItem* def
 }
 
 // 在函数调用的过程中，处理函数的 可变参数，将它变为数组
-RVM_Array* init_derive_function_variadic_argument() {
-    // TODO:
-    return nullptr;
+RVM_Array* init_derive_function_variadic_argument(Ring_VirtualMachine* rvm,
+                                                  RVM_Parameter*       parameter,
+                                                  unsigned int         dimension,
+                                                  unsigned int*        dimension_list) {
+
+    RVM_Array*           array_value          = nullptr;
+    RVM_ClassDefinition* rvm_class_definition = nullptr;
+
+    if (parameter->type_specifier->kind == RING_BASIC_TYPE_CLASS) {
+        rvm_class_definition = &(rvm->class_list[parameter->type_specifier->u.class_def_index]);
+    }
+
+    array_value = rvm_new_array(rvm,
+                                dimension, dimension_list, dimension,
+                                RVM_Array_Type(parameter->type_specifier->kind),
+                                rvm_class_definition);
+
+    return array_value;
+}
+
+void batch_set_variadic_element(Ring_VirtualMachine* rvm) {
 }

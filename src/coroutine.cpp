@@ -183,31 +183,10 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
 
             RVM_Array*   array_value      = nullptr;
 
-            switch (parameter->type_specifier->kind) {
-            case RING_BASIC_TYPE_BOOL:
-                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_BOOL, nullptr);
-                break;
-            case RING_BASIC_TYPE_INT:
-                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT, nullptr);
-                break;
-            case RING_BASIC_TYPE_INT64:
-                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_INT64, nullptr);
-                break;
-            case RING_BASIC_TYPE_DOUBLE:
-                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_DOUBLE, nullptr);
-                break;
-            case RING_BASIC_TYPE_STRING:
-                array_value = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING, nullptr);
-                break;
-            case RING_BASIC_TYPE_CLASS:
-                rvm_class_definition = &(rvm->class_list[parameter->type_specifier->u.class_def_index]);
-                array_value          = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLASS_OBJECT, rvm_class_definition);
-                break;
-
-            default:
-                ring_error_report("only support bool/int/double/string/class as variadic parameter");
-                break;
-            }
+            //
+            array_value = init_derive_function_variadic_argument(rvm,
+                                                                 parameter,
+                                                                 dimension, dimension_list);
 
             // 将stack中的参数放入array中
             for (unsigned array_index = 0;
@@ -242,9 +221,13 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
                     RVM_ClassObject* class_ob = VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset].u.class_ob_value;
                     rvm_array_set_class_object(rvm, array_value, array_index, &class_ob);
                 } break;
+                case RING_BASIC_TYPE_FUNC: {
+                    RVM_Closure* closure = VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset].u.closure_value;
+                    rvm_array_set_closure(rvm, array_value, array_index, &closure);
+                } break;
 
                 default:
-                    ring_error_report("only support bool/int/double/string/class as variadic parameter");
+                    ring_error_report("only support bool/int/double/string/class/fn as variadic parameter");
                     break;
                 }
             }

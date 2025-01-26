@@ -643,9 +643,9 @@ struct RVM_FreeValue {
     union {
         RVM_FreeValue* recur; // is_recur == true
         RVM_Value*     p;     // is_recur == false
-        // 可指向 open/close value
-        // open时，指向栈空间
-        // close时，指向c_value，是一个拷贝
+        // p 可指向 open/close value
+        // open时，p指向栈空间
+        // close时，p指向c_value，是一个拷贝
     } u;
 
     // is_recur == false
@@ -3336,6 +3336,11 @@ RVM_DeferItem*       new_defer_item(Ring_VirtualMachine* rvm, RVM_Closure* closu
 void                 coroutine_push_defer_item(Ring_VirtualMachine* rvm, RVM_DeferItem* defer_item);
 RVM_DeferItem*       coroutine_pop_defer_item(Ring_VirtualMachine* rvm);
 void                 fill_defer_item_argument_stack(Ring_VirtualMachine* rvm, RVM_DeferItem* defer_item);
+
+RVM_Array*           init_derive_function_variadic_argument(Ring_VirtualMachine* rvm,
+                                                            RVM_Parameter*       parameter,
+                                                            unsigned int         dimension,
+                                                            unsigned int*        dimension_list);
 // --------------------
 
 
@@ -3510,8 +3515,13 @@ void             gc(Ring_VirtualMachine* rvm);
 void             gc_summary(Ring_VirtualMachine* rvm);
 void             gc_mark(Ring_VirtualMachine* rvm);
 void             gc_sweep(Ring_VirtualMachine* rvm);
-void             gc_mark_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob);
-void             gc_mark_array(Ring_VirtualMachine* rvm, RVM_Array* array);
+
+void             gc_mark_rvm_value(RVM_Value* value);
+void             gc_mark_class_ob(RVM_ClassObject* class_ob);
+void             gc_mark_array(RVM_Array* array);
+void             gc_mark_closure(RVM_Closure* closure);
+void             gc_mark_free_value(RVM_FreeValue* free_value);
+
 void             rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
 
 RVM_String*      rvm_gc_new_string_meta(Ring_VirtualMachine* rvm);
