@@ -644,8 +644,8 @@ struct RVM_FreeValue {
         RVM_FreeValue* recur; // is_recur == true
         RVM_Value*     p;     // is_recur == false
         // p 可指向 open/close value
-        // open时，p指向栈空间
-        // close时，p指向c_value，是一个拷贝
+        // is_open == true 时，p指向栈空间
+        // is_open == false时，p指向c_value，是一个拷贝
     } u;
 
     // is_recur == false
@@ -3320,13 +3320,6 @@ RVM_String*          rvm_double_2_string(Ring_VirtualMachine* rvm, double value)
 
 int                  rvm_string_cmp(RVM_String* string1, RVM_String* string2);
 
-void                 rvm_heap_alloc_size_incr(Ring_VirtualMachine* rvm, unsigned int size);
-void                 rvm_heap_alloc_size_decr(Ring_VirtualMachine* rvm, unsigned int size);
-void                 rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
-void                 rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
-
-
-long long            rvm_heap_size(Ring_VirtualMachine* rvm);
 
 RVM_Closure*         new_closure(Ring_VirtualMachine* rvm,
                                  RVM_Function* caller_function, RVM_Closure* caller_closure,
@@ -3511,6 +3504,12 @@ void     test_mem_pool();
  *
  */
 
+void             rvm_heap_alloc_size_incr(Ring_VirtualMachine* rvm, long long size);
+long long        rvm_heap_size(Ring_VirtualMachine* rvm);
+void             rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
+void             rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
+
+
 void             gc(Ring_VirtualMachine* rvm);
 void             gc_summary(Ring_VirtualMachine* rvm);
 void             gc_mark(Ring_VirtualMachine* rvm);
@@ -3553,6 +3552,9 @@ unsigned int     rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* cl
 
 
 RVM_Closure*     rvm_gc_new_closure_meta(Ring_VirtualMachine* rvm);
+void             rvm_fill_closure(Ring_VirtualMachine* rvm,
+                                  RVM_Closure*         closure,
+                                  RVM_Function*        callee_function);
 RVM_Closure*     rvm_deep_copy_closure(Ring_VirtualMachine* rvm, RVM_Closure* src);
 unsigned int     rvm_free_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure);
 // --------------------

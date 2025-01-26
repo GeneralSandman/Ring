@@ -3018,7 +3018,7 @@ RVM_Array* rvm_new_array_literal_a(Ring_VirtualMachine* rvm,
     array->length    = size;
     array->capacity  = size;
 
-    array->u.a_array = (RVM_Array*)mem_alloc(rvm->meta_pool,
+    array->u.a_array = (RVM_Array*)mem_alloc(rvm->data_pool,
                                              sizeof(RVM_Array) * array->capacity);
 
     // FIXME:
@@ -3099,11 +3099,12 @@ ErrorCode rvm_array_append_bool(Ring_VirtualMachine* rvm, RVM_Array* array, bool
 
         new_alloc_size      = array->capacity * sizeof(bool);
 
-        array->u.bool_array = (bool*)realloc(array->u.bool_array,
-                                             new_alloc_size);
+        array->u.bool_array = (bool*)mem_realloc(rvm->data_pool,
+                                                 array->u.bool_array,
+                                                 old_alloc_size,
+                                                 new_alloc_size);
 
-        rvm_heap_alloc_size_incr(rvm, new_alloc_size);
-        rvm_heap_alloc_size_decr(rvm, old_alloc_size);
+        rvm_heap_alloc_size_incr(rvm, new_alloc_size - old_alloc_size);
     }
     array->u.bool_array[array->length++] = *value;
     return ERROR_CODE_SUCCESS;
@@ -3139,11 +3140,12 @@ ErrorCode rvm_array_append_int(Ring_VirtualMachine* rvm, RVM_Array* array, int* 
 
         new_alloc_size     = array->capacity * sizeof(int);
 
-        array->u.int_array = (int*)realloc(array->u.int_array,
-                                           new_alloc_size);
+        array->u.int_array = (int*)mem_realloc(rvm->data_pool,
+                                               array->u.int_array,
+                                               old_alloc_size,
+                                               new_alloc_size);
 
-        rvm_heap_alloc_size_incr(rvm, new_alloc_size);
-        rvm_heap_alloc_size_decr(rvm, old_alloc_size);
+        rvm_heap_alloc_size_incr(rvm, new_alloc_size - old_alloc_size);
     }
     array->u.int_array[array->length++] = *value;
     return ERROR_CODE_SUCCESS;
@@ -3180,11 +3182,12 @@ ErrorCode rvm_array_append_int64(Ring_VirtualMachine* rvm, RVM_Array* array, lon
 
         new_alloc_size       = array->capacity * sizeof(long long);
 
-        array->u.int64_array = (long long*)realloc(array->u.int64_array,
-                                                   new_alloc_size);
+        array->u.int64_array = (long long*)mem_realloc(rvm->data_pool,
+                                                       array->u.int64_array,
+                                                       old_alloc_size,
+                                                       new_alloc_size);
 
-        rvm_heap_alloc_size_incr(rvm, new_alloc_size);
-        rvm_heap_alloc_size_decr(rvm, old_alloc_size);
+        rvm_heap_alloc_size_incr(rvm, new_alloc_size - old_alloc_size);
     }
     array->u.int64_array[array->length++] = *value;
     return ERROR_CODE_SUCCESS;
@@ -3220,11 +3223,12 @@ ErrorCode rvm_array_append_double(Ring_VirtualMachine* rvm, RVM_Array* array, do
 
         new_alloc_size        = array->capacity * sizeof(double);
 
-        array->u.double_array = (double*)realloc(array->u.double_array,
-                                                 new_alloc_size);
+        array->u.double_array = (double*)mem_realloc(rvm->data_pool,
+                                                     array->u.double_array,
+                                                     old_alloc_size,
+                                                     new_alloc_size);
 
-        rvm_heap_alloc_size_incr(rvm, new_alloc_size);
-        rvm_heap_alloc_size_decr(rvm, old_alloc_size);
+        rvm_heap_alloc_size_incr(rvm, new_alloc_size - old_alloc_size);
     }
     array->u.double_array[array->length++] = *value;
     return ERROR_CODE_SUCCESS;
@@ -3342,7 +3346,7 @@ ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm,
         new_alloc_size          = array->capacity * sizeof(RVM_ClassObject);
 
 
-        array->u.class_ob_array = (RVM_ClassObject*)mem_realloc(rvm->meta_pool,
+        array->u.class_ob_array = (RVM_ClassObject*)mem_realloc(rvm->data_pool,
                                                                 array->u.class_ob_array,
                                                                 old_alloc_size,
                                                                 new_alloc_size);
@@ -3414,11 +3418,9 @@ ErrorCode rvm_array_append_closure(Ring_VirtualMachine* rvm,
             array->capacity *= 2;
         }
 
-        new_alloc_size = array->capacity * sizeof(RVM_Closure);
+        new_alloc_size         = array->capacity * sizeof(RVM_Closure);
 
-
-        // FIXME: 这里内存分配的位置不对
-        array->u.closure_array = (RVM_Closure*)mem_realloc(rvm->meta_pool,
+        array->u.closure_array = (RVM_Closure*)mem_realloc(rvm->data_pool,
                                                            array->u.class_ob_array,
                                                            old_alloc_size,
                                                            new_alloc_size);
@@ -3545,56 +3547,14 @@ int rvm_string_cmp(RVM_String* string1, RVM_String* string2) {
 }
 
 
-void rvm_heap_alloc_size_incr(Ring_VirtualMachine* rvm, unsigned int size) {
-    rvm->runtime_heap->alloc_size += size;
-}
-
-void rvm_heap_alloc_size_decr(Ring_VirtualMachine* rvm, unsigned int size) {
-    rvm->runtime_heap->alloc_size -= size;
-}
-
-void rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
-    assert(object != nullptr);
-
-    object->gc_next = rvm->runtime_heap->list;
-    if (rvm->runtime_heap->list != nullptr) {
-        rvm->runtime_heap->list->gc_prev = object;
-    }
-
-    rvm->runtime_heap->list = object;
-}
-
-void rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
-    assert(object != nullptr);
-
-    if (object->gc_prev != nullptr) {
-        object->gc_prev->gc_next = object->gc_next;
-    }
-    if (object->gc_next != nullptr) {
-        object->gc_next->gc_prev = object->gc_prev;
-    }
-    // new head
-    if (object->gc_prev == nullptr) {
-        rvm->runtime_heap->list = object->gc_next;
-    }
-}
-
-long long rvm_heap_size(Ring_VirtualMachine* rvm) {
-    return rvm->runtime_heap->alloc_size;
-}
-
-
 RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
                          RVM_Function* caller_function, RVM_Closure* caller_closure,
                          RVM_Function* callee_function) {
 
     // FIXME: 需要分配在堆上
     // free value 需要分配在堆上
-    RVM_Closure* closure     = rvm_gc_new_closure_meta(rvm);
-    closure->anonymous_func  = callee_function;
-    closure->free_value_size = callee_function->free_value_size;
-    closure->free_value_list = (RVM_FreeValue*)mem_alloc(rvm->data_pool,
-                                                         closure->free_value_size * sizeof(RVM_FreeValue));
+    RVM_Closure* closure = rvm_gc_new_closure_meta(rvm);
+    rvm_fill_closure(rvm, closure, callee_function);
 
     // printf("[Debug][New Closure] parent:(%p,%p), func:%p, closure(%p)\n",
     //        caller_function, caller_closure, callee_function, closure);
