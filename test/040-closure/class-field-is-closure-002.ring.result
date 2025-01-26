@@ -1,0 +1,14 @@
+-------------------
+local_job_value_0.StringField=Hello1
+a closure local_int_value_0=0
+a closure local_int_value_0=1
+
+-------------------
+local_job_value_1.StringField=Hello1
+a closure local_int_value_0=2
+a closure local_int_value_0=3
+
+-------------------
+local_job_value_0.StringField=Hello1
+a closure local_int_value_0=0
+a closure local_int_value_0=1

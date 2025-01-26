@@ -1,0 +1,4 @@
+local_job_value_0.StringField=Hello1
+Hello1 from FuncField, local_string_value_0=xx
+local_job_value_1.StringField=Hello1
+Hello1 from FuncField, local_string_value_0=xx
