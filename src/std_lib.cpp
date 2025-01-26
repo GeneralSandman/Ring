@@ -23,9 +23,9 @@ char RING_PACKAGE_STD_PATH_IO[]      = "/Users/bytedance/Desktop/Ring/std/io/";
 char RING_PACKAGE_STD_PATH_MATH[]    = "/Users/bytedance/Desktop/Ring/std/math/";
 char RING_PACKAGE_STD_PATH_OS[]      = "/Users/bytedance/Desktop/Ring/std/os/";
 char RING_PACKAGE_STD_PATH_REFLECT[] = "/Users/bytedance/Desktop/Ring/std/reflect/";
+char RING_PACKAGE_STD_PATH_RUNTIME[] = "/Users/bytedance/Desktop/Ring/std/runtime/";
 char RING_PACKAGE_STD_PATH_STRINGS[] = "/Users/bytedance/Desktop/Ring/std/strings";
 char RING_PACKAGE_STD_PATH_TIME[]    = "/Users/bytedance/Desktop/Ring/std/time/";
-char RING_PACKAGE_STD_PATH_VM[]      = "/Users/bytedance/Desktop/Ring/std/vm/";
 #else
 char RING_PACKAGE_STD_PATH_DEBUG[]   = "/usr/local/lib/ring/std/debug/";
 char RING_PACKAGE_STD_PATH_FMT[]     = "/usr/local/lib/ring/std/fmt/";
@@ -33,9 +33,9 @@ char RING_PACKAGE_STD_PATH_IO[]      = "/usr/local/lib/ring/std/io/";
 char RING_PACKAGE_STD_PATH_MATH[]    = "/usr/local/lib/ring/std/math/";
 char RING_PACKAGE_STD_PATH_OS[]      = "/usr/local/lib/ring/std/os/";
 char RING_PACKAGE_STD_PATH_REFLECT[] = "/usr/local/lib/ring/std/reflect/";
+char RING_PACKAGE_STD_PATH_RUNTIME[] = "/usr/local/lib/ring/std/runtime/";
 char RING_PACKAGE_STD_PATH_STRINGS[] = "/usr/local/lib/ring/std/strings/";
 char RING_PACKAGE_STD_PATH_TIME[]    = "/usr/local/lib/ring/std/time/";
-char RING_PACKAGE_STD_PATH_VM[]      = "/usr/local/lib/ring/std/vm/";
 #endif
 
 /*
@@ -60,7 +60,6 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         RING_PACKAGE_STD_PATH_DEBUG,
         std::vector<StdPackageNativeFunction>{
             {(char*)"assert", std_lib_debug_assert, 1, 0},
-            {(char*)"print_call_stack", std_lib_debug_print_call_stack, 0, 0},
             {(char*)"var_dump", std_lib_debug_var_dump, 1, 0},
         },
     },
@@ -126,6 +125,16 @@ std::vector<StdPackageInfo> Std_Lib_List = {
     },
 
     {
+        (char*)"runtime",
+        RING_PACKAGE_STD_PATH_RUNTIME,
+        std::vector<StdPackageNativeFunction>{
+            {(char*)"heap_size", std_lib_runtime_heap_size, 0, 1},
+            {(char*)"gc", std_lib_runtime_gc, 0, 0},
+            {(char*)"print_call_stack", std_lib_runtime_print_call_stack, 0, 0},
+        },
+    },
+
+    {
         (char*)"strings",
         RING_PACKAGE_STD_PATH_STRINGS,
         std::vector<StdPackageNativeFunction>{},
@@ -137,15 +146,6 @@ std::vector<StdPackageInfo> Std_Lib_List = {
         std::vector<StdPackageNativeFunction>{
             {(char*)"time", std_lib_time_time, 0, 1},
             {(char*)"sleep", std_lib_time_sleep, 0, 0},
-        },
-    },
-
-    {
-        (char*)"vm",
-        RING_PACKAGE_STD_PATH_VM,
-        std::vector<StdPackageNativeFunction>{
-            {(char*)"heap_size", std_lib_vm_heap_size, 0, 1},
-            {(char*)"garbage_collect", std_lib_vm_garbage_collect, 0, 0},
         },
     },
 
@@ -874,23 +874,6 @@ RVM_Value std_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count,
     return ret;
 }
 
-/*
- * Package: debug
- * Function: print_call_stack
- * Type: @native
- */
-RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    assert(arg_count == 0);
-
-    std::string call_stack = format_rvm_call_stack(rvm);
-    printf("%s", call_stack.c_str());
-
-    fflush(stdout);
-
-    RVM_Value ret;
-    ret.u.int_value = 0;
-    return ret;
-}
 
 /*
  * Package: debug
@@ -915,38 +898,6 @@ RVM_Value std_lib_debug_var_dump(Ring_VirtualMachine* rvm, unsigned int arg_coun
 
 
 /*
- * Package: vm
- * Function: heap_size
- * Type: @native
- *
- */
-RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    assert(arg_count == 0);
-
-    RVM_Value ret;
-    ret.type          = RVM_VALUE_TYPE_INT64;
-    ret.u.int64_value = rvm_heap_size(rvm);
-
-    return ret;
-}
-
-/*
- * Package: vm
- * Function: heap_size
- * Type: @native
- */
-RVM_Value std_lib_vm_garbage_collect(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    assert(arg_count == 0);
-
-    RVM_Value ret;
-    ret.u.int_value = 0;
-
-    gc(rvm);
-
-    return ret;
-}
-
-/*
  * Package: reflect
  * Function: typeof
  * Type: @native
@@ -962,6 +913,57 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
     ret.type           = RVM_VALUE_TYPE_STRING;
     ret.u.string_value = string_literal_to_rvm_string(rvm, str.c_str());
 
+    return ret;
+}
+
+
+/*
+ * Package: runtime
+ * Function: heap_size
+ * Type: @native
+ *
+ */
+RVM_Value std_lib_runtime_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    assert(arg_count == 0);
+
+    RVM_Value ret;
+    ret.type          = RVM_VALUE_TYPE_INT64;
+    ret.u.int64_value = rvm_heap_size(rvm);
+
+    return ret;
+}
+
+/*
+ * Package: runtime
+ * Function: heap_size
+ * Type: @native
+ */
+RVM_Value std_lib_runtime_gc(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    assert(arg_count == 0);
+
+    RVM_Value ret;
+    ret.u.int_value = 0;
+
+    gc(rvm);
+
+    return ret;
+}
+
+/*
+ * Package: runtime
+ * Function: print_call_stack
+ * Type: @native
+ */
+RVM_Value std_lib_runtime_print_call_stack(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+    assert(arg_count == 0);
+
+    std::string call_stack = format_rvm_call_stack(rvm);
+    printf("%s", call_stack.c_str());
+
+    fflush(stdout);
+
+    RVM_Value ret;
+    ret.u.int_value = 0;
     return ret;
 }
 

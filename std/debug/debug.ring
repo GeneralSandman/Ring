@@ -13,9 +13,5 @@ import {
 @native
 fn assert(var bool bool_value);
 
-
-@native
-fn print_call_stack();
-
 @native
 fn var_dump(var any... any_value);

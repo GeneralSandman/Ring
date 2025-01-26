@@ -1,10 +1,10 @@
 //
-// File:    vm.ring
+// File:    runtime.ring
 // Author:  GeneralSandman - generalsandman@163.com
-// Date:    2023-09-07
+// Date:    2025-01-26
 //
 
-package vm
+package runtime
 
 import {
 
@@ -14,4 +14,7 @@ import {
 fn heap_size() -> (int64);
 
 @native
-fn garbage_collect();
+fn gc();
+
+@native
+fn print_call_stack();

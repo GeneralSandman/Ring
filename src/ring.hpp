@@ -3382,13 +3382,13 @@ RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, R
 RVM_Value std_lib_fmt_sprintf(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value std_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value std_lib_debug_print_call_stack(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_debug_var_dump(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
-RVM_Value std_lib_vm_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-RVM_Value std_lib_vm_garbage_collect(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
-
 RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+
+RVM_Value std_lib_runtime_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_runtime_gc(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
+RVM_Value std_lib_runtime_print_call_stack(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 
 RVM_Value std_lib_time_time(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);
 RVM_Value std_lib_time_sleep(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args);

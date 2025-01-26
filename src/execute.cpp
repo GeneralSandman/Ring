@@ -3724,4 +3724,6 @@ void fill_defer_item_argument_stack(Ring_VirtualMachine* rvm, RVM_DeferItem* def
 
 // 在函数调用的过程中，处理函数的 可变参数，将它变为数组
 RVM_Array* init_derive_function_variadic_argument() {
+    // TODO:
+    return nullptr;
 }
