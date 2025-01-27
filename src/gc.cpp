@@ -348,7 +348,11 @@ RVM_Array* rvm_gc_new_array_meta(Ring_VirtualMachine* rvm,
     return array;
 }
 
-// dimension_index 为 2 代表分配2维数组
+// dimension 为 len(dimension_list) , 也就是总共要分配的维度
+// dimension_list 为 {3,4,5} 代表分配一个3维数组，从外到内每个维度为3,4,5, 即为 new bool[3,4,5]
+// dimension_index 为 2 代表分配2维数组，会递归减小
+//
+// dimension_list 为 {4, 0, 0}, dimension = 3, 表示只分配最外围的源信息，size 为4
 RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
                          unsigned int         dimension,
                          unsigned int*        dimension_list,
@@ -359,6 +363,7 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
     if (dimension_index == 0) {
         return nullptr;
     }
+    assert(0 <= dimension - dimension_index && dimension - dimension_index < dimension);
     RVM_Array*   array      = nullptr;
     unsigned int alloc_size = 0;
 
@@ -424,13 +429,18 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
         array->u.a_array = (RVM_Array*)mem_alloc(rvm->data_pool,
                                                  sizeof(RVM_Array) * array->capacity);
 
-        for (unsigned int i = 0; i < array->length; i++) {
-            array->u.a_array[i] = *rvm_new_array(rvm,
-                                                 dimension,
-                                                 dimension_list,
-                                                 dimension_index - 1,
-                                                 array_type,
-                                                 class_definition);
+        // 预测下一个维度是否需要分配，如果不需要，则跳过
+        if (dimension - (dimension_index - 1) < dimension
+            && dimension_list[dimension - (dimension_index - 1)] != 0) {
+
+            for (unsigned int i = 0; i < array->length; i++) {
+                array->u.a_array[i] = *rvm_new_array(rvm,
+                                                     dimension,
+                                                     dimension_list,
+                                                     dimension_index - 1,
+                                                     array_type,
+                                                     class_definition);
+            }
         }
     }
 

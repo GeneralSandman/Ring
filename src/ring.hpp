@@ -3332,8 +3332,7 @@ void                 fill_defer_item_argument_stack(Ring_VirtualMachine* rvm, RV
 
 RVM_Array*           init_derive_function_variadic_argument(Ring_VirtualMachine* rvm,
                                                             RVM_Parameter*       parameter,
-                                                            unsigned int         dimension,
-                                                            unsigned int*        dimension_list);
+                                                            unsigned int         size);
 // --------------------
 
 

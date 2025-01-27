@@ -2671,19 +2671,23 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
         RVM_Parameter* parameter = &callee_function->parameter_list[i];
 
         if (parameter->is_variadic) {
-            // 可变参数只能是函数的最后一个参数,
-            // 直接一次性全部获取完成
-            // TODO: 当前只能一维数组
-            unsigned int size             = argument_list_size - argument_stack_offset;
-            unsigned int dimension        = 1;
-            unsigned int dimension_list[] = {size};
-
-            RVM_Array*   array_value      = nullptr;
+            /*
+             * 1)
+             * 可变参数只能是函数的最后一个参数, 直接一次性全部获取完成
+             * 2)
+             * 如果 parameter 是：var bool... array
+             *  则变更为 bool[]
+             * 如果 parameter 是：var bool[]... array
+             *  则变更为 bool[!2]
+             * 也就是增加一个维度
+             */
+            RVM_Array*   array_value = nullptr;
+            unsigned int size        = argument_list_size - argument_stack_offset;
 
             //
             array_value = init_derive_function_variadic_argument(rvm,
                                                                  parameter,
-                                                                 dimension, dimension_list);
+                                                                 size);
 
             // 将stack中的参数放入array中
             for (unsigned array_index = 0;
@@ -2718,13 +2722,17 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                     RVM_ClassObject* class_ob = STACK_GET_CLASS_OB_INDEX(argument_stack_index + argument_stack_offset);
                     rvm_array_set_class_object(rvm, array_value, array_index, &class_ob);
                 } break;
+                case RING_BASIC_TYPE_ARRAY: {
+                    RVM_Array* array_value_item = STACK_GET_ARRAY_INDEX(argument_stack_index + argument_stack_offset);
+                    rvm_array_set_array(rvm, array_value, array_index, array_value_item);
+                } break;
                 case RING_BASIC_TYPE_FUNC: {
                     RVM_Closure* closure = STACK_GET_CLOSURE_INDEX(argument_stack_index + argument_stack_offset);
                     rvm_array_set_closure(rvm, array_value, array_index, &closure);
                 } break;
 
                 default:
-                    ring_error_report("only support bool/int/int64/double/string/class/fn as variadic parameter");
+                    ring_error_report("not support `any` as variadic parameter");
                     break;
                 }
             }
@@ -3070,6 +3078,7 @@ ErrorCode rvm_array_get_array(Ring_VirtualMachine* rvm, RVM_Array* array, int in
 }
 
 ErrorCode rvm_array_set_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array* value) {
+    // FIXME: deep or shallow copy
     array->u.a_array[index] = *value;
     return ERROR_CODE_SUCCESS;
 }
@@ -3668,10 +3677,10 @@ void fill_defer_item_argument_stack(Ring_VirtualMachine* rvm, RVM_DeferItem* def
 }
 
 // 在函数调用的过程中，处理函数的 可变参数，将它变为数组
+// size 为数组最外围维度的大小
 RVM_Array* init_derive_function_variadic_argument(Ring_VirtualMachine* rvm,
                                                   RVM_Parameter*       parameter,
-                                                  unsigned int         dimension,
-                                                  unsigned int*        dimension_list) {
+                                                  unsigned int         size) {
 
     RVM_Array*           array_value          = nullptr;
     RVM_ClassDefinition* rvm_class_definition = nullptr;
@@ -3679,6 +3688,15 @@ RVM_Array* init_derive_function_variadic_argument(Ring_VirtualMachine* rvm,
     if (parameter->type_specifier->kind == RING_BASIC_TYPE_CLASS) {
         rvm_class_definition = &(rvm->class_list[parameter->type_specifier->u.class_def_index]);
     }
+
+    // 默认一维数组
+    unsigned int dimension = 1;
+    if (parameter->type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
+        // 增加一个维度
+        dimension = parameter->type_specifier->u.array_t->dimension + 1;
+    }
+    unsigned int dimension_list[] = {size, 0, 0, 0, 0, 0, 0, 0};
+    // 为了实现简单，直接补齐7个0 即可
 
     array_value = rvm_new_array(rvm,
                                 dimension, dimension_list, dimension,
