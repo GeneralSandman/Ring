@@ -535,6 +535,83 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
     return array;
 }
 
+// 两倍增长，默认为8
+void rvm_array_growth(Ring_VirtualMachine* rvm, RVM_Array* array) {
+    size_t       old_alloc_size = 0;
+    size_t       new_alloc_size = 0;
+
+    unsigned int old_cap        = array->capacity;
+    if (array->capacity == 0) {
+        array->capacity = 8;
+    } else {
+        array->capacity *= 2;
+    }
+    unsigned int new_cap = array->capacity;
+
+    switch (array->type) {
+    case RVM_ARRAY_BOOL:
+        old_alloc_size      = old_cap * sizeof(bool);
+        new_alloc_size      = new_cap * sizeof(bool);
+        array->u.bool_array = (bool*)mem_realloc(rvm->data_pool,
+                                                 array->u.bool_array,
+                                                 old_alloc_size,
+                                                 new_alloc_size);
+        break;
+    case RVM_ARRAY_INT:
+        old_alloc_size     = old_cap * sizeof(int);
+        new_alloc_size     = new_cap * sizeof(int);
+        array->u.int_array = (int*)mem_realloc(rvm->data_pool,
+                                               array->u.int_array,
+                                               old_alloc_size,
+                                               new_alloc_size);
+        break;
+    case RVM_ARRAY_INT64:
+        old_alloc_size       = old_cap * sizeof(long long);
+        new_alloc_size       = new_cap * sizeof(long long);
+        array->u.int64_array = (long long*)mem_realloc(rvm->data_pool,
+                                                       array->u.int64_array,
+                                                       old_alloc_size,
+                                                       new_alloc_size);
+        break;
+    case RVM_ARRAY_DOUBLE:
+        old_alloc_size        = old_cap * sizeof(double);
+        new_alloc_size        = new_cap * sizeof(double);
+        array->u.double_array = (double*)mem_realloc(rvm->data_pool,
+                                                     array->u.double_array,
+                                                     old_alloc_size,
+                                                     new_alloc_size);
+        break;
+    case RVM_ARRAY_STRING:
+        old_alloc_size        = old_cap * sizeof(RVM_String);
+        new_alloc_size        = new_cap * sizeof(RVM_String);
+        array->u.string_array = (RVM_String*)mem_realloc(rvm->data_pool,
+                                                         array->u.string_array,
+                                                         old_alloc_size,
+                                                         new_alloc_size);
+        break;
+    case RVM_ARRAY_CLASS_OBJECT:
+        old_alloc_size          = old_cap * sizeof(RVM_ClassObject);
+        new_alloc_size          = new_cap * sizeof(RVM_ClassObject);
+        array->u.class_ob_array = (RVM_ClassObject*)mem_realloc(rvm->data_pool,
+                                                                array->u.class_ob_array,
+                                                                old_alloc_size,
+                                                                new_alloc_size);
+        break;
+    case RVM_ARRAY_CLOSURE:
+        old_alloc_size         = old_cap * sizeof(RVM_Closure);
+        new_alloc_size         = new_cap * sizeof(RVM_Closure);
+        array->u.closure_array = (RVM_Closure*)mem_realloc(rvm->data_pool,
+                                                           array->u.closure_array,
+                                                           old_alloc_size,
+                                                           new_alloc_size);
+        break;
+    default:
+        break;
+    }
+
+    rvm_heap_alloc_size_incr(rvm, new_alloc_size - old_alloc_size);
+}
+
 unsigned int rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
     unsigned int free_size = 0;
 

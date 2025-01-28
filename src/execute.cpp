@@ -3094,26 +3094,8 @@ ErrorCode rvm_array_set_bool(Ring_VirtualMachine* rvm, RVM_Array* array, int ind
 }
 
 ErrorCode rvm_array_append_bool(Ring_VirtualMachine* rvm, RVM_Array* array, bool* value) {
-    size_t old_alloc_size = 0;
-    size_t new_alloc_size = 0;
-
     if (array->length == array->capacity) {
-        old_alloc_size = array->capacity * sizeof(bool);
-
-        if (array->capacity == 0) {
-            array->capacity = 8;
-        } else {
-            array->capacity *= 2;
-        }
-
-        new_alloc_size      = array->capacity * sizeof(bool);
-
-        array->u.bool_array = (bool*)mem_realloc(rvm->data_pool,
-                                                 array->u.bool_array,
-                                                 old_alloc_size,
-                                                 new_alloc_size);
-
-        rvm_heap_alloc_size_incr(rvm, new_alloc_size - old_alloc_size);
+        rvm_array_growth(rvm, array);
     }
     array->u.bool_array[array->length++] = *value;
     return ERROR_CODE_SUCCESS;
@@ -3135,26 +3117,8 @@ ErrorCode rvm_array_set_int(Ring_VirtualMachine* rvm, RVM_Array* array, int inde
 }
 
 ErrorCode rvm_array_append_int(Ring_VirtualMachine* rvm, RVM_Array* array, int* value) {
-    size_t old_alloc_size = 0;
-    size_t new_alloc_size = 0;
-
     if (array->length == array->capacity) {
-        old_alloc_size = array->capacity * sizeof(int);
-
-        if (array->capacity == 0) {
-            array->capacity = 8;
-        } else {
-            array->capacity *= 2;
-        }
-
-        new_alloc_size     = array->capacity * sizeof(int);
-
-        array->u.int_array = (int*)mem_realloc(rvm->data_pool,
-                                               array->u.int_array,
-                                               old_alloc_size,
-                                               new_alloc_size);
-
-        rvm_heap_alloc_size_incr(rvm, new_alloc_size - old_alloc_size);
+        rvm_array_growth(rvm, array);
     }
     array->u.int_array[array->length++] = *value;
     return ERROR_CODE_SUCCESS;
@@ -3177,26 +3141,8 @@ ErrorCode rvm_array_set_int64(Ring_VirtualMachine* rvm, RVM_Array* array, int in
 }
 
 ErrorCode rvm_array_append_int64(Ring_VirtualMachine* rvm, RVM_Array* array, long long* value) {
-    size_t old_alloc_size = 0;
-    size_t new_alloc_size = 0;
-
     if (array->length == array->capacity) {
-        old_alloc_size = array->capacity * sizeof(long long);
-
-        if (array->capacity == 0) {
-            array->capacity = 8;
-        } else {
-            array->capacity *= 2;
-        }
-
-        new_alloc_size       = array->capacity * sizeof(long long);
-
-        array->u.int64_array = (long long*)mem_realloc(rvm->data_pool,
-                                                       array->u.int64_array,
-                                                       old_alloc_size,
-                                                       new_alloc_size);
-
-        rvm_heap_alloc_size_incr(rvm, new_alloc_size - old_alloc_size);
+        rvm_array_growth(rvm, array);
     }
     array->u.int64_array[array->length++] = *value;
     return ERROR_CODE_SUCCESS;
@@ -3218,26 +3164,8 @@ ErrorCode rvm_array_set_double(Ring_VirtualMachine* rvm, RVM_Array* array, int i
 }
 
 ErrorCode rvm_array_append_double(Ring_VirtualMachine* rvm, RVM_Array* array, double* value) {
-    size_t old_alloc_size = 0;
-    size_t new_alloc_size = 0;
-
     if (array->length == array->capacity) {
-        old_alloc_size = array->capacity * sizeof(double);
-
-        if (array->capacity == 0) {
-            array->capacity = 4;
-        } else {
-            array->capacity *= 2;
-        }
-
-        new_alloc_size        = array->capacity * sizeof(double);
-
-        array->u.double_array = (double*)mem_realloc(rvm->data_pool,
-                                                     array->u.double_array,
-                                                     old_alloc_size,
-                                                     new_alloc_size);
-
-        rvm_heap_alloc_size_incr(rvm, new_alloc_size - old_alloc_size);
+        rvm_array_growth(rvm, array);
     }
     array->u.double_array[array->length++] = *value;
     return ERROR_CODE_SUCCESS;
@@ -3271,25 +3199,8 @@ ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Array* array, int i
 }
 
 ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_String** value) {
-    size_t old_alloc_size = 0;
-    size_t new_alloc_size = 0;
-
     if (array->length >= array->capacity) {
-        old_alloc_size = array->capacity * sizeof(RVM_String);
-
-        if (array->capacity == 0) {
-            array->capacity = 4;
-        } else {
-            array->capacity *= 2;
-        }
-
-        new_alloc_size        = array->capacity * sizeof(RVM_String);
-
-
-        array->u.string_array = (RVM_String*)mem_realloc(rvm->data_pool,
-                                                         array->u.string_array,
-                                                         old_alloc_size,
-                                                         new_alloc_size);
+        rvm_array_growth(rvm, array);
     }
     array->u.string_array[array->length++] = *rvm_deep_copy_string(rvm, *value);
     return ERROR_CODE_SUCCESS;
@@ -3340,25 +3251,8 @@ ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm,
                                         RVM_Array*           array,
                                         RVM_ClassObject**    value) {
 
-    size_t old_alloc_size = 0;
-    size_t new_alloc_size = 0;
-
     if (array->length >= array->capacity) {
-        old_alloc_size = array->capacity * sizeof(RVM_ClassObject);
-
-        if (array->capacity == 0) {
-            array->capacity = 4;
-        } else {
-            array->capacity *= 2;
-        }
-
-        new_alloc_size          = array->capacity * sizeof(RVM_ClassObject);
-
-
-        array->u.class_ob_array = (RVM_ClassObject*)mem_realloc(rvm->data_pool,
-                                                                array->u.class_ob_array,
-                                                                old_alloc_size,
-                                                                new_alloc_size);
+        rvm_array_growth(rvm, array);
     }
     array->u.class_ob_array[array->length++] = *rvm_deep_copy_class_ob(rvm, *value);
     return ERROR_CODE_SUCCESS;
@@ -3415,24 +3309,8 @@ ErrorCode rvm_array_append_closure(Ring_VirtualMachine* rvm,
                                    RVM_Array*           array,
                                    RVM_Closure**        value) {
 
-    size_t old_alloc_size = 0;
-    size_t new_alloc_size = 0;
-
     if (array->length >= array->capacity) {
-        old_alloc_size = array->capacity * sizeof(RVM_Closure);
-
-        if (array->capacity == 0) {
-            array->capacity = 4;
-        } else {
-            array->capacity *= 2;
-        }
-
-        new_alloc_size         = array->capacity * sizeof(RVM_Closure);
-
-        array->u.closure_array = (RVM_Closure*)mem_realloc(rvm->data_pool,
-                                                           array->u.class_ob_array,
-                                                           old_alloc_size,
-                                                           new_alloc_size);
+        rvm_array_growth(rvm, array);
     }
     // FIXME: deep 还是 shallow
     array->u.closure_array[array->length++] = **value;

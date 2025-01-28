@@ -3539,6 +3539,7 @@ RVM_Array*       rvm_new_array(Ring_VirtualMachine* rvm,
                                RVM_Array_Type       array_type,
                                RVM_ClassDefinition* class_definition);
 RVM_Array*       rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src);
+void             rvm_array_growth(Ring_VirtualMachine* rvm, RVM_Array* array);
 unsigned int     rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array);
 
 
