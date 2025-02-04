@@ -2410,6 +2410,7 @@ typedef enum {
     ERROR_CONCAT_OPERATOR_MISMATCH_TYPE       = 200022, // string .. 操作数类型不不匹配
     ERROR_MATH_OPERATOR_MISMATCH_TYPE         = 200023, // 数学运算操作数不是 int/int64/double 类型
     ERROR_REDEFINITE_LOCAL_VARIABLE           = 200024, // 重复定义的局部变量
+    ERROR_ARRAY_LITERAL_MISMATCH_TYPE         = 200025, // 不合法的数组常量语句，类型不匹配
 
     ERROR_REDEFINITE_CLASS                    = 200030, // 重复定义 class
     ERROR_REDEFINITE_MEMBER_IN_CLASS          = 200031, // 重复定义 class field/method

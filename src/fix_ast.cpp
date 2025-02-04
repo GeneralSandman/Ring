@@ -2148,10 +2148,61 @@ void fix_array_literal_expression(Expression*             expression,
     assert(array_literal_expression != nullptr);
 
     fix_type_specfier(array_literal_expression->type_specifier);
+    TypeSpecifier* array_type = array_literal_expression->type_specifier;
+    TypeSpecifier* item_type  = nullptr;
+    assert(array_type->kind = RING_BASIC_TYPE_ARRAY);
 
-    Expression* pos = array_literal_expression->expression_list;
-    for (; pos != nullptr; pos = pos->next) {
+
+    for (Expression* pos = array_literal_expression->expression_list;
+         pos != nullptr;
+         pos = pos->next) {
+
         fix_expression(pos, block, func);
+
+        if (pos->convert_type_size != 1) {
+            // TODO: error report
+        }
+        item_type = pos->convert_type[0];
+
+        // 检查类型是否匹配
+        // 如果item 类型为 bool , 那 数组是 bool[]
+        // 如果item 类型为 bool[!1] , 那 数组是 bool[!2]
+        // 需要差一个维度
+        // Ring-Compiler-Error-Report ERROR_ARRAY_LITERAL_MISMATCH_TYPE
+        if ((item_type->kind == RING_BASIC_TYPE_ARRAY
+             && (!comp_type_specifier(array_type->u.array_t->sub, item_type->u.array_t->sub)
+                 || array_type->u.array_t->dimension != item_type->u.array_t->dimension + 1))
+
+            ||
+
+            (item_type->kind != RING_BASIC_TYPE_ARRAY
+             && (!comp_type_specifier(array_type->u.array_t->sub, item_type)
+                 || array_type->u.array_t->dimension != 1))
+
+        ) {
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "array literal expression invalid: array type (%s) not match with literal item type (%s); E:%d.",
+                format_type_specifier(array_type).c_str(),
+                format_type_specifier(item_type).c_str(),
+                ERROR_ARRAY_LITERAL_MISMATCH_TYPE);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(pos->line_number),
+                .line_number             = pos->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
     }
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
