@@ -2198,10 +2198,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
 
-            if (closure_value == nullptr) {
-                VM_CUR_CO_PC += 1;
-                break;
-            }
+            assert_throw_nil_closure(closure_value == nullptr);
 
             new_coroutine = launch_coroutine(rvm,
                                              &caller_class_ob, &caller_function, &caller_closure,

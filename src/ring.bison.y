@@ -295,7 +295,7 @@ translation_unit
     ;
 
 package_definition
-    : TOKEN_PACKAGE IDENTIFIER
+    : TOKEN_PACKAGE identifier
     {
         $$ = create_package_info($2);
     }

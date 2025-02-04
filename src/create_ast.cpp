@@ -1,5 +1,6 @@
 #include "ring.hpp"
 #include <cassert>
+#include <cctype>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -21,7 +22,8 @@ Statement* statement_list_add_item(Statement* statement_list, Statement* stateme
     debug_ast_info_with_yellow("statement->type:%d", statement->type);
 
     Statement* pos = statement_list;
-    for (; pos->next != nullptr; pos = pos->next);
+    for (; pos->next != nullptr; pos = pos->next)
+        ;
     pos->next = statement;
     return statement_list;
 }
@@ -445,7 +447,8 @@ FieldInitExpression* field_init_list_add_item(FieldInitExpression* list,
                                               FieldInitExpression* item) {
 
     FieldInitExpression* pos = list;
-    for (; pos->next != nullptr; pos = pos->next);
+    for (; pos->next != nullptr; pos = pos->next)
+        ;
     pos->next = item;
     return list;
 }
@@ -534,14 +537,16 @@ Expression* expression_list_add_item(Expression* expression_list, Expression* ex
     }
 
     Expression* pos = expression_list;
-    for (; pos->next != nullptr; pos = pos->next);
+    for (; pos->next != nullptr; pos = pos->next)
+        ;
     pos->next = expression;
     return expression_list;
 }
 
 ArgumentList* argument_list_add_item(ArgumentList* argument_list, ArgumentList* argument) {
     ArgumentList* pos = argument_list;
-    for (; pos->next != nullptr; pos = pos->next);
+    for (; pos->next != nullptr; pos = pos->next)
+        ;
     pos->next = argument;
     return argument_list;
 }
@@ -572,7 +577,8 @@ Identifier* create_identifier(IdentifierType type, char* name) {
 
 Identifier* identifier_list_add_item(Identifier* identifier_list, Identifier* identifier) {
     Identifier* pos = identifier_list;
-    for (; pos->next != nullptr; pos = pos->next);
+    for (; pos->next != nullptr; pos = pos->next)
+        ;
     pos->next = identifier;
     return identifier_list;
 }
@@ -590,7 +596,8 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
                                                   TypeSpecifier*      type_specifier) {
 
     FunctionReturnList* pos = return_list;
-    for (; pos->next != nullptr; pos = pos->next);
+    for (; pos->next != nullptr; pos = pos->next)
+        ;
     pos->next = create_function_return_list(type_specifier);
     return return_list;
 }
@@ -1226,13 +1233,41 @@ TypeAlias* add_type_alias_func(Parameter*          parameter_list,
 
     debug_ast_info_with_yellow("\t");
 
+    // 为了提高可辨识度，typedef 定义的类名称必须大写开头
+    // Ring-Compiler-Error-Report ERROR_TYPEDEF_NAME_NOT_UPPERCASE_LETTER
+    if (std::islower(identifier->name[0])) {
+        DEFINE_ERROR_REPORT_STR;
+
+        compile_err_buf = sprintf_string(
+            "typedef `%s` must start with an uppercase letter; E:%d.",
+            identifier->name,
+            ERROR_TYPEDEF_NAME_NOT_UPPERCASE_LETTER);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(identifier->line_number),
+            .line_number             = identifier->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
     unsigned parameter_list_size = 0;
     for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next) {
         parameter_list_size++;
     }
 
     unsigned int parameter_index = 0;
-    for (Parameter* pos = parameter_list; pos != nullptr; pos = pos->next, parameter_index++) {
+    for (Parameter* pos = parameter_list;
+         pos != nullptr;
+         pos = pos->next, parameter_index++) {
 
         // 可变参数只能在函数定义中作为 最后一个参数
         // Ring-Compiler-Error-Report ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER
@@ -1428,10 +1463,37 @@ Parameter* parameter_list_add_statement(Parameter* head, Parameter* parameter) {
     return head;
 }
 
-Package* create_package_info(char* package_name) {
-    debug_ast_info_with_yellow("current package name:%s\n", package_name);
+Package* create_package_info(Identifier* identifier) {
+    debug_ast_info_with_yellow("current package name:%s\n", identifier->name);
+
+    // 为了提高可辨识度，package 定义的package名称必须小写开头
+    // Ring-Compiler-Error-Report ERROR_DEF_PACKAGE_NAME_NOT_LOWERCASE_LETTER
+    if (std::isupper(identifier->name[0])) {
+        DEFINE_ERROR_REPORT_STR;
+
+        compile_err_buf = sprintf_string(
+            "package `%s` must start with an lowercase letter; E:%d.",
+            identifier->name,
+            ERROR_DEF_PACKAGE_NAME_NOT_LOWERCASE_LETTER);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(identifier->line_number),
+            .line_number             = identifier->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
     Package* package      = (Package*)mem_alloc(get_front_mem_pool(), sizeof(Package));
-    package->package_name = package_name;
+    package->package_name = identifier->name;
 
     return package;
 }
@@ -1585,6 +1647,32 @@ ClassDefinition* finish_class_definition(ClassDefinition*        class_def,
     unsigned int  method_size = 0;
     MethodMember* method_list = nullptr;
     MethodMember* prev_method = nullptr;
+
+    // 为了提高可辨识度，typedef 定义的类名称必须大写开头
+    // Ring-Compiler-Error-Report ERROR_TYPEDEF_NAME_NOT_UPPERCASE_LETTER
+    if (std::islower(class_identifier[0])) {
+        DEFINE_ERROR_REPORT_STR;
+
+        compile_err_buf = sprintf_string(
+            "typedef `%s` must start with an uppercase letter; E:%d.",
+            class_identifier,
+            ERROR_TYPEDEF_NAME_NOT_UPPERCASE_LETTER);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(class_def->start_line_number),
+            .line_number             = class_def->start_line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
 
     // 分别存储在 field_list 和 method_list
     for (ClassMemberDeclaration* pos = class_member_declar; pos != nullptr; pos = pos->next) {

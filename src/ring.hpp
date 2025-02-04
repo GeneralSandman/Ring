@@ -2386,58 +2386,60 @@ typedef enum {
     ERROR_CODE_SEMANTIC_CHECH_ERROR,
 
 
-    ERROR_CODE_GRAMMAR_ERROR                  = 100000, // 语法错误
-    ERROR_CODE_UNKNOW_PACKAGE                 = 100001, // 找不到 package
+    ERROR_CODE_GRAMMAR_ERROR                    = 100000, // 语法错误
+    ERROR_CODE_UNKNOW_PACKAGE                   = 100001, // 找不到 package
 
-    ERROR_INVALID_TERNARY_EXPR_CONDITION      = 100002, // 三目条件运算符 不合法的条件表达式
-    ERROR_INVALID_TERNARY_EXPR_TRUE_OR_FALSE  = 100003, // 三目条件运算符 不合法true/false条件表达式
+    ERROR_INVALID_TERNARY_EXPR_CONDITION        = 100002, // 三目条件运算符 不合法的条件表达式
+    ERROR_INVALID_TERNARY_EXPR_TRUE_OR_FALSE    = 100003, // 三目条件运算符 不合法true/false条件表达式
+    ERROR_TYPEDEF_NAME_NOT_UPPERCASE_LETTER     = 100004, // typedef 定义的类型名称必须大写开头
+    ERROR_DEF_PACKAGE_NAME_NOT_LOWERCASE_LETTER = 100005, // def package 定义的 package 名称必须小写开头
 
 
-    ERROR_UNDEFINITE_VARIABLE                 = 200000,
-    ERROR_REDEFINITE_GLOBAL_VARIABLE          = 200001, // 重复定义全局变量
-    ERROR_REDEFINITE_FUNCTION                 = 200002, // 重复定义函数
-    ERROR_OPER_INVALID_USE                    = 200003, // - 符号 不合法使用
-    ERROR_DUPLICATE_IMPORT_PACKAGE            = 200004, // 重复 import package
-    ERROR_INVALID_VARIABLE_IDENTIFIER         = 200005, // 不合法的变量标识符
-    ERROR_TOO_MANY_LOCAL_VARIABLES            = 200006, // 局部变量数量超过限制
+    ERROR_UNDEFINITE_VARIABLE                   = 200000,
+    ERROR_REDEFINITE_GLOBAL_VARIABLE            = 200001, // 重复定义全局变量
+    ERROR_REDEFINITE_FUNCTION                   = 200002, // 重复定义函数
+    ERROR_OPER_INVALID_USE                      = 200003, // - 符号 不合法使用
+    ERROR_DUPLICATE_IMPORT_PACKAGE              = 200004, // 重复 import package
+    ERROR_INVALID_VARIABLE_IDENTIFIER           = 200005, // 不合法的变量标识符
+    ERROR_TOO_MANY_LOCAL_VARIABLES              = 200006, // 局部变量数量超过限制
 
-    ERROR_ARRAY_DIMENSION_INVALID             = 200010, // 数组维度不合法
-    ERROR_UNCLOSED_STRING_LITERAL             = 200011, // 未关闭的字符串常量
-    ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS  = 200012, // 函数调用用到 多项赋值中
+    ERROR_ARRAY_DIMENSION_INVALID               = 200010, // 数组维度不合法
+    ERROR_UNCLOSED_STRING_LITERAL               = 200011, // 未关闭的字符串常量
+    ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS    = 200012, // 函数调用用到 多项赋值中
 
-    ERROR_ASSIGNMENT_MISMATCH_NUM             = 200020, // 赋值时, 左值和右值的数量不匹配
-    ERROR_ASSIGNMENT_MISMATCH_TYPE            = 200021, // 赋值时, 左值和右值的类型不匹配
-    ERROR_CONCAT_OPERATOR_MISMATCH_TYPE       = 200022, // string .. 操作数类型不不匹配
-    ERROR_MATH_OPERATOR_MISMATCH_TYPE         = 200023, // 数学运算操作数不是 int/int64/double 类型
-    ERROR_REDEFINITE_LOCAL_VARIABLE           = 200024, // 重复定义的局部变量
-    ERROR_ARRAY_LITERAL_MISMATCH_TYPE         = 200025, // 不合法的数组常量语句，类型不匹配
+    ERROR_ASSIGNMENT_MISMATCH_NUM               = 200020, // 赋值时, 左值和右值的数量不匹配
+    ERROR_ASSIGNMENT_MISMATCH_TYPE              = 200021, // 赋值时, 左值和右值的类型不匹配
+    ERROR_CONCAT_OPERATOR_MISMATCH_TYPE         = 200022, // string .. 操作数类型不不匹配
+    ERROR_MATH_OPERATOR_MISMATCH_TYPE           = 200023, // 数学运算操作数不是 int/int64/double 类型
+    ERROR_REDEFINITE_LOCAL_VARIABLE             = 200024, // 重复定义的局部变量
+    ERROR_ARRAY_LITERAL_MISMATCH_TYPE           = 200025, // 不合法的数组常量语句，类型不匹配
 
-    ERROR_REDEFINITE_CLASS                    = 200030, // 重复定义 class
-    ERROR_REDEFINITE_MEMBER_IN_CLASS          = 200031, // 重复定义 class field/method
-    ERROR_TOO_MANY_FIELDS_IN_CLASS            = 200032, // class 中 field 的数量超过限制
-    ERROR_TOO_MANY_METHODS_IN_CLASS           = 200033, // class 中 method 的数量超过限制
-    ERROR_MISS_CLASS_DEFINITION               = 200034, // 缺少 class 定义
-    ERROR_INVALID_FIELD_IN_CLASS              = 200035, // field 不合法
-    ERROR_ASSIGN_TO_METHOD_OF_CLASS           = 200036, // 不能给 class中 method赋值
-    ERROR_INVOKE_FIELD_OF_CLASS_AS_METHOD     = 200037, // 不能将 class field作为匿名函数去 调用
-    ERROR_NOT_FOUND_CLASS_MEMBER              = 200038, // 找不到 class field或者method
-    ERROR_NOT_FOUND_CLASS_FIELD               = 200039, // 找不到 class field
-    ERROR_NOT_FOUND_CLASS_METHOD              = 200040, // 找不到 class method
-    ERROR_DUPLICATE_INIT_CLASS_FIELD          = 200041, // class field 初始化重复
+    ERROR_REDEFINITE_CLASS                      = 200030, // 重复定义 class
+    ERROR_REDEFINITE_MEMBER_IN_CLASS            = 200031, // 重复定义 class field/method
+    ERROR_TOO_MANY_FIELDS_IN_CLASS              = 200032, // class 中 field 的数量超过限制
+    ERROR_TOO_MANY_METHODS_IN_CLASS             = 200033, // class 中 method 的数量超过限制
+    ERROR_MISS_CLASS_DEFINITION                 = 200034, // 缺少 class 定义
+    ERROR_INVALID_FIELD_IN_CLASS                = 200035, // field 不合法
+    ERROR_ASSIGN_TO_METHOD_OF_CLASS             = 200036, // 不能给 class中 method赋值
+    ERROR_INVOKE_FIELD_OF_CLASS_AS_METHOD       = 200037, // 不能将 class field作为匿名函数去 调用
+    ERROR_NOT_FOUND_CLASS_MEMBER                = 200038, // 找不到 class field或者method
+    ERROR_NOT_FOUND_CLASS_FIELD                 = 200039, // 找不到 class field
+    ERROR_NOT_FOUND_CLASS_METHOD                = 200040, // 找不到 class method
+    ERROR_DUPLICATE_INIT_CLASS_FIELD            = 200041, // class field 初始化重复
 
-    ERROR_OVERFLOWS                           = 200051, // 溢出
+    ERROR_OVERFLOWS                             = 200051, // 溢出
 
-    ERROR_UNDEFINITE_FUNCTION                 = 300000,
-    ERROR_ARGUMENT_MISMATCH_NUM               = 300001, // 函数调用参数数量类型不匹配
-    ERROR_ARGUMENT_MISMATCH_TYPE              = 300002, // 函数调用参数数量类型不匹配
-    ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER = 300003, // 函数定义中不合法的 可变参数
+    ERROR_UNDEFINITE_FUNCTION                   = 300000,
+    ERROR_ARGUMENT_MISMATCH_NUM                 = 300001, // 函数调用参数数量类型不匹配
+    ERROR_ARGUMENT_MISMATCH_TYPE                = 300002, // 函数调用参数数量类型不匹配
+    ERROR_FUNCTION_INVALID_VARIADIC_PARAMETER   = 300003, // 函数定义中不合法的 可变参数
 
-    ERROR_FUNCTION_MISMATCH_RETURN_NUM        = 300004, // 函数定义的返回值和return中的返回值类型不匹配
-    ERROR_FUNCTION_MISMATCH_RETURN_TYPE       = 300005, // 函数定义的返回值和return中的返回值类型不匹配
+    ERROR_FUNCTION_MISMATCH_RETURN_NUM          = 300004, // 函数定义的返回值和return中的返回值类型不匹配
+    ERROR_FUNCTION_MISMATCH_RETURN_TYPE         = 300005, // 函数定义的返回值和return中的返回值类型不匹配
 
-    ERROR_FUNCTION_MAIN_INVALID               = 300006, // main函数定义不合法
+    ERROR_FUNCTION_MAIN_INVALID                 = 300006, // main函数定义不合法
 
-    ERROR_CANOT_USE_VAR_LIKE_FUNC             = 300007, // 不能使用变量名作为函数名
+    ERROR_CANOT_USE_VAR_LIKE_FUNC               = 300007, // 不能使用变量名作为函数名
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -2865,7 +2867,7 @@ Statement*                    create_multi_declaration_statement(TypeSpecifier* 
 Parameter*                    create_parameter(TypeSpecifier* type, char* identifier, bool is_variadic);
 Parameter*                    parameter_list_add_statement(Parameter* head, Parameter* parameter);
 
-Package*                      create_package_info(char* package_name);
+Package*                      create_package_info(Identifier* identifier);
 void                          import_package_list_add_item(char* package_name, char* rename);
 
 EnumDeclaration*              start_enum_declaration(TypeSpecifier* type_specifier, char* class_identifier);
