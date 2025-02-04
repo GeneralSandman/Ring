@@ -476,7 +476,6 @@ launch func_var();
 1. 关键字 function -> fn  ✅
 2. 关键字 method -> fn     ✅
 3. 关键字 field -> var   ✅
-4. 关键字 typedef -> type TODO:
 
 
 ### Y. Proposal: push pop 支持更多的类型
@@ -4092,9 +4091,6 @@ FIXME: 当class-object的多维数组的时候，就有点问题了。
 3. 对多维数组直接进行 fmt::printf()
 4. ring dump 展示是否为多维数组
 
-TODO: 从多维数组中取出一个元素进行 capacity 和 length
-TODO: 函数调用是对参数的类型进行报错提示
-
 
 ```
     global_int_array_0 = new int[2,4];
@@ -4707,7 +4703,7 @@ fmt::println_int(capacity(local_bool_array_0));
 ```
 
 
-### *C. 设计: 数组/字符串的越界访问* TODO:
+### *C. 设计: 数组/字符串的越界访问*  ✅
 
 1. 以下这几个函数在vm调用的时候，如果超过数组的边界，应该抛出异常，在这里返回一个错误码：RUNTIME_ERR_OUT_OF_ARRAY_RANGE
 
