@@ -13,8 +13,8 @@ import {
 }
 
 
-typedef functype_0 = fn();
-typedef functype_1 = fn() -> (string);
+typedef Functype_0 = fn();
+typedef Functype_1 = fn() -> (string);
 
 // TestDetail: 匿名函数
 // TestDetail: 不需要定义匿名函数变量, 可以直接通过函数参数传递
@@ -29,7 +29,7 @@ fn main() {
 	
 }
 
-fn pass_closure(var functype_0 func_0, var functype_1 func_1) {
+fn pass_closure(var Functype_0 func_0, var Functype_1 func_1) {
 	fmt::println("pass_closure::begin");
 	func_0();
 

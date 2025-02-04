@@ -13,20 +13,20 @@ import {
 }
 
 
-typedef functype_0 = fn(double) -> (string);
-typedef functype_1 = fn(int64) -> (functype_0);
-typedef functype_2 = fn(int) -> (functype_1);
+typedef Functype_0 = fn(double) -> (string);
+typedef Functype_1 = fn(int64) -> (Functype_0);
+typedef Functype_2 = fn(int) -> (Functype_1);
 
 
-fn return_closure() -> (functype_2) {
+fn return_closure() -> (Functype_2) {
 	fmt::println("return_closure:: invoke level3");
-	var functype_2 func_var;
-	func_var = fn(var int  a) -> (functype_1) {
+	var Functype_2 func_var;
+	func_var = fn(var int  a) -> (Functype_1) {
 		fmt::printf("return_closure:: invoke level2 int={}\n", a);
-		var functype_1 func_var;
-		func_var = fn(var int64 a) -> (functype_0) {
+		var Functype_1 func_var;
+		func_var = fn(var int64 a) -> (Functype_0) {
 			fmt::printf("return_closure:: invoke level1 int64={}\n", a);
-			var functype_0 func_var;
+			var Functype_0 func_var;
 			func_var = fn(var double a) -> (string) {
 				fmt::printf("return_closure:: invoke level0 double={}\n", a);
 				return "hello ring compiler";
@@ -40,18 +40,18 @@ fn return_closure() -> (functype_2) {
 
 
 fn main() {
-	var functype_2 tmp_2;
+	var Functype_2 tmp_2;
 	fmt::println("\nmain::1");
 	tmp_2 = return_closure();
 	fmt::printf("tmp_2 type:{}\n", reflect::typeof(tmp_2));
 
 
-	var functype_1 tmp_1;
+	var Functype_1 tmp_1;
 	fmt::println("\nmain::2");
 	tmp_1 = tmp_2(123);
 	fmt::printf("tmp_1 type:{}\n", reflect::typeof(tmp_1));
 
-	var functype_0 tmp_0;
+	var Functype_0 tmp_0;
 	fmt::println("\nmain::3");
 	tmp_0 = tmp_1(456L);
 	fmt::printf("tmp_0 type:{}\n", reflect::typeof(tmp_0));
