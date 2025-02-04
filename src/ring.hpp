@@ -2422,6 +2422,7 @@ typedef enum {
     ERROR_NOT_FOUND_CLASS_MEMBER              = 200038, // 找不到 class field或者method
     ERROR_NOT_FOUND_CLASS_FIELD               = 200039, // 找不到 class field
     ERROR_NOT_FOUND_CLASS_METHOD              = 200040, // 找不到 class method
+    ERROR_DUPLICATE_INIT_CLASS_FIELD          = 200041, // class field 初始化重复
 
     ERROR_OVERFLOWS                           = 200051, // 溢出
 

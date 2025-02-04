@@ -3574,7 +3574,7 @@ RVM_Array* init_derive_function_variadic_argument(Ring_VirtualMachine* rvm,
         dimension = parameter->type_specifier->u.array_t->dimension + 1;
     }
     unsigned int dimension_list[] = {size, 0, 0, 0, 0, 0, 0, 0};
-    // 为了实现简单，直接补齐7个0 即可
+    // 为了实现简单，直接补齐7个0 即可，数组的最大维度为8
 
     array_value = rvm_new_array(rvm,
                                 dimension, dimension_list, dimension,

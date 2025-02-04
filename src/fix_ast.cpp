@@ -2167,10 +2167,17 @@ void fix_class_object_literal_expression(Expression*                   expressio
 
     fix_type_specfier(literal_expression->type_specifier);
 
-    ClassDefinition*     class_definition = literal_expression->type_specifier->u.class_t->class_definition;
+    ClassDefinition* class_definition = literal_expression->type_specifier->u.class_t->class_definition;
 
+    /*
+     * 1. field 要存在
+     * 2. field 不能被初始化两次
+     * 3. field 的类型要匹配
+     */
 
-    FieldInitExpression* pos              = literal_expression->field_init_expression_list;
+    std::vector<std::string> field_init_map;
+
+    FieldInitExpression*     pos = literal_expression->field_init_expression_list;
     for (; pos != nullptr; pos = pos->next) {
 
         char*        field_identifier = pos->field_identifier;
@@ -2182,7 +2189,8 @@ void fix_class_object_literal_expression(Expression*                   expressio
             }
         }
 
-        // Ring-Compiler-Error-Report ERROR_INVALID_NOT_FOUND_CLASS_FIELD
+        // 1.
+        // Ring-Compiler-Error-Report ERROR_NOT_FOUND_CLASS_FIELD
         if (field_member == nullptr) {
             DEFINE_ERROR_REPORT_STR;
 
@@ -2190,7 +2198,7 @@ void fix_class_object_literal_expression(Expression*                   expressio
                 "ths class `%s` has not field `%s`; E:%d.",
                 class_definition->identifier,
                 field_identifier,
-                ERROR_ASSIGN_TO_METHOD_OF_CLASS);
+                ERROR_NOT_FOUND_CLASS_FIELD);
             compile_adv_buf = sprintf_string(
                 "the class `%s` definition in %s:%d.",
                 class_definition->identifier,
@@ -2213,10 +2221,97 @@ void fix_class_object_literal_expression(Expression*                   expressio
             ring_compile_error_report(&context);
         }
 
+        // 2. 是否重复初始化
+        // Ring-Compiler-Error-Report ERROR_DUPLICATE_INIT_CLASS_FIELD
+        for (auto field_tmp : field_init_map) {
+            if (str_eq(field_tmp.c_str(), field_identifier)) {
+                DEFINE_ERROR_REPORT_STR;
+
+                compile_err_buf = sprintf_string(
+                    "duplicate init field `%s`; E:%d.",
+                    field_identifier,
+                    ERROR_DUPLICATE_INIT_CLASS_FIELD);
+
+                ErrorReportContext context = {
+                    .package                 = nullptr,
+                    .package_unit            = get_package_unit(),
+                    .source_file_name        = get_package_unit()->current_file_name,
+                    .line_content            = package_unit_get_line_content(pos->line_number),
+                    .line_number             = pos->line_number,
+                    .column_number           = package_unit_get_column_number(),
+                    .error_message           = std::string(compile_err_buf),
+                    .advice                  = std::string(compile_adv_buf),
+                    .report_type             = ERROR_REPORT_TYPE_EXIT_NOW,
+                    .ring_compiler_file      = (char*)__FILE__,
+                    .ring_compiler_file_line = __LINE__,
+                };
+                ring_compile_error_report(&context);
+            }
+        }
+        field_init_map.push_back(std::string(field_identifier));
+
         pos->field_member = field_member;
+
 
         // fix init_expression
         fix_expression(pos->init_expression, block, func);
+
+
+        // 3. 查看类型是否匹配，有点类似于 assign的类型检查
+        TypeSpecifier* left_type = field_member->type_specifier;
+        // Ring-Compiler-Error-Report ERROR_ASSIGNMENT_MISMATCH_TYPE
+        if (pos->init_expression->convert_type_size != 1) {
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "assignment mismatch: expect (%s) but provided (%s); E:%d.",
+                format_type_specifier(left_type).c_str(),
+                "void", // FIXME: convert_type_size == 2 报错信息不对
+                ERROR_ASSIGNMENT_MISMATCH_TYPE);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(pos->line_number),
+                .line_number             = pos->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+
+
+        TypeSpecifier* right_type = pos->init_expression->convert_type[0];
+        // Ring-Compiler-Error-Report ERROR_ASSIGNMENT_MISMATCH_TYPE
+        if (!comp_type_specifier(left_type, right_type)) {
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "assignment mismatch: expect (%s) but provided (%s); E:%d.",
+                format_type_specifier(left_type).c_str(),
+                format_type_specifier(right_type).c_str(),
+                ERROR_ASSIGNMENT_MISMATCH_TYPE);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(pos->line_number),
+                .line_number             = pos->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
     }
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
