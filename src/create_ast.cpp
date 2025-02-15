@@ -475,8 +475,16 @@ fmt::println(return_3_bool_1());
 *  对于如上 fmt::printl() n函数调用，在语法分析阶段，暂时会将 argument_list_size认为1，
 *  需要在语义分析阶段将 argument_list_size 调整为3
 */
-FunctionCallExpression* create_function_call_expression(char*         func_identifier,
+FunctionCallExpression* create_function_call_expression(Expression*   func_expr,
                                                         ArgumentList* argument_list) {
+
+    char* package_posit   = nullptr;
+    char* func_identifier = nullptr;
+
+    if (func_expr->type == EXPRESSION_TYPE_IDENTIFIER) {
+        package_posit   = func_expr->u.identifier_expression->package_posit;
+        func_identifier = func_expr->u.identifier_expression->identifier;
+    }
 
     unsigned int argument_list_size = 0;
     for (ArgumentList* pos = argument_list; pos != nullptr; pos = pos->next) {
@@ -484,7 +492,8 @@ FunctionCallExpression* create_function_call_expression(char*         func_ident
     }
     FunctionCallExpression* function_call_expression = (FunctionCallExpression*)mem_alloc(get_front_mem_pool(), sizeof(FunctionCallExpression));
     function_call_expression->line_number            = package_unit_get_line_number();
-    function_call_expression->package_posit          = nullptr;
+    function_call_expression->func_expr              = func_expr;
+    function_call_expression->package_posit          = package_posit;
     function_call_expression->func_identifier        = func_identifier;
     function_call_expression->type                   = FUNCTION_CALL_TYPE_FUNC; // UPDATED_BY_FIX_AST
     function_call_expression->argument_list_size     = argument_list_size;

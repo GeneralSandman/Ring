@@ -1809,13 +1809,6 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
     }
     assert(function_call_expression->type != FUNCTION_CALL_TYPE_UNKNOW);
 
-
-    if (is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
-        generate_vmcode_buildin_func(executer, function_call_expression, opcode_buffer);
-        return;
-    }
-
-
     unsigned int argument_list_size = 0;
     // TODO: 这里实现的不太对，需要考虑某个expression 为 function-call，并且这个 function-call 是多返回值类型的
     // 需要考虑
@@ -1826,6 +1819,21 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
         argument_list_size += pos->expression->convert_type_size;
     }
+
+    // 对于 buildin function, 不需要 argument_num 这个字节码
+    if (is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
+        generate_vmcode_buildin_func(executer, function_call_expression, opcode_buffer);
+        return;
+    }
+
+    Expression* func_expr = function_call_expression->func_expr;
+    if (func_expr != nullptr && func_expr->type != EXPRESSION_TYPE_IDENTIFIER) {
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, function_call_expression->line_number);
+        generate_vmcode_from_expression(executer, func_expr, opcode_buffer);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, 0, function_call_expression->line_number);
+        return;
+    }
+
 
     // argument_num
     generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, function_call_expression->line_number);

@@ -124,7 +124,7 @@ void check_build_func_param_num(Expression*             expression,
 }
 
 unsigned int is_buildin_function_identifier(char* package_posit, char* identifier) {
-    if (package_posit != nullptr) {
+    if (package_posit != nullptr || identifier == nullptr) {
         return 0;
     }
 
@@ -534,12 +534,6 @@ void generate_buildin_func_len(Package_Executer*       executer,
     assert(type_specifier->kind == RING_BASIC_TYPE_STRING
            || type_specifier->kind == RING_BASIC_TYPE_ARRAY);
 
-    // push arguments
-    for (ArgumentList* pos = function_call_expression->argument_list;
-         pos != nullptr;
-         pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-    }
 
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
     if (type_specifier->kind == RING_BASIC_TYPE_STRING) {
@@ -558,12 +552,6 @@ void generate_buildin_func_capacity(Package_Executer*       executer,
     assert(type_specifier->kind == RING_BASIC_TYPE_STRING
            || type_specifier->kind == RING_BASIC_TYPE_ARRAY);
 
-    // push arguments
-    for (ArgumentList* pos = function_call_expression->argument_list;
-         pos != nullptr;
-         pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-    }
 
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
     if (type_specifier->kind == RING_BASIC_TYPE_STRING) {
@@ -581,13 +569,6 @@ void generate_buildin_func_push(Package_Executer*       executer,
 
     TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
     assert(type_specifier->kind == RING_BASIC_TYPE_ARRAY);
-
-    // push arguments
-    for (ArgumentList* pos = function_call_expression->argument_list;
-         pos != nullptr;
-         pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-    }
 
 
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
@@ -611,12 +592,6 @@ void generate_buildin_func_pop(Package_Executer*       executer,
     TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
     assert(type_specifier->kind == RING_BASIC_TYPE_ARRAY);
 
-    // push arguments
-    for (ArgumentList* pos = function_call_expression->argument_list;
-         pos != nullptr;
-         pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-    }
 
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
     switch (type_specifier->u.array_t->sub->kind) {
@@ -642,12 +617,6 @@ void generate_buildin_func_to_string(Package_Executer*       executer,
            || type_specifier->kind == RING_BASIC_TYPE_INT64
            || type_specifier->kind == RING_BASIC_TYPE_DOUBLE);
 
-    // push arguments
-    for (ArgumentList* pos = function_call_expression->argument_list;
-         pos != nullptr;
-         pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-    }
 
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
     switch (type_specifier->kind) {
@@ -667,13 +636,6 @@ void generate_buildin_func_to_int64(Package_Executer*       executer,
     TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
     assert(type_specifier->kind == RING_BASIC_TYPE_INT);
 
-    // push arguments
-    for (ArgumentList* pos = function_call_expression->argument_list;
-         pos != nullptr;
-         pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-    }
-
 
     generate_vmcode(executer, opcode_buffer, RVM_CODE_INT_2_INT64, 0, function_call_expression->line_number);
 }
@@ -685,12 +647,6 @@ void generate_buildin_func_resume(Package_Executer*       executer,
     TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
     assert(type_specifier->kind == RING_BASIC_TYPE_INT64);
 
-    // push arguments
-    for (ArgumentList* pos = function_call_expression->argument_list;
-         pos != nullptr;
-         pos = pos->next) {
-        generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-    }
 
     generate_vmcode(executer, opcode_buffer, RVM_CODE_RESUME, 0, function_call_expression->line_number);
 }

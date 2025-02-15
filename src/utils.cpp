@@ -57,7 +57,7 @@ std::string formate_expression(Expression* expression) {
         break;
 
     case EXPRESSION_TYPE_FUNCTION_CALL:
-        result = expression->u.function_call_expression->func_identifier;
+        // result = expression->u.function_call_expression->func_identifier;
         break;
 
     case EXPRESSION_TYPE_MEMBER_CALL:

@@ -197,6 +197,7 @@ int yylex();
 %type <m_expression> ternary_expression
 %type <m_expression> launch_expression
 %type <m_expression> primary_not_new_array
+%type <m_expression> primary_not_call_expression
 %type <m_expression> primary_new_creation
 %type <m_expression> member_expression
 %type <m_expression> basic_value_literal_expression
@@ -1274,6 +1275,21 @@ primary_not_new_array
     }
     ;
 
+primary_not_call_expression
+    : IDENTIFIER
+    {
+        debug_bison_info_with_green("[RULE::literal_term:identifier]\t ");
+        $$ = create_expression_identifier($1);
+    }
+    | IDENTIFIER dimension_expression
+    {
+        $$ = create_expression_identifier_with_index(create_expression_identifier($1), $2);
+    }
+    | function_call_expression
+    {
+        $$ = create_expression_from_function_call($1);
+    }
+    ;
 
 member_expression
     : primary_not_new_array TOKEN_DOT IDENTIFIER
@@ -1356,12 +1372,12 @@ derive_value_literal_expression
     ;
 
 function_call_expression
-    : IDENTIFIER TOKEN_LP argument_list TOKEN_RP
+    : primary_not_call_expression TOKEN_LP argument_list TOKEN_RP
     {
         debug_bison_info_with_green("[RULE::function_call_expression]\t ");
         $$ = create_function_call_expression($1, $3);
     }
-    | IDENTIFIER TOKEN_LP               TOKEN_RP
+    | primary_not_call_expression TOKEN_LP               TOKEN_RP
     {
         debug_bison_info_with_green("[RULE::function_call_expression]\t ");
         $$ = create_function_call_expression($1, nullptr);

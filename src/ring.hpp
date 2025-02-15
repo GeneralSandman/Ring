@@ -1732,10 +1732,25 @@ typedef enum {
 
 
 struct FunctionCallExpression {
-    unsigned int     line_number;
+    unsigned int line_number;
 
-    char*            package_posit;
-    char*            func_identifier;
+    char*        package_posit;
+    char*        func_identifier;
+    Expression*  func_expr;
+    /*
+     * TODO:
+     * 后续应该 删除 package_posit func_identifier
+     * 只保留 func_expr
+     *
+     * 因为 expression再为 IdentifierExpression 的时候，是包含了 package_posit func_identifier 的
+     * 但是需要改造的代码较多，后续可以修改
+     *
+     * 目前：
+     * func_expr != EXPRESSION_TYPE_IDENTIFIER :
+     *   取 func_expr
+     * func_expr != EXPRESSION_TYPE_IDENTIFIER :`
+     *   取 func_identifier
+     */
 
     FunctionCallType type;
     union {
@@ -2798,7 +2813,8 @@ FieldInitExpression*          create_field_init_expression(char* field_identifie
 FieldInitExpression*          field_init_list_add_item(FieldInitExpression* list, FieldInitExpression* item);
 AssignExpression*             create_assign_expression(AssignExpressionType type, Expression* left, Expression* operand);
 
-FunctionCallExpression*       create_function_call_expression(char* identifier, ArgumentList* argument_list);
+FunctionCallExpression*       create_function_call_expression(Expression*   func_expression,
+                                                              ArgumentList* argument_list);
 MemberCallExpression*         create_member_call_expression(Expression* object_expression, char* member_identifier, ArgumentList* argument_list);
 ArrayLiteralExpression*       create_array_literal_expression(TypeSpecifier* sub_type, DimensionExpression* dimension_expression, Expression* expression_list);
 ClassObjectLiteralExpression* create_class_object_literal_expression(TypeSpecifier* type_specifier, FieldInitExpression* field_init_expression_list);

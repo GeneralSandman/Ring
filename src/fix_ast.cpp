@@ -1787,8 +1787,29 @@ void fix_function_call_expression(Expression*             expression,
         fix_expression(pos->expression, block, func);
     }
 
-    Variable* variable = nullptr;
-    Function* function = nullptr;
+    Variable*   variable  = nullptr;
+    Function*   function  = nullptr;
+
+    Expression* func_expr = function_call_expression->func_expr;
+    if (func_expr != nullptr && func_expr->type != EXPRESSION_TYPE_IDENTIFIER) {
+        fix_expression(func_expr, block, func);
+
+        // func_expr 的返回值必须是一个函数
+        assert(func_expr->convert_type_size == 1);
+        assert(func_expr->convert_type[0]->kind == RING_BASIC_TYPE_FUNC);
+
+        // check 函数调用是否符合语义
+        check_func_var_call(function_call_expression, func_expr->convert_type[0]);
+
+        Ring_DeriveType_Func* func_type = func_expr->convert_type[0]->u.func_t;
+        // func_expr 的返回值的返回值 是 expression 的类型
+        for (FunctionReturnList* pos = func_type->return_list;
+             pos != nullptr;
+             pos = pos->next) {
+            EXPRESSION_ADD_CONVERT_TYPE(expression, pos->type_specifier);
+        }
+        return;
+    }
 
 
     // 1. 判断是否为closure
