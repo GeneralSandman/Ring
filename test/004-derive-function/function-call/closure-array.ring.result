@@ -1,0 +1,10 @@
+
+test0------------------
+FuncTypeVoid2Void local_array_func item 0
+FuncTypeVoid2Void local_array_func item 1
+
+test1------------------
+FuncTypeInt2Void local_array_func item 0, int_value: 1
+FuncTypeInt2Void local_array_func item 0, int_value: 2
+FuncTypeInt2Void local_array_func item 1, int_value: 3
+FuncTypeInt2Void local_array_func item 1, int_value: 4

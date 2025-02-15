@@ -1,0 +1,33 @@
+
+test0------------------
+return_closure_0 build closure:FuncTypeVoid2Void
+return_closure_0 closure block
+return_closure_0 build closure:FuncTypeVoid2Void
+return_closure_0 closure block
+
+test1------------------
+return_closure_1 build closure:FuncTypeInt2Void
+return_closure_1 closure block receive int_param=123
+return_closure_1 build closure:FuncTypeInt2Void
+return_closure_1 closure block receive int_param=456
+
+test2------------------
+return_closure_2 build closure:FuncTypeInt2String
+return_closure_2 closure block receive int_param=123
+test2 local_string_var =`123`
+return_closure_2 build closure:FuncTypeInt2String
+return_closure_2 closure block receive int_param=456
+test2 local_string_var =`456`
+
+test3------------------
+return_closure_3 build closure:FuncTypeInt2String
+return_closure_3 free_value double_param=3.140000
+return_closure_3 receive int_param=1
+test3 local_string_var =`double_param =3.140000, int_param=1`
+return_closure_3 free_value double_param=3.140000
+return_closure_3 receive int_param=2
+test3 local_string_var =`double_param =3.140000, int_param=2`
+return_closure_3 build closure:FuncTypeInt2String
+return_closure_3 free_value double_param=3.141500
+return_closure_3 receive int_param=3
+test3 local_string_var =`double_param =3.141500, int_param=3`

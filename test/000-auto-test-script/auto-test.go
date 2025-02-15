@@ -52,6 +52,7 @@ var (
 
 		"003-native-function",
 		"004-derive-function",
+		"004-derive-function/function-call",
 		"004-derive-function/pass-argument",
 		"004-derive-function/return-value",
 
