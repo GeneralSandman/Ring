@@ -22,13 +22,13 @@ Ring_Buildin_Func Ring_Buildin_Funcs[] = {
         .buildin_func_generate = generate_buildin_func_len,
     },
     {
-        .identifier            = "capacity",
+        .identifier            = "cap",
         .param_size            = 1,
         .param_types           = std::vector<TypeSpecifier*>{},
         .return_size           = 1,
         .return_types          = std::vector<TypeSpecifier*>{},
-        .buildin_func_fix      = fix_buildin_func_capacity,
-        .buildin_func_generate = generate_buildin_func_capacity,
+        .buildin_func_fix      = fix_buildin_func_cap,
+        .buildin_func_generate = generate_buildin_func_cap,
     },
     {
         .identifier            = "push",
@@ -214,11 +214,11 @@ void fix_buildin_func_len(Expression*             expression,
 }
 
 
-void fix_buildin_func_capacity(Expression*             expression,
-                               FunctionCallExpression* function_call_expression,
-                               Block*                  block,
-                               Function*               func,
-                               Ring_Buildin_Func*      build_func) {
+void fix_buildin_func_cap(Expression*             expression,
+                          FunctionCallExpression* function_call_expression,
+                          Block*                  block,
+                          Function*               func,
+                          Ring_Buildin_Func*      build_func) {
 
     check_build_func_param_num(expression, function_call_expression, block, (Function*)func, build_func);
 
@@ -544,9 +544,9 @@ void generate_buildin_func_len(Package_Executer*       executer,
     generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
 }
 
-void generate_buildin_func_capacity(Package_Executer*       executer,
-                                    FunctionCallExpression* function_call_expression,
-                                    RVM_OpcodeBuffer*       opcode_buffer) {
+void generate_buildin_func_cap(Package_Executer*       executer,
+                               FunctionCallExpression* function_call_expression,
+                               RVM_OpcodeBuffer*       opcode_buffer) {
 
     TypeSpecifier* type_specifier = function_call_expression->argument_list->expression->convert_type[0];
     assert(type_specifier->kind == RING_BASIC_TYPE_STRING

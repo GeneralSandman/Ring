@@ -3670,11 +3670,11 @@ void         fix_buildin_func_len(Expression*             expression,
                                   Block*                  block,
                                   Function*               func,
                                   Ring_Buildin_Func*      build_func);
-void         fix_buildin_func_capacity(Expression*             expression,
-                                       FunctionCallExpression* function_call_expression,
-                                       Block*                  block,
-                                       Function*               func,
-                                       Ring_Buildin_Func*      build_func);
+void         fix_buildin_func_cap(Expression*             expression,
+                                  FunctionCallExpression* function_call_expression,
+                                  Block*                  block,
+                                  Function*               func,
+                                  Ring_Buildin_Func*      build_func);
 void         fix_buildin_func_push(Expression*             expression,
                                    FunctionCallExpression* function_call_expression,
                                    Block*                  block,
@@ -3712,9 +3712,9 @@ void         generate_buildin_func_len(Package_Executer*       executer,
                                        FunctionCallExpression* function_call_expression,
                                        RVM_OpcodeBuffer*       opcode_buffer);
 
-void         generate_buildin_func_capacity(Package_Executer*       executer,
-                                            FunctionCallExpression* function_call_expression,
-                                            RVM_OpcodeBuffer*       opcode_buffer);
+void         generate_buildin_func_cap(Package_Executer*       executer,
+                                       FunctionCallExpression* function_call_expression,
+                                       RVM_OpcodeBuffer*       opcode_buffer);
 
 void         generate_buildin_func_push(Package_Executer*       executer,
                                         FunctionCallExpression* function_call_expression,
