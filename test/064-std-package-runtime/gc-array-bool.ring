@@ -32,7 +32,7 @@ fn main() {
     local_bool_array_0 = new bool[20];
 
     debug::assert(len(local_bool_array_0) == 20);
-    debug::assert(capacity(local_bool_array_0) == 24);
+    debug::assert(cap(local_bool_array_0) == 24);
     fmt::println(runtime::heap_size() - init_heap_size);
     debug::assert(runtime::heap_size() - init_heap_size == 48L);
 
@@ -41,7 +41,7 @@ fn main() {
 
 
     debug::assert(len(local_bool_array_0) == 20);
-    debug::assert(capacity(local_bool_array_0) == 24);
+    debug::assert(cap(local_bool_array_0) == 24);
     fmt::println(runtime::heap_size() - init_heap_size);
     debug::assert(runtime::heap_size() - init_heap_size == 24L);
 }

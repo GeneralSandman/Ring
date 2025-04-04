@@ -28,7 +28,7 @@ fn main() {
 
 fn func_variadic_parameter(var bool para_bool_value, var int para_int_value, var double para_double_value, var string para_string_value, var string... array_value) {
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
 
     fmt::printf("para_bool_value =   {}\n", para_bool_value);
     fmt::printf("para_int_value =    {}\n", para_int_value);

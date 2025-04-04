@@ -27,7 +27,7 @@ fn main() {
 
 fn func_variadic_parameter(var string... array_value) {
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
 
     var string string_value;
     for(string_value in range array_value) {

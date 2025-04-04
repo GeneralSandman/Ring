@@ -30,7 +30,7 @@ fn main() {
 	// 是指针，不太好测试
 	// fmt::println(local_array_func); // [closure(0x15172d460) closure(0x15172d478) closure(0x15172d490) closure(0x15172d4a8)]
 	fmt::println(len(local_array_func)); // 4
-	fmt::println(capacity(local_array_func)); // 8
+	fmt::println(cap(local_array_func)); // 8
 
 	// pass
 	fmt::printf("\ntest range closure array-------\n");

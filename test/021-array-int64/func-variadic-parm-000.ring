@@ -27,7 +27,7 @@ fn main() {
 
 fn func_variadic_parameter(var int64... array_value) {
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
 
     var int64 int64_value;
     for(int64_value in range array_value) {

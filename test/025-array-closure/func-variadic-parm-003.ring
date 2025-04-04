@@ -104,7 +104,7 @@ fn func_variadic_parameter_dimension_1(var FuncType... array_value) {
     fmt::printf("func_variadic_parameter_dimension_1========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
 
     // 这里是指针，不好测试，先忽略
     // 输出 [closure(0x7fdc157ac280) closure(0x7fdc157ac2b0) closure(0x7fdc157ac2e0)]
@@ -120,7 +120,7 @@ fn func_variadic_parameter_dimension_2(var FuncType[]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_2========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
 
     // 这里是指针，不好测试，先忽略
     // 输出 [closure(0x7fdc157ac280) closure(0x7fdc157ac2b0) closure(0x7fdc157ac2e0)]
@@ -140,7 +140,7 @@ fn func_variadic_parameter_dimension_3(var FuncType[!2]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_3========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
 
     // 这里是指针，不好测试，先忽略
     // 输出 [closure(0x7fdc157ac280) closure(0x7fdc157ac2b0) closure(0x7fdc157ac2e0)]
@@ -162,7 +162,7 @@ fn func_variadic_parameter_dimension_4(var FuncType[!3]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_4========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value); 
 }
 
@@ -170,7 +170,7 @@ fn func_variadic_parameter_dimension_5(var FuncType[!4]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_5========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value);
 }
 
@@ -178,7 +178,7 @@ fn func_variadic_parameter_dimension_6(var FuncType[!5]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_6========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value);
 }
 
@@ -186,7 +186,7 @@ fn func_variadic_parameter_dimension_7(var FuncType[!6]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_7========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value);
 }
 
@@ -194,7 +194,7 @@ fn func_variadic_parameter_dimension_8(var FuncType[!7]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_8========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value);
 }
 

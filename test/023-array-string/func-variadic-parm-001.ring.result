@@ -1,6 +1,6 @@
 test case 1--------
 len(array_value)      = 1
-capacity(array_value) = 8
+cap(array_value) = 8
 para_bool_value =   false
 para_int_value =    0
 para_double_value = 0.000000
@@ -9,7 +9,7 @@ para_string_value = #0.0
 
 test case 2--------
 len(array_value)      = 2
-capacity(array_value) = 8
+cap(array_value) = 8
 para_bool_value =   true
 para_int_value =    1
 para_double_value = 1.100000
@@ -19,7 +19,7 @@ para_string_value = #1.1
 
 test case 3--------
 len(array_value)      = 3
-capacity(array_value) = 8
+cap(array_value) = 8
 para_bool_value =   false
 para_int_value =    2
 para_double_value = 2.200000
@@ -30,7 +30,7 @@ para_string_value = #2.2
 
 test case 4--------
 len(array_value)      = 4
-capacity(array_value) = 8
+cap(array_value) = 8
 para_bool_value =   true
 para_int_value =    3
 para_double_value = 3.300000

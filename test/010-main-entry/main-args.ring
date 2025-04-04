@@ -15,7 +15,7 @@ import {
 fn main(var string[] args) {
 
     fmt::println(len(args));
-    fmt::println(capacity(args));
+    fmt::println(cap(args));
 
     fmt::println(args);
 

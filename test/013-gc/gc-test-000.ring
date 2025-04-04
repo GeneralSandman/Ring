@@ -14,11 +14,15 @@ typedef Job1 = class {
   var string  String;
 }
 
+typedef Job2 = class {
+    var int[]  IntArray;
+}
+
 global {
 }
 
 fn main() {
-    test_class_1();
+    test_class_2();
     runtime::gc();
 }
 
@@ -86,6 +90,14 @@ fn test_class_1() {
     // 指向同一块内存
     fmt::println_pointer(local_string_value_0);
     fmt::println_pointer(local_job_value_0.String);
+}
+
+fn test_class_2() {
+    var Job2 local_job2_value_0;
+
+    fmt::println(len(local_job2_value_0.IntArray));
+    runtime::gc();
+
 }
 
 fn test_array_class() {

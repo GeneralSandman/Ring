@@ -13,7 +13,7 @@ fn test1() {
 fn test2() {
 
 	// var int[] array;
-	// fmt::println(capacity(array));
+	// fmt::println(cap(array));
 
 	// 空数组报错
 	// var int[] array;

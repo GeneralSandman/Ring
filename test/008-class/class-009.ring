@@ -57,11 +57,11 @@ fn main() {
     debug::assert(len(job_0.DoubleArray)      == 0);
     debug::assert(len(job_0.StringArray)      == 0);
     debug::assert(len(job_0.RunnerArray)      == 0);
-    debug::assert(capacity(job_0.BoolArray)   == 0);
-    debug::assert(capacity(job_0.IntArray)    == 0);
-    debug::assert(capacity(job_0.DoubleArray) == 0);
-    debug::assert(capacity(job_0.StringArray) == 0);
-    debug::assert(capacity(job_0.RunnerArray) == 0);
+    debug::assert(cap(job_0.BoolArray)   == 0);
+    debug::assert(cap(job_0.IntArray)    == 0);
+    debug::assert(cap(job_0.DoubleArray) == 0);
+    debug::assert(cap(job_0.StringArray) == 0);
+    debug::assert(cap(job_0.RunnerArray) == 0);
 
 
     // 测试给class中的field赋值
@@ -100,11 +100,11 @@ fn main() {
     debug::assert(len(job_0.DoubleArray)      == 3);
     debug::assert(len(job_0.StringArray)      == 4);
     debug::assert(len(job_0.RunnerArray)      == 5);
-    debug::assert(capacity(job_0.BoolArray)   == 8);
-    debug::assert(capacity(job_0.IntArray)    == 8);
-    debug::assert(capacity(job_0.DoubleArray) == 8);
-    debug::assert(capacity(job_0.StringArray) == 8);
-    debug::assert(capacity(job_0.RunnerArray) == 8);
+    debug::assert(cap(job_0.BoolArray)   == 8);
+    debug::assert(cap(job_0.IntArray)    == 8);
+    debug::assert(cap(job_0.DoubleArray) == 8);
+    debug::assert(cap(job_0.StringArray) == 8);
+    debug::assert(cap(job_0.RunnerArray) == 8);
 
 
     
@@ -145,11 +145,11 @@ fn main() {
     debug::assert(len(job_0.DoubleArray)      == 3);
     debug::assert(len(job_0.StringArray)      == 4);
     debug::assert(len(job_0.RunnerArray)      == 5);
-    debug::assert(capacity(job_0.BoolArray)   == 8);
-    debug::assert(capacity(job_0.IntArray)    == 8);
-    debug::assert(capacity(job_0.DoubleArray) == 8);
-    debug::assert(capacity(job_0.StringArray) == 8);
-    debug::assert(capacity(job_0.RunnerArray) == 8);
+    debug::assert(cap(job_0.BoolArray)   == 8);
+    debug::assert(cap(job_0.IntArray)    == 8);
+    debug::assert(cap(job_0.DoubleArray) == 8);
+    debug::assert(cap(job_0.StringArray) == 8);
+    debug::assert(cap(job_0.RunnerArray) == 8);
 
 }
 
@@ -167,8 +167,8 @@ fn main() {
     // fmt::println_int(len(job_0.DoubleArray));
     // fmt::println_int(len(job_0.StringArray));
     // fmt::println_int(len(job_0.RunnerArray));
-    // fmt::println_int(capacity(job_0.BoolArray));
-    // fmt::println_int(capacity(job_0.IntArray));
-    // fmt::println_int(capacity(job_0.DoubleArray));
-    // fmt::println_int(capacity(job_0.StringArray));
-    // fmt::println_int(capacity(job_0.RunnerArray));
+    // fmt::println_int(cap(job_0.BoolArray));
+    // fmt::println_int(cap(job_0.IntArray));
+    // fmt::println_int(cap(job_0.DoubleArray));
+    // fmt::println_int(cap(job_0.StringArray));
+    // fmt::println_int(cap(job_0.RunnerArray));

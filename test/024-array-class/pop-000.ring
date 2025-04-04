@@ -30,9 +30,9 @@ fn main() {
     push(global_job_array_0, global_job_value_0);
 
     fmt::println_int(len(global_job_array_0));
-    fmt::println_int(capacity(global_job_array_0));
+    fmt::println_int(cap(global_job_array_0));
     debug::assert(len(global_job_array_0) == 6);
-    debug::assert(capacity(global_job_array_0) == 8);
+    debug::assert(cap(global_job_array_0) == 8);
 
 
     fmt::println_string("\ntest cast 2 ------------------------");
@@ -46,9 +46,9 @@ fn main() {
     debug::assert(global_job_value_0.Score   == 200.1);
 
     fmt::println_int(len(global_job_array_0));
-    fmt::println_int(capacity(global_job_array_0));
+    fmt::println_int(cap(global_job_array_0));
     debug::assert(len(global_job_array_0) == 5);
-    debug::assert(capacity(global_job_array_0) == 8);
+    debug::assert(cap(global_job_array_0) == 8);
 
 
     fmt::println_string("\ntest cast 3 ------------------------");
@@ -69,8 +69,8 @@ fn main() {
     debug::assert(global_job_value_0.Score   == 201.14);
 
     fmt::println_int(len(global_job_array_0));
-    fmt::println_int(capacity(global_job_array_0));
+    fmt::println_int(cap(global_job_array_0));
     debug::assert(len(global_job_array_0) == 5);
-    debug::assert(capacity(global_job_array_0) == 8);
+    debug::assert(cap(global_job_array_0) == 8);
 
 }

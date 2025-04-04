@@ -1,7 +1,7 @@
 test case 1--------
 func_variadic_parameter begin
 len(array_value)      = 1
-capacity(array_value) = 8
+cap(array_value) = 8
 invoke func_value
 func 1,1
 func_variadic_parameter end
@@ -9,7 +9,7 @@ func_variadic_parameter end
 test case 2--------
 func_variadic_parameter begin
 len(array_value)      = 2
-capacity(array_value) = 8
+cap(array_value) = 8
 invoke func_value
 func 2,1
 invoke func_value
@@ -19,7 +19,7 @@ func_variadic_parameter end
 test case 3--------
 func_variadic_parameter begin
 len(array_value)      = 3
-capacity(array_value) = 8
+cap(array_value) = 8
 invoke func_value
 func 3,1
 invoke func_value
@@ -31,7 +31,7 @@ func_variadic_parameter end
 test case 4--------
 func_variadic_parameter begin
 len(array_value)      = 4
-capacity(array_value) = 8
+cap(array_value) = 8
 invoke func_value
 func 4,1
 invoke func_value

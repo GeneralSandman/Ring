@@ -85,7 +85,7 @@ fn func_variadic_parameter_dimension_1(var Job... array_value) {
     fmt::printf("func_variadic_parameter_dimension_1========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value);
 }
 
@@ -93,7 +93,7 @@ fn func_variadic_parameter_dimension_2(var Job[]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_2========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value);
 }
 
@@ -101,7 +101,7 @@ fn func_variadic_parameter_dimension_3(var Job[!2]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_3========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value);
 }
 
@@ -109,7 +109,7 @@ fn func_variadic_parameter_dimension_4(var Job[!3]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_4========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value); 
 }
 
@@ -117,7 +117,7 @@ fn func_variadic_parameter_dimension_5(var Job[!4]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_5========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value);
 }
 
@@ -125,7 +125,7 @@ fn func_variadic_parameter_dimension_6(var Job[!5]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_6========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value);
 }
 
@@ -133,7 +133,7 @@ fn func_variadic_parameter_dimension_7(var Job[!6]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_7========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value);
 }
 
@@ -141,7 +141,7 @@ fn func_variadic_parameter_dimension_8(var Job[!7]... array_value) {
     fmt::printf("func_variadic_parameter_dimension_8========\n");
     fmt::printf("array_value  type     = {}\n", reflect::typeof(array_value));
     fmt::printf("len(array_value)      = {}\n", len(array_value));
-    fmt::printf("capacity(array_value) = {}\n", capacity(array_value));
+    fmt::printf("cap(array_value) = {}\n", cap(array_value));
     fmt::printf("array_value           ={}\n", array_value);
 }
 

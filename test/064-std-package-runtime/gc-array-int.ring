@@ -32,7 +32,7 @@ fn main() {
     local_int_array_0 = new int[20];
 
     debug::assert(len(local_int_array_0) == 20);
-    debug::assert(capacity(local_int_array_0) == 24);
+    debug::assert(cap(local_int_array_0) == 24);
     fmt::println(runtime::heap_size() - init_heap_size);
     debug::assert(runtime::heap_size() - init_heap_size == 192L);
     /*
@@ -45,7 +45,7 @@ fn main() {
 
 
     debug::assert(len(local_int_array_0) == 20);
-    debug::assert(capacity(local_int_array_0) == 24);
+    debug::assert(cap(local_int_array_0) == 24);
     fmt::println(runtime::heap_size() - init_heap_size);
     debug::assert(runtime::heap_size() - init_heap_size == 96L);
     /*

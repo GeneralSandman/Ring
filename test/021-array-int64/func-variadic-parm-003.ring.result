@@ -3,26 +3,26 @@ test case 1--------
 func_variadic_parameter_dimension_1========
 array_value  type     = int64[!1]
 len(array_value)      = 3
-capacity(array_value) = 8
+cap(array_value) = 8
 array_value           =[1 0 1]
 
 test case 2--------
 func_variadic_parameter_dimension_2========
 array_value  type     = int64[!2]
 len(array_value)      = 4
-capacity(array_value) = 4
+cap(array_value) = 4
 array_value           =[[0] [1] [0 1] [1 1 1]]
 
 test case 3--------
 func_variadic_parameter_dimension_3========
 array_value  type     = int64[!3]
 len(array_value)      = 2
-capacity(array_value) = 2
+cap(array_value) = 2
 array_value           =[[[0] [1]] [[0] [1]]]
 
 test case 4--------
 func_variadic_parameter_dimension_4========
 array_value  type     = int64[!4]
 len(array_value)      = 1
-capacity(array_value) = 1
+cap(array_value) = 1
 array_value           =[[[[0] [1]] [[0] [1]]]]

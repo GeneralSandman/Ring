@@ -1,13 +1,13 @@
 test case 1--------
 len(array_value)      = 1
-capacity(array_value) = 8
+cap(array_value) = 8
 para_bool_value = false
 para_int_value  = 0
 false
 
 test case 2--------
 len(array_value)      = 2
-capacity(array_value) = 8
+cap(array_value) = 8
 para_bool_value = true
 para_int_value  = 1
 false
@@ -15,7 +15,7 @@ true
 
 test case 3--------
 len(array_value)      = 3
-capacity(array_value) = 8
+cap(array_value) = 8
 para_bool_value = false
 para_int_value  = 2
 false
@@ -24,7 +24,7 @@ false
 
 test case 4--------
 len(array_value)      = 4
-capacity(array_value) = 8
+cap(array_value) = 8
 para_bool_value = true
 para_int_value  = 3
 false

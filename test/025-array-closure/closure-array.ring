@@ -17,7 +17,7 @@ fn main() {
 	fmt::println(local_array_func); // empty array
 	fmt::println(reflect::typeof(local_array_func)); // closure[!1] TODO: 后续需要优化一下
 	fmt::println(len(local_array_func)); // 0
-	fmt::println(capacity(local_array_func)); // 0
+	fmt::println(cap(local_array_func)); // 0
 
 
 	fmt::printf("\ntest push closure array-------\n");
@@ -42,7 +42,7 @@ fn main() {
 	fmt::println(reflect::typeof(local_array_func)); // closure[!1] TODO: 后续需要优化一下
 	fmt::println(reflect::typeof(local_array_func[0])); // fn() -> ()
 	fmt::println(len(local_array_func)); // 5
-	fmt::println(capacity(local_array_func)); // 8
+	fmt::println(cap(local_array_func)); // 8
 
 
 	// pass
@@ -68,14 +68,14 @@ fn main() {
 	fmt::printf("\ntest empty closure array-------\n");
 	fmt::println(local_array_func); // empty array
 	fmt::println(len(local_array_func)); // 0
-	fmt::println(capacity(local_array_func)); // 8
+	fmt::println(cap(local_array_func)); // 8
 
 
 	fmt::printf("\ntest new closure array-------\n");
 	local_array_func = new FuncType[5];
 	fmt::println(local_array_func); // [nil nil nil nil nil]
 	fmt::println(len(local_array_func)); // 5
-	fmt::println(capacity(local_array_func)); // 8
+	fmt::println(cap(local_array_func)); // 8
 
 
 	fmt::printf("\ntest new closure literal array-------\n");
@@ -96,7 +96,7 @@ fn main() {
 	// 是指针，不太好测试
 	// fmt::println(local_array_func); // [closure(0x15172d460) closure(0x15172d478) closure(0x15172d490) closure(0x15172d4a8)]
 	fmt::println(len(local_array_func)); // 4
-	fmt::println(capacity(local_array_func)); // 8
+	fmt::println(cap(local_array_func)); // 8
 
 	// pass
 	fmt::printf("\ntest range closure array-------\n");

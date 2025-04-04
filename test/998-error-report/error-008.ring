@@ -57,7 +57,7 @@ fn main() {
 	// to_int64(s);
 	// resume(a);
 	// resume();
-	// capacity(a);
+	// cap(a);
 	// len(a);
 	
 }

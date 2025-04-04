@@ -66,7 +66,7 @@ fn main() {
 
 fn func_variadic_parameter(var FuncType... func_array_value) {
     fmt::printf("len(func_array_value)      = {}\n", len(func_array_value));
-    fmt::printf("capacity(func_array_value) = {}\n", capacity(func_array_value));
+    fmt::printf("cap(func_array_value) = {}\n", cap(func_array_value));
 
     var FuncType func_value;
     for(func_value in range func_array_value) {
