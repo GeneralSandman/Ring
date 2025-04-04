@@ -23,6 +23,7 @@ OBJS   = \
 	debug.o\
 	vm-debug.o\
 	debug-free-value.o\
+	debug-gc.o\
 	coroutine.o\
 	../deps/linenoise/linenoise.o\
 	fmt.o\
@@ -69,6 +70,7 @@ TOOL_GEN_VMCODE_DOC_OBJS  = vm.o tool_gen_vmcode_doc.o
 #  DEBUG_GENERATE_OUTPUT_VMCODE      代码生成节点： 只打印出相应的字节码
 #  DEBUG_EXEC_VM  				     vm运行阶段的调试信息
 #  DEBUG_RVM_INTERACTIVE 		     控制调试RVM
+#  DEBUG_RVM_HEAP_ALLOC              展示Heap 分配内存详情
 #  DDEBUG_RVM_MEM_POOL_DETAIL 	     展示 Memory Pool 内存分配的详情
 #  DEBUG_RVM_GC_DETAIL 			     展示 Garbage Collect 的详情
 #  DEBUG_RDB_TRACE_DISPATH_DETAIL    调试开发Ring-Debugger: 展示 rdb trace_dispath 的详情, 可以展示每一次回掉到debugger的详情
@@ -91,6 +93,7 @@ CFLAGS = -c -static -O2 -std=c++17 \
 				 -DDEBUG_GENERATE_OUTPUT_VMCODE1 \
 				 -DDEBUG_EXEC_VM1 \
 				 -DDEBUG_RVM_INTERACTIVE1 \
+				 -DDEBUG_RVM_HEAP_ALLOC1 \
 				 -DDEBUG_RVM_MEM_POOL_DETAIL1 \
 				 -DDEBUG_RVM_GC_DETAIL1 \
 				 -DDEBUG_TRACE_CLOSURE_FREE_VALUE1 \
@@ -209,6 +212,7 @@ gc.o: gc.cpp ring.hpp
 debug.o: debug.cpp ring.hpp
 vm-debug.o: vm-debug.cpp ring.hpp
 debug-free-value.o: debug-free-value.cpp ring.hpp
+debug-gc.o: debug-gc.cpp ring.hpp
 coroutine.o: coroutine.cpp ring.hpp
 thread_pool.o: thread_pool.cpp ring.hpp
 thread_pool_test.o: thread_pool_test.cpp ring.hpp
