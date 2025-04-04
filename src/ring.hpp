@@ -17,6 +17,7 @@
 typedef struct Ring_Command_Arg             Ring_Command_Arg;
 typedef struct Ring_VirtualMachine          Ring_VirtualMachine;
 typedef struct RingCoroutine                RingCoroutine;
+typedef struct GarbageCollector             GarbageCollector;
 typedef struct ImportPackageInfo            ImportPackageInfo;
 typedef struct CompilerEntry                CompilerEntry;
 typedef struct ExecuterEntry                ExecuterEntry;
@@ -300,6 +301,9 @@ struct RingCoroutine {
     // defer 调用链
     unsigned int   defer_list_size;
     RVM_DeferItem* defer_list;
+};
+
+struct GarbageCollector {
 };
 
 struct ImportPackageInfo {
@@ -721,6 +725,7 @@ typedef enum {
 typedef enum {
     GC_MARK_COLOR_UNKNOW,
     GC_MARK_COLOR_WHITE, // 需要被回收
+    GC_MARK_COLOR_GRAY,
     GC_MARK_COLOR_BLACK, // 不需要被回收
 } GC_Mark;
 
@@ -772,14 +777,14 @@ struct RVM_Array {
 
 
     union {
-        bool*            bool_array;
-        int*             int_array;
-        long long*       int64_array;
-        double*          double_array;
-        RVM_String*      string_array;
-        RVM_ClassObject* class_ob_array;
-        RVM_Closure*     closure_array;
-        RVM_Array*       a_array; // 多维数组
+        bool*             bool_array;
+        int*              int_array;
+        long long*        int64_array;
+        double*           double_array;
+        RVM_String**      string_array;
+        RVM_ClassObject** class_ob_array;
+        RVM_Closure*      closure_array;
+        RVM_Array*        a_array; // 多维数组
     } u;
 };
 
@@ -2673,6 +2678,13 @@ struct MemBlock {
 #endif
 
 
+#ifdef DEBUG_RVM_HEAP_ALLOC
+#define debug_rvm_heap_alloc_with_green(format, ...) \
+    printf("%s [DEBUG][%s:%d][function:%s] " format " %s\n", LOG_COLOR_WHITE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#else
+#define debug_rvm_heap_alloc_with_green(format, ...)
+#endif
+
 // 以后通用的错误提示统一使用这个
 #define ring_error_report(format, ...)                                          \
     fprintf(stderr, "%s[ERROR][%s:%d]\t " format "%s\n",                        \
@@ -3529,8 +3541,8 @@ void             rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_Objec
 void             rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
 
 
-void             gc(Ring_VirtualMachine* rvm);
-void             gc_summary(Ring_VirtualMachine* rvm);
+void             gc_incremental(Ring_VirtualMachine* rvm);
+void             gc_make_sweep(Ring_VirtualMachine* rvm);
 void             gc_mark(Ring_VirtualMachine* rvm);
 void             gc_sweep(Ring_VirtualMachine* rvm);
 
@@ -3620,6 +3632,14 @@ VM_DB_Arg vm_db_parse_command(const char* line);
  *
  */
 void debug_generate_closure_dot_file(RVM_Closure* closure);
+// --------------------
+
+/* --------------------
+ * debug-gc.cpp
+ * function definition
+ *
+ */
+void debug_gc_summary(Ring_VirtualMachine* rvm, std::string stage);
 // --------------------
 
 

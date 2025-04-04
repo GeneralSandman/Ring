@@ -111,11 +111,11 @@ std::string fmt_array(RVM_Array* array_value) {
             break;
         case RVM_ARRAY_STRING: {
             std::string tmp;
-            tmp.assign(array_value->u.string_array[i].data, array_value->u.string_array[i].length);
+            tmp.assign(array_value->u.string_array[i]->data, array_value->u.string_array[i]->length);
             result += tmp;
         } break;
         case RVM_ARRAY_CLASS_OBJECT:
-            result += fmt_class(&array_value->u.class_ob_array[i]);
+            result += fmt_class(array_value->u.class_ob_array[i]);
             break;
         case RVM_ARRAY_CLOSURE:
             result += fmt_closure(&array_value->u.closure_array[i]);
@@ -274,10 +274,10 @@ std::string var_dump_array(Package_Executer* package_executer,
             result += std::to_string(array_value->u.double_array[i]);
             break;
         case RVM_ARRAY_STRING:
-            result += var_dump_string(&array_value->u.string_array[i]);
+            result += var_dump_string(array_value->u.string_array[i]);
             break;
         case RVM_ARRAY_CLASS_OBJECT:
-            result += var_dump_class(package_executer, &array_value->u.class_ob_array[i], indent + 1);
+            result += var_dump_class(package_executer, array_value->u.class_ob_array[i], indent + 1);
             break;
         case RVM_ARRAY_CLOSURE:
             result += var_dump_closure(package_executer, &array_value->u.closure_array[i]);

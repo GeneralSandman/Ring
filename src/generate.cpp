@@ -489,17 +489,25 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
     //   argument_num
     //   push_func
     //   invoke_func
-    for (unsigned int i = 0; i < package->shell_args.size(); i++) {
-        // FIXME: 这里 shell_args 是否应该被释放, 不然 constant_pool 内存会变为invaid pointor
-        int index = constant_pool_add_string(executer, package->shell_args[i].c_str());
+    RVM_Function* main_func = &executer->function_list[executer->main_func_index];
+    // 无需判断类型，已经在 语法检查中check了
+    // 没有参数 或者 只有 string[] 参数
+    unsigned int argument_num = 0;
+    if (main_func->parameter_size == 1) {
+        for (unsigned int i = 0; i < package->shell_args.size(); i++) {
+            // FIXME: 这里 shell_args 是否应该被释放, 不然 constant_pool 内存会变为invaid pointor
+            int index = constant_pool_add_string(executer, package->shell_args[i].c_str());
+            generate_vmcode(executer, opcode_buffer,
+                            RVM_CODE_PUSH_STRING, index, 0);
+        }
         generate_vmcode(executer, opcode_buffer,
-                        RVM_CODE_PUSH_STRING, index, 0);
+                        RVM_CODE_NEW_ARRAY_LITERAL_STRING, package->shell_args.size(), 0);
+        argument_num = 1;
     }
-    generate_vmcode(executer, opcode_buffer,
-                    RVM_CODE_NEW_ARRAY_LITERAL_STRING, package->shell_args.size(), 0);
+
 
     generate_vmcode(executer, opcode_buffer,
-                    RVM_CODE_ARGUMENT_NUM, 1, 0);
+                    RVM_CODE_ARGUMENT_NUM, argument_num, 0);
     generate_vmcode(executer, opcode_buffer,
                     RVM_CODE_PUSH_FUNC,
                     ((package->compiler_entry->package_list.size() - 1) << 8)

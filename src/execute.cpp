@@ -2833,6 +2833,8 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
         local_vari_stack_offset++;
     }
 
+    // 如果 runtime_stack 中没有对应的参数
+    // caller 还尝试获取对应的参数，那么这里就会报错
     assert(callee_function->local_variable_size == local_vari_stack_offset);
 
     // Step-End: increase top index of runtime_stack.
@@ -2970,8 +2972,9 @@ RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int s
 
     RVM_Array*   array            = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_STRING, nullptr);
     for (unsigned int i = 0; i < size; i++) {
-        // TODO: shallow copy
-        array->u.string_array[i] = *STACK_GET_STRING_OFFSET(-size + i);
+        // shallow copy 有助于提升速度
+        // 这里没有错误
+        array->u.string_array[i] = STACK_GET_STRING_OFFSET(-size + i);
     }
 
     return array;
@@ -2992,7 +2995,7 @@ RVM_Array* rvm_new_array_literal_class_object(Ring_VirtualMachine* rvm,
     RVM_Array*   array            = rvm_new_array(rvm, dimension, dimension_list, dimension, RVM_ARRAY_CLASS_OBJECT, class_definition);
     for (unsigned int i = 0; i < size; i++) {
         // TODO: shallow copy
-        array->u.class_ob_array[i] = *(STACK_GET_CLASS_OB_OFFSET(-size + i));
+        array->u.class_ob_array[i] = STACK_GET_CLASS_OB_OFFSET(-size + i);
     }
 
     return array;
@@ -3174,7 +3177,7 @@ ErrorCode rvm_array_pop_double(Ring_VirtualMachine* rvm, RVM_Array* array, doubl
 }
 
 ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_String** value) {
-    RVM_String* src_string = &(array->u.string_array[index]);
+    RVM_String* src_string = array->u.string_array[index];
 
     RVM_String* dst_string = rvm_deep_copy_string(rvm, src_string);
 
@@ -3190,7 +3193,7 @@ ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Array* array, int i
 ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_String** value) {
     RVM_String* dst_string       = rvm_deep_copy_string(rvm, *value);
 
-    array->u.string_array[index] = *dst_string;
+    array->u.string_array[index] = dst_string;
 
     return ERROR_CODE_SUCCESS;
 }
@@ -3199,12 +3202,12 @@ ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Array* array, RV
     if (array->length >= array->capacity) {
         rvm_array_growth(rvm, array);
     }
-    array->u.string_array[array->length++] = *rvm_deep_copy_string(rvm, *value);
+    array->u.string_array[array->length++] = rvm_deep_copy_string(rvm, *value);
     return ERROR_CODE_SUCCESS;
 }
 
 ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_String** value) {
-    RVM_String* dst_string = rvm_deep_copy_string(rvm, &(array->u.string_array[--array->length]));
+    RVM_String* dst_string = rvm_deep_copy_string(rvm, array->u.string_array[--array->length]);
     *value                 = dst_string; // FIXME: 这里内存泄漏了
     return ERROR_CODE_SUCCESS;
 }
@@ -3217,7 +3220,7 @@ ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm,
                                      int                  index,
                                      RVM_ClassObject**    value) {
 
-    RVM_ClassObject* src_class_object = &(array->u.class_ob_array[index]);
+    RVM_ClassObject* src_class_object = array->u.class_ob_array[index];
     RVM_ClassObject* dst_class_object = nullptr;
 
     // dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
@@ -3238,7 +3241,7 @@ ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm,
     RVM_ClassObject* dst_class_object = nullptr;
     dst_class_object                  = rvm_deep_copy_class_ob(rvm, *value);
 
-    array->u.class_ob_array[index]    = *dst_class_object;
+    array->u.class_ob_array[index]    = dst_class_object;
 
     return ERROR_CODE_SUCCESS;
 }
@@ -3251,7 +3254,7 @@ ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm,
     if (array->length >= array->capacity) {
         rvm_array_growth(rvm, array);
     }
-    array->u.class_ob_array[array->length++] = *rvm_deep_copy_class_ob(rvm, *value);
+    array->u.class_ob_array[array->length++] = rvm_deep_copy_class_ob(rvm, *value);
     return ERROR_CODE_SUCCESS;
 }
 
@@ -3259,7 +3262,7 @@ ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm,
                                      RVM_Array*           array,
                                      RVM_ClassObject**    value) {
 
-    RVM_ClassObject* src_class_object = &(array->u.class_ob_array[--array->length]);
+    RVM_ClassObject* src_class_object = array->u.class_ob_array[--array->length];
     RVM_ClassObject* dst_class_object = rvm_deep_copy_class_ob(rvm, src_class_object);
 
     *value                            = dst_class_object;

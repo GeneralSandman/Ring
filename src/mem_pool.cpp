@@ -207,6 +207,8 @@ void mem_free(MemPool* pool, void* ptr, size_t size) {
         return;
     }
 
+    memset(ptr, 0, size);
+
     auto iter = pool->active_mem_map.find(ptr);
     if (iter == pool->active_mem_map.end()) {
         ring_error_report("ptr:%p is not allocated by memory pool", ptr);

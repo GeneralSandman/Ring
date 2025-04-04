@@ -21,9 +21,19 @@ void rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
     }
 
     rvm->runtime_heap->list = object;
+
+#ifdef DEBUG_RVM_HEAP_ALLOC
+    unsigned int count = 0;
+    for (RVM_GC_Object* obj = rvm->runtime_heap->list; obj != nullptr; obj = obj->gc_next) {
+        count++;
+    }
+    debug_rvm_heap_alloc_with_green("heap_list count: %u", count);
+#endif
 }
 
 void rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
+    assert(rvm != nullptr);
+    assert(rvm->runtime_heap != nullptr);
     assert(object != nullptr);
 
     if (object->gc_prev != nullptr) {
@@ -36,6 +46,23 @@ void rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object
     if (object->gc_prev == nullptr) {
         rvm->runtime_heap->list = object->gc_next;
     }
+
+    object->gc_prev = nullptr;
+    object->gc_next = nullptr;
+
+#ifdef DEBUG_RVM_HEAP_ALLOC
+    unsigned int count = 0;
+    for (RVM_GC_Object* obj = rvm->runtime_heap->list; obj != nullptr; obj = obj->gc_next) {
+        count++;
+    }
+    debug_rvm_heap_alloc_with_green("heap_list count: %u", count);
+#endif
+}
+
+/*
+ * 基于三色标记的增量式垃圾回收机制
+ */
+void gc_incremental(Ring_VirtualMachine* rvm) {
 }
 
 /*
@@ -45,16 +72,21 @@ void rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object
  * 1. gc 的过程会暂停程序
  */
 
-void gc(Ring_VirtualMachine* rvm) {
+void gc_make_sweep(Ring_VirtualMachine* rvm) {
 #ifdef DEBUG_RVM_GC_DETAIL
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     long long start_timestamp = (long long)(ts.tv_sec) * 1000000000 + ts.tv_nsec;
     printf("============Debug RVM GC Detail(Begin)============\n");
-    // gc_summary(rvm);
+    debug_gc_summary(rvm, "BeforeMark");
 #endif
 
     gc_mark(rvm);
+
+#ifdef DEBUG_RVM_GC_DETAIL
+    // debug_gc_summary(rvm, "AfterMark");
+#endif
+
     gc_sweep(rvm);
 
 #ifdef DEBUG_RVM_GC_DETAIL
@@ -62,58 +94,11 @@ void gc(Ring_VirtualMachine* rvm) {
     long long end_timestamp = (long long)(ts.tv_sec) * 1000000000 + ts.tv_nsec;
     printf("gc use time:%f ms\n", double(end_timestamp - start_timestamp) / 1000000.0);
     printf("%s-----------------GC Action-----------------%s\n", LOG_COLOR_YELLOW, LOG_COLOR_CLEAR);
-    // gc_summary(rvm);
+    debug_gc_summary(rvm, "AfterSweep");
     printf("============Debug RVM GC Detail(End)============\n\n");
 #endif
 }
 
-void gc_summary(Ring_VirtualMachine* rvm) {
-    printf("%sStatic:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
-    for (unsigned int i = 0; i < rvm->runtime_static->size; i++) {
-        RVM_Value*  value = &(VM_STATIC_DATA[i]);
-
-        std::string type;
-        type = format_rvm_type(rvm, value);
-        printf("\tRVM_Value: %s\n", type.c_str());
-    }
-
-    printf("%sHeap:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
-    for (RVM_GC_Object* pos = rvm->runtime_heap->list; pos != nullptr; pos = pos->gc_next) {
-        switch (pos->gc_type) {
-        case RVM_GC_OBJECT_TYPE_STRING:
-            printf("\tRVM_GC_Object: string\n");
-            break;
-        case RVM_GC_OBJECT_TYPE_CLASS_OB:
-            printf("\tRVM_GC_Object: class-object\n");
-            break;
-        case RVM_GC_OBJECT_TYPE_ARRAY:
-            printf("\tRVM_GC_Object: array\n");
-            break;
-        case RVM_GC_OBJECT_TYPE_CLOSURE:
-            printf("\tRVM_GC_Object: closure\n");
-            break;
-        default:
-            break;
-        }
-    }
-
-    printf("%sStack:%s\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR);
-    for (unsigned int stack_index = 0; stack_index < VM_CUR_CO_STACK_TOP_INDEX; stack_index++) {
-        RVM_Value*  value = &(VM_CUR_CO_STACK_DATA[stack_index]);
-
-        std::string type;
-        type = format_rvm_type(rvm, value);
-
-        // 不展示目前 函数调用写死 的 20 local_variable_size
-        if (!str_eq(type.c_str(), "callinfo")
-            && !str_eq(type.c_str(), "unknow")) {
-            printf("\tRVM_Value type:%s\n", type.c_str());
-        }
-    }
-
-
-    printf("%sHead Size:%s %lld\n", LOG_COLOR_GREEN, LOG_COLOR_CLEAR, rvm->runtime_heap->alloc_size);
-}
 
 /*
  * 对动态分配的内存进行标记
@@ -129,6 +114,8 @@ void gc_mark(Ring_VirtualMachine* rvm) {
     }
 
     //  2. runtime stack 变量 指向的位置 需要标记
+    // TODO: 这里是收集的当前协程的空间
+    debug_rvm_heap_alloc_with_green("stack_size %u", VM_CUR_CO_STACK_TOP_INDEX);
     for (unsigned int stack_index = 0; stack_index < VM_CUR_CO_STACK_TOP_INDEX; stack_index++) {
         RVM_Value* value = &(VM_CUR_CO_STACK_DATA[stack_index]);
         gc_mark_rvm_value(value);
@@ -159,6 +146,7 @@ void gc_mark_rvm_value(RVM_Value* value) {
         gc_mark_class_ob(value->u.class_ob_value);
         break;
     case RVM_VALUE_TYPE_ARRAY:
+        debug_rvm_heap_alloc_with_green("mark array %p", value->u.array_value);
         gc_mark_array(value->u.array_value);
         break;
     case RVM_VALUE_TYPE_CLOSURE:
@@ -187,10 +175,11 @@ void gc_mark_array(RVM_Array* array) {
     for (unsigned int i = 0; i < array->length; i++) {
         switch (array->type) {
         case RVM_ARRAY_STRING:
-            array->u.string_array[i].gc_mark = GC_MARK_COLOR_BLACK;
+            debug_rvm_heap_alloc_with_green("mark array:string %p", array->u.string_array[i]);
+            array->u.string_array[i]->gc_mark = GC_MARK_COLOR_BLACK;
             break;
         case RVM_ARRAY_CLASS_OBJECT:
-            array->u.class_ob_array[i].gc_mark = GC_MARK_COLOR_BLACK;
+            array->u.class_ob_array[i]->gc_mark = GC_MARK_COLOR_BLACK;
             break;
         case RVM_ARRAY_CLOSURE:
             array->u.closure_array[i].gc_mark = GC_MARK_COLOR_BLACK;
@@ -232,9 +221,12 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
     RVM_ClassObject* class_ob     = nullptr;
     RVM_Closure*     closure      = nullptr;
 
+    // 一定先从heap中移除
+    rvm_heap_list_remove_object(rvm, object);
+
     switch (object->gc_type) {
     case RVM_GC_OBJECT_TYPE_STRING:
-        // printf("free string\n");
+        debug_rvm_heap_alloc_with_green("free string %p", object);
         string_value = (RVM_String*)object;
         free_size    = rvm_free_string(rvm, string_value);
         break;
@@ -246,7 +238,7 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
         break;
 
     case RVM_GC_OBJECT_TYPE_ARRAY:
-        // printf("free array\n");
+        debug_rvm_heap_alloc_with_green("free array %p", object);
         array     = (RVM_Array*)object;
         free_size = rvm_free_array(rvm, array);
         break;
@@ -261,7 +253,6 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
         break;
     }
 
-    rvm_heap_list_remove_object(rvm, object);
     rvm_heap_alloc_size_incr(rvm, -free_size);
 }
 
@@ -293,6 +284,10 @@ void rvm_fill_string(Ring_VirtualMachine* rvm, RVM_String* string, unsigned int 
     memset(string->data, 0, alloc_size);
 
     rvm_heap_alloc_size_incr(rvm, alloc_size);
+    debug_rvm_heap_alloc_with_green("rvm_fill_string: %p alloc_size:%u  [heap_size:%lld]",
+                                    string,
+                                    alloc_size,
+                                    rvm_heap_size(rvm));
 }
 
 
@@ -308,6 +303,10 @@ RVM_String* rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src) {
     memcpy(string->data, src->data, alloc_size);
 
     rvm_heap_alloc_size_incr(rvm, alloc_size);
+    debug_rvm_heap_alloc_with_green("rvm_deep_copy_string: %p alloc_size:%u  [heap_size:%lld]",
+                                    string,
+                                    alloc_size,
+                                    rvm_heap_size(rvm));
 
     return string;
 }
@@ -315,11 +314,12 @@ RVM_String* rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src) {
 unsigned int rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string) {
     assert(string != nullptr);
 
+    // 释放真正的数据
     if (string->data != nullptr) {
-        mem_free(rvm->data_pool, (void*)string->data, string->capacity);
+        mem_free(rvm->data_pool, (void*)string->data, string->capacity * sizeof(char));
     }
     unsigned int free_size = string->capacity * sizeof(char);
-
+    // 释放元信息
     mem_free(rvm->data_pool, string, sizeof(RVM_String));
 
     return free_size;
@@ -368,7 +368,9 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
     unsigned int alloc_size = 0;
 
     array                   = rvm_gc_new_array_meta(rvm,
-                                                    array_type, class_definition, dimension_index);
+                                                    array_type,
+                                                    class_definition,
+                                                    dimension_index);
     array->length           = dimension_list[dimension - dimension_index];
     array->capacity         = dimension_list[dimension - dimension_index];
 
@@ -394,27 +396,35 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
             array->u.double_array = (double*)mem_alloc(rvm->data_pool, alloc_size);
             break;
         case RVM_ARRAY_STRING:
-            array->u.string_array = (RVM_String*)mem_alloc(rvm->data_pool,
-                                                           sizeof(RVM_String) * array->capacity);
+            alloc_size            = sizeof(RVM_String*) * array->capacity;
+            array->u.string_array = (RVM_String**)mem_alloc(rvm->data_pool, alloc_size);
+            alloc_size            = 0; // gc-object 元信息不计入 heap的空间
             for (unsigned int i = 0; i < array->length; i++) {
                 RVM_String* string_value = rvm_gc_new_string_meta(rvm);
                 rvm_fill_string(rvm, string_value, ROUND_UP8(1));
-                array->u.string_array[i] = *string_value;
+                array->u.string_array[i] = string_value;
             }
             break;
         case RVM_ARRAY_CLASS_OBJECT:
             assert(class_definition != nullptr);
-            array->u.class_ob_array = (RVM_ClassObject*)mem_alloc(rvm->data_pool,
-                                                                  sizeof(RVM_ClassObject) * array->capacity);
+            alloc_size              = sizeof(RVM_ClassObject*) * array->capacity;
+            array->u.class_ob_array = (RVM_ClassObject**)mem_alloc(rvm->data_pool, alloc_size);
+            alloc_size              = 0; // gc-object 元信息不计入 heap的空间
             for (unsigned int i = 0; i < array->length; i++) {
                 RVM_ClassObject* class_ob = rvm_gc_new_class_ob_meta(rvm);
                 rvm_fill_class_ob(rvm, class_ob, class_definition);
-                array->u.class_ob_array[i] = *class_ob;
+                array->u.class_ob_array[i] = class_ob;
             }
             break;
+
+        case RVM_ARRAY_A:
+            // 不会出现这种情况
+            break;
+
         case RVM_ARRAY_CLOSURE:
-            array->u.closure_array = (RVM_Closure*)mem_alloc(rvm->data_pool,
-                                                             sizeof(RVM_Closure) * array->capacity);
+            alloc_size             = sizeof(RVM_Closure) * array->capacity;
+            array->u.closure_array = (RVM_Closure*)mem_alloc(rvm->data_pool, alloc_size);
+            alloc_size             = 0; // gc-object 元信息不计入 heap的空间
             for (unsigned int i = 0; i < array->length; i++) {
                 RVM_Closure* closure      = rvm_gc_new_closure_meta(rvm);
                 array->u.closure_array[i] = *closure;
@@ -426,8 +436,9 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
     } else {
         // 递归分配多维数组
         array->type      = RVM_ARRAY_A;
-        array->u.a_array = (RVM_Array*)mem_alloc(rvm->data_pool,
-                                                 sizeof(RVM_Array) * array->capacity);
+        alloc_size       = sizeof(RVM_Array) * array->capacity;
+        array->u.a_array = (RVM_Array*)mem_alloc(rvm->data_pool, alloc_size);
+        alloc_size       = 0; // gc-object 元信息不计入 heap的空间
 
         // 预测下一个维度是否需要分配，如果不需要，则跳过
         if (dimension - (dimension_index - 1) < dimension
@@ -445,21 +456,28 @@ RVM_Array* rvm_new_array(Ring_VirtualMachine* rvm,
     }
 
     rvm_heap_alloc_size_incr(rvm, alloc_size);
+    debug_rvm_heap_alloc_with_green("rvm_new_array array_type:%d array->capacity:%d alloc_size:%u   [heap_size:%lld]",
+                                    array_type,
+                                    array->capacity,
+                                    alloc_size,
+                                    rvm_heap_size(rvm));
 
     return array;
 }
 
 
 RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
-    RVM_Array* array  = nullptr;
+    RVM_Array* array        = nullptr;
 
-    array             = rvm_gc_new_array_meta(rvm,
-                                              src->type, src->class_ref, src->dimension);
-    array->length     = src->length;
-    array->capacity   = src->capacity;
+    array                   = rvm_gc_new_array_meta(rvm,
+                                                    src->type,
+                                                    src->class_ref,
+                                                    src->dimension);
+    array->length           = src->length;
+    array->capacity         = src->capacity;
 
 
-    size_t alloc_size = 0;
+    unsigned int alloc_size = 0;
 
     switch (src->type) {
     case RVM_ARRAY_BOOL:
@@ -487,28 +505,30 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         break;
 
     case RVM_ARRAY_STRING:
-        array->u.string_array = (RVM_String*)mem_alloc(rvm->data_pool,
-                                                       sizeof(RVM_String) * array->capacity);
+        alloc_size            = sizeof(RVM_String*) * array->capacity;
+        array->u.string_array = (RVM_String**)mem_alloc(rvm->data_pool, alloc_size);
+        alloc_size            = 0; // gc-object 元信息不计入 heap的空间
         for (unsigned int i = 0; i < array->length; i++) {
-            RVM_String* tmp          = rvm_deep_copy_string(rvm, &(src->u.string_array[i]));
-            array->u.string_array[i] = *tmp;
+            RVM_String* tmp          = rvm_deep_copy_string(rvm, src->u.string_array[i]);
+            array->u.string_array[i] = tmp;
         }
         break;
 
     case RVM_ARRAY_CLASS_OBJECT:
         array->class_ref        = src->class_ref;
-        array->u.class_ob_array = (RVM_ClassObject*)mem_alloc(rvm->data_pool, // FIXME:
-                                                              sizeof(RVM_ClassObject) * array->capacity);
-        for (unsigned int i = 0; i < src->length; i++) {
-            RVM_ClassObject* tmp       = rvm_deep_copy_class_ob(rvm, &(src->u.class_ob_array[i]));
-            array->u.class_ob_array[i] = *tmp;
+        alloc_size              = sizeof(RVM_ClassObject*) * array->capacity;
+        array->u.class_ob_array = (RVM_ClassObject**)mem_alloc(rvm->data_pool, alloc_size);
+        alloc_size              = 0; // gc-object 元信息不计入 heap的空间
+        for (unsigned int i = 0; i < array->length; i++) {
+            RVM_ClassObject* tmp       = rvm_deep_copy_class_ob(rvm, src->u.class_ob_array[i]);
+            array->u.class_ob_array[i] = tmp;
         }
         break;
 
     case RVM_ARRAY_A:
-        array->u.a_array = (RVM_Array*)mem_alloc(rvm->data_pool,
-                                                 sizeof(RVM_Array) * array->capacity);
-
+        alloc_size       = sizeof(RVM_Array) * array->capacity;
+        array->u.a_array = (RVM_Array*)mem_alloc(rvm->data_pool, alloc_size);
+        alloc_size       = 0; // gc-object 元信息不计入 heap的空间
         for (unsigned int i = 0; i < array->length; i++) {
             RVM_Array* tmp      = rvm_deep_copy_array(rvm, &(src->u.a_array[i]));
             array->u.a_array[i] = *tmp;
@@ -516,9 +536,10 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         break;
 
     case RVM_ARRAY_CLOSURE:
-        array->u.closure_array = (RVM_Closure*)mem_alloc(rvm->data_pool,
-                                                         sizeof(RVM_Closure) * array->capacity);
-        for (unsigned int i = 0; i < src->length; i++) {
+        alloc_size             = sizeof(RVM_Closure) * array->capacity;
+        array->u.closure_array = (RVM_Closure*)mem_alloc(rvm->data_pool, alloc_size);
+        alloc_size             = 0; // gc-object 元信息不计入 heap的空间
+        for (unsigned int i = 0; i < array->length; i++) {
             RVM_Closure* closure      = rvm_deep_copy_closure(rvm, &(src->u.closure_array[i]));
             array->u.closure_array[i] = *closure;
         }
@@ -528,9 +549,12 @@ RVM_Array* rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src) {
         break;
     }
 
-
     rvm_heap_alloc_size_incr(rvm, alloc_size);
-
+    debug_rvm_heap_alloc_with_green("rvm_deep_copy_array array_type:%d array->capacity:%d alloc_size:%u    [heap_size:%lld]",
+                                    src->type,
+                                    array->capacity,
+                                    alloc_size,
+                                    rvm_heap_size(rvm));
 
     return array;
 }
@@ -582,20 +606,20 @@ void rvm_array_growth(Ring_VirtualMachine* rvm, RVM_Array* array) {
                                                      new_alloc_size);
         break;
     case RVM_ARRAY_STRING:
-        old_alloc_size        = old_cap * sizeof(RVM_String);
-        new_alloc_size        = new_cap * sizeof(RVM_String);
-        array->u.string_array = (RVM_String*)mem_realloc(rvm->data_pool,
-                                                         array->u.string_array,
-                                                         old_alloc_size,
-                                                         new_alloc_size);
+        old_alloc_size        = old_cap * sizeof(RVM_String*);
+        new_alloc_size        = new_cap * sizeof(RVM_String*);
+        array->u.string_array = (RVM_String**)mem_realloc(rvm->data_pool,
+                                                          array->u.string_array,
+                                                          old_alloc_size,
+                                                          new_alloc_size);
         break;
     case RVM_ARRAY_CLASS_OBJECT:
-        old_alloc_size          = old_cap * sizeof(RVM_ClassObject);
-        new_alloc_size          = new_cap * sizeof(RVM_ClassObject);
-        array->u.class_ob_array = (RVM_ClassObject*)mem_realloc(rvm->data_pool,
-                                                                array->u.class_ob_array,
-                                                                old_alloc_size,
-                                                                new_alloc_size);
+        old_alloc_size          = old_cap * sizeof(RVM_ClassObject*);
+        new_alloc_size          = new_cap * sizeof(RVM_ClassObject*);
+        array->u.class_ob_array = (RVM_ClassObject**)mem_realloc(rvm->data_pool,
+                                                                 array->u.class_ob_array,
+                                                                 old_alloc_size,
+                                                                 new_alloc_size);
         break;
     case RVM_ARRAY_CLOSURE:
         old_alloc_size         = old_cap * sizeof(RVM_Closure);
@@ -633,24 +657,25 @@ unsigned int rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
         mem_free(rvm->data_pool, array->u.double_array, free_size);
         break;
     case RVM_ARRAY_STRING:
-        free_size = sizeof(RVM_String) * array->capacity;
+        free_size = sizeof(RVM_String*) * array->capacity;
         mem_free(rvm->data_pool, array->u.string_array, free_size);
-        // TODO: 释放实际的数组
+        free_size = 0; // gc-object 元信息不计入 heap的空间
+        // 不必递归向下释放
         break;
     case RVM_ARRAY_CLASS_OBJECT:
-        free_size = sizeof(RVM_ClassObject) * array->capacity;
+        free_size = sizeof(RVM_ClassObject*) * array->capacity;
         mem_free(rvm->data_pool, array->u.class_ob_array, free_size);
-        // TODO: 释放实际的数据
+        free_size = 0; // gc-object 元信息不计入 heap的空间
         break;
     case RVM_ARRAY_CLOSURE:
         free_size = sizeof(RVM_Closure) * array->capacity;
         mem_free(rvm->data_pool, array->u.closure_array, free_size);
-        // TODO: 释放实际的数据
+        free_size = 0; // gc-object 元信息不计入 heap的空间
         break;
     case RVM_ARRAY_A:
         free_size = sizeof(RVM_Array) * array->capacity;
         mem_free(rvm->data_pool, array->u.a_array, free_size);
-        // TODO: 释放实际的数据
+        free_size = 0; // gc-object 元信息不计入 heap的空间
         break;
     default: break;
     }
@@ -695,7 +720,7 @@ void rvm_fill_class_ob(Ring_VirtualMachine* rvm,
     RVM_Closure*         field_closure          = nullptr;
 
     size_t               alloc_meta_size        = 0;
-    size_t               alloc_data_size        = 0;
+    unsigned int         alloc_data_size        = 0;
 
     alloc_meta_size                             = class_definition->field_size * sizeof(RVM_Value);
     field_list                                  = (RVM_Value*)mem_alloc(rvm->data_pool,
@@ -734,6 +759,7 @@ void rvm_fill_class_ob(Ring_VirtualMachine* rvm,
             rvm_fill_string(rvm, field_string, ROUND_UP8(1));
             field_list[field_index].type           = RVM_VALUE_TYPE_STRING;
             field_list[field_index].u.string_value = field_string;
+            alloc_data_size += 0; // 由 rvm_fill_string 负责增加
             break;
         case RING_BASIC_TYPE_CLASS:
             field_class_definition = &(rvm->class_list[type_specifier->u.class_def_index]);
@@ -765,6 +791,9 @@ void rvm_fill_class_ob(Ring_VirtualMachine* rvm,
     class_ob->field_list  = field_list;
 
     rvm_heap_alloc_size_incr(rvm, alloc_data_size);
+    debug_rvm_heap_alloc_with_green("rvm_fill_class_ob alloc_size:%u   [heap_size:%lld]",
+                                    alloc_data_size,
+                                    rvm_heap_size(rvm));
 }
 
 
@@ -848,34 +877,37 @@ RVM_ClassObject* rvm_deep_copy_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObjec
 }
 
 unsigned int rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob) {
-    unsigned int free_size = 0;
+    unsigned int free_meta_size = 0;
+    unsigned int free_data_size = 0;
 
     // FIXME: 释放 string class array
     for (unsigned int field_index = 0; field_index < class_ob->field_count; field_index++) {
         switch (class_ob->field_list[field_index].type) {
         case RVM_VALUE_TYPE_BOOL:
-            free_size += 1;
+            free_data_size += 1;
             break;
         case RVM_VALUE_TYPE_INT:
-            free_size += 4;
+            free_data_size += 4;
             break;
         case RVM_VALUE_TYPE_INT64:
-            free_size += 8;
+            free_data_size += 8;
             break;
         case RVM_VALUE_TYPE_DOUBLE:
-            free_size += 8;
+            free_data_size += 8;
             break;
         case RVM_VALUE_TYPE_STRING:
-            free_size += rvm_free_string(rvm, class_ob->field_list[field_index].u.string_value);
+            free_data_size += 0;
+            // 不必递归向下释放
+            // string 自己控制生命周期
             break;
         case RVM_VALUE_TYPE_CLASS_OB:
-            free_size += rvm_free_class_ob(rvm, class_ob->field_list[field_index].u.class_ob_value);
+            free_data_size += rvm_free_class_ob(rvm, class_ob->field_list[field_index].u.class_ob_value);
             break;
         case RVM_VALUE_TYPE_ARRAY:
-            free_size += rvm_free_array(rvm, class_ob->field_list[field_index].u.array_value);
+            free_data_size += rvm_free_array(rvm, class_ob->field_list[field_index].u.array_value);
             break;
         case RVM_VALUE_TYPE_CLOSURE:
-            free_size += rvm_free_closure(rvm, class_ob->field_list[field_index].u.closure_value);
+            free_data_size += rvm_free_closure(rvm, class_ob->field_list[field_index].u.closure_value);
             break;
         default:
             break;
@@ -883,13 +915,13 @@ unsigned int rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_
     }
 
     if (class_ob->field_list != nullptr) {
+        free_meta_size = class_ob->field_count * sizeof(RVM_Value);
         mem_free(rvm->data_pool,
                  class_ob->field_list,
-                 class_ob->field_count * sizeof(RVM_Value));
+                 free_meta_size);
     }
-    free_size = class_ob->field_count * sizeof(RVM_Value);
     mem_free(rvm->data_pool, class_ob, sizeof(RVM_ClassObject));
-    return free_size;
+    return free_data_size;
 }
 
 RVM_Closure* rvm_gc_new_closure_meta(Ring_VirtualMachine* rvm) {

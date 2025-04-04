@@ -944,7 +944,8 @@ RVM_Value std_lib_runtime_gc(Ring_VirtualMachine* rvm, unsigned int arg_count, R
     RVM_Value ret;
     ret.u.int_value = 0;
 
-    gc(rvm);
+    // gc_incremental(rvm);
+    gc_make_sweep(rvm);
 
     return ret;
 }
