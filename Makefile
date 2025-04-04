@@ -66,20 +66,22 @@ testdump:
 	bash ./test/000-auto-test-script/automated-testing-dump.sh
 
 install:
+	$(call install_package_std)
+
 	@echo "\033[34m[+]Install Bin\033[0m"
 	$(CMD_INSTALL_EXEC) ./bin/ring $(INSTALL_BIN)
 	@echo "\033[32m[+]Install Bin  SUCCESS\033[0m"
 	@echo ""
 
-	$(call install_package_std)
 
 uninstall:
+	$(call uninstall_package_std)
+
 	@echo "\033[34m[-]Uninstall Bin\033[0m"
 	$(CMD_RM) $(INSTALL_BIN)/ring
 	@echo "\033[32m[-]Uninstall Bin  SUCCESS\033[0m"
 	@echo ""
 
-	$(call uninstall_package_std)
 
 echo:
 	@echo "[Build Info]"
@@ -107,18 +109,18 @@ endef
 
 
 define func_install_package_std
-	@echo "\033[34m[+]Install Package: Std/$(1)\033[0m"
+	@echo "\033[34m[+]Install Package: std/$(1)\033[0m"
 	$(CMD_MKDIR) $(INSTALL_PACK_STD)/$(1)
 	$(CMD_INSTALL_DATA) std/$(1)/* $(INSTALL_PACK_STD)/$(1)
-	@echo "\033[32m[+]Install Package: Std/$(1)  SUCCESS\033[0m"
+	@echo "\033[32m[+]Install Package: std/$(1)  SUCCESS\033[0m"
 	@echo ""
 
 endef
 
 define func_uninstall_package_std
-	@echo "\033[34m[-]Uninstall Package: Std/$(1)\033[0m"
+	@echo "\033[34m[-]Uninstall Package: std/$(1)\033[0m"
 	$(CMD_RM) $(INSTALL_PACK_STD)/$(1)
-	@echo "\033[32m[-]Uninstall Package: Std/$(1)  SUCCESS\033[0m"
+	@echo "\033[32m[-]Uninstall Package: std/$(1)  SUCCESS\033[0m"
 	@echo ""
 
 endef
