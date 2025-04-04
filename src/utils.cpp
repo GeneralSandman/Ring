@@ -1435,7 +1435,8 @@ std::string formate_array_item_type(RVM_Array* array_value) {
     case RVM_ARRAY_A:
         // 中间态数组
         // 递归向下找，找到元素的类型，最后加上 数组维度
-        str = formate_array_item_type(array_value->u.a_array);
+        // FIXME: 0 这里会 panic
+        str = formate_array_item_type(array_value->u.a_array[0]);
         break;
     case RVM_ARRAY_CLOSURE:
         str = "closure";

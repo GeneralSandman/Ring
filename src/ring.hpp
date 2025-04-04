@@ -775,6 +775,8 @@ struct RVM_Array {
     // 只有当 type == RVM_ARRAY_CLASS_OBJECT 才有意义
     RVM_ClassDefinition* class_ref;
 
+    // TODO: 直接加一个类型，指向最终的元素的类型
+
 
     union {
         bool*             bool_array;
@@ -784,7 +786,7 @@ struct RVM_Array {
         RVM_String**      string_array;
         RVM_ClassObject** class_ob_array;
         RVM_Closure*      closure_array;
-        RVM_Array*        a_array; // 多维数组
+        RVM_Array**       a_array; // 多维数组
     } u;
 };
 
