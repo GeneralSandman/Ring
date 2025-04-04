@@ -1453,7 +1453,7 @@ std::string formate_array_item_type(RVM_Array* array_value) {
 std::string formate_closure_type(Package_Executer* package_executer,
                                  RVM_Closure*      closure_value) {
 
-    if (closure_value == nullptr) {
+    if (closure_value == nullptr || closure_value->anonymous_func == nullptr) {
         return "nil-closure";
     }
 

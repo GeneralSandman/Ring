@@ -118,7 +118,7 @@ std::string fmt_array(RVM_Array* array_value) {
             result += fmt_class(array_value->u.class_ob_array[i]);
             break;
         case RVM_ARRAY_CLOSURE:
-            result += fmt_closure(&array_value->u.closure_array[i]);
+            result += fmt_closure(array_value->u.closure_array[i]);
             break;
         case RVM_ARRAY_A:
             result += fmt_array(array_value->u.a_array[i]);
@@ -280,7 +280,7 @@ std::string var_dump_array(Package_Executer* package_executer,
             result += var_dump_class(package_executer, array_value->u.class_ob_array[i], indent + 1);
             break;
         case RVM_ARRAY_CLOSURE:
-            result += var_dump_closure(package_executer, &array_value->u.closure_array[i]);
+            result += var_dump_closure(package_executer, array_value->u.closure_array[i]);
             break;
         case RVM_ARRAY_A:
             result += var_dump_array(package_executer, array_value->u.a_array[i], indent + 1);

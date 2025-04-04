@@ -785,7 +785,7 @@ struct RVM_Array {
         double*           double_array;
         RVM_String**      string_array;
         RVM_ClassObject** class_ob_array;
-        RVM_Closure*      closure_array;
+        RVM_Closure**     closure_array;
         RVM_Array**       a_array; // 多维数组
     } u;
 };

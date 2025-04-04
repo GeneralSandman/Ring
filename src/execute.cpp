@@ -2078,7 +2078,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
 
-            assert_throw_nil_closure(closure_value == nullptr);
+            assert_throw_nil_closure(closure_value == nullptr || closure_value->anonymous_func == nullptr);
 
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
@@ -2200,7 +2200,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
 
-            assert_throw_nil_closure(closure_value == nullptr);
+            assert_throw_nil_closure(closure_value == nullptr || closure_value->anonymous_func == nullptr);
 
             new_coroutine = launch_coroutine(rvm,
                                              &caller_class_ob, &caller_function, &caller_closure,
@@ -2825,10 +2825,10 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
 
             STACK_SET_ARRAY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, array);
         } break;
-        case RING_BASIC_TYPE_FUNC:
-            // TODO: 这里没有分配空间
-            STACK_SET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, nullptr);
-            break;
+        case RING_BASIC_TYPE_FUNC: {
+            RVM_Closure* closure = rvm_gc_new_closure_meta(rvm);
+            STACK_SET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, closure);
+        } break;
 
         default:
             break;
@@ -3019,7 +3019,7 @@ RVM_Array* rvm_new_array_literal_closure(Ring_VirtualMachine* rvm,
                                                   dimension, dimension_list, dimension,
                                                   RVM_ARRAY_CLOSURE, nullptr);
     for (unsigned int i = 0; i < size; i++) {
-        array->u.closure_array[i] = *STACK_GET_CLOSURE_OFFSET(-size + i);
+        array->u.closure_array[i] = STACK_GET_CLOSURE_OFFSET(-size + i);
     }
 
     return array;
@@ -3289,7 +3289,7 @@ ErrorCode rvm_array_get_closure(Ring_VirtualMachine* rvm,
                                 int                  index,
                                 RVM_Closure**        value) {
 
-    RVM_Closure* src_closure = &(array->u.closure_array[index]);
+    RVM_Closure* src_closure = array->u.closure_array[index];
     RVM_Closure* dst_closure = nullptr;
 
     // dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
@@ -3312,7 +3312,7 @@ ErrorCode rvm_array_set_closure(Ring_VirtualMachine* rvm,
     // FIXME: deep 还是 shallow
     dst_closure                   = *value;
 
-    array->u.closure_array[index] = *dst_closure;
+    array->u.closure_array[index] = dst_closure;
 
     return ERROR_CODE_SUCCESS;
 }
@@ -3325,7 +3325,7 @@ ErrorCode rvm_array_append_closure(Ring_VirtualMachine* rvm,
         rvm_array_growth(rvm, array);
     }
     // FIXME: deep 还是 shallow
-    array->u.closure_array[array->length++] = **value;
+    array->u.closure_array[array->length++] = *value;
     return ERROR_CODE_SUCCESS;
 }
 
@@ -3333,7 +3333,7 @@ ErrorCode rvm_array_pop_closure(Ring_VirtualMachine* rvm,
                                 RVM_Array*           array,
                                 RVM_Closure**        value) {
 
-    RVM_Closure* src_closure = &(array->u.closure_array[--array->length]);
+    RVM_Closure* src_closure = array->u.closure_array[--array->length];
     // FIXME: deep 还是 shallow
     RVM_Closure* dst_closure = src_closure;
 
