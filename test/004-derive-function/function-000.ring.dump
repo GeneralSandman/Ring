@@ -1,4 +1,4 @@
-#Constants:       13
+#Constants:       12
  ├──     0: string(I'm function doit1, go go go!)
  ├──     1: string(I'm function doit2, go go go!)
  ├──     2: string(I'm function doit3, go go go!)
@@ -11,7 +11,6 @@
  ├──     9: string(invoke doit3)
  ├──    10: string()
  ├──    11: string(invoke doit4)
- ├──    12: string(./test/004-derive-function/function-000.ring)
 
 #Globals:       0
 

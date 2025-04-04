@@ -1,4 +1,4 @@
-#Constants:       18
+#Constants:       17
  ├──     0: string(abcdefg)
  ├──     1: string(1234456)
  ├──     2: string(1)
@@ -16,7 +16,6 @@
  ├──    14: string(ab)
  ├──    15: string(ab == ab)
  ├──    16: string(ab != ab)
- ├──    17: string(./test/001-basic-type/string-003.ring)
 
 #Globals:       0
 

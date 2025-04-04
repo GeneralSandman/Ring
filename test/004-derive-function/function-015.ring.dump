@@ -1,4 +1,4 @@
-#Constants:       6
+#Constants:       5
  ├──     0: string(
 test case 1)
  ├──     1: string(
@@ -9,7 +9,6 @@ test case 3)
 test case 4)
  ├──     4: string(
 test case 5)
- ├──     5: string(./test/004-derive-function/function-015.ring)
 
 #Globals:       0
 

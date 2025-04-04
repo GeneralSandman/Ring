@@ -1,4 +1,4 @@
-#Constants:       50
+#Constants:       49
  ├──     0: string(a)
  ├──     1: string(a)
  ├──     2: string(test pass)
@@ -48,7 +48,6 @@
  ├──    46: string(b)
  ├──    47: string(test pass)
  ├──    48: string(test failed)
- ├──    49: string(./test/001-basic-type/string-002.ring)
 
 #Globals:       0
 
