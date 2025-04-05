@@ -1260,10 +1260,24 @@ void generate_vmcode_from_assign_expression(Package_Executer* executer,
 
     // dp
     if (expression->type == ASSIGN_EXPRESSION_TYPE_MULTI_ASSIGN) {
-        for (unsigned int i = 0; i < operand_num; i++) {
-            unsigned int offset  = i + 1;
+        unsigned operand_index = 0;
+        for (pos = expression->operand; pos; pos = pos->next, operand_index++) {
+            unsigned int offset  = operand_index + 1;
             unsigned int operand = (offset << 8) | offset;
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_DEEP_COPY, operand, expression->line_number);
+
+            RVM_Opcode   opcode  = RVM_CODE_UNKNOW;
+            // assert(pos->convert_type_size == 1);
+            TypeSpecifier* type_specifier = pos->convert_type[0];
+            if (type_specifier->kind == RING_BASIC_TYPE_CLASS) {
+                opcode = RVM_CODE_DEEP_COPY_CLASS_OB;
+            } else if (type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
+                opcode = RVM_CODE_DEEP_COPY_ARRAY;
+            } else {
+                continue;
+            }
+
+
+            generate_vmcode(executer, opcode_buffer, opcode, operand, expression->line_number);
         }
     }
 

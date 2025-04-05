@@ -1147,7 +1147,8 @@ typedef enum {
 
     // duplicate
     RVM_CODE_SHALLOW_COPY,
-    RVM_CODE_DEEP_COPY,
+    RVM_CODE_DEEP_COPY_CLASS_OB,
+    RVM_CODE_DEEP_COPY_ARRAY,
 
     // func
     RVM_CODE_ARGUMENT_NUM,

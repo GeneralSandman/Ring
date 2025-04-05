@@ -680,9 +680,9 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_POP_STACK_ARRAY:
             caller_stack_offset = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             // This is shallow copy
-            // array_value         = STACK_GET_ARRAY_OFFSET(-1);
+            array_value = STACK_GET_ARRAY_OFFSET(-1);
             // This is deep copy
-            array_value = rvm_deep_copy_array(rvm, STACK_GET_ARRAY_OFFSET(-1));
+            // array_value = rvm_deep_copy_array(rvm, STACK_GET_ARRAY_OFFSET(-1));
             STACK_SET_ARRAY_INDEX(
                 VM_CUR_CO_CSB + caller_stack_offset,
                 array_value);
@@ -1996,29 +1996,32 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
-        case RVM_CODE_DEEP_COPY:
-            // TODO: 这里有个不足
-            // 就是 deep_copy 没有区分数据的类型,
-            // 所以说需要进入函数内部进行选择处理 deep_copy, 后续需要进行优化
+        case RVM_CODE_DEEP_COPY_CLASS_OB: {
             dst_offset = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             src_offset = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
+            assert(STACK_GET_TYPE_OFFSET(-src_offset) == RVM_VALUE_TYPE_CLASS_OB);
 
-            if (STACK_GET_TYPE_OFFSET(-src_offset) == RVM_VALUE_TYPE_CLASS_OB) {
-                RVM_ClassObject* src_class_object = STACK_GET_CLASS_OB_OFFSET(-src_offset);
-                RVM_ClassObject* dst_class_object = nullptr;
-                dst_class_object                  = rvm_deep_copy_class_ob(rvm, src_class_object);
-                STACK_SET_CLASS_OB_OFFSET(-dst_offset, dst_class_object);
-            } else if (STACK_GET_TYPE_OFFSET(-src_offset) == RVM_VALUE_TYPE_ARRAY) {
-                RVM_Array* src_array = STACK_GET_ARRAY_OFFSET(-src_offset);
-                RVM_Array* dst_array = nullptr;
-                dst_array            = rvm_deep_copy_array(rvm, src_array);
-                STACK_SET_ARRAY_OFFSET(-dst_offset, dst_array);
-            }
+            RVM_ClassObject* src_class_ob = STACK_GET_CLASS_OB_OFFSET(-src_offset);
+            RVM_ClassObject* dst_class_ob = rvm_deep_copy_class_ob(rvm, src_class_ob);
+            STACK_SET_CLASS_OB_OFFSET(-dst_offset, dst_class_ob);
 
             if (dst_offset == 0)
                 VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
-            break;
+        } break;
+        case RVM_CODE_DEEP_COPY_ARRAY: {
+            dst_offset = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            src_offset = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
+            assert(STACK_GET_TYPE_OFFSET(-src_offset) == RVM_VALUE_TYPE_ARRAY);
+
+            RVM_Array* src_array = STACK_GET_ARRAY_OFFSET(-src_offset);
+            RVM_Array* dst_array = rvm_deep_copy_array(rvm, src_array);
+            STACK_SET_ARRAY_OFFSET(-dst_offset, dst_array);
+
+            if (dst_offset == 0)
+                VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 3;
+        } break;
 
 
         // func

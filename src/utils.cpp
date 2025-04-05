@@ -1159,7 +1159,7 @@ std::string format_rvm_type_specifier(Package_Executer*  package_executer,
         case RING_BASIC_TYPE_DOUBLE: str = "double"; break;
         case RING_BASIC_TYPE_STRING: str = "string"; break;
         case RING_BASIC_TYPE_CLASS:
-            rvm_class_definition = &(package_executer->class_list[type_specifier->u.class_def_index]);
+            rvm_class_definition = &(package_executer->class_list[type_specifier->u.array_t->sub->u.class_def_index]);
             str                  = std::string(rvm_class_definition->identifier);
             break;
         default: str = ".unknow"; break;
