@@ -90,13 +90,13 @@ Usetime  = 1S
    2. 全局变量的类型是基础类型 bool/int/int64/double/string
    3. 全局变量的类型是类      class
    4. 支持多个变量在一行内定义+初始化
-   5. TODO:  多维数组（基础类型+类） (Path: ./test/011-global-variable/def-and-init-array-*) ✅
+   5. 多维数组（基础类型+类） (Path: ./test/011-global-variable/def-and-init-array-*) ✅
 4. 局部变量
    1. 变量的定义+初始化 (Path: ./test/012-local-variable/def-and-init-*)
    2. 全局变量的类型是基础类型 bool/int/int64/double/string
    3. 全局变量的类型是类      class
    4. 支持多个变量在一行内定义+初始化
-   5. TODO:  多维数组（基础类型+类）  (Path: ./test/012-local-variable/def-and-init-array-*) ✅
+   5. 多维数组（基础类型+类）  (Path: ./test/012-local-variable/def-and-init-array-*) ✅
 5. 数组的 new
    1. 数组常量 作为函数参数
    2. 数组常量 作为函数返回值
@@ -104,7 +104,7 @@ Usetime  = 1S
    4. 数组常量 赋值给 局部变量
    5. 需要覆盖基础类型： bool[]/int[]/int64[]/double[]/string[]
    6. 需要覆盖类：      class[]
-   7. TODO:  多维数组（基础类型+类）
+   7. 多维数组（基础类型+类）
 
 
 
@@ -721,19 +721,6 @@ fmt::println(reflect::typeof(local_func_var0)); // nil-closure
 
 1. 如果一个 变量没有分配内存，array/closure，typeof 也能获取到对应的值
 
-### G. Proposal: 丰富标准库 TODO:
-
-string 要支持切片
-string_value[a:b];
-
-array 要支持切片
-array_value[a:b];
-
-切片返回新的数组/string
-
-strings 相关的标准库, 
-fmt 相关的标准库
-
 -----------------------------
 
 
@@ -757,19 +744,6 @@ closure function build-function 他们名字相同时，允许覆盖么，
 
 比如说 build-function append, 如果用户自定义了一个 append函数，他们是如何影响的
 
-
-
-### D. Proposal: 支持typedef 定义类型别名 TODO:
-
-当前只支持 typedef fn() FuncType;
-
-后续还要支持，基础类型和嵌套类型别名
-```
-typedef int intType1;
-typedef intType1 intType2;
-
-typedef string  JobID:
-```
 
 
 
@@ -898,7 +872,7 @@ e.g.
 3. 在Assignment阶段，生成对应的assign字节码，同时这个阶段方便的对 赋值语句的左值和右值进行语义检查，检查类型是否匹配。
 
 
-### E. Proposal: 关于ring的保留字 TODO:
+### E. Proposal: 关于ring的保留字
 
 #### 1. class 中的 field/method 是否应该改为 var/fn
 
@@ -973,7 +947,6 @@ func_ = fn() {
 ```
 
 
-#### 3. class定义的方式是不是应该简化一下，目前过于繁琐了
 
 ### F. 关于多项赋值
 
@@ -986,9 +959,6 @@ var int global_int_value_1, global_int_value_2 = get_next_global_count(), get_ne
 
 
 
-
-
-### H. Proposal: 协程在launch的时候就应该运行 TODO:
 
 
 ### L. Proposal: ring dump  ✅ 
@@ -1006,20 +976,7 @@ var int global_int_value_1, global_int_value_2 = get_next_global_count(), get_ne
 - 详细模式下，对于 invoke_func , 能够展示函数名称，这样能提高调试效率
 
 
-### M. Fix: TODO:
 
-
-目前，下面的这行代码应该不会编译报错的
-
-
-```ring
-
-var int a = 1;
-
-b = 3;
-
-var int b = 2;
-```
 
 -----------------------------
 
@@ -1255,22 +1212,8 @@ Circle::new() 是一个关联函数,用于创建新的 Circle 实例。circle.ar
 
 
 
-### D. 支持解析 16进制常量 TODO:
-
-
-### E. 支持通过debug模式展示语法树，语法树的展示可以尽量简单，但是一定要有区分度，能够展示层级关系 TODO:
-
-
-
 ### F. 一个package中 import-package的名称/enum的名称/class的名称/函数的名称  均不能相同，不然语义分析会产生错误，后续可以考虑优化
 
-
-### G. 考虑一下类型推导 TODO:
-
-
-### H. 枚举需要在语法上支持 TODO:
-
-### G. 枚举需要在语义上支持 TODO:
 
 
 ### I. 实现 std io/os/time/math package ✅
@@ -1353,40 +1296,7 @@ Fix: 需要在语义分析的时候检查，std package lib
 
 
 
-### N. Fix: 这里有个重大bug
 
-
-```ring
-
-package main
-
-import {
-    fmt;
-    debug;
-    vm;
-    os;
-    io;
-}
-
-
-typedef class File {
-    field int fd;
-}
-
-fn main() {
-    var int fileid = io::open("/Users/zhenhuli/Desktop/Ring/test/065-std-package-io/000.ring", "");
-
-    // var string content = io::read_all(fileid);  // FIXME: 这样写存在bug, 会调用两次
-
-    var string content;
-    content = io::read_all(fileid);
-
-    fmt::println_string(content);
-
-    io::close(fileid);
-}
-
-```
 
 
 var string content 初始化会调用两次, 需要修正.
@@ -1970,9 +1880,6 @@ ring 需要做一下限制
 
 
 ### N. 调研/涉及 switch/match 语法
-
-
-### K. TODO: 调研 enum/const 如何实现。
 
 
 ### Z. 调用 rust 元组tuple的语法逻辑
@@ -2796,10 +2703,6 @@ new_array_literal_bool 这个操作码 应该是在函数内部, 还是在函数
 ### D. ring dump 中, 格式化 可变参数类型不正确 ✅ 
 
 
-### E 多维数组 + 可变参数类型, 类型的多维展开  TODO:
-
-
-
 
 
 -----------------------------
@@ -2904,15 +2807,6 @@ TODO: 关于展开
 在这里, 多次取到一个名字叫做展开, 就是指 函数调用表达式后边还有别的表达式, 不能继续展开. 如何只是一个单独的表达式, 他自己是可以自己展开的
 如何使用一种通用的方法去描述这种 能够展开的情况
 
-### G. 关于 ring 语义分析 中, 强制检查变量的类型
-
-TODO: 关于类型的比较
-1. 基础类型的比较只需要比 TypeSpecifier.kind 即可
-2. 对于 数组 类型的比较 (比较数组的维度, 和数组元素的类型 )
-3. 对于 类   类型的比较 (类应该有一个全局的标识符, 这个标识符用来 作为 class的 unique-id, 如 package+class-identifier )
-4. 对于函数有多项返回值的情况, 还需要处理是否能够展开
-5. 还要考虑 函数调用中 any类型 和 可变参数类型
-6. 当前, 函数还不能作为变量进行传递, 所以暂时先不考虑 函数类型的比较, 函数如何区分 unique-id.
 
 
 
@@ -2944,7 +2838,7 @@ TODO: 关于类型的比较
 
 
 
-1. FIXME: Break set 还有个bug, 如果某行为注释或者空行, breakpoint 可能不会生效, 验证测试下
+1. TODO: Break set 还有个bug, 如果某行为注释或者空行, breakpoint 可能不会生效, 验证测试下
 2. cont 命令 是不是 跟 step命令一块放在一起比较好
 
 
@@ -3172,7 +3066,7 @@ method printInfo() {
 }
 ```
 
-FIXME: 这样写是会崩溃的, 因为本来没返回值, 这里却返回了, 需要强制检查返回值.
+TODO: 这样写是会崩溃的, 因为本来没返回值, 这里却返回了, 需要强制检查返回值.
 
 
 ### D. 多项赋值 的深度 copy, 通过 RVM_CODE_DEEP_COPY 解决这个问题 ✅ 
@@ -3181,7 +3075,7 @@ FIXME: 这样写是会崩溃的, 因为本来没返回值, 这里却返回了, �
 
 ```
 for(i = 0; i<5; i++) {
-    // FIXME: 这样写是有bug, 
+    // TODO: 这样写是有bug, 
     global_job_array_0[i], global_job_array_0[9-i] = global_job_array_0[9-i], global_job_array_0[i];
 }
 ```
@@ -3286,17 +3180,13 @@ class有4级嵌套
 rdb命令:
 
 1. global: 打印全局变量
-2. global <variable>: 打印全局变量 //TODO: 后续支持, 
-3. local: 打印局部变量
-4. local <variable>: 打印局部变量 //TODO: 后续支持, 
-5. cont/c: 继续执行, 直到遇到一个break-points
-6. bt: 打印堆栈
-7. clear: 清屏
-8. quit/q: 退出 ctrl-c
-9. code list: 打印当前行代码, 当前位置前后12行代码
-10. step-over step-into step-out
-12. until <line-number>: 则继续执行直至行号大于或等于 line-number
-13. step opcode: 一次执行一个ring虚拟机字节码 //TODO: 后续支持,
+2. local: 打印局部变量
+1. cont/c: 继续执行, 直到遇到一个break-points
+2. bt: 打印堆栈
+3. clear: 清屏
+4. quit/q: 退出 ctrl-c
+5. code list: 打印当前行代码, 当前位置前后12行代码
+6.  step-over step-into step-out
 
 断点命令相关:
 1. break set   <line-number>  放置断点, 会获得一个breakpointID
@@ -3622,7 +3512,7 @@ job_1 = Job1{
 
 ### F. 测试 字符串比较的时候, 要转化成 ne_string ✅ 
 
-FIXME:
+TODO:
 
 ```ring
 
@@ -3728,7 +3618,7 @@ int[,,]{
 3. 多维数组常量  ✅ 
 
 
-4. 当然这个也可以是个嵌套的，所以说通过单纯的语法分析是远远不够的，还需要语义分析 TODO:测试
+4. 当然这个也可以是个嵌套的，所以说通过单纯的语法分析是远远不够的，还需要语义分析
 
 ```
 array_0 = int[]{1,2,3}
@@ -3814,7 +3704,7 @@ Job[,,]{
 
 ```
 
-4. TODO: 当然，这个也可以是个嵌套的，也可以这样，所以说通过单纯的语法分析是远远不够的，还需要语义分析
+4. 当然，这个也可以是个嵌套的，也可以这样，所以说通过单纯的语法分析是远远不够的，还需要语义分析
 
 ```ring
 
@@ -3972,7 +3862,6 @@ func main() {
 ### *A. 重构vm 中 string class-object array* ✅ 
 
 
-TODO: 重构之后，heap_size要重新验证， gc要重新验证
 
 
 ### B. class 中支持存放array ✅ 
@@ -3989,7 +3878,6 @@ double[]
 string[]
 class[]
 
-TODO: field支持多维数组
 
 
 ### C. 所有的没有处理的错误报错，都要添加上 ring_error_report ✅ 
@@ -4040,7 +3928,6 @@ TODO: field支持多维数组
 
 多维数组 为 bool/int/double/string的时候，没有问题 ✅ 
 
-FIXME: 当class-object的多维数组的时候，就有点问题了。
 
 
 2. ring dump 多维数组

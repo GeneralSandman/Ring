@@ -141,7 +141,6 @@ body: proto 的基本格式
 
 介绍Lua虚拟机指令集和指令编码格式, 对指令进行解码.
 
-TODO: 这里还没通过代码实现
 
 
 #### 3. 第四章 至 第六章
@@ -155,7 +154,6 @@ TODO: 这里还没通过代码实现
 
 介绍 表, 函数调用, Closure&Upvalue, 元编程, 迭代器, 异常和错误处理
 
-TODO: Closure&Upvalue
 
 
 ## QuickJS
