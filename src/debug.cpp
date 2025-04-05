@@ -513,7 +513,7 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
                        break_points.size(),
                        breakpoint_line);
 
-                // TODO:
+                // TODO: 展示更多的信息
                 RVM_BreakPoint breakpoint = RVM_BreakPoint{
                     .package     = nullptr,
                     .file_name   = nullptr,

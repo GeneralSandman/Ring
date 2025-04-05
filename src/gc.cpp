@@ -182,7 +182,7 @@ void gc_mark_class_ob(RVM_ClassObject* class_ob) {
     }
 }
 
-// FIXME: 这里需要重新审视
+// TODO: 这里需要重新审视
 void gc_mark_array(RVM_Array* array) {
     array->gc_mark = GC_MARK_COLOR_BLACK;
 
@@ -765,6 +765,9 @@ unsigned int rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array) {
     default: break;
     }
 
+    // 释放元信息
+    mem_free(rvm->data_pool, array, sizeof(RVM_Array));
+
     return free_size;
 }
 
@@ -971,7 +974,7 @@ unsigned int rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_
     unsigned int free_meta_size = 0;
     unsigned int free_data_size = 0;
 
-    // FIXME: 释放 string class array
+    // TODO: 释放 string class array
     for (unsigned int field_index = 0; field_index < class_ob->field_count; field_index++) {
         switch (class_ob->field_list[field_index].type) {
         case RVM_VALUE_TYPE_BOOL:
@@ -992,6 +995,7 @@ unsigned int rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_
             // string 自己控制生命周期
             break;
         case RVM_VALUE_TYPE_CLASS_OB:
+            // TODO: 不要递归向下释放
             free_data_size += rvm_free_class_ob(rvm, class_ob->field_list[field_index].u.class_ob_value);
             break;
         case RVM_VALUE_TYPE_ARRAY:
@@ -1014,6 +1018,7 @@ unsigned int rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_
                  class_ob->field_list,
                  free_meta_size);
     }
+    // 释放元信息
     mem_free(rvm->data_pool, class_ob, sizeof(RVM_ClassObject));
     return free_data_size;
 }
@@ -1050,7 +1055,7 @@ void rvm_fill_closure(Ring_VirtualMachine* rvm,
     unsigned int alloc_data_size = 0;
 
     alloc_data_size += closure->free_value_size
-        * sizeof(RVM_FreeValue); // 自由变量空间 FIXME:
+        * sizeof(RVM_FreeValue); // 自由变量空间 TODO:
 
     rvm_heap_alloc_size_incr(rvm, alloc_data_size);
     debug_rvm_heap_alloc_with_green("rvm_fill_closure alloc_size:%u   [heap_size:%lld]",
@@ -1075,13 +1080,13 @@ unsigned int rvm_free_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure) {
              closure->free_value_list,
              closure->free_value_size * sizeof(RVM_FreeValue));
 
-    // 元信息
+    // 释放元信息
     mem_free(rvm->data_pool, closure, sizeof(RVM_Closure));
 
     unsigned int free_data_size = 0;
     free_data_size += 8; // 释放元信息
     free_data_size += closure->free_value_size
-        * sizeof(RVM_FreeValue); // 自由变量空间 FIXME:
+        * sizeof(RVM_FreeValue); // 自由变量空间 TODO:
 
     return free_data_size;
 }

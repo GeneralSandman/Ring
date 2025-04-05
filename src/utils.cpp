@@ -1488,7 +1488,6 @@ std::string formate_closure_type(Package_Executer* package_executer,
  *
  * 深度比较两个 TypeSpecifier
  * 后续需要添加一个参数：用来判断是否 any 类型
- * TODO: 如何比较类
  */
 bool comp_type_specifier(TypeSpecifier* a, TypeSpecifier* b) {
     if (a == nullptr && b == nullptr) {
@@ -1507,7 +1506,10 @@ bool comp_type_specifier(TypeSpecifier* a, TypeSpecifier* b) {
     }
 
     if (a->kind == RING_BASIC_TYPE_CLASS) {
-        // TODO: class 如何比较
+        // TODO:
+        // 如何比较类的类型
+        //       在不同的package下
+        //       在相同的package下
         return true;
     } else if (a->kind == RING_BASIC_TYPE_ARRAY) {
         Ring_DeriveType_Array* a_array_t = a->u.array_t;

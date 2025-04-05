@@ -233,7 +233,7 @@ int main(int argc, char** argv) {
      * 初始化语法处理节点相关的struct
      */
     CompilerEntry* compiler_entry = compiler_entry_create();
-    // FIXME: 目前main package 只能有一个源文件
+    // TODO: 目前main package 只能有一个源文件
     // main package 源文件即为 ring run 指定的输入文件
     Package* main_package = package_create_input_file(compiler_entry,
                                                       (char*)"main",

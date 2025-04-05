@@ -196,7 +196,6 @@ void* mem_realloc(MemPool* pool, void* ptr, size_t old_size, size_t new_size) {
     return new_ptr;
 }
 
-// FIXME: 这里的逻辑不对, 内存泄漏
 void mem_free(MemPool* pool, void* ptr, size_t size) {
     if (pool == NULL_MEM_POOL) {
         free(ptr);

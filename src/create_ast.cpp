@@ -22,8 +22,7 @@ Statement* statement_list_add_item(Statement* statement_list, Statement* stateme
     debug_ast_info_with_yellow("statement->type:%d", statement->type);
 
     Statement* pos = statement_list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = statement;
     return statement_list;
 }
@@ -320,7 +319,7 @@ Expression* create_expression_literal(ExpressionType type, char* literal_interfa
             expression->type            = EXPRESSION_TYPE_LITERAL_INT64;
             expression->u.int64_literal = (unsigned long long)int64_value;
         } else {
-            // FIXME:
+            // TODO:
             // ring error report 数据类型溢出
             // 这里还有一个棘手的问题需要处理一下
             // 2147483648 会溢出 但是 -2147483648 不会溢出, 所以针对 负号 还要做更加细致的语义检查
@@ -447,8 +446,7 @@ FieldInitExpression* field_init_list_add_item(FieldInitExpression* list,
                                               FieldInitExpression* item) {
 
     FieldInitExpression* pos = list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = item;
     return list;
 }
@@ -546,16 +544,14 @@ Expression* expression_list_add_item(Expression* expression_list, Expression* ex
     }
 
     Expression* pos = expression_list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = expression;
     return expression_list;
 }
 
 ArgumentList* argument_list_add_item(ArgumentList* argument_list, ArgumentList* argument) {
     ArgumentList* pos = argument_list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = argument;
     return argument_list;
 }
@@ -586,8 +582,7 @@ Identifier* create_identifier(IdentifierType type, char* name) {
 
 Identifier* identifier_list_add_item(Identifier* identifier_list, Identifier* identifier) {
     Identifier* pos = identifier_list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = identifier;
     return identifier_list;
 }
@@ -605,8 +600,7 @@ FunctionReturnList* function_return_list_add_item(FunctionReturnList* return_lis
                                                   TypeSpecifier*      type_specifier) {
 
     FunctionReturnList* pos = return_list;
-    for (; pos->next != nullptr; pos = pos->next)
-        ;
+    for (; pos->next != nullptr; pos = pos->next);
     pos->next = create_function_return_list(type_specifier);
     return return_list;
 }
@@ -660,7 +654,7 @@ FunctionTuple* create_function_tuple(Location*           location,
     FunctionTuple* function_tup       = (FunctionTuple*)mem_alloc(get_front_mem_pool(), sizeof(FunctionTuple));
     function_tup->source_file         = package_unit_get_file_name();
     function_tup->start_line_number   = location->line_number;
-    function_tup->end_line_number     = package_unit_get_line_number(); // FIXME: 如何记录结束行
+    function_tup->end_line_number     = package_unit_get_line_number();
     function_tup->ring_file_stat      = get_package_unit()->ring_file_stat;
 
     function_tup->parameter_list_size = parameter_list_size;
@@ -1324,7 +1318,7 @@ TypeAlias* add_type_alias_func(Parameter*          parameter_list,
     return type_alias;
 }
 
-// FIXME: 这里没有深度copy
+// TODO: 这里没有深度copy
 Ring_DeriveType_Func* create_derive_type_func(Parameter*          parameter_list,
                                               FunctionReturnList* return_list) {
 
@@ -1615,7 +1609,7 @@ EnumItemDeclaration* create_enum_item_declaration(char* identifier) {
     EnumItemDeclaration* enum_item_decl = (EnumItemDeclaration*)mem_alloc(get_front_mem_pool(), sizeof(EnumItemDeclaration));
     enum_item_decl->line_number         = package_unit_get_line_number();
     enum_item_decl->index_of_enum       = 0;       // UPDATED_BY_FIX_AST
-    enum_item_decl->type_specifier      = nullptr; // FIXME:
+    enum_item_decl->type_specifier      = nullptr; // TODO:
     enum_item_decl->identifier          = identifier;
     enum_item_decl->next                = nullptr;
 
@@ -1772,7 +1766,7 @@ FieldMember* create_class_member_field(TypeSpecifier* type_specifier,
 
     debug_ast_info_with_yellow("\t");
 
-    // FIXME: 该判断需要再 fix_ast中调整
+    // TODO: 该判断需要再 fix_ast中调整
     // 当前field 的类型只能是 bool int double string
     // Ring-Compiler-Error-Report
     // if (type_specifier->kind == RING_BASIC_TYPE_ANY

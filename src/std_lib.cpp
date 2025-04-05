@@ -228,7 +228,7 @@ RVM_Value std_lib_os_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
 
     RVM_String* str = args[0].u.string_value;
 
-    // FIXME:
+    // TODO: 写法丑陋，需要后续抽象
     str->data[str->length] = '\0';
     remove(str->data);
 
@@ -258,7 +258,7 @@ RVM_Value std_lib_os_getenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
     RVM_String* str = args[0].u.string_value;
-    // FIXME:
+    // TODO: 写法丑陋，需要后续抽象
     str->data[str->length] = '\0';
 
     char* res              = getenv(str->data);
@@ -401,7 +401,7 @@ RVM_Value std_lib_io_read_all(Ring_VirtualMachine* rvm, unsigned int arg_count, 
         memset(buffer, 0, 1024);
     }
 
-    // FIXME:  这里写的实在是太丑了
+    // TODO: 写法丑陋，需要后续抽象
     RVM_String* str_val = rvm_gc_new_string_meta(rvm);
     rvm_fill_string(rvm, str_val, ROUND_UP8(result.size()));
 
@@ -469,7 +469,7 @@ RVM_Value std_lib_io_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
 
     RVM_String* str = args[0].u.string_value;
 
-    // FIXME:
+    // TODO: 写法丑陋，需要后续抽象
     str->data[str->length] = '\0';
     remove(str->data);
 
@@ -727,7 +727,7 @@ RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, R
     assert(arg_count >= 1);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
-    // FIXME: 这里先留一个坑吧, 先使用 std::string
+    // TODO: 这里先留一个坑吧, 先使用 std::string
     // 不太合规, 后续统一优化
     std::string  result;
 
@@ -788,12 +788,12 @@ RVM_Value std_lib_fmt_sprintf(Ring_VirtualMachine* rvm, unsigned int arg_count, 
     assert(arg_count >= 1);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
-    // FIXME: 这里先留一个坑吧, 先使用 std::string
+    // TODO: 这里先留一个坑吧, 先使用 std::string
     // 不太合规, 后续统一优化
     std::string result;
 
 
-    // FIXME: 这里和 printf 代码重复了, 后续优化
+    // TODO: 这里和 printf 代码重复了, 后续优化
     unsigned int format_index  = 0;
     unsigned int format_length = args[0].u.string_value->length;
     unsigned int args_index    = 1;

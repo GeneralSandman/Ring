@@ -211,7 +211,7 @@ void package_compile(Package* package) {
 
         // package unit 编译完成之后
         // package_unit->line_offset_map 以成功更新
-        // FIXME: 这里直接copy过去, 实现的不太好
+        // TODO: 这里直接copy过去, 实现的不太好, 需要后续优化
         // 应该动态更新 file_stat
         package_unit->ring_file_stat->line_offset_map = package_unit->line_offset_map;
     }

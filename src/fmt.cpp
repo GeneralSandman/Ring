@@ -213,7 +213,6 @@ std::string var_dump_string(RVM_String* string_value) {
     return res;
 }
 
-// TODO: 缩进展示
 std::string var_dump_class(Package_Executer* package_executer,
                            RVM_ClassObject*  class_object,
                            unsigned int      indent) {

@@ -2707,10 +2707,6 @@ struct MemBlock {
             LOG_COLOR_RED, __FILE__, __LINE__, ##__VA_ARGS__, LOG_COLOR_CLEAR); \
     exit(1);
 
-// TODO: 在虚拟机执行字节码的过程中，判断内部指针的合法性
-// 如果不合法的话，在开启Debug的时候，应该抛出堆栈信息，便于定位
-// #define vm_assert()
-
 
 #define DEBUG_RVM_INTERACTIVE_STDOUT_FILE "/tmp/ring-debug-vm.stdout.log"
 

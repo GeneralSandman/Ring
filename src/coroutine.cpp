@@ -21,8 +21,13 @@ static CO_ID get_next_coroutine_id() {
 }
 
 
-// FIXME: 这里写的不太好，rvm->executer 有可能还是 nullptr，需要确定初始化时机
-// TODO: 这里应该 拆分成 create 和 launch 两个函数，类似于  launch 和 resume 函数
+/*
+ * launch_root_coroutine
+ *
+ * TODO:
+ * 1. 这里写的不太好，rvm->executer 有可能还是 nullptr，需要确定初始化时机
+ * 2. 这里应该 拆分成 create 和 launch 两个函数，类似于  launch 和 resume 函数
+ */
 RingCoroutine* launch_root_coroutine(Ring_VirtualMachine* rvm) {
     RingCoroutine* co = (RingCoroutine*)mem_alloc(rvm->meta_pool, sizeof(RingCoroutine));
     co->co_id         = get_next_coroutine_id();

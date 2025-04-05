@@ -177,7 +177,7 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 RVM_RuntimeStack* new_runtime_stack() {
     RVM_RuntimeStack* stack = (RVM_RuntimeStack*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_RuntimeStack));
     stack->top_index        = 0;
-    stack->capacity         = 1024 * 1024; // FIXME: 先开辟一个大的空间
+    stack->capacity         = 1024 * 1024; // TODO: 先开辟一个大的空间
     stack->data             = (RVM_Value*)mem_alloc(NULL_MEM_POOL, stack->capacity * sizeof(RVM_Value));
     stack->size             = 0;
     return stack;
@@ -1528,16 +1528,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_PUSH_FIELD_BOOL:
             class_ob_value = STACK_GET_CLASS_OB_OFFSET(-1);
             field_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            // TODO:
-            // 在 Ring VM 崩溃的时候，应该抛出详细信息，方便编译器的开发者定位问题
-            // 是通过宏控制，还是通过ring 执行时命令行控制
-            // 通过 ring 执行时 注入环境变量比较优雅，
-            // Usage: RVM_COLL_ERR=true ./bin/ring run ./test/000.ring
-            // if (class_ob_value == nullptr) {
-            //     std::string tmp = format_rvm_call_stack(rvm);
-            //     printf("tmp:%s\n", tmp.c_str());
-            //     ring_exec_err_report("Runtime Stack:\n%s\n", tmp.c_str());
-            // }
             STACK_SET_BOOL_OFFSET(-1, class_ob_value->field_list[field_index].u.bool_value);
             VM_CUR_CO_PC += 3;
             break;
@@ -2432,7 +2422,7 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
         }
     }
 
-    // FIXME: 需要优化这种写法
+    // TODO: 需要优化这种写法
     // 需要重新绑定值
     if (callee_closure != nullptr) {
 
@@ -2481,7 +2471,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
                             RVM_Function* callee_function,
                             unsigned int  return_value_list_size) {
 
-    // FIXME:
+    // TODO:
     // 不应该直接操作 VM_CUR_CO_STACK_TOP_INDEX
     // 应该根据 VM_CUR_CO_STACK_TOP_INDEX 来进行操作
 
@@ -2634,8 +2624,8 @@ RVM_CallInfo* restore_callinfo(RVM_CallInfo** head_) {
  * 1. callee_class_object 是 callee_function的 所属对象
  *    用来区分是 method调用, 并 把 callee_class_object 初始化给 self 变量
  *
- * FIXME: 初始化局部变量列表的时候存在问题
- * FIXME: 如果局部变量是个数组
+ * TODO: 初始化局部变量列表的时候存在问题
+ * TODO: 如果局部变量是个数组
  */
 void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                                          RVM_ClassObject*     callee_object,
@@ -2930,8 +2920,7 @@ RVM_Array* rvm_new_array_literal_string(Ring_VirtualMachine* rvm, unsigned int s
                                                   dimension, dimension_list, dimension,
                                                   RVM_ARRAY_STRING, nullptr);
     for (unsigned int i = 0; i < size; i++) {
-        // shallow copy 有助于提升速度
-        // 这里没有错误
+        // this is shallow copy
         array->u.string_array[i] = STACK_GET_STRING_OFFSET(-size + i);
     }
 
@@ -2954,7 +2943,7 @@ RVM_Array* rvm_new_array_literal_class_object(Ring_VirtualMachine* rvm,
                                                   dimension, dimension_list, dimension,
                                                   RVM_ARRAY_CLASS_OBJECT, class_definition);
     for (unsigned int i = 0; i < size; i++) {
-        // TODO: shallow copy
+        // this is shallow copy
         array->u.class_ob_array[i] = STACK_GET_CLASS_OB_OFFSET(-size + i);
     }
 
@@ -2971,6 +2960,7 @@ RVM_Array* rvm_new_array_literal_closure(Ring_VirtualMachine* rvm,
                                                   dimension, dimension_list, dimension,
                                                   RVM_ARRAY_CLOSURE, nullptr);
     for (unsigned int i = 0; i < size; i++) {
+        // this is shallow copy
         array->u.closure_array[i] = STACK_GET_CLOSURE_OFFSET(-size + i);
     }
 
@@ -3004,7 +2994,7 @@ RVM_Array* rvm_new_array_literal_a(Ring_VirtualMachine* rvm,
 
 
 void rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Array* array, int* value) {
-    // FIXME: 这里unsigned int -> int
+    // TODO: 这里unsigned int -> int
     if (array == nullptr) {
         *value = 0;
         return;
@@ -3013,7 +3003,7 @@ void rvm_array_get_length(Ring_VirtualMachine* rvm, RVM_Array* array, int* value
 }
 
 void rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Array* array, int* value) {
-    // FIXME: 这里unsigned int -> int
+    // TODO: 这里unsigned int -> int
     if (array == nullptr) {
         *value = 0;
         return;
@@ -3022,12 +3012,12 @@ void rvm_array_get_capacity(Ring_VirtualMachine* rvm, RVM_Array* array, int* val
 }
 
 void rvm_string_get_length(Ring_VirtualMachine* rvm, RVM_String* string, int* value) {
-    // FIXME: 这里unsigned int -> int
+    // TODO: 这里unsigned int -> int
     *value = (int)string->length;
 }
 
 void rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_String* string, int* value) {
-    // FIXME: 这里unsigned int -> int
+    // TODO: 这里unsigned int -> int
     *value = (int)string->capacity;
 }
 
@@ -3042,7 +3032,7 @@ ErrorCode rvm_array_get_array(Ring_VirtualMachine* rvm, RVM_Array* array, int in
 }
 
 ErrorCode rvm_array_set_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array* value) {
-    // FIXME: deep or shallow copy
+    // this is shallow copy
     array->u.a_array[index] = value;
     return ERROR_CODE_SUCCESS;
 }
@@ -3142,9 +3132,7 @@ ErrorCode rvm_array_pop_double(Ring_VirtualMachine* rvm, RVM_Array* array, doubl
 
 ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_String** value) {
     RVM_String* src_string = array->u.string_array[index];
-
     RVM_String* dst_string = rvm_deep_copy_string(rvm, src_string);
-
     *value                 = dst_string;
     return ERROR_CODE_SUCCESS;
 }
@@ -3152,13 +3140,11 @@ ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Array* array, int i
 /*
  * deep copy `value` and set by `array`&`index`
  *
- * FIXME: 重新考虑一下, 可能存在内存泄漏
+ * TODO: 重新考虑一下, 可能存在内存泄漏
  */
 ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_String** value) {
     RVM_String* dst_string       = rvm_deep_copy_string(rvm, *value);
-
     array->u.string_array[index] = dst_string;
-
     return ERROR_CODE_SUCCESS;
 }
 
@@ -3172,7 +3158,7 @@ ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Array* array, RV
 
 ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_String** value) {
     RVM_String* dst_string = rvm_deep_copy_string(rvm, array->u.string_array[--array->length]);
-    *value                 = dst_string; // FIXME: 这里内存泄漏了
+    *value                 = dst_string; // TODO: 这里内存泄漏了
     return ERROR_CODE_SUCCESS;
 }
 
@@ -3245,7 +3231,7 @@ ErrorCode rvm_array_get_closure(Ring_VirtualMachine* rvm,
     RVM_Closure* dst_closure = nullptr;
 
     // dst_class_object = rvm_deep_copy_class_object(rvm, src_class_object);
-    // FIXME: deep 还是 shallow
+    // TODO: deep 还是 shallow
     dst_closure = src_closure;
 
     *value      = dst_closure;
@@ -3261,11 +3247,9 @@ ErrorCode rvm_array_set_closure(Ring_VirtualMachine* rvm,
                                 RVM_Closure**        value) {
 
     RVM_Closure* dst_closure = nullptr;
-    // FIXME: deep 还是 shallow
+    // this is shallow copy
     dst_closure                   = *value;
-
     array->u.closure_array[index] = dst_closure;
-
     return ERROR_CODE_SUCCESS;
 }
 
@@ -3276,7 +3260,7 @@ ErrorCode rvm_array_append_closure(Ring_VirtualMachine* rvm,
     if (array->length >= array->capacity) {
         rvm_array_growth(rvm, array);
     }
-    // FIXME: deep 还是 shallow
+    // this is shallow copy
     array->u.closure_array[array->length++] = *value;
     return ERROR_CODE_SUCCESS;
 }
@@ -3286,9 +3270,8 @@ ErrorCode rvm_array_pop_closure(Ring_VirtualMachine* rvm,
                                 RVM_Closure**        value) {
 
     RVM_Closure* src_closure = array->u.closure_array[--array->length];
-    // FIXME: deep 还是 shallow
+    // this is shallow copy
     RVM_Closure* dst_closure = src_closure;
-
     *value                   = dst_closure;
     return ERROR_CODE_SUCCESS;
 }
@@ -3402,7 +3385,7 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
                          RVM_Function* caller_function, RVM_Closure* caller_closure,
                          RVM_Function* callee_function) {
 
-    // FIXME: 需要分配在堆上
+    // TODO: 需要分配在堆上
     // free value 需要分配在堆上
     RVM_Closure* closure = rvm_gc_new_closure_meta(rvm);
     rvm_fill_closure(rvm, closure, callee_function);
@@ -3415,7 +3398,7 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
         // TODO: 当前只支持直接外围函数的局部变量 作为FreeValue
 
         if (callee_function->free_value_list[i].is_curr_local) {
-            // FIXME: 这里有问题  VM_CUR_CO_CSB 不正确
+            // TODO: 这里有问题  VM_CUR_CO_CSB 不正确
             unsigned int index                   = callee_function->free_value_list[i].u.curr_local_index;
 
             closure->free_value_list[i].is_recur = false;

@@ -812,7 +812,7 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
     // push array-object
     generate_vmcode_from_identifier_expression(executer, range_statement->operand->u.identifier_expression, opcode_buffer);
     // push array-iterator
-    // FIXME: 这里数组的数量收到限制了
+    // FIXME: 这里数组的数量受到了限制
     generate_vmcode(executer, opcode_buffer,
                     RVM_CODE_PUSH_INT_2BYTE, 0,
                     range_statement->operand->u.identifier_expression->line_number);

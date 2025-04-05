@@ -2720,7 +2720,7 @@ void fix_anonymous_func_expression(Expression*              expression,
 
     // 从函数定义中，创建一个 type_specifier , 用于 后续比对 type_specifier 是否一致
     // 类型为匿名函数的类型
-    // FIXME: 这里不应该每次都要创建，应该共享一份
+    // TODO: 这里不应该每次都要创建，应该共享一份
     Ring_DeriveType_Func* func_type      = create_derive_type_func(closure->parameter_list, closure->return_list);
 
     TypeSpecifier*        type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
