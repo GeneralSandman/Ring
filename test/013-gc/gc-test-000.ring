@@ -42,7 +42,7 @@ global {
 }
 
 fn main() {
-    test_funcvar_0();
+    test_assign_2();
     // runtime::gc();
 }
 
@@ -297,4 +297,45 @@ fn test_funcvar_array_0() {
 
     local_func_value_0[0]();
     local_func_value_0[1]();
+}
+
+
+// fn test_assign_0() {
+//     var int local_int_value_0;
+//     var int local_int_value_1;
+
+//     local_int_value_0, local_int_value_1 = 1, 2;
+
+//     fmt::println(local_int_value_0);
+//     fmt::println(local_int_value_1);
+// }
+
+fn test_assign_1() {
+    var int[] tmp;
+    var int[] local_int_array_0;
+    var int[] local_int_array_1;
+
+    tmp = new int[8];
+
+    // 触发 deep copy
+    local_int_array_0, local_int_array_1 = tmp, tmp;
+
+    // // 不会触发 deep copy
+    // local_int_array_0 = tmp;
+    // local_int_array_1 = tmp;
+
+    fmt::println_pointer(tmp);
+    fmt::println_pointer(local_int_array_0);
+    fmt::println_pointer(local_int_array_1);
+}
+
+fn test_assign_2() {
+    var int local_int_value_0;
+    var int local_int_value_1;
+
+    local_int_value_0, local_int_value_1 = 1, 2;
+    fmt::println(local_int_value_0, local_int_value_1);
+
+    local_int_value_0, local_int_value_1 = local_int_value_1, local_int_value_0;
+    fmt::println(local_int_value_0, local_int_value_1);
 }

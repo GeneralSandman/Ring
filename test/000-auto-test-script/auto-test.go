@@ -122,6 +122,7 @@ var (
 		"test/064-std-package-runtime/gc-array.ring",
 		"test/064-std-package-runtime/gc-array-string.ring",
 		"test/064-std-package-runtime/gc-class-002.ring",
+		"test/064-std-package-runtime/gc-string-000.ring",
 
 		// 临时测试文件
 		"test/013-gc/gc-test-000.ring",
