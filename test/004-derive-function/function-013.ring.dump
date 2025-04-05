@@ -1,4 +1,4 @@
-#Constants:       15
+#Constants:       14
  ├──     0: string(level 0)
  ├──     1: string(level 1)
  ├──     2: string(level 2)
@@ -12,8 +12,7 @@
  ├──    10: string(level 10)
  ├──    11: string(score invalid)
  ├──    12: string(=====)
- ├──    13: string(=====)
- ├──    14: string()
+ ├──    13: string()
 
 #Globals:       0
 
@@ -230,11 +229,11 @@ $main()    <./test/004-derive-function/function-013.ring:45,61>
  ├──21      argument_num                  1                                     
  ├──22      push_func                     1, 1                                  
  ├──23      invoke_func_native                                                  
- ├──24      push_string                   13                  56                
+ ├──24      push_string                   12                  56                
  ├──25      argument_num                  1                                     
  ├──26      push_func                     1, 4                                  
  ├──27      invoke_func_native                                                  
- ├──28      push_string                   14                  58                
+ ├──28      push_string                   13                  58                
  ├──29      argument_num                  1                                     
  ├──30      push_func                     1, 4                                  
  ├──31      invoke_func_native                                                  

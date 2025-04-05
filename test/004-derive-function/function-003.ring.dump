@@ -1,7 +1,5 @@
-#Constants:       3
+#Constants:       1
  ├──     0: string()
- ├──     1: string()
- ├──     2: string()
 
 #Globals:       1
  ├──var int              int_value_global    
@@ -121,7 +119,7 @@ $main()    <./test/004-derive-function/function-003.ring:34,60>
  ├──46      argument_num                  0                   47                
  ├──47      push_func                     9, 1                                  
  ├──48      invoke_func                                                         
- ├──49      push_string                   1                   48                
+ ├──49      push_string                   0                   48                
  ├──50      argument_num                  1                                     
  ├──51      push_func                     1, 4                                  
  ├──52      invoke_func_native                                                  
@@ -165,7 +163,7 @@ $main()    <./test/004-derive-function/function-003.ring:34,60>
  ├──90      argument_num                  1                                     
  ├──91      push_func                     0, 0                                  
  ├──92      invoke_func_native                                                  
- ├──93      push_string                   2                   58                
+ ├──93      push_string                   0                   58                
  ├──94      argument_num                  1                                     
  ├──95      push_func                     1, 4                                  
  ├──96      invoke_func_native                                                  
