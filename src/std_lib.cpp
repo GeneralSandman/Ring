@@ -836,7 +836,7 @@ RVM_Value std_lib_fmt_sprintf(Ring_VirtualMachine* rvm, unsigned int arg_count, 
 
     RVM_Value ret;
     ret.type           = RVM_VALUE_TYPE_STRING;
-    ret.u.string_value = string_literal_to_rvm_string(rvm, result.c_str());
+    ret.u.string_value = rvm_gc_new_rvm_string(rvm, result.c_str());
 
     return ret;
 }
@@ -911,7 +911,7 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
 
     RVM_Value ret;
     ret.type           = RVM_VALUE_TYPE_STRING;
-    ret.u.string_value = string_literal_to_rvm_string(rvm, str.c_str());
+    ret.u.string_value = rvm_gc_new_rvm_string(rvm, str.c_str());
 
     return ret;
 }

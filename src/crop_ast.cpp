@@ -256,9 +256,12 @@ void crop_binary_concat_expression(Expression*       expression,
     assert(left->next == nullptr);
     assert(right->next == nullptr);
 
-    if (left->type == EXPRESSION_TYPE_LITERAL_STRING && right->type == EXPRESSION_TYPE_LITERAL_STRING) {
+    // "a" .. "b" 直接优化成一个常量即可
+    if (left->type == EXPRESSION_TYPE_LITERAL_STRING
+        && right->type == EXPRESSION_TYPE_LITERAL_STRING) {
         expression->type                    = EXPRESSION_TYPE_LITERAL_STRING;
-        expression->u.string_literal        = get_string_constant_literal(left->u.string_literal, right->u.string_literal);
+        expression->u.string_literal        = get_string_constant_literal(left->u.string_literal,
+                                                                          right->u.string_literal);
 
         binary_expression->left_expression  = nullptr;
         binary_expression->right_expression = nullptr;

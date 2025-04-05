@@ -114,6 +114,7 @@ typedef struct ErrorReportContext           ErrorReportContext;
 typedef struct AttributeInfo                AttributeInfo;
 
 typedef struct RVM_ConstantPool             RVM_ConstantPool;
+typedef struct RVM_Constant                 RVM_Constant;
 typedef struct RVM_String                   RVM_String;
 typedef struct RVM_Array                    RVM_Array;
 typedef struct RVM_Closure                  RVM_Closure;
@@ -347,8 +348,7 @@ struct Package_Executer {
     unsigned int         package_index; // 在 ExecuterEntry 中的 index
     char*                package_name;
 
-    unsigned int         constant_pool_size;
-    RVM_ConstantPool*    constant_pool_list;
+    RVM_ConstantPool*    constant_pool;
 
     unsigned int         global_variable_size;
     RVM_Variable*        global_variable_list;
@@ -698,12 +698,20 @@ typedef enum {
 } ConstantPoolType;
 
 struct RVM_ConstantPool {
+    unsigned int  size;
+    RVM_Constant* list;
+
+    // 字符串常量需要去重
+    std::unordered_map<std::string, int> string_index_map;
+};
+
+struct RVM_Constant {
     ConstantPoolType type;
     union {
         int           int_value;
         long long     int64_value;
         double        double_value;
-        const char*   string_value;
+        RVM_String*   string_value; // 这里不能分配在 heap上
         RVM_Function* anonymous_func_value;
     } u;
 };
@@ -3275,9 +3283,6 @@ void                 init_derive_function_local_variable(Ring_VirtualMachine* rv
                                                          RVM_Function*        callee_function,
                                                          unsigned int         argument_list_size);
 
-RVM_String*          string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal);
-RVM_String*          concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b);
-
 
 RVM_Array*           rvm_new_array_literal_bool(Ring_VirtualMachine* rvm, unsigned int size);
 RVM_Array*           rvm_new_array_literal_int(Ring_VirtualMachine* rvm, unsigned int size);
@@ -3457,7 +3462,7 @@ void                     dump_vm_function(Package_Executer*    package_executer,
                                           RVM_Function*        function);
 void                     dump_vm_class(Package_Executer*    package_executer,
                                        RVM_ClassDefinition* class_definition);
-std::string              dump_vm_constant(RVM_ConstantPool* constant);
+std::string              dump_vm_constant(RVM_Constant* constant);
 
 unsigned int             get_source_line_number_by_pc(RVM_Function* function, unsigned int pc);
 
@@ -3538,28 +3543,33 @@ void     test_mem_pool();
  *
  */
 
-void             rvm_heap_alloc_size_incr(Ring_VirtualMachine* rvm, long long size);
-long long        rvm_heap_size(Ring_VirtualMachine* rvm);
-void             rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
-void             rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
+void        rvm_heap_alloc_size_incr(Ring_VirtualMachine* rvm, long long size);
+long long   rvm_heap_size(Ring_VirtualMachine* rvm);
+void        rvm_heap_list_add_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
+void        rvm_heap_list_remove_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
 
 
-void             gc_incremental(Ring_VirtualMachine* rvm);
-void             gc_make_sweep(Ring_VirtualMachine* rvm);
-void             gc_mark(Ring_VirtualMachine* rvm);
-void             gc_sweep(Ring_VirtualMachine* rvm);
+void        gc_incremental(Ring_VirtualMachine* rvm);
+void        gc_make_sweep(Ring_VirtualMachine* rvm);
+void        gc_mark(Ring_VirtualMachine* rvm);
+void        gc_sweep(Ring_VirtualMachine* rvm);
 
-void             gc_mark_rvm_value(RVM_Value* value);
-void             gc_mark_class_ob(RVM_ClassObject* class_ob);
-void             gc_mark_array(RVM_Array* array);
-void             gc_mark_closure(RVM_Closure* closure);
-void             gc_mark_free_value(RVM_FreeValue* free_value);
+void        gc_mark_rvm_value(RVM_Value* value);
+void        gc_mark_class_ob(RVM_ClassObject* class_ob);
+void        gc_mark_array(RVM_Array* array);
+void        gc_mark_closure(RVM_Closure* closure);
+void        gc_mark_free_value(RVM_FreeValue* free_value);
 
-void             rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
+void        rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
 
+RVM_String* new_string_meta();
+// 不分配在 heap上
+RVM_String*      string_literal_to_rvm_string(const char* string_literal);
+RVM_String*      rvm_gc_new_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal);
 RVM_String*      rvm_gc_new_string_meta(Ring_VirtualMachine* rvm);
 void             rvm_fill_string(Ring_VirtualMachine* rvm, RVM_String* string, unsigned int capacity);
 RVM_String*      rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src);
+RVM_String*      concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b);
 unsigned int     rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
 
 

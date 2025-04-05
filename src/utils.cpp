@@ -216,17 +216,17 @@ void ring_compiler_functions_dump(PackageUnit* package_unit) {
 
 void ring_vm_constantpool_dump(Package_Executer* executer) {
     printf(" ************  rvm constant pool  ****\n");
-    for (unsigned int i = 0; i < executer->constant_pool_size; i++) {
+    for (unsigned int i = 0; i < executer->constant_pool->size; i++) {
         printf("%10d | ", i);
-        switch (executer->constant_pool_list[i].type) {
+        switch (executer->constant_pool->list[i].type) {
         case CONSTANTPOOL_TYPE_INT:
-            printf("<int> %15d\n", executer->constant_pool_list[i].u.int_value);
+            printf("<int> %15d\n", executer->constant_pool->list[i].u.int_value);
             break;
         case CONSTANTPOOL_TYPE_DOUBLE:
-            printf("<double> %15f\n", executer->constant_pool_list[i].u.double_value);
+            printf("<double> %15f\n", executer->constant_pool->list[i].u.double_value);
             break;
         case CONSTANTPOOL_TYPE_STRING:
-            printf("<string> %15s\n", executer->constant_pool_list[i].u.string_value);
+            printf("<string> %15s\n", executer->constant_pool->list[i].u.string_value->data);
             break;
         default:
             fprintf(stderr, "error-----------");
@@ -726,7 +726,7 @@ void dump_vm_class(Package_Executer*    package_executer,
     printf("\n");
 }
 
-std::string dump_vm_constant(RVM_ConstantPool* constant) {
+std::string dump_vm_constant(RVM_Constant* constant) {
     std::string tmp;
 
     switch (constant->type) {
@@ -740,7 +740,7 @@ std::string dump_vm_constant(RVM_ConstantPool* constant) {
         return "double(" + std::to_string(constant->u.double_value) + ")";
         break;
     case CONSTANTPOOL_TYPE_STRING:
-        return "string(" + std::string(constant->u.string_value) + ")";
+        return "string(" + std::string(constant->u.string_value->data) + ")";
         break;
     case CONSTANTPOOL_TYPE_CLOSURE:
         tmp = sprintf_string("%p", (void*)constant->u.anonymous_func_value);

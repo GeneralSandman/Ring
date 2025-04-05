@@ -12,12 +12,16 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 Package_Executer* package_executer_create(ExecuterEntry* executer_entry,
                                           char*          package_name) {
 
+    RVM_ConstantPool* constant_pool           = (RVM_ConstantPool*)mem_alloc(NULL_MEM_POOL,
+                                                                             sizeof(RVM_ConstantPool));
+    constant_pool->size                       = 0;
+    constant_pool->list                       = nullptr;
+    constant_pool->string_index_map           = std::unordered_map<std::string, int>{};
     Package_Executer* executer                = (Package_Executer*)mem_alloc(NULL_MEM_POOL, sizeof(Package_Executer));
     executer->executer_entry                  = executer_entry;
     executer->package_index                   = -1;
     executer->package_name                    = package_name;
-    executer->constant_pool_size              = 0;
-    executer->constant_pool_list              = nullptr;
+    executer->constant_pool                   = constant_pool;
     executer->global_variable_size            = 0;
     executer->global_variable_list            = nullptr;
     executer->function_size                   = 0;
@@ -53,11 +57,11 @@ void print_package_executer(Package_Executer* package_executer) {
 void package_executer_dump(Package_Executer* package_executer) {
 
     // 1. dump constant
-    printf("#Constants:       %d\n", package_executer->constant_pool_size);
-    for (unsigned int i = 0; i < package_executer->constant_pool_size; i++) {
+    printf("#Constants:       %d\n", package_executer->constant_pool->size);
+    for (unsigned int i = 0; i < package_executer->constant_pool->size; i++) {
         printf(" ├──%6d: %s\n",
                i,
-               dump_vm_constant(&(package_executer->constant_pool_list[i])).c_str());
+               dump_vm_constant(&(package_executer->constant_pool->list[i])).c_str());
     }
     printf("\n");
 
@@ -80,9 +84,9 @@ void package_executer_dump(Package_Executer* package_executer) {
     }
 
     // 4. dump const closure
-    for (unsigned int i = 0; i < package_executer->constant_pool_size; i++) {
-        if (package_executer->constant_pool_list[i].type == CONSTANTPOOL_TYPE_CLOSURE) {
-            dump_vm_function(package_executer, nullptr, (RVM_Function*)(package_executer->constant_pool_list[i].u.anonymous_func_value));
+    for (unsigned int i = 0; i < package_executer->constant_pool->size; i++) {
+        if (package_executer->constant_pool->list[i].type == CONSTANTPOOL_TYPE_CLOSURE) {
+            dump_vm_function(package_executer, nullptr, (RVM_Function*)(package_executer->constant_pool->list[i].u.anonymous_func_value));
         }
     }
 
@@ -2579,17 +2583,17 @@ void generate_vmcode(Package_Executer* executer,
 
 int constant_pool_grow(Package_Executer* executer, unsigned int growth_size) {
     debug_generate_info_with_darkgreen("\t");
-    int    old_size       = executer->constant_pool_size;
+    int    old_size       = executer->constant_pool->size;
 
-    size_t old_alloc_size = executer->constant_pool_size * sizeof(RVM_ConstantPool);
-    executer->constant_pool_size += growth_size;
-    size_t new_alloc_size        = executer->constant_pool_size * sizeof(RVM_ConstantPool);
+    size_t old_alloc_size = executer->constant_pool->size * sizeof(RVM_Constant);
+    executer->constant_pool->size += growth_size;
+    size_t new_alloc_size         = executer->constant_pool->size * sizeof(RVM_Constant);
 
 
-    executer->constant_pool_list = (RVM_ConstantPool*)mem_realloc(NULL_MEM_POOL,
-                                                                  executer->constant_pool_list,
-                                                                  old_alloc_size,
-                                                                  new_alloc_size);
+    executer->constant_pool->list = (RVM_Constant*)mem_realloc(NULL_MEM_POOL,
+                                                               executer->constant_pool->list,
+                                                               old_alloc_size,
+                                                               new_alloc_size);
 
     return old_size;
 }
@@ -2597,45 +2601,63 @@ int constant_pool_grow(Package_Executer* executer, unsigned int growth_size) {
 int constant_pool_add_int(Package_Executer* executer, int int_literal) {
     debug_generate_info_with_darkgreen("\t");
 
-    int index                                       = constant_pool_grow(executer, 1);
-    executer->constant_pool_list[index].type        = CONSTANTPOOL_TYPE_INT;
-    executer->constant_pool_list[index].u.int_value = int_literal;
+    int index                                        = constant_pool_grow(executer, 1);
+    executer->constant_pool->list[index].type        = CONSTANTPOOL_TYPE_INT;
+    executer->constant_pool->list[index].u.int_value = int_literal;
     return index;
 }
 
 int constant_pool_add_int64(Package_Executer* executer, long long int64_literal) {
     debug_generate_info_with_darkgreen("\t");
 
-    int index                                         = constant_pool_grow(executer, 1);
-    executer->constant_pool_list[index].type          = CONSTANTPOOL_TYPE_INT64;
-    executer->constant_pool_list[index].u.int64_value = int64_literal;
+    int index                                          = constant_pool_grow(executer, 1);
+    executer->constant_pool->list[index].type          = CONSTANTPOOL_TYPE_INT64;
+    executer->constant_pool->list[index].u.int64_value = int64_literal;
     return index;
 }
 
 int constant_pool_add_double(Package_Executer* executer, double double_literal) {
     debug_generate_info_with_darkgreen("\t");
 
-    int index                                          = constant_pool_grow(executer, 1);
-    executer->constant_pool_list[index].type           = CONSTANTPOOL_TYPE_DOUBLE;
-    executer->constant_pool_list[index].u.double_value = double_literal;
+    int index                                           = constant_pool_grow(executer, 1);
+    executer->constant_pool->list[index].type           = CONSTANTPOOL_TYPE_DOUBLE;
+    executer->constant_pool->list[index].u.double_value = double_literal;
     return index;
 }
 
+/*
+ * constant_pool_add_string
+ *
+ * 这里提前分配 RVM_String, 因为常量区是不可修改的
+ * 没有 分配在 heap上
+ * 要去重
+ * TODO: 这里引入一个问题：编译器前后端没有完全解耦合
+ */
 int constant_pool_add_string(Package_Executer* executer, const char* string_literal) {
     debug_generate_info_with_darkgreen("\t");
 
-    int index                                          = constant_pool_grow(executer, 1);
-    executer->constant_pool_list[index].type           = CONSTANTPOOL_TYPE_STRING;
-    executer->constant_pool_list[index].u.string_value = string_literal;
+    std::string str = string_literal;
+    if (executer->constant_pool->string_index_map.find(str)
+        != executer->constant_pool->string_index_map.end()) {
+        // 直接去重即可
+        return executer->constant_pool->string_index_map[str];
+    }
+
+    int index                                           = constant_pool_grow(executer, 1);
+    executer->constant_pool->string_index_map[str]      = index;
+
+    RVM_String* rvm_string                              = string_literal_to_rvm_string(string_literal);
+    executer->constant_pool->list[index].type           = CONSTANTPOOL_TYPE_STRING;
+    executer->constant_pool->list[index].u.string_value = rvm_string;
     return index;
 }
 
 int constant_pool_add_closure(Package_Executer* executer, RVM_Function* func) {
     debug_generate_info_with_darkgreen("\t");
 
-    int index                                                  = constant_pool_grow(executer, 1);
-    executer->constant_pool_list[index].type                   = CONSTANTPOOL_TYPE_CLOSURE;
-    executer->constant_pool_list[index].u.anonymous_func_value = func;
+    int index                                                   = constant_pool_grow(executer, 1);
+    executer->constant_pool->list[index].type                   = CONSTANTPOOL_TYPE_CLOSURE;
+    executer->constant_pool->list[index].u.anonymous_func_value = func;
     return index;
 }
 

@@ -277,6 +277,58 @@ void rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object) {
     rvm_heap_alloc_size_incr(rvm, -free_size);
 }
 
+RVM_String* new_string_meta() {
+    RVM_String* string = (RVM_String*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_String));
+    string->gc_type    = RVM_GC_OBJECT_TYPE_STRING;
+    string->gc_mark    = GC_MARK_COLOR_WHITE;
+    string->gc_prev    = nullptr;
+    string->gc_next    = nullptr;
+    string->length     = 0;
+    string->capacity   = 0;
+    string->data       = nullptr;
+    return string;
+}
+
+// 不分配在 heap上
+RVM_String* string_literal_to_rvm_string(const char* string_literal) {
+
+    RVM_String* string    = new_string_meta();
+
+    size_t      length    = 0;
+    length                = (string_literal != nullptr) ? strlen(string_literal) : 0;
+    unsigned int capacity = ROUND_UP8(length);
+    if (capacity == 0)
+        capacity = 8;
+
+    unsigned int alloc_size = capacity * sizeof(char);
+    string->length          = 0;
+    string->capacity        = capacity;
+    string->data            = (char*)mem_alloc(NULL_MEM_POOL, alloc_size);
+    memset(string->data, 0, alloc_size);
+
+    strncpy(string->data, string_literal, length);
+    string->length = length;
+
+    return string;
+}
+
+RVM_String* rvm_gc_new_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal) {
+    RVM_String* string    = rvm_gc_new_string_meta(rvm);
+
+    size_t      length    = 0;
+    length                = (string_literal != nullptr) ? strlen(string_literal) : 0;
+    unsigned int capacity = ROUND_UP8(length);
+    if (capacity == 0)
+        capacity = 8;
+
+    rvm_fill_string(rvm, string, capacity);
+
+    strncpy(string->data, string_literal, length);
+    string->length = length;
+
+    return string;
+}
+
 RVM_String* rvm_gc_new_string_meta(Ring_VirtualMachine* rvm) {
     RVM_String* string = (RVM_String*)mem_alloc(rvm->data_pool, sizeof(RVM_String));
     string->gc_type    = RVM_GC_OBJECT_TYPE_STRING;
@@ -301,7 +353,6 @@ void rvm_fill_string(Ring_VirtualMachine* rvm, RVM_String* string, unsigned int 
     string->length          = 0;
     string->capacity        = capacity;
     string->data            = (char*)mem_alloc(rvm->data_pool, alloc_size);
-
     memset(string->data, 0, alloc_size);
 
     rvm_heap_alloc_size_incr(rvm, alloc_size);
@@ -328,6 +379,22 @@ RVM_String* rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src) {
                                     string,
                                     alloc_size,
                                     rvm_heap_size(rvm));
+
+    return string;
+}
+
+RVM_String* concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b) {
+    assert(a != nullptr);
+    assert(b != nullptr);
+
+    RVM_String* string;
+
+    string = rvm_gc_new_string_meta(rvm);
+    rvm_fill_string(rvm, string, ROUND_UP8(a->length + b->length));
+
+    string->length = a->length + b->length;
+    strncpy(string->data, a->data, a->length);
+    strncpy(string->data + a->length, b->data, b->length);
 
     return string;
 }

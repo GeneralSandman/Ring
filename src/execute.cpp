@@ -348,7 +348,7 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
  */
 int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
-    RVM_ConstantPool*    constant_pool_list     = rvm->executer->constant_pool_list;
+    RVM_Constant*        constant_list          = rvm->executer->constant_pool->list;
 
     unsigned int         runtime_static_index   = 0;
     unsigned int         oper_num               = 0;
@@ -511,25 +511,25 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_PUSH_INT:
             const_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            STACK_SET_INT_OFFSET(0, constant_pool_list[const_index].u.int_value);
+            STACK_SET_INT_OFFSET(0, constant_list[const_index].u.int_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_INT64:
             const_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            STACK_SET_INT64_OFFSET(0, constant_pool_list[const_index].u.int64_value);
+            STACK_SET_INT64_OFFSET(0, constant_list[const_index].u.int64_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_DOUBLE:
             const_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            STACK_SET_DOUBLE_OFFSET(0, constant_pool_list[const_index].u.double_value);
+            STACK_SET_DOUBLE_OFFSET(0, constant_list[const_index].u.double_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_PUSH_STRING:
             const_index  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            string_value = string_literal_to_rvm_string(rvm, constant_pool_list[const_index].u.string_value);
+            string_value = constant_list[const_index].u.string_value;
             STACK_SET_STRING_OFFSET(0, string_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
@@ -2130,7 +2130,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         // closure
         case RVM_CODE_NEW_CLOSURE:
             const_index    = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            anonymous_func = constant_pool_list[const_index].u.anonymous_func_value;
+            anonymous_func = constant_list[const_index].u.anonymous_func_value;
             closure_value  = new_closure(rvm, caller_function, caller_closure, anonymous_func);
             STACK_SET_CLOSURE_OFFSET(0, closure_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
@@ -2846,57 +2846,6 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
 
     // Step-End: increase top index of runtime_stack.
     VM_CUR_CO_STACK_TOP_INDEX += callee_function->local_variable_size;
-}
-
-
-/*
- * 通过string常量 去创建一个临时变量
- *
- * TODO: 这个变量的生命周期在 会随着 function 的完成而结束
- *
- * 场景:
- *     1. string_value = "abc";
- *     2. return "abc";
- *
- */
-RVM_String* string_literal_to_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal) {
-    size_t length      = 0;
-    length             = (string_literal != nullptr) ? strlen(string_literal) : 0;
-
-    RVM_String* string = rvm_gc_new_string_meta(rvm);
-    rvm_fill_string(rvm, string, ROUND_UP8(length));
-
-    strncpy(string->data, string_literal, length);
-    string->length = length;
-
-    return string;
-}
-
-/*
- * 拼接字符串运算符 ..
- *
- * 拼接之后会创建一个临时变量
- * TODO: 这个变量的生命周期 会随着 function 的完成而结束
- *
- * 场景:
- *     1. fmt::println_string("a".."b");
- *     2. return "a".."b";
- *
- */
-RVM_String* concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b) {
-    assert(a != nullptr);
-    assert(b != nullptr);
-
-    RVM_String* string;
-
-    string = rvm_gc_new_string_meta(rvm);
-    rvm_fill_string(rvm, string, ROUND_UP8(a->length + b->length));
-
-    string->length = a->length + b->length;
-    strncpy(string->data, a->data, a->length);
-    strncpy(string->data + a->length, b->data, b->length);
-
-    return string;
 }
 
 
