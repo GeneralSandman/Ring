@@ -705,7 +705,7 @@ invoke_closures
 
 ### E. reflect::typeof() 支持获取匿名函数变量的类型 ✅
 
-TODO: 如果一个匿名函数变量没有被初始化，会得到 `nil-closure`
+如果一个匿名函数变量没有被初始化，会得到 `nil-closure`
 
 ```
 typedef fn() FuncType0;
@@ -717,7 +717,7 @@ fmt::println(reflect::typeof(local_func_var0)); // nil-closure
 ```
 
 
-### F. Proposal: reflect::typeof() 应该进行优化 TODO:
+### F. Proposal: reflect::typeof() 应该进行优化 ✅
 
 1. 如果一个 变量没有分配内存，array/closure，typeof 也能获取到对应的值
 
@@ -2838,10 +2838,6 @@ TODO: 关于展开
 
 
 
-1. TODO: Break set 还有个bug, 如果某行为注释或者空行, breakpoint 可能不会生效, 验证测试下
-2. cont 命令 是不是 跟 step命令一块放在一起比较好
-
-
 ### B. ring debugger 如何显示源代码文件的内容, 方便调试 ✅ 
 
 命令: ```code list```
@@ -2963,7 +2959,7 @@ duplicate 修改成 shallow_copy 更好理解,
 
 
 
-#### c. 目前只能一步一步的运行, 需要支持进入函数和不进入函数 // TODO:
+#### c. 目前只能一步一步的运行, 需要支持进入函数和不进入函数
 
 Enter 一步一步
 step:
@@ -3057,7 +3053,7 @@ package_unit 中记录了源代码文件, rdb在获取源代码内容的时候, 
 
 
 
-### C. BUG: 返回值
+### C. BUG: 返回值  ✅ 
 
 
 ```
@@ -3066,7 +3062,7 @@ method printInfo() {
 }
 ```
 
-TODO: 这样写是会崩溃的, 因为本来没返回值, 这里却返回了, 需要强制检查返回值.
+这样写是会崩溃的, 因为本来没返回值, 这里却返回了, 需要强制检查返回值.
 
 
 ### D. 多项赋值 的深度 copy, 通过 RVM_CODE_DEEP_COPY 解决这个问题 ✅ 
@@ -3512,7 +3508,6 @@ job_1 = Job1{
 
 ### F. 测试 字符串比较的时候, 要转化成 ne_string ✅ 
 
-TODO:
 
 ```ring
 
