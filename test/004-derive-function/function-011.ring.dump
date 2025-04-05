@@ -58,7 +58,7 @@ $main()    <./test/004-derive-function/function-011.ring:33,42>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
-+Instructions: 69
++Instructions: 66
  ├──*Num    *Instruction                  *Operand            *SourceLineNum    
  ├──0       push_static_int               0                   34                
  ├──1       push_int_1byte                0                                     
@@ -77,21 +77,20 @@ $main()    <./test/004-derive-function/function-011.ring:33,42>
  ├──14      argument_num                  2                                     
  ├──15      push_func                     9, 1                                  
  ├──16      invoke_func                                                         
- ├──17      deep_copy                     1, 1                                  
- ├──18      pop_static_int                1                                     
- ├──19      pop_static_int                0                                     
- ├──20      push_static_int               0                   39                
- ├──21      push_int_1byte                123                                   
- ├──22      eq_int                                                              
- ├──23      argument_num                  1                                     
- ├──24      push_func                     0, 0                                  
- ├──25      invoke_func_native                                                  
- ├──26      push_static_int               1                   40                
- ├──27      push_int_1byte                234                                   
- ├──28      eq_int                                                              
- ├──29      argument_num                  1                                     
- ├──30      push_func                     0, 0                                  
- ├──31      invoke_func_native                                                  
- ├──32      pop_defer                                         42                
- ├──33      function_finish                                                     
+ ├──17      pop_static_int                1                                     
+ ├──18      pop_static_int                0                                     
+ ├──19      push_static_int               0                   39                
+ ├──20      push_int_1byte                123                                   
+ ├──21      eq_int                                                              
+ ├──22      argument_num                  1                                     
+ ├──23      push_func                     0, 0                                  
+ ├──24      invoke_func_native                                                  
+ ├──25      push_static_int               1                   40                
+ ├──26      push_int_1byte                234                                   
+ ├──27      eq_int                                                              
+ ├──28      argument_num                  1                                     
+ ├──29      push_func                     0, 0                                  
+ ├──30      invoke_func_native                                                  
+ ├──31      pop_defer                                         42                
+ ├──32      function_finish                                                     
 
