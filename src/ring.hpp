@@ -993,6 +993,7 @@ typedef enum {
     RVM_CODE_POP_ARRAY_CLOSURE,
 
     // array append
+    RVM_CODE_ARRAY_APPEND_A,
     RVM_CODE_ARRAY_APPEND_BOOL,
     RVM_CODE_ARRAY_APPEND_INT,
     RVM_CODE_ARRAY_APPEND_INT64,
@@ -1001,6 +1002,7 @@ typedef enum {
     RVM_CODE_ARRAY_APPEND_CLASS_OB,
     RVM_CODE_ARRAY_APPEND_CLOSURE,
     // array pop
+    RVM_CODE_ARRAY_POP_A,
     RVM_CODE_ARRAY_POP_BOOL,
     RVM_CODE_ARRAY_POP_INT,
     RVM_CODE_ARRAY_POP_INT64,
@@ -3301,7 +3303,9 @@ void                 rvm_string_get_length(Ring_VirtualMachine* rvm, RVM_String*
 void                 rvm_string_get_capacity(Ring_VirtualMachine* rvm, RVM_String* string, int* value);
 
 ErrorCode            rvm_array_get_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array** value);
-ErrorCode            rvm_array_set_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array* value);
+ErrorCode            rvm_array_set_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array** value);
+ErrorCode            rvm_array_append_array(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_Array** value);
+ErrorCode            rvm_array_pop_array(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_Array** value);
 
 ErrorCode            rvm_array_get_bool(Ring_VirtualMachine* rvm, RVM_Array* array, int index, bool* value);
 ErrorCode            rvm_array_set_bool(Ring_VirtualMachine* rvm, RVM_Array* array, int index, bool* value);
@@ -3369,6 +3373,8 @@ void                 fill_defer_item_argument_stack(Ring_VirtualMachine* rvm, RV
 RVM_Array*           init_derive_function_variadic_argument(Ring_VirtualMachine* rvm,
                                                             RVM_Parameter*       parameter,
                                                             unsigned int         size);
+void                 batch_set_variadic_element(Ring_VirtualMachine* rvm);
+RVM_Array_Type       convert_rvm_array_type(RVM_TypeSpecifier* type_specifier);
 // --------------------
 
 

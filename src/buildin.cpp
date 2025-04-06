@@ -303,9 +303,8 @@ void fix_buildin_func_push(Expression*             expression,
 
     // 2. 第一个参数必须要比第二个参数大一个维度，并且sub是同类型
     if (item_type_specifier->kind == RING_BASIC_TYPE_ARRAY) {
+        // push(int[,]{}, int[]{})
 
-        // TODO: 后续放开多维数组
-        goto ERROR_REPORT;
         if (!comp_type_specifier(array_type_specifier->u.array_t->sub,
                                  item_type_specifier->u.array_t->sub)) {
             goto ERROR_REPORT;
@@ -314,6 +313,8 @@ void fix_buildin_func_push(Expression*             expression,
             goto ERROR_REPORT;
         }
     } else {
+        // push(int[], int)
+
         if (!comp_type_specifier(array_type_specifier->u.array_t->sub,
                                  item_type_specifier)) {
             goto ERROR_REPORT;
@@ -572,16 +573,25 @@ void generate_buildin_func_push(Package_Executer*       executer,
 
 
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
-    switch (type_specifier->u.array_t->sub->kind) {
-    case RING_BASIC_TYPE_BOOL: opcode = RVM_CODE_ARRAY_APPEND_BOOL; break;
-    case RING_BASIC_TYPE_INT: opcode = RVM_CODE_ARRAY_APPEND_INT; break;
-    case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_ARRAY_APPEND_INT64; break;
-    case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_ARRAY_APPEND_DOUBLE; break;
-    case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_ARRAY_APPEND_STRING; break;
-    case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_ARRAY_APPEND_CLASS_OB; break;
-    case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_ARRAY_APPEND_CLOSURE; break;
-    default: ring_error_report("error: push() is only be used by bool[] int[] int64[] double[] string[] class[] fn[]\n");
+    if (type_specifier->u.array_t->dimension == 1) {
+        // push(int[], int)
+
+        switch (type_specifier->u.array_t->sub->kind) {
+        case RING_BASIC_TYPE_BOOL: opcode = RVM_CODE_ARRAY_APPEND_BOOL; break;
+        case RING_BASIC_TYPE_INT: opcode = RVM_CODE_ARRAY_APPEND_INT; break;
+        case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_ARRAY_APPEND_INT64; break;
+        case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_ARRAY_APPEND_DOUBLE; break;
+        case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_ARRAY_APPEND_STRING; break;
+        case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_ARRAY_APPEND_CLASS_OB; break;
+        case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_ARRAY_APPEND_CLOSURE; break;
+        default: ring_error_report("error: push() is only be used by bool[] int[] int64[] double[] string[] class[] fn[]\n");
+        }
+    } else {
+        // push(int[,]{}, int[]{})
+
+        opcode = RVM_CODE_ARRAY_APPEND_A;
     }
+
     generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
 }
 

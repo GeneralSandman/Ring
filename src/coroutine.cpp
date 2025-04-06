@@ -232,7 +232,7 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
                 } break;
                 case RING_BASIC_TYPE_ARRAY: {
                     RVM_Array* array_value_item = VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset].u.array_value;
-                    rvm_array_set_array(rvm, array_value, array_index, array_value_item);
+                    rvm_array_set_array(rvm, array_value, array_index, &array_value_item);
                 } break;
                 case RING_BASIC_TYPE_FUNC: {
                     RVM_Closure* closure = VM_CUR_CO->runtime_stack->data[argument_stack_index + argument_stack_offset].u.closure_value;

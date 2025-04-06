@@ -114,21 +114,23 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
 
     // array append
-    {RVM_CODE_ARRAY_APPEND_BOOL, "array_append_bool", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[object,bool]->[]", ""},
-    {RVM_CODE_ARRAY_APPEND_INT, "array_append_int", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[object,int]->[]", ""},
-    {RVM_CODE_ARRAY_APPEND_INT64, "array_append_int64", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[object,int64]->[]", ""},
-    {RVM_CODE_ARRAY_APPEND_DOUBLE, "array_append_double", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[object,double]->[]", ""},
-    {RVM_CODE_ARRAY_APPEND_STRING, "array_append_string", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[object,string]->[]", ""},
-    {RVM_CODE_ARRAY_APPEND_CLASS_OB, "array_append_class_ob", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[object,object]->[]", ""},
-    {RVM_CODE_ARRAY_APPEND_CLOSURE, "array_append_closure", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[object,closure]->[]", ""},
+    {RVM_CODE_ARRAY_APPEND_A, "array_append_a", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[array,array]->[]", ""},
+    {RVM_CODE_ARRAY_APPEND_BOOL, "array_append_bool", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[array,bool]->[]", ""},
+    {RVM_CODE_ARRAY_APPEND_INT, "array_append_int", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[array,int]->[]", ""},
+    {RVM_CODE_ARRAY_APPEND_INT64, "array_append_int64", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[array,int64]->[]", ""},
+    {RVM_CODE_ARRAY_APPEND_DOUBLE, "array_append_double", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[array,double]->[]", ""},
+    {RVM_CODE_ARRAY_APPEND_STRING, "array_append_string", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[array,string]->[]", ""},
+    {RVM_CODE_ARRAY_APPEND_CLASS_OB, "array_append_class_ob", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[array,class-ob]->[]", ""},
+    {RVM_CODE_ARRAY_APPEND_CLOSURE, "array_append_closure", OPCODE_OPERAND_TYPE_0BYTE, -2, "assign to object array by index", "[array,closure]->[]", ""},
     // array pop
-    {RVM_CODE_ARRAY_POP_BOOL, "array_pop_bool", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[object]->[bool]", ""},
-    {RVM_CODE_ARRAY_POP_INT, "array_pop_int", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[object]->[int]", ""},
-    {RVM_CODE_ARRAY_POP_INT64, "array_pop_int64", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[object]->[int64]", ""},
-    {RVM_CODE_ARRAY_POP_DOUBLE, "array_pop_double", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[object]->[double]", ""},
-    {RVM_CODE_ARRAY_POP_STRING, "array_pop_string", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[object]->[string]", ""},
-    {RVM_CODE_ARRAY_POP_CLASS_OB, "array_pop_class_ob", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[object]->[object]", ""},
-    {RVM_CODE_ARRAY_POP_CLOSURE, "array_pop_closure", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[object]->[closure]", ""},
+    {RVM_CODE_ARRAY_POP_A, "array_pop_a", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[array]->[array]", ""},
+    {RVM_CODE_ARRAY_POP_BOOL, "array_pop_bool", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[array]->[bool]", ""},
+    {RVM_CODE_ARRAY_POP_INT, "array_pop_int", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[array]->[int]", ""},
+    {RVM_CODE_ARRAY_POP_INT64, "array_pop_int64", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[array]->[int64]", ""},
+    {RVM_CODE_ARRAY_POP_DOUBLE, "array_pop_double", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[array]->[double]", ""},
+    {RVM_CODE_ARRAY_POP_STRING, "array_pop_string", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[array]->[string]", ""},
+    {RVM_CODE_ARRAY_POP_CLASS_OB, "array_pop_class_ob", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[array]->[class-ob]", ""},
+    {RVM_CODE_ARRAY_POP_CLOSURE, "array_pop_closure", OPCODE_OPERAND_TYPE_0BYTE, 0, "assign to object array by index", "[array]->[closure]", ""},
 
 
     // array
