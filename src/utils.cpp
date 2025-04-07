@@ -740,7 +740,7 @@ std::string dump_vm_constant(RVM_Constant* constant) {
         return "double(" + std::to_string(constant->u.double_value) + ")";
         break;
     case CONSTANTPOOL_TYPE_STRING:
-        return "string(" + std::string(constant->u.string_value->data) + ")";
+        return "string(" + std::string(constant->u.string_value->data, constant->u.string_value->length) + ")";
         break;
     case CONSTANTPOOL_TYPE_CLOSURE:
         tmp = sprintf_string("%p", (void*)constant->u.anonymous_func_value);
