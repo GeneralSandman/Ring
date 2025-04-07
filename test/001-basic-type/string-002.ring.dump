@@ -2,7 +2,7 @@
  ├──     0: string(a)
  ├──     1: string(test pass)
  ├──     2: string(test failed)
- ├──     3: string(----------------b)
+ ├──     3: string(----------------)
  ├──     4: string(b)
 
 #Globals:       0

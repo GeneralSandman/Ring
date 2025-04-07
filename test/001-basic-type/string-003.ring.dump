@@ -6,7 +6,7 @@
  ├──     4: string(3)
  ├──     5: string(12)
  ├──     6: string(string_value_1 == string_value_2)
- ├──     7: string(string_value_1 != string_value_2string_value_1 == string_value_2)
+ ├──     7: string(string_value_1 != string_value_2)
  ├──     8: string(a)
  ├──     9: string(b)
  ├──    10: string(a == b)
