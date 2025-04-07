@@ -202,7 +202,6 @@ void add_classes(Package* package, Package_Executer* executer) {
  * front-end: RVM_ClassDefinition
  * back-end:  RVM_ClassDefinition
  *
- * TODO: field is shallow copy
  */
 void class_def_deep_copy(Package_Executer*    executer,
                          RVM_ClassDefinition* dst,
@@ -457,7 +456,7 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
     debug_generate_info_with_darkgreen("\t");
 
     if (!executer->exist_main_func) {
-        // TODO: error report
+        // TODO: 编译阶段报错
         // main-package 中 必须含有 main函数
         return;
     }
@@ -499,7 +498,7 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
     unsigned int argument_num = 0;
     if (main_func->parameter_size == 1) {
         for (unsigned int i = 0; i < package->shell_args.size(); i++) {
-            // FIXME: 这里 shell_args 是否应该被释放, 不然 constant_pool 内存会变为invaid pointor
+            // TODO: 这里 shell_args 是否应该被释放, 不然 constant_pool 内存会变为invaid pointor
             int index = constant_pool_add_string(executer, package->shell_args[i].c_str());
             generate_vmcode(executer, opcode_buffer,
                             RVM_CODE_PUSH_STRING, index, 0);
@@ -806,13 +805,13 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
     // step-1. range_call
     //       push array-object & array-iter to runtime_stack
     if (range_statement->operand->type != EXPRESSION_TYPE_IDENTIFIER) {
-        // TODO: error report
+        // TODO: 编译阶段报错
     }
 
     // push array-object
     generate_vmcode_from_identifier_expression(executer, range_statement->operand->u.identifier_expression, opcode_buffer);
     // push array-iterator
-    // FIXME: 这里数组的数量受到了限制
+    // TODO: 这里数组的数量受到了限制
     generate_vmcode(executer, opcode_buffer,
                     RVM_CODE_PUSH_INT_2BYTE, 0,
                     range_statement->operand->u.identifier_expression->line_number);
@@ -1384,12 +1383,12 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
 
     VarDecl* declaration = array_index_expression->array_expression->u.identifier_expression->u.variable->decl;
     if (declaration == nullptr) {
-        // TODO: 编译报错
+        // TODO: 编译阶段报错
         ring_error_report("invalid operator[] in identifier:%s\n",
                           array_index_expression->array_expression->u.identifier_expression->identifier);
     }
     if (declaration->type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
-        // TODO: 编译报错
+        // TODO: 编译阶段报错
         ring_error_report("invalid declaration in operation[] identifier:%s\n",
                           array_index_expression->array_expression->u.identifier_expression->identifier);
     }
@@ -1431,7 +1430,7 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
                 case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_POP_ARRAY_CLASS_OB; break;
                 case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_POP_ARRAY_CLOSURE; break;
                 default:
-                    // TODO: 编译报错
+                    // TODO: 编译阶段报错
                     ring_error_report("error: assign to item of array only support bool[] int[] int64[] double[] string[] class[] fn[]\n");
                     break;
                 }
@@ -1613,11 +1612,12 @@ void generate_vmcode_from_relational_expression(Package_Executer* executer,
 
 
 /*
- * TODO:
+ * generate_vmcode_from_increase_decrease_expression
+ *
  * 因为 ++ -- 语句只能用在单独的表达式中，不能组合
  * 所以对于这种语句，在生成AST的时候可以转成
- * += 1 += 1L += 1.0
- * -= 1 -= 1L -= 1.0
+ * +=1 +=1L +=1.0
+ * -=1 -=1L -=1.0
  * 这样可减少字节码的数量
  */
 void generate_vmcode_from_increase_decrease_expression(Package_Executer* executer,
@@ -1716,7 +1716,6 @@ void generate_vmcode_from_identifier_expression(Package_Executer*     executer,
     case IDENTIFIER_EXPRESSION_TYPE_VARIABLE:
         if (identifier_expression->u.variable->is_free_value) {
             opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_FREE_BOOL, identifier_expression->u.variable->decl->type_specifier);
-            // TODO:free value 的 index，这个索引是不能变的，因为他会生成对应的字节码
             offset = identifier_expression->u.variable->free_value_desc->free_value_index;
             generate_vmcode(executer, opcode_buffer, opcode, offset, identifier_expression->line_number);
         } else if (identifier_expression->u.variable->decl->is_local) {
@@ -1836,13 +1835,14 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
     assert(function_call_expression->type != FUNCTION_CALL_TYPE_UNKNOW);
 
     unsigned int argument_list_size = 0;
-    // TODO: 这里实现的不太对，需要考虑某个expression 为 function-call，并且这个 function-call 是多返回值类型的
-    // 需要考虑
-    // 1. 可变参数类型
     for (ArgumentList* pos = function_call_expression->argument_list;
          pos != nullptr;
          pos = pos->next) {
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+        // 为什么 要 += pos->expression->convert_type_size
+        // 如果：某个expression 为 function-call，并且这个 function-call 是多返回值类型的
+        // 例如：fn return_multi_val() -> (bool, int) {}
+        //      func_call(return_multi_val());
         argument_list_size += pos->expression->convert_type_size;
     }
 
@@ -1891,12 +1891,10 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
         unsigned int offset  = 0;
 
         // push_stack_closure or push_static_closure
-        if (closure->is_local) {
-            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_BOOL, closure->type_specifier);
-        } else {
-            // TODO: 不支持全局变量为匿名函数，理论上不会走的这里，需要在 语义检查的时候报错
-            opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STATIC_BOOL, closure->type_specifier);
-        }
+        // 不支持全局变量为匿名函数, 与类的定位重复了
+        assert(closure->is_local);
+        opcode = convert_opcode_by_rvm_type(RVM_CODE_PUSH_STACK_BOOL, closure->type_specifier);
+
         offset = closure->variable_index;
         generate_vmcode(executer, opcode_buffer, opcode, offset, function_call_expression->line_number);
 
@@ -1913,13 +1911,14 @@ void generate_vmcode_from_member_call_expression(Package_Executer*     executer,
     }
 
     unsigned int argument_list_size = 0;
-    // TODO: 这里实现的不太对，需要考虑某个expression 为 function-call，并且这个 function-call 是多返回值类型的
-    // 需要考虑
-    // 1. 可变参数类型
     for (ArgumentList* pos = member_call_expression->argument_list;
          pos != nullptr;
          pos = pos->next) {
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+        // 为什么 要 += pos->expression->convert_type_size
+        // 如果：某个expression 为 function-call，并且这个 function-call 是多返回值类型的
+        // 例如：fn return_multi_val() -> (bool, int) {}
+        //      func_call(return_multi_val());
         argument_list_size += pos->expression->convert_type_size;
     }
 
@@ -1959,7 +1958,7 @@ void generate_vmcode_from_cast_expression(Package_Executer* executer,
 
     generate_vmcode_from_expression(executer, cast_expression->operand, opcode_buffer);
 
-    // FIXME: derive type
+    // TODO: convert derive type
     switch (cast_expression->type_specifier->kind) {
     case RING_BASIC_TYPE_BOOL:
         if (cast_expression->operand->convert_type != nullptr
@@ -1982,7 +1981,7 @@ void generate_vmcode_from_cast_expression(Package_Executer* executer,
         break;
 
     case RING_BASIC_TYPE_INT64:
-        // TODO:
+        // TODO: 待实现
         break;
 
     case RING_BASIC_TYPE_DOUBLE:
@@ -2064,14 +2063,14 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
             return;
         }
 
-        // TODO: 参数
         ArgumentList* pos                = function_call_expression->argument_list;
         unsigned int  argument_list_size = 0;
-        // TODO: 这里实现的不太对，需要考虑某个expression 为 function-call，并且这个 function-call 是多返回值类型的
-        // 需要考虑
-        // 1. 可变参数类型
         for (; pos != nullptr; pos = pos->next) {
             generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
+            // 为什么 要 += pos->expression->convert_type_size
+            // 如果：某个expression 为 function-call，并且这个 function-call 是多返回值类型的
+            // 例如：fn return_multi_val() -> (bool, int) {}
+            //      func_call(return_multi_val());
             argument_list_size += pos->expression->convert_type_size;
         }
 
@@ -2131,14 +2130,15 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
 
 
         unsigned int argument_list_size = 0;
-        // TODO: 这里实现的不太对，需要考虑某个expression 为 function-call，并且这个 function-call 是多返回值类型的
-        // 需要考虑
-        // 1. 可变参数类型
         for (ArgumentList* pos = member_call_expression->argument_list;
              pos != nullptr;
              pos = pos->next) {
             generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
-            argument_list_size++;
+            // 为什么 要 += pos->expression->convert_type_size
+            // 如果：某个expression 为 function-call，并且这个 function-call 是多返回值类型的
+            // 例如：fn return_multi_val() -> (bool, int) {}
+            //      func_call(return_multi_val());
+            argument_list_size += pos->expression->convert_type_size;
         }
 
         // argument_num
@@ -2331,8 +2331,6 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
     assert(new_array_expression->type_specifier->kind == RING_BASIC_TYPE_ARRAY);
     assert(new_array_expression->type_specifier->u.array_t->sub != nullptr);
 
-    // 当前 new的时候，dimension 当前只能是1
-    // TODO: 继续支持多维数组
     unsigned int dimension = new_array_expression->dimension_expression->dimension;
 
     // 将每个维度的size push stack
@@ -2363,7 +2361,7 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
         break;
     case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_NEW_ARRAY_CLOSURE; break;
     default:
-        // TODO: 编译报错
+        // TODO: 编译阶段报错
         ring_error_report("error: new array only support bool[] int[] int64[] double[] string[] class[] fn[]\n");
         break;
     }
@@ -2381,7 +2379,8 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer*     
     assert(literal_expression->field_init_expression_list != nullptr);
 
 
-    // TODO: 这里要做强制检查
+    assert(literal_expression->type_specifier->kind == RING_BASIC_TYPE_CLASS);
+    assert(literal_expression->type_specifier->u.class_t->class_definition != nullptr);
     ClassDefinition* class_definition = literal_expression->type_specifier->u.class_t->class_definition;
 
     // 0. new class-object
@@ -2455,7 +2454,7 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
             break;
         case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_NEW_ARRAY_LITERAL_CLOSURE; break;
         default:
-            // TODO: 编译报错
+            // TODO: 编译阶段报错
             ring_error_report("error: array literal expression not support bool[] int[] double[] string[] <class>[] fn[]\n");
             break;
         }
@@ -2891,7 +2890,7 @@ void type_specifier_deep_copy(RVM_TypeSpecifier* dst, TypeSpecifier* src) {
 
     if (src->kind == RING_BASIC_TYPE_CLASS) {
         // class_index 在 type_specifier_deep_copy 没有修正
-        // TODO: 后期修正
+        // TODO: 前后端没有完全解耦
         dst->u.class_def_index = src->u.class_t->class_definition->class_index;
     }
 
