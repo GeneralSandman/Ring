@@ -316,7 +316,8 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
         case RING_BASIC_TYPE_ARRAY: {
             // 这里没有分配空间, 只分配了一下meta
             // array_type 强制转化一下
-            RVM_TypeSpecifier*   sub_type_specifier   = type_specifier->u.array_t->sub;
+            RVM_TypeSpecifier* sub_type_specifier = type_specifier->u.array_t->sub;
+            // TODO: RVM_Array_Type 强制转换有问题
             RVM_Array_Type       sub_array_type       = RVM_Array_Type(sub_type_specifier->kind);
             RVM_ClassDefinition* sub_class_definition = nullptr;
             if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
@@ -375,7 +376,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_String*          string_value           = nullptr;
     RVM_ClassObject*     class_ob_value         = nullptr;
     RVM_Array*           array_value            = nullptr;
-    RVM_Array*           array_c_value          = nullptr;
+    RVM_Array*           array_c_value          = nullptr; // 多维数组中间态
     RVM_Closure*         closure_value          = nullptr;
     RVM_Function*        anonymous_func         = nullptr;
 
@@ -858,13 +859,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // array
         case RVM_CODE_PUSH_ARRAY_A:
-            array_c_value = STACK_GET_ARRAY_OFFSET(-2);
-            array_index   = STACK_GET_INT_OFFSET(-1);
+            array_value = STACK_GET_ARRAY_OFFSET(-2);
+            array_index = STACK_GET_INT_OFFSET(-1);
             assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
-            rvm_array_get_array(rvm, array_c_value, array_index, &array_value);
+            rvm_array_get_array(rvm, array_value, array_index, &array_c_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
-            STACK_SET_ARRAY_OFFSET(0, array_value);
+            STACK_SET_ARRAY_OFFSET(0, array_c_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 1;
             break;
@@ -947,12 +948,12 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
 
         case RVM_CODE_POP_ARRAY_A:
-            array_c_value = STACK_GET_ARRAY_OFFSET(-2);
+            array_value   = STACK_GET_ARRAY_OFFSET(-2);
             array_index   = STACK_GET_INT_OFFSET(-1);
-            array_value   = STACK_GET_ARRAY_OFFSET(-3);
+            array_c_value = STACK_GET_ARRAY_OFFSET(-3);
             assert_throw_nil_array(array_value == nullptr);
             assert_throw_range(array_index, array_value->length);
-            rvm_array_set_array(rvm, array_c_value, array_index, &array_value);
+            rvm_array_set_array(rvm, array_value, array_index, &array_c_value);
             VM_CUR_CO_STACK_TOP_INDEX -= 3;
             VM_CUR_CO_PC += 1;
             break;
@@ -2820,10 +2821,10 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             break;
         case RING_BASIC_TYPE_ARRAY: {
             // 这里没有分配空间, 只分配了一下meta
-            // array_type 强制转化一下
             RVM_TypeSpecifier* sub_type_specifier = type_specifier->u.array_t->sub;
             RVM_Array_Type     array_type         = RVM_Array_Type(sub_type_specifier->kind);
-            // TODO: 应该 使用这个 convert_rvm_array_type， 上边的在多维数组的情况下会有bug
+            // TODO: RVM_Array_Type 强制转换有问题
+            //       应该 使用这个 convert_rvm_array_type， 上边的在多维数组的情况下会有bug
             // RVM_Array_Type       array_type           = convert_rvm_array_type(type_specifier);
             RVM_ClassDefinition* sub_class_definition = nullptr;
             if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
@@ -3555,6 +3556,7 @@ RVM_Array* init_derive_function_variadic_argument(Ring_VirtualMachine* rvm,
     unsigned int dimension_list[] = {size, 0, 0, 0, 0, 0, 0, 0};
     // 为了实现简单，直接补齐7个0 即可，数组的最大维度为8
 
+    // TODO: RVM_Array_Type 强制转换有问题
     array_value = rvm_new_array(rvm,
                                 dimension, dimension_list, dimension,
                                 RVM_Array_Type(parameter->type_specifier->kind),

@@ -327,23 +327,29 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
             break;
         case RING_BASIC_TYPE_ARRAY: {
             // 这里没有分配空间, 只分配了一下meta
+            RVM_TypeSpecifier* sub_type_specifier = type_specifier->u.array_t->sub;
+            RVM_Array_Type     array_type         = RVM_Array_Type(sub_type_specifier->kind);
+            // TODO: RVM_Array_Type 强制转换有问题
+            //       应该 使用这个 convert_rvm_array_type， 上边的在多维数组的情况下会有bug
+            // RVM_Array_Type       array_type           = convert_rvm_array_type(type_specifier);
             RVM_ClassDefinition* sub_class_definition = nullptr;
-            RVM_TypeSpecifier*   sub_type_specifier   = type_specifier->u.array_t->sub;
             if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
                 sub_class_definition = &(rvm->class_list[sub_type_specifier->u.class_def_index]);
             }
 
             array = rvm_gc_new_array_meta(rvm,
-                                          RVM_Array_Type(type_specifier->u.array_t->sub->kind), // 这里强制转化一下
+                                          array_type,
                                           sub_class_definition,
                                           type_specifier->u.array_t->dimension);
             //
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type          = RVM_VALUE_TYPE_ARRAY;
             co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.array_value = array;
         } break;
-        case RING_BASIC_TYPE_FUNC:
-            // TODO: 这里没有分配空间
-            break;
+        case RING_BASIC_TYPE_FUNC: {
+            RVM_Closure* closure                                                                            = rvm_gc_new_closure_meta(rvm);
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].type            = RVM_VALUE_TYPE_CLOSURE;
+            co->runtime_stack->data[co->runtime_stack->top_index + local_vari_stack_offset].u.closure_value = closure;
+        } break;
         default:
             break;
         }

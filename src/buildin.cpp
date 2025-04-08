@@ -388,8 +388,27 @@ void fix_buildin_func_pop(Expression*             expression,
         };
         ring_compile_error_report(&context);
     }
+
+    assert(array_type_specifier->u.array_t != nullptr);
+    // 生成一个 TypeSpecifier
+    TypeSpecifier* type = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
+    type->line_number   = function_call_expression->line_number;
+    if (array_type_specifier->u.array_t->dimension > 1) {
+        // 多维数组
+        // pop 的返回值也是一个数组
+        type->kind                 = RING_BASIC_TYPE_ARRAY;
+        type->u.array_t            = (Ring_DeriveType_Array*)mem_alloc(get_front_mem_pool(), sizeof(Ring_DeriveType_Array));
+        type->u.array_t->dimension = array_type_specifier->u.array_t->dimension - 1;
+        type->u.array_t->sub       = array_type_specifier->u.array_t->sub;
+    } else {
+        // 一维数组
+        // pop 的返回值是一个元素
+        // shallow copy
+        type = array_type_specifier->u.array_t->sub;
+    }
+
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
-    EXPRESSION_ADD_CONVERT_TYPE(expression, (array_type_specifier->u.array_t->sub));
+    EXPRESSION_ADD_CONVERT_TYPE(expression, type);
 }
 
 void fix_buildin_func_to_string(Expression*             expression,
@@ -604,16 +623,25 @@ void generate_buildin_func_pop(Package_Executer*       executer,
 
 
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
-    switch (type_specifier->u.array_t->sub->kind) {
-    case RING_BASIC_TYPE_BOOL: opcode = RVM_CODE_ARRAY_POP_BOOL; break;
-    case RING_BASIC_TYPE_INT: opcode = RVM_CODE_ARRAY_POP_INT; break;
-    case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_ARRAY_POP_INT64; break;
-    case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_ARRAY_POP_DOUBLE; break;
-    case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_ARRAY_POP_STRING; break;
-    case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_ARRAY_POP_CLASS_OB; break;
-    case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_ARRAY_POP_CLOSURE; break;
-    default: ring_error_report("error: pop() is only be used by bool[] int[] int64[] double[] string[] class[] fn[]\n");
+    if (type_specifier->u.array_t->dimension == 1) {
+        // pop(int[])
+
+        switch (type_specifier->u.array_t->sub->kind) {
+        case RING_BASIC_TYPE_BOOL: opcode = RVM_CODE_ARRAY_POP_BOOL; break;
+        case RING_BASIC_TYPE_INT: opcode = RVM_CODE_ARRAY_POP_INT; break;
+        case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_ARRAY_POP_INT64; break;
+        case RING_BASIC_TYPE_DOUBLE: opcode = RVM_CODE_ARRAY_POP_DOUBLE; break;
+        case RING_BASIC_TYPE_STRING: opcode = RVM_CODE_ARRAY_POP_STRING; break;
+        case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_ARRAY_POP_CLASS_OB; break;
+        case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_ARRAY_POP_CLOSURE; break;
+        default: ring_error_report("error: pop() is only be used by bool[] int[] int64[] double[] string[] class[] fn[]\n");
+        }
+    } else {
+        // pop(int[,]{})
+
+        opcode = RVM_CODE_ARRAY_POP_A;
     }
+
     generate_vmcode(executer, opcode_buffer, opcode, 0, function_call_expression->line_number);
 }
 
