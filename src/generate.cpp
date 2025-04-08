@@ -1311,10 +1311,13 @@ void generate_pop_to_leftvalue(Package_Executer* executer,
                                RVM_OpcodeBuffer* opcode_buffer) {
 
     if (expression->type == EXPRESSION_TYPE_IDENTIFIER) {
+        // 给变量赋值
         generate_pop_to_leftvalue_identifier(executer, expression->u.identifier_expression, opcode_buffer);
     } else if (expression->type == EXPRESSION_TYPE_MEMBER) {
+        // 给成员变量赋值
         generate_pop_to_leftvalue_member(executer, expression->u.member_expression, opcode_buffer);
     } else if (expression->type == EXPRESSION_TYPE_ARRAY_INDEX) {
+        // 给数组元素赋值
         generate_pop_to_leftvalue_array_index(executer, expression->u.array_index_expression, opcode_buffer);
     } else {
         ring_error_report("not support assign to left-value\n");

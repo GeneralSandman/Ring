@@ -2091,10 +2091,20 @@ void fix_array_index_expression(Expression*           expression,
                                                   block);
 
     if (variable == nullptr) {
+        // TODO: 完善编译报错
         ring_error_report("use undeclared identifier `%s`; E:%d.\n",
                           array_identifier,
                           ERROR_UNDEFINITE_VARIABLE);
     }
+
+    TypeSpecifier* type_specifier = variable->decl->type_specifier;
+    if (type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
+        // TODO: 完善编译报错
+        ring_error_report("`%s` is not an array; E:%d.\n",
+                          array_identifier,
+                          ERROR_UNDEFINITE_VARIABLE);
+    }
+    assert(type_specifier->u.array_t != nullptr);
 
     fix_expression(array_index_expression->array_expression, block, func);
 
@@ -2131,7 +2141,7 @@ void fix_array_index_expression(Expression*           expression,
     } else if (type->kind == RING_BASIC_TYPE_FUNC) {
         type->u.func_t = variable->decl->type_specifier->u.array_t->sub->u.func_t;
     } else {
-        // TODO:
+        // TODO: 如果表达式是个多维数组，如何处理
     }
     fix_type_specfier(type);
 
@@ -2181,7 +2191,7 @@ void fix_array_literal_expression(Expression*             expression,
         fix_expression(pos, block, func);
 
         if (pos->convert_type_size != 1) {
-            // TODO: error report
+            // TODO: 完善编译报错
         }
         item_type = pos->convert_type[0];
 
@@ -3067,7 +3077,6 @@ Function* search_function(char* package_posit, char* identifier) {
             ring_compile_error_report(&context);
         }
 
-        // TODO: 封装成函数
         for (auto function : package->function_list) {
             if (str_eq(function->identifier, identifier)) {
                 return function;
