@@ -1,0 +1,26 @@
+test_pop_1 ------------
+pop value = 3
+pop value = 2
+pop value = 1
+local_int_array_0 = []
+test_pop_2 ------------
+pop value = [7 8 9]
+pop value = [4 5 6]
+pop value = [1 2 3]
+local_int_array_0 = []
+test_pop_2 ------------
+pop value = 9
+pop value = 8
+pop value = 7
+pop value = 6
+pop value = 5
+pop value = 4
+pop value = 3
+pop value = 2
+pop value = 1
+local_int_array_0 = [[] [] []]
+test_pop_4 ------------
+pop value = 9
+pop value = [7 8]
+typeof = int
+typeof = int[!1]
