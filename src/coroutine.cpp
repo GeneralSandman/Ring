@@ -339,6 +339,7 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
 
             array = rvm_gc_new_array_meta(rvm,
                                           array_type,
+                                          sub_type_specifier->kind,
                                           sub_class_definition,
                                           type_specifier->u.array_t->dimension);
             //

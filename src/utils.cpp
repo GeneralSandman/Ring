@@ -1419,6 +1419,32 @@ std::string formate_array_type(RVM_Array* array_value) {
 std::string formate_array_item_type(RVM_Array* array_value) {
     std::string str;
 
+    // assert(array_value->item_type_kind != RING_BASIC_TYPE_ARRAY);
+    switch (array_value->item_type_kind) {
+    case RING_BASIC_TYPE_BOOL: str = "bool"; break;
+    case RING_BASIC_TYPE_INT: str = "int"; break;
+    case RING_BASIC_TYPE_INT64: str = "int64"; break;
+    case RING_BASIC_TYPE_DOUBLE: str = "double"; break;
+    case RING_BASIC_TYPE_STRING: str = "string"; break;
+    case RING_BASIC_TYPE_CLASS:
+        if (array_value->class_ref == nullptr) {
+            str = "unknow";
+        } else {
+            str = array_value->class_ref->identifier;
+        }
+        break;
+    case RING_BASIC_TYPE_FUNC:
+        str = "closure";
+        break;
+    default:
+        str = "unknow";
+    }
+    if (str != "unknow") {
+        // 兼容继续处理 array_value->type
+        return str;
+    }
+
+    // TODO: 后续删除 array_value->type，删除此逻辑
     switch (array_value->type) {
     case RVM_ARRAY_BOOL: str = "bool"; break;
     case RVM_ARRAY_INT: str = "int"; break;
@@ -1435,9 +1461,11 @@ std::string formate_array_item_type(RVM_Array* array_value) {
     case RVM_ARRAY_A:
         // 中间态数组
         // 递归向下找，找到元素的类型，最后加上 数组维度
-        // FIXME: 0 这里会 panic
-        str = formate_array_item_type(array_value->u.a_array[0]);
-        // str = "array-unknow";
+        if (array_value->length > 0) {
+            str = formate_array_item_type(array_value->u.a_array[0]);
+        } else {
+            str = "unknow";
+        }
         break;
     case RVM_ARRAY_CLOSURE:
         str = "closure";

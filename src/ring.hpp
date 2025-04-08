@@ -774,17 +774,20 @@ typedef enum {
 struct RVM_Array {
     RVM_GC_Object_Header;
 
-    RVM_Array_Type type;
+    RVM_Array_Type type; // 用来选择 u
     unsigned char  dimension;
     unsigned int   length;
     unsigned int   capacity;
 
+    // 数组最终元素的 类型
+    // item_type_kind 不可能 为 array
+    // 方便快速定位到最终的数组元素，但是当前设计存在冗余
+    // TODO: 后续应该废弃掉 RVM_Array_Type type
+    Ring_BasicType item_type_kind;
+
     // 这里实现的不太好，信息冗余了
     // 只有当 type == RVM_ARRAY_CLASS_OBJECT 才有意义
     RVM_ClassDefinition* class_ref;
-
-    // TODO: 直接加一个类型，指向最终的元素的类型
-
 
     union {
         bool*             bool_array;
@@ -3577,6 +3580,7 @@ unsigned int     rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
 
 RVM_Array*       rvm_gc_new_array_meta(Ring_VirtualMachine* rvm,
                                        RVM_Array_Type       array_type,
+                                       Ring_BasicType       item_type_kind,
                                        RVM_ClassDefinition* class_definition,
                                        unsigned int         dimension);
 RVM_Array*       rvm_new_array(Ring_VirtualMachine* rvm,
@@ -3584,6 +3588,7 @@ RVM_Array*       rvm_new_array(Ring_VirtualMachine* rvm,
                                unsigned int*        dimension_list,
                                unsigned int         dimension_index,
                                RVM_Array_Type       array_type,
+                               Ring_BasicType       item_type_kind,
                                RVM_ClassDefinition* class_definition);
 RVM_Array*       rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src);
 void             rvm_array_growth(Ring_VirtualMachine* rvm, RVM_Array* array);
