@@ -327,11 +327,8 @@ void init_coroutine_entry_func_local_variable(Ring_VirtualMachine* rvm,
             break;
         case RING_BASIC_TYPE_ARRAY: {
             // 这里没有分配空间, 只分配了一下meta
-            RVM_TypeSpecifier* sub_type_specifier = type_specifier->u.array_t->sub;
-            RVM_Array_Type     array_type         = RVM_Array_Type(sub_type_specifier->kind);
-            // TODO: RVM_Array_Type 强制转换有问题
-            //       应该 使用这个 convert_rvm_array_type， 上边的在多维数组的情况下会有bug
-            // RVM_Array_Type       array_type           = convert_rvm_array_type(type_specifier);
+            RVM_TypeSpecifier*   sub_type_specifier   = type_specifier->u.array_t->sub;
+            RVM_Array_Type       array_type           = convert_rvm_array_type(type_specifier);
             RVM_ClassDefinition* sub_class_definition = nullptr;
             if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
                 sub_class_definition = &(rvm->class_list[sub_type_specifier->u.class_def_index]);

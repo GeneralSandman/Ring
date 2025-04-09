@@ -868,14 +868,14 @@ void rvm_fill_class_ob(Ring_VirtualMachine* rvm,
             // 这里没有分配空间, 只分配了一下meta
             // array_type 强制转化一下
             RVM_TypeSpecifier*   sub_type_specifier   = type_specifier->u.array_t->sub;
-            RVM_Array_Type       sub_array_type       = RVM_Array_Type(sub_type_specifier->kind);
+            RVM_Array_Type       array_type           = convert_rvm_array_type(type_specifier);
             RVM_ClassDefinition* sub_class_definition = nullptr;
             if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
                 sub_class_definition = &(rvm->class_list[sub_type_specifier->u.class_def_index]);
             }
 
             field_array                           = rvm_gc_new_array_meta(rvm,
-                                                                          sub_array_type,
+                                                                          array_type,
                                                                           sub_type_specifier->kind,
                                                                           sub_class_definition,
                                                                           type_specifier->u.array_t->dimension);

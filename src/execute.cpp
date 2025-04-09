@@ -316,16 +316,15 @@ void rvm_init_static_variable(Ring_VirtualMachine* rvm,
         case RING_BASIC_TYPE_ARRAY: {
             // 这里没有分配空间, 只分配了一下meta
             // array_type 强制转化一下
-            RVM_TypeSpecifier* sub_type_specifier = type_specifier->u.array_t->sub;
-            // TODO: RVM_Array_Type 强制转换有问题
-            RVM_Array_Type       sub_array_type       = RVM_Array_Type(sub_type_specifier->kind);
+            RVM_TypeSpecifier*   sub_type_specifier   = type_specifier->u.array_t->sub;
+            RVM_Array_Type       array_type           = convert_rvm_array_type(type_specifier);
             RVM_ClassDefinition* sub_class_definition = nullptr;
             if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
                 sub_class_definition = &(rvm->class_list[sub_type_specifier->u.class_def_index]);
             }
 
             array = rvm_gc_new_array_meta(rvm,
-                                          sub_array_type,
+                                          array_type,
                                           sub_type_specifier->kind,
                                           sub_class_definition,
                                           type_specifier->u.array_t->dimension);
@@ -2822,10 +2821,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             break;
         case RING_BASIC_TYPE_ARRAY: {
             // 这里没有分配空间, 只分配了一下meta
-            RVM_TypeSpecifier* sub_type_specifier = type_specifier->u.array_t->sub;
-            // RVM_Array_Type     array_type         = RVM_Array_Type(sub_type_specifier->kind);
-            // TODO: RVM_Array_Type 强制转换有问题
-            //       应该 使用这个 convert_rvm_array_type， 上边的在多维数组的情况下会有bug
+            RVM_TypeSpecifier*   sub_type_specifier   = type_specifier->u.array_t->sub;
             RVM_Array_Type       array_type           = convert_rvm_array_type(type_specifier);
             RVM_ClassDefinition* sub_class_definition = nullptr;
             if (sub_type_specifier->kind == RING_BASIC_TYPE_CLASS) {
@@ -3568,12 +3564,13 @@ RVM_Array* init_derive_function_variadic_argument(Ring_VirtualMachine* rvm,
     unsigned int dimension_list[] = {size, 0, 0, 0, 0, 0, 0, 0};
     // 为了实现简单，直接补齐7个0 即可，数组的最大维度为8
 
-    // TODO: RVM_Array_Type 强制转换有问题
-    array_value = rvm_new_array(rvm,
-                                dimension, dimension_list, dimension,
-                                RVM_Array_Type(parameter->type_specifier->kind),
-                                parameter->type_specifier->kind,
-                                rvm_class_definition);
+    RVM_Array_Type array_type = convert_rvm_array_type(parameter->type_specifier);
+
+    array_value               = rvm_new_array(rvm,
+                                              dimension, dimension_list, dimension,
+                                              array_type,
+                                              parameter->type_specifier->kind,
+                                              rvm_class_definition);
 
     return array_value;
 }
@@ -3582,7 +3579,9 @@ void batch_set_variadic_element(Ring_VirtualMachine* rvm) {
 }
 
 RVM_Array_Type convert_rvm_array_type(RVM_TypeSpecifier* type_specifier) {
-    assert(type_specifier->kind == RING_BASIC_TYPE_ARRAY);
+    if (type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
+        return RVM_Array_Type(type_specifier->kind);
+    }
 
     RVM_TypeSpecifier_Array* array_t = type_specifier->u.array_t;
 
