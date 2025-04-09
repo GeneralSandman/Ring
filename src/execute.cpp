@@ -2572,7 +2572,22 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     }
 
 
-    // TODO: 为了安全性，需要进行检查
+    /*
+     * 理论上，一个函数在完成之后，VM_CUR_CO_STACK_TOP_INDEX == callinfo->caller_stack_base
+     * 但是这里设计存在一个缺陷：
+     * e.g. 只有一个表达式作为语句
+     *  a;
+     *
+     * 此时，只有一个push字节码，没有pop字节码
+     * 当前的栈空间会占用一个
+     * 对于这种情况，应该生成一个 pop 字节码，不如栈空间会不受控制的增长
+     *
+     * TODO: 后续解决这个问题
+     * 1. 将 AssignExpression 调整为 Statement
+     * 2. 如果 statement 是一个表达式，那么在执行完之后，需要添加一个 pop
+     * 3. 无需手动设置 VM_CUR_CO_STACK_TOP_INDEX
+     */
+    VM_CUR_CO_STACK_TOP_INDEX = callinfo->caller_stack_base;
     // assert(VM_CUR_CO_STACK_TOP_INDEX == callinfo->caller_stack_base);
 
     // 释放arguement
@@ -3199,7 +3214,7 @@ ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Array* array, RV
 
 ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_String** value) {
     RVM_String* dst_string = rvm_deep_copy_string(rvm, array->u.string_array[--array->length]);
-    *value                 = dst_string; // TODO: 这里内存泄漏了
+    *value                 = dst_string;
     return ERROR_CODE_SUCCESS;
 }
 
