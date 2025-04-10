@@ -1606,10 +1606,12 @@ EnumItemDeclaration* enum_item_declaration_list_add_item(EnumItemDeclaration* li
 EnumItemDeclaration* create_enum_item_declaration(char* identifier) {
     debug_ast_info_with_yellow("\t");
 
+    // TODO: 继续实现
+
     EnumItemDeclaration* enum_item_decl = (EnumItemDeclaration*)mem_alloc(get_front_mem_pool(), sizeof(EnumItemDeclaration));
     enum_item_decl->line_number         = package_unit_get_line_number();
-    enum_item_decl->index_of_enum       = 0;       // UPDATED_BY_FIX_AST
-    enum_item_decl->type_specifier      = nullptr; // TODO:
+    enum_item_decl->index_of_enum       = 0; // UPDATED_BY_FIX_AST
+    enum_item_decl->type_specifier      = nullptr;
     enum_item_decl->identifier          = identifier;
     enum_item_decl->next                = nullptr;
 

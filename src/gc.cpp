@@ -1061,11 +1061,12 @@ void rvm_fill_closure(Ring_VirtualMachine* rvm,
                       RVM_Closure*         closure,
                       RVM_Function*        callee_function) {
 
-    closure->anonymous_func      = callee_function;
-    closure->free_value_size     = callee_function->free_value_size;
-    closure->free_value_list     = (RVM_FreeValue*)mem_alloc(rvm->data_pool,
-                                                             closure->free_value_size
-                                                                 * sizeof(RVM_FreeValue));
+    closure->anonymous_func  = callee_function;
+    closure->free_value_size = callee_function->free_value_size;
+    closure->free_value_list = (RVM_FreeValue*)mem_alloc(rvm->data_pool,
+                                                         closure->free_value_size
+                                                             * sizeof(RVM_FreeValue));
+    // TODO: free_value 分配的位置不对，所有权需要继续优化
 
     unsigned int alloc_data_size = 0;
 

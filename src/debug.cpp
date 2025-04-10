@@ -513,7 +513,15 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
                        break_points.size(),
                        breakpoint_line);
 
-                // TODO: 展示更多的信息
+                // TODO:
+                // 1. 添加更多的信息：文件名，函数名
+                // 2. 如果行数所在的代码为空行，需要提示添加失败
+                // 3. 不光能在 main package 设置断点，还支持在其他 package设置断点
+                // break set <line>
+                // break set <filename>:<line>
+                // break set <filename>:<func
+                // break <funcname> 函数入口处设置断点
+                // break <filename>:<funcname>
                 RVM_BreakPoint breakpoint = RVM_BreakPoint{
                     .package     = nullptr,
                     .file_name   = nullptr,

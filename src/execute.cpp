@@ -3441,8 +3441,6 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
                          RVM_Function* caller_function, RVM_Closure* caller_closure,
                          RVM_Function* callee_function) {
 
-    // TODO: 需要分配在堆上
-    // free value 需要分配在堆上
     RVM_Closure* closure = rvm_gc_new_closure_meta(rvm);
     rvm_fill_closure(rvm, closure, callee_function);
 
