@@ -1,0 +1,25 @@
+test_range_bool_array_literal -------------
+value = false
+value = true
+value = false
+value = true
+test_range_bool -------------
+value = [false true]
+value = [true false]
+value = false
+value = true
+value = true
+value = false
+test_range_class -------------
+value = [{Bool:false Int:0 Int64:0 Double:0.000000} {Bool:true Int:1 Int64:1 Double:1.000000}]
+value = [{Bool:true Int:2 Int64:2 Double:2.000000} {Bool:false Int:3 Int64:3 Double:3.000000}]
+value = {Bool:false Int:0 Int64:0 Double:0.000000}
+value = {Bool:true Int:1 Int64:1 Double:1.000000}
+value = {Bool:true Int:2 Int64:2 Double:2.000000}
+value = {Bool:false Int:3 Int64:3 Double:3.000000}
+test_range_class_field -------------
+value = 1
+value = 2
+value = 3
+value = 4
+value = 5
