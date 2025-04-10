@@ -13,7 +13,7 @@ int yylex();
 
 %locations                       // 开启locations
 %glr-parser                      // 使用 GLR 解析
-%expect    4                     // legitimate 0 shift/reduce conflicts
+%expect    5                     // legitimate 0 shift/reduce conflicts
 %expect-rr 0                     // legitimate 0 reduce/reduce conflicts
 
 // 在 array_literal_expression 的 class_type_specifier dimension_expression TOKEN_LC expression_list TOKEN_RC
@@ -639,7 +639,13 @@ for_statement
         debug_bison_info_with_green("[RULE::for_statement]\t ");
         $$ = create_for_ternary_statement($3, $5, $7, $9);
     }
-    | TOKEN_FOR TOKEN_LP      IDENTIFIER TOKEN_IN TOKEN_RANGE primary_not_new_array      TOKEN_RP block 
+    | TOKEN_FOR TOKEN_LP      IDENTIFIER TOKEN_IN TOKEN_RANGE left_value_expression      TOKEN_RP block 
+    {
+        debug_bison_info_with_green("[RULE::for_statement:range]\t ");
+        
+        $$ = create_for_range_statement(create_expression_identifier($3), $6, $8);
+    }
+    | TOKEN_FOR TOKEN_LP      IDENTIFIER TOKEN_IN TOKEN_RANGE derive_value_literal_expression      TOKEN_RP block 
     {
         debug_bison_info_with_green("[RULE::for_statement:range]\t ");
         

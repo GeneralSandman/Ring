@@ -804,12 +804,9 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
 
     // step-1. range_call
     //       push array-object & array-iter to runtime_stack
-    if (range_statement->operand->type != EXPRESSION_TYPE_IDENTIFIER) {
-        // TODO: 编译阶段报错
-    }
 
     // push array-object
-    generate_vmcode_from_identifier_expression(executer, range_statement->operand->u.identifier_expression, opcode_buffer);
+    generate_vmcode_from_expression(executer, range_statement->operand, opcode_buffer);
     // push array-iterator
     // TODO: 这里数组的数量受到了限制
     generate_vmcode(executer, opcode_buffer,
@@ -824,28 +821,21 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
     //       [RVM_CODE_FOR_RANGE_INIT]: push index & value to runtime_stack
     //       [RVM_CODE_FOR_RANGE_INIT]: add array-iter
     //       pop -> index & value
-
     end_label = opcode_buffer_get_label(opcode_buffer);
-    // generate_vmcode(executer, opcode_buffer,
-    //                 RVM_CODE_FOR_RANGE_INIT, end_label,
-    //                 range_statement->operand->u.identifier_expression->line_number);
 
 
-    // generate_vmcode(executer, opcode_buffer,
-    //                 RVM_CODE_DUPLICATE, (0<<8) | 1 ,
-    //                 range_statement->operand->u.identifier_expression->line_number);
+    assert(range_statement->operand->convert_type_size == 1
+           && range_statement->operand->convert_type != nullptr);
+    TypeSpecifier* type_specifier = range_statement->operand->convert_type[0];
+    assert(type_specifier != nullptr);
 
 
-    VarDecl* declaration = range_statement->operand->u.identifier_expression->u.variable->decl;
-    if (declaration == nullptr) {
-        ring_error_report("invalid range operand:%s\n", range_statement->operand->u.identifier_expression->identifier);
-    }
-    if (declaration->type_specifier->u.array_t->dimension > 1) {
+    if (type_specifier->u.array_t->dimension > 1) {
         generate_vmcode(executer, opcode_buffer, RVM_CODE_FOR_RANGE_ARRAY_A, end_label, range_statement->operand->u.identifier_expression->line_number);
     } else {
 
         RVM_Opcode opcode = RVM_CODE_UNKNOW;
-        switch (declaration->type_specifier->u.array_t->sub->kind) {
+        switch (type_specifier->u.array_t->sub->kind) {
         case RING_BASIC_TYPE_BOOL: opcode = RVM_CODE_FOR_RANGE_ARRAY_BOOL; break;
         case RING_BASIC_TYPE_INT: opcode = RVM_CODE_FOR_RANGE_ARRAY_INT; break;
         case RING_BASIC_TYPE_INT64: opcode = RVM_CODE_FOR_RANGE_ARRAY_INT64; break;
