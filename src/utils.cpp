@@ -622,8 +622,8 @@ void dump_vm_function(Package_Executer*    package_executer,
     // 5. Instructions
     printf("+Instructions: %u\n",
            (function->type == RVM_FUNCTION_TYPE_DERIVE) ? (function->u.derive_func->code_size) : 0);
-    printf(" ├──%-8s%-30s%-20s%-18s\n",
-           "*Num", "*Instruction", "*Operand", "*SourceLineNum");
+    printf(" ├──%-8s%-22s%-30s%-20s%-18s\n",
+           "*Num", "*PC", "*Instruction", "*Operand", "*SourceLineNum");
     if (function->type == RVM_FUNCTION_TYPE_DERIVE) {
         RVM_Byte*                          code_list  = nullptr;
         unsigned int                       code_size  = 0;
@@ -635,14 +635,14 @@ void dump_vm_function(Package_Executer*    package_executer,
         code_size                                              = function->u.derive_func->code_size;
         code_line_map                                          = function->u.derive_func->code_line_map;
 
-        for (unsigned int i = 0; i < code_size; opcode_num++) {
+        for (unsigned int pc = 0; pc < code_size; opcode_num++) {
             std::string source_code_line_number;
-            if (code_line_map_index < code_line_map.size() && i == code_line_map[code_line_map_index].opcode_begin_index) {
+            if (code_line_map_index < code_line_map.size() && pc == code_line_map[code_line_map_index].opcode_begin_index) {
                 source_code_line_number = std::to_string(code_line_map[code_line_map_index].line_number);
                 code_line_map_index++;
             }
 
-            RVM_Byte opcode = code_list[i++];
+            RVM_Byte opcode = code_list[pc++];
             if (opcode <= RVM_CODE_UNKNOW || RVM_CODES_NUM <= opcode) {
                 ring_error_report("error: invalid opcode %d in generate\n", opcode);
             }
@@ -659,33 +659,34 @@ void dump_vm_function(Package_Executer*    package_executer,
                 break;
 
             case OPCODE_OPERAND_TYPE_1BYTE_A:
-                operand_str = std::to_string(code_list[i++]);
+                operand_str = std::to_string(code_list[pc++]);
                 break;
 
             case OPCODE_OPERAND_TYPE_2BYTE_As:
-                operand1 = code_list[i++] << 8;
-                operand1 += code_list[i++];
+                operand1 = code_list[pc++] << 8;
+                operand1 += code_list[pc++];
                 operand_str = std::to_string(operand1);
                 break;
 
             case OPCODE_OPERAND_TYPE_2BYTE_AB:
-                operand1    = code_list[i++];
-                operand2    = code_list[i++];
+                operand1    = code_list[pc++];
+                operand2    = code_list[pc++];
                 operand_str = std::to_string(operand1) + ", " + std::to_string(operand2);
                 break;
 
             case OPCODE_OPERAND_TYPE_3BYTE_ABs:
-                operand1 = code_list[i++];
-                operand2 = code_list[i++] << 8;
-                operand2 += code_list[i++];
+                operand1 = code_list[pc++];
+                operand2 = code_list[pc++] << 8;
+                operand2 += code_list[pc++];
                 operand_str = std::to_string(operand1) + ", " + std::to_string(operand2);
                 break;
 
             default: break;
             }
 
-            printf(" ├──%-8d%-30s%-20s%-18s\n",
+            printf(" ├──%-8d%-22u%-30s%-20s%-18s\n",
                    opcode_num,
+                   pc,
                    opcode_name.c_str(),
                    operand_str.c_str(),
                    source_code_line_number.c_str());

@@ -747,14 +747,14 @@ void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
 
     ForTernaryStatement* ternary_statement = for_statement->u.ternary_statement;
 
-    // Step-1:
+    // Step-1: init expression
     if (ternary_statement->init_expression) {
         generate_vmcode_from_expression(executer, ternary_statement->init_expression, opcode_buffer);
     }
     loop_label = opcode_buffer_get_label(opcode_buffer);
     opcode_buffer_set_label(opcode_buffer, loop_label, opcode_buffer->code_size);
 
-    // Step-2:
+    // Step-2: condition expression
     end_label = opcode_buffer_get_label(opcode_buffer);
     if (ternary_statement->condition_expression) {
         generate_vmcode_from_expression(executer, ternary_statement->condition_expression, opcode_buffer);
@@ -764,16 +764,17 @@ void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
 
     // Step-3:
     if (for_statement->block) {
-        for_statement->block->block_labels.break_label = end_label;
-        for_statement->block->block_labels.continue_label =
-            continue_label = opcode_buffer_get_label(opcode_buffer);
+        for_statement->block->block_labels.break_label    = end_label;
+        continue_label                                    = opcode_buffer_get_label(opcode_buffer);
+        for_statement->block->block_labels.continue_label = continue_label;
+
 
         generate_vmcode_from_block(executer, for_statement->block, opcode_buffer);
     }
 
     opcode_buffer_set_label(opcode_buffer, continue_label, opcode_buffer->code_size);
 
-    // Step-4:
+    // Step-4: post expression
     if (ternary_statement->post_expression) {
         generate_vmcode_from_expression(executer, ternary_statement->post_expression, opcode_buffer);
     }
