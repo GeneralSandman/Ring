@@ -1273,7 +1273,7 @@ void throw_runtime_err(Ring_VirtualMachine* rvm,
 
 #define THROW_NIL_FMT "invalid memory address or nil pointer dereference"
 #define THROW_NIL_FMT_DETAIL "invalid memory address or nil pointer dereference: %s"
-#define THROW_RANGE_FMT "index out of range [%d] with length %d"
+#define THROW_RANGE_FMT "index out of range [%u] with length %u"
 #define THROW_INVAID_OPCODE "invalid vm opcode: %d, pc: %d"
 #define THROW_COROUTINE_NIL "coroutine is nil, coroutinue id: %llu"
 #define THROW_COROUTINE_DEAD "coroutine is dead, coroutinue id: %llu"

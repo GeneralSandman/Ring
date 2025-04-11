@@ -622,12 +622,13 @@ void dump_vm_function(Package_Executer*    package_executer,
     // 5. Instructions
     printf("+Instructions: %u\n",
            (function->type == RVM_FUNCTION_TYPE_DERIVE) ? (function->u.derive_func->code_size) : 0);
-    printf(" ├──%-8s%-30s%-20s%-18s\n",
-           "*Num", "*Instruction", "*Operand", "*SourceLineNum");
+    printf(" ├──%-8s%-8s%-30s%-20s%-18s\n",
+           "*Num", "*PC", "*Instruction", "*Operand", "*SourceLineNum");
     if (function->type == RVM_FUNCTION_TYPE_DERIVE) {
         RVM_Byte*                          code_list  = nullptr;
         unsigned int                       code_size  = 0;
         unsigned int                       opcode_num = 0; // 多个 RVM_Byte 组成一个 有效的字节码, 不定长字节码
+        unsigned int                       pc         = 0;
         std::vector<RVM_SourceCodeLineMap> code_line_map;
         unsigned int                       code_line_map_index = 0;
 
@@ -636,6 +637,8 @@ void dump_vm_function(Package_Executer*    package_executer,
         code_line_map                                          = function->u.derive_func->code_line_map;
 
         for (unsigned int i = 0; i < code_size; opcode_num++) {
+            pc = i;
+
             std::string source_code_line_number;
             if (code_line_map_index < code_line_map.size() && i == code_line_map[code_line_map_index].opcode_begin_index) {
                 source_code_line_number = std::to_string(code_line_map[code_line_map_index].line_number);
@@ -684,8 +687,9 @@ void dump_vm_function(Package_Executer*    package_executer,
             default: break;
             }
 
-            printf(" ├──%-8d%-30s%-20s%-18s\n",
+            printf(" ├──%-8d%-8u%-30s%-20s%-18s\n",
                    opcode_num,
+                   pc,
                    opcode_name.c_str(),
                    operand_str.c_str(),
                    source_code_line_number.c_str());
