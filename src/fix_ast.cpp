@@ -613,8 +613,99 @@ void fix_for_statement(ForStatement* for_statement, Block* block, FunctionTuple*
         fix_expression(for_statement->u.ternary_statement->condition_expression, block, func);
         fix_expression(for_statement->u.ternary_statement->post_expression, block, func);
     } else if (for_statement->type == FOR_STATEMENT_TYPE_RANGE) {
-        fix_expression(for_statement->u.range_statement->left, block, func);
-        fix_expression(for_statement->u.range_statement->operand, block, func);
+        Expression* left    = for_statement->u.range_statement->left;
+        Expression* operand = for_statement->u.range_statement->operand;
+        fix_expression(left, block, func);
+        fix_expression(operand, block, func);
+
+        // Ring-Compiler-Error-Report ERROR_FOR_RANGE_INVALID_LEFT_VALUE
+        if (left->convert_type_size != 1
+            || left->convert_type == nullptr) {
+            std::string left_type_str = format_type_specifier(left->convert_type_size, left->convert_type);
+
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "for range statement: invalid item type(%s); E:%d.",
+                left_type_str.c_str(),
+                ERROR_FOR_RANGE_MISMATCH_LEFT_OPERAND);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(left->line_number),
+                .line_number             = left->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+
+        // Ring-Compiler-Error-Report ERROR_FOR_RANGE_INVALID_OPERAND_VALUE
+        if (operand->convert_type_size != 1
+            || operand->convert_type == nullptr) {
+            std::string operand_type_str = format_type_specifier(operand->convert_type_size, operand->convert_type);
+
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "for range statement: invalid array type(%s); E:%d.",
+                operand_type_str.c_str(),
+                ERROR_FOR_RANGE_MISMATCH_LEFT_OPERAND);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(left->line_number),
+                .line_number             = left->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
+
+        TypeSpecifier* left_type    = left->convert_type[0];
+        TypeSpecifier* operand_type = operand->convert_type[0];
+        // 像赋值的逻辑一样，进行匹配
+        // left 是否 比 operand 小一个纬度
+        // Ring-Compiler-Error-Report ERROR_FOR_RANGE_MISMATCH_LEFT_OPERAND
+        if (!comp_type_specifier_dimension(operand_type, left_type, 1)) {
+            std::string operand_type_str = format_type_specifier(operand_type);
+            std::string left_type_str    = format_type_specifier(left_type);
+
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "for range statement: array type(%s) not match item type(%s); E:%d.",
+                operand_type_str.c_str(),
+                left_type_str.c_str(),
+                ERROR_FOR_RANGE_MISMATCH_LEFT_OPERAND);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(left->line_number),
+                .line_number             = left->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
     } else {
         ring_error_report("for statement type is invalid error\n");
     }

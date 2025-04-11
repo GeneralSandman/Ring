@@ -937,6 +937,18 @@ std::string format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int sourc
     return result;
 }
 
+std::string format_type_specifier(unsigned int convert_type_size, TypeSpecifier** convert_type) {
+    std::string result;
+
+    for (unsigned int i = 0; i < convert_type_size; i++) {
+        if (i != 0) {
+            result += ", ";
+        }
+        result += format_type_specifier(convert_type[i]);
+    }
+
+    return result;
+}
 
 std::string format_type_specifier(TypeSpecifier* type_specifier) {
     assert(type_specifier != nullptr);
@@ -1597,6 +1609,42 @@ bool comp_type_specifier_func(Ring_DeriveType_Func* a, Ring_DeriveType_Func* b) 
 
 
     return true;
+}
+
+/*
+ * comp_type_specifier_dimension
+ *
+ * 判断 某个类型item 是否为 array 类型的子维度，也就是 array的第dimension个纬度
+ * e.g.
+ *    int 为 int[] 的第一个子维度
+ *    int[] 为 int[,,] 的第二个子维度
+ *
+ * 如果 dimension == 0, 则判断 item 与 array 类型是否一致
+ */
+bool comp_type_specifier_dimension(TypeSpecifier* array, TypeSpecifier* item, unsigned int dimension) {
+    if (array->kind != RING_BASIC_TYPE_ARRAY) {
+        return false;
+    }
+
+    if (dimension == 0) {
+        return comp_type_specifier(array, item);
+    }
+
+    if (item->kind == RING_BASIC_TYPE_ARRAY) {
+        // 都是数组，需要判断维度
+        Ring_DeriveType_Array* a_array_t = array->u.array_t;
+        Ring_DeriveType_Array* b_array_t = item->u.array_t;
+
+        return a_array_t->dimension == b_array_t->dimension + 1
+            && comp_type_specifier(a_array_t->sub, b_array_t->sub);
+    } else {
+        // item不是数组，
+        if (array->u.array_t->dimension != 1) {
+            return false;
+        }
+
+        return comp_type_specifier(array->u.array_t->sub, item);
+    }
 }
 
 std::string sprintf_string(const char* format, ...) {

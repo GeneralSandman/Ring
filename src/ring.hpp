@@ -2478,6 +2478,10 @@ typedef enum {
 
     ERROR_CANOT_USE_VAR_LIKE_FUNC               = 300007, // 不能使用变量名作为函数名
 
+    ERROR_FOR_RANGE_INVALID_LEFT_VALUE          = 300008, // for range 中，不合法的被赋值表达式
+    ERROR_FOR_RANGE_INVALID_OPERAND_VALUE       = 300009, // for range 中，不合法的array 表达式
+    ERROR_FOR_RANGE_MISMATCH_LEFT_OPERAND       = 300010, // for range 中，赋值不匹配
+
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
 
@@ -3477,6 +3481,7 @@ std::string              format_rvm_value(RVM_Value* value);
 std::string              format_rvm_call_stack(Ring_VirtualMachine* rvm);
 std::string              format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int source_line_number);
 
+std::string              format_type_specifier(unsigned int convert_type_size, TypeSpecifier** convert_type);
 std::string              format_type_specifier(TypeSpecifier* type_specifier);
 std::string              format_type_specifier_array(Ring_DeriveType_Array* array_type);
 std::string              format_type_specifier_class(Ring_DeriveType_Class* class_type);
@@ -3512,6 +3517,7 @@ std::string              formate_closure_type(Package_Executer* package_executer
 
 bool                     comp_type_specifier(TypeSpecifier* a, TypeSpecifier* b);
 bool                     comp_type_specifier_func(Ring_DeriveType_Func* a, Ring_DeriveType_Func* b);
+bool                     comp_type_specifier_dimension(TypeSpecifier* array, TypeSpecifier* item, unsigned int dimension);
 
 std::string              sprintf_string(const char* format, ...);
 std::string              sprintf_string_va(const char* format, va_list args);
