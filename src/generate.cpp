@@ -731,7 +731,6 @@ void generate_vmcode_from_for_statement(Package_Executer* executer,
     }
 }
 
-// TODO: 暂时不支持 break continue
 void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
                                                 ForStatement*     for_statement,
                                                 RVM_OpcodeBuffer* opcode_buffer) {
@@ -747,14 +746,14 @@ void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
 
     ForTernaryStatement* ternary_statement = for_statement->u.ternary_statement;
 
-    // Step-1:
+    // Step-1: init expression
     if (ternary_statement->init_expression) {
         generate_vmcode_from_expression(executer, ternary_statement->init_expression, opcode_buffer);
     }
     loop_label = opcode_buffer_get_label(opcode_buffer);
     opcode_buffer_set_label(opcode_buffer, loop_label, opcode_buffer->code_size);
 
-    // Step-2:
+    // Step-2: condition expression
     end_label = opcode_buffer_get_label(opcode_buffer);
     if (ternary_statement->condition_expression) {
         generate_vmcode_from_expression(executer, ternary_statement->condition_expression, opcode_buffer);
@@ -762,7 +761,7 @@ void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
     }
 
 
-    // Step-3:
+    // Step-3: block
     if (for_statement->block) {
         for_statement->block->block_labels.break_label = end_label;
         for_statement->block->block_labels.continue_label =
@@ -773,7 +772,7 @@ void generate_vmcode_from_for_ternary_statement(Package_Executer* executer,
 
     opcode_buffer_set_label(opcode_buffer, continue_label, opcode_buffer->code_size);
 
-    // Step-4:
+    // Step-4: post expression
     if (ternary_statement->post_expression) {
         generate_vmcode_from_expression(executer, ternary_statement->post_expression, opcode_buffer);
     }
@@ -877,7 +876,6 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
 }
 
 
-// TODO: 暂时不支持 break continue
 void generate_vmcode_from_dofor_statement(Package_Executer* executer,
                                           DoForStatement*   dofor_statement,
                                           RVM_OpcodeBuffer* opcode_buffer) {
@@ -891,7 +889,7 @@ void generate_vmcode_from_dofor_statement(Package_Executer* executer,
     unsigned int continue_label = 0;
 
 
-    // Step-1:
+    // Step-1: init expression
     if (dofor_statement->init_expression) {
         generate_vmcode_from_expression(executer, dofor_statement->init_expression, opcode_buffer);
     }
@@ -899,7 +897,7 @@ void generate_vmcode_from_dofor_statement(Package_Executer* executer,
     opcode_buffer_set_label(opcode_buffer, loop_label, opcode_buffer->code_size);
 
 
-    // Step-2:
+    // Step-2: block
     end_label = opcode_buffer_get_label(opcode_buffer);
     if (dofor_statement->block) {
         dofor_statement->block->block_labels.break_label = end_label;
@@ -913,14 +911,14 @@ void generate_vmcode_from_dofor_statement(Package_Executer* executer,
     opcode_buffer_set_label(opcode_buffer, continue_label, opcode_buffer->code_size);
 
 
-    // Step-3:
+    // Step-3:  condition expression
     if (dofor_statement->condition_expression) {
         generate_vmcode_from_expression(executer, dofor_statement->condition_expression, opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label, dofor_statement->condition_expression->line_number);
     }
 
 
-    // Step-4:
+    // Step-4: post expression
     if (dofor_statement->post_expression) {
         generate_vmcode_from_expression(executer, dofor_statement->post_expression, opcode_buffer);
     }
@@ -928,7 +926,7 @@ void generate_vmcode_from_dofor_statement(Package_Executer* executer,
     // Step-5;
     generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, loop_label, dofor_statement->line_number);
 
-    // Step-End;
+    // Step-End:
     opcode_buffer_set_label(opcode_buffer, end_label, opcode_buffer->code_size);
 }
 
