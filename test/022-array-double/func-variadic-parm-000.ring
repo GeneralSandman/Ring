@@ -30,7 +30,7 @@ fn func_variadic_parameter(var double... array_value) {
     fmt::printf("cap(array_value) = {}\n", cap(array_value));
 
     var double double_value;
-    for(double_value in range array_value) {
+    for(double_value = range array_value) {
         fmt::println(double_value);
     }
 }

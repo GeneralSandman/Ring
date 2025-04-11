@@ -76,7 +76,7 @@ fn sum(var int... array_value) -> (int) {
     var int sum;
     var int int_value;
 
-    for(int_value in range array_value) {
+    for(int_value = range array_value) {
         sum += int_value;
     }
 

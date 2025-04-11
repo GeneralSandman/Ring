@@ -21,7 +21,7 @@ fn main() {
     global_job_array_0 = new Job[30];
 
     var int index = 0;
-    for(job_value in range global_job_array_0) {
+    for(job_value = range global_job_array_0) {
         fmt::println_string("-----");
         
         fmt::println_bool(job_value.Running);

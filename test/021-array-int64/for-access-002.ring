@@ -14,7 +14,7 @@ fn main() {
 
   global_int64_array_0 = new int64[200];
 
-  for(value in range global_int64_array_0) {
+  for(value = range global_int64_array_0) {
 	  fmt::println_int64(value);
 	  debug::assert(value == 0L);
   }

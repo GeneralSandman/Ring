@@ -26,7 +26,7 @@ global {
 // TestDetail: 数组元素为 class-obect
 // TestDetail: 通过for-range访问数组元素并直接调用method
 // TestDetail: ```
-// TestDetail: for(local_job_value in range global_job_array_0) {
+// TestDetail: for(local_job_value = range global_job_array_0) {
 // TestDetail:     local_job_value.printInfo();
 // TestDetail: }
 // TestDetail: ```
@@ -97,7 +97,7 @@ fn main() {
     fmt::println_string("test case 1-------");
 
     var Job local_job_value;
-    for(local_job_value in range global_job_array_0) {
+    for(local_job_value = range global_job_array_0) {
         local_job_value.printInfo();
     }
 

@@ -67,7 +67,7 @@ fn main() {
 
 
     fmt::println_string("\ntest cast 7 value------------------------");
-    for(double_value in range global_double_array_0) {
+    for(double_value = range global_double_array_0) {
         debug::assert(double_value  == 6.578);
     }
 }

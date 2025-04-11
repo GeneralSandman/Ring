@@ -62,7 +62,7 @@ fn test_for_range_break() {
 	var int index;
 	var int value;
 
-	for(value in range local_int_array_0) {
+	for(value = range local_int_array_0) {
 		if(value == 5) {
 			break;
 		}
@@ -78,7 +78,7 @@ fn test_for_range_continue() {
 	var int index;
 	var int value;
 
-	for(value in range local_int_array_0) {
+	for(value = range local_int_array_0) {
 		if(value == 5) {
 			continue;
 		}

@@ -97,7 +97,7 @@ fn main() {
 
     fmt::println_string("test case 1-------");
     var Job local_job_value;
-    for(local_job_value in range global_job_array_0) {
+    for(local_job_value = range global_job_array_0) {
         local_job_value.printInfo();
     }
 
@@ -115,7 +115,7 @@ fn main() {
 
 
     fmt::println_string("\ntest case 2-------");
-    for(local_job_value in range global_job_array_0) {
+    for(local_job_value = range global_job_array_0) {
         local_job_value.printInfo();
     }
 

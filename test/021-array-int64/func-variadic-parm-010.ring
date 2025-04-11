@@ -76,7 +76,7 @@ fn sum(var int64... array_value) -> (int64) {
     var int64 sum;
     var int64 int64_value;
 
-    for(int64_value in range array_value) {
+    for(int64_value = range array_value) {
         sum += int64_value;
     }
 

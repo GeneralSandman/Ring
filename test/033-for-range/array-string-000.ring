@@ -25,7 +25,7 @@ fn main() {
 	var string value;
 	
 	fmt::println_string("test case for-range --------------------");
-	for(value in range local_string_array_0) {
+	for(value = range local_string_array_0) {
 		fmt::println_string(value);
 	}
 
@@ -36,7 +36,7 @@ fn main() {
 
 	fmt::println_string("\ntest case for-range&for --------------------");
 	index = 0;
-	for(value in range local_string_array_0) {
+	for(value = range local_string_array_0) {
 		debug::assert(value == local_string_array_0[index]);
 		index++;
 	}

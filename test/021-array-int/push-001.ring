@@ -67,7 +67,7 @@ fn main() {
 
 
     fmt::println_string("\ntest cast 7 value------------------------");
-    for(int_value in range global_int_array_0) {
+    for(int_value = range global_int_array_0) {
         debug::assert(int_value  == 123);
     }
 }

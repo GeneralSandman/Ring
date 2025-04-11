@@ -33,7 +33,7 @@ fn func_variadic_parameter(var bool para_bool_value, var bool... array_value) {
     fmt::printf("para_bool_value = {}\n", para_bool_value);
 
     var bool bool_value;
-    for(bool_value in range array_value) {
+    for(bool_value = range array_value) {
         fmt::println(bool_value);
     }
 }

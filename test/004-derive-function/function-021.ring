@@ -11,7 +11,7 @@ import {
 
 fn test(var int... int_value_list) {
     var int int_value;
-    for(int_value in range int_value_list) {
+    for(int_value = range int_value_list) {
         fmt::println(int_value);
     }
 }

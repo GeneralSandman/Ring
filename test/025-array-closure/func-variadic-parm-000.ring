@@ -69,7 +69,7 @@ fn func_variadic_parameter(var FuncType... func_array_value) {
     fmt::printf("cap(func_array_value) = {}\n", cap(func_array_value));
 
     var FuncType func_value;
-    for(func_value in range func_array_value) {
+    for(func_value = range func_array_value) {
         func_value();
     }
 }

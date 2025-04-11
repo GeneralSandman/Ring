@@ -67,7 +67,7 @@ fn main() {
 
 
     fmt::println_string("\ntest cast 7 value------------------------");
-    for(bool_value in range global_bool_array_0) {
+    for(bool_value = range global_bool_array_0) {
         debug::assert(bool_value  == true);
     }
 }

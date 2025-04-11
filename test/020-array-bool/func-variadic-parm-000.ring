@@ -30,7 +30,7 @@ fn func_variadic_parameter(var bool... array_value) {
     fmt::printf("cap(array_value) = {}\n", cap(array_value));
 
     var bool bool_value;
-    for(bool_value in range array_value) {
+    for(bool_value = range array_value) {
         fmt::println(bool_value);
     }
 }

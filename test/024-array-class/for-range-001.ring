@@ -88,9 +88,9 @@ fn main() {
 	var Job1[]  tmp_1;
 	var Job1    tmp_0;
 
-	for(tmp_2 in range global_job1_array_0) {
-		for(tmp_1 in range tmp_2) {
-		    for(tmp_0 in range tmp_1) {
+	for(tmp_2 = range global_job1_array_0) {
+		for(tmp_1 = range tmp_2) {
+		    for(tmp_0 = range tmp_1) {
 				if(tmp_0.Bool != bool_value){
 					fmt::println_string("test failed");
 				}

@@ -48,7 +48,7 @@ fn func_variadic_parameter(var int... array_value) {
     fmt::printf("cap(array_value) = {}\n", cap(array_value));
 
     var int int_value;
-    for(int_value in range array_value) {
+    for(int_value = range array_value) {
         fmt::println(int_value);
         yield();
     }

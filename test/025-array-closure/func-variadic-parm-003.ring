@@ -111,7 +111,7 @@ fn func_variadic_parameter_dimension_1(var FuncType... array_value) {
     // fmt::printf("array_value           ={}\n", array_value);
 
     var FuncType local_func_value_0;
-    for(local_func_value_0 in range array_value) {
+    for(local_func_value_0 = range array_value) {
         local_func_value_0();
     }
 }
@@ -128,8 +128,8 @@ fn func_variadic_parameter_dimension_2(var FuncType[]... array_value) {
 
     var FuncType[] array_tmp_1;
     var FuncType local_func_value_0;
-    for(array_tmp_1 in range array_value) {
-        for(local_func_value_0 in range array_tmp_1) {
+    for(array_tmp_1 = range array_value) {
+        for(local_func_value_0 = range array_tmp_1) {
             local_func_value_0();
         }
     }
@@ -149,9 +149,9 @@ fn func_variadic_parameter_dimension_3(var FuncType[!2]... array_value) {
     var FuncType[!2] array_tmp_2;
     var FuncType[] array_tmp_1;
     var FuncType local_func_value_0;
-    for(array_tmp_2 in range array_value) {
-        for(array_tmp_1 in range array_tmp_2) {
-            for(local_func_value_0 in range array_tmp_1) {
+    for(array_tmp_2 = range array_value) {
+        for(array_tmp_1 = range array_tmp_2) {
+            for(local_func_value_0 = range array_tmp_1) {
                 local_func_value_0();
             }
         }
