@@ -19,127 +19,127 @@ $doit1()    <./test/004-derive-function/function-001.ring:11,14>
 +Local:       0
 +FreeValue:        0
 +Instructions: 20
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_string                   0                   12                
- ├──1       argument_num                  1                                     
- ├──2       push_func                     1, 4                                  
- ├──3       invoke_func_native                                                  
- ├──4       push_string                   1                   13                
- ├──5       argument_num                  1                                     
- ├──6       push_func                     1, 4                                  
- ├──7       invoke_func_native                                                  
- ├──8       pop_defer                                         14                
- ├──9       function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   0                   12                
+ ├──1       3       argument_num                  1                                     
+ ├──2       5       push_func                     1, 4                                  
+ ├──3       8       invoke_func_native                                                  
+ ├──4       9       push_string                   1                   13                
+ ├──5       12      argument_num                  1                                     
+ ├──6       14      push_func                     1, 4                                  
+ ├──7       17      invoke_func_native                                                  
+ ├──8       18      pop_defer                                         14                
+ ├──9       19      function_finish                                                     
 
 $doit2()    <./test/004-derive-function/function-001.ring:16,22>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
 +Instructions: 26
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_string                   2                   17                
- ├──1       argument_num                  1                                     
- ├──2       push_func                     1, 4                                  
- ├──3       invoke_func_native                                                  
- ├──4       argument_num                  0                   19                
- ├──5       push_func                     9, 0                                  
- ├──6       invoke_func                                                         
- ├──7       push_string                   3                   21                
- ├──8       argument_num                  1                                     
- ├──9       push_func                     1, 4                                  
- ├──10      invoke_func_native                                                  
- ├──11      pop_defer                                         22                
- ├──12      function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   2                   17                
+ ├──1       3       argument_num                  1                                     
+ ├──2       5       push_func                     1, 4                                  
+ ├──3       8       invoke_func_native                                                  
+ ├──4       9       argument_num                  0                   19                
+ ├──5       11      push_func                     9, 0                                  
+ ├──6       14      invoke_func                                                         
+ ├──7       15      push_string                   3                   21                
+ ├──8       18      argument_num                  1                                     
+ ├──9       20      push_func                     1, 4                                  
+ ├──10      23      invoke_func_native                                                  
+ ├──11      24      pop_defer                                         22                
+ ├──12      25      function_finish                                                     
 
 $doit3()    <./test/004-derive-function/function-001.ring:24,30>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
 +Instructions: 26
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_string                   4                   25                
- ├──1       argument_num                  1                                     
- ├──2       push_func                     1, 4                                  
- ├──3       invoke_func_native                                                  
- ├──4       argument_num                  0                   27                
- ├──5       push_func                     9, 1                                  
- ├──6       invoke_func                                                         
- ├──7       push_string                   5                   29                
- ├──8       argument_num                  1                                     
- ├──9       push_func                     1, 4                                  
- ├──10      invoke_func_native                                                  
- ├──11      pop_defer                                         30                
- ├──12      function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   4                   25                
+ ├──1       3       argument_num                  1                                     
+ ├──2       5       push_func                     1, 4                                  
+ ├──3       8       invoke_func_native                                                  
+ ├──4       9       argument_num                  0                   27                
+ ├──5       11      push_func                     9, 1                                  
+ ├──6       14      invoke_func                                                         
+ ├──7       15      push_string                   5                   29                
+ ├──8       18      argument_num                  1                                     
+ ├──9       20      push_func                     1, 4                                  
+ ├──10      23      invoke_func_native                                                  
+ ├──11      24      pop_defer                                         30                
+ ├──12      25      function_finish                                                     
 
 $doit4()    <./test/004-derive-function/function-001.ring:32,38>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
 +Instructions: 26
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_string                   6                   33                
- ├──1       argument_num                  1                                     
- ├──2       push_func                     1, 4                                  
- ├──3       invoke_func_native                                                  
- ├──4       argument_num                  0                   35                
- ├──5       push_func                     9, 2                                  
- ├──6       invoke_func                                                         
- ├──7       push_string                   7                   37                
- ├──8       argument_num                  1                                     
- ├──9       push_func                     1, 4                                  
- ├──10      invoke_func_native                                                  
- ├──11      pop_defer                                         38                
- ├──12      function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   6                   33                
+ ├──1       3       argument_num                  1                                     
+ ├──2       5       push_func                     1, 4                                  
+ ├──3       8       invoke_func_native                                                  
+ ├──4       9       argument_num                  0                   35                
+ ├──5       11      push_func                     9, 2                                  
+ ├──6       14      invoke_func                                                         
+ ├──7       15      push_string                   7                   37                
+ ├──8       18      argument_num                  1                                     
+ ├──9       20      push_func                     1, 4                                  
+ ├──10      23      invoke_func_native                                                  
+ ├──11      24      pop_defer                                         38                
+ ├──12      25      function_finish                                                     
 
 $doit5()    <./test/004-derive-function/function-001.ring:40,46>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
 +Instructions: 26
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_string                   8                   41                
- ├──1       argument_num                  1                                     
- ├──2       push_func                     1, 4                                  
- ├──3       invoke_func_native                                                  
- ├──4       argument_num                  0                   43                
- ├──5       push_func                     9, 3                                  
- ├──6       invoke_func                                                         
- ├──7       push_string                   9                   45                
- ├──8       argument_num                  1                                     
- ├──9       push_func                     1, 4                                  
- ├──10      invoke_func_native                                                  
- ├──11      pop_defer                                         46                
- ├──12      function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   8                   41                
+ ├──1       3       argument_num                  1                                     
+ ├──2       5       push_func                     1, 4                                  
+ ├──3       8       invoke_func_native                                                  
+ ├──4       9       argument_num                  0                   43                
+ ├──5       11      push_func                     9, 3                                  
+ ├──6       14      invoke_func                                                         
+ ├──7       15      push_string                   9                   45                
+ ├──8       18      argument_num                  1                                     
+ ├──9       20      push_func                     1, 4                                  
+ ├──10      23      invoke_func_native                                                  
+ ├──11      24      pop_defer                                         46                
+ ├──12      25      function_finish                                                     
 
 $doit6()    <./test/004-derive-function/function-001.ring:48,54>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
 +Instructions: 26
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_string                   10                  49                
- ├──1       argument_num                  1                                     
- ├──2       push_func                     1, 4                                  
- ├──3       invoke_func_native                                                  
- ├──4       argument_num                  0                   51                
- ├──5       push_func                     9, 4                                  
- ├──6       invoke_func                                                         
- ├──7       push_string                   11                  53                
- ├──8       argument_num                  1                                     
- ├──9       push_func                     1, 4                                  
- ├──10      invoke_func_native                                                  
- ├──11      pop_defer                                         54                
- ├──12      function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   10                  49                
+ ├──1       3       argument_num                  1                                     
+ ├──2       5       push_func                     1, 4                                  
+ ├──3       8       invoke_func_native                                                  
+ ├──4       9       argument_num                  0                   51                
+ ├──5       11      push_func                     9, 4                                  
+ ├──6       14      invoke_func                                                         
+ ├──7       15      push_string                   11                  53                
+ ├──8       18      argument_num                  1                                     
+ ├──9       20      push_func                     1, 4                                  
+ ├──10      23      invoke_func_native                                                  
+ ├──11      24      pop_defer                                         54                
+ ├──12      25      function_finish                                                     
 
 $main()    <./test/004-derive-function/function-001.ring:57,61>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
 +Instructions: 8
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       argument_num                  0                   59                
- ├──1       push_func                     9, 5                                  
- ├──2       invoke_func                                                         
- ├──3       pop_defer                                         61                
- ├──4       function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       argument_num                  0                   59                
+ ├──1       2       push_func                     9, 5                                  
+ ├──2       5       invoke_func                                                         
+ ├──3       6       pop_defer                                         61                
+ ├──4       7       function_finish                                                     
 

@@ -17,112 +17,112 @@ $doit1()    <./test/004-derive-function/function-000.ring:11,13>
 +Local:       0
 +FreeValue:        0
 +Instructions: 11
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_string                   0                   12                
- ├──1       argument_num                  1                                     
- ├──2       push_func                     1, 4                                  
- ├──3       invoke_func_native                                                  
- ├──4       pop_defer                                         13                
- ├──5       function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   0                   12                
+ ├──1       3       argument_num                  1                                     
+ ├──2       5       push_func                     1, 4                                  
+ ├──3       8       invoke_func_native                                                  
+ ├──4       9       pop_defer                                         13                
+ ├──5       10      function_finish                                                     
 
 $doit2()    <./test/004-derive-function/function-000.ring:15,17>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
 +Instructions: 11
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_string                   1                   16                
- ├──1       argument_num                  1                                     
- ├──2       push_func                     1, 4                                  
- ├──3       invoke_func_native                                                  
- ├──4       pop_defer                                         17                
- ├──5       function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   1                   16                
+ ├──1       3       argument_num                  1                                     
+ ├──2       5       push_func                     1, 4                                  
+ ├──3       8       invoke_func_native                                                  
+ ├──4       9       pop_defer                                         17                
+ ├──5       10      function_finish                                                     
 
 $doit3()    <./test/004-derive-function/function-000.ring:19,21>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
 +Instructions: 11
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_string                   2                   20                
- ├──1       argument_num                  1                                     
- ├──2       push_func                     1, 4                                  
- ├──3       invoke_func_native                                                  
- ├──4       pop_defer                                         21                
- ├──5       function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   2                   20                
+ ├──1       3       argument_num                  1                                     
+ ├──2       5       push_func                     1, 4                                  
+ ├──3       8       invoke_func_native                                                  
+ ├──4       9       pop_defer                                         21                
+ ├──5       10      function_finish                                                     
 
 $doit4()    <./test/004-derive-function/function-000.ring:24,32>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
 +Instructions: 38
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_string                   3                   25                
- ├──1       argument_num                  1                                     
- ├──2       push_func                     1, 4                                  
- ├──3       invoke_func_native                                                  
- ├──4       argument_num                  0                   27                
- ├──5       push_func                     9, 0                                  
- ├──6       invoke_func                                                         
- ├──7       argument_num                  0                   28                
- ├──8       push_func                     9, 1                                  
- ├──9       invoke_func                                                         
- ├──10      argument_num                  0                   29                
- ├──11      push_func                     9, 2                                  
- ├──12      invoke_func                                                         
- ├──13      push_string                   4                   31                
- ├──14      argument_num                  1                                     
- ├──15      push_func                     1, 4                                  
- ├──16      invoke_func_native                                                  
- ├──17      pop_defer                                         32                
- ├──18      function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   3                   25                
+ ├──1       3       argument_num                  1                                     
+ ├──2       5       push_func                     1, 4                                  
+ ├──3       8       invoke_func_native                                                  
+ ├──4       9       argument_num                  0                   27                
+ ├──5       11      push_func                     9, 0                                  
+ ├──6       14      invoke_func                                                         
+ ├──7       15      argument_num                  0                   28                
+ ├──8       17      push_func                     9, 1                                  
+ ├──9       20      invoke_func                                                         
+ ├──10      21      argument_num                  0                   29                
+ ├──11      23      push_func                     9, 2                                  
+ ├──12      26      invoke_func                                                         
+ ├──13      27      push_string                   4                   31                
+ ├──14      30      argument_num                  1                                     
+ ├──15      32      push_func                     1, 4                                  
+ ├──16      35      invoke_func_native                                                  
+ ├──17      36      pop_defer                                         32                
+ ├──18      37      function_finish                                                     
 
 $main()    <./test/004-derive-function/function-000.ring:35,60>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
 +Instructions: 89
- ├──*Num    *Instruction                  *Operand            *SourceLineNum    
- ├──0       push_string                   5                   37                
- ├──1       argument_num                  1                                     
- ├──2       push_func                     1, 4                                  
- ├──3       invoke_func_native                                                  
- ├──4       argument_num                  0                   38                
- ├──5       push_func                     9, 0                                  
- ├──6       invoke_func                                                         
- ├──7       push_string                   6                   41                
- ├──8       argument_num                  1                                     
- ├──9       push_func                     1, 4                                  
- ├──10      invoke_func_native                                                  
- ├──11      push_string                   7                   44                
- ├──12      argument_num                  1                                     
- ├──13      push_func                     1, 4                                  
- ├──14      invoke_func_native                                                  
- ├──15      argument_num                  0                   45                
- ├──16      push_func                     9, 1                                  
- ├──17      invoke_func                                                         
- ├──18      push_string                   6                   48                
- ├──19      argument_num                  1                                     
- ├──20      push_func                     1, 4                                  
- ├──21      invoke_func_native                                                  
- ├──22      push_string                   8                   51                
- ├──23      argument_num                  1                                     
- ├──24      push_func                     1, 4                                  
- ├──25      invoke_func_native                                                  
- ├──26      argument_num                  0                   52                
- ├──27      push_func                     9, 2                                  
- ├──28      invoke_func                                                         
- ├──29      push_string                   6                   54                
- ├──30      argument_num                  1                                     
- ├──31      push_func                     1, 4                                  
- ├──32      invoke_func_native                                                  
- ├──33      push_string                   9                   57                
- ├──34      argument_num                  1                                     
- ├──35      push_func                     1, 4                                  
- ├──36      invoke_func_native                                                  
- ├──37      argument_num                  0                   58                
- ├──38      push_func                     9, 3                                  
- ├──39      invoke_func                                                         
- ├──40      pop_defer                                         60                
- ├──41      function_finish                                                     
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   5                   37                
+ ├──1       3       argument_num                  1                                     
+ ├──2       5       push_func                     1, 4                                  
+ ├──3       8       invoke_func_native                                                  
+ ├──4       9       argument_num                  0                   38                
+ ├──5       11      push_func                     9, 0                                  
+ ├──6       14      invoke_func                                                         
+ ├──7       15      push_string                   6                   41                
+ ├──8       18      argument_num                  1                                     
+ ├──9       20      push_func                     1, 4                                  
+ ├──10      23      invoke_func_native                                                  
+ ├──11      24      push_string                   7                   44                
+ ├──12      27      argument_num                  1                                     
+ ├──13      29      push_func                     1, 4                                  
+ ├──14      32      invoke_func_native                                                  
+ ├──15      33      argument_num                  0                   45                
+ ├──16      35      push_func                     9, 1                                  
+ ├──17      38      invoke_func                                                         
+ ├──18      39      push_string                   6                   48                
+ ├──19      42      argument_num                  1                                     
+ ├──20      44      push_func                     1, 4                                  
+ ├──21      47      invoke_func_native                                                  
+ ├──22      48      push_string                   8                   51                
+ ├──23      51      argument_num                  1                                     
+ ├──24      53      push_func                     1, 4                                  
+ ├──25      56      invoke_func_native                                                  
+ ├──26      57      argument_num                  0                   52                
+ ├──27      59      push_func                     9, 2                                  
+ ├──28      62      invoke_func                                                         
+ ├──29      63      push_string                   6                   54                
+ ├──30      66      argument_num                  1                                     
+ ├──31      68      push_func                     1, 4                                  
+ ├──32      71      invoke_func_native                                                  
+ ├──33      72      push_string                   9                   57                
+ ├──34      75      argument_num                  1                                     
+ ├──35      77      push_func                     1, 4                                  
+ ├──36      80      invoke_func_native                                                  
+ ├──37      81      argument_num                  0                   58                
+ ├──38      83      push_func                     9, 3                                  
+ ├──39      86      invoke_func                                                         
+ ├──40      87      pop_defer                                         60                
+ ├──41      88      function_finish                                                     
 
