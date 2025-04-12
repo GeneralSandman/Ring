@@ -2181,19 +2181,61 @@ void fix_array_index_expression(Expression*           expression,
                                                   array_identifier,
                                                   block);
 
+    // Ring-Compiler-Error-Report ERROR_UNDEFINITE_VARIABLE
     if (variable == nullptr) {
-        // TODO: 完善编译报错
-        ring_error_report("use undeclared identifier `%s`; E:%d.\n",
-                          array_identifier,
-                          ERROR_UNDEFINITE_VARIABLE);
+        DEFINE_ERROR_REPORT_STR;
+        compile_err_buf = sprintf_string(
+            "use undeclared identifier `%s`; E:%d.",
+            array_identifier,
+            ERROR_UNDEFINITE_VARIABLE);
+        compile_adv_buf = sprintf_string(
+            "definite variable `%s` like: `var bool[]|int[]|double[]|string[] %s;` before use it.",
+            array_identifier,
+            array_identifier);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(array_index_expression->line_number),
+            .line_number             = array_index_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
 
     TypeSpecifier* type_specifier = variable->decl->type_specifier;
+    // Ring-Compiler-Error-Report ERROR_VAR_IS_NOT_ARRAY
     if (type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
-        // TODO: 完善编译报错
-        ring_error_report("`%s` is not an array; E:%d.\n",
-                          array_identifier,
-                          ERROR_UNDEFINITE_VARIABLE);
+        DEFINE_ERROR_REPORT_STR;
+        compile_err_buf = sprintf_string(
+            "`%s` is not an array; E:%d.",
+            array_identifier,
+            ERROR_VAR_IS_NOT_ARRAY);
+        compile_adv_buf = sprintf_string(
+            "definite variable `%s` like: `var bool[]|int[]|double[]|string[] %s;` before use it.",
+            array_identifier,
+            array_identifier);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(array_index_expression->line_number),
+            .line_number             = array_index_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
     assert(type_specifier->u.array_t != nullptr);
 
@@ -2223,16 +2265,41 @@ void fix_array_index_expression(Expression*           expression,
     } else if (index_expression->dimension == variable->decl->type_specifier->u.array_t->dimension) {
         type->kind = variable->decl->type_specifier->u.array_t->sub->kind;
     } else {
-        ring_error_report("array index access error; E:%d.\n", ERROR_ARRAY_DIMENSION_INVALID);
+        // 数组为 int[], 但是a[1,1] 这样访问
+        // Ring-Compiler-Error-Report ERROR_ARRAY_ACCESS_DIMENSION_INVALID
+        DEFINE_ERROR_REPORT_STR;
+
+        compile_err_buf = sprintf_string(
+            "dimension of array is %d, but access dimension is %d; E:%d.",
+            variable->decl->type_specifier->u.array_t->dimension,
+            index_expression->dimension,
+            ERROR_ARRAY_ACCESS_DIMENSION_INVALID);
+
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(array_index_expression->line_number),
+            .line_number             = array_index_expression->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
     }
 
 
+    // shallow copy
     if (type->kind == RING_BASIC_TYPE_CLASS) {
         type->u.class_t = variable->decl->type_specifier->u.array_t->sub->u.class_t;
     } else if (type->kind == RING_BASIC_TYPE_FUNC) {
         type->u.func_t = variable->decl->type_specifier->u.array_t->sub->u.func_t;
     } else {
-        // TODO: 如果表达式是个多维数组，如何处理
+        // 上面已经处理过了
     }
     fix_type_specfier(type);
 
@@ -2281,9 +2348,35 @@ void fix_array_literal_expression(Expression*             expression,
 
         fix_expression(pos, block, func);
 
-        if (pos->convert_type_size != 1) {
-            // TODO: 完善编译报错
+        // Ring-Compiler-Error-Report ERROR_ARRAY_LITERAL_INVALID_ITEM
+        if (pos->convert_type_size != 1
+            || pos->convert_type == nullptr) {
+            std::string pos_type_str = format_type_specifier(pos->convert_type_size, pos->convert_type);
+
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "array literal: invalid item type(%s); E:%d.",
+                pos_type_str.c_str(),
+                ERROR_ARRAY_LITERAL_INVALID_ITEM);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(pos->line_number),
+                .line_number             = pos->line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
         }
+
+
         item_type = pos->convert_type[0];
 
         // 检查类型是否匹配
@@ -2291,17 +2384,7 @@ void fix_array_literal_expression(Expression*             expression,
         // 如果item 类型为 bool[!1] , 那 数组是 bool[!2]
         // 需要差一个维度
         // Ring-Compiler-Error-Report ERROR_ARRAY_LITERAL_MISMATCH_TYPE
-        if ((item_type->kind == RING_BASIC_TYPE_ARRAY
-             && (!comp_type_specifier(array_type->u.array_t->sub, item_type->u.array_t->sub)
-                 || array_type->u.array_t->dimension != item_type->u.array_t->dimension + 1))
-
-            ||
-
-            (item_type->kind != RING_BASIC_TYPE_ARRAY
-             && (!comp_type_specifier(array_type->u.array_t->sub, item_type)
-                 || array_type->u.array_t->dimension != 1))
-
-        ) {
+        if (!comp_type_specifier_dimension(array_type, item_type, 1)) {
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf = sprintf_string(

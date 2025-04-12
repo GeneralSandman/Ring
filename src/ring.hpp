@@ -2440,7 +2440,8 @@ typedef enum {
     ERROR_INVALID_VARIABLE_IDENTIFIER           = 200005, // 不合法的变量标识符
     ERROR_TOO_MANY_LOCAL_VARIABLES              = 200006, // 局部变量数量超过限制
 
-    ERROR_ARRAY_DIMENSION_INVALID               = 200010, // 数组维度不合法
+    ERROR_ARRAY_ACCESS_DIMENSION_INVALID        = 200009, // 数组访问维度不合法
+    ERROR_ARRAY_DIMENSION_INVALID               = 200010, // 定义数组维度不合法
     ERROR_UNCLOSED_STRING_LITERAL               = 200011, // 未关闭的字符串常量
     ERROR_FUNCTION_CALL_IN_MULTIPLE_OPERANDS    = 200012, // 函数调用用到 多项赋值中
 
@@ -2449,7 +2450,8 @@ typedef enum {
     ERROR_CONCAT_OPERATOR_MISMATCH_TYPE         = 200022, // string .. 操作数类型不不匹配
     ERROR_MATH_OPERATOR_MISMATCH_TYPE           = 200023, // 数学运算操作数不是 int/int64/double 类型
     ERROR_REDEFINITE_LOCAL_VARIABLE             = 200024, // 重复定义的局部变量
-    ERROR_ARRAY_LITERAL_MISMATCH_TYPE           = 200025, // 不合法的数组常量语句，类型不匹配
+    ERROR_ARRAY_LITERAL_INVALID_ITEM            = 200025, // 数组字面量中，不合法的元素
+    ERROR_ARRAY_LITERAL_MISMATCH_TYPE           = 200026, // 不合法的数组常量语句，类型不匹配
 
     ERROR_REDEFINITE_CLASS                      = 200030, // 重复定义 class
     ERROR_REDEFINITE_MEMBER_IN_CLASS            = 200031, // 重复定义 class field/method
@@ -2481,6 +2483,8 @@ typedef enum {
     ERROR_FOR_RANGE_INVALID_LEFT_VALUE          = 300008, // for range 中，不合法的被赋值表达式
     ERROR_FOR_RANGE_INVALID_OPERAND_VALUE       = 300009, // for range 中，不合法的array 表达式
     ERROR_FOR_RANGE_MISMATCH_LEFT_OPERAND       = 300010, // for range 中，赋值不匹配
+
+    ERROR_VAR_IS_NOT_ARRAY                      = 300011, // 变量不是数组
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
