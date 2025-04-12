@@ -940,6 +940,10 @@ std::string format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int sourc
 std::string format_type_specifier(unsigned int convert_type_size, TypeSpecifier** convert_type) {
     std::string result;
 
+    if (convert_type_size == 0) {
+        return "void";
+    }
+
     for (unsigned int i = 0; i < convert_type_size; i++) {
         if (i != 0) {
             result += ", ";
