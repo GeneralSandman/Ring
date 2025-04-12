@@ -2465,6 +2465,7 @@ typedef enum {
     ERROR_NOT_FOUND_CLASS_FIELD                 = 200039, // 找不到 class field
     ERROR_NOT_FOUND_CLASS_METHOD                = 200040, // 找不到 class method
     ERROR_DUPLICATE_INIT_CLASS_FIELD            = 200041, // class field 初始化重复
+    ERROR_ARRAY_LITERAL_INVALID_FILED_INIT_EXPR = 200042, // 不合法的field初始表达式
 
     ERROR_OVERFLOWS                             = 200051, // 溢出
 

@@ -2515,15 +2515,18 @@ void fix_class_object_literal_expression(Expression*                   expressio
 
         // 3. 查看类型是否匹配，有点类似于 assign的类型检查
         TypeSpecifier* left_type = field_member->type_specifier;
-        // Ring-Compiler-Error-Report ERROR_ASSIGNMENT_MISMATCH_TYPE
-        if (pos->init_expression->convert_type_size != 1) {
+        // Ring-Compiler-Error-Report ERROR_ARRAY_LITERAL_INVALID_FILED_INIT_EXPR
+        if (pos->init_expression->convert_type_size != 1
+            || pos->init_expression->convert_type == nullptr) {
+            std::string pos_type_str = format_type_specifier(pos->init_expression->convert_type_size, pos->init_expression->convert_type);
+
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf = sprintf_string(
-                "assignment mismatch: expect (%s) but provided (%s); E:%d.",
+                "array literal field expression: expect (%s) but provided (%s); E:%d.",
                 format_type_specifier(left_type).c_str(),
-                "void", // FIXME: convert_type_size == 2 报错信息不对
-                ERROR_ASSIGNMENT_MISMATCH_TYPE);
+                pos_type_str.c_str(),
+                ERROR_ARRAY_LITERAL_INVALID_FILED_INIT_EXPR);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
