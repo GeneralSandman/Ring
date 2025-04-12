@@ -2118,6 +2118,8 @@ struct BreakStatement {
 
     unsigned int break_loop_num;
     // 语法:  break; break 1; break 2;
+
+    Block* jump_to_block; // UPDATED_BY_FIX_AST: break 语句跳转位置 所在的block
 };
 
 struct TagDefinitionStatement {
@@ -2140,6 +2142,8 @@ struct DeferStatement {
 
 struct ContinueStatement {
     unsigned int line_number;
+
+    Block*       jump_to_block; // UPDATED_BY_FIX_AST: continue 语句跳转位置 所在的block
 };
 
 struct ReturnStatement {
@@ -2486,6 +2490,8 @@ typedef enum {
     ERROR_FOR_RANGE_MISMATCH_LEFT_OPERAND       = 300010, // for range 中，赋值不匹配
 
     ERROR_VAR_IS_NOT_ARRAY                      = 300011, // 变量不是数组
+    ERROR_INVALID_BREAK_STATEMENT               = 300012, // break 语句不合法
+    ERROR_INVALID_CONTINUE_STATEMENT            = 300013, // continue 语句不合法
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -3006,6 +3012,8 @@ void             fix_block(Block* block, FunctionTuple* func);
 void             fix_if_statement(IfStatement* if_statement, Block* block, FunctionTuple* func);
 void             fix_for_statement(ForStatement* for_statement, Block* block, FunctionTuple* func);
 void             fix_dofor_statement(DoForStatement* dofor_statement, Block* block, FunctionTuple* func);
+void             fix_break_statement(BreakStatement* break_statement, Block* block, FunctionTuple* func);
+void             fix_continue_statement(ContinueStatement* continue_statement, Block* block, FunctionTuple* func);
 void             fix_return_statement(ReturnStatement* return_statement, Block* block, FunctionTuple* func);
 void             fix_defer_statement(DeferStatement* defer_statement, Block* block, FunctionTuple* func);
 void             fix_identifier_expression(Expression*           expression,

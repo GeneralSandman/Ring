@@ -991,6 +991,7 @@ BreakStatement* create_break_statement(char* literal_interface) {
     BreakStatement* break_statement = (BreakStatement*)mem_alloc(get_front_mem_pool(), sizeof(BreakStatement));
     break_statement->line_number    = package_unit_get_line_number();
     break_statement->break_loop_num = break_loop_num;
+    break_statement->jump_to_block  = nullptr;
 
     return break_statement;
 }
@@ -1011,6 +1012,7 @@ Statement* create_statement_from_continue(ContinueStatement* continue_statement)
 ContinueStatement* create_continue_statement() {
     ContinueStatement* continue_statement = (ContinueStatement*)mem_alloc(get_front_mem_pool(), sizeof(ContinueStatement));
     continue_statement->line_number       = package_unit_get_line_number();
+    continue_statement->jump_to_block     = nullptr;
 
     return continue_statement;
 }

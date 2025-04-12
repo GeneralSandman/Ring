@@ -498,7 +498,6 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
     unsigned int argument_num = 0;
     if (main_func->parameter_size == 1) {
         for (unsigned int i = 0; i < package->shell_args.size(); i++) {
-            // TODO: 这里 shell_args 是否应该被释放, 不然 constant_pool 内存会变为invaid pointor
             int index = constant_pool_add_string(executer, package->shell_args[i].c_str());
             generate_vmcode(executer, opcode_buffer,
                             RVM_CODE_PUSH_STRING, index, 0);
@@ -940,29 +939,12 @@ void generate_vmcode_from_break_statement(Package_Executer* executer,
         return;
     }
 
-    unsigned int break_loop_num = break_statement->break_loop_num;
+    assert(break_statement->jump_to_block != nullptr);
 
-    Block*       pos            = block;
-    unsigned int loop_num       = 1;
-    for (; pos; pos = pos->parent_block) {
-
-        if (pos->type != BLOCK_TYPE_FOR && pos->type != BLOCK_TYPE_DOFOR) {
-            continue;
-        }
-
-        if (break_loop_num == loop_num) {
-            break;
-        }
-        loop_num++;
-    }
-
-
-    if (pos == nullptr) {
-        // TODO: 这里应该 在 fix_ast 中编译报错
-        ring_error_report("generate vm code of `break`\n");
-    }
-
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, pos->block_labels.break_label, break_statement->line_number);
+    generate_vmcode(executer, opcode_buffer,
+                    RVM_CODE_JUMP,
+                    break_statement->jump_to_block->block_labels.break_label,
+                    break_statement->line_number);
 }
 
 void generate_vmcode_from_continue_statement(Package_Executer*  executer,
@@ -975,20 +957,12 @@ void generate_vmcode_from_continue_statement(Package_Executer*  executer,
         return;
     }
 
-    Block* pos = block;
-    for (; pos; pos = pos->parent_block) {
-        if (pos->type == BLOCK_TYPE_FOR || pos->type == BLOCK_TYPE_DOFOR) {
-            break;
-        }
-    }
+    assert(continue_statement->jump_to_block != nullptr);
 
-
-    if (pos == nullptr) {
-        // TODO: 这里应该 在 fix_ast 中编译报错
-        ring_error_report("generate vm code of `continue`\n");
-    }
-
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP, pos->block_labels.continue_label, continue_statement->line_number);
+    generate_vmcode(executer, opcode_buffer,
+                    RVM_CODE_JUMP,
+                    continue_statement->jump_to_block->block_labels.continue_label,
+                    continue_statement->line_number);
 }
 
 void generate_vmcode_from_return_statement(Package_Executer* executer,
@@ -1372,17 +1346,14 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
     assert(array_index_expression->array_expression != nullptr);
     assert(array_index_expression->index_expression != nullptr);
 
-    VarDecl* declaration = array_index_expression->array_expression->u.identifier_expression->u.variable->decl;
-    if (declaration == nullptr) {
-        // TODO: 编译阶段报错
-        ring_error_report("invalid operator[] in identifier:%s\n",
-                          array_index_expression->array_expression->u.identifier_expression->identifier);
-    }
-    if (declaration->type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
-        // TODO: 编译阶段报错
-        ring_error_report("invalid declaration in operation[] identifier:%s\n",
-                          array_index_expression->array_expression->u.identifier_expression->identifier);
-    }
+    // 这里不需要详细检查，因为在语义分析中已经做了强制检查
+    Variable* variable = array_index_expression->array_expression->u.identifier_expression->u.variable;
+    assert(variable != nullptr);
+    VarDecl* declaration = variable->decl;
+    assert(declaration != nullptr);
+    assert(declaration->type_specifier != nullptr);
+    assert(declaration->type_specifier->kind == RING_BASIC_TYPE_ARRAY);
+
 
     // push array-object to runtime_stack
     RVM_Opcode opcode = RVM_CODE_UNKNOW;
@@ -1421,8 +1392,7 @@ void generate_pop_to_leftvalue_array_index(Package_Executer*     executer,
                 case RING_BASIC_TYPE_CLASS: opcode = RVM_CODE_POP_ARRAY_CLASS_OB; break;
                 case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_POP_ARRAY_CLOSURE; break;
                 default:
-                    // TODO: 编译阶段报错
-                    ring_error_report("error: assign to item of array only support bool[] int[] int64[] double[] string[] class[] fn[]\n");
+                    // 语义分析会报错
                     break;
                 }
                 generate_vmcode(executer, opcode_buffer, opcode, 0, array_index_expression->line_number);
@@ -2352,8 +2322,7 @@ void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
         break;
     case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_NEW_ARRAY_CLOSURE; break;
     default:
-        // TODO: 编译阶段报错
-        ring_error_report("error: new array only support bool[] int[] int64[] double[] string[] class[] fn[]\n");
+        // 语义分析会报错
         break;
     }
 
@@ -2445,8 +2414,7 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
             break;
         case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_NEW_ARRAY_LITERAL_CLOSURE; break;
         default:
-            // TODO: 编译阶段报错
-            ring_error_report("error: array literal expression not support bool[] int[] double[] string[] <class>[] fn[]\n");
+            // 语义分析会报错
             break;
         }
         generate_vmcode(executer, opcode_buffer, opcode, operand, array_literal_expression->line_number);
@@ -2466,19 +2434,18 @@ void generate_vmcode_from_array_index_expression(Package_Executer*     executer,
     assert(array_index_expression->array_expression != nullptr);
     assert(array_index_expression->index_expression != nullptr);
 
-    // TODO：需要处理一下字符串 通过索引寻址
-    // 这里暂时只处理数组
-    // 暂时只处理一维数组
+    // TODO: 需要处理一下字符串 通过索引寻址
+    // 这里暂时只处理数组，还不能处理字符串
     // 要通过变量的类型来决定 push_array_int push_array_double push_array_object
-    VarDecl* declaration = array_index_expression->array_expression->u.identifier_expression->u.variable->decl;
-    if (declaration == nullptr) {
-        // TODO: 在编译阶段报错
-        ring_error_report("invalid operator[] in identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
-    }
-    if (declaration->type_specifier->kind != RING_BASIC_TYPE_ARRAY) {
-        // TODO: 在编译阶段报错
-        ring_error_report("invalid declaration in operation[] identifier:%s\n", array_index_expression->array_expression->u.identifier_expression->identifier);
-    }
+
+    // 这里不需要详细检查，因为在语义分析中已经做了强制检查
+    Variable* variable = array_index_expression->array_expression->u.identifier_expression->u.variable;
+    assert(variable != nullptr);
+    VarDecl* declaration = variable->decl;
+    assert(declaration != nullptr);
+    assert(declaration->type_specifier != nullptr);
+    assert(declaration->type_specifier->kind == RING_BASIC_TYPE_ARRAY);
+
 
     // push array-object to runtime_stack
     RVM_Opcode opcode = RVM_CODE_UNKNOW;

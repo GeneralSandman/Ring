@@ -280,6 +280,14 @@ void fix_statement(Statement* statement, Block* block, FunctionTuple* func) {
         fix_dofor_statement(statement->u.dofor_statement, block, func);
         break;
 
+    case STATEMENT_TYPE_BREAK:
+        fix_break_statement(statement->u.break_statement, block, func);
+        break;
+
+    case STATEMENT_TYPE_CONTINUE:
+        fix_continue_statement(statement->u.continue_statement, block, func);
+        break;
+
     case STATEMENT_TYPE_RETURN:
         fix_return_statement(statement->u.return_statement, block, func);
         break;
@@ -727,6 +735,99 @@ void fix_dofor_statement(DoForStatement* dofor_statement, Block* block, Function
     fix_block(dofor_statement->block, func);
     fix_expression(dofor_statement->condition_expression, block, func);
     fix_expression(dofor_statement->post_expression, block, func);
+}
+
+void fix_break_statement(BreakStatement* break_statement, Block* block, FunctionTuple* func) {
+    if (break_statement == nullptr) {
+        return;
+    }
+
+    unsigned int break_loop_num = break_statement->break_loop_num;
+
+    // 一层一层的往上找
+    // 直到找到 break_loop_num 层对应的 for循环
+    Block*       pos      = block;
+    unsigned int loop_num = 1;
+    for (; pos; pos = pos->parent_block) {
+
+        if (pos->type != BLOCK_TYPE_FOR && pos->type != BLOCK_TYPE_DOFOR) {
+            continue;
+        }
+
+        if (break_loop_num == loop_num) {
+            break;
+        }
+        loop_num++;
+    }
+
+
+    // 找不到对应的跳转block
+    // Ring-Compiler-Error-Report ERROR_INVALID_BREAK_STATEMENT
+    if (pos == nullptr) {
+        DEFINE_ERROR_REPORT_STR;
+
+        compile_err_buf = sprintf_string(
+            "invalid break statement, can't find break jump block; E:%d.",
+            ERROR_INVALID_BREAK_STATEMENT);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(break_statement->line_number),
+            .line_number             = break_statement->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+    break_statement->jump_to_block = pos;
+}
+
+void fix_continue_statement(ContinueStatement* continue_statement, Block* block, FunctionTuple* func) {
+    if (continue_statement == nullptr) {
+        return;
+    }
+
+    Block* pos = block;
+    for (; pos; pos = pos->parent_block) {
+        if (pos->type == BLOCK_TYPE_FOR || pos->type == BLOCK_TYPE_DOFOR) {
+            break;
+        }
+    }
+
+
+    // 找不到对应的跳转block
+    // Ring-Compiler-Error-Report ERROR_INVALID_CONTINUE_STATEMENT
+    if (pos == nullptr) {
+        DEFINE_ERROR_REPORT_STR;
+
+        compile_err_buf = sprintf_string(
+            "invalid continue statement, can't find continue jump block; E:%d.",
+            ERROR_INVALID_CONTINUE_STATEMENT);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(continue_statement->line_number),
+            .line_number             = continue_statement->line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+
+    continue_statement->jump_to_block = pos;
 }
 
 void fix_return_statement(ReturnStatement* return_statement, Block* block, FunctionTuple* func) {
@@ -2238,6 +2339,10 @@ void fix_array_index_expression(Expression*           expression,
         ring_compile_error_report(&context);
     }
     assert(type_specifier->u.array_t != nullptr);
+    TypeSpecifier* sub_type_specifier = type_specifier->u.array_t->sub;
+    assert(sub_type_specifier->kind != RING_BASIC_TYPE_UNKNOW
+           && sub_type_specifier->kind != RING_BASIC_TYPE_ARRAY
+           && sub_type_specifier->kind != RING_BASIC_TYPE_ANY);
 
     fix_expression(array_index_expression->array_expression, block, func);
 
@@ -2315,6 +2420,13 @@ void fix_new_array_expression(Expression*         expression,
     fix_dimension_expression(new_array_expression->dimension_expression, block, func);
     fix_type_specfier(new_array_expression->type_specifier);
 
+    TypeSpecifier* sub_type_specifier = new_array_expression->type_specifier->u.array_t->sub;
+    assert(sub_type_specifier != nullptr);
+    assert(sub_type_specifier->kind != RING_BASIC_TYPE_UNKNOW
+           && sub_type_specifier->kind != RING_BASIC_TYPE_ARRAY
+           && sub_type_specifier->kind != RING_BASIC_TYPE_ANY);
+
+
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     EXPRESSION_ADD_CONVERT_TYPE(expression, (new_array_expression->type_specifier));
 }
@@ -2340,6 +2452,11 @@ void fix_array_literal_expression(Expression*             expression,
     TypeSpecifier* array_type = array_literal_expression->type_specifier;
     TypeSpecifier* item_type  = nullptr;
     assert(array_type->kind = RING_BASIC_TYPE_ARRAY);
+
+    TypeSpecifier* sub_type_specifier = array_type->u.array_t->sub;
+    assert(sub_type_specifier->kind != RING_BASIC_TYPE_UNKNOW
+           && sub_type_specifier->kind != RING_BASIC_TYPE_ARRAY
+           && sub_type_specifier->kind != RING_BASIC_TYPE_ANY);
 
 
     for (Expression* pos = array_literal_expression->expression_list;
@@ -2956,10 +3073,12 @@ void fix_iife_expression(Expression*                   expression,
     check_iife_call(iife);
 
 
-    // FIXME: 应该是函数的返回值类型
+    // 如果 iife 是一个单独的表达式，
+    // 无需将 convert_type 透传到最外层
     if (expression == nullptr) {
         return;
     }
+    // 函数返回值的类型作为整个表达式的类型
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     for (FunctionReturnList* pos = anonymous_func->return_list;
          pos != nullptr;
