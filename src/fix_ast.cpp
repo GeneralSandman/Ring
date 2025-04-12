@@ -992,8 +992,9 @@ void fix_identifier_expression(Expression*           expression,
     Function*      function       = nullptr;
     TypeSpecifier* type_specifier = nullptr;
 
+    Package*       package        = resolve_package(identifier_expression->package_posit, identifier_expression->line_number, block);
     //
-    variable = resolve_variable(identifier_expression->package_posit, identifier_expression->identifier, block);
+    variable = resolve_variable(package, identifier_expression->identifier, block);
     if (variable != nullptr) {
         // is a variable
         identifier_expression->type       = IDENTIFIER_EXPRESSION_TYPE_VARIABLE;
@@ -1005,7 +1006,7 @@ void fix_identifier_expression(Expression*           expression,
         return;
     }
 
-    function = search_function(identifier_expression->package_posit, identifier_expression->identifier);
+    function = search_function(package, identifier_expression->identifier);
     if (function != nullptr) {
         // is a function
         identifier_expression->type       = IDENTIFIER_EXPRESSION_TYPE_FUNC;
@@ -2005,9 +2006,10 @@ void fix_function_call_expression(Expression*             expression,
 
 
     // 1. 判断是否为closure
-    variable = resolve_variable(nullptr,
-                                function_call_expression->func_identifier,
-                                block);
+    Package* package = resolve_package(nullptr, 0, block);
+    variable         = resolve_variable(package,
+                                        function_call_expression->func_identifier,
+                                        block);
     if (variable != nullptr) {
 
         if (variable->decl->type_specifier->kind == RING_BASIC_TYPE_FUNC) {
@@ -2047,14 +2049,16 @@ void fix_function_call_expression(Expression*             expression,
 
     // 3. 搜素剩下的函数
     // 如果还不能搜索到，就需要报错了
-    function = search_function(function_call_expression->package_posit,
+    package  = resolve_package(function_call_expression->package_posit, function_call_expression->line_number, block);
+    function = search_function(package,
                                function_call_expression->func_identifier);
     // Ring-Compiler-Error-Report ERROR_UNDEFINITE_FUNCTION
     if (function == nullptr) {
         DEFINE_ERROR_REPORT_STR;
 
-        compile_err_buf            = sprintf_string("use undeclared function `%s`; E:%d",
+        compile_err_buf            = sprintf_string("use undeclared function `%s` in package `%s`; E:%d",
                                                     function_call_expression->func_identifier,
+                                                    package->package_name,
                                                     ERROR_UNDEFINITE_FUNCTION);
         compile_adv_buf            = sprintf_string("definite function `%s` like: `function %s() {}` before use it.",
                                                     function_call_expression->func_identifier,
@@ -2278,7 +2282,8 @@ void fix_array_index_expression(Expression*           expression,
     char*     array_identifier = array_index_expression->array_expression->u.identifier_expression->identifier;
     Variable* variable         = nullptr;
 
-    variable                   = resolve_variable(package_posit,
+    Package*  package          = resolve_package(package_posit, array_index_expression->line_number, block);
+    variable                   = resolve_variable(package,
                                                   array_identifier,
                                                   block);
 
@@ -2839,19 +2844,22 @@ void fix_ternary_condition_expression(Expression*        expression,
 
     // Ring-Compiler-Error-Report ERROR_INVALID_TERNARY_EXPR_CONDITION
     if (condition_expression->convert_type_size != 1
+        || condition_expression->convert_type == nullptr
         || condition_expression->convert_type[0]->kind != RING_BASIC_TYPE_BOOL) {
+        std::string condition_expression_type = format_type_specifier(condition_expression->convert_type_size, condition_expression->convert_type);
         DEFINE_ERROR_REPORT_STR;
 
         compile_err_buf = sprintf_string(
-            "requires <bool> in condition of ternary expression; E:%d.",
+            "requires type (bool) in ` ? : ` expression, but provided type (%s); E:%d.",
+            condition_expression_type.c_str(),
             ERROR_INVALID_TERNARY_EXPR_CONDITION);
 
         ErrorReportContext context = {
             .package                 = nullptr,
             .package_unit            = get_package_unit(),
             .source_file_name        = get_package_unit()->current_file_name,
-            .line_content            = package_unit_get_line_content(condition_expression->line_number), // FIXME:
-            .line_number             = condition_expression->line_number,                                // FIXME:
+            .line_content            = package_unit_get_line_content(condition_expression->line_number),
+            .line_number             = condition_expression->line_number,
             .column_number           = package_unit_get_column_number(),
             .error_message           = std::string(compile_err_buf),
             .advice                  = std::string(compile_adv_buf),
@@ -2878,8 +2886,8 @@ void fix_ternary_condition_expression(Expression*        expression,
             .package                 = nullptr,
             .package_unit            = get_package_unit(),
             .source_file_name        = get_package_unit()->current_file_name,
-            .line_content            = package_unit_get_line_content(condition_expression->line_number), // FIXME:
-            .line_number             = condition_expression->line_number,                                // FIXME:
+            .line_content            = package_unit_get_line_content(condition_expression->line_number),
+            .line_number             = condition_expression->line_number,
             .column_number           = package_unit_get_column_number(),
             .error_message           = std::string(compile_err_buf),
             .advice                  = std::string(compile_adv_buf),
@@ -3133,25 +3141,47 @@ void add_parameter_to_declaration(Parameter* parameter, Block* block) {
     }
 }
 
-// -----------------
-/*
- * resolve_variable 递归搜索一个变量
- *
- * 搜索顺序：
- * 1. 在当前Block搜索定义的局部变量
- * 2. 在当前Block搜素自由变量
- * 3. 去上一级搜索... 步骤为1.2
- * 4. 去全局变量搜索
- */
-Variable* resolve_variable(char* package_posit, char* identifier, Block* block) {
+Package* resolve_package(char*        package_posit,
+                         unsigned int line_number,
+                         Block*       block) {
 
     Package* package = nullptr;
+
     if (package_posit == nullptr || strlen(package_posit) == 0) {
+        assert(block != nullptr);
+        assert(block->package_unit != nullptr);
+        assert(block->package_unit->parent_package != nullptr);
+
         // 在当前 package中查找
-        package = block->package_unit->parent_package;
-    } else {
-        package = search_package(get_compiler_entry(), package_posit);
+        return block->package_unit->parent_package;
     }
+
+    // Ring-Compiler-Error-Report ERROR_USE_PACKAGE_MAIN_IMPORT
+    if (str_eq(package_posit, "main")) {
+        DEFINE_ERROR_REPORT_STR;
+
+        compile_err_buf = sprintf_string(
+            "canot use package `%s` to find symbol; E:%d.",
+            package_posit,
+            ERROR_USE_PACKAGE_MAIN_IMPORT);
+
+        ErrorReportContext context = {
+            .package                 = nullptr,
+            .package_unit            = get_package_unit(),
+            .source_file_name        = get_package_unit()->current_file_name,
+            .line_content            = package_unit_get_line_content(line_number),
+            .line_number             = line_number,
+            .column_number           = package_unit_get_column_number(),
+            .error_message           = std::string(compile_err_buf),
+            .advice                  = std::string(compile_adv_buf),
+            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+            .ring_compiler_file      = (char*)__FILE__,
+            .ring_compiler_file_line = __LINE__,
+        };
+        ring_compile_error_report(&context);
+    }
+    package = search_package(get_compiler_entry(), package_posit);
+
 
     // 未找到对应的Package
     // Ring-Compiler-Error-Report ERROR_CODE_UNKNOW_PACKAGE
@@ -3167,8 +3197,8 @@ Variable* resolve_variable(char* package_posit, char* identifier, Block* block) 
             .package                 = nullptr,
             .package_unit            = get_package_unit(),
             .source_file_name        = get_package_unit()->current_file_name,
-            .line_content            = package_unit_get_line_content(1), // FIXME:
-            .line_number             = 1,                                // FIXME:
+            .line_content            = package_unit_get_line_content(line_number),
+            .line_number             = line_number,
             .column_number           = package_unit_get_column_number(),
             .error_message           = std::string(compile_err_buf),
             .advice                  = std::string(compile_adv_buf),
@@ -3178,6 +3208,21 @@ Variable* resolve_variable(char* package_posit, char* identifier, Block* block) 
         };
         ring_compile_error_report(&context);
     }
+
+    return package;
+}
+
+// -----------------
+/*
+ * resolve_variable 递归搜索一个变量
+ *
+ * 搜索顺序：
+ * 1. 在当前Block搜索定义的局部变量
+ * 2. 在当前Block搜素自由变量
+ * 3. 去上一级搜索... 步骤为1.2
+ * 4. 去全局变量搜索
+ */
+Variable* resolve_variable(Package* package, char* identifier, Block* block) {
 
     Variable* var = nullptr;
 
@@ -3343,51 +3388,13 @@ Variable* resolve_variable_recur(Package* package, char* identifier, Block* bloc
 }
 
 
-Function* search_function(char* package_posit, char* identifier) {
-    if (package_posit != nullptr) {
-        CompilerEntry* compiler_entry = get_compiler_entry();
-        Package*       package        = search_package(compiler_entry, package_posit);
-
-        // Ring-Compiler-Error-Report ERROR_CODE_UNKNOW_PACKAGE
-        if (package == nullptr) {
-            DEFINE_ERROR_REPORT_STR;
-
-            compile_err_buf = sprintf_string(
-                "unknow package `%s`; E:%d.",
-                package_posit,
-                ERROR_CODE_UNKNOW_PACKAGE);
-
-            ErrorReportContext context = {
-                .package                 = nullptr,
-                .package_unit            = get_package_unit(),
-                .source_file_name        = get_package_unit()->current_file_name,
-                .line_content            = package_unit_get_line_content(1), // FIXME:
-                .line_number             = 1,                                // FIXME:
-                .column_number           = package_unit_get_column_number(),
-                .error_message           = std::string(compile_err_buf),
-                .advice                  = std::string(compile_adv_buf),
-                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
-                .ring_compiler_file      = (char*)__FILE__,
-                .ring_compiler_file_line = __LINE__,
-            };
-            ring_compile_error_report(&context);
-        }
-
-        for (auto function : package->function_list) {
-            if (str_eq(function->identifier, identifier)) {
-                return function;
-            }
-        }
-
-        return nullptr;
-    }
-
-    for (Function* pos : get_package_unit()->function_list) {
-        if (str_eq(identifier, pos->identifier)) {
-            return pos;
+Function* search_function(Package* package, char* identifier) {
+    assert(package != nullptr);
+    for (auto function : package->function_list) {
+        if (str_eq(function->identifier, identifier)) {
+            return function;
         }
     }
-
     return nullptr;
 }
 

@@ -2434,6 +2434,7 @@ typedef enum {
     ERROR_INVALID_TERNARY_EXPR_TRUE_OR_FALSE    = 100003, // 三目条件运算符 不合法true/false条件表达式
     ERROR_TYPEDEF_NAME_NOT_UPPERCASE_LETTER     = 100004, // typedef 定义的类型名称必须大写开头
     ERROR_DEF_PACKAGE_NAME_NOT_LOWERCASE_LETTER = 100005, // def package 定义的 package 名称必须小写开头
+    ERROR_USE_PACKAGE_MAIN_IMPORT               = 100006, // use package 不能导入 main
 
 
     ERROR_UNDEFINITE_VARIABLE                   = 200000,
@@ -3098,11 +3099,15 @@ void             fix_iife_expression(Expression*                   expression,
 
 void             add_parameter_to_declaration(Parameter* parameter, Block* block);
 
-Variable*        resolve_variable(char* package_posit, char* identifier, Block* block);
+
+Package*         resolve_package(char*        package_posit,
+                                 unsigned int line_number,
+                                 Block*       block);
+Variable*        resolve_variable(Package* package, char* identifier, Block* block);
 Variable*        resolve_variable_global(Package* package, char* identifier, Block* block);
 Variable*        resolve_variable_recur(Package* package, char* identifier, Block* block);
 
-Function*        search_function(char* package_posit, char* identifier);
+Function*        search_function(Package* package, char* identifier);
 
 FreeValueDesc*   free_value_list_add_item(FreeValueDesc* head, FreeValueDesc* free_value);
 Variable*        variable_list_add_item(Variable* head, Variable* variable);
