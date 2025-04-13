@@ -42,8 +42,9 @@ global {
 }
 
 fn main() {
-    test_assign_2();
+    // test_assign_2();
     // runtime::gc();
+    test_array_string();
 }
 
 fn test_array_int() {
@@ -73,7 +74,7 @@ fn test_array_int64() {
 }
 
 fn test_array_string() {
-    string[]{"1", "2", "3", "4", "5", "6", "7", "8"};
+    var string[] tmp = new string[8];
     runtime::gc();
 }
 
