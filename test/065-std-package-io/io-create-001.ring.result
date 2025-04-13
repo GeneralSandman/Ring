@@ -22,5 +22,11 @@ debug_assert PASS
 test case [7][read_all]----------
 content=
 debug_assert PASS
+
+test case [8][close]----------
+close result=0
+debug_assert PASS
+
+test case [9][remove]----------
 file exist: false
 debug_assert PASS

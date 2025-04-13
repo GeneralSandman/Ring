@@ -33,11 +33,10 @@ fn test_pop_0_() {
 
 
 	// test_pop_0_ test_pop_1_ 的区别
-	pop(array); // TODO: 后续 补齐一个 pop字节码，可以及时被回收
-	// var string tmp = pop(array);
+	pop(array);
 	runtime::gc();
 	fmt::printf("heap_size: {}\n", runtime::heap_size());
-	debug::assert(runtime::heap_size() == 64L); // 8*8
+	debug::assert(runtime::heap_size() == 56L); // 7*8
 	
 }
 

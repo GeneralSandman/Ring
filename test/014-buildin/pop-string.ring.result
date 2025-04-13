@@ -1,7 +1,7 @@
 test_pop_0 -------
 heap_size: 64
 debug_assert PASS
-heap_size: 64
+heap_size: 56
 debug_assert PASS
 heap_size: 0
 debug_assert PASS

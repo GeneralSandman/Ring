@@ -22,6 +22,7 @@ fn main() {
     var int    fileid;
     var string content;
     var string content_tmp = "test-write-content";
+    var int    res;
 
     
     fmt::printf("test case [0][exist]----------\n");
@@ -65,9 +66,13 @@ fn main() {
     debug::assert(content == "");
 
 
-    io::close(fileid);
+    fmt::printf("\ntest case [8][close]----------\n");
+    res = io::close(fileid);
+    fmt::printf("close result={}\n", res);
+    debug::assert(res == 0);
 
     
+    fmt::printf("\ntest case [9][remove]----------\n");
 	io::remove(file_name);
     exist = io::exist(file_name);
     fmt::printf("file exist: {}\n", exist);
