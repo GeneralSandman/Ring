@@ -35,7 +35,7 @@ fn read_all(var int fd) -> (string);
 fn write(var int fd, var string buffer);
 
 @native
-fn close(var int fd);
+fn close(var int fd) -> (int);
 
 @native
 fn remove(var string path);
