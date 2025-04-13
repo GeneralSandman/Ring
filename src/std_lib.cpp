@@ -87,10 +87,10 @@ std::vector<StdPackageInfo> Std_Lib_List = {
             {(char*)"exist", std_lib_io_exist, 1, 1},
             {(char*)"open", std_lib_io_open, 1, 1},
             {(char*)"create", std_lib_io_create, 1, 1},
-            {(char*)"seek", std_lib_io_seek, 1, 1},
+            {(char*)"seek", std_lib_io_seek, 1, 0},
             {(char*)"read_all", std_lib_io_read_all, 1, 1},
             {(char*)"write", std_lib_io_write, 2, 0},
-            {(char*)"close", std_lib_io_close, 1, 0},
+            {(char*)"close", std_lib_io_close, 1, 1},
             {(char*)"remove", std_lib_io_remove, 1, 0},
         },
     },
@@ -448,13 +448,13 @@ RVM_Value std_lib_io_close(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_INT);
 
-    int fid = args[0].u.int_value;
+    int       fid = args[0].u.int_value;
 
-    close(fid);
+    int       res = close(fid);
 
     RVM_Value ret;
     ret.type        = RVM_VALUE_TYPE_INT;
-    ret.u.int_value = 0;
+    ret.u.int_value = res;
     return ret;
 }
 

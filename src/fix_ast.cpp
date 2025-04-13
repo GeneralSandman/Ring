@@ -406,6 +406,10 @@ BEGIN:
     case EXPRESSION_TYPE_UNITARY_INCREASE:
     case EXPRESSION_TYPE_UNITARY_DECREASE:
         fix_unitary_expression(expression, expression->u.unitary_expression, block, func);
+        // TODO: 封装到函数中，unitaray 都有继续拆分
+        // 清理掉 因为 自增/自减 都只能用在单独的表达式中
+        expression->convert_type_size = 0;
+        expression->convert_type      = nullptr;
         fix_unitary_increase_decrease_expression(expression, expression->u.unitary_expression, block, func);
         break;
 

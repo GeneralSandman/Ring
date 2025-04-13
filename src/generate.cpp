@@ -614,6 +614,10 @@ void generate_vmcode_from_statement_list(Package_Executer* executer,
         switch (statement->type) {
         case STATEMENT_TYPE_EXPRESSION:
             generate_vmcode_from_expression(executer, statement->u.expression, opcode_buffer);
+            if (statement->u.expression != nullptr
+                && statement->u.expression->convert_type_size) {
+                generate_vmcode(executer, opcode_buffer, RVM_CODE_POP, statement->u.expression->convert_type_size, statement->line_number);
+            }
             break;
 
         case STATEMENT_TYPE_IF:

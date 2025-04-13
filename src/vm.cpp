@@ -285,9 +285,10 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
 
 
     // duplicate
-    {RVM_CODE_SHALLOW_COPY, "shallow_copy", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, "", "shallow copy value from B to A.", ""},
-    {RVM_CODE_DEEP_COPY_CLASS_OB, "deep_copy_class_ob", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, "", "deep copy class-object from B to A.", ""},
-    {RVM_CODE_DEEP_COPY_ARRAY, "deep_copy_array", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, "", "deep copy array from B to A.", ""},
+    {RVM_CODE_SHALLOW_COPY, "shallow_copy", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, "shallow copy value from B to A", "", ""},
+    {RVM_CODE_DEEP_COPY_CLASS_OB, "deep_copy_class_ob", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, "deep copy class-object from B to A", "", ""},
+    {RVM_CODE_DEEP_COPY_ARRAY, "deep_copy_array", OPCODE_OPERAND_TYPE_2BYTE_AB, 1, "deep copy array from B to A", "", ""},
+    {RVM_CODE_POP, "pop", OPCODE_OPERAND_TYPE_1BYTE_A, -1, "pop num value from stack", "[...]->[]", ""},
 
 
     // func

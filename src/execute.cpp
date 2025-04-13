@@ -368,6 +368,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
     unsigned int         dst_offset             = 0;
     unsigned int         src_offset             = 0;
+    unsigned int         pop_count              = 0;
 
     bool                 bool_value             = false;
     int                  int_value              = 0;
@@ -2030,6 +2031,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                 VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
         } break;
+        case RVM_CODE_POP:
+            pop_count = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            VM_CUR_CO_STACK_TOP_INDEX -= pop_count;
+            VM_CUR_CO_PC += 2;
+            break;
 
 
         // func
