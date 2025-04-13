@@ -2494,6 +2494,7 @@ typedef enum {
     ERROR_VAR_IS_NOT_ARRAY                      = 300011, // 变量不是数组
     ERROR_INVALID_BREAK_STATEMENT               = 300012, // break 语句不合法
     ERROR_INVALID_CONTINUE_STATEMENT            = 300013, // continue 语句不合法
+    ERROR_FUNCTION_MISS_BLOCK                   = 300014, // 函数缺少代码块
 
     // 优化AST错误
     ERROR_CODE_OPTIMIZATION_AST_ERROR,
@@ -3038,9 +3039,7 @@ void             fix_binary_relational_expression(Expression*       expression,
                                                   BinaryExpression* binary_expression,
                                                   Block* block, FunctionTuple* func);
 
-void             fix_unitary_expression(Expression* expression,
-                                        Expression* unitary_expression,
-                                        Block* block, FunctionTuple* func);
+
 void             fix_unitary_minus_expression(Expression* expression,
                                               Expression* unitary_expression,
                                               Block* block, FunctionTuple* func);

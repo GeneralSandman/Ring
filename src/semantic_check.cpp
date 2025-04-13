@@ -91,6 +91,32 @@ void ring_compiler_analysis_function(Package* package) {
         if (function->type != FUNCTION_TYPE_DERIVE) {
             continue;
         }
+
+        // 只有函数声明，没有函数体
+        // Ring-Compiler-Error-Report ERROR_FUNCTION_MISS_BLOCK
+        if (function->block == nullptr) {
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "function `%s` miss code block; E:%d.",
+                function->identifier,
+                ERROR_FUNCTION_MISS_BLOCK);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(function->start_line_number),
+                .line_number             = function->start_line_number,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        }
         ring_compiler_analysis_function_block(package, function->block);
     }
 }

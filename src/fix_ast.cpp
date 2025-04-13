@@ -396,20 +396,13 @@ BEGIN:
 
 
     case EXPRESSION_TYPE_ARITHMETIC_UNITARY_MINUS:
-        fix_unitary_expression(expression, expression->u.unitary_expression, block, func);
         fix_unitary_minus_expression(expression, expression->u.unitary_expression, block, func);
         break;
     case EXPRESSION_TYPE_LOGICAL_UNITARY_NOT:
-        fix_unitary_expression(expression, expression->u.unitary_expression, block, func);
         fix_unitary_not_expression(expression, expression->u.unitary_expression, block, func);
         break;
     case EXPRESSION_TYPE_UNITARY_INCREASE:
     case EXPRESSION_TYPE_UNITARY_DECREASE:
-        fix_unitary_expression(expression, expression->u.unitary_expression, block, func);
-        // TODO: 封装到函数中，unitaray 都有继续拆分
-        // 清理掉 因为 自增/自减 都只能用在单独的表达式中
-        expression->convert_type_size = 0;
-        expression->convert_type      = nullptr;
         fix_unitary_increase_decrease_expression(expression, expression->u.unitary_expression, block, func);
         break;
 
@@ -1806,22 +1799,25 @@ void fix_binary_relational_expression(Expression*       expression,
     }
 }
 
-void fix_unitary_expression(Expression* expression,
-                            Expression* unitary_expression,
-                            Block* block, FunctionTuple* func) {
+
+void fix_unitary_minus_expression(Expression* expression,
+                                  Expression* unitary_expression,
+                                  Block* block, FunctionTuple* func) {
 
     fix_expression(unitary_expression, block, func);
 
-    std::string oper = formate_operator(expression->type);
-
+    // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
     if (unitary_expression->convert_type_size != 1
-        || unitary_expression->convert_type == nullptr) {
-        // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
+        || unitary_expression->convert_type == nullptr
+        || !TYPE_IS_NUM(unitary_expression->convert_type[0])) {
+
+        std::string type = format_type_specifier(unitary_expression->convert_type_size, unitary_expression->convert_type);
+
         DEFINE_ERROR_REPORT_STR;
 
         compile_err_buf = sprintf_string(
-            "mismatch typed in operator `%s`; E:%d.",
-            oper.c_str(),
+            "operator `-` only be used in int/int64/double, but provided type(%s); E:%d.",
+            type.c_str(),
             ERROR_OPER_INVALID_USE);
 
         ErrorReportContext context = {
@@ -1838,68 +1834,35 @@ void fix_unitary_expression(Expression* expression,
             .ring_compiler_file_line = __LINE__,
         };
         ring_compile_error_report(&context);
+    }
+
+
+    if (ring_command_arg.optimize_level > 0) {
+        crop_unitary_expression(expression, unitary_expression, block, func);
     }
 
     EXPRESSION_CLEAR_CONVERT_TYPE(expression);
     EXPRESSION_ADD_CONVERT_TYPE(expression, unitary_expression->convert_type[0]);
 }
 
-void fix_unitary_minus_expression(Expression* expression,
-                                  Expression* unitary_expression,
-                                  Block* block, FunctionTuple* func) {
-
-
-    TypeSpecifier* type_specifier = unitary_expression->convert_type[0];
-
-    if (!TYPE_IS_NUM(type_specifier)) {
-        // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
-        DEFINE_ERROR_REPORT_STR;
-
-        compile_err_buf = sprintf_string(
-            "operator `-` only be used in int/int64/double; E:%d.",
-            ERROR_OPER_INVALID_USE);
-
-        ErrorReportContext context = {
-            .package                 = nullptr,
-            .package_unit            = get_package_unit(),
-            .source_file_name        = get_package_unit()->current_file_name,
-            .line_content            = package_unit_get_line_content(unitary_expression->line_number),
-            .line_number             = unitary_expression->line_number,
-            .column_number           = package_unit_get_column_number(),
-            .error_message           = std::string(compile_err_buf),
-            .advice                  = std::string(compile_adv_buf),
-            .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
-            .ring_compiler_file      = (char*)__FILE__,
-            .ring_compiler_file_line = __LINE__,
-        };
-        ring_compile_error_report(&context);
-    }
-
-
-    // TODO: 需要完善语义检查
-    // 自增/自减 只能作为一个单独的 expression
-    // 以下语法编译错误
-    // 1++  // 1 不是左值
-    // a = b++ // 这种行为太复杂，不支持，因为复杂c/cpp 引入了前置/后置 自增/自减
-
-    if (ring_command_arg.optimize_level > 0) {
-        crop_unitary_expression(expression, unitary_expression, block, func);
-    }
-}
-
 void fix_unitary_not_expression(Expression* expression,
                                 Expression* unitary_expression,
                                 Block* block, FunctionTuple* func) {
 
+    fix_expression(unitary_expression, block, func);
 
-    TypeSpecifier* type_specifier = unitary_expression->convert_type[0];
+    // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
+    if (unitary_expression->convert_type_size != 1
+        || unitary_expression->convert_type == nullptr
+        || unitary_expression->convert_type[0]->kind != RING_BASIC_TYPE_BOOL) {
 
-    if (type_specifier->kind != RING_BASIC_TYPE_BOOL) {
-        // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
+        std::string type = format_type_specifier(unitary_expression->convert_type_size, unitary_expression->convert_type);
+
         DEFINE_ERROR_REPORT_STR;
 
         compile_err_buf = sprintf_string(
-            "operator `not` only be used in bool; E:%d.",
+            "operator `not` only be used in bool, but provided type(%s); E:%d.",
+            type.c_str(),
             ERROR_OPER_INVALID_USE);
 
         ErrorReportContext context = {
@@ -1921,6 +1884,9 @@ void fix_unitary_not_expression(Expression* expression,
     if (ring_command_arg.optimize_level > 0) {
         crop_unitary_expression(expression, unitary_expression, block, func);
     }
+
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
+    EXPRESSION_ADD_CONVERT_TYPE(expression, unitary_expression->convert_type[0]);
 }
 
 
@@ -1928,15 +1894,20 @@ void fix_unitary_increase_decrease_expression(Expression* expression,
                                               Expression* unitary_expression,
                                               Block* block, FunctionTuple* func) {
 
+    fix_expression(unitary_expression, block, func);
 
-    TypeSpecifier* type_specifier = unitary_expression->convert_type[0];
+    // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
+    if (unitary_expression->convert_type_size != 1
+        || unitary_expression->convert_type == nullptr
+        || !TYPE_IS_NUM(unitary_expression->convert_type[0])) {
 
-    if (!TYPE_IS_NUM(type_specifier)) {
-        // Ring-Compiler-Error-Report ERROR_OPER_INVALID_USE
+        std::string type = format_type_specifier(unitary_expression->convert_type_size, unitary_expression->convert_type);
+
         DEFINE_ERROR_REPORT_STR;
 
         compile_err_buf = sprintf_string(
-            "operator `++`/`--` only be used in int/int64/double; E:%d.",
+            "operator `++`/`--` only be used in int/int64/double, but provided type(%s); E:%d.",
+            type.c_str(),
             ERROR_OPER_INVALID_USE);
 
         ErrorReportContext context = {
@@ -1958,6 +1929,15 @@ void fix_unitary_increase_decrease_expression(Expression* expression,
     if (ring_command_arg.optimize_level > 0) {
         crop_unitary_expression(expression, unitary_expression, block, func);
     }
+
+    // TODO: 编译错误
+    // 1++ 这种语法不支持
+    // 1 不是左值
+
+    // 自增/自减 只能作为一个单独的 expression
+    // 以下语法编译错误
+    // a = b++ // 这种行为太复杂，不支持，因为复杂c/cpp 引入了前置/后置 自增/自减
+    EXPRESSION_CLEAR_CONVERT_TYPE(expression);
 }
 
 /*
