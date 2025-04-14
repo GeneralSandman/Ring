@@ -103,7 +103,34 @@ void ring_generate_vm_code(Package* package, Package_Executer* package_executer)
     add_global_variable(package, package_executer);
     add_functions(package, package_executer);
     add_classes(package, package_executer);
-    add_top_level_code(package, package_executer);
+
+    if (str_eq(package->package_name, "main")) {
+        // Ring-Compiler-Error-Report ERROR_NOT_FOUND_MAIN_FUNCTION
+        if (!package_executer->exist_main_func) {
+            DEFINE_ERROR_REPORT_STR;
+
+            compile_err_buf = sprintf_string(
+                "canot find function `main` in package main; E:%d.",
+                ERROR_NOT_FOUND_MAIN_FUNCTION);
+
+            ErrorReportContext context = {
+                .package                 = nullptr,
+                .package_unit            = get_package_unit(),
+                .source_file_name        = get_package_unit()->current_file_name,
+                .line_content            = package_unit_get_line_content(0),
+                .line_number             = 0,
+                .column_number           = package_unit_get_column_number(),
+                .error_message           = std::string(compile_err_buf),
+                .advice                  = std::string(compile_adv_buf),
+                .report_type             = ERROR_REPORT_TYPE_COLL_ERR,
+                .ring_compiler_file      = (char*)__FILE__,
+                .ring_compiler_file_line = __LINE__,
+            };
+            ring_compile_error_report(&context);
+        } else {
+            add_top_level_code(package, package_executer);
+        }
+    }
 
 #ifdef DEBUG_GENERATE_SUMMARY
     if (str_eq(package->package_name, "main")) {
@@ -170,7 +197,8 @@ void add_functions(Package* package, Package_Executer* executer) {
     for (unsigned int i = 0; i < package->function_list.size(); i++) {
         copy_function(executer, &(executer->function_list[i]), package->function_list[i]);
         // 注册main函数
-        if (str_eq(package->function_list[i]->identifier, "main")) {
+        if (str_eq(package->package_name, "main")
+            && str_eq(package->function_list[i]->identifier, "main")) {
             executer->exist_main_func = true;
             executer->main_func_index = i;
         } else if (str_eq(package->function_list[i]->identifier, "__global_init")) {
@@ -455,11 +483,7 @@ void add_global_init_func(Package* package, Package_Executer* executer) {
 void add_top_level_code(Package* package, Package_Executer* executer) {
     debug_generate_info_with_darkgreen("\t");
 
-    if (!executer->exist_main_func) {
-        // TODO: 编译阶段报错
-        // main-package 中 必须含有 main函数
-        return;
-    }
+    assert(executer->exist_main_func);
 
     RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
 

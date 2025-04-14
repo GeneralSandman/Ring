@@ -2495,10 +2495,6 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
                             RVM_Function* callee_function,
                             unsigned int  return_value_list_size) {
 
-    // TODO:
-    // 不应该直接操作 VM_CUR_CO_STACK_TOP_INDEX
-    // 应该根据 VM_CUR_CO_STACK_TOP_INDEX 来进行操作
-
     unsigned int old_return_value_list_index;
 
     old_return_value_list_index = VM_CUR_CO_STACK_TOP_INDEX - return_value_list_size;

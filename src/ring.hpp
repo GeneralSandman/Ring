@@ -2436,6 +2436,7 @@ typedef enum {
     ERROR_TYPEDEF_NAME_NOT_UPPERCASE_LETTER     = 100004, // typedef 定义的类型名称必须大写开头
     ERROR_DEF_PACKAGE_NAME_NOT_LOWERCASE_LETTER = 100005, // def package 定义的 package 名称必须小写开头
     ERROR_USE_PACKAGE_MAIN_IMPORT               = 100006, // use package 不能导入 main
+    ERROR_NOT_FOUND_MAIN_FUNCTION               = 100007, // 找不到 main 函数
 
 
     ERROR_UNDEFINITE_VARIABLE                   = 200000,
