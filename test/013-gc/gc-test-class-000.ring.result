@@ -1,0 +1,12 @@
+test_class_0 ------------
+debug_assert PASS
+debug_assert PASS
+test_class_1 ------------
+debug_assert PASS
+debug_assert PASS
+test_class_2 ------------
+debug_assert PASS
+local_job0_value:{Bool:true Int:1 Int64:0 Double:0.000000 String:} local_job1_value:{Bool:false Int:0 Int64:0 Double:0.000000 String: Job0Value:{Bool:true Int:1 Int64:0 Double:0.000000 String:}}
+debug_assert PASS
+debug_assert PASS
+debug_assert PASS

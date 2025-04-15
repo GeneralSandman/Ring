@@ -1,4 +1,10 @@
+test_array_string ------------
 debug_assert PASS
+debug_assert PASS
+test_array_string_2 ------------
+debug_assert PASS
+debug_assert PASS
+test_array_string_3 ------------
 debug_assert PASS
 debug_assert PASS
 debug_assert PASS
