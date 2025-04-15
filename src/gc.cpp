@@ -182,7 +182,6 @@ void gc_mark_class_ob(RVM_ClassObject* class_ob) {
     }
 }
 
-// TODO: 这里需要重新审视
 void gc_mark_array(RVM_Array* array) {
     array->gc_mark = GC_MARK_COLOR_BLACK;
 
@@ -1010,8 +1009,9 @@ unsigned int rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_
             // string 自己控制生命周期
             break;
         case RVM_VALUE_TYPE_CLASS_OB:
-            // TODO: 不要递归向下释放
-            free_data_size += rvm_free_class_ob(rvm, class_ob->field_list[field_index].u.class_ob_value);
+            free_data_size += 0;
+            // 不必递归向下释放
+            // class 自己控制生命周期
             break;
         case RVM_VALUE_TYPE_ARRAY:
             free_data_size += 0;

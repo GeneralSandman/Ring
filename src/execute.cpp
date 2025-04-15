@@ -3198,7 +3198,6 @@ ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Array* array, int i
 /*
  * deep copy `value` and set by `array`&`index`
  *
- * TODO: 重新考虑一下, 可能存在内存泄漏
  */
 ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_String** value) {
     RVM_String* dst_string       = rvm_deep_copy_string(rvm, *value);
