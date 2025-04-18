@@ -12,4 +12,13 @@ test_push_3 ------------
 local_int_array_0 = []
 local_int_array_0 = [[1 2 3]]
 local_int_array_0 = [[1 2 3] [4 5 6]]
-local_int_array_0 = [[1 2 3] [4 5 6] [4 5 6]]
+local_int_array_0 = [[1 2 3] [4 5 6] [7 8 9]]
+test_push_4 ------------
+local_int_array_0 = []
+local_int_array_0 = [[[1 2 3] [4 5 6] [7 8 9]]]
+local_int_array_0 = [[[1 2 3] [4 5 6] [7 8 9]] [[10 11 12] [13 14 15] [16 17 18]]]
+local_int_array_0 = [[[1 2 3] [4 5 6] [7 8 9]] [[10 11 12] [13 14 15] [16 17 18]] [[19 20 21] [22 23 24] [25 26 27]]]
+test_push_5 ------------
+local_int_array_0 = [[1 2 3 11] [4 5 6] [7 8 9]]
+local_int_array_0 = [[1 2 3 11] [4 5 6 11] [7 8 9]]
+local_int_array_0 = [[1 2 3 11] [4 5 6 11] [7 8 9 11]]
