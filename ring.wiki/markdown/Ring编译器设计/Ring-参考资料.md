@@ -195,9 +195,6 @@ https://github.com/microsoft/vscode/blob/main/extensions/go/syntaxes/go.tmLangua
 https://github.com/worlpaker/go-syntax/blob/master/syntaxes/go.tmLanguage.json
 
 
-关于vscode 的 debugger插件
-https://code.visualstudio.com/api/extension-guides/debugger-extension
-
 
 
 ## 垃圾回收专题
