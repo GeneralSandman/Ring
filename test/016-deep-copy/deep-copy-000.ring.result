@@ -1,0 +1,10 @@
+
+test_deep_copy_array--------------
+test_fn_array_as_param int_array = [1 0 0 0 0 0 0 0 0 0]
+debug_assert PASS
+local_int_array_0 = [0 0 0 0 0 0 0 0 0 0]
+
+test_deep_copy_class--------------
+test_fn_class_as_param job1_value = {Bool:true Int:0 Int64:0 Double:0.000000 String:}
+debug_assert PASS
+local_job1_value_0 = {Bool:false Int:0 Int64:0 Double:0.000000 String:}

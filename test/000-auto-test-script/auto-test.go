@@ -65,6 +65,7 @@ var (
 		"013-gc",
 		"014-buildin",
 		"015-statement/for",
+		"016-deep-copy",
 
 		"020-array-bool",
 		"021-array-int",

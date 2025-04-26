@@ -44,9 +44,9 @@ fn main() {
     fmt::println_bool(local_value_job_0.Running);
     fmt::println_int(local_value_job_0.JobID);
     fmt::println_double(local_value_job_0.Score);
-    debug::assert(local_value_job_0.Running == false);
-    debug::assert(local_value_job_0.JobID == 2);
-    debug::assert(local_value_job_0.Score == 2.2);
+    debug::assert(local_value_job_0.Running == true);
+    debug::assert(local_value_job_0.JobID == 1);
+    debug::assert(local_value_job_0.Score == 1.1);
 
 }
 

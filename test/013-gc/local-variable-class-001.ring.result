@@ -27,9 +27,9 @@ debug_assert PASS
 
 ------test case 4
 
-false
-2
-2.200000
+true
+1
+1.100000
 debug_assert PASS
 debug_assert PASS
 debug_assert PASS
