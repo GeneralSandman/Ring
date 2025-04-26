@@ -861,6 +861,7 @@ std::string format_rvm_value(RVM_Value* value) {
 
 
 std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
+    // TODO: 后续与 get_rvm_call_stack 代码合并
 
     std::string   result;
     std::string   call_info_s;
@@ -895,7 +896,7 @@ std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
                                          source_file.c_str(), source_line_number);
 
         } else {
-            // bootloader callinfo
+            // main-loader callinfo
             call_info_s = sprintf_string("#%d $ring!%s\n", offset, "start()");
         }
 
@@ -903,6 +904,51 @@ std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
     }
 
     return result;
+}
+
+CallInfo get_rvm_call_stack(Ring_VirtualMachine* rvm, unsigned int skip) {
+    std::string   call_info_s;
+
+    unsigned int  offset = 0;
+    RVM_CallInfo* pos    = VM_CUR_CO_CALLINFO;
+
+    std::string   func_name;
+    std::string   source_file;
+    unsigned int  source_line_number = 0;
+
+    for (; pos != nullptr; pos = pos->next, offset++) {
+
+        if (offset != skip) {
+            continue;
+        }
+
+        if (pos->callee_function != nullptr) {
+
+            if (pos->callee_object != nullptr) {
+                func_name = sprintf_string("%s.%s",
+                                           pos->callee_object->class_ref->identifier,
+                                           format_rvm_function(rvm->executer, (RVM_Function*)pos->callee_function).c_str());
+            } else {
+                func_name = sprintf_string("%s", format_rvm_function(rvm->executer, (RVM_Function*)pos->callee_function).c_str());
+            }
+
+            source_file        = pos->callee_function->source_file;
+            source_line_number = get_source_line_number_by_pc(pos->callee_function, pos->pc);
+
+        } else {
+            func_name = "~start()";
+        }
+
+
+        return CallInfo{
+            .pc   = pos->pc,
+            .file = source_file,
+            .func = func_name,
+            .line = source_line_number,
+        };
+    }
+
+    return CallInfo{};
 }
 
 std::string format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int source_line_number) {

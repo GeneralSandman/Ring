@@ -2301,29 +2301,26 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
                             RVM_Function*        function,
                             unsigned int         argument_list_size) {
 
-    RVM_Value           ret;
-
-    int                 return_list_count = function->u.native_func->return_list_count;
-    RVM_NativeFuncProc* native_func_proc  = function->u.native_func->func_proc;
-    RVM_Value*          args              = nullptr;
+    RVM_NativeFuncProc* native_func_proc = function->u.native_func->func_proc;
+    RVM_Value*          args             = nullptr;
+    unsigned int        return_size      = 0;
+    RVM_Value*          return_list      = nullptr;
 
     //
     args = &VM_CUR_CO_STACK_DATA[VM_CUR_CO_STACK_TOP_INDEX - argument_list_size];
 
-    ret  = native_func_proc(rvm, argument_list_size, args);
+    native_func_proc(rvm, argument_list_size, args, &return_size, &return_list);
 
 
     // 销毁 argument
     VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
 
-    // TODO: 需要补齐一个 return 指令
-    //       如何在这里处理 return 多返回值的问题
-    if (return_list_count == 0) {
-    } else if (return_list_count == 1) {
-        VM_CUR_CO_STACK_DATA[VM_CUR_CO_STACK_TOP_INDEX++] = ret;
-    } else {
-        ring_error_report("native function return value count > 1");
+    // 放置返回值
+    for (unsigned int i = 0; i < return_size; i++) {
+        VM_CUR_CO_STACK_DATA[VM_CUR_CO_STACK_TOP_INDEX++] = return_list[i];
     }
+
+    destory_native_return_list(return_list, return_size);
 }
 
 /*

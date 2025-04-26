@@ -18,3 +18,7 @@ fn gc();
 
 @native
 fn print_call_stack();
+
+@native
+// return (pc, file, func_name, line)
+fn call_info(var int skip) -> (int64, string, string, int);

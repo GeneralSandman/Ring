@@ -131,6 +131,7 @@ std::vector<StdPackageInfo> Std_Lib_List = {
             {(char*)"heap_size", std_lib_runtime_heap_size, 0, 1},
             {(char*)"gc", std_lib_runtime_gc, 0, 0},
             {(char*)"print_call_stack", std_lib_runtime_print_call_stack, 0, 0},
+            {(char*)"call_info", std_lib_runtime_call_info, 1, 4},
         },
     },
 
@@ -201,20 +202,44 @@ void register_lib(Package_Executer*   package_executer,
     }
 }
 
+RVM_Value* new_native_return_list(unsigned int return_size) {
+    return (RVM_Value*)mem_alloc(NULL_MEM_POOL, return_size * sizeof(RVM_Value));
+}
+void destory_native_return_list(RVM_Value* return_list, unsigned int return_size) {
+    mem_free(NULL_MEM_POOL, return_list, return_size * sizeof(RVM_Value));
+}
+
+#define RETURN_LIST_SET_BOOL(list, index, value)        \
+    (list)[(index)].type         = RVM_VALUE_TYPE_BOOL; \
+    (list)[(index)].u.bool_value = (value);
+#define RETURN_LIST_SET_INT(list, index, value)       \
+    (list)[(index)].type        = RVM_VALUE_TYPE_INT; \
+    (list)[(index)].u.int_value = (value);
+#define RETURN_LIST_SET_INT64(list, index, value)         \
+    (list)[(index)].type          = RVM_VALUE_TYPE_INT64; \
+    (list)[(index)].u.int64_value = (value);
+#define RETURN_LIST_SET_DOUBLE(list, index, value)          \
+    (list)[(index)].type           = RVM_VALUE_TYPE_DOUBLE; \
+    (list)[(index)].u.double_value = (value);
+#define RETURN_LIST_SET_STRING(list, index, value)          \
+    (list)[(index)].type           = RVM_VALUE_TYPE_STRING; \
+    (list)[(index)].u.string_value = (value);
+
 /*
  * Package: os
  * Function: exit
  * Type: @native
  */
-RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    assert(arg_count == 1);
+void std_lib_os_exit(Ring_VirtualMachine* rvm,
+                     unsigned int arg_count, RVM_Value* args,
+                     unsigned int* return_size, RVM_Value** return_list) {
 
-    RVM_Value ret;
-    ret.u.int_value = 0;
+    assert(arg_count == 1);
 
     exit(args->u.int_value);
 
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -222,7 +247,10 @@ RVM_Value std_lib_os_exit(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
  * Function: remove
  * Type: @native
  */
-RVM_Value std_lib_os_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_os_remove(Ring_VirtualMachine* rvm,
+                       unsigned int arg_count, RVM_Value* args,
+                       unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
@@ -232,9 +260,8 @@ RVM_Value std_lib_os_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
     str->data[str->length] = '\0';
     remove(str->data);
 
-    RVM_Value ret;
-    ret.u.int_value = 0;
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -242,10 +269,12 @@ RVM_Value std_lib_os_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Function: rename
  * Type: @native
  */
-RVM_Value std_lib_os_rename(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    RVM_Value ret;
-    ret.u.int_value = 0;
-    return ret;
+void std_lib_os_rename(Ring_VirtualMachine* rvm,
+                       unsigned int arg_count, RVM_Value* args,
+                       unsigned int* return_size, RVM_Value** return_list) {
+
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -253,7 +282,10 @@ RVM_Value std_lib_os_rename(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Function: getenv
  * Type: @native
  */
-RVM_Value std_lib_os_getenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_os_getenv(Ring_VirtualMachine* rvm,
+                       unsigned int arg_count, RVM_Value* args,
+                       unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
@@ -272,11 +304,9 @@ RVM_Value std_lib_os_getenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
     str_val->length            = strlen(res);
     str_val->data[strlen(res)] = '\0';
 
-    // TODO: 这里应该是浅copy 还是深度copy
-    RVM_Value ret;
-    ret.type           = RVM_VALUE_TYPE_STRING;
-    ret.u.string_value = str_val;
-    return ret;
+    *return_size               = 1;
+    *return_list               = new_native_return_list(*return_size);
+    RETURN_LIST_SET_STRING(*return_list, 0, str_val);
 }
 
 /*
@@ -284,20 +314,21 @@ RVM_Value std_lib_os_getenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Function: setenv
  * Type: @native
  */
-RVM_Value std_lib_os_setenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_os_setenv(Ring_VirtualMachine* rvm,
+                       unsigned int arg_count, RVM_Value* args,
+                       unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 2);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
     assert(args[1].type == RVM_VALUE_TYPE_STRING);
 
-    int         res;
     RVM_String* name  = args[0].u.string_value;
     RVM_String* value = args[1].u.string_value;
 
-    res               = setenv(name->data, value->data, 1);
+    setenv(name->data, value->data, 1);
 
-    RVM_Value ret;
-    ret.u.int_value = res;
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -305,20 +336,22 @@ RVM_Value std_lib_os_setenv(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Function: exist
  * Type: @native
  */
-RVM_Value std_lib_io_exist(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_io_exist(Ring_VirtualMachine* rvm,
+                      unsigned int arg_count, RVM_Value* args,
+                      unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
     RVM_String* str = args[0].u.string_value;
 
     int         res;
-    res = access(str->data, F_OK);
+    res          = access(str->data, F_OK);
 
 
-    RVM_Value ret;
-    ret.type         = RVM_VALUE_TYPE_BOOL;
-    ret.u.bool_value = ((res == 0) ? RVM_TRUE : RVM_FALSE);
-    return ret;
+    *return_size = 1;
+    *return_list = new_native_return_list(*return_size);
+    RETURN_LIST_SET_BOOL(*return_list, 0, ((res == 0) ? RVM_TRUE : RVM_FALSE));
 }
 
 /*
@@ -326,16 +359,18 @@ RVM_Value std_lib_io_exist(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
  * Function: open
  * Type: @native
  */
-RVM_Value std_lib_io_open(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_io_open(Ring_VirtualMachine* rvm,
+                     unsigned int arg_count, RVM_Value* args,
+                     unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
-    int       fid = open(args[0].u.string_value->data, O_RDONLY);
+    int fid      = open(args[0].u.string_value->data, O_RDONLY);
 
-    RVM_Value ret;
-    ret.type        = RVM_VALUE_TYPE_INT;
-    ret.u.int_value = fid;
-    return ret;
+    *return_size = 1;
+    *return_list = new_native_return_list(*return_size);
+    RETURN_LIST_SET_INT(*return_list, 0, fid);
 }
 
 /*
@@ -343,16 +378,18 @@ RVM_Value std_lib_io_open(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
  * Function: create
  * Type: @native
  */
-RVM_Value std_lib_io_create(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_io_create(Ring_VirtualMachine* rvm,
+                       unsigned int arg_count, RVM_Value* args,
+                       unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
-    int       fid = open(args[0].u.string_value->data, O_CREAT | O_RDWR, 0666);
+    int fid      = open(args[0].u.string_value->data, O_CREAT | O_RDWR, 0666);
 
-    RVM_Value ret;
-    ret.type        = RVM_VALUE_TYPE_INT;
-    ret.u.int_value = fid;
-    return ret;
+    *return_size = 1;
+    *return_list = new_native_return_list(*return_size);
+    RETURN_LIST_SET_INT(*return_list, 0, fid);
 }
 
 /*
@@ -360,7 +397,10 @@ RVM_Value std_lib_io_create(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Function: seek
  * Type: @native
  */
-RVM_Value std_lib_io_seek(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_io_seek(Ring_VirtualMachine* rvm,
+                     unsigned int arg_count, RVM_Value* args,
+                     unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 3);
     assert(args[0].type == RVM_VALUE_TYPE_INT);
     assert(args[1].type == RVM_VALUE_TYPE_INT64);
@@ -372,10 +412,8 @@ RVM_Value std_lib_io_seek(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
 
     lseek(fid, offset, whence);
 
-    RVM_Value ret;
-    ret.type        = RVM_VALUE_TYPE_INT;
-    ret.u.int_value = fid;
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -383,7 +421,10 @@ RVM_Value std_lib_io_seek(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_
  * Function: read_all
  * Type: @native
  */
-RVM_Value std_lib_io_read_all(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_io_read_all(Ring_VirtualMachine* rvm,
+                         unsigned int arg_count, RVM_Value* args,
+                         unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_INT);
 
@@ -410,11 +451,9 @@ RVM_Value std_lib_io_read_all(Ring_VirtualMachine* rvm, unsigned int arg_count, 
     str_val->length              = result.size();
     str_val->data[result.size()] = '\0';
 
-
-    RVM_Value ret;
-    ret.type           = RVM_VALUE_TYPE_STRING;
-    ret.u.string_value = str_val;
-    return ret;
+    *return_size                 = 1;
+    *return_list                 = new_native_return_list(*return_size);
+    RETURN_LIST_SET_STRING(*return_list, 0, str_val);
 }
 
 /*
@@ -422,7 +461,10 @@ RVM_Value std_lib_io_read_all(Ring_VirtualMachine* rvm, unsigned int arg_count, 
  * Function: write
  * Type: @native
  */
-RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_io_write(Ring_VirtualMachine* rvm,
+                      unsigned int arg_count, RVM_Value* args,
+                      unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 2);
     assert(args[0].type == RVM_VALUE_TYPE_INT);
     assert(args[1].type == RVM_VALUE_TYPE_STRING);
@@ -433,10 +475,8 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
     ssize_t     ws     = write(fid, buffer->data, buffer->length);
     (void)ws;
 
-    RVM_Value ret;
-    ret.type        = RVM_VALUE_TYPE_INT;
-    ret.u.int_value = 0;
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -444,18 +484,20 @@ RVM_Value std_lib_io_write(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
  * Function: close
  * Type: @native
  */
-RVM_Value std_lib_io_close(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_io_close(Ring_VirtualMachine* rvm,
+                      unsigned int arg_count, RVM_Value* args,
+                      unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_INT);
 
-    int       fid = args[0].u.int_value;
+    int fid      = args[0].u.int_value;
 
-    int       res = close(fid);
+    int res      = close(fid);
 
-    RVM_Value ret;
-    ret.type        = RVM_VALUE_TYPE_INT;
-    ret.u.int_value = res;
-    return ret;
+    *return_size = 1;
+    *return_list = new_native_return_list(*return_size);
+    RETURN_LIST_SET_INT(*return_list, 0, res);
 }
 
 /*
@@ -463,7 +505,10 @@ RVM_Value std_lib_io_close(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
  * Function: remove
  * Type: @native
  */
-RVM_Value std_lib_io_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_io_remove(Ring_VirtualMachine* rvm,
+                       unsigned int arg_count, RVM_Value* args,
+                       unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
@@ -473,10 +518,8 @@ RVM_Value std_lib_io_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
     str->data[str->length] = '\0';
     remove(str->data);
 
-    RVM_Value ret;
-    ret.type        = RVM_VALUE_TYPE_INT;
-    ret.u.int_value = 0;
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -484,9 +527,9 @@ RVM_Value std_lib_io_remove(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Function: println_bool
  * Type: @native
  */
-RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm,
-                                   unsigned int         arg_count,
-                                   RVM_Value*           args) {
+void std_lib_fmt_println_bool(Ring_VirtualMachine* rvm,
+                              unsigned int arg_count, RVM_Value* args,
+                              unsigned int* return_size, RVM_Value** return_list) {
 
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_BOOL);
@@ -508,7 +551,8 @@ RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm,
     mem_free(NULL_MEM_POOL, (void*)output_buffer, 6 * sizeof(char));
 
 
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -516,7 +560,10 @@ RVM_Value std_lib_fmt_println_bool(Ring_VirtualMachine* rvm,
  * Function: println_int
  * Type: @native
  */
-RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_fmt_println_int(Ring_VirtualMachine* rvm,
+                             unsigned int arg_count, RVM_Value* args,
+                             unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_INT);
 
@@ -533,7 +580,8 @@ RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
     mem_free(NULL_MEM_POOL, (void*)output_buffer, 12 * sizeof(char));
 
 
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -541,7 +589,10 @@ RVM_Value std_lib_fmt_println_int(Ring_VirtualMachine* rvm, unsigned int arg_cou
  * Function: println_int64
  * Type: @native
  */
-RVM_Value std_lib_fmt_println_int64(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_fmt_println_int64(Ring_VirtualMachine* rvm,
+                               unsigned int arg_count, RVM_Value* args,
+                               unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_INT64);
 
@@ -558,7 +609,8 @@ RVM_Value std_lib_fmt_println_int64(Ring_VirtualMachine* rvm, unsigned int arg_c
     mem_free(NULL_MEM_POOL, (void*)output_buffer, 22 * sizeof(char));
 
 
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -566,7 +618,10 @@ RVM_Value std_lib_fmt_println_int64(Ring_VirtualMachine* rvm, unsigned int arg_c
  * Function: println_double
  * Type: @native
  */
-RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_fmt_println_double(Ring_VirtualMachine* rvm,
+                                unsigned int arg_count, RVM_Value* args,
+                                unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_DOUBLE);
 
@@ -583,7 +638,8 @@ RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
     mem_free(NULL_MEM_POOL, (void*)output_buffer, 1024 * sizeof(char));
 
 
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -591,7 +647,10 @@ RVM_Value std_lib_fmt_println_double(Ring_VirtualMachine* rvm, unsigned int arg_
  * Function: println_string
  * Type: @native
  */
-RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_fmt_println_string(Ring_VirtualMachine* rvm,
+                                unsigned int arg_count, RVM_Value* args,
+                                unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
@@ -625,7 +684,8 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
     mem_free(NULL_MEM_POOL, (void*)output_buffer, capacity * sizeof(char));
 
 
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -635,7 +695,10 @@ RVM_Value std_lib_fmt_println_string(Ring_VirtualMachine* rvm, unsigned int arg_
  *
  * TODO: 后续废弃
  */
-RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm,
+                                 unsigned int arg_count, RVM_Value* args,
+                                 unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
 
     unsigned int length        = 20;
@@ -685,9 +748,8 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
 
     mem_free(NULL_MEM_POOL, (void*)output_buffer, length * sizeof(char));
 
-    RVM_Value ret;
-    ret.u.int_value = 0;
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -695,7 +757,10 @@ RVM_Value std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm, unsigned int arg
  * Function: println
  * Type: @native
  */
-RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_fmt_println(Ring_VirtualMachine* rvm,
+                         unsigned int arg_count, RVM_Value* args,
+                         unsigned int* return_size, RVM_Value** return_list) {
+
     std::string result;
     std::string tmp;
 
@@ -712,10 +777,8 @@ RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, 
     printf("%s", result.c_str());
     fflush(stdout);
 
-    RVM_Value ret;
-    ret.u.int_value = 0;
-
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -723,7 +786,10 @@ RVM_Value std_lib_fmt_println(Ring_VirtualMachine* rvm, unsigned int arg_count, 
  * Function: printf
  * Type: @native
  */
-RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_fmt_printf(Ring_VirtualMachine* rvm,
+                        unsigned int arg_count, RVM_Value* args,
+                        unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count >= 1);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
@@ -774,9 +840,8 @@ RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, R
     printf("%s", result.c_str());
     fflush(stdout);
 
-    RVM_Value ret;
-    ret.u.int_value = 0;
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -784,7 +849,10 @@ RVM_Value std_lib_fmt_printf(Ring_VirtualMachine* rvm, unsigned int arg_count, R
  * Function: printf
  * Type: @native
  */
-RVM_Value std_lib_fmt_sprintf(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_fmt_sprintf(Ring_VirtualMachine* rvm,
+                         unsigned int arg_count, RVM_Value* args,
+                         unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count >= 1);
     assert(args[0].type == RVM_VALUE_TYPE_STRING);
 
@@ -834,11 +902,9 @@ RVM_Value std_lib_fmt_sprintf(Ring_VirtualMachine* rvm, unsigned int arg_count, 
     }
 
 
-    RVM_Value ret;
-    ret.type           = RVM_VALUE_TYPE_STRING;
-    ret.u.string_value = rvm_gc_new_rvm_string(rvm, result.c_str());
-
-    return ret;
+    *return_size = 1;
+    *return_list = new_native_return_list(*return_size);
+    RETURN_LIST_SET_STRING(*return_list, 0, rvm_gc_new_rvm_string(rvm, result.c_str()));
 }
 
 
@@ -847,12 +913,13 @@ RVM_Value std_lib_fmt_sprintf(Ring_VirtualMachine* rvm, unsigned int arg_count, 
  * Function: debug_assert
  * Type: @native
  */
-RVM_Value std_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_debug_assert(Ring_VirtualMachine* rvm,
+                          unsigned int arg_count, RVM_Value* args,
+                          unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_BOOL);
 
-    RVM_Value ret;
-    ret.u.int_value            = 0;
 
     unsigned int length        = 20;
     char*        output_buffer = (char*)mem_alloc(NULL_MEM_POOL, length * sizeof(char));
@@ -871,7 +938,8 @@ RVM_Value std_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count,
     mem_free(NULL_MEM_POOL, (void*)output_buffer, length * sizeof(char));
 
 
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 
@@ -880,7 +948,9 @@ RVM_Value std_lib_debug_assert(Ring_VirtualMachine* rvm, unsigned int arg_count,
  * Function: std_lib_debug_var_dump
  * Type: @native
  */
-RVM_Value std_lib_debug_var_dump(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_debug_var_dump(Ring_VirtualMachine* rvm,
+                            unsigned int arg_count, RVM_Value* args,
+                            unsigned int* return_size, RVM_Value** return_list) {
 
     std::string res;
     for (unsigned int i = 0; i < arg_count; i++) {
@@ -891,9 +961,8 @@ RVM_Value std_lib_debug_var_dump(Ring_VirtualMachine* rvm, unsigned int arg_coun
     printf("%s", res.c_str());
     fflush(stdout);
 
-    RVM_Value ret;
-    ret.u.int_value = 0;
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 
@@ -902,18 +971,20 @@ RVM_Value std_lib_debug_var_dump(Ring_VirtualMachine* rvm, unsigned int arg_coun
  * Function: typeof
  * Type: @native
  */
-RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_reflect_typeof(Ring_VirtualMachine* rvm,
+                            unsigned int arg_count, RVM_Value* args,
+                            unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
 
     std::string str = "";
 
     str             = format_rvm_type(rvm, args);
 
-    RVM_Value ret;
-    ret.type           = RVM_VALUE_TYPE_STRING;
-    ret.u.string_value = rvm_gc_new_rvm_string(rvm, str.c_str());
 
-    return ret;
+    *return_size    = 1;
+    *return_list    = new_native_return_list(*return_size);
+    RETURN_LIST_SET_STRING(*return_list, 0, rvm_gc_new_rvm_string(rvm, str.c_str()));
 }
 
 
@@ -923,14 +994,16 @@ RVM_Value std_lib_reflect_typeof(Ring_VirtualMachine* rvm, unsigned int arg_coun
  * Type: @native
  *
  */
-RVM_Value std_lib_runtime_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_runtime_heap_size(Ring_VirtualMachine* rvm,
+                               unsigned int arg_count, RVM_Value* args,
+                               unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 0);
 
-    RVM_Value ret;
-    ret.type          = RVM_VALUE_TYPE_INT64;
-    ret.u.int64_value = rvm_heap_size(rvm);
 
-    return ret;
+    *return_size = 1;
+    *return_list = new_native_return_list(*return_size);
+    RETURN_LIST_SET_INT64(*return_list, 0, rvm_heap_size(rvm));
 }
 
 /*
@@ -938,7 +1011,10 @@ RVM_Value std_lib_runtime_heap_size(Ring_VirtualMachine* rvm, unsigned int arg_c
  * Function: heap_size
  * Type: @native
  */
-RVM_Value std_lib_runtime_gc(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_runtime_gc(Ring_VirtualMachine* rvm,
+                        unsigned int arg_count, RVM_Value* args,
+                        unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 0);
 
     RVM_Value ret;
@@ -947,7 +1023,8 @@ RVM_Value std_lib_runtime_gc(Ring_VirtualMachine* rvm, unsigned int arg_count, R
     // gc_incremental(rvm);
     gc_make_sweep(rvm);
 
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -955,7 +1032,10 @@ RVM_Value std_lib_runtime_gc(Ring_VirtualMachine* rvm, unsigned int arg_count, R
  * Function: print_call_stack
  * Type: @native
  */
-RVM_Value std_lib_runtime_print_call_stack(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_runtime_print_call_stack(Ring_VirtualMachine* rvm,
+                                      unsigned int arg_count, RVM_Value* args,
+                                      unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 0);
 
     std::string call_stack = format_rvm_call_stack(rvm);
@@ -963,9 +1043,27 @@ RVM_Value std_lib_runtime_print_call_stack(Ring_VirtualMachine* rvm, unsigned in
 
     fflush(stdout);
 
-    RVM_Value ret;
-    ret.u.int_value = 0;
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
+}
+
+/*
+ * Package: runtime
+ * Function: call_info
+ * Type: @native
+ */
+void std_lib_runtime_call_info(Ring_VirtualMachine* rvm,
+                               unsigned int arg_count, RVM_Value* args,
+                               unsigned int* return_size, RVM_Value** return_list) {
+
+    CallInfo call_info = get_rvm_call_stack(rvm, args[0].u.int_value);
+
+    *return_size       = 4;
+    *return_list       = new_native_return_list(*return_size);
+    RETURN_LIST_SET_INT64(*return_list, 0, call_info.pc);
+    RETURN_LIST_SET_STRING(*return_list, 1, rvm_gc_new_rvm_string(rvm, call_info.file.c_str()));
+    RETURN_LIST_SET_STRING(*return_list, 2, rvm_gc_new_rvm_string(rvm, call_info.func.c_str()));
+    RETURN_LIST_SET_INT(*return_list, 3, call_info.line);
 }
 
 /*
@@ -974,22 +1072,20 @@ RVM_Value std_lib_runtime_print_call_stack(Ring_VirtualMachine* rvm, unsigned in
  * Type: @native
  * 返回 纳秒时间戳
  */
-RVM_Value std_lib_time_time(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
-    assert(arg_count == 0);
+void std_lib_time_time(Ring_VirtualMachine* rvm,
+                       unsigned int arg_count, RVM_Value* args,
+                       unsigned int* return_size, RVM_Value** return_list) {
 
-    // 10 位时间戳
-    // time_t res;
-    // res = time(nullptr);
+    assert(arg_count == 0);
 
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     long long timestamp = (long long)(ts.tv_sec) * 1000000000 + ts.tv_nsec;
 
-    RVM_Value ret;
-    ret.type          = RVM_VALUE_TYPE_INT64;
-    ret.u.int64_value = timestamp;
 
-    return ret;
+    *return_size        = 1;
+    *return_list        = new_native_return_list(*return_size);
+    RETURN_LIST_SET_INT64(*return_list, 0, timestamp);
 }
 
 /*
@@ -999,7 +1095,10 @@ RVM_Value std_lib_time_time(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  *
  * // 单位纳秒
  */
-RVM_Value std_lib_time_sleep(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_time_sleep(Ring_VirtualMachine* rvm,
+                        unsigned int arg_count, RVM_Value* args,
+                        unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_INT64);
 
@@ -1009,15 +1108,10 @@ RVM_Value std_lib_time_sleep(Ring_VirtualMachine* rvm, unsigned int arg_count, R
     ts.tv_sec  = ns / 1000000000;
     ts.tv_nsec = ns % 1000000000;
 
-
     nanosleep(&ts, NULL);
 
-
-    RVM_Value ret;
-    ret.type        = RVM_VALUE_TYPE_INT;
-    ret.u.int_value = 0;
-
-    return ret;
+    *return_size = 0;
+    *return_list = nullptr;
 }
 
 /*
@@ -1025,18 +1119,20 @@ RVM_Value std_lib_time_sleep(Ring_VirtualMachine* rvm, unsigned int arg_count, R
  * Function: abs
  * Type: @native
  */
-RVM_Value std_lib_math_abs(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_math_abs(Ring_VirtualMachine* rvm,
+                      unsigned int arg_count, RVM_Value* args,
+                      unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_DOUBLE);
 
-    double    double_val = args[0].u.double_value;
+    double double_val = args[0].u.double_value;
 
-    double    res        = fabs(double_val);
+    double res        = fabs(double_val);
 
-    RVM_Value ret;
-    ret.type           = RVM_VALUE_TYPE_DOUBLE;
-    ret.u.double_value = res;
-    return ret;
+    *return_size      = 1;
+    *return_list      = new_native_return_list(*return_size);
+    RETURN_LIST_SET_DOUBLE(*return_list, 0, res);
 }
 
 
@@ -1045,18 +1141,20 @@ RVM_Value std_lib_math_abs(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM
  * Function: sqrt
  * Type: @native
  */
-RVM_Value std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_math_sqrt(Ring_VirtualMachine* rvm,
+                       unsigned int arg_count, RVM_Value* args,
+                       unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 1);
     assert(args[0].type == RVM_VALUE_TYPE_DOUBLE);
 
-    double    double_val = args[0].u.double_value;
+    double double_val = args[0].u.double_value;
 
-    double    res        = sqrt(double_val);
+    double res        = sqrt(double_val);
 
-    RVM_Value ret;
-    ret.type           = RVM_VALUE_TYPE_DOUBLE;
-    ret.u.double_value = res;
-    return ret;
+    *return_size      = 1;
+    *return_list      = new_native_return_list(*return_size);
+    RETURN_LIST_SET_DOUBLE(*return_list, 0, res);
 }
 
 /*
@@ -1064,18 +1162,20 @@ RVM_Value std_lib_math_sqrt(Ring_VirtualMachine* rvm, unsigned int arg_count, RV
  * Function: pow
  * Type: @native
  */
-RVM_Value std_lib_math_pow(Ring_VirtualMachine* rvm, unsigned int arg_count, RVM_Value* args) {
+void std_lib_math_pow(Ring_VirtualMachine* rvm,
+                      unsigned int arg_count, RVM_Value* args,
+                      unsigned int* return_size, RVM_Value** return_list) {
+
     assert(arg_count == 2);
     assert(args[0].type == RVM_VALUE_TYPE_DOUBLE);
     assert(args[1].type == RVM_VALUE_TYPE_DOUBLE);
 
-    double    x   = args[0].u.double_value;
-    double    y   = args[1].u.double_value;
+    double x     = args[0].u.double_value;
+    double y     = args[1].u.double_value;
 
-    double    res = pow(x, y);
+    double res   = pow(x, y);
 
-    RVM_Value ret;
-    ret.type           = RVM_VALUE_TYPE_DOUBLE;
-    ret.u.double_value = res;
-    return ret;
+    *return_size = 1;
+    *return_list = new_native_return_list(*return_size);
+    RETURN_LIST_SET_DOUBLE(*return_list, 0, res);
 }
