@@ -129,9 +129,11 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define FREE_GET_CLASS_OB_INDEX(index) \
     (GET_FREE_VALUE(index))->u.class_ob_value;
 
+// shallow copy class-ob/array/closure
 #define STACK_COPY_INDEX(dst_index, src_index) \
     (VM_CUR_CO_STACK_DATA[(dst_index)] = VM_CUR_CO_STACK_DATA[(src_index)])
 
+// shallow copy class-ob/array/closure
 #define STACK_COPY_OFFSET(dst_offset, src_offset) \
     STACK_COPY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + (dst_offset), VM_CUR_CO_STACK_TOP_INDEX + (src_offset))
 
@@ -2742,18 +2744,22 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
                     rvm_array_set_double(rvm, array_value, array_index, &double_value);
                 } break;
                 case RING_BASIC_TYPE_STRING: {
+                    // deep copy
                     RVM_String* string_value = STACK_GET_STRING_INDEX(argument_stack_index + argument_stack_offset);
                     rvm_array_set_string(rvm, array_value, array_index, &string_value);
                 } break;
                 case RING_BASIC_TYPE_CLASS: {
+                    // deep copy
                     RVM_ClassObject* class_ob = STACK_GET_CLASS_OB_INDEX(argument_stack_index + argument_stack_offset);
                     rvm_array_set_class_object(rvm, array_value, array_index, &class_ob);
                 } break;
                 case RING_BASIC_TYPE_ARRAY: {
+                    // shallow copy
                     RVM_Array* array_value_item = STACK_GET_ARRAY_INDEX(argument_stack_index + argument_stack_offset);
                     rvm_array_set_array(rvm, array_value, array_index, &array_value_item);
                 } break;
                 case RING_BASIC_TYPE_FUNC: {
+                    // shallow copy
                     RVM_Closure* closure = STACK_GET_CLOSURE_INDEX(argument_stack_index + argument_stack_offset);
                     rvm_array_set_closure(rvm, array_value, array_index, &closure);
                 } break;
@@ -2773,9 +2779,26 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             // 直接break没有问题
             break;
         } else {
-            STACK_COPY_INDEX(
-                VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset,
-                argument_stack_index + argument_stack_offset);
+            switch (parameter->type_specifier->kind) {
+            case RING_BASIC_TYPE_CLASS: {
+                RVM_ClassObject* src_class_ob = STACK_GET_CLASS_OB_INDEX(argument_stack_index + argument_stack_offset);
+                RVM_ClassObject* dst_class_ob = rvm_deep_copy_class_ob(rvm, src_class_ob);
+                STACK_SET_CLASS_OB_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, dst_class_ob);
+            } break;
+            case RING_BASIC_TYPE_ARRAY: {
+                RVM_Array* src_array = STACK_GET_ARRAY_INDEX(argument_stack_index + argument_stack_offset);
+                RVM_Array* dst_array = rvm_deep_copy_array(rvm, src_array);
+                STACK_SET_ARRAY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, dst_array);
+            } break;
+            case RING_BASIC_TYPE_STRING:
+            default:
+                // TODO: 目前string 内容是不可修改的，所以 shallow copy 没有问题的
+                STACK_COPY_INDEX(
+                    VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset,
+                    argument_stack_index + argument_stack_offset);
+                break;
+            }
+
             local_vari_stack_offset++;
         }
     }
@@ -2854,6 +2877,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
             STACK_SET_ARRAY_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, array);
         } break;
         case RING_BASIC_TYPE_FUNC: {
+            // 这里没有分配空间, 只分配了一下meta
             RVM_Closure* closure = rvm_gc_new_closure_meta(rvm);
             STACK_SET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + local_vari_stack_offset, closure);
         } break;
@@ -3076,6 +3100,9 @@ ErrorCode rvm_array_get_array(Ring_VirtualMachine* rvm, RVM_Array* array, int in
     return ERROR_CODE_SUCCESS;
 }
 
+/*
+ * shallow copy
+ */
 ErrorCode rvm_array_set_array(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_Array** value) {
     // this is shallow copy
     array->u.a_array[index] = *value;
@@ -3188,6 +3215,9 @@ ErrorCode rvm_array_pop_double(Ring_VirtualMachine* rvm, RVM_Array* array, doubl
     return ERROR_CODE_SUCCESS;
 }
 
+/*
+ * deep copy
+ */
 ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_String** value) {
     RVM_String* src_string = array->u.string_array[index];
     RVM_String* dst_string = rvm_deep_copy_string(rvm, src_string);
@@ -3196,8 +3226,7 @@ ErrorCode rvm_array_get_string(Ring_VirtualMachine* rvm, RVM_Array* array, int i
 }
 
 /*
- * deep copy `value` and set by `array`&`index`
- *
+ * deep copy
  */
 ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Array* array, int index, RVM_String** value) {
     RVM_String* dst_string       = rvm_deep_copy_string(rvm, *value);
@@ -3205,6 +3234,9 @@ ErrorCode rvm_array_set_string(Ring_VirtualMachine* rvm, RVM_Array* array, int i
     return ERROR_CODE_SUCCESS;
 }
 
+/*
+ * deep copy
+ */
 ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_String** value) {
     if (array->length >= array->capacity) {
         rvm_array_growth(rvm, array);
@@ -3213,6 +3245,9 @@ ErrorCode rvm_array_append_string(Ring_VirtualMachine* rvm, RVM_Array* array, RV
     return ERROR_CODE_SUCCESS;
 }
 
+/*
+ * deep copy
+ */
 ErrorCode rvm_array_pop_string(Ring_VirtualMachine* rvm, RVM_Array* array, RVM_String** value) {
     RVM_String* dst_string = rvm_deep_copy_string(rvm, array->u.string_array[--array->length]);
     *value                 = dst_string;
@@ -3238,7 +3273,7 @@ ErrorCode rvm_array_get_class_object(Ring_VirtualMachine* rvm,
 }
 
 /*
- * deep copy `value` and set by `array`&`index`
+ * deep copy
  */
 ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm,
                                      RVM_Array*           array,
@@ -3253,7 +3288,9 @@ ErrorCode rvm_array_set_class_object(Ring_VirtualMachine* rvm,
     return ERROR_CODE_SUCCESS;
 }
 
-
+/*
+ * deep copy
+ */
 ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm,
                                         RVM_Array*           array,
                                         RVM_ClassObject**    value) {
@@ -3265,6 +3302,9 @@ ErrorCode rvm_array_append_class_object(Ring_VirtualMachine* rvm,
     return ERROR_CODE_SUCCESS;
 }
 
+/*
+ * deep copy
+ */
 ErrorCode rvm_array_pop_class_object(Ring_VirtualMachine* rvm,
                                      RVM_Array*           array,
                                      RVM_ClassObject**    value) {
@@ -3310,6 +3350,9 @@ ErrorCode rvm_array_set_closure(Ring_VirtualMachine* rvm,
     return ERROR_CODE_SUCCESS;
 }
 
+/*
+ * shallow copy
+ */
 ErrorCode rvm_array_append_closure(Ring_VirtualMachine* rvm,
                                    RVM_Array*           array,
                                    RVM_Closure**        value) {
@@ -3322,6 +3365,9 @@ ErrorCode rvm_array_append_closure(Ring_VirtualMachine* rvm,
     return ERROR_CODE_SUCCESS;
 }
 
+/*
+ * shallow copy
+ */
 ErrorCode rvm_array_pop_closure(Ring_VirtualMachine* rvm,
                                 RVM_Array*           array,
                                 RVM_Closure**        value) {
