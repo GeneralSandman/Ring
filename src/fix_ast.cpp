@@ -113,8 +113,9 @@ void ring_compiler_fix_ast(Package* package) {
     // step-2. fix global init statement
     // 添加一个 __global_init() 函数
     // 专门用来对全局变量的初始化
-    // TODO: 当前一个package中只能有一个文件, 所以当前的实现暂时没有什么问题
-    // TODO: global_init_func 应该根据 有无 global{} 块 针对性生成
+    // TODO:
+    // 当前一个package中只能有一个文件, 所以 一个package只有 一个 global{} 块
+    // 后续如果支持了多个文件，这里需要适配
     Function*  global_init_func = create_global_init_func(package);
     Statement* global_statement = nullptr;
     if (global_init_func != nullptr) {
@@ -849,6 +850,7 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
 
         fix_expression(pos, block, func);
 
+        // 函数调用有可能有多个返回值
         for (unsigned int i = 0; i < pos->convert_type_size; i++) {
             return_convert_type.push_back(pos->convert_type[i]);
         }
@@ -883,14 +885,31 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
     }
 
 
+    std::string expect_type_str;
+    // formate to string
+    {
+        std::vector<TypeSpecifier*> tmp;
+        for (FunctionReturnList* pos = func->return_list;
+             pos != nullptr;
+             pos = pos->next) {
+
+            tmp.push_back(pos->type_specifier);
+        }
+        expect_type_str = format_type_specifier(tmp);
+    }
+
+    std::string return_type_str;
+    return_type_str = format_type_specifier(return_convert_type);
+
+
     // Ring-Compiler-Error-Report ERROR_FUNCTION_MISMATCH_RETURN_NUM
     if (func->return_list_size != return_convert_type.size()) {
         DEFINE_ERROR_REPORT_STR;
 
         compile_err_buf = sprintf_string(
-            "the number of return expression list mismatch function definition return value list, expect %d but return %ld; E:%d.",
-            func->return_list_size,
-            return_convert_type.size(),
+            "return mismatch: function expect (%s) but return (%s); E:%d.",
+            expect_type_str.c_str(),
+            return_type_str.c_str(),
             ERROR_FUNCTION_MISMATCH_RETURN_NUM);
 
 
@@ -911,31 +930,6 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
     }
 
 
-    std::string expect_type_str;
-    // formate to string
-    {
-        std::vector<std::string> tmp;
-        for (FunctionReturnList* pos = func->return_list;
-             pos != nullptr;
-             pos = pos->next) {
-
-            tmp.push_back(format_type_specifier(pos->type_specifier));
-        }
-        expect_type_str = "(" + strings_join(tmp, ", ") + ")";
-    }
-
-
-    std::string actual_type_str;
-    // formate to string
-    {
-        std::vector<std::string> tmp;
-        for (TypeSpecifier* type : return_convert_type) {
-            tmp.push_back(format_type_specifier(type));
-        }
-        actual_type_str = "(" + strings_join(tmp, ", ") + ")";
-    }
-
-
     // Ring-Compiler-Error-Report ERROR_FUNCTION_MISMATCH_RETURN_TYPE
     FunctionReturnList* return_value = func->return_list;
     unsigned int        i            = 0;
@@ -950,10 +944,10 @@ void fix_return_statement(ReturnStatement* return_statement, Block* block, Funct
             DEFINE_ERROR_REPORT_STR;
 
             compile_err_buf = sprintf_string(
-                "return mismatch: function expect %s but return %s; E:%d.",
+                "return mismatch: function expect (%s) but return (%s); E:%d.",
                 expect_type_str.c_str(),
-                actual_type_str.c_str(),
-                ERROR_ASSIGNMENT_MISMATCH_TYPE);
+                return_type_str.c_str(),
+                ERROR_FUNCTION_MISMATCH_RETURN_TYPE);
 
             ErrorReportContext context = {
                 .package                 = nullptr,
@@ -1933,6 +1927,7 @@ void fix_unitary_increase_decrease_expression(Expression* expression,
     // TODO: 编译错误
     // 1++ 这种语法不支持
     // 1 不是左值
+    // 但是目前这种分析还不太好做
 
     // 自增/自减 只能作为一个单独的 expression
     // 以下语法编译错误
@@ -3016,7 +3011,7 @@ void fix_anonymous_func_expression(Expression*              expression,
 
     // 从函数定义中，创建一个 type_specifier , 用于 后续比对 type_specifier 是否一致
     // 类型为匿名函数的类型
-    // TODO: 这里不应该每次都要创建，应该共享一份
+    // TODO: 每次都创建新内存，不能复用
     Ring_DeriveType_Func* func_type      = create_derive_type_func(closure->parameter_list, closure->return_list);
 
     TypeSpecifier*        type_specifier = (TypeSpecifier*)mem_alloc(get_front_mem_pool(), sizeof(TypeSpecifier));
@@ -3238,7 +3233,7 @@ Variable* resolve_variable_global(Package* package, char* identifier, Block* blo
         return nullptr;
     }
 
-    // TODO: 注意，这里没有重复利用，占用了很多内存
+    // TODO: 每次都创建新内存，不能复用
     Variable* variable        = (Variable*)mem_alloc(get_front_mem_pool(), sizeof(Variable));
     variable->decl            = var_decl;
     variable->is_free_value   = false;

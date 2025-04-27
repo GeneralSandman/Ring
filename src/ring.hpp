@@ -3585,6 +3585,7 @@ std::string              format_rvm_call_stack(Ring_VirtualMachine* rvm);
 CallInfo                 get_rvm_call_stack(Ring_VirtualMachine* rvm, unsigned int skip);
 std::string              format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int source_line_number);
 
+std::string              format_type_specifier(std::vector<TypeSpecifier*> convert_type);
 std::string              format_type_specifier(unsigned int convert_type_size, TypeSpecifier** convert_type);
 std::string              format_type_specifier(TypeSpecifier* type_specifier);
 std::string              format_type_specifier_array(Ring_DeriveType_Array* array_type);

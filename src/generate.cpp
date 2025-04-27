@@ -834,7 +834,7 @@ void generate_vmcode_from_for_range_statement(Package_Executer* executer,
     // push array-object
     generate_vmcode_from_expression(executer, range_statement->operand, opcode_buffer);
     // push array-iterator
-    // TODO: 这里数组的数量受到了限制
+    // TODO: 这里数组的数量受到了限制，最大 65536
     generate_vmcode(executer, opcode_buffer,
                     RVM_CODE_PUSH_INT_2BYTE, 0,
                     range_statement->operand->u.identifier_expression->line_number);
