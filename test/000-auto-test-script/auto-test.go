@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -149,6 +150,17 @@ var (
 	TEST_PATH                     = "./test"
 )
 
+const (
+	Reset  = "\033[0m"
+	Red    = "\033[31m"
+	Green  = "\033[32m"
+	Yellow = "\033[33m"
+	Blue   = "\033[34m"
+	Purple = "\033[35m"
+	Cyan   = "\033[36m"
+	White  = "\033[37m"
+)
+
 func main() {
 	var wg sync.WaitGroup
 
@@ -179,6 +191,9 @@ func main() {
 		fmt.Printf("%-25s %-80s %-80s %s\n", "Model", "SourceCodeFile", "ResultFile", "Result")
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	for loop := 0; loop < TEST_LOOP_NUM; loop++ {
 		for _, testCase := range allTestCases {
 			go func(testCase RingTestCase) {
@@ -191,7 +206,7 @@ func main() {
 				wg.Add(1)
 				maxConcurrentChannel <- struct{}{}
 
-				testResult := autoTestAction(testCase, displayMode)
+				testResult := autoTestAction(ctx, testCase, displayMode)
 				testCaseResultMap.Store(testCase.FileName, testResult)
 			}(testCase)
 		}
@@ -220,9 +235,9 @@ func main() {
 	fmt.Printf("TEST_RING_COMMAND = %s\n", TEST_RING_COMMAND)
 	fmt.Printf("TEST_PATH         = %s\n", TEST_PATH)
 
-	resultColor := "\033[32m"
+	resultColor := Green
 	if failNum != 0 {
-		resultColor = "\033[33m"
+		resultColor = Yellow
 	}
 	fmt.Printf("%s", resultColor)
 	fmt.Printf("\n")
@@ -231,19 +246,21 @@ func main() {
 	fmt.Printf("NotTest  = %d\n", notTestNum)
 	fmt.Printf("Fail     = %d\n", failNum)
 	fmt.Printf("Usetime  = %dS\n", int(time.Since(startTime).Seconds()))
-	fmt.Printf("%s", "\033[0m")
+	fmt.Printf("%s", Reset)
 
 	if failNum != 0 {
 		fmt.Printf("[Failed TestCase]\n")
 		for _, testResult := range failedResults {
+			fmt.Printf("%s", Red)
 			fmt.Printf("******** FileName: %s********\n", testResult.RingTestCase.FileName)
-			fmt.Printf("Output: %s\n", testResult.Detail)
+			fmt.Printf("%s", Reset)
+			fmt.Printf("*Detail: \n%s\n", testResult.Detail)
 			fmt.Printf("\n")
 		}
 	}
 }
 
-func autoTestAction(testCase RingTestCase, printDetail bool) *RingTestResult {
+func autoTestAction(ctx context.Context, testCase RingTestCase, printDetail bool) *RingTestResult {
 	model := testCase.Model
 	sourceCodeFile := "./" + testCase.FileName
 	expectResultFile := "./" + sourceCodeFile + ".result"
@@ -259,13 +276,47 @@ func autoTestAction(testCase RingTestCase, printDetail bool) *RingTestResult {
 		}
 	}
 
-	cmd := exec.Command(TEST_RING_BIN, TEST_RING_OPTION, TEST_RING_COMMAND, sourceCodeFile)
+	bin := TEST_RING_BIN
+	commands := []string{TEST_RING_OPTION, TEST_RING_COMMAND, sourceCodeFile}
+
+	cmd := exec.CommandContext(ctx, bin, commands...)
+
+	// err = cmd.Run()
+	// if err != nil {
+	// 	if ctx.Err() == context.DeadlineExceeded {
+	// 		fmt.Println("命令超时")
+	// 		return &RingTestResult{
+	// 			RingTestCase: testCase,
+	// 			Status:       Status_Failed,
+	// 			Detail:       "timeout",
+	// 		}
+	// 	} else {
+	// 		return &RingTestResult{
+	// 			RingTestCase: testCase,
+	// 			Status:       Status_Failed,
+	// 			Detail:       fmt.Sprintf("命令执行错误: %v\n", err),
+	// 		}
+	// 	}
+	// }
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		detail := ""
+		if ctx.Err() == context.DeadlineExceeded {
+			tmp := make([]string, 0)
+			tmp = append(tmp, bin)
+			tmp = append(tmp, commands...)
+			detail = fmt.Sprintf("shell command timeout:%s", strings.Join(tmp, " "))
+		} else {
+			detail = fmt.Sprintf("run test case failed:\n    Error: %s\n", err.Error())
+			if string(output) != "" {
+				detail += fmt.Sprintf("    Output:\n```\n%s```", string(output))
+			}
+		}
+
 		return &RingTestResult{
 			RingTestCase: testCase,
 			Status:       Status_Failed,
-			Detail:       fmt.Sprintf("run test case Error:%s Output:%s", err.Error(), string(output)),
+			Detail:       detail,
 		}
 	}
 
