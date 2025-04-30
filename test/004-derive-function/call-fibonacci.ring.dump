@@ -1,0 +1,162 @@
+#Constants:       11
+ ├──     0: string(fibonacci(0) = {}
+)
+ ├──     1: string(fibonacci(1) = {}
+)
+ ├──     2: string(fibonacci(2) = {}
+)
+ ├──     3: string(fibonacci(3) = {}
+)
+ ├──     4: string(fibonacci(4) = {}
+)
+ ├──     5: string(fibonacci(5) = {}
+)
+ ├──     6: string(fibonacci(6) = {}
+)
+ ├──     7: string(fibonacci(7) = {}
+)
+ ├──     8: string(fibonacci(8) = {}
+)
+ ├──     9: string(fibonacci(9) = {}
+)
+ ├──    10: string(fibonacci(10) = {}
+)
+
+#Globals:       0
+
+$main()    <./test/004-derive-function/call-fibonacci.ring:9,21>
++Parameter:   0
++Local:       0
++FreeValue:        0
++Instructions: 189
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_string                   0                   10                
+ ├──1       3       push_int_1byte                0                                     
+ ├──2       5       argument_num                  1                                     
+ ├──3       7       push_func                     9, 1                                  
+ ├──4       10      invoke_func                                                         
+ ├──5       11      argument_num                  2                                     
+ ├──6       13      push_func                     1, 7                                  
+ ├──7       16      invoke_func_native                                                  
+ ├──8       17      push_string                   1                   11                
+ ├──9       20      push_int_1byte                1                                     
+ ├──10      22      argument_num                  1                                     
+ ├──11      24      push_func                     9, 1                                  
+ ├──12      27      invoke_func                                                         
+ ├──13      28      argument_num                  2                                     
+ ├──14      30      push_func                     1, 7                                  
+ ├──15      33      invoke_func_native                                                  
+ ├──16      34      push_string                   2                   12                
+ ├──17      37      push_int_1byte                2                                     
+ ├──18      39      argument_num                  1                                     
+ ├──19      41      push_func                     9, 1                                  
+ ├──20      44      invoke_func                                                         
+ ├──21      45      argument_num                  2                                     
+ ├──22      47      push_func                     1, 7                                  
+ ├──23      50      invoke_func_native                                                  
+ ├──24      51      push_string                   3                   13                
+ ├──25      54      push_int_1byte                3                                     
+ ├──26      56      argument_num                  1                                     
+ ├──27      58      push_func                     9, 1                                  
+ ├──28      61      invoke_func                                                         
+ ├──29      62      argument_num                  2                                     
+ ├──30      64      push_func                     1, 7                                  
+ ├──31      67      invoke_func_native                                                  
+ ├──32      68      push_string                   4                   14                
+ ├──33      71      push_int_1byte                4                                     
+ ├──34      73      argument_num                  1                                     
+ ├──35      75      push_func                     9, 1                                  
+ ├──36      78      invoke_func                                                         
+ ├──37      79      argument_num                  2                                     
+ ├──38      81      push_func                     1, 7                                  
+ ├──39      84      invoke_func_native                                                  
+ ├──40      85      push_string                   5                   15                
+ ├──41      88      push_int_1byte                5                                     
+ ├──42      90      argument_num                  1                                     
+ ├──43      92      push_func                     9, 1                                  
+ ├──44      95      invoke_func                                                         
+ ├──45      96      argument_num                  2                                     
+ ├──46      98      push_func                     1, 7                                  
+ ├──47      101     invoke_func_native                                                  
+ ├──48      102     push_string                   6                   16                
+ ├──49      105     push_int_1byte                6                                     
+ ├──50      107     argument_num                  1                                     
+ ├──51      109     push_func                     9, 1                                  
+ ├──52      112     invoke_func                                                         
+ ├──53      113     argument_num                  2                                     
+ ├──54      115     push_func                     1, 7                                  
+ ├──55      118     invoke_func_native                                                  
+ ├──56      119     push_string                   7                   17                
+ ├──57      122     push_int_1byte                7                                     
+ ├──58      124     argument_num                  1                                     
+ ├──59      126     push_func                     9, 1                                  
+ ├──60      129     invoke_func                                                         
+ ├──61      130     argument_num                  2                                     
+ ├──62      132     push_func                     1, 7                                  
+ ├──63      135     invoke_func_native                                                  
+ ├──64      136     push_string                   8                   18                
+ ├──65      139     push_int_1byte                8                                     
+ ├──66      141     argument_num                  1                                     
+ ├──67      143     push_func                     9, 1                                  
+ ├──68      146     invoke_func                                                         
+ ├──69      147     argument_num                  2                                     
+ ├──70      149     push_func                     1, 7                                  
+ ├──71      152     invoke_func_native                                                  
+ ├──72      153     push_string                   9                   19                
+ ├──73      156     push_int_1byte                9                                     
+ ├──74      158     argument_num                  1                                     
+ ├──75      160     push_func                     9, 1                                  
+ ├──76      163     invoke_func                                                         
+ ├──77      164     argument_num                  2                                     
+ ├──78      166     push_func                     1, 7                                  
+ ├──79      169     invoke_func_native                                                  
+ ├──80      170     push_string                   10                  20                
+ ├──81      173     push_int_1byte                10                                    
+ ├──82      175     argument_num                  1                                     
+ ├──83      177     push_func                     9, 1                                  
+ ├──84      180     invoke_func                                                         
+ ├──85      181     argument_num                  2                                     
+ ├──86      183     push_func                     1, 7                                  
+ ├──87      186     invoke_func_native                                                  
+ ├──88      187     pop_defer                                         21                
+ ├──89      188     function_finish                                                     
+
+$fibonacci(int)->(int)    <./test/004-derive-function/call-fibonacci.ring:24,31>
++Parameter:   1
+ ├──var int              n                   
++Local:       1
+ ├──var int              n                   
++FreeValue:        0
++Instructions: 64
+ ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
+ ├──0       0       push_stack_int                0                   25                
+ ├──1       3       push_int_1byte                0                                     
+ ├──2       5       le_int                                                              
+ ├──3       6       jump_if_false                 17                  30                
+ ├──4       9       push_int_1byte                0                   26                
+ ├──5       11      return                        1                                     
+ ├──6       14      jump                          34                  30                
+ ├──7       17      push_stack_int                0                   27                
+ ├──8       20      push_int_1byte                1                                     
+ ├──9       22      eq_int                                                              
+ ├──10      23      jump_if_false                 34                  29                
+ ├──11      26      push_int_1byte                1                   28                
+ ├──12      28      return                        1                                     
+ ├──13      31      jump                          34                  29                
+ ├──14      34      push_stack_int                0                   30                
+ ├──15      37      push_int_1byte                1                                     
+ ├──16      39      sub_int                                                             
+ ├──17      40      argument_num                  1                                     
+ ├──18      42      push_func                     9, 1                                  
+ ├──19      45      invoke_func                                                         
+ ├──20      46      push_stack_int                0                                     
+ ├──21      49      push_int_1byte                2                                     
+ ├──22      51      sub_int                                                             
+ ├──23      52      argument_num                  1                                     
+ ├──24      54      push_func                     9, 1                                  
+ ├──25      57      invoke_func                                                         
+ ├──26      58      add_int                                                             
+ ├──27      59      return                        1                                     
+ ├──28      62      pop_defer                                         31                
+ ├──29      63      function_finish                                                     
+
