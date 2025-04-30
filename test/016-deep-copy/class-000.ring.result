@@ -1,0 +1,5 @@
+local_job1_value_0 = {Bool:true Int:1 Int64:2 Double:3.000000 String:hello}
+local_job1_value_1 = {Bool:true Int:1 Int64:2 Double:3.000000 String:hello}
+local_job1_value_0 = {Bool:true Int:100 Int64:2 Double:3.000000 String:hello}
+local_job1_value_1 = {Bool:true Int:200 Int64:2 Double:3.000000 String:hello}
+debug_assert PASS
