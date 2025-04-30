@@ -91,6 +91,7 @@ var (
 		"062-std-package-reflect",
 		"063-std-package-os",
 		"064-std-package-runtime",
+		"064-std-package-runtime/gc/free-value",
 		"065-std-package-io",
 		"066-std-package-time",
 		"067-std-package-math",
