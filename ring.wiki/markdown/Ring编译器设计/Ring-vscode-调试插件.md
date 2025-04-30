@@ -6,6 +6,45 @@
 关于vscode 的 debugger插件
 https://code.visualstudio.com/api/extension-guides/debugger-extension
 
+dlv lldb gdb 调试器
+
+
+
+
+
+
+dap 协议常用的封装
+CPP  https://github.com/google/cppdap
+
+
+
+## 1. 更直观的了解一下 dap 协议是如何交互的
+
+### Golang  
+https://github.com/google/go-dap
+
+这下边 有个 cmd/mockserver 可以参考一下
+
+### 协议
+
+dap 协议
+https://microsoft.github.io/debug-adapter-protocol/overview
+
+dap 协议报文格式细节
+https://microsoft.github.io/debug-adapter-protocol/specification
+
+dap-adapter 和 debugger 流程 交互细节
+https://microsoft.github.io/debug-adapter-protocol/overview#How_it_works
+
+
+## 2. 直观的了解一下，一个 lua 的 debugger 是如何实现的
+
+一个基于 dap 实现的 vscode lua debugger 插件
+https://github.com/sssooonnnggg/luau-debugger
+
+
+一些 debugger 的实现
+https://microsoft.github.io/debug-adapter-protocol/implementors/adapters/
 
 ## DAP 如何与你的虚拟机交互？
 - VSCode 调试 UI（如断点、变量查看、调用栈）通过 DAP 发送请求。
