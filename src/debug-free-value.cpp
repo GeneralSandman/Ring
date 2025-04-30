@@ -97,8 +97,8 @@ classes: {
 
 
     //
-    for (unsigned int i = 0; i < closure->free_value_size; i++) {
-        RVM_FreeValue* value                 = &(closure->free_value_list[i]);
+    for (unsigned int i = 0; closure->fvb != nullptr && i < closure->fvb->size; i++) {
+        RVM_FreeValue* value                 = &(closure->fvb->list[i]);
 
 
         const char*    free_value_identifier = func->free_value_list[i].identifier;

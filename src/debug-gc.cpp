@@ -47,6 +47,9 @@ void debug_gc_summary(Ring_VirtualMachine* rvm, std::string stage) {
         case RVM_GC_OBJECT_TYPE_CLOSURE:
             gc_type = "closure";
             break;
+        case RVM_GC_OBJECT_TYPE_FVB:
+            gc_type = "fvb";
+            break;
         default:
             break;
         }

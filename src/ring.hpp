@@ -120,6 +120,7 @@ typedef struct RVM_Array                    RVM_Array;
 typedef struct RVM_Closure                  RVM_Closure;
 typedef struct RVM_FreeValueDesc            RVM_FreeValueDesc;
 typedef struct RVM_FreeValue                RVM_FreeValue;
+typedef struct RVM_FreeValueBlock           RVM_FreeValueBlock;
 typedef struct RVM_ClassObject              RVM_ClassObject;
 typedef struct RVM_GC_Object                RVM_GC_Object;
 typedef struct RVM_TypeSpecifier_Array      RVM_TypeSpecifier_Array;
@@ -659,6 +660,9 @@ struct RVM_FreeValue {
     // is_recur == false
     bool      is_open; // open/close
     RVM_Value c_value; // closed value
+
+    // is_recur == false 以下才有用
+    RVM_Closure* belong_closure; // free_value 所在的 closure
 };
 
 
@@ -732,6 +736,7 @@ typedef enum {
     RVM_GC_OBJECT_TYPE_CLASS_OB,
     RVM_GC_OBJECT_TYPE_ARRAY,
     RVM_GC_OBJECT_TYPE_CLOSURE,
+    RVM_GC_OBJECT_TYPE_FVB,
 } RVM_GC_Object_Type;
 
 typedef enum {
@@ -817,9 +822,16 @@ struct RVM_ClassObject {
 struct RVM_Closure {
     RVM_GC_Object_Header;
 
-    RVM_Function*  anonymous_func;
-    unsigned int   free_value_size;
-    RVM_FreeValue* free_value_list;
+    RVM_Function*       anonymous_func;
+    RVM_FreeValueBlock* fvb; // free_value_block
+    bool                is_root_closure;
+};
+
+struct RVM_FreeValueBlock {
+    RVM_GC_Object_Header;
+
+    unsigned int   size;
+    RVM_FreeValue* list;
 };
 
 struct RVM_TypeSpecifier_Array {
@@ -3311,6 +3323,9 @@ void                 derive_function_finish(Ring_VirtualMachine* rvm,
                                             RVM_ClassObject** caller_object, RVM_Function** caller_function, RVM_Closure** caller_closure,
                                             RVM_Function* callee_function,
                                             unsigned int  return_value_list_size);
+RVM_Closure*         new_closure(Ring_VirtualMachine* rvm,
+                                 RVM_Function* caller_function, RVM_Closure* caller_closure,
+                                 RVM_Function* func);
 RVM_CallInfo*        store_callinfo(RVM_CallInfo* head, RVM_CallInfo* call_info);
 RVM_CallInfo*        restore_callinfo(RVM_CallInfo** head_);
 void                 init_derive_function_local_variable(Ring_VirtualMachine* rvm,
@@ -3397,10 +3412,6 @@ RVM_String*          rvm_double_2_string(Ring_VirtualMachine* rvm, double value)
 
 int                  rvm_string_cmp(RVM_String* string1, RVM_String* string2);
 
-
-RVM_Closure*         new_closure(Ring_VirtualMachine* rvm,
-                                 RVM_Function* caller_function, RVM_Closure* caller_closure,
-                                 RVM_Function* func);
 
 RVM_DeferItem*       new_defer_item(Ring_VirtualMachine* rvm, RVM_Closure* closure, unsigned int argument_list_size);
 void                 coroutine_push_defer_item(Ring_VirtualMachine* rvm, RVM_DeferItem* defer_item);
@@ -3675,52 +3686,59 @@ void        gc_mark_rvm_value(RVM_Value* value);
 void        gc_mark_class_ob(RVM_ClassObject* class_ob);
 void        gc_mark_array(RVM_Array* array);
 void        gc_mark_closure(RVM_Closure* closure);
+void        gc_mark_fvb(RVM_FreeValueBlock* fvb);
 void        gc_mark_free_value(RVM_FreeValue* free_value);
 
 void        rvm_free_object(Ring_VirtualMachine* rvm, RVM_GC_Object* object);
 
 RVM_String* new_string_meta();
 // 不分配在 heap上
-RVM_String*      string_literal_to_rvm_string(const char* string_literal);
-RVM_String*      rvm_gc_new_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal);
-RVM_String*      rvm_gc_new_string_meta(Ring_VirtualMachine* rvm);
-void             rvm_fill_string(Ring_VirtualMachine* rvm, RVM_String* string, unsigned int capacity);
-RVM_String*      rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src);
-RVM_String*      concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b);
-unsigned int     rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
+RVM_String*         string_literal_to_rvm_string(const char* string_literal);
+RVM_String*         rvm_gc_new_rvm_string(Ring_VirtualMachine* rvm, const char* string_literal);
+RVM_String*         rvm_gc_new_string_meta(Ring_VirtualMachine* rvm);
+void                rvm_fill_string(Ring_VirtualMachine* rvm, RVM_String* string, unsigned int capacity);
+RVM_String*         rvm_deep_copy_string(Ring_VirtualMachine* rvm, RVM_String* src);
+RVM_String*         concat_string(Ring_VirtualMachine* rvm, RVM_String* a, RVM_String* b);
+unsigned int        rvm_free_string(Ring_VirtualMachine* rvm, RVM_String* string);
 
 
-RVM_Array*       rvm_gc_new_array_meta(Ring_VirtualMachine* rvm,
-                                       RVM_Array_Type       array_type,
-                                       Ring_BasicType       item_type_kind,
-                                       RVM_ClassDefinition* class_definition,
-                                       unsigned int         dimension);
-RVM_Array*       rvm_new_array(Ring_VirtualMachine* rvm,
-                               unsigned int         dimension,
-                               unsigned int*        dimension_list,
-                               unsigned int         dimension_index,
-                               RVM_Array_Type       array_type,
-                               Ring_BasicType       item_type_kind,
-                               RVM_ClassDefinition* class_definition);
-RVM_Array*       rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src);
-void             rvm_array_growth(Ring_VirtualMachine* rvm, RVM_Array* array);
-unsigned int     rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array);
+RVM_Array*          rvm_gc_new_array_meta(Ring_VirtualMachine* rvm,
+                                          RVM_Array_Type       array_type,
+                                          Ring_BasicType       item_type_kind,
+                                          RVM_ClassDefinition* class_definition,
+                                          unsigned int         dimension);
+RVM_Array*          rvm_new_array(Ring_VirtualMachine* rvm,
+                                  unsigned int         dimension,
+                                  unsigned int*        dimension_list,
+                                  unsigned int         dimension_index,
+                                  RVM_Array_Type       array_type,
+                                  Ring_BasicType       item_type_kind,
+                                  RVM_ClassDefinition* class_definition);
+RVM_Array*          rvm_deep_copy_array(Ring_VirtualMachine* rvm, RVM_Array* src);
+void                rvm_array_growth(Ring_VirtualMachine* rvm, RVM_Array* array);
+unsigned int        rvm_free_array(Ring_VirtualMachine* rvm, RVM_Array* array);
 
 
-RVM_ClassObject* rvm_gc_new_class_ob_meta(Ring_VirtualMachine* rvm);
-void             rvm_fill_class_ob(Ring_VirtualMachine* rvm,
-                                   RVM_ClassObject*     class_ob,
-                                   RVM_ClassDefinition* class_definition);
-RVM_ClassObject* rvm_deep_copy_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
-unsigned int     rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob);
+RVM_ClassObject*    rvm_gc_new_class_ob_meta(Ring_VirtualMachine* rvm);
+void                rvm_fill_class_ob(Ring_VirtualMachine* rvm,
+                                      RVM_ClassObject*     class_ob,
+                                      RVM_ClassDefinition* class_definition);
+RVM_ClassObject*    rvm_deep_copy_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* src);
+unsigned int        rvm_free_class_ob(Ring_VirtualMachine* rvm, RVM_ClassObject* class_ob);
 
 
-RVM_Closure*     rvm_gc_new_closure_meta(Ring_VirtualMachine* rvm);
-void             rvm_fill_closure(Ring_VirtualMachine* rvm,
-                                  RVM_Closure*         closure,
-                                  RVM_Function*        callee_function);
-RVM_Closure*     rvm_deep_copy_closure(Ring_VirtualMachine* rvm, RVM_Closure* src);
-unsigned int     rvm_free_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure);
+RVM_Closure*        rvm_gc_new_closure_meta(Ring_VirtualMachine* rvm);
+void                rvm_fill_closure(Ring_VirtualMachine* rvm,
+                                     RVM_Closure*         closure,
+                                     RVM_Function*        callee_function);
+RVM_Closure*        rvm_deep_copy_closure(Ring_VirtualMachine* rvm, RVM_Closure* src);
+unsigned int        rvm_free_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure);
+
+RVM_FreeValueBlock* rvm_gc_new_fvb_meta(Ring_VirtualMachine* rvm);
+void                rvm_fill_fvb(Ring_VirtualMachine* rvm,
+                                 RVM_FreeValueBlock*  fvb,
+                                 unsigned int         free_value_size);
+unsigned int        rvm_free_fvb(Ring_VirtualMachine* rvm, RVM_FreeValueBlock* fvb);
 // --------------------
 
 
