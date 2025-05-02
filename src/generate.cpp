@@ -2451,7 +2451,9 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
         generate_vmcode(executer, opcode_buffer, opcode, operand, array_literal_expression->line_number);
 
     } else {
-        oper_num = (array_literal_expression->dimension_expression->dimension << 16) | size;
+        oper_num = (sub_type_specifier->kind << 24)
+            | (array_literal_expression->dimension_expression->dimension << 16)
+            | size;
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_ARRAY_LITERAL_A, oper_num, array_literal_expression->line_number);
     }
 }
@@ -2556,6 +2558,13 @@ void generate_vmcode(Package_Executer* executer,
         break;
 
     case OPCODE_OPERAND_TYPE_3BYTE_ABs:
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((operand >> 16) & 0XFF);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((operand >> 8) & 0XFF);
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(operand & 0XFF);
+        break;
+
+    case OPCODE_OPERAND_TYPE_4BYTE_ABCs:
+        opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((operand >> 24) & 0XFF);
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((operand >> 16) & 0XFF);
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((operand >> 8) & 0XFF);
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(operand & 0XFF);
@@ -2711,6 +2720,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         case OPCODE_OPERAND_TYPE_2BYTE_As:
         case OPCODE_OPERAND_TYPE_2BYTE_AB: i += 3; break;
         case OPCODE_OPERAND_TYPE_3BYTE_ABs: i += 4; break;
+        case OPCODE_OPERAND_TYPE_4BYTE_ABCs: i += 5; break;
         default:
             ring_error_report("opcode_buffer_fix_label(opcode is valid:%d)\n", opcode);
             break;

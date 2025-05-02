@@ -393,6 +393,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
     RVM_Byte             opcode                 = 0;
     unsigned int         prev_code_line_number  = 0;
     int                  res                    = 0;
+    Ring_BasicType       basic_type             = RING_BASIC_TYPE_UNKNOW;
 
     unsigned int         dimension              = 0;
     unsigned int*        dimension_list         = (unsigned int*)mem_alloc(rvm->meta_pool, sizeof(unsigned int) * MAX_DIMENSION_NUM);
@@ -1317,13 +1318,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_A:
-            dimension   = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            array_size  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
-            array_value = rvm_new_array_literal_a(rvm, dimension, array_size);
+            basic_type  = (Ring_BasicType)OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            dimension   = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
+            array_size  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 3]);
+            array_value = rvm_new_array_literal_a(rvm, basic_type, dimension, array_size);
             VM_CUR_CO_STACK_TOP_INDEX -= array_size;
             STACK_SET_ARRAY_OFFSET(0, array_value);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
-            VM_CUR_CO_PC += 4;
+            VM_CUR_CO_PC += 5;
             break;
 
 
@@ -3036,32 +3038,26 @@ RVM_Array* rvm_new_array_literal_closure(Ring_VirtualMachine* rvm,
  * 初始化多维数组常量
  */
 RVM_Array* rvm_new_array_literal_a(Ring_VirtualMachine* rvm,
+                                   Ring_BasicType       basic_type,
                                    unsigned int         dimension,
                                    unsigned int         size) {
 
-    RVM_Array* array = rvm_gc_new_array_meta(rvm,
-                                             RVM_ARRAY_A,
-                                             RING_BASIC_TYPE_UNKNOW,
-                                             nullptr,
-                                             dimension);
-    // TODO:
-    // 当前设计存在缺陷 在 rvm_gc_new_array_meta 无法提前获取子数组的元素类型
-    // 这里先 设置为 RING_BASIC_TYPE_UNKNOW
-    // 然后在 shallow copy 的过程中，获取子数组的 item_type_kind
+    RVM_Array* array      = rvm_gc_new_array_meta(rvm,
+                                                  RVM_ARRAY_A,
+                                                  RING_BASIC_TYPE_UNKNOW,
+                                                  nullptr,
+                                                  dimension);
 
-
-    array->length    = size;
-    array->capacity  = size;
-
-    array->u.a_array = (RVM_Array**)mem_alloc(rvm->data_pool,
-                                              sizeof(RVM_Array) * array->capacity);
+    array->length         = size;
+    array->capacity       = size;
+    array->item_type_kind = basic_type;
+    array->u.a_array      = (RVM_Array**)mem_alloc(rvm->data_pool,
+                                                   sizeof(RVM_Array) * array->capacity);
 
     for (unsigned int i = 0; i < size; i++) {
         // this is shallow copy
         array->u.a_array[i] = STACK_GET_ARRAY_OFFSET(-size + i);
-
-        // 见上方注释
-        array->item_type_kind = array->u.a_array[i]->item_type_kind;
+        assert(array->item_type_kind == array->u.a_array[i]->item_type_kind);
     }
 
     return array;

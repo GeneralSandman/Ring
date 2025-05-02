@@ -284,6 +284,7 @@ void ring_vm_code_dump(RVM_Function* function,
         std::string     operand_str = "";
         int             operand1    = 0;
         int             operand2    = 0;
+        int             operand3    = 0;
 
         if (pointer.size()) {
             next_opcode_info = opcode_info;
@@ -314,6 +315,13 @@ void ring_vm_code_dump(RVM_Function* function,
             operand2 = code_list[i++] << 8;
             operand2 += code_list[i++];
             operand_str = std::to_string(operand1) + ", " + std::to_string(operand2);
+            break;
+        case OPCODE_OPERAND_TYPE_4BYTE_ABCs:
+            operand1 = code_list[i++];
+            operand2 = code_list[i++];
+            operand3 = code_list[i++] << 8;
+            operand3 += code_list[i++];
+            operand_str = std::to_string(operand1) + ", " + std::to_string(operand2) + ", " + std::to_string(operand3);
             break;
 
         default: break;
@@ -654,6 +662,7 @@ void dump_vm_function(Package_Executer*    package_executer,
             std::string     operand_str = "";
             int             operand1    = 0;
             int             operand2    = 0;
+            int             operand3    = 0;
 
             opcode_name.assign(opcode_info.name, strlen(opcode_info.name));
 
@@ -682,6 +691,14 @@ void dump_vm_function(Package_Executer*    package_executer,
                 operand2 = code_list[i++] << 8;
                 operand2 += code_list[i++];
                 operand_str = std::to_string(operand1) + ", " + std::to_string(operand2);
+                break;
+
+            case OPCODE_OPERAND_TYPE_4BYTE_ABCs:
+                operand1 = code_list[i++];
+                operand2 = code_list[i++];
+                operand3 = code_list[i++] << 8;
+                operand3 += code_list[i++];
+                operand_str = std::to_string(operand1) + ", " + std::to_string(operand2) + ", " + std::to_string(operand3);
                 break;
 
             default: break;

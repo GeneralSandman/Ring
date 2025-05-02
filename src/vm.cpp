@@ -149,7 +149,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_NEW_ARRAY_LITERAL_STRING, "new_array_literal_string", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "create an array of string with literal", "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB, "new_array_literal_class_ob", OPCODE_OPERAND_TYPE_3BYTE_ABs, 1, "create an array of object with literal", "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_CLOSURE, "new_array_literal_closure", OPCODE_OPERAND_TYPE_2BYTE_As, 1, "create an array of closure with literal", "", ""},
-    {RVM_CODE_NEW_ARRAY_LITERAL_A, "new_array_literal_a", OPCODE_OPERAND_TYPE_3BYTE_ABs, 1, "", "", ""},
+    {RVM_CODE_NEW_ARRAY_LITERAL_A, "new_array_literal_a", OPCODE_OPERAND_TYPE_4BYTE_ABCs, 1, "", "", ""},
 
 
     // range array/string
