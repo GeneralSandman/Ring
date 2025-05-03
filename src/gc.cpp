@@ -241,7 +241,7 @@ void gc_mark_fvb(RVM_FreeValueBlock* fvb) {
 }
 
 void gc_mark_free_value(RVM_FreeValue* free_value) {
-    if (free_value->is_recur) {
+    if (free_value->state == RVM_FREEVALUE_STATE_RECUR) {
         gc_mark_free_value(free_value->u.recur);
     } else {
         if (free_value->belong_closure != nullptr) {

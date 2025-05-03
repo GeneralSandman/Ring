@@ -647,21 +647,27 @@ struct RVM_FreeValueDesc {
     // curr_local_index function 局部变量的 stack-index
 };
 
+typedef enum {
+    RVM_FREEVALUE_STATE_UNKNOW,
+    RVM_FREEVALUE_STATE_OPEN,
+    RVM_FREEVALUE_STATE_CLOSE,
+    RVM_FREEVALUE_STATE_RECUR,
+} RVM_FreeValue_State;
+
 struct RVM_FreeValue {
-    bool is_recur; // 需要递归
+    RVM_FreeValue_State state;
+
     union {
-        RVM_FreeValue* recur; // is_recur == true
-        RVM_Value*     p;     // is_recur == false
+        RVM_Value*     p;     // state == open | close
+        RVM_FreeValue* recur; // state == recur
         // p 可指向 open/close value
-        // is_open == true 时，p指向栈空间
-        // is_open == false时，p指向c_value，是一个拷贝
+        //     open 时，p指向栈空间
+        //     close 时，p指向c_value，是一个拷贝
     } u;
 
-    // is_recur == false
-    bool      is_open; // open/close
     RVM_Value c_value; // closed value
 
-    // is_recur == false 以下才有用
+    // state == open | close 以下才有用
     RVM_Closure* belong_closure; // free_value 所在的 closure
 };
 
@@ -985,12 +991,14 @@ typedef enum {
     RVM_CODE_POP_FREE_DOUBLE,
     RVM_CODE_POP_FREE_STRING,
     RVM_CODE_POP_FREE_CLASS_OB,
+    RVM_CODE_POP_FREE_ARRAY,
     RVM_CODE_PUSH_FREE_BOOL,
     RVM_CODE_PUSH_FREE_INT,
     RVM_CODE_PUSH_FREE_INT64,
     RVM_CODE_PUSH_FREE_DOUBLE,
     RVM_CODE_PUSH_FREE_STRING,
     RVM_CODE_PUSH_FREE_CLASS_OB,
+    RVM_CODE_PUSH_FREE_ARRAY,
 
     // array
     RVM_CODE_PUSH_ARRAY_A,

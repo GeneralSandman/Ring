@@ -98,9 +98,9 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
 #define STACK_SET_CLOSURE_OFFSET(offset, value) \
     STACK_SET_CLOSURE_INDEX(VM_CUR_CO_STACK_TOP_INDEX + (offset), (value))
 
-#define GET_FREE_VALUE(index)                                                  \
-    ((VM_CUR_CO_CALLINFO->curr_closure->fvb->list[(index)].is_recur) ?         \
-         (VM_CUR_CO_CALLINFO->curr_closure->fvb->list[(index)].u.recur->u.p) : \
+#define GET_FREE_VALUE(index)                                                                    \
+    ((VM_CUR_CO_CALLINFO->curr_closure->fvb->list[(index)].state == RVM_FREEVALUE_STATE_RECUR) ? \
+         (VM_CUR_CO_CALLINFO->curr_closure->fvb->list[(index)].u.recur->u.p) :                   \
          (VM_CUR_CO_CALLINFO->curr_closure->fvb->list[(index)].u.p))
 
 #define FREE_SET_BOOL_INDEX(index, value) \
@@ -115,6 +115,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     (GET_FREE_VALUE(index))->u.string_value = (value);
 #define FREE_SET_CLASS_OB_INDEX(index, value) \
     (GET_FREE_VALUE(index))->u.class_ob_value = (value);
+#define FREE_SET_ARRAY_INDEX(index, value) \
+    (GET_FREE_VALUE(index))->u.array_value = (value);
 
 #define FREE_GET_BOOL_INDEX(index) \
     (GET_FREE_VALUE(index))->u.bool_value;
@@ -128,6 +130,8 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     (GET_FREE_VALUE(index))->u.string_value;
 #define FREE_GET_CLASS_OB_INDEX(index) \
     (GET_FREE_VALUE(index))->u.class_ob_value;
+#define FREE_GET_ARRAY_INDEX(index) \
+    (GET_FREE_VALUE(index))->u.array_value;
 
 // shallow copy class-ob/array/closure
 #define STACK_COPY_INDEX(dst_index, src_index) \
@@ -813,6 +817,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= 1;
             VM_CUR_CO_PC += 3;
             break;
+        case RVM_CODE_POP_FREE_ARRAY:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            array_value      = STACK_GET_ARRAY_OFFSET(-1);
+            FREE_SET_ARRAY_INDEX(free_value_index, array_value);
+
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
+            VM_CUR_CO_PC += 3;
+            break;
 
         case RVM_CODE_PUSH_FREE_BOOL:
             free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
@@ -858,6 +870,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             class_ob_value   = FREE_GET_CLASS_OB_INDEX(free_value_index);
             STACK_SET_CLASS_OB_OFFSET(0, class_ob_value);
+
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 3;
+            break;
+        case RVM_CODE_PUSH_FREE_ARRAY:
+            free_value_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            array_value      = FREE_GET_ARRAY_INDEX(free_value_index);
+            STACK_SET_ARRAY_OFFSET(0, array_value);
 
             VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
@@ -2428,9 +2448,8 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
             if (callee_function->free_value_list[i].is_curr_local) {
                 unsigned int index                          = callee_function->free_value_list[i].u.curr_local_index;
 
-                callee_closure->fvb->list[i].is_recur       = false;
+                callee_closure->fvb->list[i].state          = RVM_FREEVALUE_STATE_OPEN;
                 callee_closure->fvb->list[i].u.p            = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
-                callee_closure->fvb->list[i].is_open        = true;
                 callee_closure->fvb->list[i].c_value        = RVM_Value{};
                 callee_closure->fvb->list[i].belong_closure = callee_closure;
             }
@@ -2513,10 +2532,11 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
 
         for (unsigned int i = 0; i < closure->fvb->size; i++) {
             // close a free value
-            if (!closure->fvb->list[i].is_recur
-                && closure->fvb->list[i].is_open) {
-                // TODO: deep_copy string/array/class-object
-                closure->fvb->list[i].is_open = false;
+            if (closure->fvb->list[i].state == RVM_FREEVALUE_STATE_OPEN) {
+                // this is shallow copy
+                // 只需要 保存 string/array/class-object 的指针即可
+                // 因为他们本来就是分配在 heap 上的
+                closure->fvb->list[i].state   = RVM_FREEVALUE_STATE_CLOSE;
                 closure->fvb->list[i].c_value = *(closure->fvb->list[i].u.p);
                 closure->fvb->list[i].u.p     = &(closure->fvb->list[i].c_value);
                 // closure->free_value_block->free_value_list[i].belong_closure = nullptr; // 变量逃逸，不属于 closure
@@ -2584,9 +2604,8 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
             // TODO: 这里有问题  VM_CUR_CO_CSB 不正确
             unsigned int index                   = callee_function->free_value_list[i].u.curr_local_index;
 
-            closure->fvb->list[i].is_recur       = false;
+            closure->fvb->list[i].state          = RVM_FREEVALUE_STATE_OPEN;
             closure->fvb->list[i].u.p            = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
-            closure->fvb->list[i].is_open        = true;
             closure->fvb->list[i].c_value        = RVM_Value{};
             closure->fvb->list[i].belong_closure = closure;
         } else {
@@ -2596,11 +2615,11 @@ RVM_Closure* new_closure(Ring_VirtualMachine* rvm,
 
             // 通过调用链向上递归查找, 知道找到直接指向的agent
             RVM_FreeValue* parent = &(caller_closure->fvb->list[index]);
-            while (parent->is_recur) {
+            while (parent->state == RVM_FREEVALUE_STATE_RECUR) {
                 parent = parent->u.recur;
             }
-            closure->fvb->list[i].is_recur = true;
-            closure->fvb->list[i].u.recur  = parent;
+            closure->fvb->list[i].state   = RVM_FREEVALUE_STATE_RECUR;
+            closure->fvb->list[i].u.recur = parent;
         }
     }
 

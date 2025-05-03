@@ -113,7 +113,7 @@ classes: {
 
         std::string prev_node = node2;
 
-        if (value->is_recur) {
+        if (value->state == RVM_FREEVALUE_STATE_RECUR) {
             node1 = prev_node;
             node2 = sprintf_string("FreeValue(%p, %s)",
                                    value->u.recur, free_value_identifier);
@@ -121,7 +121,7 @@ classes: {
             nodes.insert(std::make_pair(node2, ""));
             edges.insert({node1, node2, "recur"});
         } else {
-            if (value->is_open) {
+            if (value->state == RVM_FREEVALUE_STATE_OPEN) {
                 node1 = prev_node;
                 node2 = sprintf_string("Open(%p)", value->u.p);
                 nodes.insert(std::make_pair(node1, ""));
