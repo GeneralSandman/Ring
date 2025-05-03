@@ -1102,12 +1102,8 @@ RVM_Closure* rvm_deep_copy_closure(Ring_VirtualMachine* rvm, RVM_Closure* src) {
 }
 
 unsigned int rvm_free_closure(Ring_VirtualMachine* rvm, RVM_Closure* closure) {
-
-    debug_rvm_heap_alloc_with_green("closure %p", closure);
-    // 释放元信息
     mem_free(rvm->data_pool, closure, sizeof(RVM_Closure));
-    unsigned int free_data_size = 0;
-    free_data_size += 8; // 释放元信息
+    unsigned int free_data_size = 8; // 8字节的元信息
     return free_data_size;
 }
 
@@ -1121,7 +1117,7 @@ RVM_FreeValueBlock* rvm_gc_new_fvb_meta(Ring_VirtualMachine* rvm) {
     fvb->list               = nullptr;
 
     rvm_heap_list_add_object(rvm, (RVM_GC_Object*)fvb);
-    rvm_heap_alloc_size_incr(rvm, 8); // 8字节的元信息
+    rvm_heap_alloc_size_incr(rvm, 8); // 固定8字节的元信息
     debug_rvm_heap_alloc_with_green("rvm_gc_new_fvb_meta alloc_size:%u   [heap_size:%lld]",
                                     8,
                                     rvm_heap_size(rvm));
@@ -1138,23 +1134,23 @@ void rvm_fill_fvb(Ring_VirtualMachine* rvm,
     fvb->size                    = free_value_size;
     fvb->list                    = (RVM_FreeValue*)mem_alloc(rvm->data_pool, alloc_data_size);
 
+    alloc_data_size              = 0; // 元数据不记入 heap的空间
     rvm_heap_alloc_size_incr(rvm, alloc_data_size);
-    debug_rvm_heap_alloc_with_green("rvm_fill_fvb alloc_size:%u   [heap_size:%lld]",
-                                    alloc_data_size,
-                                    rvm_heap_size(rvm));
 }
 
 unsigned int rvm_free_fvb(Ring_VirtualMachine* rvm, RVM_FreeValueBlock* fvb) {
-    // 释放 free_value
-    for (unsigned int i = 0;
-         i < fvb->size;
-         i++) {
-        // TODO: 释放具体的 free_value实际数据
-    }
+
+    // 为什么不释放 fvb 每个 item 指向的对象
+    // 直接使用标记算法自动释放即可
+    // 生命周期不由 fvb 管理
+
 
     unsigned int alloc_data_size = fvb->size * sizeof(RVM_FreeValue);
-    mem_free(rvm->data_pool,
-             fvb->list, alloc_data_size);
+    mem_free(rvm->data_pool, fvb->list, alloc_data_size);
+    alloc_data_size = 0; // 元数据不记入 heap的空间
+
+    // 释放元信息
+    mem_free(rvm->data_pool, fvb, sizeof(RVM_FreeValueBlock));
 
     return alloc_data_size;
 }
