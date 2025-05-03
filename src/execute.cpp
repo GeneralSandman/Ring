@@ -2432,27 +2432,26 @@ void invoke_derive_function(Ring_VirtualMachine* rvm,
         rvm_fill_closure(rvm, closure, callee_function);
         closure->is_root_closure = true;
         callee_closure           = closure;
-
-        if (RING_DEBUG_TRACE_CLOSURE_FREE_VALUE) {
-#ifdef DEBUG_TRACE_CLOSURE_FREE_VALUE
-            debug_generate_closure_dot_file(closure);
-#endif
-        }
     }
 
-    // TODO: 需要优化这种写法
-    // 需要重新绑定值
+    // free value 绑定对应的值
     if (callee_closure != nullptr) {
         for (unsigned int i = 0; i < callee_function->free_value_size; i++) {
-            // 需要重新绑定值
             if (callee_function->free_value_list[i].is_curr_local) {
-                unsigned int index                          = callee_function->free_value_list[i].u.curr_local_index;
+                unsigned int index = callee_function->free_value_list[i].u.curr_local_index;
 
+                // open, 指向 runtime_stack
                 callee_closure->fvb->list[i].state          = RVM_FREEVALUE_STATE_OPEN;
                 callee_closure->fvb->list[i].u.p            = &(VM_CUR_CO_STACK_DATA[VM_CUR_CO_CSB + index]);
                 callee_closure->fvb->list[i].c_value        = RVM_Value{};
                 callee_closure->fvb->list[i].belong_closure = callee_closure;
             }
+        }
+
+        if (RING_DEBUG_TRACE_CLOSURE_FREE_VALUE) {
+#ifdef DEBUG_TRACE_CLOSURE_FREE_VALUE
+            debug_generate_closure_dot_file(closure);
+#endif
         }
     }
 
