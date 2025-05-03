@@ -1,0 +1,9 @@
+test0_return_closure------------
+local_int_array_0=[1 0 0 0 0 0 0 0]
+local_int_array_0=[1 2 0 0 0 0 0 0]
+local_int_array_0=[1 2 3 0 0 0 0 0]
+local_int_array_0=[1 2 3 4 0 0 0 0]
+local_int_array_0=[1 2 3 4 5 0 0 0]
+local_int_array_0=[1 2 3 4 5 6 0 0]
+local_int_array_0=[1 2 3 4 5 6 7 0]
+local_int_array_0=[1 2 3 4 5 6 7 8]
