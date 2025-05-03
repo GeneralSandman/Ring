@@ -11,7 +11,7 @@
 #include <unordered_set>
 #include <vector>
 
-#define RING_VERSION "ring-v0.2.18-beta Copyright (C) 2021-2025 ring.wiki, ZhenhuLi"
+#define RING_VERSION "ring-v0.3.0-beta Copyright (C) 2021-2025 ring.wiki, ZhenhuLi"
 
 
 typedef struct Ring_Command_Arg             Ring_Command_Arg;

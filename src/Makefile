@@ -1,5 +1,5 @@
 TARGET = ring
-VERSION= ring-v0.2.18-beta
+VERSION= ring-v0.3.0-beta
 CC     = g++
 OBJS   = \
 	lex.yy.o\
