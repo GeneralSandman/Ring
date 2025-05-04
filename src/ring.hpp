@@ -571,7 +571,7 @@ struct TypeSpecifier {
 
 
 typedef void RVM_NativeFuncProc(Ring_VirtualMachine* rvm,
-                                unsigned int arg_count, RVM_Value* args,
+                                unsigned int arg_size, RVM_Value* args,
                                 unsigned int* return_size, RVM_Value** return_list);
 
 typedef enum {
@@ -3458,113 +3458,113 @@ RVM_Value* new_native_return_list(unsigned int return_size);
 void       destory_native_return_list(RVM_Value* return_list, unsigned int return_size);
 
 void       std_lib_os_exit(Ring_VirtualMachine* rvm,
-                           unsigned int arg_count, RVM_Value* args,
+                           unsigned int arg_size, RVM_Value* args,
                            unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_os_remove(Ring_VirtualMachine* rvm,
-                             unsigned int arg_count, RVM_Value* args,
+                             unsigned int arg_size, RVM_Value* args,
                              unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_os_rename(Ring_VirtualMachine* rvm,
-                             unsigned int arg_count, RVM_Value* args,
+                             unsigned int arg_size, RVM_Value* args,
                              unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_os_getenv(Ring_VirtualMachine* rvm,
-                             unsigned int arg_count, RVM_Value* args,
+                             unsigned int arg_size, RVM_Value* args,
                              unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_os_setenv(Ring_VirtualMachine* rvm,
-                             unsigned int arg_count, RVM_Value* args,
+                             unsigned int arg_size, RVM_Value* args,
                              unsigned int* return_size, RVM_Value** return_list);
 
 void       std_lib_io_exist(Ring_VirtualMachine* rvm,
-                            unsigned int arg_count, RVM_Value* args,
+                            unsigned int arg_size, RVM_Value* args,
                             unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_io_open(Ring_VirtualMachine* rvm,
-                           unsigned int arg_count, RVM_Value* args,
+                           unsigned int arg_size, RVM_Value* args,
                            unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_io_create(Ring_VirtualMachine* rvm,
-                             unsigned int arg_count, RVM_Value* args,
+                             unsigned int arg_size, RVM_Value* args,
                              unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_io_seek(Ring_VirtualMachine* rvm,
-                           unsigned int arg_count, RVM_Value* args,
+                           unsigned int arg_size, RVM_Value* args,
                            unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_io_read_all(Ring_VirtualMachine* rvm,
-                               unsigned int arg_count, RVM_Value* args,
+                               unsigned int arg_size, RVM_Value* args,
                                unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_io_write(Ring_VirtualMachine* rvm,
-                            unsigned int arg_count, RVM_Value* args,
+                            unsigned int arg_size, RVM_Value* args,
                             unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_io_close(Ring_VirtualMachine* rvm,
-                            unsigned int arg_count, RVM_Value* args,
+                            unsigned int arg_size, RVM_Value* args,
                             unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_io_remove(Ring_VirtualMachine* rvm,
-                             unsigned int arg_count, RVM_Value* args,
+                             unsigned int arg_size, RVM_Value* args,
                              unsigned int* return_size, RVM_Value** return_list);
 
 void       std_lib_fmt_println_bool(Ring_VirtualMachine* rvm,
-                                    unsigned int arg_count, RVM_Value* args,
+                                    unsigned int arg_size, RVM_Value* args,
                                     unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_fmt_println_int(Ring_VirtualMachine* rvm,
-                                   unsigned int arg_count, RVM_Value* args,
+                                   unsigned int arg_size, RVM_Value* args,
                                    unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_fmt_println_int64(Ring_VirtualMachine* rvm,
-                                     unsigned int arg_count, RVM_Value* args,
+                                     unsigned int arg_size, RVM_Value* args,
                                      unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_fmt_println_double(Ring_VirtualMachine* rvm,
-                                      unsigned int arg_count, RVM_Value* args,
+                                      unsigned int arg_size, RVM_Value* args,
                                       unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_fmt_println_string(Ring_VirtualMachine* rvm,
-                                      unsigned int arg_count, RVM_Value* args,
+                                      unsigned int arg_size, RVM_Value* args,
                                       unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_fmt_println_pointer(Ring_VirtualMachine* rvm,
-                                       unsigned int arg_count, RVM_Value* args,
+                                       unsigned int arg_size, RVM_Value* args,
                                        unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_fmt_println(Ring_VirtualMachine* rvm,
-                               unsigned int arg_count, RVM_Value* args,
+                               unsigned int arg_size, RVM_Value* args,
                                unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_fmt_printf(Ring_VirtualMachine* rvm,
-                              unsigned int arg_count, RVM_Value* args,
+                              unsigned int arg_size, RVM_Value* args,
                               unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_fmt_sprintf(Ring_VirtualMachine* rvm,
-                               unsigned int arg_count, RVM_Value* args,
+                               unsigned int arg_size, RVM_Value* args,
                                unsigned int* return_size, RVM_Value** return_list);
 
 void       std_lib_debug_assert(Ring_VirtualMachine* rvm,
-                                unsigned int arg_count, RVM_Value* args,
+                                unsigned int arg_size, RVM_Value* args,
                                 unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_debug_var_dump(Ring_VirtualMachine* rvm,
-                                  unsigned int arg_count, RVM_Value* args,
+                                  unsigned int arg_size, RVM_Value* args,
                                   unsigned int* return_size, RVM_Value** return_list);
 
 void       std_lib_reflect_typeof(Ring_VirtualMachine* rvm,
-                                  unsigned int arg_count, RVM_Value* args,
+                                  unsigned int arg_size, RVM_Value* args,
                                   unsigned int* return_size, RVM_Value** return_list);
 
 void       std_lib_runtime_heap_size(Ring_VirtualMachine* rvm,
-                                     unsigned int arg_count, RVM_Value* args,
+                                     unsigned int arg_size, RVM_Value* args,
                                      unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_runtime_gc(Ring_VirtualMachine* rvm,
-                              unsigned int arg_count, RVM_Value* args,
+                              unsigned int arg_size, RVM_Value* args,
                               unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_runtime_print_call_stack(Ring_VirtualMachine* rvm,
-                                            unsigned int arg_count, RVM_Value* args,
+                                            unsigned int arg_size, RVM_Value* args,
                                             unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_runtime_call_info(Ring_VirtualMachine* rvm,
-                                     unsigned int arg_count, RVM_Value* args,
+                                     unsigned int arg_size, RVM_Value* args,
                                      unsigned int* return_size, RVM_Value** return_list);
 
 void       std_lib_time_time(Ring_VirtualMachine* rvm,
-                             unsigned int arg_count, RVM_Value* args,
+                             unsigned int arg_size, RVM_Value* args,
                              unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_time_sleep(Ring_VirtualMachine* rvm,
-                              unsigned int arg_count, RVM_Value* args,
+                              unsigned int arg_size, RVM_Value* args,
                               unsigned int* return_size, RVM_Value** return_list);
 
 void       std_lib_math_abs(Ring_VirtualMachine* rvm,
-                            unsigned int arg_count, RVM_Value* args,
+                            unsigned int arg_size, RVM_Value* args,
                             unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_math_sqrt(Ring_VirtualMachine* rvm,
-                             unsigned int arg_count, RVM_Value* args,
+                             unsigned int arg_size, RVM_Value* args,
                              unsigned int* return_size, RVM_Value** return_list);
 void       std_lib_math_pow(Ring_VirtualMachine* rvm,
-                            unsigned int arg_count, RVM_Value* args,
+                            unsigned int arg_size, RVM_Value* args,
                             unsigned int* return_size, RVM_Value** return_list);
 // --------------------
 
