@@ -51,6 +51,7 @@ help:
 # 	  make tool_gen_vmcode_doc && ./bin/tool_gen_vmcode_doc
 $(TOOL_GEN_VMCODE_DOC_TARGET):
 	@cd src && $(MAKE) $@
+	@./bin/tool_gen_vmcode_doc > ring.wiki/markdown/Ring编译器设计/Ring-Vm-Instruction-Set.md
 
 test_thread_pool:
 	@cd src && $(MAKE) $@
