@@ -1310,10 +1310,9 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB:
             // TODO: class_index 有个限制，不能超过255
-            // TODO: class_index 放在第三字节比较好
-            class_index          = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            array_size           = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            class_index          = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 3]);
             rvm_class_definition = &(rvm->class_list[class_index]);
-            array_size           = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
             array_value          = rvm_new_array_literal_class_object(rvm, array_size, rvm_class_definition);
             VM_CUR_CO_STACK_TOP_INDEX -= array_size;
             STACK_SET_ARRAY_OFFSET(0, array_value);

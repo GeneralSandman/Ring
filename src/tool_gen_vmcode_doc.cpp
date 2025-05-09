@@ -26,24 +26,21 @@ int main() {
         case OPCODE_OPERAND_TYPE_1BYTE_A: operand_type = "1Byte_A"; break;
         case OPCODE_OPERAND_TYPE_2BYTE_As: operand_type = "2Byte_As"; break;
         case OPCODE_OPERAND_TYPE_2BYTE_AB: operand_type = "2Byte_AB"; break;
-        case OPCODE_OPERAND_TYPE_3BYTE_ABs: operand_type = "3Byte_ABs"; break;
+        case OPCODE_OPERAND_TYPE_3BYTE_AsB: operand_type = "3Byte_AsB"; break;
         case OPCODE_OPERAND_TYPE_4BYTE_ABCs: operand_type = "4Byte_ABCs"; break;
         }
 
 
-        std::string runtime_stack_increment_str = std::to_string(opcode_info.runtime_stack_increment);
-        if (opcode_info.runtime_stack_increment > 0) {
-            runtime_stack_increment_str = "+" + std::to_string(opcode_info.runtime_stack_increment);
-        }
+        std::string runtime_stack_increment_str = opcode_info.stack_incr_expr;
 
         printf("|%5d|%30s|%10s|%30s|%30s|%50s|%s|\n",
                int(vmcode),
                vmcode_name.c_str(),
                operand_type.c_str(),
-               opcode_info.stack_top_change.c_str(),
+               opcode_info.stack_top_change,
                runtime_stack_increment_str.c_str(),
-               opcode_info.usage_comment.c_str(),
-               opcode_info.math_formula.c_str());
+               opcode_info.usage_comment,
+               opcode_info.math_formula);
     }
 
 

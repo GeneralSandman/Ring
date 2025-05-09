@@ -8,7 +8,7 @@ std::string operand_desc =
     "- 1Byte_A: 1字节操作数A\n\n"
     "- 2Byte_As: 2字节操作数A\n\n"
     "- 2Byte_AB: 1字节操作数A和1字节操作数B\n\n"
-    "- 3Byte_ABs: 1字节操作数A和2字节操作数B\n\n";
+    "- 3Byte_AsB: 1字节操作数A和2字节操作数B\n\n";
 
 std::string math_formula_desc =
     "\n"
@@ -149,7 +149,7 @@ RVM_Opcode_Info RVM_Opcode_Infos[] = {
     {RVM_CODE_NEW_ARRAY_LITERAL_INT64, "new_array_literal_int64", OPCODE_OPERAND_TYPE_2BYTE_As, "-As+1", INT_MIN, "create an array of int64 with literal", "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_DOUBLE, "new_array_literal_double", OPCODE_OPERAND_TYPE_2BYTE_As, "-As+1", INT_MIN, "create an array of double with literal", "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_STRING, "new_array_literal_string", OPCODE_OPERAND_TYPE_2BYTE_As, "-As+1", INT_MIN, "create an array of string with literal", "", ""},
-    {RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB, "new_array_literal_class_ob", OPCODE_OPERAND_TYPE_3BYTE_ABs, "-Bs+1", INT_MIN, "create an array of object with literal", "", ""},
+    {RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB, "new_array_literal_class_ob", OPCODE_OPERAND_TYPE_3BYTE_AsB, "-As+1", INT_MIN, "create an array of object with literal", "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_CLOSURE, "new_array_literal_closure", OPCODE_OPERAND_TYPE_2BYTE_As, "-As+1", INT_MIN, "create an array of closure with literal", "", ""},
     {RVM_CODE_NEW_ARRAY_LITERAL_A, "new_array_literal_a", OPCODE_OPERAND_TYPE_4BYTE_ABCs, "-Cs+1", INT_MIN, "", "", ""},
 
@@ -358,7 +358,7 @@ int rvm_function_calc_stack_cap(RVM_Function* function) {
         case OPCODE_OPERAND_TYPE_1BYTE_A: i++; break;
         case OPCODE_OPERAND_TYPE_2BYTE_As: i += 2; break;
         case OPCODE_OPERAND_TYPE_2BYTE_AB: i += 2; break;
-        case OPCODE_OPERAND_TYPE_3BYTE_ABs: i += 3; break;
+        case OPCODE_OPERAND_TYPE_3BYTE_AsB: i += 3; break;
         case OPCODE_OPERAND_TYPE_4BYTE_ABCs: i += 4; break;
         default: break;
         }
@@ -406,11 +406,11 @@ int opcode_calc_stack_cap(RVM_Byte* code_list, unsigned int pc, RVM_Byte opcode)
                     value = OPCODE_GET_1BYTE(&code_list[pc + 2]);
                 }
                 break;
-            case OPCODE_OPERAND_TYPE_3BYTE_ABs:
-                if (term.variable == "A") {
-                    value = OPCODE_GET_1BYTE(&code_list[pc + 1]);
-                } else if (term.variable == "Bs") {
-                    value = OPCODE_GET_2BYTE(&code_list[pc + 2]);
+            case OPCODE_OPERAND_TYPE_3BYTE_AsB:
+                if (term.variable == "As") {
+                    value = OPCODE_GET_2BYTE(&code_list[pc + 1]);
+                } else if (term.variable == "B") {
+                    value = OPCODE_GET_1BYTE(&code_list[pc + 3]);
                 }
                 break;
             case OPCODE_OPERAND_TYPE_4BYTE_ABCs:

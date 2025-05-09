@@ -2432,7 +2432,7 @@ void generate_vmcode_from_array_literal_expreesion(Package_Executer*       execu
         case RING_BASIC_TYPE_CLASS:
             opcode           = RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB;
             class_definition = sub_type_specifier->u.class_t->class_definition;
-            operand          = (class_definition->class_index << 16) | size;
+            operand          = (size << 8) | (class_definition->class_index);
             break;
         case RING_BASIC_TYPE_FUNC: opcode = RVM_CODE_NEW_ARRAY_LITERAL_CLOSURE; break;
         default:
@@ -2550,7 +2550,7 @@ void generate_vmcode(Package_Executer* executer,
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(operand & 0XFF);
         break;
 
-    case OPCODE_OPERAND_TYPE_3BYTE_ABs:
+    case OPCODE_OPERAND_TYPE_3BYTE_AsB:
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((operand >> 16) & 0XFF);
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)((operand >> 8) & 0XFF);
         opcode_buffer->code_list[opcode_buffer->code_size++] = (RVM_Byte)(operand & 0XFF);
@@ -2718,7 +2718,7 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         case OPCODE_OPERAND_TYPE_1BYTE_A: i += 2; break;
         case OPCODE_OPERAND_TYPE_2BYTE_As:
         case OPCODE_OPERAND_TYPE_2BYTE_AB: i += 3; break;
-        case OPCODE_OPERAND_TYPE_3BYTE_ABs: i += 4; break;
+        case OPCODE_OPERAND_TYPE_3BYTE_AsB: i += 4; break;
         case OPCODE_OPERAND_TYPE_4BYTE_ABCs: i += 5; break;
         default:
             ring_error_report("opcode_buffer_fix_label(opcode is valid:%d)\n", opcode);
