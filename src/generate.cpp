@@ -485,7 +485,8 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
 
     assert(executer->exist_main_func);
 
-    RVM_OpcodeBuffer* opcode_buffer = new_opcode_buffer();
+    RVM_OpcodeBuffer* opcode_buffer   = new_opcode_buffer();
+    unsigned int      need_stack_size = 0; // TODO:
 
 
     // step-1. 生成调用 __global_init() 函数相关的字节码
@@ -496,8 +497,6 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
     // __global_init() 函数是不允许调试的
     // 但是 __global_init() 函数调用的 函数是允许调试的
     if (executer->exist_global_init_func) {
-        generate_vmcode(executer, opcode_buffer,
-                        RVM_CODE_ARGUMENT_NUM, 0, 0);
         generate_vmcode(executer, opcode_buffer,
                         RVM_CODE_PUSH_FUNC,
                         ((package->compiler_entry->package_list.size() - 1) << 8)
@@ -533,22 +532,21 @@ void add_top_level_code(Package* package, Package_Executer* executer) {
 
 
     generate_vmcode(executer, opcode_buffer,
-                    RVM_CODE_ARGUMENT_NUM, argument_num, 0);
-    generate_vmcode(executer, opcode_buffer,
                     RVM_CODE_PUSH_FUNC,
                     ((package->compiler_entry->package_list.size() - 1) << 8)
                         | executer->main_func_index,
                     0);
     generate_vmcode(executer, opcode_buffer,
-                    RVM_CODE_INVOKE_FUNC, 0, 0);
+                    RVM_CODE_INVOKE_FUNC, argument_num, 0);
 
     // step-3. exit 字节码
     unsigned int exit_code = 0;
     generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_INT_2BYTE, exit_code, 0);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_EXIT, 0, 0);
 
-    executer->bootloader_code_list = opcode_buffer->code_list;
-    executer->bootloader_code_size = opcode_buffer->code_size;
+    executer->bootloader_code_list       = opcode_buffer->code_list;
+    executer->bootloader_code_size       = opcode_buffer->code_size;
+    executer->bootloader_need_stack_size = need_stack_size;
 }
 
 void generate_code_from_function_definition(Package_Executer* executer,
@@ -568,9 +566,10 @@ void generate_code_from_function_definition(Package_Executer* executer,
     opcode_buffer_fix_label(opcode_buffer);
 
 
-    dst->u.derive_func->code_list     = opcode_buffer->code_list;
-    dst->u.derive_func->code_size     = opcode_buffer->code_size;
-    dst->u.derive_func->code_line_map = opcode_buffer->code_line_map;
+    dst->u.derive_func->code_list       = opcode_buffer->code_list;
+    dst->u.derive_func->code_size       = opcode_buffer->code_size;
+    dst->u.derive_func->need_stack_size = opcode_buffer->need_stack_size;
+    dst->u.derive_func->code_line_map   = opcode_buffer->code_line_map;
 
 
 #ifdef DEBUG_GENERATE_OUTPUT_VMCODE
@@ -1051,15 +1050,13 @@ void generate_vmcode_from_defer_statement(Package_Executer* executer,
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
         argument_list_size += pos->expression->convert_type_size;
     }
-    // opcode: argument_num
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, iife->line_number);
 
     // opcode: new_closure
     int constant_index = constant_pool_add_closure(executer, dst);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLOSURE, constant_index, iife->line_number);
 
     // opcode: push_defer
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_DEFER, 0, defer_statement->line_number);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_DEFER, argument_list_size, defer_statement->line_number);
 }
 
 void generate_vmcode_from_expression(Package_Executer* executer,
@@ -1455,6 +1452,8 @@ void generate_vmcode_from_logical_expression(Package_Executer* executer,
         generate_vmcode_from_expression(executer, left, opcode_buffer);
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_SHALLOW_COPY, (0 << 8) | 1, expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NOP, 0, expression->line_number);
+
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_FALSE, end_label, expression->line_number);
 
@@ -1465,6 +1464,8 @@ void generate_vmcode_from_logical_expression(Package_Executer* executer,
         generate_vmcode_from_expression(executer, left, opcode_buffer);
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_SHALLOW_COPY, (0 << 8) | 1, expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NOP, 0, expression->line_number);
+
         end_label = opcode_buffer_get_label(opcode_buffer);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_JUMP_IF_TRUE, end_label, expression->line_number);
 
@@ -1848,17 +1849,14 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
 
     Expression* func_expr = function_call_expression->func_expr;
     if (func_expr != nullptr && func_expr->type != EXPRESSION_TYPE_IDENTIFIER) {
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, function_call_expression->line_number);
         generate_vmcode_from_expression(executer, func_expr, opcode_buffer);
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, 0, function_call_expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, argument_list_size, function_call_expression->line_number);
         return;
     }
 
 
-    // argument_num
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, function_call_expression->line_number);
-
     if (function_call_expression->type == FUNCTION_CALL_TYPE_FUNC) {
+
         unsigned int package_offset = 0;
         unsigned int offset         = 0;
         unsigned int operand        = 0;
@@ -1870,12 +1868,13 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
 
 
         if (function_call_expression->u.fc.function->type == FUNCTION_TYPE_NATIVE) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC_NATIVE, 0, function_call_expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC_NATIVE, argument_list_size, function_call_expression->line_number);
         } else if (function_call_expression->u.fc.function->type == FUNCTION_TYPE_DERIVE) {
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, 0, function_call_expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_FUNC, argument_list_size, function_call_expression->line_number);
         }
 
     } else if (function_call_expression->type == FUNCTION_CALL_TYPE_CLOSURE) {
+
         assert(function_call_expression->u.cc.closure_decl != nullptr);
         // 判断函数名称变量 是 global 还是 local
         // push_stack_closure
@@ -1892,7 +1891,7 @@ void generate_vmcode_from_function_call_expression(Package_Executer*       execu
         offset = closure->variable_index;
         generate_vmcode(executer, opcode_buffer, opcode, offset, function_call_expression->line_number);
 
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, 0, function_call_expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, argument_list_size, function_call_expression->line_number);
     }
 }
 
@@ -1916,8 +1915,6 @@ void generate_vmcode_from_member_call_expression(Package_Executer*     executer,
         argument_list_size += pos->expression->convert_type_size;
     }
 
-    // argument_num
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, member_call_expression->line_number);
 
     // object
     generate_vmcode_from_expression(executer, member_call_expression->object_expression, opcode_buffer);
@@ -1931,13 +1928,13 @@ void generate_vmcode_from_member_call_expression(Package_Executer*     executer,
         index_of_class = method_member->index_of_class;
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_METHOD, index_of_class, member_call_expression->line_number);
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_METHOD, 0, member_call_expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_METHOD, argument_list_size, member_call_expression->line_number);
     } else if (member_call_expression->type == MEMBER_CALL_TYPE_FIELD) {
         field_member   = member_call_expression->u.fc.field_member;
         index_of_class = field_member->index_of_class;
 
         generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FIELD_CLOSURE, index_of_class, member_call_expression->line_number);
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, 0, member_call_expression->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, argument_list_size, member_call_expression->line_number);
     }
 }
 
@@ -2068,8 +2065,6 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
             argument_list_size += pos->expression->convert_type_size;
         }
 
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, function_call_expression->line_number);
-
         if (function_call_expression->type == FUNCTION_CALL_TYPE_FUNC) {
 
             if (is_buildin_function_identifier(function_call_expression->package_posit, function_call_expression->func_identifier)) {
@@ -2091,7 +2086,7 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
             operand                     = (package_offset << 8) | offset;
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FUNC, operand, function_call_expression->line_number);
 
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH, 0, function_call_expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH, argument_list_size, function_call_expression->line_number);
         } else if (function_call_expression->type == FUNCTION_CALL_TYPE_CLOSURE) {
             assert(function_call_expression->u.cc.closure_decl != nullptr);
             // 判断函数名称变量 是 global 还是 local
@@ -2109,7 +2104,7 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
             offset = closure->variable_index;
             generate_vmcode(executer, opcode_buffer, opcode, offset, function_call_expression->line_number);
 
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_CLOSURE, 0, function_call_expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_CLOSURE, argument_list_size, function_call_expression->line_number);
         }
 
 
@@ -2135,9 +2130,6 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
             argument_list_size += pos->expression->convert_type_size;
         }
 
-        // argument_num
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, member_call_expression->line_number);
-
         // object
         generate_vmcode_from_expression(executer, member_call_expression->object_expression, opcode_buffer);
 
@@ -2150,13 +2142,13 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
             index_of_class = method_member->index_of_class;
 
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_METHOD, index_of_class, member_call_expression->line_number);
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_METHOD, 0, member_call_expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_METHOD, argument_list_size, member_call_expression->line_number);
         } else if (member_call_expression->type == MEMBER_CALL_TYPE_FIELD) {
             field_member   = member_call_expression->u.fc.field_member;
             index_of_class = field_member->index_of_class;
 
             generate_vmcode(executer, opcode_buffer, RVM_CODE_PUSH_FIELD_CLOSURE, index_of_class, member_call_expression->line_number);
-            generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_CLOSURE, 0, member_call_expression->line_number);
+            generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_CLOSURE, argument_list_size, member_call_expression->line_number);
         }
 
     } else if (launch_expression->type == LAUNCH_EXPRESSION_TYPE_IIFE) {
@@ -2182,15 +2174,13 @@ void generate_vmcode_from_launch_expression(Package_Executer* executer,
             generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
             argument_list_size += pos->expression->convert_type_size;
         }
-        // opcode: argument_num
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, iife->line_number);
 
         // opcode: new_closure
         int constant_index = constant_pool_add_closure(executer, dst);
         generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLOSURE, constant_index, iife->line_number);
 
         // opcode: launch_closure
-        generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_CLOSURE, 0, iife->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_LAUNCH_CLOSURE, argument_list_size, iife->line_number);
     }
 }
 
@@ -2303,15 +2293,13 @@ void generate_vmcode_from_iife_expreesion(Package_Executer*             executer
         generate_vmcode_from_expression(executer, pos->expression, opcode_buffer);
         argument_list_size += pos->expression->convert_type_size;
     }
-    // opcode: argument_num
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_ARGUMENT_NUM, argument_list_size, iife->line_number);
 
     // opcode: new_closure
     int constant_index = constant_pool_add_closure(executer, dst);
     generate_vmcode(executer, opcode_buffer, RVM_CODE_NEW_CLOSURE, constant_index, iife->line_number);
 
     // opcode: invoke_closure
-    generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, 0, iife->line_number);
+    generate_vmcode(executer, opcode_buffer, RVM_CODE_INVOKE_CLOSURE, argument_list_size, iife->line_number);
 }
 
 void generate_vmcode_from_new_array_expression(Package_Executer*   executer,
@@ -2391,6 +2379,7 @@ void generate_vmcode_from_class_object_literal_expreesion(Package_Executer*     
         unsigned int oper_num = 0;
         oper_num              = (0 << 8) | 2;
         generate_vmcode(executer, opcode_buffer, RVM_CODE_SHALLOW_COPY, oper_num, pos->line_number);
+        generate_vmcode(executer, opcode_buffer, RVM_CODE_NOP, 0, pos->line_number);
 
 
         FieldMember* field_member = pos->field_member;
@@ -2577,6 +2566,13 @@ void generate_vmcode(Package_Executer* executer,
     default: break;
     }
 
+    // TODO:
+    // 计算字节码消耗的空间
+    opcode_buffer->need_stack_size +=
+        opcode_calc_stack_cap(opcode_buffer->code_list,
+                              start_pc,
+                              opcode);
+
     if (line_number) {
         add_code_line_map(opcode_buffer, line_number, start_pc, opcode_buffer->code_size - start_pc);
     }
@@ -2705,7 +2701,6 @@ void opcode_buffer_fix_label(RVM_OpcodeBuffer* opcode_buffer) {
         case RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB:
         case RVM_CODE_FOR_RANGE_ARRAY_CLOSURE:
         case RVM_CODE_FOR_RANGE_ARRAY_A:
-        case RVM_CODE_FOR_RANGE_STRING:
             label                           = (opcode_buffer->code_list[i + 1] << 8) + (opcode_buffer->code_list[i + 2]);
             label_address                   = opcode_buffer->lable_list[label].label_address;
 
