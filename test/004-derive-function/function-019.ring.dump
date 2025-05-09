@@ -8,28 +8,29 @@ $get_level_by_score(int)->(int)    <./test/004-derive-function/function-019.ring
 +Local:       1
  ├──var int              score               
 +FreeValue:        0
-+Instructions: 44
++Instructions: 43
  ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
  ├──0       0       push_int_1byte                0                   12                
  ├──1       2       push_stack_int                0                                     
  ├──2       5       le_int                                                              
  ├──3       6       shallow_copy                  0, 1                                  
- ├──4       9       jump_if_false                 19                                    
- ├──5       12      push_stack_int                0                                     
- ├──6       15      push_int_1byte                100                                   
- ├──7       17      le_int                                                              
- ├──8       18      logical_and                                                         
- ├──9       19      jump_if_false                 34                  16                
- ├──10      22      push_stack_int                0                   13                
- ├──11      25      push_int_1byte                10                                    
- ├──12      27      div_int                                                             
- ├──13      28      return                        1                                     
- ├──14      31      jump                          42                  16                
- ├──15      34      push_int_1byte                0                   15                
- ├──16      36      return                        1                                     
- ├──17      39      jump                          42                                    
- ├──18      42      pop_defer                                         17                
- ├──19      43      function_finish                                                     
+ ├──4       9       nop                                                                 
+ ├──5       10      jump_if_false                 20                                    
+ ├──6       13      push_stack_int                0                                     
+ ├──7       16      push_int_1byte                100                                   
+ ├──8       18      le_int                                                              
+ ├──9       19      logical_and                                                         
+ ├──10      20      jump_if_false                 34                  16                
+ ├──11      23      push_stack_int                0                   13                
+ ├──12      26      push_int_1byte                10                                    
+ ├──13      28      div_int                                                             
+ ├──14      29      return                        1                                     
+ ├──15      31      jump                          41                  16                
+ ├──16      34      push_int_1byte                0                   15                
+ ├──17      36      return                        1                                     
+ ├──18      38      jump                          41                                    
+ ├──19      41      pop_defer                                         17                
+ ├──20      42      function_finish                                                     
 
 $main()    <./test/004-derive-function/function-019.ring:20,42>
 +Parameter:   0
@@ -38,7 +39,7 @@ $main()    <./test/004-derive-function/function-019.ring:20,42>
  ├──var int              score               
  ├──var int              level               
 +FreeValue:        0
-+Instructions: 148
++Instructions: 142
  ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
  ├──0       0       push_int_1byte                0                   26                
  ├──1       2       pop_stack_int                 0                                     
@@ -48,62 +49,56 @@ $main()    <./test/004-derive-function/function-019.ring:20,42>
  ├──5       11      push_stack_int                1                                     
  ├──6       14      push_int_1byte                110                                   
  ├──7       16      le_int                                                              
- ├──8       17      jump_if_false                 54                                    
+ ├──8       17      jump_if_false                 53                                    
  ├──9       20      push_stack_int                1                   28                
- ├──10      23      argument_num                  1                                     
- ├──11      25      push_func                     9, 0                                  
- ├──12      28      invoke_func                                                         
- ├──13      29      pop_stack_int                 2                                     
- ├──14      32      push_stack_int                0                   29                
- ├──15      35      push_stack_int                2                                     
- ├──16      38      add_int                                                             
- ├──17      39      pop_stack_int                 0                                     
- ├──18      42      push_stack_int                1                   27                
- ├──19      45      push_int_1byte                1                                     
- ├──20      47      add_int                                                             
- ├──21      48      pop_stack_int                 1                                     
- ├──22      51      jump                          11                  30                
- ├──23      54      push_stack_int                0                   31                
- ├──24      57      argument_num                  1                                     
- ├──25      59      push_func                     1, 1                                  
- ├──26      62      invoke_func_native                                                  
- ├──27      63      push_stack_int                0                   32                
- ├──28      66      push_int_2byte                460                                   
- ├──29      69      eq_int                                                              
- ├──30      70      argument_num                  1                                     
- ├──31      72      push_func                     0, 0                                  
- ├──32      75      invoke_func_native                                                  
- ├──33      76      push_int_1byte                0                   35                
- ├──34      78      pop_stack_int                 0                                     
- ├──35      81      push_int_1byte                9                   36                
- ├──36      83      minus_int                                                           
- ├──37      84      pop_stack_int                 1                                     
- ├──38      87      push_stack_int                1                                     
- ├──39      90      push_int_1byte                110                                   
- ├──40      92      le_int                                                              
- ├──41      93      jump_if_false                 124                                   
- ├──42      96      push_stack_int                0                   37                
- ├──43      99      push_stack_int                1                                     
- ├──44      102     argument_num                  1                                     
- ├──45      104     push_func                     9, 0                                  
- ├──46      107     invoke_func                                                         
- ├──47      108     add_int                                                             
- ├──48      109     pop_stack_int                 0                                     
- ├──49      112     push_stack_int                1                   36                
- ├──50      115     push_int_1byte                1                                     
- ├──51      117     add_int                                                             
- ├──52      118     pop_stack_int                 1                                     
- ├──53      121     jump                          87                  38                
- ├──54      124     push_stack_int                0                   39                
- ├──55      127     argument_num                  1                                     
- ├──56      129     push_func                     1, 1                                  
- ├──57      132     invoke_func_native                                                  
- ├──58      133     push_stack_int                0                   40                
- ├──59      136     push_int_2byte                460                                   
- ├──60      139     eq_int                                                              
- ├──61      140     argument_num                  1                                     
- ├──62      142     push_func                     0, 0                                  
- ├──63      145     invoke_func_native                                                  
- ├──64      146     pop_defer                                         42                
- ├──65      147     function_finish                                                     
+ ├──10      23      push_func                     9, 0                                  
+ ├──11      26      invoke_func                   1                                     
+ ├──12      28      pop_stack_int                 2                                     
+ ├──13      31      push_stack_int                0                   29                
+ ├──14      34      push_stack_int                2                                     
+ ├──15      37      add_int                                                             
+ ├──16      38      pop_stack_int                 0                                     
+ ├──17      41      push_stack_int                1                   27                
+ ├──18      44      push_int_1byte                1                                     
+ ├──19      46      add_int                                                             
+ ├──20      47      pop_stack_int                 1                                     
+ ├──21      50      jump                          11                  30                
+ ├──22      53      push_stack_int                0                   31                
+ ├──23      56      push_func                     1, 1                                  
+ ├──24      59      invoke_func_native            1                                     
+ ├──25      61      push_stack_int                0                   32                
+ ├──26      64      push_int_2byte                460                                   
+ ├──27      67      eq_int                                                              
+ ├──28      68      push_func                     0, 0                                  
+ ├──29      71      invoke_func_native            1                                     
+ ├──30      73      push_int_1byte                0                   35                
+ ├──31      75      pop_stack_int                 0                                     
+ ├──32      78      push_int_1byte                9                   36                
+ ├──33      80      minus_int                                                           
+ ├──34      81      pop_stack_int                 1                                     
+ ├──35      84      push_stack_int                1                                     
+ ├──36      87      push_int_1byte                110                                   
+ ├──37      89      le_int                                                              
+ ├──38      90      jump_if_false                 120                                   
+ ├──39      93      push_stack_int                0                   37                
+ ├──40      96      push_stack_int                1                                     
+ ├──41      99      push_func                     9, 0                                  
+ ├──42      102     invoke_func                   1                                     
+ ├──43      104     add_int                                                             
+ ├──44      105     pop_stack_int                 0                                     
+ ├──45      108     push_stack_int                1                   36                
+ ├──46      111     push_int_1byte                1                                     
+ ├──47      113     add_int                                                             
+ ├──48      114     pop_stack_int                 1                                     
+ ├──49      117     jump                          84                  38                
+ ├──50      120     push_stack_int                0                   39                
+ ├──51      123     push_func                     1, 1                                  
+ ├──52      126     invoke_func_native            1                                     
+ ├──53      128     push_stack_int                0                   40                
+ ├──54      131     push_int_2byte                460                                   
+ ├──55      134     eq_int                                                              
+ ├──56      135     push_func                     0, 0                                  
+ ├──57      138     invoke_func_native            1                                     
+ ├──58      140     pop_defer                                         42                
+ ├──59      141     function_finish                                                     
 

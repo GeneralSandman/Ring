@@ -263,13 +263,13 @@ void ring_vm_code_dump(RVM_Function* function,
     // 取当前pc 所在的 前后20 行进行展示
 
     RVM_Opcode_Info next_opcode_info = RVM_Opcode_Info{
-        .code                    = RVM_CODE_UNKNOW,
-        .name                    = "",
-        .operand_type            = OPCODE_OPERAND_TYPE_0BYTE,
-        .runtime_stack_increment = 0,
-        .usage_comment           = "",
-        .stack_top_change        = "",
-        .math_formula            = "",
+        .code             = RVM_CODE_UNKNOW,
+        .name             = "",
+        .operand_type     = OPCODE_OPERAND_TYPE_0BYTE,
+        .stack_incr_expr  = "",
+        .usage_comment    = "",
+        .stack_top_change = "",
+        .math_formula     = "",
     };
 
     for (unsigned int i = 0; i < code_size; opcode_num++) {
@@ -299,7 +299,7 @@ void ring_vm_code_dump(RVM_Function* function,
             break;
 
         case OPCODE_OPERAND_TYPE_2BYTE_As:
-            operand1 = code_list[i++] << 8;
+            operand1 = code_list[i++] << 8; // TODO: 写法需要优化
             operand1 += code_list[i++];
             operand_str = std::to_string(operand1);
             break;
@@ -310,7 +310,7 @@ void ring_vm_code_dump(RVM_Function* function,
             operand_str = std::to_string(operand1) + ", " + std::to_string(operand2);
             break;
 
-        case OPCODE_OPERAND_TYPE_3BYTE_ABs:
+        case OPCODE_OPERAND_TYPE_3BYTE_AsB:
             operand1 = code_list[i++];
             operand2 = code_list[i++] << 8;
             operand2 += code_list[i++];
@@ -626,8 +626,12 @@ void dump_vm_function(Package_Executer*    package_executer,
                    function->free_value_list[i].u.out_free_value_index);
     }
 
+    // // 5. free value
+    // printf("+RuntimeStackSpace:        %u\n",
+    //        (function->type == RVM_FUNCTION_TYPE_DERIVE) ? (function->u.derive_func->need_stack_size) : 0);
 
-    // 5. Instructions
+
+    // 6. Instructions
     printf("+Instructions: %u\n",
            (function->type == RVM_FUNCTION_TYPE_DERIVE) ? (function->u.derive_func->code_size) : 0);
     printf(" ├──%-8s%-8s%-30s%-20s%-18s\n",
@@ -675,7 +679,7 @@ void dump_vm_function(Package_Executer*    package_executer,
                 break;
 
             case OPCODE_OPERAND_TYPE_2BYTE_As:
-                operand1 = code_list[i++] << 8;
+                operand1 = code_list[i++] << 8; // TODO: 写法需要优化
                 operand1 += code_list[i++];
                 operand_str = std::to_string(operand1);
                 break;
@@ -686,7 +690,7 @@ void dump_vm_function(Package_Executer*    package_executer,
                 operand_str = std::to_string(operand1) + ", " + std::to_string(operand2);
                 break;
 
-            case OPCODE_OPERAND_TYPE_3BYTE_ABs:
+            case OPCODE_OPERAND_TYPE_3BYTE_AsB:
                 operand1 = code_list[i++];
                 operand2 = code_list[i++] << 8;
                 operand2 += code_list[i++];

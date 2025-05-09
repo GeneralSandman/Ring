@@ -11,180 +11,155 @@ $main()    <./test/001-basic-type/string-002.ring:16,98>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
-+Instructions: 419
++Instructions: 394
  ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
  ├──0       0       push_string                   0                   19                
  ├──1       3       push_string                   0                                     
  ├──2       6       eq_string                                                           
- ├──3       7       jump_if_false                 22                  24                
+ ├──3       7       jump_if_false                 21                  24                
  ├──4       10      push_string                   1                   20                
- ├──5       13      argument_num                  1                                     
- ├──6       15      push_func                     1, 4                                  
- ├──7       18      invoke_func_native                                                  
- ├──8       19      jump                          34                  24                
- ├──9       22      push_string                   2                   22                
- ├──10      25      argument_num                  1                                     
- ├──11      27      push_func                     1, 4                                  
- ├──12      30      invoke_func_native                                                  
- ├──13      31      jump                          34                                    
- ├──14      34      push_string                   0                   26                
- ├──15      37      push_string                   0                                     
- ├──16      40      ne_string                                                           
- ├──17      41      jump_if_false                 56                  30                
- ├──18      44      push_string                   2                   27                
- ├──19      47      argument_num                  1                                     
- ├──20      49      push_func                     1, 4                                  
- ├──21      52      invoke_func_native                                                  
- ├──22      53      jump                          68                  30                
- ├──23      56      push_string                   1                   29                
- ├──24      59      argument_num                  1                                     
- ├──25      61      push_func                     1, 4                                  
- ├──26      64      invoke_func_native                                                  
- ├──27      65      jump                          68                                    
- ├──28      68      push_string                   0                   32                
- ├──29      71      push_string                   0                                     
- ├──30      74      gt_string                                                           
- ├──31      75      jump_if_false                 90                  36                
- ├──32      78      push_string                   2                   33                
- ├──33      81      argument_num                  1                                     
- ├──34      83      push_func                     1, 4                                  
- ├──35      86      invoke_func_native                                                  
- ├──36      87      jump                          102                 36                
- ├──37      90      push_string                   1                   35                
- ├──38      93      argument_num                  1                                     
- ├──39      95      push_func                     1, 4                                  
- ├──40      98      invoke_func_native                                                  
- ├──41      99      jump                          102                                   
- ├──42      102     push_string                   0                   38                
- ├──43      105     push_string                   0                                     
- ├──44      108     ge_string                                                           
- ├──45      109     jump_if_false                 124                 42                
- ├──46      112     push_string                   1                   39                
- ├──47      115     argument_num                  1                                     
- ├──48      117     push_func                     1, 4                                  
- ├──49      120     invoke_func_native                                                  
- ├──50      121     jump                          136                 42                
- ├──51      124     push_string                   2                   41                
- ├──52      127     argument_num                  1                                     
- ├──53      129     push_func                     1, 4                                  
- ├──54      132     invoke_func_native                                                  
- ├──55      133     jump                          136                                   
- ├──56      136     push_string                   0                   44                
- ├──57      139     push_string                   0                                     
- ├──58      142     lt_string                                                           
- ├──59      143     jump_if_false                 158                 48                
- ├──60      146     push_string                   2                   45                
- ├──61      149     argument_num                  1                                     
- ├──62      151     push_func                     1, 4                                  
- ├──63      154     invoke_func_native                                                  
- ├──64      155     jump                          170                 48                
- ├──65      158     push_string                   1                   47                
- ├──66      161     argument_num                  1                                     
- ├──67      163     push_func                     1, 4                                  
- ├──68      166     invoke_func_native                                                  
- ├──69      167     jump                          170                                   
- ├──70      170     push_string                   0                   50                
- ├──71      173     push_string                   0                                     
- ├──72      176     le_string                                                           
- ├──73      177     jump_if_false                 192                 54                
- ├──74      180     push_string                   1                   51                
- ├──75      183     argument_num                  1                                     
- ├──76      185     push_func                     1, 4                                  
- ├──77      188     invoke_func_native                                                  
- ├──78      189     jump                          204                 54                
- ├──79      192     push_string                   2                   53                
- ├──80      195     argument_num                  1                                     
- ├──81      197     push_func                     1, 4                                  
- ├──82      200     invoke_func_native                                                  
- ├──83      201     jump                          204                                   
- ├──84      204     push_string                   3                   58                
- ├──85      207     argument_num                  1                                     
- ├──86      209     push_func                     1, 4                                  
- ├──87      212     invoke_func_native                                                  
- ├──88      213     push_string                   0                   60                
- ├──89      216     push_string                   4                                     
- ├──90      219     eq_string                                                           
- ├──91      220     jump_if_false                 235                 64                
- ├──92      223     push_string                   2                   61                
- ├──93      226     argument_num                  1                                     
- ├──94      228     push_func                     1, 4                                  
- ├──95      231     invoke_func_native                                                  
- ├──96      232     jump                          247                 64                
- ├──97      235     push_string                   1                   63                
- ├──98      238     argument_num                  1                                     
- ├──99      240     push_func                     1, 4                                  
- ├──100     243     invoke_func_native                                                  
- ├──101     244     jump                          247                                   
- ├──102     247     push_string                   0                   66                
- ├──103     250     push_string                   4                                     
- ├──104     253     ne_string                                                           
- ├──105     254     jump_if_false                 269                 70                
- ├──106     257     push_string                   1                   67                
- ├──107     260     argument_num                  1                                     
- ├──108     262     push_func                     1, 4                                  
- ├──109     265     invoke_func_native                                                  
- ├──110     266     jump                          281                 70                
- ├──111     269     push_string                   2                   69                
- ├──112     272     argument_num                  1                                     
- ├──113     274     push_func                     1, 4                                  
- ├──114     277     invoke_func_native                                                  
- ├──115     278     jump                          281                                   
- ├──116     281     push_string                   0                   72                
- ├──117     284     push_string                   4                                     
- ├──118     287     gt_string                                                           
- ├──119     288     jump_if_false                 303                 76                
- ├──120     291     push_string                   2                   73                
- ├──121     294     argument_num                  1                                     
- ├──122     296     push_func                     1, 4                                  
- ├──123     299     invoke_func_native                                                  
- ├──124     300     jump                          315                 76                
- ├──125     303     push_string                   1                   75                
- ├──126     306     argument_num                  1                                     
- ├──127     308     push_func                     1, 4                                  
- ├──128     311     invoke_func_native                                                  
- ├──129     312     jump                          315                                   
- ├──130     315     push_string                   0                   78                
- ├──131     318     push_string                   4                                     
- ├──132     321     ge_string                                                           
- ├──133     322     jump_if_false                 337                 82                
- ├──134     325     push_string                   2                   79                
- ├──135     328     argument_num                  1                                     
- ├──136     330     push_func                     1, 4                                  
- ├──137     333     invoke_func_native                                                  
- ├──138     334     jump                          349                 82                
- ├──139     337     push_string                   1                   81                
- ├──140     340     argument_num                  1                                     
- ├──141     342     push_func                     1, 4                                  
- ├──142     345     invoke_func_native                                                  
- ├──143     346     jump                          349                                   
- ├──144     349     push_string                   0                   84                
- ├──145     352     push_string                   4                                     
- ├──146     355     lt_string                                                           
- ├──147     356     jump_if_false                 371                 88                
- ├──148     359     push_string                   1                   85                
- ├──149     362     argument_num                  1                                     
- ├──150     364     push_func                     1, 4                                  
- ├──151     367     invoke_func_native                                                  
- ├──152     368     jump                          383                 88                
- ├──153     371     push_string                   2                   87                
- ├──154     374     argument_num                  1                                     
- ├──155     376     push_func                     1, 4                                  
- ├──156     379     invoke_func_native                                                  
- ├──157     380     jump                          383                                   
- ├──158     383     push_string                   0                   90                
- ├──159     386     push_string                   4                                     
- ├──160     389     le_string                                                           
- ├──161     390     jump_if_false                 405                 94                
- ├──162     393     push_string                   1                   91                
- ├──163     396     argument_num                  1                                     
- ├──164     398     push_func                     1, 4                                  
- ├──165     401     invoke_func_native                                                  
- ├──166     402     jump                          417                 94                
- ├──167     405     push_string                   2                   93                
- ├──168     408     argument_num                  1                                     
- ├──169     410     push_func                     1, 4                                  
- ├──170     413     invoke_func_native                                                  
- ├──171     414     jump                          417                                   
- ├──172     417     pop_defer                                         98                
- ├──173     418     function_finish                                                     
+ ├──5       13      push_func                     1, 4                                  
+ ├──6       16      invoke_func_native            1                                     
+ ├──7       18      jump                          32                  24                
+ ├──8       21      push_string                   2                   22                
+ ├──9       24      push_func                     1, 4                                  
+ ├──10      27      invoke_func_native            1                                     
+ ├──11      29      jump                          32                                    
+ ├──12      32      push_string                   0                   26                
+ ├──13      35      push_string                   0                                     
+ ├──14      38      ne_string                                                           
+ ├──15      39      jump_if_false                 53                  30                
+ ├──16      42      push_string                   2                   27                
+ ├──17      45      push_func                     1, 4                                  
+ ├──18      48      invoke_func_native            1                                     
+ ├──19      50      jump                          64                  30                
+ ├──20      53      push_string                   1                   29                
+ ├──21      56      push_func                     1, 4                                  
+ ├──22      59      invoke_func_native            1                                     
+ ├──23      61      jump                          64                                    
+ ├──24      64      push_string                   0                   32                
+ ├──25      67      push_string                   0                                     
+ ├──26      70      gt_string                                                           
+ ├──27      71      jump_if_false                 85                  36                
+ ├──28      74      push_string                   2                   33                
+ ├──29      77      push_func                     1, 4                                  
+ ├──30      80      invoke_func_native            1                                     
+ ├──31      82      jump                          96                  36                
+ ├──32      85      push_string                   1                   35                
+ ├──33      88      push_func                     1, 4                                  
+ ├──34      91      invoke_func_native            1                                     
+ ├──35      93      jump                          96                                    
+ ├──36      96      push_string                   0                   38                
+ ├──37      99      push_string                   0                                     
+ ├──38      102     ge_string                                                           
+ ├──39      103     jump_if_false                 117                 42                
+ ├──40      106     push_string                   1                   39                
+ ├──41      109     push_func                     1, 4                                  
+ ├──42      112     invoke_func_native            1                                     
+ ├──43      114     jump                          128                 42                
+ ├──44      117     push_string                   2                   41                
+ ├──45      120     push_func                     1, 4                                  
+ ├──46      123     invoke_func_native            1                                     
+ ├──47      125     jump                          128                                   
+ ├──48      128     push_string                   0                   44                
+ ├──49      131     push_string                   0                                     
+ ├──50      134     lt_string                                                           
+ ├──51      135     jump_if_false                 149                 48                
+ ├──52      138     push_string                   2                   45                
+ ├──53      141     push_func                     1, 4                                  
+ ├──54      144     invoke_func_native            1                                     
+ ├──55      146     jump                          160                 48                
+ ├──56      149     push_string                   1                   47                
+ ├──57      152     push_func                     1, 4                                  
+ ├──58      155     invoke_func_native            1                                     
+ ├──59      157     jump                          160                                   
+ ├──60      160     push_string                   0                   50                
+ ├──61      163     push_string                   0                                     
+ ├──62      166     le_string                                                           
+ ├──63      167     jump_if_false                 181                 54                
+ ├──64      170     push_string                   1                   51                
+ ├──65      173     push_func                     1, 4                                  
+ ├──66      176     invoke_func_native            1                                     
+ ├──67      178     jump                          192                 54                
+ ├──68      181     push_string                   2                   53                
+ ├──69      184     push_func                     1, 4                                  
+ ├──70      187     invoke_func_native            1                                     
+ ├──71      189     jump                          192                                   
+ ├──72      192     push_string                   3                   58                
+ ├──73      195     push_func                     1, 4                                  
+ ├──74      198     invoke_func_native            1                                     
+ ├──75      200     push_string                   0                   60                
+ ├──76      203     push_string                   4                                     
+ ├──77      206     eq_string                                                           
+ ├──78      207     jump_if_false                 221                 64                
+ ├──79      210     push_string                   2                   61                
+ ├──80      213     push_func                     1, 4                                  
+ ├──81      216     invoke_func_native            1                                     
+ ├──82      218     jump                          232                 64                
+ ├──83      221     push_string                   1                   63                
+ ├──84      224     push_func                     1, 4                                  
+ ├──85      227     invoke_func_native            1                                     
+ ├──86      229     jump                          232                                   
+ ├──87      232     push_string                   0                   66                
+ ├──88      235     push_string                   4                                     
+ ├──89      238     ne_string                                                           
+ ├──90      239     jump_if_false                 253                 70                
+ ├──91      242     push_string                   1                   67                
+ ├──92      245     push_func                     1, 4                                  
+ ├──93      248     invoke_func_native            1                                     
+ ├──94      250     jump                          264                 70                
+ ├──95      253     push_string                   2                   69                
+ ├──96      256     push_func                     1, 4                                  
+ ├──97      259     invoke_func_native            1                                     
+ ├──98      261     jump                          264                                   
+ ├──99      264     push_string                   0                   72                
+ ├──100     267     push_string                   4                                     
+ ├──101     270     gt_string                                                           
+ ├──102     271     jump_if_false                 285                 76                
+ ├──103     274     push_string                   2                   73                
+ ├──104     277     push_func                     1, 4                                  
+ ├──105     280     invoke_func_native            1                                     
+ ├──106     282     jump                          296                 76                
+ ├──107     285     push_string                   1                   75                
+ ├──108     288     push_func                     1, 4                                  
+ ├──109     291     invoke_func_native            1                                     
+ ├──110     293     jump                          296                                   
+ ├──111     296     push_string                   0                   78                
+ ├──112     299     push_string                   4                                     
+ ├──113     302     ge_string                                                           
+ ├──114     303     jump_if_false                 317                 82                
+ ├──115     306     push_string                   2                   79                
+ ├──116     309     push_func                     1, 4                                  
+ ├──117     312     invoke_func_native            1                                     
+ ├──118     314     jump                          328                 82                
+ ├──119     317     push_string                   1                   81                
+ ├──120     320     push_func                     1, 4                                  
+ ├──121     323     invoke_func_native            1                                     
+ ├──122     325     jump                          328                                   
+ ├──123     328     push_string                   0                   84                
+ ├──124     331     push_string                   4                                     
+ ├──125     334     lt_string                                                           
+ ├──126     335     jump_if_false                 349                 88                
+ ├──127     338     push_string                   1                   85                
+ ├──128     341     push_func                     1, 4                                  
+ ├──129     344     invoke_func_native            1                                     
+ ├──130     346     jump                          360                 88                
+ ├──131     349     push_string                   2                   87                
+ ├──132     352     push_func                     1, 4                                  
+ ├──133     355     invoke_func_native            1                                     
+ ├──134     357     jump                          360                                   
+ ├──135     360     push_string                   0                   90                
+ ├──136     363     push_string                   4                                     
+ ├──137     366     le_string                                                           
+ ├──138     367     jump_if_false                 381                 94                
+ ├──139     370     push_string                   1                   91                
+ ├──140     373     push_func                     1, 4                                  
+ ├──141     376     invoke_func_native            1                                     
+ ├──142     378     jump                          392                 94                
+ ├──143     381     push_string                   2                   93                
+ ├──144     384     push_func                     1, 4                                  
+ ├──145     387     invoke_func_native            1                                     
+ ├──146     389     jump                          392                                   
+ ├──147     392     pop_defer                                         98                
+ ├──148     393     function_finish                                                     
 

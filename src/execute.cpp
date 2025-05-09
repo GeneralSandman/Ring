@@ -169,17 +169,6 @@ extern RVM_Opcode_Info RVM_Opcode_Infos[];
     VM_STATIC_DATA[(index)].u.closure_value = (value);
 
 
-// 从后边获取 1BYTE的操作数
-#define OPCODE_GET_1BYTE(p) \
-    (((p)[0]))
-// 从后边获取 2BYTE的操作数
-#define OPCODE_GET_2BYTE(p) \
-    (((p)[0] << 8) + (p)[1])
-// 把两BYTE的操作数放到后边
-#define OPCODE_SET_2BYTE(p, value) \
-    (((p)[0] = (value) >> 8), ((p)[1] = value & 0xff))
-
-
 RVM_RuntimeStack* new_runtime_stack() {
     RVM_RuntimeStack* stack = (RVM_RuntimeStack*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_RuntimeStack));
     stack->top_index        = 0;
@@ -1320,9 +1309,10 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_CLASS_OB:
-            class_index          = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            // TODO: class_index 有个限制，不能超过255
+            array_size           = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            class_index          = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 3]);
             rvm_class_definition = &(rvm->class_list[class_index]);
-            array_size           = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
             array_value          = rvm_new_array_literal_class_object(rvm, array_size, rvm_class_definition);
             VM_CUR_CO_STACK_TOP_INDEX -= array_size;
             STACK_SET_ARRAY_OFFSET(0, array_value);
@@ -1338,6 +1328,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_NEW_ARRAY_LITERAL_A:
+            // TODO: dimension 放在第三字节比较好
             basic_type  = (Ring_BasicType)OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             dimension   = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
             array_size  = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 3]);
@@ -1485,8 +1476,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             // increase iter of range
             STACK_GET_INT_OFFSET(-2) += 1;
-            break;
-        case RVM_CODE_FOR_RANGE_STRING:
             break;
         case RVM_CODE_FOR_RANGE_FINISH:
             VM_CUR_CO_STACK_TOP_INDEX -= 2;
@@ -1727,7 +1716,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_GET_DOUBLE_OFFSET(-1) += 1.0;
             VM_CUR_CO_PC += 1;
             break;
-
         case RVM_CODE_SELF_DECREASE_INT:
             STACK_GET_INT_OFFSET(-1) -= 1;
             VM_CUR_CO_PC += 1;
@@ -2028,8 +2016,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             dst_offset = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             src_offset = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 2]);
             STACK_COPY_OFFSET(-dst_offset, -src_offset);
-            if (dst_offset == 0)
-                VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_DEEP_COPY_CLASS_OB: {
@@ -2041,8 +2027,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             RVM_ClassObject* dst_class_ob = rvm_deep_copy_class_ob(rvm, src_class_ob);
             STACK_SET_CLASS_OB_OFFSET(-dst_offset, dst_class_ob);
 
-            if (dst_offset == 0)
-                VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
         } break;
         case RVM_CODE_DEEP_COPY_ARRAY: {
@@ -2054,8 +2038,6 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             RVM_Array* dst_array = rvm_deep_copy_array(rvm, src_array);
             STACK_SET_ARRAY_OFFSET(-dst_offset, dst_array);
 
-            if (dst_offset == 0)
-                VM_CUR_CO_STACK_TOP_INDEX += 1;
             VM_CUR_CO_PC += 3;
         } break;
         case RVM_CODE_POP:
@@ -2063,17 +2045,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_STACK_TOP_INDEX -= pop_count;
             VM_CUR_CO_PC += 2;
             break;
+        case RVM_CODE_NOP:
+            VM_CUR_CO_STACK_TOP_INDEX += 1;
+            VM_CUR_CO_PC += 1;
+            break;
 
 
         // func
-        case RVM_CODE_ARGUMENT_NUM:
-            argument_list_size = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            STACK_SET_INT_OFFSET(0, argument_list_size);
-            VM_CUR_CO_STACK_TOP_INDEX += 1;
-            VM_CUR_CO_PC += 2;
-            break;
         case RVM_CODE_PUSH_FUNC:
-            // 这里设计的不太好
             func_index = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             STACK_SET_INT_OFFSET(0, func_index);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
@@ -2086,30 +2065,32 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             VM_CUR_CO_PC += 3;
             break;
         case RVM_CODE_INVOKE_FUNC_NATIVE:
-            argument_list_size = STACK_GET_INT_OFFSET(-2);
+            argument_list_size = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             oper_num           = STACK_GET_INT_OFFSET(-1);
             package_index      = oper_num >> 8;
             func_index         = oper_num & 0XFF;
-            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
 
             callee_function = &(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index]);
             assert(callee_function->type == RVM_FUNCTION_TYPE_NATIVE);
 
+            // TODO: 需要在外部显式修改PC
             invoke_native_function(rvm,
                                    callee_function,
                                    argument_list_size);
-            VM_CUR_CO_PC += 1;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_INVOKE_FUNC:
-            argument_list_size = STACK_GET_INT_OFFSET(-2);
+            argument_list_size = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             oper_num           = STACK_GET_INT_OFFSET(-1);
             package_index      = oper_num >> 8;
             func_index         = oper_num & 0XFF;
-            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
 
             callee_function = &(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index]);
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
 
+            // TODO: 需要在外部显式修改PC
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
                                    nullptr, callee_function, nullptr,
@@ -2118,12 +2099,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             break;
         case RVM_CODE_INVOKE_CLOSURE:
-            argument_list_size = STACK_GET_INT_OFFSET(-2);
+            argument_list_size = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
-            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
 
             assert_throw_nil_closure(closure_value == nullptr || closure_value->anonymous_func == nullptr);
 
+            // TODO: 需要在外部显式修改PC
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
                                    nullptr, closure_value->anonymous_func, closure_value,
@@ -2132,11 +2114,10 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
             break;
         case RVM_CODE_INVOKE_METHOD:
-
-            argument_list_size = STACK_GET_INT_OFFSET(-3);
+            argument_list_size = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             callee_class_ob    = STACK_GET_CLASS_OB_OFFSET(-2);
             method_index       = STACK_GET_INT_OFFSET(-1);
-            VM_CUR_CO_STACK_TOP_INDEX -= 3;
+            VM_CUR_CO_STACK_TOP_INDEX -= 2;
 
             // 每个对象的成员变量 是单独存储的
             // 但是 method 没必要单独存储, 在 class_definition 中就可以, 通过指针寻找 class_definition
@@ -2145,6 +2126,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             callee_method   = &(callee_class_ob->class_ref->method_list[method_index]);
             callee_function = callee_method->rvm_function;
 
+            // TODO: 需要在外部显式修改PC
             invoke_derive_function(rvm,
                                    &caller_class_ob, &caller_function, &caller_closure,
                                    callee_class_ob, callee_function, nullptr,
@@ -2152,8 +2134,8 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
                                    false);
             break;
         case RVM_CODE_RETURN:
-            return_value_list_size = OPCODE_GET_2BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
-            VM_CUR_CO_PC += 3;
+            return_value_list_size = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
+            VM_CUR_CO_PC += 2;
             [[fallthrough]]; // make g++ happy
         case RVM_CODE_FUNCTION_FINISH:
             derive_function_finish(rvm,
@@ -2165,6 +2147,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
         case RVM_CODE_EXIT:
             oper_num  = STACK_GET_INT_OFFSET(-1);
             exit_code = oper_num;
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
             goto EXIT;
             break;
 
@@ -2180,14 +2163,14 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // defer
         case RVM_CODE_PUSH_DEFER:
-            argument_list_size = STACK_GET_INT_OFFSET(-2);
+            argument_list_size = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
-            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
 
             defer_item = new_defer_item(rvm, closure_value, argument_list_size);
             coroutine_push_defer_item(rvm, defer_item);
 
-            VM_CUR_CO_PC += 1;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_POP_DEFER:
             if (VM_CUR_CO->defer_list_size != 0) {
@@ -2218,11 +2201,11 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
 
         // coroutine
         case RVM_CODE_LAUNCH:
-            argument_list_size = STACK_GET_INT_OFFSET(-2);
+            argument_list_size = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             oper_num           = STACK_GET_INT_OFFSET(-1);
             package_index      = oper_num >> 8;
             func_index         = oper_num & 0XFF;
-            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
 
             callee_function = &(rvm->executer_entry->package_executer_list[package_index]->function_list[func_index]);
             assert(callee_function->type == RVM_FUNCTION_TYPE_DERIVE);
@@ -2237,12 +2220,12 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_SET_INT64_OFFSET(0, new_coroutine->co_id);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
 
-            VM_CUR_CO_PC += 1;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_LAUNCH_CLOSURE:
-            argument_list_size = STACK_GET_INT_OFFSET(-2);
+            argument_list_size = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             closure_value      = STACK_GET_CLOSURE_OFFSET(-1);
-            VM_CUR_CO_STACK_TOP_INDEX -= 2;
+            VM_CUR_CO_STACK_TOP_INDEX -= 1;
 
             assert_throw_nil_closure(closure_value == nullptr || closure_value->anonymous_func == nullptr);
 
@@ -2256,13 +2239,13 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_SET_INT64_OFFSET(0, new_coroutine->co_id);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
 
-            VM_CUR_CO_PC += 1;
+            VM_CUR_CO_PC += 2;
             break;
         case RVM_CODE_LAUNCH_METHOD:
-            argument_list_size = STACK_GET_INT_OFFSET(-3);
+            argument_list_size = OPCODE_GET_1BYTE(&VM_CUR_CO_CODE_LIST[VM_CUR_CO_PC + 1]);
             callee_class_ob    = STACK_GET_CLASS_OB_OFFSET(-2);
             method_index       = STACK_GET_INT_OFFSET(-1);
-            VM_CUR_CO_STACK_TOP_INDEX -= 3;
+            VM_CUR_CO_STACK_TOP_INDEX -= 2;
 
 
             // 每个对象的成员变量 是单独存储的
@@ -2283,7 +2266,7 @@ int ring_execute_vm_code(Ring_VirtualMachine* rvm) {
             STACK_SET_INT64_OFFSET(0, new_coroutine->co_id);
             VM_CUR_CO_STACK_TOP_INDEX += 1;
 
-            VM_CUR_CO_PC += 1;
+            VM_CUR_CO_PC += 2;
             break;
 
         case RVM_CODE_RESUME:
@@ -2338,6 +2321,7 @@ void invoke_native_function(Ring_VirtualMachine* rvm,
 
 
     // 销毁 argument
+    // TODO: 这里 应该在外层释放
     VM_CUR_CO_STACK_TOP_INDEX -= argument_list_size;
 
     // 放置返回值
@@ -2515,6 +2499,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     unsigned int local_variable_size = callinfo->callee_function->local_variable_size;
 
     // 销毁 return_value_list local_variable
+    // TODO: 需要在外部显式调用
     VM_CUR_CO_STACK_TOP_INDEX -= return_value_list_size;
     VM_CUR_CO_STACK_TOP_INDEX -= local_variable_size;
 
@@ -2561,8 +2546,9 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     }
 
     if (!callinfo->caller_is_defer) {
-        // 调用完成之后，上层的函数 pc + 1
-        VM_CUR_CO_PC += 1;
+        // 调用完成之后，上层的函数 pc + 2
+        // TODO: 应该在函数调用之前设置好，否则后续不好维护
+        VM_CUR_CO_PC += 2;
     } else {
         // 如果上层是defer，那么他的pc不会+1，需要继续执行 pop_defer指令
     }
@@ -2573,6 +2559,7 @@ void derive_function_finish(Ring_VirtualMachine* rvm,
     assert(VM_CUR_CO_STACK_TOP_INDEX == callinfo->caller_stack_base);
 
     // 释放arguement
+    // TODO: 需要在外部显式调用
     VM_CUR_CO_STACK_TOP_INDEX -= callinfo->callee_argument_size;
 
 
@@ -2920,6 +2907,7 @@ void init_derive_function_local_variable(Ring_VirtualMachine* rvm,
     assert(callee_function->local_variable_size == local_vari_stack_offset);
 
     // Step-End: increase top index of runtime_stack.
+    // TODO: 需要在外部显式调用
     VM_CUR_CO_STACK_TOP_INDEX += callee_function->local_variable_size;
 }
 

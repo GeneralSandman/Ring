@@ -244,6 +244,17 @@ struct Ring_VirtualMachine {
     RingCoroutine*       current_coroutine;
 };
 
+// 从后边获取 1BYTE的操作数
+#define OPCODE_GET_1BYTE(p) \
+    (((p)[0]))
+// 从后边获取 2BYTE的操作数
+#define OPCODE_GET_2BYTE(p) \
+    (((p)[0] << 8) + (p)[1])
+// 把两BYTE的操作数放到后边
+#define OPCODE_SET_2BYTE(p, value) \
+    (((p)[0] = (value) >> 8), ((p)[1] = value & 0xff))
+
+
 #define VM_STATIC_DATA (rvm->runtime_static->data)
 
 
@@ -363,6 +374,7 @@ struct Package_Executer {
 
     unsigned int         bootloader_code_size;
     RVM_Byte*            bootloader_code_list;
+    unsigned int         bootloader_need_stack_size; // 需要的栈空间
 
     bool                 exist_main_func;
     unsigned int         main_func_index;
@@ -603,6 +615,7 @@ struct NativeFunction {
 struct DeriveFunction {
     unsigned int                       code_size;
     RVM_Byte*                          code_list;
+    unsigned int                       need_stack_size;
 
     std::vector<RVM_SourceCodeLineMap> code_line_map;
     // 一行Ring源代码 对应 一个 RVM_SourceCodeLineMap
@@ -900,6 +913,7 @@ struct RVM_OpcodeBuffer {
     RVM_Byte*                          code_list;
     unsigned int                       code_size;
     unsigned int                       code_capacity;
+    unsigned int                       need_stack_size; // 运行所有字节码需要的最大栈空间
 
     std::vector<RVM_LabelTable>        lable_list;
 
@@ -914,16 +928,26 @@ typedef enum {
     OPCODE_OPERAND_TYPE_1BYTE_A,    // 后边1BYTE操作数, pc+2
     OPCODE_OPERAND_TYPE_2BYTE_As,   // 后边2BYTE操作数 两个字节组合成一个操作数, pc+3
     OPCODE_OPERAND_TYPE_2BYTE_AB,   // 后边2BYTE操作数 两个字节分别为两个不同的操作数, pc+3
-    OPCODE_OPERAND_TYPE_3BYTE_ABs,  // 后边3BYTE操作数 第1个字节为一个操作数, 第2,3个字节为一个操作数, pc+4
+    OPCODE_OPERAND_TYPE_3BYTE_AsB,  // 后边3BYTE操作数 第1、2个字节为一个操作数, 第3个字节为一个操作数, pc+4
     OPCODE_OPERAND_TYPE_4BYTE_ABCs, // 后边4BYTE操作数 第1、2个字节各为一个操作数, 第3，4个字节为一个操作数, pc+5
 
 } OpcodeOperandType;
 
+typedef enum {
+    OPCODE_OPERAND_UNKNOW,
+    OPCODE_OPERAND_A,
+    OPCODE_OPERAND_As,
+    OPCODE_OPERAND_B,
+    OPCODE_OPERAND_Bs,
+    OPCODE_OPERAND_Cs,
+} OpcodeOperand;
+
 struct RVM_Opcode_Info {
-    RVM_Byte          code;                    // 字节码枚举
-    const char*       name;                    // 字节码字符串
-    OpcodeOperandType operand_type;            // 字节码后边的操作数所占字节数量
-    int               runtime_stack_increment; // 对运行时栈空间的增长 可为负值
+    RVM_Byte          code;                  // 字节码枚举
+    const char*       name;                  // 字节码字符串
+    OpcodeOperandType operand_type;          // 字节码后边的操作数所占字节数量
+    const char*       stack_incr_expr;       // 对运行时栈空间的增长 表达式
+    int               stack_incr_expr_debug; // TODO: 临时使用，后续删除
 
     /*
      * 字节码的注释, 放在结构体里边, 用于快速生成文档, 目前暂无使用意义, 后续放在debug控制
@@ -936,6 +960,11 @@ struct RVM_Opcode_Info {
     const char* stack_top_change;
     const char* math_formula;
 };
+
+typedef struct {
+    std::string variable;    // 变量名
+    int         coefficient; // 系数
+} _StackIncrExprTerm;
 
 typedef enum {
     RVM_CODE_UNKNOW = 0,
@@ -1066,7 +1095,6 @@ typedef enum {
     RVM_CODE_FOR_RANGE_ARRAY_STRING,
     RVM_CODE_FOR_RANGE_ARRAY_CLASS_OB,
     RVM_CODE_FOR_RANGE_ARRAY_CLOSURE,
-    RVM_CODE_FOR_RANGE_STRING,
     RVM_CODE_FOR_RANGE_FINISH,
 
     // class
@@ -1187,9 +1215,9 @@ typedef enum {
     RVM_CODE_DEEP_COPY_CLASS_OB,
     RVM_CODE_DEEP_COPY_ARRAY,
     RVM_CODE_POP,
+    RVM_CODE_NOP, // 让栈空间增加1，不做额外操作
 
     // func
-    RVM_CODE_ARGUMENT_NUM,
     RVM_CODE_PUSH_FUNC,
     RVM_CODE_PUSH_METHOD,
     RVM_CODE_INVOKE_FUNC_NATIVE,
@@ -3799,6 +3827,16 @@ void debug_generate_closure_dot_file(RVM_Closure* closure);
  *
  */
 void debug_gc_summary(Ring_VirtualMachine* rvm, std::string stage);
+// --------------------
+
+/* --------------------
+ * vm.cpp
+ * function definition
+ *
+ */
+int                             rvm_function_calc_stack_cap(RVM_Function* function);
+int                             opcode_calc_stack_cap(RVM_Byte* code_list, unsigned int pc, RVM_Byte opcode);
+std::vector<_StackIncrExprTerm> parse_stack_incr_expr(const char* expression);
 // --------------------
 
 
