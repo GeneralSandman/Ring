@@ -18,6 +18,7 @@
 ./bin/ring -O0 dump ./test/004-derive-function/function-015.ring       > ./test/004-derive-function/function-015.ring.dump                                                 
 ./bin/ring -O0 dump ./test/004-derive-function/function-016.ring       > ./test/004-derive-function/function-016.ring.dump                                                 
 ./bin/ring -O0 dump ./test/004-derive-function/function-017.ring       > ./test/004-derive-function/function-017.ring.dump                                                 
+./bin/ring -O0 dump ./test/004-derive-function/call-fibonacci.ring     > ./test/004-derive-function/call-fibonacci.ring.dump                                                 
 ./bin/ring -O0 dump ./test/001-basic-type/string-000.ring              > ./test/001-basic-type/string-000.ring.dump                                                 
 ./bin/ring -O0 dump ./test/004-derive-function/function-019.ring       > ./test/004-derive-function/function-019.ring.dump                                                 
 ./bin/ring -O0 dump ./test/001-basic-type/string-001.ring              > ./test/001-basic-type/string-001.ring.dump                                                 

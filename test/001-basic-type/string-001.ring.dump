@@ -25,116 +25,99 @@ $main()    <./test/001-basic-type/string-001.ring:16,53>
 +Local:       1
  ├──var string           string_value        
 +FreeValue:        0
-+Instructions: 243
++Instructions: 226
  ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
  ├──0       0       push_string                   0                   19                
  ├──1       3       push_string                   1                                     
  ├──2       6       concat                                                              
- ├──3       7       argument_num                  1                                     
- ├──4       9       push_func                     1, 4                                  
- ├──5       12      invoke_func_native                                                  
- ├──6       13      push_string                   0                   20                
- ├──7       16      push_string                   1                                     
- ├──8       19      concat                                                              
- ├──9       20      push_string                   2                                     
- ├──10      23      concat                                                              
- ├──11      24      argument_num                  1                                     
- ├──12      26      push_func                     1, 4                                  
- ├──13      29      invoke_func_native                                                  
- ├──14      30      push_string                   0                   21                
- ├──15      33      push_string                   1                                     
- ├──16      36      concat                                                              
- ├──17      37      push_string                   2                                     
- ├──18      40      concat                                                              
- ├──19      41      push_string                   3                                     
- ├──20      44      concat                                                              
- ├──21      45      argument_num                  1                                     
- ├──22      47      push_func                     1, 4                                  
- ├──23      50      invoke_func_native                                                  
- ├──24      51      push_string                   4                   23                
- ├──25      54      argument_num                  1                                     
- ├──26      56      push_func                     1, 4                                  
- ├──27      59      invoke_func_native                                                  
- ├──28      60      push_string                   5                   24                
- ├──29      63      argument_num                  1                                     
- ├──30      65      push_func                     1, 4                                  
- ├──31      68      invoke_func_native                                                  
- ├──32      69      push_string                   6                   29                
- ├──33      72      argument_num                  1                                     
- ├──34      74      push_func                     1, 4                                  
- ├──35      77      invoke_func_native                                                  
- ├──36      78      push_string                   7                   30                
- ├──37      81      pop_stack_string              0                                     
- ├──38      84      push_stack_string             0                   31                
- ├──39      87      argument_num                  1                                     
- ├──40      89      push_func                     1, 4                                  
- ├──41      92      invoke_func_native                                                  
- ├──42      93      push_stack_string             0                   32                
- ├──43      96      push_string                   7                                     
- ├──44      99      eq_string                                                           
- ├──45      100     argument_num                  1                                     
- ├──46      102     push_func                     0, 0                                  
- ├──47      105     invoke_func_native                                                  
- ├──48      106     push_string                   8                   36                
- ├──49      109     argument_num                  1                                     
- ├──50      111     push_func                     1, 4                                  
- ├──51      114     invoke_func_native                                                  
- ├──52      115     push_string                   0                   37                
- ├──53      118     push_string                   1                                     
- ├──54      121     concat                                                              
- ├──55      122     pop_stack_string              0                                     
- ├──56      125     push_stack_string             0                   38                
- ├──57      128     argument_num                  1                                     
- ├──58      130     push_func                     1, 4                                  
- ├──59      133     invoke_func_native                                                  
- ├──60      134     push_stack_string             0                   39                
- ├──61      137     push_string                   9                                     
- ├──62      140     eq_string                                                           
- ├──63      141     argument_num                  1                                     
- ├──64      143     push_func                     0, 0                                  
- ├──65      146     invoke_func_native                                                  
- ├──66      147     push_string                   10                  42                
- ├──67      150     argument_num                  1                                     
- ├──68      152     push_func                     1, 4                                  
- ├──69      155     invoke_func_native                                                  
- ├──70      156     push_string                   0                   43                
- ├──71      159     push_string                   1                                     
- ├──72      162     concat                                                              
- ├──73      163     push_string                   2                                     
- ├──74      166     concat                                                              
- ├──75      167     pop_stack_string              0                                     
- ├──76      170     push_stack_string             0                   44                
- ├──77      173     argument_num                  1                                     
- ├──78      175     push_func                     1, 4                                  
- ├──79      178     invoke_func_native                                                  
- ├──80      179     push_stack_string             0                   45                
- ├──81      182     push_string                   11                                    
- ├──82      185     eq_string                                                           
- ├──83      186     argument_num                  1                                     
- ├──84      188     push_func                     0, 0                                  
- ├──85      191     invoke_func_native                                                  
- ├──86      192     push_string                   12                  48                
- ├──87      195     argument_num                  1                                     
- ├──88      197     push_func                     1, 4                                  
- ├──89      200     invoke_func_native                                                  
- ├──90      201     push_string                   0                   49                
- ├──91      204     push_string                   1                                     
- ├──92      207     concat                                                              
- ├──93      208     push_string                   2                                     
- ├──94      211     concat                                                              
- ├──95      212     push_string                   3                                     
- ├──96      215     concat                                                              
- ├──97      216     pop_stack_string              0                                     
- ├──98      219     push_stack_string             0                   50                
- ├──99      222     argument_num                  1                                     
- ├──100     224     push_func                     1, 4                                  
- ├──101     227     invoke_func_native                                                  
- ├──102     228     push_stack_string             0                   51                
- ├──103     231     push_string                   13                                    
- ├──104     234     eq_string                                                           
- ├──105     235     argument_num                  1                                     
- ├──106     237     push_func                     0, 0                                  
- ├──107     240     invoke_func_native                                                  
- ├──108     241     pop_defer                                         53                
- ├──109     242     function_finish                                                     
+ ├──3       7       push_func                     1, 4                                  
+ ├──4       10      invoke_func_native            1                                     
+ ├──5       12      push_string                   0                   20                
+ ├──6       15      push_string                   1                                     
+ ├──7       18      concat                                                              
+ ├──8       19      push_string                   2                                     
+ ├──9       22      concat                                                              
+ ├──10      23      push_func                     1, 4                                  
+ ├──11      26      invoke_func_native            1                                     
+ ├──12      28      push_string                   0                   21                
+ ├──13      31      push_string                   1                                     
+ ├──14      34      concat                                                              
+ ├──15      35      push_string                   2                                     
+ ├──16      38      concat                                                              
+ ├──17      39      push_string                   3                                     
+ ├──18      42      concat                                                              
+ ├──19      43      push_func                     1, 4                                  
+ ├──20      46      invoke_func_native            1                                     
+ ├──21      48      push_string                   4                   23                
+ ├──22      51      push_func                     1, 4                                  
+ ├──23      54      invoke_func_native            1                                     
+ ├──24      56      push_string                   5                   24                
+ ├──25      59      push_func                     1, 4                                  
+ ├──26      62      invoke_func_native            1                                     
+ ├──27      64      push_string                   6                   29                
+ ├──28      67      push_func                     1, 4                                  
+ ├──29      70      invoke_func_native            1                                     
+ ├──30      72      push_string                   7                   30                
+ ├──31      75      pop_stack_string              0                                     
+ ├──32      78      push_stack_string             0                   31                
+ ├──33      81      push_func                     1, 4                                  
+ ├──34      84      invoke_func_native            1                                     
+ ├──35      86      push_stack_string             0                   32                
+ ├──36      89      push_string                   7                                     
+ ├──37      92      eq_string                                                           
+ ├──38      93      push_func                     0, 0                                  
+ ├──39      96      invoke_func_native            1                                     
+ ├──40      98      push_string                   8                   36                
+ ├──41      101     push_func                     1, 4                                  
+ ├──42      104     invoke_func_native            1                                     
+ ├──43      106     push_string                   0                   37                
+ ├──44      109     push_string                   1                                     
+ ├──45      112     concat                                                              
+ ├──46      113     pop_stack_string              0                                     
+ ├──47      116     push_stack_string             0                   38                
+ ├──48      119     push_func                     1, 4                                  
+ ├──49      122     invoke_func_native            1                                     
+ ├──50      124     push_stack_string             0                   39                
+ ├──51      127     push_string                   9                                     
+ ├──52      130     eq_string                                                           
+ ├──53      131     push_func                     0, 0                                  
+ ├──54      134     invoke_func_native            1                                     
+ ├──55      136     push_string                   10                  42                
+ ├──56      139     push_func                     1, 4                                  
+ ├──57      142     invoke_func_native            1                                     
+ ├──58      144     push_string                   0                   43                
+ ├──59      147     push_string                   1                                     
+ ├──60      150     concat                                                              
+ ├──61      151     push_string                   2                                     
+ ├──62      154     concat                                                              
+ ├──63      155     pop_stack_string              0                                     
+ ├──64      158     push_stack_string             0                   44                
+ ├──65      161     push_func                     1, 4                                  
+ ├──66      164     invoke_func_native            1                                     
+ ├──67      166     push_stack_string             0                   45                
+ ├──68      169     push_string                   11                                    
+ ├──69      172     eq_string                                                           
+ ├──70      173     push_func                     0, 0                                  
+ ├──71      176     invoke_func_native            1                                     
+ ├──72      178     push_string                   12                  48                
+ ├──73      181     push_func                     1, 4                                  
+ ├──74      184     invoke_func_native            1                                     
+ ├──75      186     push_string                   0                   49                
+ ├──76      189     push_string                   1                                     
+ ├──77      192     concat                                                              
+ ├──78      193     push_string                   2                                     
+ ├──79      196     concat                                                              
+ ├──80      197     push_string                   3                                     
+ ├──81      200     concat                                                              
+ ├──82      201     pop_stack_string              0                                     
+ ├──83      204     push_stack_string             0                   50                
+ ├──84      207     push_func                     1, 4                                  
+ ├──85      210     invoke_func_native            1                                     
+ ├──86      212     push_stack_string             0                   51                
+ ├──87      215     push_string                   13                                    
+ ├──88      218     eq_string                                                           
+ ├──89      219     push_func                     0, 0                                  
+ ├──90      222     invoke_func_native            1                                     
+ ├──91      224     pop_defer                                         53                
+ ├──92      225     function_finish                                                     
 

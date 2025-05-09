@@ -18,132 +18,110 @@ $func_use_local_variable_hidden_global()    <./test/004-derive-function/function
 +Local:       1
  ├──var int              int_value_global    
 +FreeValue:        0
-+Instructions: 91
++Instructions: 83
  ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
  ├──0       0       push_int_1byte                234                 17                
  ├──1       2       pop_stack_int                 0                                     
  ├──2       5       push_stack_int                0                   18                
- ├──3       8       argument_num                  1                                     
- ├──4       10      push_func                     1, 1                                  
- ├──5       13      invoke_func_native                                                  
- ├──6       14      push_stack_int                0                   19                
- ├──7       17      argument_num                  1                                     
- ├──8       19      push_func                     1, 1                                  
- ├──9       22      invoke_func_native                                                  
- ├──10      23      push_stack_int                0                   20                
- ├──11      26      argument_num                  1                                     
- ├──12      28      push_func                     1, 1                                  
- ├──13      31      invoke_func_native                                                  
- ├──14      32      push_stack_int                0                   21                
- ├──15      35      argument_num                  1                                     
- ├──16      37      push_func                     1, 1                                  
- ├──17      40      invoke_func_native                                                  
- ├──18      41      push_stack_int                0                   22                
- ├──19      44      push_int_1byte                234                                   
- ├──20      46      eq_int                                                              
- ├──21      47      argument_num                  1                                     
- ├──22      49      push_func                     0, 0                                  
- ├──23      52      invoke_func_native                                                  
- ├──24      53      push_stack_int                0                   23                
- ├──25      56      push_int_1byte                234                                   
- ├──26      58      eq_int                                                              
- ├──27      59      argument_num                  1                                     
- ├──28      61      push_func                     0, 0                                  
- ├──29      64      invoke_func_native                                                  
- ├──30      65      push_stack_int                0                   24                
- ├──31      68      push_int_1byte                234                                   
- ├──32      70      eq_int                                                              
- ├──33      71      argument_num                  1                                     
- ├──34      73      push_func                     0, 0                                  
- ├──35      76      invoke_func_native                                                  
- ├──36      77      push_stack_int                0                   25                
- ├──37      80      push_int_1byte                234                                   
- ├──38      82      eq_int                                                              
- ├──39      83      argument_num                  1                                     
- ├──40      85      push_func                     0, 0                                  
- ├──41      88      invoke_func_native                                                  
- ├──42      89      pop_defer                                         26                
- ├──43      90      function_finish                                                     
+ ├──3       8       push_func                     1, 1                                  
+ ├──4       11      invoke_func_native            1                                     
+ ├──5       13      push_stack_int                0                   19                
+ ├──6       16      push_func                     1, 1                                  
+ ├──7       19      invoke_func_native            1                                     
+ ├──8       21      push_stack_int                0                   20                
+ ├──9       24      push_func                     1, 1                                  
+ ├──10      27      invoke_func_native            1                                     
+ ├──11      29      push_stack_int                0                   21                
+ ├──12      32      push_func                     1, 1                                  
+ ├──13      35      invoke_func_native            1                                     
+ ├──14      37      push_stack_int                0                   22                
+ ├──15      40      push_int_1byte                234                                   
+ ├──16      42      eq_int                                                              
+ ├──17      43      push_func                     0, 0                                  
+ ├──18      46      invoke_func_native            1                                     
+ ├──19      48      push_stack_int                0                   23                
+ ├──20      51      push_int_1byte                234                                   
+ ├──21      53      eq_int                                                              
+ ├──22      54      push_func                     0, 0                                  
+ ├──23      57      invoke_func_native            1                                     
+ ├──24      59      push_stack_int                0                   24                
+ ├──25      62      push_int_1byte                234                                   
+ ├──26      64      eq_int                                                              
+ ├──27      65      push_func                     0, 0                                  
+ ├──28      68      invoke_func_native            1                                     
+ ├──29      70      push_stack_int                0                   25                
+ ├──30      73      push_int_1byte                234                                   
+ ├──31      75      eq_int                                                              
+ ├──32      76      push_func                     0, 0                                  
+ ├──33      79      invoke_func_native            1                                     
+ ├──34      81      pop_defer                                         26                
+ ├──35      82      function_finish                                                     
 
 $main()    <./test/004-derive-function/function-004.ring:32,52>
 +Parameter:   0
 +Local:       0
 +FreeValue:        0
-+Instructions: 154
++Instructions: 140
  ├──*Num    *PC     *Instruction                  *Operand            *SourceLineNum    
  ├──0       0       push_int_1byte                1                   34                
  ├──1       2       pop_static_int                0                                     
  ├──2       5       push_static_int               0                   35                
- ├──3       8       argument_num                  1                                     
- ├──4       10      push_func                     1, 1                                  
- ├──5       13      invoke_func_native                                                  
- ├──6       14      push_static_int               0                   36                
- ├──7       17      push_int_1byte                1                                     
- ├──8       19      eq_int                                                              
- ├──9       20      argument_num                  1                                     
- ├──10      22      push_func                     0, 0                                  
- ├──11      25      invoke_func_native                                                  
- ├──12      26      push_static_int               0                   37                
- ├──13      29      push_int_1byte                1                                     
- ├──14      31      eq_int                                                              
- ├──15      32      argument_num                  1                                     
- ├──16      34      push_func                     0, 0                                  
- ├──17      37      invoke_func_native                                                  
- ├──18      38      push_static_int               0                   38                
- ├──19      41      push_int_1byte                1                                     
- ├──20      43      eq_int                                                              
- ├──21      44      argument_num                  1                                     
- ├──22      46      push_func                     0, 0                                  
- ├──23      49      invoke_func_native                                                  
- ├──24      50      push_static_int               0                   39                
- ├──25      53      push_int_1byte                1                                     
- ├──26      55      eq_int                                                              
- ├──27      56      argument_num                  1                                     
- ├──28      58      push_func                     0, 0                                  
- ├──29      61      invoke_func_native                                                  
- ├──30      62      push_string                   0                   40                
- ├──31      65      argument_num                  1                                     
- ├──32      67      push_func                     1, 4                                  
- ├──33      70      invoke_func_native                                                  
- ├──34      71      argument_num                  0                   42                
- ├──35      73      push_func                     9, 1                                  
- ├──36      76      invoke_func                                                         
- ├──37      77      push_string                   0                   43                
- ├──38      80      argument_num                  1                                     
- ├──39      82      push_func                     1, 4                                  
- ├──40      85      invoke_func_native                                                  
- ├──41      86      push_static_int               0                   45                
- ├──42      89      argument_num                  1                                     
- ├──43      91      push_func                     1, 1                                  
- ├──44      94      invoke_func_native                                                  
- ├──45      95      push_static_int               0                   46                
- ├──46      98      push_int_1byte                1                                     
- ├──47      100     eq_int                                                              
- ├──48      101     argument_num                  1                                     
- ├──49      103     push_func                     0, 0                                  
- ├──50      106     invoke_func_native                                                  
- ├──51      107     push_static_int               0                   47                
- ├──52      110     push_int_1byte                1                                     
- ├──53      112     eq_int                                                              
- ├──54      113     argument_num                  1                                     
- ├──55      115     push_func                     0, 0                                  
- ├──56      118     invoke_func_native                                                  
- ├──57      119     push_static_int               0                   48                
- ├──58      122     push_int_1byte                1                                     
- ├──59      124     eq_int                                                              
- ├──60      125     argument_num                  1                                     
- ├──61      127     push_func                     0, 0                                  
- ├──62      130     invoke_func_native                                                  
- ├──63      131     push_static_int               0                   49                
- ├──64      134     push_int_1byte                1                                     
- ├──65      136     eq_int                                                              
- ├──66      137     argument_num                  1                                     
- ├──67      139     push_func                     0, 0                                  
- ├──68      142     invoke_func_native                                                  
- ├──69      143     push_string                   0                   50                
- ├──70      146     argument_num                  1                                     
- ├──71      148     push_func                     1, 4                                  
- ├──72      151     invoke_func_native                                                  
- ├──73      152     pop_defer                                         52                
- ├──74      153     function_finish                                                     
+ ├──3       8       push_func                     1, 1                                  
+ ├──4       11      invoke_func_native            1                                     
+ ├──5       13      push_static_int               0                   36                
+ ├──6       16      push_int_1byte                1                                     
+ ├──7       18      eq_int                                                              
+ ├──8       19      push_func                     0, 0                                  
+ ├──9       22      invoke_func_native            1                                     
+ ├──10      24      push_static_int               0                   37                
+ ├──11      27      push_int_1byte                1                                     
+ ├──12      29      eq_int                                                              
+ ├──13      30      push_func                     0, 0                                  
+ ├──14      33      invoke_func_native            1                                     
+ ├──15      35      push_static_int               0                   38                
+ ├──16      38      push_int_1byte                1                                     
+ ├──17      40      eq_int                                                              
+ ├──18      41      push_func                     0, 0                                  
+ ├──19      44      invoke_func_native            1                                     
+ ├──20      46      push_static_int               0                   39                
+ ├──21      49      push_int_1byte                1                                     
+ ├──22      51      eq_int                                                              
+ ├──23      52      push_func                     0, 0                                  
+ ├──24      55      invoke_func_native            1                                     
+ ├──25      57      push_string                   0                   40                
+ ├──26      60      push_func                     1, 4                                  
+ ├──27      63      invoke_func_native            1                                     
+ ├──28      65      push_func                     9, 1                42                
+ ├──29      68      invoke_func                   0                                     
+ ├──30      70      push_string                   0                   43                
+ ├──31      73      push_func                     1, 4                                  
+ ├──32      76      invoke_func_native            1                                     
+ ├──33      78      push_static_int               0                   45                
+ ├──34      81      push_func                     1, 1                                  
+ ├──35      84      invoke_func_native            1                                     
+ ├──36      86      push_static_int               0                   46                
+ ├──37      89      push_int_1byte                1                                     
+ ├──38      91      eq_int                                                              
+ ├──39      92      push_func                     0, 0                                  
+ ├──40      95      invoke_func_native            1                                     
+ ├──41      97      push_static_int               0                   47                
+ ├──42      100     push_int_1byte                1                                     
+ ├──43      102     eq_int                                                              
+ ├──44      103     push_func                     0, 0                                  
+ ├──45      106     invoke_func_native            1                                     
+ ├──46      108     push_static_int               0                   48                
+ ├──47      111     push_int_1byte                1                                     
+ ├──48      113     eq_int                                                              
+ ├──49      114     push_func                     0, 0                                  
+ ├──50      117     invoke_func_native            1                                     
+ ├──51      119     push_static_int               0                   49                
+ ├──52      122     push_int_1byte                1                                     
+ ├──53      124     eq_int                                                              
+ ├──54      125     push_func                     0, 0                                  
+ ├──55      128     invoke_func_native            1                                     
+ ├──56      130     push_string                   0                   50                
+ ├──57      133     push_func                     1, 4                                  
+ ├──58      136     invoke_func_native            1                                     
+ ├──59      138     pop_defer                                         52                
+ ├──60      139     function_finish                                                     
 
