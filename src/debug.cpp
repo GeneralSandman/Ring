@@ -293,6 +293,15 @@ int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
 
 int dispath_sae(RVM_Frame* frame, const char* event, const char* arg) {
 
+    if (IS_RDP(frame)) {
+        printf("is rdp----------\n");
+        std::string call_stack;
+        call_stack = format_rvm_call_stack(frame->rvm);
+        printf("[@]call stack:\n");
+        printf("%s", call_stack.c_str());
+        return 0;
+    }
+
     printf(LOG_COLOR_GREEN);
     printf("[@]stop at entry: main()\n");
     printf(LOG_COLOR_CLEAR);
@@ -662,6 +671,7 @@ int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
     return 0;
 }
 
+// clipp 解析命令
 RDB_Arg rdb_parse_command(const char* line) {
     std::vector<std::string> argv;
     RDB_COMMAND_TYPE         cmd       = RDB_COMMAND_UNKNOW;

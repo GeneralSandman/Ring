@@ -2264,6 +2264,7 @@ struct Ring_Command_Arg {
     std::string              input_file_name; // run/dump/rdb
     std::string              keyword;         // man
     unsigned int             optimize_level;
+    std::string              rdb_interpreter;
     std::vector<std::string> shell_args;
 };
 
@@ -2430,6 +2431,10 @@ struct RDB_Arg {
 #define ISSET_TRACE_EVENT_EXIT(debug_config) ((debug_config)->enable_trace_event & ENABLE_TRACE_EVENT_EXIT)
 #define ISSET_TRACE_EVENT_ALL(debug_config) ((debug_config)->enable_trace_event == ENABLE_TRACE_EVENT_ALL)
 
+
+#define DEBUG_CONFIG(frame) ((frame)->rvm->debug_config)
+#define IS_RDP(frame) (true == str_eq((frame)->rvm->debug_config->rdb_interpreter.c_str(), "rdp"))
+
 struct RVM_DebugConfig {
     bool                  enable;
     TraceDispacth         trace_dispatch;
@@ -2450,6 +2455,8 @@ struct RVM_DebugConfig {
     // break_points 先简单实现, 只能在 main package 中设置断点
     std::vector<RVM_BreakPoint> break_points;
     // RVM_DebugMode debug_mode;
+
+    std::string rdb_interpreter;
 };
 
 struct RVM_BreakPoint {
