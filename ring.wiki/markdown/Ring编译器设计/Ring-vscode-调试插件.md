@@ -808,4 +808,175 @@ pipe_child_to_parent[1] ← 读取 ← pipe_child_to_parent[0] (stdout/stderr)
 
 ----------------
 
+
+
+
+## configurationDone
+
+
+主要功能
+1. 通知调试器客户端已完成配置：告诉调试适配器(debug adapter)客户端已经发送完所有初始配置请求(如设置断点、设置异常处理等)
+2. 启动调试会话：在某些调试器中，只有收到configurationDone请求后，调试器才会真正开始执行被调试程序
+3. 同步点：确保所有初始配置在程序开始运行前都已正确应用
+
+
+典型使用场景
+
+1. 客户端(如VS Code)在启动调试会话后：
+
+- 首先发送initialize请求
+- 然后发送launch或attach请求
+- 接着设置断点和其他配置
+- 最后发送configurationDone表示配置完成
+
+2. 对于需要用户交互启动的调试会话(如按F5)，VS Code会在用户按下启动按钮后发送此请求
+
+
+注意事项
+1. 不是所有调试适配器都严格要求这个请求，但按照协议规范应该发送
+2. 在某些调试器中，如果不发送此请求，程序可能不会开始执行
+3. 这个请求没有参数，也不需要响应体
+
+
+----------------
+
+
+
+## breakpointLocationsRequest
+
+
+主要用于获取源代码中适合设置断点的有效位置。它的核心功能是帮助调试客户端确定在指定范围内可以设置断点的所有可能位置。
+
+### 主要用途
+
+1. 断点位置预览：
+
+当用户在IDE中悬停或准备设置断点时，可以提前显示所有可设置断点的位置
+
+常见于显示代码行号旁边的断点槽(gutter)中的断点标记
+
+2. 验证断点位置：
+
+确保客户端不会在无效位置(如空白行或注释行)设置断点
+
+3. 支持语言特性：
+
+对于一行多语句的语言(如JavaScript)，识别一行中多个可断点位置
+
+
+```ts
+let a = 1; let b = 2; // 这一行有两个可断点位置
+
+
+
+
+请求参数
+```ts
+interface BreakpointLocationsArguments {
+  source: Source;          // 源文件信息
+  line: number;            // 起始行号
+  endLine?: number;        // 可选结束行号(用于范围查询)
+  endColumn?: number;      // 可选结束列号
+  column?: number;         // 可选起始列号
+}
+```
+
+响应格式
+```ts
+interface BreakpointLocationsResponse extends Response {
+  body: {
+    breakpoints: BreakpointLocation[]; // 可设置断点的位置数组
+  };
+}
+
+
+interface BreakpointLocation {
+  line: number;      // 行号(1-based)
+  column?: number;   // 可选列号(1-based)
+  endLine?: number;  // 可选结束行号
+  endColumn?: number;// 可选结束列号
+}
+
+```
+
+
+典型使用场景
+
+1. IDE断点可视化：
+
+VS Code等编辑器在打开文件时，会查询可断点位置来显示断点槽
+
+2. 调试器兼容性：
+
+对于不支持任意位置断点的调试器(如某些嵌入式系统调试器)，确保只显示有效位置
+
+3. 复杂语言支持：
+
+在Python等使用缩进的语言中，帮助确定逻辑行的有效断点位置
+这个请求使得调试客户端能够提供更精确、用户友好的断点设置体验，而不是盲目地允许在任何位置设置可能无效的断点。
+
+
+
+----------------
+
+
+## sendErrorResponse
+
+```ts
+		this.sendErrorResponse(response, {
+			id: 1001,
+			format: `compile error: some fake error.`,
+			showUser: true,
+			url: "https://ring.wiki",
+			urlLabel: "Ring Wiki"
+		});
+```
+
+
+
+![alt text](image-9.png)
+
+
+常见错误码
+DAP 定义了一些标准错误码(在 DebugProtocol 命名空间中):
+- ErrorCodes.ParseError (3000)
+- ErrorCodes.RequestFailed (2004)
+- ErrorCodes.RequestCancelled (2005)
+- ErrorCodes.NotImplemented (2006)
+
+----------------
+```ts
+
+		const ouputEvent: DebugProtocol.OutputEvent = new OutputEvent('lizhenhu-output');
+		this.sendEvent(ouputEvent);
+```
+
+
+![alt text](image-10.png)
+
+
+```ts
+
+		const ouputEvent: DebugProtocol.OutputEvent = new OutputEvent('lizhenhu-output', 'important');
+		this.sendEvent(ouputEvent);
+```
+
+![alt text](image-11.png)
+
+----------------
+
+vscode 调试 功能
+https://vscode.github.net.cn/docs/editor/debugging
+
+运行模式
+
+
+----------------
+
+
+
+
  ./bin/ring --interpreter=rdp rdb ./test/007-array/array-000.ring
+
+
+- 支持函数断点
