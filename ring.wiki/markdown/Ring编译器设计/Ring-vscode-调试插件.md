@@ -965,6 +965,67 @@ DAP 定义了一些标准错误码(在 DebugProtocol 命名空间中):
 
 ----------------
 
+
+## setExceptionBreakpointsRequest 是干什么的
+
+----------------
+
+
+## exceptionInfoRequest
+
+```ts
+interface ExceptionInfoArguments {
+  threadId: number;  // 必需，发生异常的线程ID
+}
+```
+
+```ts
+interface ExceptionInfoResponse extends Response {
+  body: {
+    exceptionId: string;            // 异常类型标识（如"System.NullReferenceException"）
+    description?: string;           // 可读的异常描述
+    breakMode: 'never' | 'always' | 'unhandled' | 'userUnhandled'; // 中断模式
+    details?: ExceptionDetails;     // 详细的异常信息（可选）
+  };
+}
+
+interface ExceptionDetails {
+  message?: string;                 // 异常消息
+  typeName?: string;                // 异常类型名
+  fullTypeName?: string;            // 完整类型名（含命名空间）
+  stackTrace?: string;              // 堆栈跟踪信息
+  innerException?: ExceptionDetails[]; // 内部异常（嵌套异常）
+}
+```
+
+
+
+### 典型使用场景
+1. 显示异常弹窗：
+IDE在异常中断时显示详细的错误信息
+
+2. 异常诊断：
+在调试控制台输出完整的异常堆栈
+
+3. 条件断点：
+基于特定异常信息决定是否中断
+
+
+
+### 与其他请求的协作
+
+1. 先通过stopped事件（reason为'exception'）检测到异常暂停
+
+2. 然后发送exceptionInfoRequest获取详情
+
+3. 结合stackTraceRequest获取完整的调用堆栈
+
+----------------
+
+
+----------------
+
+
 vscode 调试 功能
 https://vscode.github.net.cn/docs/editor/debugging
 
