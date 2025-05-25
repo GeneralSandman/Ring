@@ -27,6 +27,7 @@ OBJS   = \
 	coroutine.o\
 	../deps/linenoise/linenoise.o\
 	fmt.o\
+	dap.o\
 	main.o
 
 # bison 可执行文件路径
@@ -209,7 +210,7 @@ man_help.o: man_help.cpp ring.hpp
 std_lib.o: std_lib.cpp ring.hpp
 mem_pool.o: mem_pool.cpp ring.hpp
 gc.o: gc.cpp ring.hpp
-debug.o: debug.cpp ring.hpp
+debug.o: debug.cpp ring.hpp dap.hpp
 vm-debug.o: vm-debug.cpp ring.hpp
 debug-free-value.o: debug-free-value.cpp ring.hpp
 debug-gc.o: debug-gc.cpp ring.hpp
@@ -219,3 +220,4 @@ thread_pool_test.o: thread_pool_test.cpp ring.hpp
 main.o: main.cpp ring.hpp
 tool_gen_vmcode_doc.o: tool_gen_vmcode_doc.cpp ring.hpp
 fmt.o: fmt.cpp ring.hpp
+dap.o: dap.cpp

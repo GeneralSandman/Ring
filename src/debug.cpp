@@ -1,4 +1,5 @@
 #include "clipp.h"
+#include "dap.hpp"
 #include "ring.hpp"
 #include <algorithm>
 #include <iostream>
@@ -235,7 +236,7 @@ std::vector<RDB_Command> rdb_commands = {
 static unsigned int trace_count = 0;
 
 //
-int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
+int debug_trace_dispatch_cli(RVM_Frame* frame, const char* event, const char* arg) {
 
     RVM_DebugConfig* debug_config = frame->rvm->debug_config;
     // std::string      func_name;
@@ -291,26 +292,77 @@ int debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg) {
     return 0;
 }
 
+/*
+ * debug_trace_dispatch_dap
+ *
+ * 通过 dap 协议来实现调试器的功能
+ */
+int debug_trace_dispatch_dap(RVM_Frame* frame, const char* event, const char* arg) {
+
+    RVM_DebugConfig* debug_config = frame->rvm->debug_config;
+
+
+#ifdef DEBUG_RDB_TRACE_DISPATH_DETAIL
+    printf("---debug_trace_dispatch[%u]---\n", trace_count);
+    printf("|[@]event:            %s\n", event);
+    printf("|[@]current_function: %s\n", frame->callee_func);
+    printf("|[@]next_opcode:      %s\n", frame->next_opcode);
+    printf("|[@]source_line_num:  %u\n", frame->source_line_number);
+    printf("---debug_trace_dispatch---\n");
+    printf("\n\n");
+#endif
+
+
+    if (str_eq(event, TRACE_EVENT_SAE)) {
+        if (ISSET_TRACE_EVENT_SAE(debug_config))
+            dispath_sae(frame, event, arg);
+    } else if (str_eq(event, TRACE_EVENT_OPCODE)) {
+        if (ISSET_TRACE_EVENT_OPCODE(debug_config))
+            dispath_opcode(frame, event, arg);
+    } else if (str_eq(event, TRACE_EVENT_LINE)) {
+        if (ISSET_TRACE_EVENT_LINE(debug_config))
+            dispath_line(frame, event, arg);
+    } else if (str_eq(event, TRACE_EVENT_CALL)) {
+        if (ISSET_TRACE_EVENT_CALL(debug_config))
+            dispath_call(frame, event, arg);
+    } else if (str_eq(event, TRACE_EVENT_RETURN)) {
+        if (ISSET_TRACE_EVENT_RETURN(debug_config))
+            dispath_return(frame, event, arg);
+    } else if (str_eq(event, TRACE_EVENT_EXIT)) {
+        if (ISSET_TRACE_EVENT_EXIT(debug_config))
+            dispath_exit(frame, event, arg);
+    }
+
+
+    trace_count++;
+
+    return 0;
+}
+
+
 int dispath_sae(RVM_Frame* frame, const char* event, const char* arg) {
 
-    if (IS_RDP(frame)) {
-        printf("is rdp----------\n");
+    if (DEBUG_IS_DAP(frame->rvm->debug_config)) {
         std::string call_stack;
         call_stack = format_rvm_call_stack(frame->rvm);
         printf("[@]call stack:\n");
-        printf("%s", call_stack.c_str());
+        printf("%s", call_stack.c_str()); // TODO: stackTraceResponse
+
+        dap::StoppedEvent event;
+        event.body.reason = dap::StoppedEvent_Reason_Entry;
+        dap::sendEvent(event);
         return 0;
     }
 
-    printf(LOG_COLOR_GREEN);
-    printf("[@]stop at entry: main()\n");
-    printf(LOG_COLOR_CLEAR);
+    // printf(LOG_COLOR_GREEN);
+    // printf("[@]stop at entry: main()\n");
+    // printf(LOG_COLOR_CLEAR);
 
 
     rdb_cli(frame, event, arg);
 
 
-    printf(LOG_COLOR_CLEAR);
+    // printf(LOG_COLOR_CLEAR);
     return 0;
 }
 
@@ -433,9 +485,9 @@ int dispath_return(RVM_Frame* frame, const char* event, const char* arg) {
 }
 
 int dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
-    printf(LOG_COLOR_GREEN);
-    printf("[@]Process exited, code:%d\n", 0);
-    printf(LOG_COLOR_CLEAR);
+    // printf(LOG_COLOR_GREEN);
+    // printf("[@]Process exited, code:%d\n", 0);
+    // printf(LOG_COLOR_CLEAR);
 
     return 0;
 }

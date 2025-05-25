@@ -1,3 +1,7 @@
+
+#ifndef RING_JSON_INCLUDE_H
+#define RING_JSON_INCLUDE_H
+
 #include <nlohmann/json.hpp>
 #include <variant>
 using json = nlohmann::json;
@@ -75,3 +79,11 @@ std::unique_ptr<JsonError> json_decode(const std::string& json_str, T* out) {
         return std::make_unique<JsonError>("Unknown error during deserialization");
     }
 }
+
+template <typename T>
+std::string json_encode(const T& obj, int indent = -1, char indent_char = ' ') {
+    json j = obj;
+    return j.dump(indent, indent_char);
+}
+
+#endif // RING_JSON_INCLUDE_H

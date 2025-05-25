@@ -2433,7 +2433,7 @@ struct RDB_Arg {
 
 
 #define DEBUG_CONFIG(frame) ((frame)->rvm->debug_config)
-#define IS_RDP(frame) (true == str_eq((frame)->rvm->debug_config->rdb_interpreter.c_str(), "rdp"))
+#define DEBUG_IS_DAP(debug_config) (true == str_eq((debug_config)->rdb_interpreter.c_str(), "dap"))
 
 struct RVM_DebugConfig {
     bool                  enable;
@@ -3792,7 +3792,10 @@ unsigned int        rvm_free_fvb(Ring_VirtualMachine* rvm, RVM_FreeValueBlock* f
  *
  */
 
-int     debug_trace_dispatch(RVM_Frame* frame, const char* event, const char* arg);
+int     debug_trace_dispatch_cli(RVM_Frame* frame, const char* event, const char* arg);
+int     debug_trace_dispatch_dap(RVM_Frame* frame, const char* event, const char* arg);
+
+
 int     dispath_sae(RVM_Frame* frame, const char* event, const char* arg);
 int     dispath_opcode(RVM_Frame* frame, const char* event, const char* arg);
 int     dispath_line(RVM_Frame* frame, const char* event, const char* arg);

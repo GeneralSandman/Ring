@@ -135,7 +135,7 @@ Ring_Command_Arg ring_parse_command(int argc, char** argv) {
     // printf("input_file_name:%s\n", input_file_name.c_str());
     // printf("keyword:%s\n", keyword.c_str());
     // printf("optimize_level:%d\n", optimize_level);
-    printf("rdb_interpreter:%s\n", rdb_interpreter.c_str());
+    // printf("rdb_interpreter:%s\n", rdb_interpreter.c_str());
     // printf("shell_args:\n");
     // for (int i = 0; i < shell_args.size(); i++) {
     //     printf("[i]:%s\n", shell_args[i].c_str());
@@ -387,7 +387,7 @@ char* ring_repl_hints(const char* buf, int* color, int* bold) {
 int register_debugger(Ring_VirtualMachine* rvm, Ring_Command_Arg args) {
     RVM_DebugConfig* debug_config      = (RVM_DebugConfig*)mem_alloc(NULL_MEM_POOL, sizeof(RVM_DebugConfig));
     debug_config->enable               = true;
-    debug_config->trace_dispatch       = debug_trace_dispatch;
+    debug_config->trace_dispatch       = debug_trace_dispatch_cli;
     debug_config->enable_trace_event   = 0;
     debug_config->stop_at_entry        = true;
     debug_config->display_globals      = false;
@@ -409,6 +409,11 @@ int register_debugger(Ring_VirtualMachine* rvm, Ring_Command_Arg args) {
 
     rvm->debug_config = debug_config;
 
+    if (DEBUG_IS_DAP(debug_config)) {
+        // TODO: launchResponse
+        debug_config->trace_dispatch = debug_trace_dispatch_dap;
+        return 0;
+    }
     printf(LOG_COLOR_YELLOW);
     printf("%s\n", RING_VERSION);
     printf("\n");

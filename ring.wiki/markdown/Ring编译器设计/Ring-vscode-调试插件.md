@@ -1022,6 +1022,50 @@ IDE在异常中断时显示详细的错误信息
 
 ----------------
 
+## CompletionsRequest
+
+当用户在调试器的源代码编辑器或类似界面中输入代码时，调试器客户端可以发送 CompletionsRequest 到调试适配器，以获取当前位置的代码补全建议。
+
+
+```ts
+	protected completionsRequest(response: DebugProtocol.CompletionsResponse, args: DebugProtocol.CompletionsArguments): void {
+
+		console.log("completionsRequest args:", args);
+
+		response.body = {
+			targets: [
+				{
+					label: "item 10",
+					sortText: "10"
+				},
+				{
+					label: "item 1",
+					sortText: "01",
+					detail: "detail 1"
+				},
+				{
+					label: "item 2",
+					sortText: "02",
+					detail: "detail 2"
+				},
+				{
+					label: "array[]",
+					selectionStart: 6,
+					sortText: "03"
+				},
+				{
+					label: "func(arg)",
+					selectionStart: 5,
+					selectionLength: 3,
+					sortText: "04"
+				}
+			]
+		};
+		this.sendResponse(response);
+	}
+```
+
+![alt text](image-12.png)
 
 ----------------
 
@@ -1037,7 +1081,54 @@ https://vscode.github.net.cn/docs/editor/debugging
 
 
 
- ./bin/ring --interpreter=rdp rdb ./test/007-array/array-000.ring
+./bin/ring --interpreter=dap rdb ./test/007-array/array-000.ring
 
 
 - 支持函数断点
+
+
+需要实现哪几种request：
+
+启动阶段：
+1. launchRequest
+2. setFunctionBreakPointsRequest
+3. setInstructionBreakpointsRequest
+4. setExceptionBreakPointsRequest
+5. setDataBreakpointsRequest
+6. configurationDoneRequest
+
+配置完成之后：
+1. 拉起对应的进程
+7. threadsRequest （在 launch完成之后， 获取线程数量）
+
+### 停到 entry
+8. stopOnEntry Reponse StoppedEvent(entry)
+9. cli 每次遇到stop事件 处理逻辑
+
+
+### 一步步执行
+7. stepInRequest
+8. stepOnStep Response StoppedEvent(step)
+9. cli 每次遇到stop事件 处理逻辑
+
+
+## 继续执行
+1. continueRequest
+
+## 遇到breakpoint
+1. StoppedEvent(breakpoint)
+2. cli 每次遇到stop事件 处理逻辑
+
+
+## cli 每次遇到stop事件 处理逻辑
+1. threadsRequest
+2. stackTraceRequest
+3. scopesRequest
+4. variablesRequest
+
+
+
+
+
+
+如何将标准输出劫持到 output Event, 是不是应该拉起一个新进程比较好

@@ -22,6 +22,7 @@ UNAME= uname
 # 编译工具要求
 # bison >= 3.8.2
 # flex >= 2.6.4
+# brew install nlohmann-json
 
 
 # 生成 Ring可执行文件

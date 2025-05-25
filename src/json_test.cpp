@@ -84,10 +84,20 @@ void json_decode_test_2() {
     std::cout << person.name << "\n";
 }
 
-/*
+void json_encode_test_1() {
+    Person person{"Alice", 28};
+
+    person.name     = "Alice--------";
+
+    std::string str = json_encode(person, 4, ' ');
+
+    std::cout << str << "\n";
+}
+
 int main() {
     json_decode_test_1();
     json_decode_test_2();
+    json_encode_test_1();
+
     return 0;
 }
-*/
