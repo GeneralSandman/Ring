@@ -84,10 +84,21 @@ enum class ErrorCode {
 };
 
 // 辅助函数：枚举转字符串
-std::string commandToString(Command cmd);
-std::string eventTypeToString(EventType type);
-Command     stringToCommand(const std::string& str);
-EventType   stringToEventType(const std::string& str);
+std::string       commandToString(Command cmd);
+std::string       eventTypeToString(EventType type);
+Command           stringToCommand(const std::string& str);
+EventType         stringToEventType(const std::string& str);
+
+
+const std::string StoppedEvent_Reason_Step                  = "step";
+const std::string StoppedEvent_Reason_Breakpoint            = "breakpoint";
+const std::string StoppedEvent_Reason_Exception             = "exception";
+const std::string StoppedEvent_Reason_Pause                 = "pause";
+const std::string StoppedEvent_Reason_Entry                 = "entry";
+const std::string StoppedEvent_Reason_Goto                  = "goto";
+const std::string StoppedEvent_Reason_FunctionBreakpoint    = "functionBreakpoint";
+const std::string StoppedEvent_Reason_DataBreakpoint        = "dataBreakpoint";
+const std::string StoppedEvent_Reason_InstructionBreakpoint = "instructionBreakpoint";
 
 
 } // namespace dap
@@ -311,30 +322,8 @@ struct Response : Message {
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Response, seq, type, request_seq, command, success, message, errorCode);
 };
 
-const std::string StoppedEvent_Reason_Step                  = "step";
-const std::string StoppedEvent_Reason_Breakpoint            = "breakpoint";
-const std::string StoppedEvent_Reason_Exception             = "exception";
-const std::string StoppedEvent_Reason_Pause                 = "pause";
-const std::string StoppedEvent_Reason_Entry                 = "entry";
-const std::string StoppedEvent_Reason_Goto                  = "goto";
-const std::string StoppedEvent_Reason_FunctionBreakpoint    = "functionBreakpoint";
-const std::string StoppedEvent_Reason_DataBreakpoint        = "dataBreakpoint";
-const std::string StoppedEvent_Reason_InstructionBreakpoint = "instructionBreakpoint";
-
 
 struct StoppedEvent {
-
-    enum class Reason {
-        Step,
-        Breakpoint,
-        Exception,
-        Pause,
-        Entry,
-        Goto,
-        FunctionBreakpoint,
-        DataBreakpoint,
-        InstructionBreakpoint,
-    };
 
 
     std::string event = "stopped";

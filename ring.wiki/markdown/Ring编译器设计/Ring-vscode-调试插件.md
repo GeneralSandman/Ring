@@ -1130,5 +1130,22 @@ https://vscode.github.net.cn/docs/editor/debugging
 
 
 
+解析实现计划：
 
-如何将标准输出劫持到 output Event, 是不是应该拉起一个新进程比较好
+--- request
+1. launchRequest
+2. threadsRequest
+3. stackTraceRequest
+
+--- response
+
+
+--- event
+
+
+--- 如何通信
+
+阻塞就行，不用非阻塞，后续会优化
+stdin 处理 request
+stderr 处理 response event
+stdout 程序的标准输出，有 typescript 那边进行截获
