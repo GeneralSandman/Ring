@@ -307,6 +307,8 @@ struct Response : Message {
     std::optional<ResponseBody> body;
     std::optional<std::string>  message;   // 错误时的消息
     std::optional<ErrorCode>    errorCode; // 错误代码
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Response, seq, type, request_seq, command, success, message, errorCode);
 };
 
 const std::string StoppedEvent_Reason_Step                  = "step";
@@ -375,12 +377,6 @@ struct OutputEvent {
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(OutputEvent, event, body);
 };
-
-
-void sendEvent(const StoppedEvent& event) {
-    std::string body = json_encode(event);
-    printf("%s^@^\r\n", body.c_str());
-}
 
 
 } // namespace dap

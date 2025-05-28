@@ -350,7 +350,6 @@ int dispath_sae(RVM_Frame* frame, const char* event, const char* arg) {
 
         dap::StoppedEvent event;
         event.body.reason = dap::StoppedEvent_Reason_Entry;
-        dap::sendEvent(event);
         return 0;
     }
 

@@ -87,9 +87,17 @@ void json_decode_test_2() {
 void json_encode_test_1() {
     Person person{"Alice", 28};
 
-    person.name     = "Alice--------";
+    person.name = "Alice--------";
 
-    std::string str = json_encode(person, 4, ' ');
+    auto result = json_encode(person, 4, ' ');
+    if (JsonError* err = std::get_if<JsonError>(&result)) {
+        // 处理错误
+        std::cerr << "Error (" << static_cast<int>(err->type) << "): " << err->message << "\n";
+        return;
+    }
+
+    std::string* str = std::get_if<std::string>(&result);
+
 
     std::cout << str << "\n";
 }

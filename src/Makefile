@@ -28,6 +28,7 @@ OBJS   = \
 	../deps/linenoise/linenoise.o\
 	fmt.o\
 	dap.o\
+	dap_process.o\
 	main.o
 
 # bison 可执行文件路径
@@ -221,3 +222,4 @@ main.o: main.cpp ring.hpp
 tool_gen_vmcode_doc.o: tool_gen_vmcode_doc.cpp ring.hpp
 fmt.o: fmt.cpp ring.hpp
 dap.o: dap.cpp
+dap_process.o: dap_process.cpp dap.hpp json.hpp

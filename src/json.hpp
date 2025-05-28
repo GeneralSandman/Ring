@@ -28,6 +28,8 @@ struct JsonError {
 template <typename T>
 using DeserializeResult = std::variant<T, JsonError>;
 
+using SerializeResult   = std::variant<std::string, JsonError>;
+
 template <typename T>
 DeserializeResult<T> json_decode(const std::string& json_str) {
     if (!json::accept(json_str)) {
@@ -81,9 +83,14 @@ std::unique_ptr<JsonError> json_decode(const std::string& json_str, T* out) {
 }
 
 template <typename T>
-std::string json_encode(const T& obj, int indent = -1, char indent_char = ' ') {
-    json j = obj;
-    return j.dump(indent, indent_char);
+SerializeResult json_encode(const T& obj, int indent = -1, char indent_char = ' ') {
+
+    try {
+        json j = obj;
+        return j.dump(indent, indent_char);
+    } catch (const json::exception& e) {
+        return JsonError{std::string("JSON serialization error: ") + e.what()};
+    }
 }
 
 #endif // RING_JSON_INCLUDE_H
