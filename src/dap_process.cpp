@@ -185,13 +185,13 @@ protected:
 };
 
 
-void exampleHandler(const std::string& body_) {
+void exampleHandler(const std::string& body) {
+
 
     dap::Message message;
 
-    auto         err = json_decode(body_, &message);
+    auto         err = json_decode(body, &message);
     if (err != nullptr) {
-        // 处理错误
         std::cerr << "Error (" << static_cast<int>(err->type) << "): " << err->message << "\n";
         return;
     }
@@ -236,10 +236,42 @@ int send_1() {
     return 0;
 }
 
-/*
+void dapHandler(const std::string& body) {
+    if (body.empty()) {
+        std::cerr << "-Received empty message" << std::endl;
+        return;
+    }
 
-int main() {
-    send_1();
+    dap::Request request;
+
+    auto         err = json_decode(body, &request);
+    if (err != nullptr) {
+        std::cerr << "Error (" << static_cast<int>(err->type) << "): " << err->message << "\n";
+        return;
+    }
+
+    std::cout << "+Received message: command=" << request.command << std::endl;
 }
 
+int process_dap_handler_test() {
+
+    MessageProcessor processor(STDIN_FILENO, dapHandler);
+    printf("Starting message processor...\n");
+    processor.run();
+
+    return 0;
+}
+/*
+
+缺失seq 字段
+{"seq1":1, "type":"request", "command":"initialize"}
+
+正常
+{"seq":1, "type":"request", "command":"initialize"}
 */
+
+
+int main() {
+    // send_1();
+    process_dap_handler_test();
+}

@@ -51,6 +51,12 @@ enum class Command {
     InvalidCommand
 };
 
+using CommandType                    = std::string;
+const std::string Command_Initialize = "initialize";
+const std::string Command_Launch     = "launch";
+const std::string Command_Attach     = "attach";
+
+
 enum class EventType {
     Initialized,
     Stopped,
@@ -307,8 +313,10 @@ using ResponseBody = std::variant<
 
 
 struct Request : Message {
-    Command          command;
+    CommandType      command;
     RequestArguments arguments;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Request, seq, type, command);
 };
 
 struct Response : Message {
