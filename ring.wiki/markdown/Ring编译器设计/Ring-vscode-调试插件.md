@@ -1136,11 +1136,14 @@ https://vscode.github.net.cn/docs/editor/debugging
 1. launchRequest
 2. threadsRequest
 3. stackTraceRequest
+4. continueRequest
 
 --- response
 
 
 --- event
+
+1. stpppedEvent
 
 
 --- 如何通信

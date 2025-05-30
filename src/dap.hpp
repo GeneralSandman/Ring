@@ -1,3 +1,6 @@
+#ifndef RING_DAP_INCLUDE_H
+#define RING_DAP_INCLUDE_H
+
 #include "json.hpp"
 #include <cstdio>
 #include <map>
@@ -377,3 +380,5 @@ struct OutputEvent {
 
 
 } // namespace dap
+
+#endif // RING_DAP_INCLUDE_H
