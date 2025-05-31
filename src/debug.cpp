@@ -527,16 +527,12 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
     DapMessageProcessor processor(STDIN_FILENO, nullptr);
 
     while (true) {
-        std::string message = processor.get_a_message();
-
-        // 开始处理消息
-        if (message.empty()) {
+        std::string message_body = processor.get_a_message();
+        if (message_body.empty()) {
             continue;
         }
-
         dap::DAPMessage dap_message;
-
-        auto            err = json_decode(message, &dap_message);
+        auto            err = json_decode(message_body, &dap_message);
         if (err != nullptr) {
             // 错误处理
             continue;
@@ -545,6 +541,12 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
         debug_rdb_with_darkgreen("dap receive request: %s\n", dap_message.command.c_str());
 
         // TODO: 处理不同的command
+        if (dap_message.command == "threads") {
+
+        } else if (dap_message.command == "stackTrace") {
+
+        } else if (dap_message.command == "continue") {
+        }
     }
 
 
