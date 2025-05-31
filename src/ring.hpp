@@ -2772,6 +2772,14 @@ struct MemBlock {
 #define debug_generate_info_with_darkgreen(format, ...)
 #endif
 
+// debug ring debugger 的详情
+#ifdef DEBUG_RDB_TRACE_DISPATH_DETAIL
+#define debug_rdb_with_darkgreen(format, ...) \
+    printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_DARKGREEN, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
+#else
+#define debug_rdb_with_darkgreen(format, ...)
+#endif
+
 #ifdef DEBUG_EXEC_VM
 #define debug_exec_info_with_white(format, ...) \
     printf("%s[DEBUG][%s:%d][function:%s]" format "%s\n", LOG_COLOR_WHITE, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__, LOG_COLOR_CLEAR)
@@ -3794,6 +3802,14 @@ unsigned int        rvm_free_fvb(Ring_VirtualMachine* rvm, RVM_FreeValueBlock* f
 
 int     debug_trace_dispatch_cli(RVM_Frame* frame, const char* event, const char* arg);
 int     debug_trace_dispatch_dap(RVM_Frame* frame, const char* event, const char* arg);
+
+int     dap_dispath_sae(RVM_Frame* frame, const char* event, const char* arg);
+int     dap_dispath_opcode(RVM_Frame* frame, const char* event, const char* arg);
+int     dap_dispath_line(RVM_Frame* frame, const char* event, const char* arg);
+int     dap_dispath_call(RVM_Frame* frame, const char* event, const char* arg);
+int     dap_dispath_return(RVM_Frame* frame, const char* event, const char* arg);
+int     dap_dispath_exit(RVM_Frame* frame, const char* event, const char* arg);
+int     dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg);
 
 
 int     dispath_sae(RVM_Frame* frame, const char* event, const char* arg);

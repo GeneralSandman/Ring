@@ -1,5 +1,5 @@
-#include "dap_process.hpp"
 #include "dap.hpp"
+#include "dap_process.hpp"
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -53,7 +53,7 @@ int send_1() {
     return 0;
 }
 
-void dapHandler(const std::string& body) {
+void testMessageHandler(const std::string& body) {
     if (body.empty()) {
         std::cerr << "-Received empty message" << std::endl;
         return;
@@ -70,14 +70,36 @@ void dapHandler(const std::string& body) {
     std::cout << "+Received message: command=" << request.command << std::endl;
 }
 
-int process_dap_handler_test() {
+// 循环处理消息
+int process_dap_handler_test_1() {
 
-    DapMessageProcessor processor(STDIN_FILENO, dapHandler);
+    DapMessageProcessor processor(STDIN_FILENO, testMessageHandler);
     printf("Starting message processor...\n");
     processor.run();
 
     return 0;
 }
+
+// 一次只处理一个消息
+int process_dap_handler_test_2() {
+
+    DapMessageProcessor processor(STDIN_FILENO, testMessageHandler);
+    printf("Starting message processor...\n");
+
+    while (true) {
+        std::string message = processor.get_a_message();
+        printf("-Received message: %s\n", message.c_str());
+        if (message == "q") {
+            printf("Exiting message processor...\n");
+            break;
+        }
+        testMessageHandler(message);
+    }
+
+
+    return 0;
+}
+
 /*
 
 缺失seq 字段
@@ -90,5 +112,8 @@ int process_dap_handler_test() {
 
 int main() {
     // send_1();
-    process_dap_handler_test();
+    // process_dap_handler_test_1();
+    process_dap_handler_test_2();
+
+    return 0;
 }

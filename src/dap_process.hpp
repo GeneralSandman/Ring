@@ -85,6 +85,28 @@ public:
         }
     }
 
+    std::string get_a_message() {
+        try {
+            std::string message;
+            if (!receiveMessage(message)) {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    // TODO: 非阻塞模式下的无数据情况
+                    return message;
+                }
+                // 错误
+                // TODO: 后续处理
+                return message;
+            }
+
+            return message;
+        } catch (const std::exception& e) {
+            std::cerr << "Error processing message: " << e.what() << std::endl;
+            // 可以选择继续处理下一条消息或退出
+        }
+
+        return "";
+    }
+
 protected:
     // 接收一条完整消息(以换行符结尾)
     bool receiveMessage(std::string& message) {

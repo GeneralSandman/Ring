@@ -337,6 +337,8 @@ struct Response : Message {
 struct StoppedEvent {
 
 
+    int         seq   = 0; // 序列号
+    std::string type  = "event";
     std::string event = "stopped";
 
     struct Body {
@@ -348,7 +350,7 @@ struct StoppedEvent {
 
     } body;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(StoppedEvent, event, body);
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(StoppedEvent, seq, type, event, body);
 };
 
 

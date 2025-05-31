@@ -1,30 +1,12 @@
 #include "clipp.h"
 #include "dap.hpp"
+#include "dap_process.hpp"
+#include "json.hpp"
 #include "ring.hpp"
 #include <algorithm>
 #include <iostream>
 #include <sys/stat.h>
 #include <unistd.h>
-
-
-/*
-调试器一般有这么几个功能
-
-1. 设置断点：在编译器中添加断点的功能，允许用户在需要时设置断点。当虚拟机执行到断点处时，暂停执行并进入调试模式。
-
-2. 单步执行：实现单步执行功能，允许用户逐步执行虚拟机指令，方便用户跟踪程序执行过程。
-
-3. 变量查看：提供查看当前栈状态、局部变量、全局变量等的功能，让用户可以查看程序中的变量值。
-
-4. 函数跟踪：记录函数调用堆栈，显示当前函数调用链，帮助用户跟踪函数调用关系。
-
-5. 错误处理：捕获运行时错误，并提供错误信息显示和定位功能，帮助用户快速定位问题。
-
-6. 用户交互界面：设计一个友好的用户交互界面，让用户可以方便地操作调试功能，设置断点、单步执行、查看变量等。
-
-7. 调试命令：设计一些调试命令，如继续执行、打印变量、查看堆栈等，让用户可以通过命令来控制调试过程。
-
-*/
 
 
 /*
@@ -255,15 +237,12 @@ int debug_trace_dispatch_cli(RVM_Frame* frame, const char* event, const char* ar
     // }
 
 
-#ifdef DEBUG_RDB_TRACE_DISPATH_DETAIL
-    printf("---debug_trace_dispatch[%u]---\n", trace_count);
-    printf("|[@]event:            %s\n", event);
-    printf("|[@]current_function: %s\n", frame->callee_func);
-    printf("|[@]next_opcode:      %s\n", frame->next_opcode);
-    printf("|[@]source_line_num:  %u\n", frame->source_line_number);
-    printf("---debug_trace_dispatch---\n");
-    printf("\n\n");
-#endif
+    debug_rdb_with_darkgreen("---debug_trace_dispatch[%u]---\n", trace_count);
+    debug_rdb_with_darkgreen("|[@]event:            %s\n", event);
+    debug_rdb_with_darkgreen("|[@]next_opcode:      %d\n", frame->next_opcode);
+    debug_rdb_with_darkgreen("|[@]source_line_num:  %u\n", frame->source_line_number);
+    debug_rdb_with_darkgreen("---debug_trace_dispatch---\n");
+    debug_rdb_with_darkgreen("\n\n");
 
 
     if (str_eq(event, TRACE_EVENT_SAE)) {
@@ -299,38 +278,37 @@ int debug_trace_dispatch_cli(RVM_Frame* frame, const char* event, const char* ar
  */
 int debug_trace_dispatch_dap(RVM_Frame* frame, const char* event, const char* arg) {
 
+    debug_rdb_with_darkgreen("it is dap process\n");
+
     RVM_DebugConfig* debug_config = frame->rvm->debug_config;
 
 
-#ifdef DEBUG_RDB_TRACE_DISPATH_DETAIL
-    printf("---debug_trace_dispatch[%u]---\n", trace_count);
-    printf("|[@]event:            %s\n", event);
-    printf("|[@]current_function: %s\n", frame->callee_func);
-    printf("|[@]next_opcode:      %s\n", frame->next_opcode);
-    printf("|[@]source_line_num:  %u\n", frame->source_line_number);
-    printf("---debug_trace_dispatch---\n");
-    printf("\n\n");
-#endif
+    debug_rdb_with_darkgreen("---debug_trace_dispatch[%u]---\n", trace_count);
+    debug_rdb_with_darkgreen("|[@]event:            %s\n", event);
+    debug_rdb_with_darkgreen("|[@]next_opcode:      %d\n", frame->next_opcode);
+    debug_rdb_with_darkgreen("|[@]source_line_num:  %u\n", frame->source_line_number);
+    debug_rdb_with_darkgreen("---debug_trace_dispatch---\n");
+    debug_rdb_with_darkgreen("\n\n");
 
 
     if (str_eq(event, TRACE_EVENT_SAE)) {
         if (ISSET_TRACE_EVENT_SAE(debug_config))
-            dispath_sae(frame, event, arg);
+            dap_dispath_sae(frame, event, arg);
     } else if (str_eq(event, TRACE_EVENT_OPCODE)) {
         if (ISSET_TRACE_EVENT_OPCODE(debug_config))
-            dispath_opcode(frame, event, arg);
+            dap_dispath_opcode(frame, event, arg);
     } else if (str_eq(event, TRACE_EVENT_LINE)) {
         if (ISSET_TRACE_EVENT_LINE(debug_config))
-            dispath_line(frame, event, arg);
+            dap_dispath_line(frame, event, arg);
     } else if (str_eq(event, TRACE_EVENT_CALL)) {
         if (ISSET_TRACE_EVENT_CALL(debug_config))
-            dispath_call(frame, event, arg);
+            dap_dispath_call(frame, event, arg);
     } else if (str_eq(event, TRACE_EVENT_RETURN)) {
         if (ISSET_TRACE_EVENT_RETURN(debug_config))
-            dispath_return(frame, event, arg);
+            dap_dispath_return(frame, event, arg);
     } else if (str_eq(event, TRACE_EVENT_EXIT)) {
         if (ISSET_TRACE_EVENT_EXIT(debug_config))
-            dispath_exit(frame, event, arg);
+            dap_dispath_exit(frame, event, arg);
     }
 
 
@@ -347,10 +325,6 @@ int dispath_sae(RVM_Frame* frame, const char* event, const char* arg) {
         call_stack = format_rvm_call_stack(frame->rvm);
         printf("[@]call stack:\n");
         printf("%s", call_stack.c_str()); // TODO: stackTraceResponse
-
-        dap::StoppedEvent event;
-        event.body.reason = dap::StoppedEvent_Reason_Entry;
-        return 0;
     }
 
     // printf(LOG_COLOR_GREEN);
@@ -365,7 +339,32 @@ int dispath_sae(RVM_Frame* frame, const char* event, const char* arg) {
     return 0;
 }
 
+
+// 1. 发送 stopped 事件
+// 2. 等待用户输入命令
+int dap_dispath_sae(RVM_Frame* frame, const char* event, const char* arg) {
+
+    debug_rdb_with_darkgreen("dap_dispath_sae\n");
+
+    dap::StoppedEvent stopped_event;
+    stopped_event.body.reason            = dap::StoppedEvent_Reason_Entry;
+    stopped_event.body.threadId          = 1; // TODO: 获取当前线程ID
+    stopped_event.body.allThreadsStopped = true;
+
+    DapMessageSender sender(STDERR_FILENO);
+    sender.send(stopped_event);
+
+
+    dap_rdb_cli(frame, event, arg);
+
+    return 0;
+}
+
 int dispath_opcode(RVM_Frame* frame, const char* event, const char* arg) {
+    return 0;
+}
+
+int dap_dispath_opcode(RVM_Frame* frame, const char* event, const char* arg) {
     return 0;
 }
 
@@ -452,6 +451,11 @@ END_DISPATH_LINE:
     return 0;
 }
 
+// 也可以暂时不用处理
+int dap_dispath_line(RVM_Frame* frame, const char* event, const char* arg) {
+    return 0;
+}
+
 int dispath_call(RVM_Frame* frame, const char* event, const char* arg) {
     RVM_DebugConfig* debug_config = frame->rvm->debug_config;
 
@@ -462,6 +466,11 @@ int dispath_call(RVM_Frame* frame, const char* event, const char* arg) {
             UNSET_TRACE_EVENT_LINE(debug_config);
         }
     }
+    return 0;
+}
+
+// 暂时不用处理即可
+int dap_dispath_call(RVM_Frame* frame, const char* event, const char* arg) {
     return 0;
 }
 
@@ -483,7 +492,24 @@ int dispath_return(RVM_Frame* frame, const char* event, const char* arg) {
     return 0;
 }
 
+// TODO:暂时不用处理即可
+int dap_dispath_return(RVM_Frame* frame, const char* event, const char* arg) {
+    return 0;
+}
+
 int dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
+    printf(LOG_COLOR_GREEN);
+    printf("[@]Process exited, code:%d\n", 0);
+    printf(LOG_COLOR_CLEAR);
+
+    return 0;
+}
+
+// TODO:
+// 1. 发送 exited 事件
+// 2. 退出循环
+// 3. 进程退出
+int dap_dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
     // printf(LOG_COLOR_GREEN);
     // printf("[@]Process exited, code:%d\n", 0);
     // printf(LOG_COLOR_CLEAR);
@@ -491,6 +517,37 @@ int dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
     return 0;
 }
 
+// 1. 从 stdin 接受dap 消息
+// 2. 解析消息
+// 3. 根据消息类型，调用对应的处理函数
+// 4. 如果是 continue 命令，退出 循环，不再处理dap消息
+// 5. 如果是 其他命令，循环处理dap 消息
+int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
+
+    DapMessageProcessor processor(STDIN_FILENO, nullptr);
+
+    while (true) {
+        std::string message = processor.get_a_message();
+
+        // 开始处理消息
+        if (message.empty()) {
+            continue;
+        }
+
+        dap::Request request;
+
+        auto         err = json_decode(message, &request);
+        if (err != nullptr) {
+            // 错误处理
+            continue;
+        }
+
+        debug_rdb_with_darkgreen("dap receive request: %s\n", request.command.c_str());
+    }
+
+
+    return 0;
+}
 
 // 启动命令行交互式输入输出
 int rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
