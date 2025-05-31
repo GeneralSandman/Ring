@@ -1143,7 +1143,7 @@ https://vscode.github.net.cn/docs/editor/debugging
 
 --- event
 
-1. stpppedEvent
+1. stopOnEntry
 
 
 --- 如何通信
@@ -1152,3 +1152,15 @@ https://vscode.github.net.cn/docs/editor/debugging
 stdin 处理 request
 stderr 处理 response event
 stdout 程序的标准输出，有 typescript 那边进行截获
+
+
+一、改造计划 --DONE
+1. 启动程序
+2. 不处理 set break point 的请求
+3. 程序在 entry 停止
+4. 发送 stopOnEntry 事件
+5. 开始 监听 处理 request事件
+
+后续：是不是开启两个进程 比较好，一个负责处理dap数据，另一个负责执行ring程序；这样如果程序在运行中，也可以设置端点。
+
+二、
