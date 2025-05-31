@@ -6,6 +6,28 @@
 #include <variant>
 using json = nlohmann::json;
 
+// 首先为 std::optional 添加支持（放在全局命名空间）
+namespace nlohmann {
+template <typename T>
+struct adl_serializer<std::optional<T>> {
+    static void to_json(json& j, const std::optional<T>& opt) {
+        if (opt.has_value()) {
+            j = *opt;
+        } else {
+            j = nullptr;
+        }
+    }
+
+    static void from_json(const json& j, std::optional<T>& opt) {
+        if (j.is_null()) {
+            opt = std::nullopt;
+        } else {
+            opt = j.get<T>();
+        }
+    }
+};
+} // namespace nlohmann
+
 struct JsonError {
     std::string message;
     enum class Type {
@@ -58,11 +80,11 @@ DeserializeResult<T> json_decode(const std::string& json_str) {
 template <typename T>
 std::unique_ptr<JsonError> json_decode(const std::string& json_str, T* out) {
     if (!out) {
-        return std::make_unique<JsonError>("Output pointer cannot be null");
+        return std::make_unique<JsonError>("json_decode:Output pointer cannot be null");
     }
 
     if (!json::accept(json_str)) {
-        return std::make_unique<JsonError>("Invalid JSON format");
+        return std::make_unique<JsonError>("json_decode:Invalid JSON format");
     }
 
     try {
@@ -70,15 +92,15 @@ std::unique_ptr<JsonError> json_decode(const std::string& json_str, T* out) {
         j.get_to(*out);
         return nullptr;
     } catch (const json::type_error& e) {
-        return std::make_unique<JsonError>(std::string("Type error: ") + e.what());
+        return std::make_unique<JsonError>(std::string("json_decode:Type error: ") + e.what());
     } catch (const json::out_of_range& e) {
-        return std::make_unique<JsonError>(std::string("Out of range: ") + e.what());
+        return std::make_unique<JsonError>(std::string("json_decode:Out of range: ") + e.what());
     } catch (const json::parse_error& e) {
-        return std::make_unique<JsonError>(std::string("Parse error: ") + e.what());
+        return std::make_unique<JsonError>(std::string("json_decode:Parse error: ") + e.what());
     } catch (const json::exception& e) {
-        return std::make_unique<JsonError>(std::string("JSON error: ") + e.what());
+        return std::make_unique<JsonError>(std::string("json_decode:JSON error: ") + e.what());
     } catch (...) {
-        return std::make_unique<JsonError>("Unknown error during deserialization");
+        return std::make_unique<JsonError>("json_decode:Unknown error during deserialization");
     }
 }
 

@@ -9,6 +9,9 @@
 #include <variant>
 #include <vector>
 
+using json = nlohmann::json;
+
+// ------- 常量和枚举定义 --------
 namespace dap {
 
 enum class Command {
@@ -53,7 +56,6 @@ enum class Command {
     BreakpointLocations,
     InvalidCommand
 };
-
 using CommandType                    = std::string;
 const std::string Command_Initialize = "initialize";
 const std::string Command_Launch     = "launch";
@@ -109,247 +111,216 @@ const std::string StoppedEvent_Reason_FunctionBreakpoint    = "functionBreakpoin
 const std::string StoppedEvent_Reason_DataBreakpoint        = "dataBreakpoint";
 const std::string StoppedEvent_Reason_InstructionBreakpoint = "instructionBreakpoint";
 
-
 } // namespace dap
 
 
+// ------- 基础消息类型定义 --------
 namespace dap {
 
-struct InitializeRequestArguments {
-    std::string clientID;
-    std::string clientName;
-    std::string adapterID;
-    std::string locale;
-    bool        linesStartAt1   = true;
-    bool        columnsStartAt1 = true;
-    std::string pathFormat;
-    bool        supportsVariableType         = false;
-    bool        supportsVariablePaging       = false;
-    bool        supportsRunInTerminalRequest = false;
-    bool        supportsMemoryReferences     = false;
-    bool        supportsProgressReporting    = false;
-    bool        supportsInvalidatedEvent     = false;
-    bool        supportsMemoryEvent          = false;
-};
-
-struct LaunchRequestArguments {
-    bool                               noDebug = false;
-    std::string                        program;
-    std::vector<std::string>           args;
-    std::map<std::string, std::string> env;
-    std::string                        cwd;
-    std::string                        runtimeExecutable;
-    std::vector<std::string>           runtimeArgs;
-    bool                               stopOnEntry = false;
-    std::string                        console;
-};
-
-struct SetBreakpointsArguments {
-    struct Source {
-        std::string name;
-        std::string path;
-    };
-
-    Source                          source;
-    std::vector<struct Breakpoint>  breakpoints;
-    std::optional<std::vector<int>> lines;
-    bool                            sourceModified = false;
-};
-
-struct Breakpoint {
-    int                        line;
-    std::optional<int>         column;
-    std::optional<std::string> condition;
-    std::optional<std::string> hitCondition;
-    std::optional<std::string> logMessage;
-};
-
-struct ContinueArguments {
-    int  threadId;
-    bool singleThread = false;
-};
-
-
-} // namespace dap
-
-namespace dap {
-
-// Initialize 响应体
-struct InitializeResponseBody {
-    struct Capabilities {
-        bool supportsConfigurationDoneRequest      = false;
-        bool supportsFunctionBreakpoints           = false;
-        bool supportsConditionalBreakpoints        = false;
-        bool supportsHitConditionalBreakpoints     = false;
-        bool supportsEvaluateForHovers             = false;
-        bool supportsStepBack                      = false;
-        bool supportsSetVariable                   = false;
-        bool supportsRestartFrame                  = false;
-        bool supportsGotoTargetsRequest            = false;
-        bool supportsStepInTargetsRequest          = false;
-        bool supportsCompletionsRequest            = false;
-        bool supportsModulesRequest                = false;
-        bool supportsRestartRequest                = false;
-        bool supportsExceptionOptions              = false;
-        bool supportsValueFormattingOptions        = false;
-        bool supportsExceptionInfoRequest          = false;
-        bool supportsTerminateDebuggee             = false;
-        bool supportsSuspendDebuggee               = false;
-        bool supportsDelayedStackTraceLoading      = false;
-        bool supportsLoadedSourcesRequest          = false;
-        bool supportsLogPoints                     = false;
-        bool supportsTerminateThreadsRequest       = false;
-        bool supportsSetExpression                 = false;
-        bool supportsTerminateRequest              = false;
-        bool supportsDataBreakpoints               = false;
-        bool supportsReadMemoryRequest             = false;
-        bool supportsWriteMemoryRequest            = false;
-        bool supportsDisassembleRequest            = false;
-        bool supportsCancelRequest                 = false;
-        bool supportsBreakpointLocationsRequest    = false;
-        bool supportsClipboardContext              = false;
-        bool supportsSteppingGranularity           = false;
-        bool supportsInstructionBreakpoints        = false;
-        bool supportsExceptionFilterOptions        = false;
-        bool supportsSingleThreadExecutionRequests = false;
-    };
-
-    Capabilities capabilities;
-};
-
-// Launch 响应体
-struct LaunchResponseBody {
-    std::optional<int>         processId;            // 被调试程序的进程ID
-    std::optional<std::string> debugServerProcessId; // 调试服务器的进程ID
-};
-
-
-// SetBreakpoints 响应体
-struct SetBreakpointsResponseBody {
-    std::vector<Breakpoint> breakpoints; // 设置的断点信息
-};
-
-// StackFrame 信息
-struct StackFrame {
-    int                        id;               // 栈帧ID
-    std::string                name;             // 栈帧名称(通常是函数名)
-    std::optional<std::string> source;           // 源文件信息
-    int                        line;             // 当前行号
-    int                        column;           // 当前列号
-    std::optional<int>         endLine;          // 结束行号
-    std::optional<int>         endColumn;        // 结束列号
-    std::optional<std::string> moduleId;         // 模块ID
-    std::optional<std::string> presentationHint; // 表示提示('normal', 'label', 'subtle')
-};
-
-// StackTrace 响应体
-struct StackTraceResponseBody {
-    std::vector<StackFrame> stackFrames; // 栈帧列表
-    std::optional<int>      totalFrames; // 总栈帧数(如果大于返回的数量)
-};
-
-// Variables 响应体
-struct Variable {
-    std::string                name;               // 变量名
-    std::string                value;              // 变量值
-    std::optional<std::string> type;               // 变量类型
-    std::optional<int>         variablesReference; // 引用ID(用于获取子变量)
-    std::optional<int>         namedVariables;     // 命名子变量数量
-    std::optional<int>         indexedVariables;   // 索引子变量数量
-    std::optional<std::string> memoryReference;    // 内存引用(用于大对象)
-};
-
-struct VariablesResponseBody {
-    std::vector<Variable> variables; // 变量列表
-};
-
-// Threads 响应体
-struct Thread {
-    int         id;   // 线程ID
-    std::string name; // 线程名称
-};
-
-struct ThreadsResponseBody {
-    std::vector<Thread> threads; // 线程列表
-};
-
-// Evaluate 响应体
-struct EvaluateResponseBody {
-    std::string                result;             // 评估结果
-    std::optional<std::string> type;               // 结果类型
-    std::optional<int>         variablesReference; // 变量引用
-    std::optional<int>         namedVariables;     // 命名变量数量
-    std::optional<int>         indexedVariables;   // 索引变量数量
-    std::optional<std::string> memoryReference;    // 内存引用
-};
-
-} // namespace dap
-
-
-namespace dap {
-
-struct Message {
+// 公共消息头
+struct DAPMessage {
     int         seq;
     std::string type;
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Message, seq, type);
+    std::string command;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(DAPMessage, seq, type, command);
 };
 
-using RequestArguments = std::variant<
-    std::monostate,
-    InitializeRequestArguments,
-    LaunchRequestArguments,
-    SetBreakpointsArguments,
-    ContinueArguments>;
-
-using ResponseBody = std::variant<
-    std::monostate, // 无响应体
-    InitializeResponseBody,
-    LaunchResponseBody,
-    SetBreakpointsResponseBody,
-    StackTraceResponseBody,
-    VariablesResponseBody,
-    ThreadsResponseBody,
-    EvaluateResponseBody
-    // 其他响应体类型...
-    >;
-
-
-struct Request : Message {
-    CommandType      command;
-    RequestArguments arguments;
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Request, seq, type, command);
+// Source 类型
+struct Source {
+    std::string                name;
+    std::optional<std::string> path;
+    std::optional<int>         sourceReference;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Source, name, path, sourceReference);
 };
 
-struct Response : Message {
-    int                         request_seq;
-    Command                     command;
-    bool                        success;
-    std::optional<ResponseBody> body;
-    std::optional<std::string>  message;   // 错误时的消息
-    std::optional<ErrorCode>    errorCode; // 错误代码
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Response, seq, type, request_seq, command, success, message, errorCode);
+// StackFrame 类型
+struct StackFrame {
+    int                        id;
+    std::string                name;
+    std::optional<Source>      source;
+    int                        line;
+    int                        column;
+    std::optional<int>         endLine;
+    std::optional<int>         endColumn;
+    std::optional<std::string> moduleId;
+    std::optional<std::string> presentationHint;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(StackFrame,
+                                   id, name, source, line, column,
+                                   endLine, endColumn, moduleId, presentationHint);
 };
+
+// Thread 类型
+struct Thread {
+    int                        id;
+    std::string                name;
+    std::optional<std::string> state;
+    std::optional<std::string> pauseReason;
+};
+void to_json(nlohmann::json& j, const Thread& t) {
+    j = nlohmann::json{
+        {"id", t.id},
+        {"name", t.name},
+        {"state", t.state ? nlohmann::json(*t.state) : nlohmann::json()},
+        {"pauseReason", t.pauseReason ? nlohmann::json(*t.pauseReason) : nlohmann::json()}};
+}
+void from_json(const nlohmann::json& j, Thread& t) {
+    j.at("id").get_to(t.id);
+    j.at("name").get_to(t.name);
+
+    if (j.contains("state") && !j["state"].is_null()) {
+        t.state = j["state"].get<std::string>();
+    } else {
+        t.state = std::nullopt;
+    }
+
+    if (j.contains("pauseReason") && !j["pauseReason"].is_null()) {
+        t.pauseReason = j["pauseReason"].get<std::string>();
+    } else {
+        t.pauseReason = std::nullopt;
+    }
+}
+
+} // namespace dap
+
+
+// ------- request/response 定义 --------
+// threads
+namespace dap {
+
+
+// threads 请求 (无参数)
+struct ThreadsRequest : DAPMessage {};
+
+// threads 响应
+struct ThreadsResponse {
+    std::vector<Thread> threads;
+};
+
+// JSON 序列化/反序列化
+void to_json(json& j, const ThreadsResponse& t) {
+    j = json{{"threads", t.threads}};
+}
+
+void from_json(const json& j, ThreadsResponse& t) {
+    j.at("threads").get_to(t.threads);
+}
+
+
+} // namespace dap
+
+
+// ------- request/response 定义 --------
+// stackTrace
+namespace dap {
+
+// stackTrace 请求参数
+struct StackTraceArguments {
+    int                threadId;
+    std::optional<int> startFrame;
+    std::optional<int> levels;
+};
+
+struct StackTraceRequest : DAPMessage {
+    StackTraceArguments arguments;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(StackTraceRequest, seq, type, command, arguments);
+};
+
+// stackTrace 响应
+struct StackTraceResponse {
+    std::vector<StackFrame> stackFrames;
+    std::optional<int>      totalFrames;
+};
+
+void to_json(json& j, const StackTraceArguments& s) {
+    j = json{{"threadId", s.threadId}};
+    if (s.startFrame)
+        j["startFrame"] = *s.startFrame;
+    if (s.levels)
+        j["levels"] = *s.levels;
+}
+void from_json(const json& j, StackTraceArguments& s) {
+    j.at("threadId").get_to(s.threadId);
+    if (j.contains("startFrame"))
+        s.startFrame = j["startFrame"];
+    if (j.contains("levels"))
+        s.levels = j["levels"];
+}
+
+void to_json(json& j, const StackTraceResponse& s) {
+    j = json{{"stackFrames", s.stackFrames}};
+    if (s.totalFrames)
+        j["totalFrames"] = *s.totalFrames;
+}
+void from_json(const json& j, StackTraceResponse& s) {
+    j.at("stackFrames").get_to(s.stackFrames);
+    if (j.contains("totalFrames"))
+        s.totalFrames = j["totalFrames"];
+}
+
+} // namespace dap
+
+
+// ------- request/response 定义 --------
+// continue
+namespace dap {
+
+// continue 请求参数
+struct ContinueArguments {
+    int                 threadId;
+    std::optional<bool> singleThread;
+};
+
+struct ContinueRequest : DAPMessage {
+    ContinueArguments arguments;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ContinueRequest, seq, type, command, arguments);
+};
+
+// continue 响应
+struct ContinueResponse {
+    std::optional<bool> allThreadsContinued;
+};
+
+// JSON 序列化/反序列化
+void to_json(json& j, const ContinueArguments& c) {
+    j = json{{"threadId", c.threadId}};
+    if (c.singleThread)
+        j["singleThread"] = *c.singleThread;
+}
+
+void from_json(const json& j, ContinueArguments& c) {
+    j.at("threadId").get_to(c.threadId);
+    if (j.contains("singleThread"))
+        c.singleThread = j["singleThread"];
+}
+
+void to_json(json& j, const ContinueResponse& c) {
+    if (c.allThreadsContinued)
+        j["allThreadsContinued"] = *c.allThreadsContinued;
+}
+
+void from_json(const json& j, ContinueResponse& c) {
+    if (j.contains("allThreadsContinued")) {
+        c.allThreadsContinued = j["allThreadsContinued"];
+    }
+}
+
+} // namespace dap
+
+
+// ------- event 定义 --------
+namespace dap {
 
 
 struct StoppedEvent {
-
-
     int         seq   = 0; // 序列号
     std::string type  = "event";
     std::string event = "stopped";
-
     struct Body {
         std::string reason;            // 停止的原因
         int         threadId;          // 停止的线程ID
         bool        allThreadsStopped; // 是否所有线程都已停止
-
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(Body, reason, threadId, allThreadsStopped);
-
     } body;
-
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(StoppedEvent, seq, type, event, body);
 };
 
@@ -362,9 +333,7 @@ struct OutputEvent {
         Stderr,
         Telemetry
     };
-
     std::string event = "output";
-
     struct Body {
         std::string output;                 // 输出内容
         std::string category;               // 输出类别
@@ -373,14 +342,13 @@ struct OutputEvent {
         int         line;
         int         column;
         std::string data;
-
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(Body, output, category, variablesReference, source, line, column, data);
     } body;
-
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(OutputEvent, event, body);
 };
 
 
 } // namespace dap
+
 
 #endif // RING_DAP_INCLUDE_H

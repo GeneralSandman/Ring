@@ -4,25 +4,6 @@
 
 using json = nlohmann::json;
 
-namespace dap {
-
-
-Response newResponse(int seq, int request_seq, Command command, bool success,
-                     const std::string& body, const std::string& message,
-                     ErrorCode errorCode) {
-    Response resp;
-    resp.seq         = seq;
-    resp.type        = "response";
-    resp.request_seq = request_seq;
-    resp.command     = command;
-    resp.success     = success;
-
-    return resp;
-}
-
-
-} // namespace dap
-
 
 namespace dap {
 
@@ -124,7 +105,5 @@ Command stringToCommand(const std::string& str) {
     return Command::InvalidCommand;
 }
 
-// TODO:
-// 类似地实现 EventType 的转换函数...
 
 } // namespace dap
