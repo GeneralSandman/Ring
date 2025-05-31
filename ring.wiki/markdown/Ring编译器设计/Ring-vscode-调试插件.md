@@ -1163,4 +1163,8 @@ stdout 程序的标准输出，有 typescript 那边进行截获
 
 后续：是不是开启两个进程 比较好，一个负责处理dap数据，另一个负责执行ring程序；这样如果程序在运行中，也可以设置端点。
 
-二、
+二、message handler 解析、处理不同 的 request
+
+1. 先处理这几种 threads stackTrace continue
+2. 完善 message的定义，能够正确解析
+3. 解析之后的处理逻辑
