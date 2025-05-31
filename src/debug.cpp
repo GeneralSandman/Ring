@@ -534,15 +534,17 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
             continue;
         }
 
-        dap::Request request;
+        dap::DAPMessage dap_message;
 
-        auto         err = json_decode(message, &request);
+        auto            err = json_decode(message, &dap_message);
         if (err != nullptr) {
             // 错误处理
             continue;
         }
 
-        debug_rdb_with_darkgreen("dap receive request: %s\n", request.command.c_str());
+        debug_rdb_with_darkgreen("dap receive request: %s\n", dap_message.command.c_str());
+
+        // TODO: 处理不同的command
     }
 
 
