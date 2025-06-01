@@ -38,7 +38,7 @@ int send_2() {
             .message     = "",
         },
         .body = dap::ThreadsResponseBody{
-            std::vector<dap::Thread>{
+            .threads = std::vector<dap::Thread>{
                 {
                     .id          = 1,
                     .name        = "thread-1",
@@ -61,7 +61,7 @@ int send_2() {
             .message     = "",
         },
         .body = dap::StackTraceResponseBody{
-            std::vector<dap::StackFrame>{
+            .stackFrames = std::vector<dap::StackFrame>{
                 {
                     .id        = 0,
                     .name      = "main",
@@ -71,6 +71,7 @@ int send_2() {
                     .endColumn = 5,
                 },
             },
+            .totalFrames = 1,
         }};
     sender.send(stack_trace_response);
 

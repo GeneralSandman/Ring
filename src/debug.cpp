@@ -564,7 +564,7 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
                     .message     = "",
                 },
                 .body = dap::ThreadsResponseBody{
-                    std::vector<dap::Thread>{
+                    .threads = std::vector<dap::Thread>{
                         {
                             .id          = 1,
                             .name        = "thread-1",
@@ -591,7 +591,7 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
                     .message     = "",
                 },
                 .body = dap::StackTraceResponseBody{
-                    std::vector<dap::StackFrame>{
+                    .stackFrames = std::vector<dap::StackFrame>{
                         {
                             .id        = 0,
                             .name      = "main",
@@ -601,6 +601,7 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
                             .endColumn = 5,
                         },
                     },
+                    .totalFrames = 1,
                 }};
             dap_sender.send(stack_trace_response);
 
