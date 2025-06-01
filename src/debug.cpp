@@ -290,9 +290,6 @@ int debug_trace_dispatch_dap(RVM_Frame* frame, const char* event, const char* ar
     debug_rdb_with_darkgreen("---debug_trace_dispatch---\n");
     debug_rdb_with_darkgreen("\n\n");
 
-    printf("this lizhenhu-debug ring stdout\n");
-    fflush(stdout);
-
 
     if (str_eq(event, TRACE_EVENT_SAE)) {
         if (ISSET_TRACE_EVENT_SAE(debug_config))
@@ -607,9 +604,9 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
                         .sourceReference = 0, // FIXME:
                     },
                     .line      = int(call_info.line),
-                    .column    = 1, // FIXME:
-                    .endLine   = 1, // FIXME:
-                    .endColumn = 1, // FIXME:
+                    .column    = 1,                   // FIXME:
+                    .endLine   = int(call_info.line), // FIXME:
+                    .endColumn = 1,                   // FIXME:
                 };
                 stack_frames.push_back(stack_frame);
             }
