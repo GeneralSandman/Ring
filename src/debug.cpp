@@ -524,12 +524,20 @@ int dap_dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
 // 5. 如果是 其他命令，循环处理dap 消息
 int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
 
-    DapMessageProcessor processor(STDIN_FILENO, nullptr);
+    DapMessageProcessor dap_processor(STDIN_FILENO, nullptr);
+    DapMessageSender    dap_sender(STDOUT_FILENO);
 
     while (true) {
-        std::string message_body = processor.get_a_message();
+
+        bool        break_read_input = false;
+
+        std::string message_body     = dap_processor.get_a_message();
         if (message_body.empty()) {
             continue;
+        }
+        if (message_body == "q") {
+            // TODO: 发送 exited 事件
+            exit(0);
         }
         dap::DAPMessage dap_message;
         auto            err = json_decode(message_body, &dap_message);
@@ -542,10 +550,84 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
 
         // TODO: 处理不同的command
         if (dap_message.command == "threads") {
+            // TODO: 只返回一个线程即可，当前只有肯定是在 stopped
+            // 返回 response即可
+            // 继续处理消息
+
+            dap::ThreadsResponse threads_response = dap::ThreadsResponse{
+                {
+                    .seq         = 1,
+                    .request_seq = 1,
+                    .type        = "response",
+                    .command     = "threads",
+                    .success     = true,
+                    .message     = "",
+                },
+                .body = dap::ThreadsResponseBody{
+                    std::vector<dap::Thread>{
+                        {
+                            .id          = 1,
+                            .name        = "thread-1",
+                            .state       = "stopped",
+                            .pauseReason = "entry",
+                        },
+                    },
+                },
+            };
+            dap_sender.send(threads_response);
 
         } else if (dap_message.command == "stackTrace") {
+            // TODO: 格式化标准的dap协议，返回
+            // 返回 response 即可
+            // 继续处理消息
+
+            dap::StackTraceResponse stack_trace_response = dap::StackTraceResponse{
+                {
+                    .seq         = 2,
+                    .request_seq = 2,
+                    .type        = "response",
+                    .command     = "stackTrace",
+                    .success     = true,
+                    .message     = "",
+                },
+                .body = dap::StackTraceResponseBody{
+                    std::vector<dap::StackFrame>{
+                        {
+                            .id        = 0,
+                            .name      = "main",
+                            .line      = 10,
+                            .column    = 5,
+                            .endLine   = 10,
+                            .endColumn = 5,
+                        },
+                    },
+                }};
+            dap_sender.send(stack_trace_response);
 
         } else if (dap_message.command == "continue") {
+            // 先发送 response
+            // 直接退出循环即可
+            break_read_input                        = true;
+
+            dap::ContinueResponse continue_response = dap::ContinueResponse{
+                {
+                    .seq         = 3,
+                    .request_seq = 3,
+                    .type        = "response",
+                    .command     = "continue",
+                    .success     = true,
+                    .message     = "",
+                },
+                .body = dap::ContinueResponseBody{
+                    .allThreadsContinued = true,
+                },
+            };
+            dap_sender.send(continue_response);
+        }
+
+
+        if (break_read_input) {
+            break;
         }
     }
 
