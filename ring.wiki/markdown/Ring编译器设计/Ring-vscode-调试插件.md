@@ -1159,7 +1159,7 @@ https://vscode.github.net.cn/docs/editor/debugging
 ----------------
 
 
-
+./bin/ring run ./test/007-array/array-000.ring
 
 ./bin/ring --interpreter=dap rdb ./test/007-array/array-000.ring
 
