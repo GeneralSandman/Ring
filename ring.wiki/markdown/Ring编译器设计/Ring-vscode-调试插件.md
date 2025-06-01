@@ -237,6 +237,86 @@ VSCode (DAP/JSON-RPC) ←→ Debug Adapter (Node.js/TypeScript) ←→ 你的虚
 
 
 
+------
+
+## initialized 请求协议交互
+
+
+1. 客户端 → 调试器 发送 initialize 请求
+
+```json
+{
+  "type": "request",
+  "command": "initialize",
+  "seq": 1,
+  "arguments": {...}
+}
+```
+
+2. 调试器 → 客户端 发送 initialize 响应
+
+
+```json
+{
+  "type": "response",
+  "command": "initialize",
+  "success": true,
+  "seq": 1,
+  "request_seq": 1,
+  "body": {...}
+}
+```
+
+
+3. 调试器 → 客户端 发送 initialized 事件
+
+```json
+{
+  "type": "event",
+  "event": "initialized",
+  "seq": 2,
+  "body": {}
+}
+```
+
+4. 客户端 → 调试器 发送 launch/attach 请求
+
+```json
+{
+  "type": "request",
+  "command": "launch",
+  "seq": 3,
+  "arguments": {...}
+}
+```
+
+
+关键注意事项
+
+1. 时序要求：
+
+initialized 事件必须在 initialize 响应之后发送
+
+客户端必须在收到 initialized 事件后才能发送 launch/attach 请求
+
+2. 空 body 设计：
+
+当前协议版本中事件体为空，但保留字段以备未来扩展
+
+实现时仍应包含 body: {} 以保证协议兼容性
+
+3. 多会话场景：
+
+每个调试会话只会发送一次 initialized 事件
+
+如果调试器重启，需要重新建立会话流程
+
+4. 错误处理：
+
+如果 initialize 请求失败，调试器不会发送 initialized 事件
+
+客户端应设置超时机制，避免长时间等待不来的 initialized 事件
+
 
 
 

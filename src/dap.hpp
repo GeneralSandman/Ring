@@ -195,6 +195,123 @@ inline void from_json(const nlohmann::json& j, Thread& t) {
 
 
 // ------- request/response 定义 --------
+// initialize
+namespace dap {
+struct InitializeRequestArguments {
+    std::string clientID;
+    std::string clientName;
+    std::string adapterID;
+    std::string locale;
+    bool        linesStartAt1;
+    bool        columnsStartAt1;
+    std::string pathFormat;
+
+    // 能力标志 (部分示例)
+    bool supportsVariableType;
+    bool supportsVariablePaging;
+    bool supportsRunInTerminalRequest;
+    bool supportsMemoryReferences;
+    // ... 其他能力标志
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        InitializeRequestArguments,
+        clientID, clientName, adapterID, locale,
+        linesStartAt1, columnsStartAt1, pathFormat,
+        supportsVariableType, supportsVariablePaging,
+        supportsRunInTerminalRequest, supportsMemoryReferences)
+};
+// 异常断点过滤器
+struct ExceptionBreakpointsFilter {
+    std::string filter;
+    std::string label;
+    bool        default_;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        ExceptionBreakpointsFilter,
+        filter, label, default_)
+};
+
+// Initialize 响应体
+struct InitializeResponseBody {
+    bool                                    supportsConfigurationDoneRequest;
+    bool                                    supportsFunctionBreakpoints;
+    bool                                    supportsConditionalBreakpoints;
+    std::vector<ExceptionBreakpointsFilter> exceptionBreakpointFilters;
+    bool                                    supportsSetVariable;
+    bool                                    supportsStepBack;
+    // ... 其他能力标志
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        InitializeResponseBody,
+        supportsConfigurationDoneRequest,
+        supportsFunctionBreakpoints,
+        supportsConditionalBreakpoints,
+        exceptionBreakpointFilters,
+        supportsSetVariable,
+        supportsStepBack)
+};
+
+
+struct InitializeRequest : DAPMessage {
+    InitializeRequestArguments arguments;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(InitializeRequest, seq, type, command, arguments);
+};
+struct InitializeResponse : DAPResponse {
+    InitializeResponseBody body;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(InitializeResponse, seq, request_seq, type, command, success, message, body);
+};
+
+} // namespace dap
+
+
+// ------- request/response 定义 --------
+// launch
+namespace dap {
+
+struct LaunchRequestArguments {
+    std::string                                      program;
+    std::vector<std::string>                         args;
+    std::string                                      cwd;
+    std::vector<std::pair<std::string, std::string>> environment;
+    bool                                             stopAtEntry;
+    std::string                                      console;
+    std::optional<std::string>                       symbolSearchPath;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        LaunchRequestArguments,
+        program, args, cwd, environment,
+        stopAtEntry, console, symbolSearchPath)
+};
+// 错误信息
+struct LaunchErrorBody {
+    int                                id;
+    std::string                        format;
+    std::map<std::string, std::string> variables;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        LaunchErrorBody,
+        id, format, variables)
+};
+
+struct LaunchResponseBody {
+    std::optional<LaunchErrorBody> error; // 可选的错误信息
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LaunchResponseBody, error);
+};
+
+struct LaunchRequest : DAPMessage {
+    LaunchRequestArguments arguments;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LaunchRequest, seq, type, command, arguments);
+};
+struct LaunchResponse : DAPResponse {
+    LaunchResponseBody body;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LaunchResponse, seq, request_seq, type, command, success, message, body);
+};
+
+
+} // namespace dap
+
+
+// ------- request/response 定义 --------
 // threads
 namespace dap {
 
@@ -334,6 +451,13 @@ inline void from_json(const json& j, ContinueResponseBody& c) {
 // ------- event 定义 --------
 namespace dap {
 
+struct InitializedEvent {
+    int         seq   = 0; // 序列号
+    std::string type  = "event";
+    std::string event = "initialized";
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(InitializedEvent, seq, type, event);
+};
 
 struct StoppedEvent {
     int         seq   = 0; // 序列号

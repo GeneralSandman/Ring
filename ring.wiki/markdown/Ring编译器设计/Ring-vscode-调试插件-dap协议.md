@@ -30,6 +30,196 @@ body.description: 可选的详细描述文本
 seq: 序列号，用于协议通信的顺序标识
 
 
+
+
+## initialize 的 request/response
+
+
+Initialize 请求 (Request)
+客户端发送给调试器的初始化请求：
+
+```json
+{
+  "type": "request",
+  "command": "initialize",
+  "seq": 1,
+  "arguments": {
+    "clientID": "vscode",
+    "clientName": "Visual Studio Code",
+    "adapterID": "cppdbg",
+    "locale": "en-US",
+    "linesStartAt1": true,
+    "columnsStartAt1": true,
+    "pathFormat": "path",
+    "supportsVariableType": true,
+    "supportsVariablePaging": true,
+    "supportsRunInTerminalRequest": true,
+    "supportsMemoryReferences": true,
+    "supportsProgressReporting": true,
+    "supportsInvalidatedEvent": true,
+    "supportsMemoryEvent": true,
+    "supportsArgsCanBeInterpretedByShell": true
+  }
+}
+```
+
+关键参数说明:
+
+参数	类型	说明
+clientID	string	客户端标识符
+clientName	string	客户端显示名称
+adapterID	string	调试器适配器类型
+locale	string	客户端区域设置
+linesStartAt1	boolean	是否使用1-based行号
+columnsStartAt1	boolean	是否使用1-based列号
+pathFormat	string	路径格式 ("path" 或 "uri")
+supports*	boolean	各种能力标志
+
+
+
+Initialize 响应 (Response)
+调试器返回的初始化响应：
+
+
+```json
+{
+  "type": "response",
+  "command": "initialize",
+  "success": true,
+  "seq": 1,
+  "request_seq": 1,
+  "body": {
+    "supportsConfigurationDoneRequest": true,
+    "supportsFunctionBreakpoints": true,
+    "supportsConditionalBreakpoints": true,
+    "supportsHitConditionalBreakpoints": true,
+    "supportsEvaluateForHovers": true,
+    "exceptionBreakpointFilters": [
+      {
+        "filter": "cpp_exceptions",
+        "label": "C++ Exceptions",
+        "default": false
+      }
+    ],
+    "supportsStepBack": false,
+    "supportsSetVariable": true,
+    "supportsRestartFrame": true,
+    "supportsGotoTargetsRequest": true,
+    "supportsStepInTargetsRequest": true,
+    "supportsCompletionsRequest": true,
+    "supportsModulesRequest": true,
+    "additionalModuleColumns": [],
+    "supportedChecksumAlgorithms": ["MD5", "SHA1"],
+    "supportsRestartRequest": true,
+    "supportsExceptionOptions": true,
+    "supportsValueFormattingOptions": true,
+    "supportsExceptionInfoRequest": true,
+    "supportTerminateDebuggee": true,
+    "supportsDelayedStackTraceLoading": true,
+    "supportsLoadedSourcesRequest": true,
+    "supportsLogPoints": true,
+    "supportsTerminateThreadsRequest": true,
+    "supportsSetExpression": true,
+    "supportsTerminateRequest": true,
+    "supportsDataBreakpoints": true,
+    "supportsReadMemoryRequest": true,
+    "supportsDisassembleRequest": true,
+    "supportsCancelRequest": true,
+    "supportsBreakpointLocationsRequest": true
+  }
+}
+
+```
+
+
+
+## Initialized event
+
+
+```json
+{
+  "type": "event",
+  "event": "initialized",
+  "seq": 2,
+  "body": {}
+}
+``` 
+
+
+## launch request/response
+
+1. launch 请求 (Request)
+客户端发送给调试器的请求：
+
+```json
+{
+  "type": "request",
+  "command": "launch",
+  "seq": 4,
+  "arguments": {
+    "program": "/path/to/executable",
+    "args": ["arg1", "arg2"],
+    "cwd": "/working/directory",
+    "environment": [{"name": "ENV_VAR", "value": "value"}],
+    "stopAtEntry": true,
+    "console": "externalTerminal",
+    "symbolSearchPath": "/path/to/symbols"
+  }
+}
+```
+
+常见参数:
+
+program: 要调试的可执行文件路径
+args: 程序参数数组
+cwd: 工作目录
+environment: 环境变量设置
+stopAtEntry: 是否在入口点暂停
+console: 控制台类型 ("internalConsole", "integratedTerminal", "externalTerminal")
+symbolSearchPath: 符号文件搜索路径
+
+
+
+2. launch 响应 (Response)
+调试器返回的响应：
+
+成功响应：
+
+```json
+{
+  "type": "response",
+  "command": "launch",
+  "success": true,
+  "seq": 4,
+  "request_seq": 4,
+  "body": {}
+}
+```
+
+
+失败响应：
+
+```json
+{
+  "type": "response",
+  "command": "launch",
+  "success": false,
+  "seq": 4,
+  "request_seq": 4,
+  "message": "Failed to launch: executable not found",
+  "body": {
+    "error": {
+      "id": 3000,
+      "format": "Unable to start debugging. Program '{path}' not found.",
+      "variables": {
+        "path": "/path/to/executable"
+      }
+    }
+  }
+}
+```
+
+
 ## stacktrace 的 request 和 response
 
 

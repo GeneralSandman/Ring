@@ -26,8 +26,52 @@ int send_1() {
 
 // response
 int send_2() {
-    DapMessageSender     sender(STDOUT_FILENO);
+    DapMessageSender sender(STDOUT_FILENO);
 
+    // initialize_response
+    dap::InitializeResponse initialize_response = dap::InitializeResponse{
+        {
+            .seq         = 1,
+            .request_seq = 1,
+            .type        = "response",
+            .command     = "initialize",
+            .success     = true,
+            .message     = "",
+        },
+        .body = dap::InitializeResponseBody{
+            .supportsConfigurationDoneRequest = true,
+            .supportsFunctionBreakpoints      = true,
+            .supportsConditionalBreakpoints   = true,
+            .exceptionBreakpointFilters       = std::vector<dap::ExceptionBreakpointsFilter>{},
+            .supportsSetVariable              = true,
+            .supportsStepBack                 = true,
+        },
+    };
+    sender.send(initialize_response);
+
+
+    // launch_response
+    dap::LaunchResponse launch_response = dap::LaunchResponse{
+        {
+            .seq         = 2,
+            .request_seq = 2,
+            .type        = "response",
+            .command     = "launch",
+            .success     = true,
+            .message     = "",
+        },
+        .body = dap::LaunchResponseBody{
+            .error = dap::LaunchErrorBody{
+                .id        = 1,
+                .format    = "Launch failed",
+                .variables = {{"reason", "Invalid program path"}},
+            },
+        },
+    };
+    sender.send(launch_response);
+
+
+    // threads_response
     dap::ThreadsResponse threads_response = dap::ThreadsResponse{
         {
             .seq         = 1,
