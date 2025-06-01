@@ -927,6 +927,22 @@ std::string format_rvm_call_stack(Ring_VirtualMachine* rvm) {
     return result;
 }
 
+unsigned int get_rvm_call_stack_level(Ring_VirtualMachine* rvm) {
+    std::string   call_info_s;
+
+    unsigned int  offset = 0;
+    RVM_CallInfo* pos    = VM_CUR_CO_CALLINFO;
+
+    std::string   func_name;
+    std::string   source_file;
+    unsigned int  source_line_number = 0;
+
+    for (; pos != nullptr; pos = pos->next, offset++) {
+    }
+
+    return offset;
+}
+
 CallInfo get_rvm_call_stack(Ring_VirtualMachine* rvm, unsigned int skip) {
     std::string   call_info_s;
 

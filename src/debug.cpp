@@ -290,6 +290,9 @@ int debug_trace_dispatch_dap(RVM_Frame* frame, const char* event, const char* ar
     debug_rdb_with_darkgreen("---debug_trace_dispatch---\n");
     debug_rdb_with_darkgreen("\n\n");
 
+    printf("this lizhenhu-debug ring stdout\n");
+    fflush(stdout);
+
 
     if (str_eq(event, TRACE_EVENT_SAE)) {
         if (ISSET_TRACE_EVENT_SAE(debug_config))
@@ -340,6 +343,8 @@ int dispath_sae(RVM_Frame* frame, const char* event, const char* arg) {
 }
 
 
+static int dap_seq = 0;
+
 // 1. 发送 stopped 事件
 // 2. 等待用户输入命令
 int dap_dispath_sae(RVM_Frame* frame, const char* event, const char* arg) {
@@ -347,6 +352,7 @@ int dap_dispath_sae(RVM_Frame* frame, const char* event, const char* arg) {
     debug_rdb_with_darkgreen("dap_dispath_sae\n");
 
     dap::StoppedEvent stopped_event;
+    stopped_event.seq                    = dap_seq++;
     stopped_event.body.reason            = dap::StoppedEvent_Reason_Entry;
     stopped_event.body.threadId          = 1; // TODO: 获取当前线程ID
     stopped_event.body.allThreadsStopped = true;
@@ -517,6 +523,7 @@ int dap_dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
     return 0;
 }
 
+
 // 1. 从 stdin 接受dap 消息
 // 2. 解析消息
 // 3. 根据消息类型，调用对应的处理函数
@@ -525,7 +532,7 @@ int dap_dispath_exit(RVM_Frame* frame, const char* event, const char* arg) {
 int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
 
     DapMessageProcessor dap_processor(STDIN_FILENO, nullptr);
-    DapMessageSender    dap_sender(STDOUT_FILENO);
+    DapMessageSender    dap_sender(STDERR_FILENO);
 
     while (true) {
 
@@ -548,6 +555,9 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
 
         debug_rdb_with_darkgreen("dap receive request: %s\n", dap_message.command.c_str());
 
+        printf("this lizhenhu-debug ring stdout: receive request: %s\n", dap_message.command.c_str());
+        fflush(stdout);
+
         // TODO: 处理不同的command
         if (dap_message.command == "threads") {
             // TODO: 只返回一个线程即可，当前只有肯定是在 stopped
@@ -556,8 +566,8 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
 
             dap::ThreadsResponse threads_response = dap::ThreadsResponse{
                 {
-                    .seq         = 1,
-                    .request_seq = 1,
+                    .seq         = dap_seq++,
+                    .request_seq = dap_message.seq,
                     .type        = "response",
                     .command     = "threads",
                     .success     = true,
@@ -581,27 +591,42 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
             // 返回 response 即可
             // 继续处理消息
 
+            unsigned int                 stack_level = get_rvm_call_stack_level(frame->rvm);
+
+            std::vector<dap::StackFrame> stack_frames;
+            for (int level = 0; level < stack_level; level++) {
+                CallInfo call_info = get_rvm_call_stack(frame->rvm, level);
+
+                // 格式化一下
+                dap::StackFrame stack_frame = dap::StackFrame{
+                    .id     = level,
+                    .name   = call_info.func,
+                    .source = dap::Source{
+                        .name            = "", // FIXME:
+                        .path            = call_info.file,
+                        .sourceReference = 0, // FIXME:
+                    },
+                    .line      = int(call_info.line),
+                    .column    = 1, // FIXME:
+                    .endLine   = 1, // FIXME:
+                    .endColumn = 1, // FIXME:
+                };
+                stack_frames.push_back(stack_frame);
+            }
+
+            //
             dap::StackTraceResponse stack_trace_response = dap::StackTraceResponse{
                 {
-                    .seq         = 2,
-                    .request_seq = 2,
+                    .seq         = dap_seq++,
+                    .request_seq = dap_message.seq,
                     .type        = "response",
                     .command     = "stackTrace",
                     .success     = true,
                     .message     = "",
                 },
                 .body = dap::StackTraceResponseBody{
-                    .stackFrames = std::vector<dap::StackFrame>{
-                        {
-                            .id        = 0,
-                            .name      = "main",
-                            .line      = 10,
-                            .column    = 5,
-                            .endLine   = 10,
-                            .endColumn = 5,
-                        },
-                    },
-                    .totalFrames = 1,
+                    .stackFrames = stack_frames,
+                    .totalFrames = stack_level,
                 }};
             dap_sender.send(stack_trace_response);
 
@@ -612,8 +637,8 @@ int dap_rdb_cli(RVM_Frame* frame, const char* event, const char* arg) {
 
             dap::ContinueResponse continue_response = dap::ContinueResponse{
                 {
-                    .seq         = 3,
-                    .request_seq = 3,
+                    .seq         = dap_seq++,
+                    .request_seq = dap_message.seq,
                     .type        = "response",
                     .command     = "continue",
                     .success     = true,

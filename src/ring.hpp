@@ -3645,6 +3645,7 @@ unsigned int             get_source_line_number_by_pc(RVM_Function* function, un
 std::string              format_rvm_type(Ring_VirtualMachine* rvm, RVM_Value* value);
 std::string              format_rvm_value(RVM_Value* value);
 std::string              format_rvm_call_stack(Ring_VirtualMachine* rvm);
+unsigned int             get_rvm_call_stack_level(Ring_VirtualMachine* rvm);
 CallInfo                 get_rvm_call_stack(Ring_VirtualMachine* rvm, unsigned int skip);
 std::string              format_rvm_current_func(Ring_VirtualMachine* rvm, unsigned int source_line_number);
 
