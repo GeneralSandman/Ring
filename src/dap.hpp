@@ -125,6 +125,17 @@ struct DAPMessage {
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(DAPMessage, seq, type, command);
 };
 
+// 通用响应结构
+struct DAPResponse {
+    int                        seq;
+    int                        request_seq;
+    std::string                type;
+    std::string                command;
+    bool                       success;
+    std::optional<std::string> message;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(DAPResponse, seq, request_seq, type, command, success, message);
+};
+
 // Source 类型
 struct Source {
     std::string                name;
@@ -153,17 +164,17 @@ struct StackFrame {
 struct Thread {
     int                        id;
     std::string                name;
-    std::optional<std::string> state;
-    std::optional<std::string> pauseReason;
+    std::optional<std::string> state;       // TODO: 使用枚举类型代替
+    std::optional<std::string> pauseReason; // TODO: 使用枚举类型代替
 };
-void to_json(nlohmann::json& j, const Thread& t) {
+inline void to_json(nlohmann::json& j, const Thread& t) {
     j = nlohmann::json{
         {"id", t.id},
         {"name", t.name},
         {"state", t.state ? nlohmann::json(*t.state) : nlohmann::json()},
         {"pauseReason", t.pauseReason ? nlohmann::json(*t.pauseReason) : nlohmann::json()}};
 }
-void from_json(const nlohmann::json& j, Thread& t) {
+inline void from_json(const nlohmann::json& j, Thread& t) {
     j.at("id").get_to(t.id);
     j.at("name").get_to(t.name);
 
@@ -192,16 +203,20 @@ namespace dap {
 struct ThreadsRequest : DAPMessage {};
 
 // threads 响应
-struct ThreadsResponse {
+struct ThreadsResponseBody {
     std::vector<Thread> threads;
+};
+struct ThreadsResponse : DAPResponse {
+    ThreadsResponseBody body;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ThreadsResponse, seq, request_seq, type, command, success, message, body);
 };
 
 // JSON 序列化/反序列化
-void to_json(json& j, const ThreadsResponse& t) {
+inline void to_json(json& j, const ThreadsResponseBody& t) {
     j = json{{"threads", t.threads}};
 }
 
-void from_json(const json& j, ThreadsResponse& t) {
+inline void from_json(const json& j, ThreadsResponseBody& t) {
     j.at("threads").get_to(t.threads);
 }
 
@@ -219,26 +234,32 @@ struct StackTraceArguments {
     std::optional<int> startFrame;
     std::optional<int> levels;
 };
-
 struct StackTraceRequest : DAPMessage {
     StackTraceArguments arguments;
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(StackTraceRequest, seq, type, command, arguments);
 };
 
-// stackTrace 响应
-struct StackTraceResponse {
+struct StackTraceResponseBody {
     std::vector<StackFrame> stackFrames;
     std::optional<int>      totalFrames;
 };
+struct StackTraceResponse : DAPResponse {
+    StackTraceResponseBody body;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(StackTraceResponse, seq, request_seq, type, command, success, message, body);
+};
 
-void to_json(json& j, const StackTraceArguments& s) {
+
+// stackTrace 响应
+
+
+inline void to_json(json& j, const StackTraceArguments& s) {
     j = json{{"threadId", s.threadId}};
     if (s.startFrame)
         j["startFrame"] = *s.startFrame;
     if (s.levels)
         j["levels"] = *s.levels;
 }
-void from_json(const json& j, StackTraceArguments& s) {
+inline void from_json(const json& j, StackTraceArguments& s) {
     j.at("threadId").get_to(s.threadId);
     if (j.contains("startFrame"))
         s.startFrame = j["startFrame"];
@@ -246,12 +267,12 @@ void from_json(const json& j, StackTraceArguments& s) {
         s.levels = j["levels"];
 }
 
-void to_json(json& j, const StackTraceResponse& s) {
+inline void to_json(json& j, const StackTraceResponseBody& s) {
     j = json{{"stackFrames", s.stackFrames}};
     if (s.totalFrames)
         j["totalFrames"] = *s.totalFrames;
 }
-void from_json(const json& j, StackTraceResponse& s) {
+inline void from_json(const json& j, StackTraceResponseBody& s) {
     j.at("stackFrames").get_to(s.stackFrames);
     if (j.contains("totalFrames"))
         s.totalFrames = j["totalFrames"];
@@ -272,33 +293,36 @@ struct ContinueArguments {
 
 struct ContinueRequest : DAPMessage {
     ContinueArguments arguments;
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ContinueRequest, seq, type, command, arguments);
 };
 
 // continue 响应
-struct ContinueResponse {
+struct ContinueResponseBody {
     std::optional<bool> allThreadsContinued;
+};
+struct ContinueResponse : DAPResponse {
+    ContinueResponseBody body;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ContinueResponse, seq, request_seq, type, command, success, message, body);
 };
 
 // JSON 序列化/反序列化
-void to_json(json& j, const ContinueArguments& c) {
+inline void to_json(json& j, const ContinueArguments& c) {
     j = json{{"threadId", c.threadId}};
     if (c.singleThread)
         j["singleThread"] = *c.singleThread;
 }
 
-void from_json(const json& j, ContinueArguments& c) {
+inline void from_json(const json& j, ContinueArguments& c) {
     j.at("threadId").get_to(c.threadId);
     if (j.contains("singleThread"))
         c.singleThread = j["singleThread"];
 }
 
-void to_json(json& j, const ContinueResponse& c) {
+inline void to_json(json& j, const ContinueResponseBody& c) {
     if (c.allThreadsContinued)
         j["allThreadsContinued"] = *c.allThreadsContinued;
 }
 
-void from_json(const json& j, ContinueResponse& c) {
+inline void from_json(const json& j, ContinueResponseBody& c) {
     if (j.contains("allThreadsContinued")) {
         c.allThreadsContinued = j["allThreadsContinued"];
     }

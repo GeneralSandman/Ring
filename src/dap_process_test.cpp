@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 
+// event
 int send_1() {
     DapMessageSender  sender(STDOUT_FILENO);
 
@@ -19,6 +20,76 @@ int send_1() {
 
     dap::StoppedEvent event2;
     sender.send(event2);
+
+    return 0;
+}
+
+// response
+int send_2() {
+    DapMessageSender     sender(STDOUT_FILENO);
+
+    dap::ThreadsResponse threads_response = dap::ThreadsResponse{
+        {
+            .seq         = 1,
+            .request_seq = 1,
+            .type        = "response",
+            .command     = "threads",
+            .success     = true,
+            .message     = "",
+        },
+        .body = dap::ThreadsResponseBody{
+            std::vector<dap::Thread>{
+                {
+                    .id          = 1,
+                    .name        = "thread-1",
+                    .state       = "stopped",
+                    .pauseReason = "entry",
+                },
+            },
+        },
+    };
+    sender.send(threads_response);
+
+
+    dap::StackTraceResponse stack_trace_response = dap::StackTraceResponse{
+        {
+            .seq         = 2,
+            .request_seq = 2,
+            .type        = "response",
+            .command     = "stackTrace",
+            .success     = true,
+            .message     = "",
+        },
+        .body = dap::StackTraceResponseBody{
+            std::vector<dap::StackFrame>{
+                {
+                    .id        = 0,
+                    .name      = "main",
+                    .line      = 10,
+                    .column    = 5,
+                    .endLine   = 10,
+                    .endColumn = 5,
+                },
+            },
+        }};
+    sender.send(stack_trace_response);
+
+
+    dap::ContinueResponse continue_response = dap::ContinueResponse{
+        {
+            .seq         = 3,
+            .request_seq = 3,
+            .type        = "response",
+            .command     = "continue",
+            .success     = true,
+            .message     = "",
+        },
+        .body = dap::ContinueResponseBody{
+            .allThreadsContinued = true,
+        },
+    };
+    sender.send(continue_response);
+
 
     return 0;
 }
@@ -132,7 +203,10 @@ int process_dap_handler_test_2() {
 
 int main() {
     // send_1();
-    process_dap_handler_test_1();
+    send_2();
+
+
+    // process_dap_handler_test_1();
     // process_dap_handler_test_2();
 
     return 0;

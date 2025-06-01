@@ -28,7 +28,6 @@ OBJS   = \
 	../deps/linenoise/linenoise.o\
 	fmt.o\
 	dap.o\
-	dap_process.o\
 	main.o
 
 # bison 可执行文件路径
@@ -76,13 +75,13 @@ TOOL_GEN_VMCODE_DOC_OBJS  = vm.o tool_gen_vmcode_doc.o
 #  DDEBUG_RVM_MEM_POOL_DETAIL 	     展示 Memory Pool 内存分配的详情
 #  DEBUG_RVM_GC_DETAIL 			     展示 Garbage Collect 的详情
 #  DEBUG_RDB_TRACE_DISPATH_DETAIL    调试开发Ring-Debugger: 展示 rdb trace_dispath 的详情, 可以展示每一次回掉到debugger的详情
-CFLAGS = -c -static -O2 -std=c++17 \
+CFLAGS = -c -static -std=c++20 \
 				-Wall \
 				-Wextra \
 				-Wno-sign-compare \
 				-Wno-unused-parameter \
 				-Wno-unused-function \
-				 # -g \
+				  -g \
 				 -DDEBUG \
 				 -DDEBUG_FLEX1 \
 				 -DDEBUG_BISON1 \
@@ -99,7 +98,7 @@ CFLAGS = -c -static -O2 -std=c++17 \
 				 -DDEBUG_RVM_MEM_POOL_DETAIL1 \
 				 -DDEBUG_RVM_GC_DETAIL1 \
 				 -DDEBUG_TRACE_CLOSURE_FREE_VALUE1 \
-				 -DDEBUG_RDB_TRACE_DISPATH_DETAIL1
+				 -DDEBUG_RDB_TRACE_DISPATH_DETAIL
 
 CFLAGS+= -I../deps/linenoise
 CFLAGS+= -I../deps/clipp
@@ -211,7 +210,7 @@ man_help.o: man_help.cpp ring.hpp
 std_lib.o: std_lib.cpp ring.hpp
 mem_pool.o: mem_pool.cpp ring.hpp
 gc.o: gc.cpp ring.hpp
-debug.o: debug.cpp ring.hpp dap.hpp
+debug.o: debug.cpp dap.hpp dap_process.hpp ring.hpp
 vm-debug.o: vm-debug.cpp ring.hpp
 debug-free-value.o: debug-free-value.cpp ring.hpp
 debug-gc.o: debug-gc.cpp ring.hpp
@@ -222,4 +221,3 @@ main.o: main.cpp ring.hpp
 tool_gen_vmcode_doc.o: tool_gen_vmcode_doc.cpp ring.hpp
 fmt.o: fmt.cpp ring.hpp
 dap.o: dap.cpp
-dap_process.o: dap_process.cpp dap.hpp json.hpp
