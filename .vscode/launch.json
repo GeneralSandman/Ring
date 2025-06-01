@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "(lldb) 启动",
+      "name": "Debug Ring run",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/ring",
@@ -10,6 +10,22 @@
         "-O0",
         "run",
         "${workspaceFolder}/test/040-aonymous-function/test-001.ring"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb"
+    },
+    {
+      "name": "Debug Ring rdb",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/ring",
+      "args": [
+        "--interpreter=dap",
+        "rdb",
+        "${workspaceFolder}/test/007-array/array-bool-000.ring"
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
